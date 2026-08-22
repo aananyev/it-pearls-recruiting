@@ -110,18 +110,21 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             return emptyData;
         }
 
-        String cleanedText = rawText.trim();
-        log.info("[SMART_VACANCY_OPENING] >>> Начало парсинга текста вакансии (длина: {} символов). Превью: [{}]",
-                cleanedText.length(), preview(cleanedText, 150));
+        // Предотвращение HTML-разметки от RichTextArea: очищаем до форматированного plain text
+        String cleanedPlainText = cleanHtmlToPlainText(rawText);
+        String textForAi = !cleanedPlainText.isEmpty() ? cleanedPlainText : rawText.trim();
+
+        log.info("[SMART_VACANCY_OPENING] >>> Начало парсинга текста вакансии (длина исходного: {}, очищенного: {} символов). Превью: [{}]",
+                rawText.length(), textForAi.length(), preview(textForAi, 150));
 
         SmartOpenPositionParsedData data = new SmartOpenPositionParsedData();
-        data.setRawText(cleanedText);
+        data.setRawText(textForAi);
 
         // 1. Попытка AI-анализа через системный сервис
         boolean parsedByAi = false;
         try {
             log.info("[SMART_VACANCY_OPENING] Отправка запроса к AI-функции '{}'...", FUNCTION_VACANCY_SMART_PARSE_JSON);
-            Map<String, Object> ctx = Collections.singletonMap("sourceText", cleanedText);
+            Map<String, Object> ctx = Collections.singletonMap("sourceText", textForAi);
             AiExecutionResult aiResult = aiExecutionService.executeText(FUNCTION_VACANCY_SMART_PARSE_JSON, ctx);
 
             if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
@@ -133,58 +136,118 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 JsonNode json = objectMapper.readTree(aiText);
                 log.info("[SMART_VACANCY_OPENING] JSON успешно десериализован из AI-ответа: {}", json.toString());
 
-                if (json.hasNonNull("vacansyName")) {
-                    data.setVacansyName(json.get("vacansyName").asText().trim());
+                // 1.1 Название вакансии (поддержка вариаций c/s и алиасов)
+                String vacName = getJsonString(json, "vacancyName", "vacansyName", "title", "name", "position");
+                if (vacName != null && !vacName.isEmpty()) {
+                    data.setVacansyName(cleanTitle(vacName));
                 }
-                if (json.hasNonNull("projectName")) {
-                    data.setProjectName(json.get("projectName").asText().trim());
+
+                // 1.2 Название проекта
+                String projName = getJsonString(json, "projectName", "project", "projectTitle");
+                if (projName != null && !projName.isEmpty()) {
+                    data.setProjectName(cleanTitle(projName));
                 }
-                if (json.hasNonNull("companyName")) {
-                    data.setCompanyName(json.get("companyName").asText().trim());
+
+                // 1.3 Название компании
+                String compName = getJsonString(json, "companyName", "company", "customer", "client");
+                if (compName != null && !compName.isEmpty()) {
+                    data.setCompanyName(cleanTitle(compName));
                 }
-                if (json.hasNonNull("positionTypeName")) {
-                    data.setPositionTypeName(json.get("positionTypeName").asText().trim());
+
+                // 1.4 Тип позиции / должность
+                String posTypeName = getJsonString(json, "positionName", "positionTypeName", "role", "jobTitle", "specialization");
+                if (posTypeName != null && !posTypeName.isEmpty()) {
+                    data.setPositionTypeName(cleanTitle(posTypeName));
                 }
-                if (json.hasNonNull("gradeName")) {
-                    data.setGradeName(json.get("gradeName").asText().trim());
+
+                // 1.5 Грейд
+                String grade = getJsonString(json, "grade", "gradeName", "level", "seniority");
+                if (grade != null && !grade.isEmpty()) {
+                    data.setGradeName(cleanTitle(grade));
                 }
-                if (json.hasNonNull("cityName")) {
-                    data.setCityName(json.get("cityName").asText().trim());
+
+                // 1.6 Город / локация
+                String city = getJsonString(json, "cityName", "city", "location");
+                if (city == null && json.has("cities") && json.get("cities").isArray() && json.get("cities").size() > 0) {
+                    city = json.get("cities").get(0).asText(null);
                 }
-                if (json.hasNonNull("remoteWork")) {
-                    data.setRemoteWork(json.get("remoteWork").asInt(1));
+                if (city != null && !city.isEmpty()) {
+                    data.setCityName(cleanTitle(city));
                 }
-                if (json.hasNonNull("salaryMin")) {
-                    data.setSalaryMin(BigDecimal.valueOf(json.get("salaryMin").asDouble()));
-                }
-                if (json.hasNonNull("salaryMax")) {
-                    data.setSalaryMax(BigDecimal.valueOf(json.get("salaryMax").asDouble()));
-                }
-                if (json.hasNonNull("workExperience")) {
-                    data.setWorkExperience(json.get("workExperience").asInt(3));
-                }
-                if (json.hasNonNull("shortDescription")) {
-                    data.setShortDescription(json.get("shortDescription").asText().trim());
-                }
-                if (json.has("requiredSkills") && json.get("requiredSkills").isArray()) {
-                    List<String> skills = new ArrayList<>();
-                    for (JsonNode skillNode : json.get("requiredSkills")) {
-                        String s = skillNode.asText().trim();
-                        if (!s.isEmpty()) skills.add(s);
+
+                // 1.7 Формат работы (REMOTE / HYBRID / OFFICE или 1 / 2 / 0)
+                if (json.has("remoteWork")) {
+                    JsonNode rwNode = json.get("remoteWork");
+                    if (rwNode.isNumber()) {
+                        data.setRemoteWork(rwNode.asInt(1));
+                    } else if (rwNode.isTextual()) {
+                        String rwStr = rwNode.asText().toUpperCase().trim();
+                        if (rwStr.contains("OFFICE") || rwStr.contains("ONSITE") || rwStr.contains("ОФИС")) {
+                            data.setRemoteWork(0);
+                        } else if (rwStr.contains("HYBRID") || rwStr.contains("ГИБРИД")) {
+                            data.setRemoteWork(2);
+                        } else {
+                            data.setRemoteWork(1); // REMOTE
+                        }
                     }
+                } else if (json.has("workFormat")) {
+                    String wf = json.get("workFormat").asText("").toUpperCase();
+                    if (wf.contains("OFFICE") || wf.contains("ОФИС")) data.setRemoteWork(0);
+                    else if (wf.contains("HYBRID") || wf.contains("ГИБРИД")) data.setRemoteWork(2);
+                    else data.setRemoteWork(1);
+                }
+
+                // 1.8 Зарплата
+                BigDecimal sMin = getJsonBigDecimal(json, "salaryMin", "minSalary", "salaryFrom", "rateMin");
+                if (sMin != null) data.setSalaryMin(sMin);
+                BigDecimal sMax = getJsonBigDecimal(json, "salaryMax", "maxSalary", "salaryTo", "rateMax", "rate");
+                if (sMax != null) data.setSalaryMax(sMax);
+
+                // 1.9 Опыт работы
+                if (json.has("workExperience") || json.has("experience")) {
+                    JsonNode expNode = json.has("workExperience") ? json.get("workExperience") : json.get("experience");
+                    if (expNode.isNumber()) {
+                        data.setWorkExperience(expNode.asInt(3));
+                    } else if (expNode.isTextual()) {
+                        Pattern numPat = Pattern.compile("(\\d+)");
+                        Matcher numMat = numPat.matcher(expNode.asText());
+                        if (numMat.find()) {
+                            try {
+                                data.setWorkExperience(Integer.parseInt(numMat.group(1)));
+                            } catch (Exception ignored) {
+                                data.setWorkExperience(3);
+                            }
+                        } else {
+                            data.setWorkExperience(3);
+                        }
+                    }
+                }
+
+                // 1.10 Краткое описание
+                String shortDesc = getJsonString(json, "shortDescription", "projectShortDescription", "description", "summary");
+                if (shortDesc != null && !shortDesc.isEmpty()) {
+                    data.setShortDescription(cleanHtmlToPlainText(shortDesc));
+                }
+
+                // 1.11 Навыки
+                List<String> skills = getJsonStringList(json, "skills", "requiredSkills", "techStack", "technologies", "keySkills");
+                if (!skills.isEmpty()) {
                     data.setRequiredSkills(skills);
                 }
-                if (json.has("checklist") && json.get("checklist").isArray()) {
-                    List<String> chk = new ArrayList<>();
-                    for (JsonNode chkNode : json.get("checklist")) {
-                        String c = chkNode.asText().trim();
-                        if (!c.isEmpty()) chk.add(c);
-                    }
+
+                // 1.12 Чеклист / требования
+                List<String> chk = getJsonStringList(json, "checklist", "requirements", "tasks", "responsibilities");
+                if (!chk.isEmpty()) {
                     data.setChecklist(chk);
                 }
-                parsedByAi = true;
-                log.info("[SMART_VACANCY_OPENING] ✓ AI-распознавание завершено успешно. Позиция: '{}', Проект: '{}', Компания: '{}', Зарплата: {} - {}, Навыки: {}",
-                        data.getVacansyName(), data.getProjectName(), data.getCompanyName(), data.getSalaryMin(), data.getSalaryMax(), data.getRequiredSkills());
+
+                if (data.getVacansyName() != null && !data.getVacansyName().isEmpty()) {
+                    parsedByAi = true;
+                    log.info("[SMART_VACANCY_OPENING] ✓ AI-распознавание завершено успешно. Позиция: '{}', Проект: '{}', Компания: '{}', Зарплата: {} - {}, Навыки: {}",
+                            data.getVacansyName(), data.getProjectName(), data.getCompanyName(), data.getSalaryMin(), data.getSalaryMax(), data.getRequiredSkills());
+                } else {
+                    log.warn("[SMART_VACANCY_OPENING] AI вернул JSON без поля наименования вакансии, запуск fallback-парсера");
+                }
             } else {
                 log.warn("[SMART_VACANCY_OPENING] AI вернул пустой результат, переключение на эвристический парсер");
             }
@@ -196,12 +259,12 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         // 2. Эвристический fallback-парсинг, если AI недоступен или вернул пустые поля
         if (!parsedByAi || data.getVacansyName() == null || data.getVacansyName().isEmpty()) {
             log.info("[SMART_VACANCY_OPENING] Запуск эвристического fallback-парсера...");
-            fallbackHeuristicParse(cleanedText, data);
+            fallbackHeuristicParse(textForAi, data);
             log.info("[SMART_VACANCY_OPENING] Результаты эвристического парсинга: vacansyName='{}', remoteWork={}, salaryMin={}, salaryMax={}, grade='{}', skills={}",
                     data.getVacansyName(), data.getRemoteWork(), data.getSalaryMin(), data.getSalaryMax(), data.getGradeName(), data.getRequiredSkills());
         }
 
-        data.setComment(cleanedText);
+        data.setComment(textForAi);
 
         // Проверка обязательных полей
         if (data.getVacansyName() == null || data.getVacansyName().isEmpty()) {
@@ -234,22 +297,80 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         return s.trim();
     }
 
+    private String getJsonString(JsonNode json, String... keys) {
+        for (String k : keys) {
+            if (json.hasNonNull(k) && !json.get(k).asText().trim().isEmpty()) {
+                return json.get(k).asText().trim();
+            }
+        }
+        return null;
+    }
+
+    private BigDecimal getJsonBigDecimal(JsonNode json, String... keys) {
+        for (String k : keys) {
+            if (json.hasNonNull(k)) {
+                JsonNode node = json.get(k);
+                if (node.isNumber()) {
+                    return BigDecimal.valueOf(node.asDouble());
+                } else if (node.isTextual()) {
+                    String clean = node.asText().replaceAll("[^\\d.]", "");
+                    if (!clean.isEmpty()) {
+                        try {
+                            return new BigDecimal(clean);
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private List<String> getJsonStringList(JsonNode json, String... keys) {
+        List<String> result = new ArrayList<>();
+        for (String k : keys) {
+            if (json.has(k)) {
+                JsonNode node = json.get(k);
+                if (node.isArray()) {
+                    for (JsonNode item : node) {
+                        String s = item.asText().trim();
+                        if (!s.isEmpty()) result.add(s);
+                    }
+                    if (!result.isEmpty()) return result;
+                } else if (node.isTextual() && !node.asText().trim().isEmpty()) {
+                    String[] parts = node.asText().split("[,;\\n]+");
+                    for (String p : parts) {
+                        String s = p.trim();
+                        if (!s.isEmpty()) result.add(s);
+                    }
+                    if (!result.isEmpty()) return result;
+                }
+            }
+        }
+        return result;
+    }
+
     private void fallbackHeuristicParse(String text, SmartOpenPositionParsedData data) {
-        String[] lines = text.split("\\r?\\n");
+        String cleanText = cleanHtmlToPlainText(text);
+        String[] lines = cleanText.split("\\r?\\n");
         for (String line : lines) {
             String trimmed = line.trim();
             if (trimmed.isEmpty()) continue;
 
+            // Пропускаем служебные строки с ID
+            if (trimmed.matches("(?i)^(?:[🆔\\s]*ID|🆔|запрос|номер).*?\\d+.*")) {
+                continue;
+            }
+
             if (data.getVacansyName() == null) {
                 if (trimmed.toLowerCase().startsWith("вакансия:") || trimmed.toLowerCase().startsWith("позиция:") || trimmed.toLowerCase().startsWith("должность:")) {
-                    data.setVacansyName(trimmed.substring(trimmed.indexOf(":") + 1).trim());
-                } else if (trimmed.length() < 80 && (trimmed.toLowerCase().contains("developer") || trimmed.toLowerCase().contains("engineer") || trimmed.toLowerCase().contains("разработчик") || trimmed.toLowerCase().contains("аналитик") || trimmed.toLowerCase().contains("тестировщик") || trimmed.toLowerCase().contains("дизайнер") || trimmed.toLowerCase().contains("менеджер") || trimmed.toLowerCase().contains("lead") || trimmed.toLowerCase().contains("devops"))) {
-                    data.setVacansyName(trimmed);
+                    data.setVacansyName(cleanTitle(trimmed.substring(trimmed.indexOf(":") + 1).trim()));
+                } else if (trimmed.length() < 80 && (trimmed.toLowerCase().contains("developer") || trimmed.toLowerCase().contains("engineer") || trimmed.toLowerCase().contains("разработчик") || trimmed.toLowerCase().contains("аналитик") || trimmed.toLowerCase().contains("тестировщик") || trimmed.toLowerCase().contains("дизайнер") || trimmed.toLowerCase().contains("менеджер") || trimmed.toLowerCase().contains("lead") || trimmed.toLowerCase().contains("devops") || trimmed.toLowerCase().contains("architect"))) {
+                    data.setVacansyName(cleanTitle(trimmed));
                 }
             }
 
-            // Зарплата
-            Pattern salaryPattern = Pattern.compile("(\\d[\\d\\s]{3,})\\s*(?:-|до|—|–)\\s*(\\d[\\d\\s]{3,})\\s*(?:руб|р|rub|usd|\\$|€)?", Pattern.CASE_INSENSITIVE);
+            // Зарплата / ставка
+            Pattern salaryPattern = Pattern.compile("(?:ставка|зп|оплата|доход)?[:\\s]*(\\d[\\d\\s]{2,})\\s*(?:-|до|—|–)\\s*(\\d[\\d\\s]{2,})\\s*(?:руб|р|rub|usd|\\$|€|рд|\\/час)?", Pattern.CASE_INSENSITIVE);
             Matcher salaryMatcher = salaryPattern.matcher(trimmed);
             if (salaryMatcher.find()) {
                 try {
@@ -258,6 +379,15 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     if (data.getSalaryMin() == null) data.setSalaryMin(new BigDecimal(minStr));
                     if (data.getSalaryMax() == null) data.setSalaryMax(new BigDecimal(maxStr));
                 } catch (Exception ignored) {}
+            } else {
+                Pattern singleRatePattern = Pattern.compile("(?:ставка|до)\\s*(\\d[\\d\\s]{2,})", Pattern.CASE_INSENSITIVE);
+                Matcher singleRateMatcher = singleRatePattern.matcher(trimmed);
+                if (singleRateMatcher.find() && data.getSalaryMax() == null) {
+                    try {
+                        String rateStr = singleRateMatcher.group(1).replaceAll("\\s+", "");
+                        data.setSalaryMax(new BigDecimal(rateStr));
+                    } catch (Exception ignored) {}
+                }
             }
 
             // Формат работы
@@ -279,39 +409,50 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             }
 
             // Грейд
-            if (trimmed.toLowerCase().contains("senior")) {
+            if (trimmed.toLowerCase().contains("senior") || trimmed.toLowerCase().contains("сеньор")) {
                 data.setGradeName("Senior");
-            } else if (trimmed.toLowerCase().contains("middle")) {
+            } else if (trimmed.toLowerCase().contains("middle") || trimmed.toLowerCase().contains("мидл")) {
                 data.setGradeName("Middle");
-            } else if (trimmed.toLowerCase().contains("junior")) {
+            } else if (trimmed.toLowerCase().contains("junior") || trimmed.toLowerCase().contains("джуниор")) {
                 data.setGradeName("Junior");
-            } else if (trimmed.toLowerCase().contains("lead")) {
+            } else if (trimmed.toLowerCase().contains("lead") || trimmed.toLowerCase().contains("тимлид") || trimmed.toLowerCase().contains("лид")) {
                 data.setGradeName("Lead");
             }
         }
 
-        if (data.getVacansyName() == null && lines.length > 0) {
-            data.setVacansyName(lines[0].trim());
+        if (data.getVacansyName() == null) {
+            for (String l : lines) {
+                String cleanL = cleanTitle(l);
+                if (!cleanL.isEmpty() && cleanL.length() <= 80 && !cleanL.matches("(?i)^(?:[🆔\\s]*ID|🆔|запрос|номер).*")) {
+                    data.setVacansyName(cleanL);
+                    break;
+                }
+            }
         }
 
         // Поиск навыков по ключевым словам
-        String[] popularSkills = {"Java", "Spring", "Kotlin", "Python", "PostgreSQL", "Docker", "Kubernetes", "React", "TypeScript", "JavaScript", "Go", "C#", "Kafka", "Redis", "Git", "CI/CD", "Linux", "SQL"};
+        String[] popularSkills = {"Java", "Spring", "Kotlin", "Python", "PostgreSQL", "Docker", "Kubernetes", "React", "TypeScript", "JavaScript", "Go", "C#", "Kafka", "Redis", "Git", "CI/CD", "Linux", "SQL", "BPMN", "Бизнес-анализ", "Честный знак"};
         List<String> foundSkills = new ArrayList<>();
         for (String skill : popularSkills) {
-            if (Pattern.compile("\\b" + Pattern.quote(skill) + "\\b", Pattern.CASE_INSENSITIVE).matcher(text).find()) {
+            if (Pattern.compile("\\b" + Pattern.quote(skill) + "\\b", Pattern.CASE_INSENSITIVE).matcher(cleanText).find()) {
                 foundSkills.add(skill);
             }
         }
-        data.setRequiredSkills(foundSkills);
+        if (data.getRequiredSkills() == null || data.getRequiredSkills().isEmpty()) {
+            data.setRequiredSkills(foundSkills);
+        }
     }
 
     @Override
     public OpenPosition findDuplicate(SmartOpenPositionParsedData data) {
         if (data == null || data.getVacansyName() == null) return null;
-        log.info("[SMART_VACANCY_OPENING] Поиск дубликата для вакансии: '{}'", data.getVacansyName());
+        String cleanName = cleanTitle(data.getVacansyName());
+        if (cleanName.isEmpty()) return null;
+
+        log.info("[SMART_VACANCY_OPENING] Поиск дубликата для вакансии: '{}'", cleanName);
         List<OpenPosition> list = dataManager.load(OpenPosition.class)
                 .query("select e from hunttech_OpenPosition e where lower(e.vacansyName) = lower(:name) and e.openClose = false")
-                .parameter("name", data.getVacansyName().trim())
+                .parameter("name", cleanName)
                 .view("openPosition-browse-view")
                 .maxResults(1)
                 .list();
@@ -321,7 +462,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     duplicate.getId(), duplicate.getVacansyID(), duplicate.getVacansyName());
             return duplicate;
         }
-        log.info("[SMART_VACANCY_OPENING] Дубликатов для вакансии '{}' не обнаружено", data.getVacansyName());
+        log.info("[SMART_VACANCY_OPENING] Дубликатов для вакансии '{}' не обнаружено", cleanName);
         return null;
     }
 
@@ -333,8 +474,12 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         try {
             CommitContext commitContext = new CommitContext();
 
+            String rawName = data.getVacansyName() != null ? data.getVacansyName() : "Открытая вакансия";
+            String safeVacName = truncate(cleanTitle(rawName), 250);
+            if (safeVacName.isEmpty()) safeVacName = "Открытая вакансия";
+
             OpenPosition openPosition = metadata.create(OpenPosition.class);
-            openPosition.setVacansyName(data.getVacansyName() != null ? data.getVacansyName() : "Открытая вакансия");
+            openPosition.setVacansyName(safeVacName);
             openPosition.setOpenClose(false); // Открыта
             openPosition.setSignDraft(false);
             openPosition.setRemoteWork(data.getRemoteWork() != null ? data.getRemoteWork() : 1);
@@ -344,15 +489,20 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setSalaryMax(data.getSalaryMax());
             // Все вакансии, созданные через умную ИИ-загрузку, получают статус «На проверку» (-2)
             openPosition.setPriority(OpenPositionPriority.UNDER_REVIEW.getId());
-            openPosition.setComment(data.getComment() != null ? data.getComment() : data.getRawText());
-            openPosition.setShortDescription(data.getShortDescription() != null && data.getShortDescription().length() <= 250
-                    ? data.getShortDescription() : (openPosition.getVacansyName().length() <= 250 ? openPosition.getVacansyName() : openPosition.getVacansyName().substring(0, 250)));
+
+            String fullComment = data.getComment() != null ? data.getComment() : data.getRawText();
+            openPosition.setComment(cleanHtmlToPlainText(fullComment));
+
+            String shortDesc = data.getShortDescription() != null && !data.getShortDescription().isEmpty()
+                    ? cleanHtmlToPlainText(data.getShortDescription()) : safeVacName;
+            openPosition.setShortDescription(truncate(shortDesc, 250));
+
             openPosition.setLastOpenDate(new Date());
             openPosition.setOwner(recruiter);
             openPosition.setCommandCandidate(1);
 
-            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
-                    openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getWorkExperience());
+            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
+                    openPosition.getVacansyName(), openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getWorkExperience());
 
             // Поиск / привязка проекта
             Project project = findOrCreateProject(data.getProjectName(), data.getCompanyName());
@@ -360,12 +510,10 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             log.info("[SMART_VACANCY_OPENING] Проект позиции: {}", project != null ? (project.getProjectName() + " (ID=" + project.getId() + ")") : "НЕ НАЙДЕН");
 
             // Поиск / привязка типа позиции
-            if (data.getPositionTypeName() != null || openPosition.getVacansyName() != null) {
-                String posName = data.getPositionTypeName() != null ? data.getPositionTypeName() : openPosition.getVacansyName();
-                Position positionType = findOrCreatePositionType(posName);
-                openPosition.setPositionType(positionType);
-                log.info("[SMART_VACANCY_OPENING] Тип позиции: {}", positionType != null ? (positionType.getPositionRuName() + " (ID=" + positionType.getId() + ")") : "НЕ НАЙДЕН");
-            }
+            String posName = data.getPositionTypeName() != null ? data.getPositionTypeName() : openPosition.getVacansyName();
+            Position positionType = findOrCreatePositionType(posName);
+            openPosition.setPositionType(positionType);
+            log.info("[SMART_VACANCY_OPENING] Тип позиции: {}", positionType != null ? (positionType.getPositionRuName() + " (ID=" + positionType.getId() + ")") : "НЕ НАЙДЕН");
 
             // Поиск / привязка грейда
             if (data.getGradeName() != null) {
@@ -390,11 +538,14 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             // Добавление ключевых навыков в позицию
             if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
                 log.info("[SMART_VACANCY_OPENING] Добавление {} навыков в SkillTree: {}", data.getRequiredSkills().size(), data.getRequiredSkills());
-                for (String skillName : data.getRequiredSkills()) {
-                    SkillTree st = metadata.create(SkillTree.class);
-                    st.setSkillName(skillName);
-                    st.setOpenPosition(openPosition);
-                    commitContext.addInstanceToCommit(st);
+                for (String rawSkill : data.getRequiredSkills()) {
+                    String cleanSkill = cleanTitle(rawSkill);
+                    if (!cleanSkill.isEmpty()) {
+                        SkillTree st = metadata.create(SkillTree.class);
+                        st.setSkillName(truncate(cleanSkill, 100));
+                        st.setOpenPosition(openPosition);
+                        commitContext.addInstanceToCommit(st);
+                    }
                 }
             }
 
@@ -415,11 +566,12 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
     }
 
     private Project findOrCreateProject(String projectName, String companyName) {
-        log.info("[SMART_VACANCY_OPENING] Поиск проекта: name='{}', company='{}'", projectName, companyName);
-        if (projectName != null && !projectName.trim().isEmpty()) {
+        String cleanName = projectName != null ? cleanTitle(projectName) : "";
+        log.info("[SMART_VACANCY_OPENING] Поиск проекта: name='{}', company='{}'", cleanName, companyName);
+        if (!cleanName.isEmpty()) {
             List<Project> list = dataManager.load(Project.class)
                     .query("select e from hunttech_Project e where lower(e.projectName) like lower(:name)")
-                    .parameter("name", "%" + projectName.trim() + "%")
+                    .parameter("name", "%" + cleanName + "%")
                     .view("project-picker-view")
                     .maxResults(1)
                     .list();
@@ -444,10 +596,16 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
     private Position findOrCreatePositionType(String positionName) {
         if (positionName == null || positionName.trim().isEmpty()) return null;
-        log.info("[SMART_VACANCY_OPENING] Поиск / создание типа должности: '{}'", positionName);
+        String cleanName = cleanTitle(positionName);
+        if (cleanName.isEmpty()) return null;
+
+        // Строгое ограничение: колонка HUNTTECH_POSITION.POSITION_RU_NAME имеет тип varchar(80)
+        String safeName = truncate(cleanName, 80);
+
+        log.info("[SMART_VACANCY_OPENING] Поиск / создание типа должности: '{}'", safeName);
         List<Position> list = dataManager.load(Position.class)
                 .query("select e from hunttech_Position e where lower(e.positionRuName) = lower(:name) or lower(e.positionEnName) = lower(:name)")
-                .parameter("name", positionName.trim())
+                .parameter("name", safeName)
                 .view("position-picker-view")
                 .maxResults(1)
                 .list();
@@ -456,7 +614,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             return list.get(0);
         }
         Position pos = metadata.create(Position.class);
-        pos.setPositionRuName(positionName.trim());
+        pos.setPositionRuName(safeName);
         dataManager.commit(pos);
         log.info("[SMART_VACANCY_OPENING] Создан новый тип должности: '{}' (ID={})", pos.getPositionRuName(), pos.getId());
         return pos;
@@ -464,10 +622,13 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
     private Grade findGrade(String gradeName) {
         if (gradeName == null) return null;
-        log.info("[SMART_VACANCY_OPENING] Поиск грейда: '{}'", gradeName);
+        String cleanGrade = cleanTitle(gradeName);
+        if (cleanGrade.isEmpty()) return null;
+
+        log.info("[SMART_VACANCY_OPENING] Поиск грейда: '{}'", cleanGrade);
         List<Grade> list = dataManager.load(Grade.class)
                 .query("select e from hunttech_Grade e where lower(e.gradeName) like lower(:g)")
-                .parameter("g", "%" + gradeName.trim() + "%")
+                .parameter("g", "%" + cleanGrade + "%")
                 .view("_local")
                 .maxResults(1)
                 .list();
@@ -476,14 +637,50 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
     private City findCity(String cityName) {
         if (cityName == null) return null;
-        log.info("[SMART_VACANCY_OPENING] Поиск города: '{}'", cityName);
+        String cleanCity = cleanTitle(cityName);
+        if (cleanCity.isEmpty()) return null;
+
+        log.info("[SMART_VACANCY_OPENING] Поиск города: '{}'", cleanCity);
         List<City> list = dataManager.load(City.class)
                 .query("select e from hunttech_City e where lower(e.cityRuName) like lower(:c)")
-                .parameter("c", "%" + cityName.trim() + "%")
+                .parameter("c", "%" + cleanCity + "%")
                 .view("city-picker-view")
                 .maxResults(1)
                 .list();
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    private static String cleanHtmlToPlainText(String text) {
+        if (text == null || text.trim().isEmpty()) return "";
+        String s = text.replaceAll("(?is)<script.*?</script>", " ")
+                .replaceAll("(?is)<style.*?</style>", " ")
+                .replaceAll("(?i)<br\\s*/?>", "\n")
+                .replaceAll("(?i)</?(?:div|p|li|tr|h[1-6])[^>]*>", "\n")
+                .replaceAll("<[^>]+>", " ")
+                .replaceAll("&nbsp;", " ")
+                .replaceAll("&quot;", "\"")
+                .replaceAll("&amp;", "&")
+                .replaceAll("&lt;", "<")
+                .replaceAll("&gt;", ">")
+                .replaceAll("&apos;", "'")
+                .replaceAll("&#39;", "'");
+
+        return s.replaceAll("\\r", "").replaceAll("\\n{3,}", "\n\n").trim();
+    }
+
+    private static String cleanTitle(String title) {
+        if (title == null) return "";
+        String clean = cleanHtmlToPlainText(title);
+        // Удаляем эмодзи и спецсимволы в начале строки (например 🥇, 🆔, 🎯, 🔹, —)
+        clean = clean.replaceAll("^[\\s\\p{Punct}\\p{So}\\p{Sc}\\p{Sm}\\p{Sk}]+", "").trim();
+        clean = clean.replaceAll("[\\s:;,-]+$", "").trim();
+        return clean;
+    }
+
+    private static String truncate(String s, int maxLen) {
+        if (s == null) return "";
+        String t = s.trim();
+        return t.length() <= maxLen ? t : t.substring(0, maxLen).trim();
     }
 
     private static String preview(String s, int maxLen) {
@@ -491,4 +688,5 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         String oneLine = s.replaceAll("\\s+", " ").trim();
         return oneLine.length() <= maxLen ? oneLine : oneLine.substring(0, maxLen) + "...";
     }
+}
 }
