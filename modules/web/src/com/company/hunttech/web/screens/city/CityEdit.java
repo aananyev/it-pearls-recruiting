@@ -66,6 +66,92 @@ public class CityEdit extends StandardEditor<City> {
     private DataContext dataContext;
     @Inject
     private Notifications notifications;
+    @Inject
+    private com.company.hunttech.service.GeoDataEnrichmentService geoDataEnrichmentService;
+
+    /**
+     * Умное автозаполнение реквизитов города по API и поиск герба.
+     */
+    public void onEnrichCityByApi() {
+        City city = getEditedEntity();
+        String query = city.getCityRuName();
+        if (query == null || query.trim().isEmpty()) {
+            query = city.getCityEngName();
+        }
+        if (query == null || query.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Укажите наименование города")
+                    .withDescription("Для автоматического поиска введите название города (например, Москва, Казань, Екатеринбург).")
+                    .show();
+            return;
+        }
+
+        try {
+            com.company.hunttech.entity.Region region = city.getCityRegion();
+            com.company.hunttech.entity.Country country = region != null ? region.getRegionCountry() : null;
+            com.company.hunttech.entity.GeoCityData data = geoDataEnrichmentService.enrichCity(query, region, country);
+            if (data != null) {
+                if (data.getCityRuName() != null && (city.getCityRuName() == null || city.getCityRuName().trim().isEmpty())) {
+                    city.setCityRuName(data.getCityRuName());
+                }
+                if (data.getCityEngName() != null && (city.getCityEngName() == null || city.getCityEngName().trim().isEmpty())) {
+                    city.setCityEngName(data.getCityEngName());
+                }
+                if (data.getCityPhoneCode() != null && (city.getCityPhoneCode() == null || city.getCityPhoneCode().trim().isEmpty())) {
+                    city.setCityPhoneCode(data.getCityPhoneCode());
+                }
+                if (data.getPostalCode() != null && (city.getPostalCode() == null || city.getPostalCode().trim().isEmpty())) {
+                    city.setPostalCode(data.getPostalCode());
+                }
+                if (data.getPopulation() != null && city.getPopulation() == null) {
+                    city.setPopulation(data.getPopulation());
+                }
+                if (data.getLatitude() != null && city.getLatitude() == null) {
+                    city.setLatitude(data.getLatitude());
+                }
+                if (data.getLongitude() != null && city.getLongitude() == null) {
+                    city.setLongitude(data.getLongitude());
+                }
+                if (data.getTimeZone() != null && (city.getTimeZone() == null || city.getTimeZone().trim().isEmpty())) {
+                    city.setTimeZone(data.getTimeZone());
+                }
+                if (data.getFiasId() != null && (city.getFiasId() == null || city.getFiasId().trim().isEmpty())) {
+                    city.setFiasId(data.getFiasId());
+                }
+
+                // Скачивание и привязка герба города
+                boolean emblemLoaded = false;
+                if (data.getEmblemUrl() != null && !data.getEmblemUrl().isEmpty() && city.getFileCityEmblem() == null) {
+                    FileDescriptor emblemFd = geoDataEnrichmentService.downloadAndSaveImage(
+                            data.getEmblemUrl(),
+                            "emblem_city_" + System.currentTimeMillis() + ".png");
+                    if (emblemFd != null) {
+                        createdUncommittedDescriptors.add(emblemFd);
+                        city.setFileCityEmblem(dataContext.merge(emblemFd));
+                        emblemLoaded = true;
+                    }
+                }
+
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Реквизиты города успешно заполнены")
+                        .withDescription(emblemLoaded
+                                ? "Телефонный код, индекс, население, координаты и герб получены."
+                                : "Телефонный код, индекс, население и координаты получены.")
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption("Данные не найдены")
+                        .withDescription("Не удалось получить реквизиты для города: " + query)
+                        .show();
+            }
+        } catch (Exception e) {
+            log.error("Ошибка автозаполнения города: {}", e.getMessage(), e);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка обращения к Geo-API")
+                    .withDescription("Не удалось получить данные сервиса. Попробуйте позже или проверьте настройки.")
+                    .show();
+        }
+    }
 
     private final Set<FileDescriptor> pendingRemovalDescriptors = new HashSet<>();
     private final Set<FileDescriptor> createdUncommittedDescriptors = new HashSet<>();

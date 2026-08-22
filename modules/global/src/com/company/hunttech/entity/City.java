@@ -21,8 +21,29 @@ public class City extends StandardEntity {
     @Column(name = "CITY_RU_NAME", nullable = false, unique = true, length = 50)
     protected String cityRuName;
 
-    @Column(name = "CITY_PHONE_CODE", unique = true, length = 5)
+    @Column(name = "CITY_ENG_NAME", length = 100)
+    protected String cityEngName;
+
+    @Column(name = "CITY_PHONE_CODE", length = 10)
     protected String cityPhoneCode;
+
+    @Column(name = "POSTAL_CODE", length = 20)
+    protected String postalCode;
+
+    @Column(name = "FIAS_ID", length = 50)
+    protected String fiasId;
+
+    @Column(name = "POPULATION")
+    protected Long population;
+
+    @Column(name = "LATITUDE")
+    protected Double latitude;
+
+    @Column(name = "LONGITUDE")
+    protected Double longitude;
+
+    @Column(name = "TIME_ZONE", length = 50)
+    protected String timeZone;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_CITY_EMBLEM_ID")
@@ -36,6 +57,62 @@ public class City extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
+
+    public String getCityEngName() {
+        return cityEngName;
+    }
+
+    public void setCityEngName(String cityEngName) {
+        this.cityEngName = cityEngName;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getFiasId() {
+        return fiasId;
+    }
+
+    public void setFiasId(String fiasId) {
+        this.fiasId = fiasId;
+    }
+
+    public Long getPopulation() {
+        return population;
+    }
+
+    public void setPopulation(Long population) {
+        this.population = population;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
 
     public FileDescriptor getFileCityEmblem() {
         return fileCityEmblem;

@@ -93,13 +93,20 @@ order by e.countryRuName]]></query>
             </vbox>
             <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
             <vbox id="regionWorkspace" stylename="edit-workspace" expand="regionWorkspaceScroll" width="100%" height="100%" spacing="false">
-                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <!-- Toolbar с заголовком карточки, описанием и кнопкой автозаполнения по API. -->
                 <hbox id="regionToolbar" stylename="edit-toolbar" width="100%" spacing="true">
                     <!-- Текстовый блок toolbar: заголовок и описание. -->
                     <vbox id="regionToolbarText" width="100%" spacing="false">
                         <label value="Карточка региона" stylename="edit-toolbar-title"/>
-                        <label value="Принадлежность стране, код и перечень городов" stylename="edit-toolbar-description"/>
+                        <label value="Принадлежность стране, коды, герб и перечень городов" stylename="edit-toolbar-description"/>
                     </vbox>
+                    <!-- Кнопка умного автозаполнения по API / AI -->
+                    <button id="enrichRegionByApiBtn"
+                            caption="Умное заполнение по API"
+                            icon="MAGIC"
+                            stylename="friendly company-search-ai-btn"
+                            align="MIDDLE_RIGHT"
+                            invoke="onEnrichRegionByApi"/>
                 </hbox>
                 <!-- Прокручиваемая область контента рабочей области. -->
                 <scrollBox id="regionWorkspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
@@ -110,14 +117,26 @@ order by e.countryRuName]]></query>
                             <!-- Форма региона с полями, привязанными к regionDc. -->
                             <form id="form" dataContainer="regionDc" width="100%">
                                 <column width="100%">
-                                    <!-- Название региона. -->
+                                    <!-- Название региона на русском. -->
                                     <textField id="regionRuNameField" property="regionRuName" caption="mainMsg://msgRegionRuName" width="100%" stylename="edit-form-control"/>
+                                    <!-- Международное наименование региона. -->
+                                    <textField id="regionEngNameField" property="regionEngName" caption="mainMsg://msgRegionEngName" width="100%" stylename="edit-form-control"/>
                                     <!-- Страна региона (picker из кэшируемого справочника стран). -->
                                     <lookupPickerField id="regionCountryField" optionsContainer="regionCountriesDc" property="regionCountry" caption="mainMsg://msgCountry" width="100%" stylename="edit-form-control">
                                         <actions><action id="lookup" type="picker_lookup"/></actions>
                                     </lookupPickerField>
-                                    <!-- Код региона. -->
+                                    <!-- Тип региона (область, республика, штат...). -->
+                                    <textField id="regionTypeField" property="regionType" caption="mainMsg://msgRegionType" width="100%" stylename="edit-form-control"/>
+                                    <!-- Административный центр / столица региона. -->
+                                    <textField id="capitalField" property="capital" caption="mainMsg://msgAdministrativeCenter" width="100%" stylename="edit-form-control"/>
+                                    <!-- Код региона (автомобильный / территориальный). -->
                                     <textField id="regionCodeField" property="regionCode" caption="mainMsg://msgRegionCode" width="100%" stylename="edit-form-control"/>
+                                    <!-- Код ISO 3166-2. -->
+                                    <textField id="isoCodeField" property="isoCode" caption="mainMsg://msgIsoCode" width="100%" stylename="edit-form-control"/>
+                                    <!-- Часовой пояс. -->
+                                    <textField id="timeZoneField" property="timeZone" caption="mainMsg://msgTimeZone" width="100%" stylename="edit-form-control"/>
+                                    <!-- Идентификатор ФИАС / КЛАДР. -->
+                                    <textField id="fiasIdField" property="fiasId" caption="mainMsg://msgFiasId" width="100%" stylename="edit-form-control"/>
                                 </column>
                             </form>
                         </groupBox>

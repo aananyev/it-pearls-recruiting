@@ -90,21 +90,35 @@
                 <hbox id="cityToolbar" stylename="edit-toolbar" width="100%" spacing="true">
                     <vbox id="cityToolbarText" width="100%" spacing="false">
                         <label value="Карточка города" stylename="edit-toolbar-title"/>
-                        <label value="Наименование, телефонный код и принадлежность региону" stylename="edit-toolbar-description"/>
+                        <label value="Наименование, коды, координаты, герб и связь с регионом" stylename="edit-toolbar-description"/>
                     </vbox>
+                    <!-- Кнопка умного автозаполнения по API / AI -->
+                    <button id="enrichCityByApiBtn"
+                            caption="Умное заполнение по API"
+                            icon="MAGIC"
+                            stylename="friendly company-search-ai-btn"
+                            align="MIDDLE_RIGHT"
+                            invoke="onEnrichCityByApi"/>
                 </hbox>
                 <scrollBox id="cityWorkspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
                     <vbox id="citySections" width="100%" spacing="true">
-                        <!-- Наименование и телефонный код образуют единый идентификационный блок. -->
-                        <groupBox id="cityIdentitySection" caption="Наименование" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
+                        <!-- Основные реквизиты города -->
+                        <groupBox id="cityIdentitySection" caption="Основные данные" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
                             <form id="cityIdentityForm" dataContainer="cityDc" width="100%">
                                 <column width="100%">
                                     <textField id="cityRuNameField" property="cityRuName" caption="mainMsg://msgCityRuName" width="100%" stylename="edit-form-control"/>
+                                    <textField id="cityEngNameField" property="cityEngName" caption="mainMsg://msgCityEngName" width="100%" stylename="edit-form-control"/>
                                     <textField id="cityPhoneCodeField" property="cityPhoneCode" caption="mainMsg://msgCityPhoneCode" width="100%" stylename="edit-form-control"/>
+                                    <textField id="postalCodeField" property="postalCode" caption="mainMsg://msgPostalCode" width="100%" stylename="edit-form-control"/>
+                                    <textField id="populationField" property="population" caption="mainMsg://msgPopulation" width="100%" stylename="edit-form-control"/>
+                                    <textField id="timeZoneField" property="timeZone" caption="mainMsg://msgTimeZone" width="100%" stylename="edit-form-control"/>
+                                    <textField id="latitudeField" property="latitude" caption="mainMsg://msgLatitude" width="100%" stylename="edit-form-control"/>
+                                    <textField id="longitudeField" property="longitude" caption="mainMsg://msgLongitude" width="100%" stylename="edit-form-control"/>
+                                    <textField id="fiasIdField" property="fiasId" caption="mainMsg://msgFiasId" width="100%" stylename="edit-form-control"/>
                                 </column>
                             </form>
                         </groupBox>
-                        <!-- Связь с регионом вынесена в отдельную карточку без изменения binding и picker action. -->
+                        <!-- Связь с регионом -->
                         <groupBox id="cityRegionSection" caption="Регион и связь" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
                             <form id="cityRegionForm" dataContainer="cityDc" width="100%">
                                 <column width="100%">

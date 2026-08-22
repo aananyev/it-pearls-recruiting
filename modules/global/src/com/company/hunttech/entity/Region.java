@@ -23,6 +23,9 @@ public class Region extends StandardEntity {
     @Column(name = "REGION_RU_NAME", nullable = false, unique = true, length = 50)
     protected String regionRuName;
 
+    @Column(name = "REGION_ENG_NAME", length = 100)
+    protected String regionEngName;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REGION_COUNTRY_ID")
@@ -38,6 +41,69 @@ public class Region extends StandardEntity {
 
     @Column(name = "REGION_CODE", unique = true)
     protected Integer regionCode;
+
+    @Column(name = "ISO_CODE", length = 10)
+    protected String isoCode;
+
+    @Column(name = "FIAS_ID", length = 50)
+    protected String fiasId;
+
+    @Column(name = "REGION_TYPE", length = 50)
+    protected String regionType;
+
+    @Column(name = "CAPITAL", length = 100)
+    protected String capital;
+
+    @Column(name = "TIME_ZONE", length = 50)
+    protected String timeZone;
+
+    public String getRegionEngName() {
+        return regionEngName;
+    }
+
+    public void setRegionEngName(String regionEngName) {
+        this.regionEngName = regionEngName;
+    }
+
+    public String getIsoCode() {
+        return isoCode;
+    }
+
+    public void setIsoCode(String isoCode) {
+        this.isoCode = isoCode;
+    }
+
+    public String getFiasId() {
+        return fiasId;
+    }
+
+    public void setFiasId(String fiasId) {
+        this.fiasId = fiasId;
+    }
+
+    public String getRegionType() {
+        return regionType;
+    }
+
+    public void setRegionType(String regionType) {
+        this.regionType = regionType;
+    }
+
+    public String getCapital() {
+        return capital;
+    }
+
+    public void setCapital(String capital) {
+        this.capital = capital;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
 
     public FileDescriptor getFileRegionEmblem() {
         return fileRegionEmblem;

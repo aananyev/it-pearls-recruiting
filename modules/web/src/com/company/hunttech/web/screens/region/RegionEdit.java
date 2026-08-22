@@ -60,6 +60,87 @@ public class RegionEdit extends StandardEditor<Region> {
     private DataContext dataContext;
     @Inject
     private Notifications notifications;
+    @Inject
+    private com.company.hunttech.service.GeoDataEnrichmentService geoDataEnrichmentService;
+
+    /**
+     * Умное автозаполнение реквизитов региона по API и поиск герба.
+     */
+    public void onEnrichRegionByApi() {
+        Region region = getEditedEntity();
+        String query = region.getRegionRuName();
+        if (query == null || query.trim().isEmpty()) {
+            query = region.getRegionEngName();
+        }
+        if (query == null || query.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Укажите наименование региона")
+                    .withDescription("Для автоматического поиска введите название региона (например, Московская область, Татарстан, Санкт-Петербург).")
+                    .show();
+            return;
+        }
+
+        try {
+            com.company.hunttech.entity.GeoRegionData data = geoDataEnrichmentService.enrichRegion(query, region.getRegionCountry());
+            if (data != null) {
+                if (data.getRegionRuName() != null && (region.getRegionRuName() == null || region.getRegionRuName().trim().isEmpty())) {
+                    region.setRegionRuName(data.getRegionRuName());
+                }
+                if (data.getRegionEngName() != null && (region.getRegionEngName() == null || region.getRegionEngName().trim().isEmpty())) {
+                    region.setRegionEngName(data.getRegionEngName());
+                }
+                if (data.getRegionCode() != null && region.getRegionCode() == null) {
+                    region.setRegionCode(data.getRegionCode());
+                }
+                if (data.getIsoCode() != null && (region.getIsoCode() == null || region.getIsoCode().trim().isEmpty())) {
+                    region.setIsoCode(data.getIsoCode());
+                }
+                if (data.getRegionType() != null && (region.getRegionType() == null || region.getRegionType().trim().isEmpty())) {
+                    region.setRegionType(data.getRegionType());
+                }
+                if (data.getCapital() != null && (region.getCapital() == null || region.getCapital().trim().isEmpty())) {
+                    region.setCapital(data.getCapital());
+                }
+                if (data.getTimeZone() != null && (region.getTimeZone() == null || region.getTimeZone().trim().isEmpty())) {
+                    region.setTimeZone(data.getTimeZone());
+                }
+                if (data.getFiasId() != null && (region.getFiasId() == null || region.getFiasId().trim().isEmpty())) {
+                    region.setFiasId(data.getFiasId());
+                }
+
+                // Скачивание и привязка герба региона
+                boolean emblemLoaded = false;
+                if (data.getEmblemUrl() != null && !data.getEmblemUrl().isEmpty() && region.getFileRegionEmblem() == null) {
+                    FileDescriptor emblemFd = geoDataEnrichmentService.downloadAndSaveImage(
+                            data.getEmblemUrl(),
+                            "emblem_region_" + (data.getIsoCode() != null ? data.getIsoCode().toLowerCase() : "region") + ".png");
+                    if (emblemFd != null) {
+                        createdUncommittedDescriptors.add(emblemFd);
+                        region.setFileRegionEmblem(dataContext.merge(emblemFd));
+                        emblemLoaded = true;
+                    }
+                }
+
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Реквизиты региона успешно заполнены")
+                        .withDescription(emblemLoaded
+                                ? "Коды, тип региона, столица и герб получены."
+                                : "Коды, тип региона и столица получены.")
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption("Данные не найдены")
+                        .withDescription("Не удалось получить реквизиты для региона: " + query)
+                        .show();
+            }
+        } catch (Exception e) {
+            log.error("Ошибка автозаполнения региона: {}", e.getMessage(), e);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка обращения к Geo-API")
+                    .withDescription("Не удалось получить данные сервиса. Попробуйте позже или проверьте настройки.")
+                    .show();
+        }
+    }
 
     private final Set<FileDescriptor> pendingRemovalDescriptors = new HashSet<>();
     private final Set<FileDescriptor> createdUncommittedDescriptors = new HashSet<>();

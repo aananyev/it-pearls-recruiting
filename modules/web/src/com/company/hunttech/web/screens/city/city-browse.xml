@@ -34,9 +34,13 @@ order by e.cityRuName]]>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="cityRuName"/>
-                <column id="cityPhoneCode"/>
-                <column id="cityRegion"/>
+                <column id="cityRuName" caption="mainMsg://msgCityRuName"/>
+                <column id="cityEngName" caption="mainMsg://msgCityEngName"/>
+                <column id="cityRegion" caption="mainMsg://msgCityRegion"/>
+                <column id="cityPhoneCode" caption="mainMsg://msgCityPhoneCode"/>
+                <column id="postalCode" caption="mainMsg://msgPostalCode"/>
+                <column id="population" caption="mainMsg://msgPopulation"/>
+                <column id="timeZone" caption="mainMsg://msgTimeZone"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

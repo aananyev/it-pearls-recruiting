@@ -26,6 +26,134 @@ public class CountryEdit extends StandardEditor<Country> {
     private Button countryMainNav;
     @Inject
     private Button countryRegionsNav;
+    @Inject
+    private com.company.hunttech.service.GeoDataEnrichmentService geoDataEnrichmentService;
+    @Inject
+    private com.haulmont.cuba.gui.Notifications notifications;
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CountryEdit.class);
+
+    @Inject
+    private com.haulmont.cuba.gui.model.DataContext dataContext;
+    @Inject
+    private com.haulmont.cuba.core.app.FileStorageService fileStorageService;
+    @Inject
+    private com.haulmont.cuba.core.global.DataManager dataManager;
+
+    private final java.util.Set<com.haulmont.cuba.core.entity.FileDescriptor> pendingRemovalDescriptors = new java.util.HashSet<>();
+    private final java.util.Set<com.haulmont.cuba.core.entity.FileDescriptor> createdUncommittedDescriptors = new java.util.HashSet<>();
+
+    @com.haulmont.cuba.gui.screen.Subscribe
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        createdUncommittedDescriptors.clear();
+        if (!pendingRemovalDescriptors.isEmpty()) {
+            for (com.haulmont.cuba.core.entity.FileDescriptor descriptor : pendingRemovalDescriptors) {
+                try {
+                    fileStorageService.removeFile(descriptor);
+                    dataManager.remove(descriptor);
+                } catch (Exception ex) {
+                    log.warn("Не удалось удалить устаревший дескриптор флага {}: {}", descriptor.getId(), ex.getMessage());
+                }
+            }
+            pendingRemovalDescriptors.clear();
+        }
+    }
+
+    @com.haulmont.cuba.gui.screen.Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        if (!event.closedWith(com.haulmont.cuba.gui.screen.StandardOutcome.COMMIT) && !createdUncommittedDescriptors.isEmpty()) {
+            for (com.haulmont.cuba.core.entity.FileDescriptor descriptor : createdUncommittedDescriptors) {
+                try {
+                    fileStorageService.removeFile(descriptor);
+                } catch (Exception ex) {
+                    log.warn("Не удалось удалить временный файл флага {}: {}", descriptor.getId(), ex.getMessage());
+                }
+            }
+            createdUncommittedDescriptors.clear();
+        }
+    }
+
+    /**
+     * Умное автозаполнение реквизитов страны по API и скачивание флага государства из интернета.
+     */
+    public void onEnrichCountryByApi() {
+        Country country = getEditedEntity();
+        String query = country.getCountryRuName();
+        if (query == null || query.trim().isEmpty()) {
+            query = country.getCountryShortName();
+        }
+        if (query == null || query.trim().isEmpty()) {
+            query = country.getCountryEngName();
+        }
+        if (query == null || query.trim().isEmpty()) {
+            notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.WARNING)
+                    .withCaption("Укажите наименование страны")
+                    .withDescription("Для автоматического поиска введите русское или английское название или код страны (например, Россия, RU, Казахстан).")
+                    .show();
+            return;
+        }
+
+        try {
+            com.company.hunttech.entity.GeoCountryData data = geoDataEnrichmentService.enrichCountry(query);
+            if (data != null) {
+                if (data.getCountryRuName() != null && (country.getCountryRuName() == null || country.getCountryRuName().trim().isEmpty())) {
+                    country.setCountryRuName(data.getCountryRuName());
+                }
+                if (data.getCountryEngName() != null && (country.getCountryEngName() == null || country.getCountryEngName().trim().isEmpty())) {
+                    country.setCountryEngName(data.getCountryEngName());
+                }
+                if (data.getCountryShortName() != null && (country.getCountryShortName() == null || country.getCountryShortName().trim().isEmpty())) {
+                    country.setCountryShortName(data.getCountryShortName());
+                }
+                if (data.getAlpha3Code() != null && (country.getAlpha3Code() == null || country.getAlpha3Code().trim().isEmpty())) {
+                    country.setAlpha3Code(data.getAlpha3Code());
+                }
+                if (data.getNumericCode() != null && (country.getNumericCode() == null || country.getNumericCode().trim().isEmpty())) {
+                    country.setNumericCode(data.getNumericCode());
+                }
+                if (data.getCurrencyCode() != null && (country.getCurrencyCode() == null || country.getCurrencyCode().trim().isEmpty())) {
+                    country.setCurrencyCode(data.getCurrencyCode());
+                }
+                if (data.getCapital() != null && (country.getCapital() == null || country.getCapital().trim().isEmpty())) {
+                    country.setCapital(data.getCapital());
+                }
+                if (data.getPhoneCode() != null && country.getPhoneCode() == null) {
+                    country.setPhoneCode(data.getPhoneCode());
+                }
+
+                // Скачивание и привязка флага государства
+                boolean flagLoaded = false;
+                if (data.getFlagUrl() != null && !data.getFlagUrl().isEmpty() && country.getFileFlag() == null) {
+                    com.haulmont.cuba.core.entity.FileDescriptor flagFd = geoDataEnrichmentService.downloadAndSaveImage(
+                            data.getFlagUrl(),
+                            "flag_" + (data.getCountryShortName() != null ? data.getCountryShortName().toLowerCase() : "country") + ".png");
+                    if (flagFd != null) {
+                        createdUncommittedDescriptors.add(flagFd);
+                        country.setFileFlag(dataContext.merge(flagFd));
+                        flagLoaded = true;
+                    }
+                }
+
+                notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.TRAY)
+                        .withCaption("Реквизиты страны успешно заполнены")
+                        .withDescription(flagLoaded
+                                ? "Коды ISO, валюта, столица и официальный флаг государства загружены."
+                                : "Коды ISO, валюта и столица государства получены.")
+                        .show();
+            } else {
+                notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.HUMANIZED)
+                        .withCaption("Данные не найдены")
+                        .withDescription("Не удалось получить реквизиты для запроса: " + query)
+                        .show();
+            }
+        } catch (Exception e) {
+            log.error("Ошибка автозаполнения страны: {}", e.getMessage(), e);
+            notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка обращения к Geo-API")
+                    .withDescription("Не удалось получить данные сервиса. Попробуйте позже или проверьте настройки.")
+                    .show();
+        }
+    }
 
     /**
      * Переводит фокус к основным реквизитам страны, не затрагивая entity и lifecycle сохранения.
