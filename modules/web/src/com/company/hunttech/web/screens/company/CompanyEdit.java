@@ -88,6 +88,8 @@ public class CompanyEdit extends StandardEditor<Company> {
     @Inject
     private CompanyRequisitesIngestService companyRequisitesIngestService;
     @Inject
+    private com.company.hunttech.service.CompanySearchAiService companySearchAiService;
+    @Inject
     private Notifications notifications;
 
     private boolean addressLoaded;
@@ -239,11 +241,26 @@ public class CompanyEdit extends StandardEditor<Company> {
         mainTab.setSelectedTab("tabCompanyDepartament");
     }
 
+    @Subscribe("smartFillCompanyBtn")
+    public void onSmartFillCompanyBtnClick(Button.ClickEvent event) {
+        openSmartCompanyWizard();
+    }
+
+    @Subscribe("smartFillCompanyTabBtn")
+    public void onSmartFillCompanyTabBtnClick(Button.ClickEvent event) {
+        openSmartCompanyWizard();
+    }
+
     @Subscribe("smartUploadRequisitesBtn")
     public void onSmartUploadRequisitesBtnClick(Button.ClickEvent event) {
+        openSmartCompanyWizard();
+    }
+
+    private void openSmartCompanyWizard() {
         SmartCompanyRequisitesUploadScreen screen = screens.create(
                 SmartCompanyRequisitesUploadScreen.class,
                 OpenMode.DIALOG);
+        screen.setInitialSearchParams(getEditedEntity().getComanyName(), getEditedEntity().getInn());
         screen.addAfterCloseListener(afterCloseEvent -> {
             if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
                 CompanyRequisitesParsedData data = screen.getParsedData();
@@ -255,8 +272,8 @@ public class CompanyEdit extends StandardEditor<Company> {
                     Region oldRegion = target.getRegionOfCompany();
                     Country oldCountry = target.getCountryOfCompany();
 
-                    // applied возвращается из middleware
-                    Company applied = companyRequisitesIngestService.applyRequisitesToCompany(target, data);
+                    // applied возвращается из middleware с заполненными реквизитами, контактами, адресами и описанием
+                    Company applied = companySearchAiService.applyCompanyData(target, data);
 
                     // Перезагрузка коллекций опций только при фактическом изменении связанных сущностей
                     if (applied.getCompanyOwnership() != null && !java.util.Objects.equals(applied.getCompanyOwnership(), oldOwnership)) {
@@ -293,6 +310,15 @@ public class CompanyEdit extends StandardEditor<Company> {
                     if (applied.getEmail() != null) target.setEmail(applied.getEmail());
                     if (applied.getWebsite() != null) target.setWebsite(applied.getWebsite());
 
+                    if (applied.getCompanyDescription() != null && !applied.getCompanyDescription().trim().isEmpty()) {
+                        target.setCompanyDescription(applied.getCompanyDescription().trim());
+                        companyDescriptionLoaded = true;
+                    }
+                    if (applied.getWorkingConditions() != null && !applied.getWorkingConditions().trim().isEmpty()) {
+                        target.setWorkingConditions(applied.getWorkingConditions().trim());
+                        companyDescriptionLoaded = true;
+                    }
+
                     if (target.getComanyName() == null || target.getComanyName().trim().isEmpty()) {
                         if (applied.getComanyName() != null && !applied.getComanyName().trim().isEmpty()) {
                             target.setComanyName(applied.getComanyName());
@@ -321,8 +347,10 @@ public class CompanyEdit extends StandardEditor<Company> {
                         target.setCityOfCompany(dataContext.merge(applied.getCityOfCompany()));
                     }
 
+                    updateSidebarTitle();
+
                     notifications.create(Notifications.NotificationType.TRAY)
-                            .withCaption("Реквизиты применены")
+                            .withCaption("Данные компании обновлены")
                             .withDescription(target.getComanyName() != null ? target.getComanyName() : (target.getLegalEntityName() != null ? target.getLegalEntityName() : ""))
                             .show();
                 }

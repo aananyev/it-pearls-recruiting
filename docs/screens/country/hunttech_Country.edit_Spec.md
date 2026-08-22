@@ -106,7 +106,7 @@
 
 - Двухпанельная композиция по контракту Edit-экранов (канон: [GeolocationEditForms_Spec.md](../../ui/GeolocationEditForms_Spec.md)):
   - корневой layout `country-editor` (`edit-screen-layout`), sidebar слева + рабочая область справа;
-  - sidebar (`edit-sidebar` 270px, `#172638`): visual-блок с круглой иллюстрацией `ovalImage` 176×176, identity (`edit-sidebar-title` — название страны из `countryDc`, по центру по горизонтали; подпись типа записи убрана), label-навигация (`label-navigation` → «Разделы», пункты 27px), spacer, hint; контент имеет стандартные отступы от краёв (`padding: 14px 16px 12px`, правая граница и тень — эталон ProjectEdit);
+  - sidebar (`edit-sidebar` 270px, `#172638`): visual-блок с прямоугольным флагом `fallbackImage` 200×120px (`country-flag-rectangular-image`), identity (`edit-sidebar-title` — название страны из `countryDc`, по центру по горизонтали; подпись типа записи убрана), label-навигация (`label-navigation` → «Разделы», пункты 27px), spacer, hint; контент имеет стандартные отступы от краёв (`padding: 14px 16px 12px`, правая граница и тень — эталон ProjectEdit);
   - рабочая область (`edit-workspace`): toolbar, scrollBox с карточками `edit-card` (`showAsPanel="true"`), footer `edit-footer-actions`;
 - Footer: кнопки ОК/Отмена прижаты к правому нижнему углу (expand-спейсер + `align="MIDDLE_RIGHT"`), стили primary/secondary как у формы Project (`country-editor-primary-action`/`country-editor-secondary-action`, 40px/14px/600/radius 4px).
 
@@ -124,6 +124,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-22 | §6: Изображение флага переведено в прямоугольный формат (200×120px, `.country-flag-rectangular-image`), проверено отсутствие лишних кнопок улучшения |
 | 2026-08-14 | §6: CountryEdit sidebar доведён до эталона ProjectEdit — стандартные отступы контента sidebar (`padding: 14px 16px 12px` + граница + тень), подпись «Страна» удалена, название страны по центру по горизонтали, footer-кнопки ОК/Отмена в правом нижнем углу со стилем primary/secondary формы Project; тест `GeolocationEditFormsContractTest` дополнен |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |

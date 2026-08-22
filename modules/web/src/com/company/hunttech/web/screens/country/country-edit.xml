@@ -42,7 +42,7 @@
                   height="100%"
                   spacing="true"
                   expand="countrySidebarSpacer">
-                <!-- Визуальный блок sidebar: квадратный флаг страны 176×176 с fallback icons/dictionaries/country.png
+                <!-- Визуальный блок sidebar: прямоугольный флаг страны 200×120 с fallback icons/dictionaries/country.png
                      и загрузкой файла флага. -->
                 <vbox id="countryVisual"
                       stylename="edit-sidebar-visual"
@@ -55,12 +55,12 @@
                         <fallbackImage id="countryFlagFileImage"
                                        dataContainer="countryDc"
                                        property="fileFlag"
-                                       width="176px"
-                                       height="176px"
+                                       width="200px"
+                                       height="120px"
                                        fallbackThemePath="icons/dictionaries/country.png"
                                        visible="true"
                                        align="MIDDLE_CENTER"
-                                       stylename="country-flag-square-image"
+                                       stylename="country-flag-rectangular-image"
                                        scaleMode="CONTAIN"/>
                     </vbox>
                     <upload id="countryFlagFileUpload"

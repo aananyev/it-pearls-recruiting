@@ -181,11 +181,13 @@
                   height="100%"
                   spacing="false"
                   expand="mainTab">
-                <!-- Toolbar: заголовок «Компании» и краткое описание назначения формы. -->
+                <!-- Toolbar: заголовок «Компании», описание и кнопка умного заполнения формы -->
                 <hbox id="companyEditorToolbar"
                       stylename="edit-toolbar"
                       width="100%"
-                      spacing="false">
+                      spacing="true"
+                      align="MIDDLE_LEFT"
+                      expand="companyEditorToolbarTitleBox">
                     <vbox id="companyEditorToolbarTitleBox"
                           width="100%"
                           spacing="false">
@@ -196,6 +198,12 @@
                                stylename="edit-toolbar-description"
                                value="msg://msgCompanyToolbarDescription"/>
                     </vbox>
+                    <button id="smartFillCompanyBtn"
+                            caption="msg://msgSmartCompanyFill"
+                            icon="font-icon:MAGIC"
+                            stylename="primary candidate-btn candidate-smartload-btn"
+                            description="msg://msgSmartCompanyFillHint"
+                            align="MIDDLE_RIGHT"/>
                 </hbox>
                 <!-- Вкладки компании: 4 вкладки с выверенной сеткой полей -->
                 <tabSheet id="mainTab"
@@ -218,6 +226,20 @@
                                   width="100%"
                                   spacing="true"
                                   stylename="edit-workspace-content">
+                                <!-- Верхняя панель быстрого умного заполнения компании -->
+                                <hbox id="companyDetailsSmartBar"
+                                      width="100%"
+                                      spacing="true"
+                                      align="MIDDLE_LEFT"
+                                      stylename="candidate-filter-bar edit-card">
+                                    <button id="smartFillCompanyTabBtn"
+                                            caption="msg://msgSmartCompanyFill"
+                                            icon="font-icon:MAGIC"
+                                            stylename="primary candidate-btn candidate-smartload-btn"/>
+                                    <label value="msg://msgSmartCompanyFillHint"
+                                           stylename="edit-help"
+                                           align="MIDDLE_LEFT"/>
+                                </hbox>
                                 <!-- Карточка «Реквизиты компании»: наименования, группа, директор (поле Форма собственности убрано) -->
                                 <groupBox id="companyMainCard"
                                           caption="msg://msgCompanyMainSection"

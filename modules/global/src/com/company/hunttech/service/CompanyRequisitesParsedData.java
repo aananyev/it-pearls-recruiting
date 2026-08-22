@@ -33,6 +33,11 @@ public class CompanyRequisitesParsedData implements Serializable {
     private String email;
     private String website;
 
+    // Описание и условия работы компании
+    private String companyDescription;
+    private String workingConditions;
+    private String rawFoundSnippet;
+
     // Данные генерального директора
     private String directorLastName;
     private String directorFirstName;
@@ -40,6 +45,30 @@ public class CompanyRequisitesParsedData implements Serializable {
     private String directorPosition;
     private String directorPhone;
     private String directorEmail;
+
+    public String getCompanyDescription() {
+        return companyDescription;
+    }
+
+    public void setCompanyDescription(String companyDescription) {
+        this.companyDescription = companyDescription;
+    }
+
+    public String getWorkingConditions() {
+        return workingConditions;
+    }
+
+    public void setWorkingConditions(String workingConditions) {
+        this.workingConditions = workingConditions;
+    }
+
+    public String getRawFoundSnippet() {
+        return rawFoundSnippet;
+    }
+
+    public void setRawFoundSnippet(String rawFoundSnippet) {
+        this.rawFoundSnippet = rawFoundSnippet;
+    }
 
     public String getCompanyName() {
         return companyName;

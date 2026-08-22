@@ -4,49 +4,89 @@ import com.company.hunttech.entity.Company;
 import com.company.hunttech.entity.Person;
 import com.company.hunttech.service.CompanyRequisitesIngestService;
 import com.company.hunttech.service.CompanyRequisitesParsedData;
+import com.company.hunttech.service.CompanySearchAiService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 @UiController("hunttech_SmartCompanyRequisitesUploadScreen")
 @UiDescriptor("smart-company-requisites-upload-screen.xml")
 public class SmartCompanyRequisitesUploadScreen extends Screen {
+    private static final Logger log = LoggerFactory.getLogger(SmartCompanyRequisitesUploadScreen.class);
 
     @Inject
     private CompanyRequisitesIngestService companyRequisitesIngestService;
+    @Inject
+    private CompanySearchAiService companySearchAiService;
     @Inject
     private FileUploadingAPI fileUploadingAPI;
     @Inject
     private DataManager dataManager;
     @Inject
     private Notifications notifications;
+    @Inject
+    private BackgroundWorker backgroundWorker;
+    @Inject
+    private UiComponents uiComponents;
 
+    // Вкладка 1: Поиск в интернете
+    @Inject
+    private TextField<String> searchCompanyNameField;
+    @Inject
+    private TextField<String> searchInnField;
+    @Inject
+    private Button searchWebBtn;
+    @Inject
+    private Button clearSearchBtn;
+
+    // Вкладка 2: Файл
     @Inject
     private FileUploadField fileUpload;
     @Inject
     private Label<String> selectedFileNameLabel;
+
+    // Вкладка 3: Текст
     @Inject
     private RichTextArea rawRichTextArea;
+
+    // Вкладка 4: URL
     @Inject
     private TextField<String> urlField;
+
+    // Прогресс
     @Inject
     private ProgressBar progressBar;
     @Inject
     private Label<String> statusLabel;
 
+    // Секция кандидатов
+    @Inject
+    private VBoxLayout candidatesCard;
+    @Inject
+    private VBoxLayout candidatesListBox;
+
+    // Дубликаты
     @Inject
     private VBoxLayout duplicateBox;
     @Inject
     private Label<String> duplicateInfoLabel;
 
+    // Предпросмотр
     @Inject
     private VBoxLayout previewCard;
     @Inject
@@ -78,8 +118,14 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
     @Inject
     private Label<String> previewDirector;
     @Inject
+    private Label<String> previewDescription;
+    @Inject
+    private Label<String> previewWorkingConditions;
+
+    @Inject
     private Button applyBtn;
 
+    private List<CompanyRequisitesParsedData> foundCandidates = new ArrayList<>();
     private CompanyRequisitesParsedData parsedData;
     private FileDescriptor uploadedFileDescriptor;
 
@@ -100,6 +146,80 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
                 }
             }
         });
+    }
+
+    /**
+     * Предзаполнение поисковых параметров из вызывающей формы (CompanyEdit).
+     */
+    public void setInitialSearchParams(String companyName, String inn) {
+        if (companyName != null && !companyName.trim().isEmpty()) {
+            searchCompanyNameField.setValue(companyName.trim());
+        }
+        if (inn != null && !inn.trim().isEmpty()) {
+            searchInnField.setValue(inn.trim());
+        }
+    }
+
+    @Subscribe("searchWebBtn")
+    public void onSearchWebBtnClick(Button.ClickEvent event) {
+        String companyName = searchCompanyNameField.getValue();
+        String inn = searchInnField.getValue();
+
+        if ((companyName == null || companyName.trim().isEmpty()) && (inn == null || inn.trim().isEmpty())) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Введите наименование или ИНН компании")
+                    .show();
+            return;
+        }
+
+        setLoadingState(true, "Поиск информации об организации в интернете через AI...");
+        candidatesCard.setVisible(false);
+        previewCard.setVisible(false);
+        applyBtn.setEnabled(false);
+
+        BackgroundTask<Integer, List<CompanyRequisitesParsedData>> searchTask =
+                new BackgroundTask<Integer, List<CompanyRequisitesParsedData>>(60, this) {
+                    @Override
+                    public List<CompanyRequisitesParsedData> run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        return companySearchAiService.searchCompanyInWeb(companyName, inn);
+                    }
+
+                    @Override
+                    public void done(List<CompanyRequisitesParsedData> result) {
+                        setLoadingState(false, "Поиск завершен");
+                        foundCandidates = result != null ? result : new ArrayList<>();
+                        if (!foundCandidates.isEmpty()) {
+                            renderCandidatesList(foundCandidates);
+                            selectCandidate(foundCandidates.get(0));
+                            statusLabel.setValue("✓ Найдено вариантов организаций: " + foundCandidates.size());
+                        } else {
+                            statusLabel.setValue("Организации по запросу не найдены");
+                            notifications.create(Notifications.NotificationType.HUMANIZED)
+                                    .withCaption("По запросу ничего не найдено")
+                                    .show();
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        setLoadingState(false, "Ошибка поиска");
+                        log.error("Ошибка при AI-поиске компании", ex);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка поиска в интернете")
+                                .withDescription(ex.getMessage())
+                                .show();
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(searchTask).execute();
+    }
+
+    @Subscribe("clearSearchBtn")
+    public void onClearSearchBtnClick(Button.ClickEvent event) {
+        searchCompanyNameField.clear();
+        searchInnField.clear();
+        statusLabel.setValue("Поля поиска очищены");
     }
 
     @Subscribe("parseFileBtn")
@@ -199,22 +319,21 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
 
     private void processTextAndShowPreview(String text) {
         try {
-            parsedData = companyRequisitesIngestService.parseRequisites(text);
+            parsedData = companySearchAiService.parseCompanyData(text);
             setLoadingState(false, "Обработка завершена");
 
             if (parsedData != null && hasMeaningfulData(parsedData)) {
-                updatePreview(parsedData);
-                checkDuplicates(parsedData);
-                previewCard.setVisible(true);
-                applyBtn.setEnabled(true);
+                foundCandidates = new ArrayList<>();
+                foundCandidates.add(parsedData);
+                candidatesCard.setVisible(false);
+                selectCandidate(parsedData);
                 statusLabel.setValue("✓ Реквизиты организации успешно распознаны");
             } else {
                 if (parsedData != null) {
-                    updatePreview(parsedData);
-                    previewCard.setVisible(true);
+                    selectCandidate(parsedData);
                 }
                 applyBtn.setEnabled(false);
-                statusLabel.setValue("Не удалось распознать реквизиты из предоставленного текста");
+                statusLabel.setValue("Не удалось распознать реквизиты из предоставленного источника");
             }
         } catch (Exception e) {
             setLoadingState(false, "Ошибка при обработке реквизитов");
@@ -223,6 +342,85 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
                     .withDescription(e.getMessage())
                     .show();
         }
+    }
+
+    private void renderCandidatesList(List<CompanyRequisitesParsedData> candidates) {
+        candidatesListBox.removeAll();
+        if (candidates == null || candidates.isEmpty() || candidates.size() == 1) {
+            candidatesCard.setVisible(false);
+            return;
+        }
+
+        candidatesCard.setVisible(true);
+        for (int i = 0; i < candidates.size(); i++) {
+            CompanyRequisitesParsedData candidate = candidates.get(i);
+            boolean isSelected = candidate == parsedData;
+
+            HBoxLayout cardBox = uiComponents.create(HBoxLayout.class);
+            cardBox.setWidth("100%");
+            cardBox.setSpacing(true);
+            cardBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            cardBox.setStyleName(isSelected ? "edit-card candidate-filter-bar" : "edit-card");
+
+            VBoxLayout infoBox = uiComponents.create(VBoxLayout.class);
+            infoBox.setWidth("100%");
+            infoBox.setSpacing(false);
+
+            String title = candidate.getCompanyName() != null ? candidate.getCompanyName() : "Организация #" + (i + 1);
+            if (candidate.getLegalEntityName() != null && !candidate.getLegalEntityName().equals(candidate.getCompanyName())) {
+                title += " (" + candidate.getLegalEntityName() + ")";
+            }
+
+            Label<String> titleLabel = uiComponents.create(Label.TYPE_STRING);
+            titleLabel.setHtmlEnabled(true);
+            titleLabel.setValue("<span style='font-size: 13.5px; font-weight: 700; color: #1e3a8a;'>🏢 " + escapeHtml(title) + "</span>");
+            infoBox.add(titleLabel);
+
+            StringBuilder sub = new StringBuilder();
+            if (candidate.getInn() != null) sub.append("ИНН: ").append(candidate.getInn()).append("  ");
+            if (candidate.getOgrn() != null) sub.append("ОГРН: ").append(candidate.getOgrn()).append("  ");
+            if (candidate.getCity() != null) sub.append("📍 ").append(candidate.getCity()).append("  ");
+            if (candidate.getDirectorFullName() != null && !candidate.getDirectorFullName().isEmpty()) {
+                sub.append("👤 ").append(candidate.getDirectorFullName());
+            }
+
+            Label<String> subLabel = uiComponents.create(Label.TYPE_STRING);
+            subLabel.setHtmlEnabled(true);
+            subLabel.setValue("<span style='font-size: 11.5px; color: #475569;'>" + escapeHtml(sub.toString()) + "</span>");
+            infoBox.add(subLabel);
+
+            if (candidate.getCompanyDescription() != null && !candidate.getCompanyDescription().isEmpty()) {
+                Label<String> descLabel = uiComponents.create(Label.TYPE_STRING);
+                descLabel.setHtmlEnabled(true);
+                String descSnippet = candidate.getCompanyDescription();
+                if (descSnippet.length() > 140) descSnippet = descSnippet.substring(0, 140) + "...";
+                descLabel.setValue("<span style='font-size: 11px; color: #64748b;'>ℹ️ " + escapeHtml(descSnippet) + "</span>");
+                infoBox.add(descLabel);
+            }
+
+            Button selectBtn = uiComponents.create(Button.class);
+            selectBtn.setCaption(isSelected ? "✓ Выбрано" : "Выбрать");
+            selectBtn.setIcon(isSelected ? "font-icon:CHECK" : "font-icon:ARROW_RIGHT");
+            selectBtn.setStyleName(isSelected ? "primary candidate-btn" : "secondary candidate-btn");
+            selectBtn.addClickListener(e -> {
+                selectCandidate(candidate);
+                renderCandidatesList(foundCandidates);
+            });
+
+            cardBox.add(infoBox);
+            cardBox.expand(infoBox);
+            cardBox.add(selectBtn);
+
+            candidatesListBox.add(cardBox);
+        }
+    }
+
+    private void selectCandidate(CompanyRequisitesParsedData candidate) {
+        this.parsedData = candidate;
+        updatePreview(candidate);
+        checkDuplicates(candidate);
+        previewCard.setVisible(true);
+        applyBtn.setEnabled(hasMeaningfulData(candidate));
     }
 
     private void checkDuplicates(CompanyRequisitesParsedData data) {
@@ -243,7 +441,7 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
             String compName = comp.getComanyName() != null ? comp.getComanyName() : "Без названия";
             String compShort = comp.getCompanyShortName() != null ? " (" + comp.getCompanyShortName() + ")" : "";
             duplicateInfoLabel.setValue("Организация <b>" + escapeHtml(compName + compShort) + "</b> с ИНН <b>" +
-                    escapeHtml(inn) + "</b> уже присутствует в базе. При нажатии «Применить реквизиты» существующая карточка будет обновлена новыми данными.");
+                    escapeHtml(inn) + "</b> уже присутствует в базе. При нажатии «Применить к карточке компании» данные карточки будут обновлены.");
             duplicateBox.setVisible(true);
         } else {
             duplicateBox.setVisible(false);
@@ -258,7 +456,8 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
                 isNotBlank(data.getOgrn()) ||
                 isNotBlank(data.getBik()) ||
                 isNotBlank(data.getLegalAddress()) ||
-                isNotBlank(data.getDirectorFullName());
+                isNotBlank(data.getDirectorFullName()) ||
+                isNotBlank(data.getCompanyDescription());
     }
 
     private boolean isNotBlank(String s) {
@@ -345,6 +544,9 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
         } else {
             previewDirector.setValue("—");
         }
+
+        previewDescription.setValue(isNotBlank(data.getCompanyDescription()) ? data.getCompanyDescription() : "—");
+        previewWorkingConditions.setValue(isNotBlank(data.getWorkingConditions()) ? data.getWorkingConditions() : "—");
     }
 
     @Subscribe("applyBtn")

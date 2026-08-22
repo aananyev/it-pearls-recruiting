@@ -208,18 +208,18 @@
             <vbox id="positionsTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="positionsTableCard" margin="true,true,true,false">
 
                 <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card">
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
 
                     <!-- Левая группа основных действий: Создать вакансию, Умная загрузка, Редактировать, Удалить -->
-                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createPositionBtn" caption="Создать вакансию" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
                         <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
                         <button id="editPositionToolbarBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
                         <button id="removePositionToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
-                    </hbox>
+                    </cssLayout>
 
                     <!-- Правая группа фильтров и сервисных действий -->
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
                         <popupButton id="vacanciesFilterPopupButton"
                                      caption="Все вакансии"
                                      icon="COMPASS"
@@ -266,8 +266,8 @@
                                 <action id="printCandidateMemoAction" caption="Памятка для кандидата" icon="PRINT"/>
                             </actions>
                         </popupButton>
-                    </hbox>
-                </hbox>
+                    </cssLayout>
+                </cssLayout>
 
                 <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы позиций -->
                 <filter id="filter"

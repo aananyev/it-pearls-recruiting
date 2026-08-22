@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
-        caption="Умная AI-загрузка реквизитов компании"
+        caption="Мастер умного поиска и заполнения реквизитов компании"
         messagesPack="com.company.hunttech.web.screens.company"
         icon="MAGIC">
-    <dialogMode width="880px" height="720px" modal="true" closeable="true" resizable="true"/>
+    <dialogMode width="960px" height="760px" modal="true" closeable="true" resizable="true"/>
     <layout spacing="true" expand="mainContentBox" width="100%" height="100%" stylename="edit-screen-layout">
         <!-- Шапка окна с заголовком и описанием -->
         <hbox id="headerBox" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
             <vbox spacing="false" width="100%">
-                <label value="Умная AI-загрузка реквизитов компании" stylename="edit-toolbar-title h2"/>
-                <label value="Автоматическое извлечение официальных реквизитов, кодов регистрации, адресов и руководства из документов, текста или URL"
+                <label value="Мастер умного поиска и автозаполнения компании" stylename="edit-toolbar-title h2"/>
+                <label value="Интеллектуальный поиск в интернете по названию и ИНН, извлечение реквизитов, адресов, контактов, руководства и описания деятельности"
                        stylename="edit-toolbar-description edit-help"/>
             </vbox>
         </hbox>
@@ -18,12 +18,51 @@
         <scrollBox id="mainContentBox" width="100%" height="100%" spacing="true" orientation="vertical">
             <vbox width="100%" spacing="true">
 
-                <!-- Зона загрузки файла, текста или ссылки (Шаг 1) -->
+                <!-- Зона поиска и ввода данных (Шаг 1) -->
                 <vbox id="uploadCard" width="100%" spacing="true" stylename="edit-card">
-                    <label value="1. ВЫБЕРИТЕ ФАЙЛ КАРТОЧКИ ИЛИ ВСТАВЬТЕ ТЕКСТ / ССЫЛКУ" stylename="label-nav-title job-candidate-section-title"/>
+                    <label value="1. ПОИСК В ИНТЕРНЕТЕ ИЛИ ЗАГРУЗКА ИСТОЧНИКА ДАННЫХ" stylename="label-nav-title job-candidate-section-title"/>
 
                     <tabSheet id="inputTabSheet" width="100%">
-                        <!-- Вкладка 1: Загрузка файла (drag-and-drop) -->
+                        <!-- Вкладка 1: Поиск в интернете (Основная) -->
+                        <tab id="searchTab" caption="Поиск в интернете (AI)" icon="font-icon:SEARCH">
+                            <vbox spacing="true" width="100%" margin="true,false,false,false">
+                                <label value="Введите наименование компании (бренд) и, опционально, ИНН для точного поиска в открытых реестрах и интернет-источниках:"
+                                       stylename="edit-help"/>
+                                <grid spacing="true" width="100%">
+                                    <columns>
+                                        <column flex="3"/>
+                                        <column flex="2"/>
+                                    </columns>
+                                    <rows>
+                                        <row>
+                                            <textField id="searchCompanyNameField"
+                                                       caption="Наименование организации / Бренд *"
+                                                       width="100%"
+                                                       inputPrompt="Например: Яндекс, HuntTech, Сбер, Ромашка"/>
+                                            <textField id="searchInnField"
+                                                       caption="ИНН компании (опционально)"
+                                                       width="100%"
+                                                       inputPrompt="10 или 12 цифр"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                                <hbox spacing="true" align="MIDDLE_LEFT" margin="true,false,false,false">
+                                    <button id="searchWebBtn"
+                                            caption="Найти в интернете через AI"
+                                            icon="font-icon:MAGIC"
+                                            stylename="primary candidate-btn candidate-smartload-btn"
+                                            width="280px"/>
+                                    <button id="clearSearchBtn"
+                                            caption="Очистить"
+                                            icon="ERASER"
+                                            stylename="secondary candidate-btn"/>
+                                </hbox>
+                                <label value="AI выполнит поиск в открытых реестрах, базах контрагентов и официальных сайтах, выделит ключевые реквизиты, контакты, руководство и профиль деятельности компании."
+                                       stylename="edit-help" css="font-size: 11.5px; color: #64748b;"/>
+                            </vbox>
+                        </tab>
+
+                        <!-- Вкладка 2: Загрузка файла (drag-and-drop) -->
                         <tab id="fileTab" caption="Загрузка файла" icon="CLOUD_UPLOAD">
                             <vbox spacing="true" width="100%" margin="true,false,false,false">
                                 <label value="Перетащите файл с карточкой предприятия / реквизитами в эту область или нажмите кнопку выбора:" stylename="edit-help"/>
@@ -44,7 +83,7 @@
                             </vbox>
                         </tab>
 
-                        <!-- Вкладка 2: Вставка текста -->
+                        <!-- Вкладка 3: Вставка текста -->
                         <tab id="textTab" caption="Вставка текста" icon="FILE_TEXT_O">
                             <vbox spacing="true" width="100%" margin="true,false,false,false">
                                 <label value="Вставьте произвольный текст реквизитов или карточки организации из буфера обмена:" stylename="edit-help"/>
@@ -64,7 +103,7 @@
                             </vbox>
                         </tab>
 
-                        <!-- Вкладка 3: Загрузка по ссылке из интернета -->
+                        <!-- Вкладка 4: Загрузка по ссылке из интернета -->
                         <tab id="urlTab" caption="Загрузка по ссылке" icon="GLOBE">
                             <vbox spacing="true" width="100%" margin="true,false,false,false">
                                 <label value="Укажите интернет-ссылку на страницу компании с официальными реквизитами / контактами:" stylename="edit-help"/>
@@ -90,11 +129,21 @@
                     <!-- Индикатор прогресса и статус выполнения -->
                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT" margin="true,false,false,false">
                         <progressBar id="progressBar" indeterminate="true" visible="false" align="MIDDLE_LEFT" width="200px"/>
-                        <label id="statusLabel" value="Готов к загрузке файла или текста реквизитов" align="MIDDLE_LEFT" stylename="edit-help"/>
+                        <label id="statusLabel" value="Готов к поиску или загрузке реквизитов" align="MIDDLE_LEFT" stylename="edit-help"/>
                     </hbox>
                 </vbox>
 
-                <!-- Блок предупреждения о найденной существующей организации -->
+                <!-- Секция выбора из нескольких найденных кандидатов (Шаг 2. Варианты) -->
+                <vbox id="candidatesCard" width="100%" spacing="true" visible="false" stylename="edit-card">
+                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                        <label value="2. НАЙДЕННЫЕ ВАРИАНТЫ ОРГАНИЗАЦИЙ В СЕТИ (ВЫБЕРИТЕ ОДИН)" stylename="label-nav-title job-candidate-section-title" width="100%"/>
+                    </hbox>
+                    <label value="По вашему запросу найдено несколько организаций. Выберите нужный вариант для детального просмотра и применения:"
+                           stylename="edit-help"/>
+                    <vbox id="candidatesListBox" width="100%" spacing="true"/>
+                </vbox>
+
+                <!-- Блок предупреждения о найденной существующей организации в БД -->
                 <vbox id="duplicateBox" width="100%" spacing="true" visible="false" stylename="edit-card"
                       css="border-left: 4px solid #f59e0b !important; background: #fffbeb !important;">
                     <hbox spacing="true" align="MIDDLE_LEFT">
@@ -104,15 +153,15 @@
                     <label id="duplicateInfoLabel" htmlEnabled="true" width="100%"/>
                 </vbox>
 
-                <!-- Блок предварительного просмотра распознанных данных (Шаг 2) -->
+                <!-- Блок предварительного просмотра выбранных данных (Шаг 3) -->
                 <vbox id="previewCard" width="100%" spacing="true" visible="false" stylename="edit-card">
-                    <label value="2. РАСПОЗНАННЫЕ РЕКВИЗИТЫ ОРГАНИЗАЦИИ" stylename="label-nav-title job-candidate-section-title"/>
+                    <label value="3. ПРЕДПРОСМОТР ДАННЫХ ДЛЯ КАРТОЧКИ КОМПАНИИ" stylename="label-nav-title job-candidate-section-title"/>
 
                     <grid id="previewGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                         <columns>
-                            <column width="160px"/>
+                            <column width="170px"/>
                             <column flex="1"/>
-                            <column width="160px"/>
+                            <column width="170px"/>
                             <column flex="1"/>
                         </columns>
                         <rows>
@@ -153,10 +202,18 @@
                                 <label id="previewAccounts" value="—"/>
                             </row>
                             <row>
-                                <label value="Контакты:" stylename="bold"/>
+                                <label value="Контакты (Тел / Email / Web):" stylename="bold"/>
                                 <label id="previewContacts" value="—"/>
                                 <label value="Руководитель:" stylename="bold"/>
                                 <label id="previewDirector" value="—" htmlEnabled="true"/>
+                            </row>
+                            <row>
+                                <label value="Описание компании:" stylename="bold"/>
+                                <label id="previewDescription" value="—" colspan="3"/>
+                            </row>
+                            <row>
+                                <label value="Условия и особенности:" stylename="bold"/>
+                                <label id="previewWorkingConditions" value="—" colspan="3"/>
                             </row>
                         </rows>
                     </grid>
@@ -167,7 +224,7 @@
 
         <!-- Нижняя панель действий -->
         <hbox id="footerToolbar" width="100%" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar">
-            <button id="applyBtn" caption="Применить реквизиты" icon="CHECK" stylename="primary" enabled="false"/>
+            <button id="applyBtn" caption="Применить к карточке компании" icon="CHECK" stylename="primary" enabled="false"/>
             <button id="cancelBtn" caption="Отмена" icon="BAN" stylename="secondary"/>
         </hbox>
     </layout>
