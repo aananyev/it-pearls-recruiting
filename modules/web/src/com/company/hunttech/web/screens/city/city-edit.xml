@@ -50,11 +50,11 @@
                             showClearButton="true"
                             property="fileCityEmblem"/>
                     <button id="enhanceCityEmblemBtn"
-                            caption="Умная обработка герба"
+                            caption="msg://enhanceCityEmblemCaption"
                             icon="font-icon:MAGIC"
                             stylename="secondary candidate-btn"
                             width="100%"
-                            description="Удалить фон, сделать его прозрачным и улучшить качество"/>
+                            description="msg://enhanceCityEmblemDescription"/>
                 </vbox>
                 <!-- Блок идентификации: название города из контейнера.
                      Подпись типа записи убрана — название выровнено по центру

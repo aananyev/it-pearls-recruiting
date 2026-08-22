@@ -218,9 +218,6 @@
                         <button id="removePositionToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
                     </hbox>
 
-                    <!-- Распорка для выравнивания правых кнопок по правому краю -->
-                    <hbox id="toolbarSpacer" width="100%"/>
-
                     <!-- Правая группа фильтров и сервисных действий -->
                     <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
                         <popupButton id="vacanciesFilterPopupButton"

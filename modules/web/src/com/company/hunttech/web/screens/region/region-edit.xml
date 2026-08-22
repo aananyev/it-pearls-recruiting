@@ -59,11 +59,11 @@ order by e.countryRuName]]></query>
                             showClearButton="true"
                             property="fileRegionEmblem"/>
                     <button id="enhanceRegionEmblemBtn"
-                            caption="Умная обработка герба"
+                            caption="msg://enhanceRegionEmblemCaption"
                             icon="font-icon:MAGIC"
                             stylename="secondary candidate-btn"
                             width="100%"
-                            description="Удалить фон, сделать его прозрачным и улучшить качество"/>
+                            description="msg://enhanceRegionEmblemDescription"/>
                 </vbox>
                 <!-- Блок идентификации: название региона из контейнера.
                      Подпись типа записи убрана — название выровнено по центру

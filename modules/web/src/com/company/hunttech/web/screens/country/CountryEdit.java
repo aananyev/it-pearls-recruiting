@@ -16,10 +16,14 @@ import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.StandardEditor;
+import com.haulmont.cuba.gui.screen.StandardOutcome;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import org.apache.commons.io.IOUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.InputStream;
@@ -31,6 +35,8 @@ import java.util.Set;
 @EditedEntityContainer("countryDc")
 @LoadDataBeforeShow
 public class CountryEdit extends StandardEditor<Country> {
+
+    private static final Logger log = LoggerFactory.getLogger(CountryEdit.class);
 
     @Inject
     private TextField<String> countryRuNameField;
@@ -56,19 +62,35 @@ public class CountryEdit extends StandardEditor<Country> {
     private Notifications notifications;
 
     private final Set<FileDescriptor> pendingRemovalDescriptors = new HashSet<>();
+    private final Set<FileDescriptor> createdUncommittedDescriptors = new HashSet<>();
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        createdUncommittedDescriptors.clear();
         if (!pendingRemovalDescriptors.isEmpty()) {
             for (FileDescriptor descriptor : pendingRemovalDescriptors) {
                 try {
                     fileStorageService.removeFile(descriptor);
                     dataManager.remove(descriptor);
                 } catch (Exception ex) {
-                    // non-fatal
+                    log.warn("Не удалось удалить устаревший дескриптор флага {}: {}", descriptor.getId(), ex.getMessage());
                 }
             }
             pendingRemovalDescriptors.clear();
+        }
+    }
+
+    @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        if (!event.closedWith(StandardOutcome.COMMIT) && !createdUncommittedDescriptors.isEmpty()) {
+            for (FileDescriptor descriptor : createdUncommittedDescriptors) {
+                try {
+                    fileStorageService.removeFile(descriptor);
+                } catch (Exception ex) {
+                    log.warn("Не удалось удалить временный файл флага {}: {}", descriptor.getId(), ex.getMessage());
+                }
+            }
+            createdUncommittedDescriptors.clear();
         }
     }
 
@@ -102,9 +124,10 @@ public class CountryEdit extends StandardEditor<Country> {
                 newDescriptor.setCreateDate(new java.util.Date());
 
                 fileStorageService.saveFile(newDescriptor, processed.getData());
-                FileDescriptor committedDescriptor = dataManager.commit(newDescriptor);
+                FileDescriptor mergedDescriptor = dataContext.merge(newDescriptor);
 
-                country.setFileFlag(dataContext.merge(committedDescriptor));
+                country.setFileFlag(mergedDescriptor);
+                createdUncommittedDescriptors.add(newDescriptor);
                 pendingRemovalDescriptors.add(flagDescriptor);
 
                 notifications.create(Notifications.NotificationType.TRAY)
@@ -118,9 +141,10 @@ public class CountryEdit extends StandardEditor<Country> {
                         .show();
             }
         } catch (Exception e) {
+            log.error("Ошибка при умной обработке флага страны", e);
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption("Ошибка обработки изображения")
-                    .withDescription(e.getMessage())
+                    .withDescription("Не удалось обработать изображение, попробуйте позже")
                     .show();
         }
     }

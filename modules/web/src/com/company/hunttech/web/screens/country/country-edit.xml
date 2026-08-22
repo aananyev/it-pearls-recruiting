@@ -75,11 +75,11 @@
                             showClearButton="true"
                             property="fileFlag"/>
                     <button id="enhanceFlagBtn"
-                            caption="Умная обработка флага"
+                            caption="msg://enhanceFlagCaption"
                             icon="font-icon:MAGIC"
                             stylename="secondary candidate-btn"
                             width="100%"
-                            description="Удалить фон, сделать его прозрачным и улучшить качество"/>
+                            description="msg://enhanceFlagDescription"/>
                 </vbox>
                 <!-- Блок идентификации: название страны из контейнера.
                      Подпись типа записи убрана — название выровнено по центру
