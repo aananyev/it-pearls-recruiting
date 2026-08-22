@@ -142,4 +142,8 @@
     <include file="260821-7-configureTelegramBotSetup.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- CompanySearchAiService: Seed AI-функции COMPANY_WEB_SEARCH_PARSE_JSON для интеллектуального поиска компаний в интернете. -->
+    <include file="260822-2-addCompanyWebSearchAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

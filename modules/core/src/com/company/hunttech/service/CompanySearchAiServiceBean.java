@@ -31,66 +31,135 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
 
         String searchName = companyName != null ? companyName.trim() : "";
         String searchInn = inn != null ? inn.trim() : "";
+        String combinedQuery = (searchName + " " + searchInn).trim();
 
+        // 1. Попытка вызова специализированной AI-функции поиска в интернете
+        AiExecutionResult aiResult = null;
         try {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put("companyName", searchName);
             context.put("inn", searchInn);
-            context.put("searchQuery", (searchName + " " + searchInn).trim());
+            context.put("searchQuery", combinedQuery);
             context.put("callerSource", "CompanySearchAiService (searchCompanyInWeb)");
-            context.put("sourceText", "Поиск в интернете организации: " + searchName + (searchInn.isEmpty() ? "" : " ИНН " + searchInn));
+            context.put("sourceText", "Поиск в открытых реестрах и интернет-источниках сведений об организации: "
+                    + searchName + (searchInn.isEmpty() ? "" : ", ИНН " + searchInn));
 
-            AiExecutionResult aiResult = aiExecutionService.executeText(FUNCTION_COMPANY_WEB_SEARCH_PARSE_JSON, context);
-            if (aiResult == null || aiResult.getText() == null || aiResult.getText().trim().isEmpty()) {
-                // Fallback на универсальный парсер реквизитов
-                aiResult = aiExecutionService.executeText(CompanyRequisitesIngestService.FUNCTION_COMPANY_REQUISITES_PARSE_JSON, context);
+            aiResult = aiExecutionService.executeText(FUNCTION_COMPANY_WEB_SEARCH_PARSE_JSON, context);
+        } catch (Exception e) {
+            log.info("AI-функция {} недоступна, пробуем резервную функцию: {}", FUNCTION_COMPANY_WEB_SEARCH_PARSE_JSON, e.getMessage(), e);
+        }
+
+        // 2. Резервный вызов базовой AI-функции распознавания реквизитов при необходимости
+        if (aiResult == null || aiResult.getText() == null || aiResult.getText().trim().isEmpty()) {
+            try {
+                Map<String, Object> fallbackCtx = new LinkedHashMap<>();
+                fallbackCtx.put("sourceText", "Организация: " + searchName + (searchInn.isEmpty() ? "" : ", ИНН " + searchInn));
+                fallbackCtx.put("callerSource", "CompanySearchAiService (fallback)");
+                aiResult = aiExecutionService.executeText(CompanyRequisitesIngestService.FUNCTION_COMPANY_REQUISITES_PARSE_JSON, fallbackCtx);
+            } catch (Exception e) {
+                log.warn("Резервный AI-вызов завершился с ошибкой: {}", e.getMessage(), e);
             }
+        }
 
-            if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
+        // 3. Парсинг ответа AI
+        if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
+            try {
                 String json = cleanJson(aiResult.getText().trim());
                 JsonNode root = objectMapper.readTree(json);
 
                 if (root.isArray()) {
                     for (JsonNode item : root) {
-                        CompanyRequisitesParsedData data = parseJsonNode(item);
-                        if (isValidCandidate(data)) {
-                            results.add(data);
+                        if (item != null && item.isObject()) {
+                            CompanyRequisitesParsedData data = parseJsonNode(item);
+                            if (isValidCandidate(data)) {
+                                results.add(data);
+                            }
                         }
                     }
                 } else if (root.isObject()) {
-                    if (root.has("candidates") && root.get("candidates").isArray()) {
-                        for (JsonNode item : root.get("candidates")) {
-                            CompanyRequisitesParsedData data = parseJsonNode(item);
+                    boolean parsedNested = false;
+                    if (root.has("candidates")) {
+                        JsonNode candNode = root.get("candidates");
+                        if (candNode.isArray()) {
+                            for (JsonNode item : candNode) {
+                                if (item != null && item.isObject()) {
+                                    CompanyRequisitesParsedData data = parseJsonNode(item);
+                                    if (isValidCandidate(data)) {
+                                        results.add(data);
+                                        parsedNested = true;
+                                    }
+                                }
+                            }
+                        } else if (candNode.isObject()) {
+                            CompanyRequisitesParsedData data = parseJsonNode(candNode);
                             if (isValidCandidate(data)) {
                                 results.add(data);
+                                parsedNested = true;
                             }
                         }
-                    } else if (root.has("items") && root.get("items").isArray()) {
-                        for (JsonNode item : root.get("items")) {
-                            CompanyRequisitesParsedData data = parseJsonNode(item);
+                    }
+                    if (!parsedNested && root.has("items")) {
+                        JsonNode itemsNode = root.get("items");
+                        if (itemsNode.isArray()) {
+                            for (JsonNode item : itemsNode) {
+                                if (item != null && item.isObject()) {
+                                    CompanyRequisitesParsedData data = parseJsonNode(item);
+                                    if (isValidCandidate(data)) {
+                                        results.add(data);
+                                        parsedNested = true;
+                                    }
+                                }
+                            }
+                        } else if (itemsNode.isObject()) {
+                            CompanyRequisitesParsedData data = parseJsonNode(itemsNode);
                             if (isValidCandidate(data)) {
                                 results.add(data);
+                                parsedNested = true;
                             }
                         }
-                    } else {
+                    }
+                    if (!parsedNested && root.has("data")) {
+                        JsonNode dataNode = root.get("data");
+                        if (dataNode.isArray()) {
+                            for (JsonNode item : dataNode) {
+                                if (item != null && item.isObject()) {
+                                    CompanyRequisitesParsedData data = parseJsonNode(item);
+                                    if (isValidCandidate(data)) {
+                                        results.add(data);
+                                        parsedNested = true;
+                                    }
+                                }
+                            }
+                        } else if (dataNode.isObject()) {
+                            CompanyRequisitesParsedData data = parseJsonNode(dataNode);
+                            if (isValidCandidate(data)) {
+                                results.add(data);
+                                parsedNested = true;
+                            }
+                        }
+                    }
+                    if (!parsedNested) {
                         CompanyRequisitesParsedData data = parseJsonNode(root);
                         if (isValidCandidate(data)) {
                             results.add(data);
                         }
                     }
                 }
+            } catch (Exception e) {
+                log.warn("Ошибка парсинга JSON ответа AI: {}", e.getMessage(), e);
             }
-        } catch (Exception e) {
-            log.warn("AI-поиск компании в интернете завершился с предупреждением: {}", e.getMessage());
         }
 
-        // Если AI не нашел вариантов или вернул пустоту — создаем базовый кандидат из входных параметров
+        // 4. Честный fallback кандидат при отсутствии ответа AI
         if (results.isEmpty()) {
             CompanyRequisitesParsedData fallbackData = new CompanyRequisitesParsedData();
-            fallbackData.setCompanyName(searchName.isEmpty() ? "Организация ИНН " + searchInn : searchName);
-            fallbackData.setCompanyShortName(searchName);
-            fallbackData.setInn(searchInn);
-            fallbackData.setRawFoundSnippet("Черновой кандидат на основе введенных параметров поиска.");
+            String name = !searchName.isEmpty() ? searchName : "Организация ИНН " + searchInn;
+            fallbackData.setCompanyName(name);
+            fallbackData.setCompanyShortName(name);
+            if (!searchInn.isEmpty()) {
+                fallbackData.setInn(searchInn);
+            }
+            fallbackData.setRawFoundSnippet("Черновой вариант на основе поискового запроса. Официальные реквизиты не были получены от AI-модуля.");
             results.add(fallbackData);
         }
 

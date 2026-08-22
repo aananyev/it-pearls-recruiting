@@ -2,6 +2,7 @@ package com.company.hunttech.core;
 
 import com.company.hunttech.service.CompanyRequisitesParsedData;
 import com.company.hunttech.service.CompanySearchAiService;
+import com.company.hunttech.service.CompanySearchAiServiceBean;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -108,6 +110,23 @@ public class CompanySearchWizardContractTest {
         String webSpring = readProjectFile("modules/web/src/com/company/hunttech/web-spring.xml");
         assertTrue("Сервис должен быть зарегистрирован в web-spring.xml как remoteProxy",
                 webSpring.contains("hunttech_CompanySearchAiService"));
+
+        String sqlMigration = readProjectFile("modules/core/db/update/postgres/26/260822-2-addCompanyWebSearchAiFunction.sql");
+        assertTrue("Миграция должна сидировать AI-функцию COMPANY_WEB_SEARCH_PARSE_JSON",
+                sqlMigration.contains("COMPANY_WEB_SEARCH_PARSE_JSON"));
+    }
+
+    @Test
+    public void testEnrichedSearchOfflineGeneration() {
+        CompanySearchAiServiceBean serviceBean = new CompanySearchAiServiceBean();
+        List<CompanyRequisitesParsedData> results = serviceBean.searchCompanyInWeb("Яндекс", "7736207543");
+        assertNotNull("Результаты поиска не должны быть null", results);
+        assertFalse("Для запроса 'Яндекс' должен быть сформирован кандидат", results.isEmpty());
+
+        CompanyRequisitesParsedData candidate = results.get(0);
+        assertEquals("Яндекс", candidate.getCompanyName());
+        assertEquals("7736207543", candidate.getInn());
+        assertNotNull("Сниппет о статусе данных должен присутствовать", candidate.getRawFoundSnippet());
     }
 
     private static String readProjectFile(String relativePath) throws IOException {
