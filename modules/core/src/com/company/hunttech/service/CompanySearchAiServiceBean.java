@@ -46,10 +46,12 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             egrulData = fetchEgrulData(searchInn);
         }
 
-        String wikiExtract = null;
+        WikiInfo wiki = null;
         if (!searchName.isEmpty()) {
-            wikiExtract = fetchWikipediaData(searchName);
+            wiki = fetchWikipediaData(searchName);
         }
+        String wikiExtract = wiki != null ? wiki.extract : null;
+        String wikiLogo = wiki != null ? wiki.logoUrl : null;
 
         // 2. Подготовка обогащенного контекста для AI
         StringBuilder webContext = new StringBuilder();
@@ -213,10 +215,18 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             }
         }
 
-        // 6. Обогащение описаний и условий
-        for (CompanyRequisitesParsedData item : results) {
-            if ((item.getCompanyDescription() == null || item.getCompanyDescription().trim().isEmpty()) && wikiExtract != null) {
-                item.setCompanyDescription(wikiExtract);
+        // 6. Обогащение описаний, условий и логотипов
+        for (int i = 0; i < results.size(); i++) {
+            CompanyRequisitesParsedData item = results.get(i);
+            boolean isMatchingSearch = isNameMatching(item, searchName);
+            if (isMatchingSearch) {
+                if ((item.getCompanyDescription() == null || item.getCompanyDescription().trim().isEmpty()) && wikiExtract != null) {
+                    item.setCompanyDescription(wikiExtract);
+                }
+                // Применять логотип только к первому подходящему кандидату, исключая дублирование на несвязанные сущности
+                if (i == 0 && (item.getLogoUrl() == null || item.getLogoUrl().trim().isEmpty()) && wikiLogo != null) {
+                    item.setLogoUrl(wikiLogo);
+                }
             }
             if (item.getWorkingConditions() == null || item.getWorkingConditions().trim().isEmpty()) {
                 item.setWorkingConditions("Оформление по ТК РФ, конкурентная заработная плата, социальный пакет, комфортные условия труда.");
@@ -227,6 +237,17 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
         }
 
         return results;
+    }
+
+    private boolean isNameMatching(CompanyRequisitesParsedData item, String searchName) {
+        if (searchName == null || searchName.trim().isEmpty() || item == null) return false;
+        String s = searchName.trim().toLowerCase();
+        String name = item.getCompanyName() != null ? item.getCompanyName().toLowerCase() : "";
+        String shortName = item.getCompanyShortName() != null ? item.getCompanyShortName().toLowerCase() : "";
+        String legalName = item.getLegalEntityName() != null ? item.getLegalEntityName().toLowerCase() : "";
+        return (!name.isEmpty() && (name.equalsIgnoreCase(s) || name.contains(s) || s.contains(name)))
+                || (!shortName.isEmpty() && (shortName.equalsIgnoreCase(s) || shortName.contains(s)))
+                || (!legalName.isEmpty() && legalName.contains(s));
     }
 
     private CompanyRequisitesParsedData fetchEgrulData(String inn) {
@@ -272,12 +293,22 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
         return null;
     }
 
-    private String fetchWikipediaData(String companyName) {
+    private static class WikiInfo {
+        final String extract;
+        final String logoUrl;
+
+        WikiInfo(String extract, String logoUrl) {
+            this.extract = extract;
+            this.logoUrl = logoUrl;
+        }
+    }
+
+    private WikiInfo fetchWikipediaData(String companyName) {
         try {
             String encoded = URLEncoder.encode(companyName.trim(), StandardCharsets.UTF_8.name());
-            String url = "https://ru.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=" + encoded + "&format=json";
+            String url = "https://ru.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=original|thumbnail&pithumbsize=400&titles=" + encoded + "&format=json";
             String json = fetchHttpText(url, 3000);
-            if (json != null && json.contains("\"extract\"")) {
+            if (json != null && (json.contains("\"extract\"") || json.contains("\"thumbnail\"") || json.contains("\"original\""))) {
                 JsonNode root = objectMapper.readTree(json);
                 JsonNode pages = root.path("query").path("pages");
                 if (pages.isObject()) {
@@ -285,9 +316,16 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                     if (it.hasNext()) {
                         JsonNode page = it.next();
                         String extract = textOrNull(page, "extract");
-                        if (extract != null && !extract.trim().isEmpty()) {
-                            return extract.length() > 1000 ? extract.substring(0, 1000) + "..." : extract;
+                        if (extract != null && extract.length() > 1000) {
+                            extract = extract.substring(0, 1000) + "...";
                         }
+                        String logoUrl = null;
+                        if (page.has("thumbnail") && page.get("thumbnail").has("source")) {
+                            logoUrl = page.get("thumbnail").get("source").asText();
+                        } else if (page.has("original") && page.get("original").has("source")) {
+                            logoUrl = page.get("original").get("source").asText();
+                        }
+                        return new WikiInfo(extract, logoUrl);
                     }
                 }
             }
@@ -380,6 +418,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             y.setCompanyDescription("Крупнейшая российская технологическая компания, развивающая экосистему поисковых, рекламных, облачных, транспортных (Такси, Драйв, Доставка), e-commerce и медиа-сервисов (Кинопоиск, Музыка). Лидер в сфере искусственного интеллекта (YandexGPT).");
             y.setWorkingConditions("Гибридный/удаленный формат работы, ДМС со стоматологией, комфортные офисы класса А, компенсация питания, программы релокации, техника на выбор (MacBook/ThinkPad), внутренние конференции.");
             y.setRawFoundSnippet("Справка об экосистеме «Яндекс». Юридическое лицо: ООО «Яндекс» (ИНН 7736207543, ОГРН 1027700229193).");
+            y.setLogoUrl("https://yastatic.net/s3/home-static/_/logo/ru.png");
             list.add(y);
             return list;
         }
@@ -409,6 +448,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             s.setCompanyDescription("Крупнейший банк и технологический лидер России, развивающий цифровую экосистему для физических и юридических лиц, финтех-решения, генеративный AI (GigaChat), облачные технологии (Cloud.ru) и кибербезопасность.");
             s.setWorkingConditions("Официальное оформление по ТК РФ, льготная ипотека для сотрудников, расширенный ДМС, корпоративный университет Сбера, гибкий график, годовые бонусы.");
             s.setRawFoundSnippet("Справка об экосистеме «Сбербанк». Юридическое лицо: ПАО Сбербанк (ИНН 7707083893, ОГРН 1027700132195).");
+            s.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Sberbank_Logo_2020.svg/400px-Sberbank_Logo_2020.svg.png");
             list.add(s);
             return list;
         }
@@ -438,6 +478,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             ht.setCompanyDescription("Инновационная компания-разработчик интеллектуальной HRM-платформы HuntTech и систем подбора персонала с поддержкой AI-скрининга, автоматического парсинга резюме, интеграции с открытыми реестрами и мессенджерами.");
             ht.setWorkingConditions("Гибкий график, удаленный или гибридный формат, работа с передовым стеком технологий (CUBA Platform, Spring, AI/LLM интеграции), оплата обучения и профильных курсов.");
             ht.setRawFoundSnippet("ООО «ХантТек» — разработчик платформы HRM HuntTech.");
+            ht.setLogoUrl("https://hunttech.ru/logo.png");
             list.add(ht);
             return list;
         }
@@ -467,6 +508,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             ozon.setCompanyDescription("Один из ведущих российских e-commerce маркетплейсов и финтех-экосистем, предоставляющий миллионам покупателей доступ к миллионам товаров, быструю логистику Ozon Rocket и банковские сервисы Ozon Банк.");
             ozon.setWorkingConditions("Удаленный и гибридный формат работы, ДМС с первого месяца, скидки на покупки на маркетплейсе, современный офис в Москва-Сити, участие в масштабных финтех и highload проектах.");
             ozon.setRawFoundSnippet("Справка об экосистеме Ozon. Юридическое лицо: ООО «Интернет Решения» (ИНН 7704217370, ОГРН 1027739244741).");
+            ozon.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Ozon_logo.svg/400px-Ozon_logo.svg.png");
             list.add(ozon);
             return list;
         }
@@ -496,6 +538,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             vk.setCompanyDescription("Крупнейшая российская технологическая корпорация, объединяющая социальные сети (ВКонтакте, Одноклассники), контентные и медиа-платформы (VK Музыка, VK Видео, VK Клипы, Дзен), почтовый сервис Mail.ru и образовательные сервисы.");
             vk.setWorkingConditions("Гибридный график, ДМС со стоматологией, комфортный офис на Ленинградке с лаундж-зонами, спортзалом и фреш-барами, техника на выбор, участие в масштабных проектах.");
             vk.setRawFoundSnippet("Справка об экосистеме VK. Юридическое лицо: ООО «ВК» (ИНН 7743001840, ОГРН 1027739850962).");
+            vk.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/VK_Compact_Logo_%282021-present%29.svg/400px-VK_Compact_Logo_%282021-present%29.svg.png");
             list.add(vk);
             return list;
         }
@@ -525,6 +568,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             tb.setCompanyDescription("Ведущий российский онлайн-банк и экосистема финансовых и лайфстайл-услуг, обслуживающий более 40 млн клиентов без отделений через мобильное приложение и сеть представителей.");
             tb.setWorkingConditions("Удаленный и гибридный формат работы, ДМС с телемедициной, корпоративные скидки, современный стек разработки, возможность профессионального роста.");
             tb.setRawFoundSnippet("Справка об экосистеме «Т-Банк». Юридическое лицо: АО «ТБанк» (ИНН 7710140679, ОГРН 1027739642281).");
+            tb.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/T-Bank_Logo.svg/400px-T-Bank_Logo.svg.png");
             list.add(tb);
             return list;
         }
@@ -554,6 +598,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             hh.setCompanyDescription("Крупнейшая российская платформа онлайн-рекрутинга и HR-tech сервисов, соединяющая работодателей и соискателей по всей России и СНГ.");
             hh.setWorkingConditions("Гибридный график, ДМС, комфортный офис, современные инструменты разработки и анализа больших данных.");
             hh.setRawFoundSnippet("Справка о сервисе HeadHunter. Юридическое лицо: ООО «Хэдхантер» (ИНН 7704259848, ОГРН 1027700207391).");
+            hh.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/HeadHunter_logo.svg/400px-HeadHunter_logo.svg.png");
             list.add(hh);
             return list;
         }
@@ -635,6 +680,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
         data.setPhone(textOrNull(node, "phone"));
         data.setEmail(textOrNull(node, "email"));
         data.setWebsite(textOrNull(node, "website"));
+        data.setLogoUrl(textOrNull(node, "logoUrl"));
 
         data.setDirectorLastName(textOrNull(node, "directorLastName"));
         data.setDirectorFirstName(textOrNull(node, "directorFirstName"));

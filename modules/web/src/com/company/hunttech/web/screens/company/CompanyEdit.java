@@ -21,11 +21,17 @@ import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import org.apache.commons.io.IOUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.InputStream;
@@ -41,6 +47,10 @@ import java.util.Set;
 @EditedEntityContainer("companyDc")
 @LoadDataBeforeShow
 public class CompanyEdit extends StandardEditor<Company> {
+    private static final Logger log = LoggerFactory.getLogger(CompanyEdit.class);
+
+    @Inject
+    private BackgroundWorker backgroundWorker;
     @Inject
     private WebOvaFallbackImage companyLogoFileImage;
     @Inject
@@ -347,6 +357,11 @@ public class CompanyEdit extends StandardEditor<Company> {
                         target.setCityOfCompany(dataContext.merge(applied.getCityOfCompany()));
                     }
 
+                    // Автоматическая загрузка логотипа при наличии URL и отсутствии текущего логотипа
+                    if (data.getLogoUrl() != null && !data.getLogoUrl().trim().isEmpty() && target.getFileCompanyLogo() == null) {
+                        downloadAndApplyLogo(target, data.getLogoUrl());
+                    }
+
                     updateSidebarTitle();
 
                     notifications.create(Notifications.NotificationType.TRAY)
@@ -357,6 +372,172 @@ public class CompanyEdit extends StandardEditor<Company> {
             }
         });
         screen.show();
+    }
+
+    private void downloadAndApplyLogo(Company company, String logoUrl) {
+        if (logoUrl == null || logoUrl.trim().isEmpty() || company.getFileCompanyLogo() != null) {
+            return;
+        }
+        String cleanUrl = logoUrl.trim();
+        java.net.URI uri;
+        try {
+            uri = new java.net.URI(cleanUrl);
+        } catch (Exception ex) {
+            return;
+        }
+
+        String scheme = uri.getScheme();
+        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+            return;
+        }
+        int port = uri.getPort();
+        if (port != -1 && port != 80 && port != 443) {
+            return;
+        }
+        String host = uri.getHost();
+        if (host == null || host.trim().isEmpty()) {
+            return;
+        }
+
+        BackgroundTask<Integer, FileDescriptor> task = new BackgroundTask<Integer, FileDescriptor>(15, this) {
+            @Override
+            public FileDescriptor run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+                // Разрешение IP и проверка на SSRF / DNS rebinding непосредственно в момент выполнения соединения
+                java.net.InetAddress addr = java.net.InetAddress.getByName(host.trim());
+                if (!isSafePublicIp(addr)) {
+                    log.warn("Отклонен небезопасный целевой IP адрес для логотипа: {}", addr.getHostAddress());
+                    return null;
+                }
+
+                java.net.HttpURLConnection conn = null;
+                try {
+                    int targetPort = port != -1 ? port : ("https".equalsIgnoreCase(scheme) ? 443 : 80);
+                    String pathAndQuery = (uri.getRawPath() == null || uri.getRawPath().isEmpty() ? "/" : uri.getRawPath())
+                            + (uri.getRawQuery() != null ? "?" + uri.getRawQuery() : "");
+                    java.net.URL pinnedUrl = new java.net.URL(scheme, addr.getHostAddress(), targetPort, pathAndQuery);
+
+                    conn = (java.net.HttpURLConnection) pinnedUrl.openConnection();
+                    conn.setRequestProperty("Host", host);
+                    conn.setRequestProperty("User-Agent", "HuntTech-HRM/1.0");
+                    conn.setConnectTimeout(4000);
+                    conn.setReadTimeout(4000);
+                    conn.setInstanceFollowRedirects(false);
+
+                    if (conn instanceof javax.net.ssl.HttpsURLConnection) {
+                        javax.net.ssl.HttpsURLConnection httpsConn = (javax.net.ssl.HttpsURLConnection) conn;
+                        httpsConn.setHostnameVerifier((h, session) ->
+                                javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(host, session));
+                    }
+
+                    int code = conn.getResponseCode();
+                    if (code >= 200 && code < 300) {
+                        byte[] bytes;
+                        try (InputStream is = conn.getInputStream()) {
+                            bytes = readBoundedStream(is, 5 * 1024 * 1024);
+                        }
+                        if (bytes != null && bytes.length >= 128) {
+                            String ext = detectImageExtension(bytes);
+                            if (ext != null) {
+                                // Валидация подлинности и декодируемости растрового изображения
+                                java.awt.image.BufferedImage img = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes));
+                                if (img != null && img.getWidth() > 0 && img.getHeight() > 0) {
+                                    FileDescriptor fd = metadata.create(FileDescriptor.class);
+                                    fd.setName("company-logo-" + company.getId() + "." + ext);
+                                    fd.setExtension(ext);
+                                    fd.setSize((long) bytes.length);
+                                    fd.setCreateDate(new java.util.Date());
+                                    fileStorageService.saveFile(fd, bytes);
+                                    return dataManager.commit(fd);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    if (conn != null) {
+                        try {
+                            conn.disconnect();
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public void done(FileDescriptor committed) {
+                // Проверка актуальности экрана и неизменности сущности перед применением
+                if (committed != null && getEditedEntity() == company && company.getFileCompanyLogo() == null) {
+                    company.setFileCompanyLogo(dataContext.merge(committed));
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Логотип компании успешно загружен")
+                            .show();
+                }
+            }
+
+            @Override
+            public boolean handleException(Exception ex) {
+                log.warn("Ошибка при фоновой загрузке логотипа компании по URL {}: {}", cleanUrl, ex.getMessage(), ex);
+                return true;
+            }
+        };
+
+        backgroundWorker.handle(task).execute();
+    }
+
+    private boolean isSafePublicIp(java.net.InetAddress addr) {
+        if (addr == null) return false;
+        if (addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isLinkLocalAddress()
+                || addr.isSiteLocalAddress() || addr.isMulticastAddress()) {
+            return false;
+        }
+        byte[] raw = addr.getAddress();
+        if (raw.length == 4) {
+            int b0 = raw[0] & 0xFF;
+            int b1 = raw[1] & 0xFF;
+            if (b0 == 10 || b0 == 127 || b0 == 0) return false;
+            if (b0 == 172 && (b1 >= 16 && b1 <= 31)) return false;
+            if (b0 == 192 && b1 == 168) return false;
+            if (b0 == 169 && b1 == 254) return false;
+            if (b0 == 100 && (b1 >= 64 && b1 <= 127)) return false;
+        }
+        return true;
+    }
+
+    private byte[] readBoundedStream(InputStream is, int maxBytes) throws java.io.IOException {
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int read;
+        int total = 0;
+        while ((read = is.read(buffer)) != -1) {
+            total += read;
+            if (total > maxBytes) {
+                throw new java.io.IOException("Размер файла превышает лимит " + maxBytes + " байт");
+            }
+            baos.write(buffer, 0, read);
+        }
+        return baos.toByteArray();
+    }
+
+    private String detectImageExtension(byte[] bytes) {
+        if (bytes == null || bytes.length < 8) return null;
+        // PNG magic: 89 50 4E 47
+        if ((bytes[0] & 0xFF) == 0x89 && bytes[1] == 'P' && bytes[2] == 'N' && bytes[3] == 'G') {
+            return "png";
+        }
+        // JPEG magic: FF D8 FF
+        if ((bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xD8 && (bytes[2] & 0xFF) == 0xFF) {
+            return "jpg";
+        }
+        // WebP magic: RIFF ... WEBP
+        if (bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F'
+                && bytes.length > 12 && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P') {
+            return "webp";
+        }
+        // GIF magic: GIF87a / GIF89a
+        if (bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F') {
+            return "gif";
+        }
+        return null;
     }
 
     private void updateSidebarTitle() {

@@ -32,6 +32,7 @@ public class CompanyRequisitesParsedData implements Serializable {
     private String phone;
     private String email;
     private String website;
+    private String logoUrl;
 
     // Описание и условия работы компании
     private String companyDescription;
@@ -45,6 +46,14 @@ public class CompanyRequisitesParsedData implements Serializable {
     private String directorPosition;
     private String directorPhone;
     private String directorEmail;
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
 
     public String getCompanyDescription() {
         return companyDescription;

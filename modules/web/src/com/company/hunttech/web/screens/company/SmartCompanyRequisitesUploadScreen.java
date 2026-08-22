@@ -371,9 +371,11 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
                 title += " (" + candidate.getLegalEntityName() + ")";
             }
 
+            String logoImgTag = buildLogoTag(candidate.getLogoUrl(), "#e2e8f0");
+
             Label<String> titleLabel = uiComponents.create(Label.TYPE_STRING);
             titleLabel.setHtmlEnabled(true);
-            titleLabel.setValue("<span style='font-size: 13.5px; font-weight: 700; color: #1e3a8a;'>🏢 " + escapeHtml(title) + "</span>");
+            titleLabel.setValue("<div style='display: flex; align-items: center;'>" + logoImgTag + "<span style='font-size: 13.5px; font-weight: 700; color: #1e3a8a;'>🏢 " + escapeHtml(title) + "</span></div>");
             infoBox.add(titleLabel);
 
             StringBuilder sub = new StringBuilder();
@@ -473,13 +475,29 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
                 .replace("'", "&#x27;");
     }
 
+    private boolean isSafeImageUrl(String url) {
+        if (url == null || url.trim().isEmpty()) return false;
+        String clean = url.trim().toLowerCase();
+        return (clean.startsWith("http://") || clean.startsWith("https://"))
+                && !clean.contains("javascript:")
+                && !clean.contains("data:")
+                && !clean.contains("<")
+                && !clean.contains(">");
+    }
+
+    private String buildLogoTag(String url, String borderColor) {
+        if (!isSafeImageUrl(url)) return "";
+        return "<img src='" + escapeHtml(url.trim()) + "' style='width: 24px; height: 24px; object-fit: contain; border-radius: 4px; vertical-align: middle; margin-right: 6px; background: #fff; border: 1px solid " + borderColor + "; padding: 1px;'/>";
+    }
+
     private void updatePreview(CompanyRequisitesParsedData data) {
         String name = data.getCompanyName() != null ? data.getCompanyName() : "";
         if (data.getCompanyShortName() != null && !data.getCompanyShortName().isEmpty()
                 && !data.getCompanyShortName().equals(name)) {
             name += " (" + data.getCompanyShortName() + ")";
         }
-        previewName.setValue(!name.isEmpty() ? name : "—");
+        String logoPreview = buildLogoTag(data.getLogoUrl(), "#cbd5e1");
+        previewName.setValue(!name.isEmpty() ? (logoPreview + escapeHtml(name)) : "—");
 
         previewLegalName.setValue(data.getLegalEntityName() != null ? data.getLegalEntityName() : "—");
 

@@ -226,11 +226,12 @@
                                   width="100%"
                                   spacing="true"
                                   stylename="edit-workspace-content">
-                                <!-- Верхняя панель быстрого умного заполнения компании -->
+                                <!-- Панель быстрого умного заполнения во вкладке скрыта (активна верхняя кнопка) -->
                                 <hbox id="companyDetailsSmartBar"
                                       width="100%"
                                       spacing="true"
                                       align="MIDDLE_LEFT"
+                                      visible="false"
                                       stylename="candidate-filter-bar edit-card">
                                     <button id="smartFillCompanyTabBtn"
                                             caption="msg://msgSmartCompanyFill"

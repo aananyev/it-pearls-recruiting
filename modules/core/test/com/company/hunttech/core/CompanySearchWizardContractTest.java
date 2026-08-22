@@ -78,8 +78,8 @@ public class CompanySearchWizardContractTest {
 
         assertTrue("В тулбаре CompanyEdit должна быть кнопка smartFillCompanyBtn",
                 xml.contains("id=\"smartFillCompanyBtn\""));
-        assertTrue("На вкладке деталей должна быть кнопка smartFillCompanyTabBtn",
-                xml.contains("id=\"smartFillCompanyTabBtn\""));
+        assertTrue("На вкладке деталей панель быстрого заполнения должна быть скрыта (visible=\"false\")",
+                xml.contains("id=\"companyDetailsSmartBar\"") && xml.contains("visible=\"false\""));
     }
 
     @Test
@@ -94,6 +94,8 @@ public class CompanySearchWizardContractTest {
                 java.contains("setInitialSearchParams"));
         assertTrue("CompanyEdit должен применять описание компании",
                 java.contains("setCompanyDescription"));
+        assertTrue("CompanyEdit должен содержать метод автоматической загрузки логотипа",
+                java.contains("downloadAndApplyLogo"));
     }
 
     @Test
@@ -126,6 +128,7 @@ public class CompanySearchWizardContractTest {
         CompanyRequisitesParsedData candidate = results.get(0);
         assertEquals("Яндекс", candidate.getCompanyName());
         assertEquals("7736207543", candidate.getInn());
+        assertNotNull("Логотип должен быть сформирован для кандидата", candidate.getLogoUrl());
         assertNotNull("Сниппет о статусе данных должен присутствовать", candidate.getRawFoundSnippet());
     }
 

@@ -167,7 +167,7 @@
                         <rows>
                             <row>
                                 <label value="Торговое имя (бренд):" stylename="bold"/>
-                                <label id="previewName" value="—" stylename="bold" css="color: #1e3a8a;"/>
+                                <label id="previewName" value="—" htmlEnabled="true" stylename="bold" css="color: #1e3a8a;"/>
                                 <label value="Юридическое лицо:" stylename="bold"/>
                                 <label id="previewLegalName" value="—" stylename="bold"/>
                             </row>
