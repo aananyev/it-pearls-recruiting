@@ -208,7 +208,7 @@
             <vbox id="positionsTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="positionsTableCard" margin="true,true,true,false">
 
                 <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card">
 
                     <!-- Левая группа основных действий: Создать вакансию, Умная загрузка, Редактировать, Удалить -->
                     <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">

@@ -1,6 +1,7 @@
 package com.company.hunttech.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -23,6 +24,10 @@ public class City extends StandardEntity {
     @Column(name = "CITY_PHONE_CODE", unique = true, length = 5)
     protected String cityPhoneCode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_CITY_EMBLEM_ID")
+    protected FileDescriptor fileCityEmblem;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_REGION_ID")
@@ -31,6 +36,14 @@ public class City extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
+
+    public FileDescriptor getFileCityEmblem() {
+        return fileCityEmblem;
+    }
+
+    public void setFileCityEmblem(FileDescriptor fileCityEmblem) {
+        this.fileCityEmblem = fileCityEmblem;
+    }
 
     public Region getCityRegion() {
         return cityRegion;

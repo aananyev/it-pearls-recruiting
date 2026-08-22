@@ -2,6 +2,7 @@ package com.company.hunttech.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -28,10 +29,22 @@ public class Country extends StandardEntity {
     @Column(name = "PHONE_CODE")
     protected Integer phoneCode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_FLAG_ID")
+    protected FileDescriptor fileFlag;
+
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "regionCountry")
     protected List<Region> countryOfRegion;
+
+    public FileDescriptor getFileFlag() {
+        return fileFlag;
+    }
+
+    public void setFileFlag(FileDescriptor fileFlag) {
+        this.fileFlag = fileFlag;
+    }
 
     public List<Region> getCountryOfRegion() {
         return countryOfRegion;

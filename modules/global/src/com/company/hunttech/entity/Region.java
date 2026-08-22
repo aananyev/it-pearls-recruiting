@@ -2,6 +2,7 @@ package com.company.hunttech.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -27,12 +28,24 @@ public class Region extends StandardEntity {
     @JoinColumn(name = "REGION_COUNTRY_ID")
     protected Country regionCountry;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_REGION_EMBLEM_ID")
+    protected FileDescriptor fileRegionEmblem;
+
     @Composition
     @OneToMany(mappedBy = "cityRegion")
     protected List<City> regionOfCity;
 
     @Column(name = "REGION_CODE", unique = true)
     protected Integer regionCode;
+
+    public FileDescriptor getFileRegionEmblem() {
+        return fileRegionEmblem;
+    }
+
+    public void setFileRegionEmblem(FileDescriptor fileRegionEmblem) {
+        this.fileRegionEmblem = fileRegionEmblem;
+    }
 
     public List<City> getRegionOfCity() {
         return regionOfCity;

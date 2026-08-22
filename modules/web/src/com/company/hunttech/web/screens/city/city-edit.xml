@@ -23,20 +23,38 @@
         <hbox id="cityMainLayout" stylename="edit-screen-layout" expand="cityWorkspace" spacing="false" width="100%" height="100%">
             <!-- Левая контекстная панель: идентификация, label-навигация, сводка и подсказка. -->
             <vbox id="citySidebar" stylename="edit-sidebar" width="270px" height="100%" spacing="true" expand="citySidebarSpacer">
-                <!-- Визуальный блок sidebar: круглая иллюстрация города
-                     (без привязки к данным — загрузка изображения формой не предусмотрена). -->
+                <!-- Визуальный блок sidebar: круглый герб города 176×176 с fallback icons/dictionaries/city.png,
+                     загрузка файла и кнопка умной обработки герба. -->
                 <vbox id="cityVisual" stylename="edit-sidebar-visual" width="100%" spacing="true" align="MIDDLE_CENTER">
-                    <ovalImage id="cityLogoImage"
-                               width="176px"
-                               height="176px"
-                               ovalWidth="176px"
-                               ovalHeight="176px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               scaleMode="SCALE_DOWN"
-                               stylename="dictionary-logo-image">
-                        <theme path="icons/dictionaries/city.png"/>
-                    </ovalImage>
+                    <vbox id="cityLogoPicBox" spacing="false" align="MIDDLE_CENTER">
+                        <ovaFallbackImage id="cityEmblemFileImage"
+                                          dataContainer="cityDc"
+                                          property="fileCityEmblem"
+                                          width="176px"
+                                          height="176px"
+                                          ovalWidth="176px"
+                                          ovalHeight="176px"
+                                          ovalBackground="#3a3e44"
+                                          fallbackThemePath="icons/dictionaries/city.png"
+                                          visible="true"
+                                          align="MIDDLE_CENTER"
+                                          stylename="dictionary-logo-image"
+                                          scaleMode="SCALE_DOWN"/>
+                    </vbox>
+                    <upload id="cityEmblemFileUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="cityDc"
+                            align="MIDDLE_CENTER"
+                            showFileName="false"
+                            dropZone="cityVisual"
+                            showClearButton="true"
+                            property="fileCityEmblem"/>
+                    <button id="enhanceCityEmblemBtn"
+                            caption="Умная обработка герба"
+                            icon="font-icon:MAGIC"
+                            stylename="secondary candidate-btn"
+                            width="100%"
+                            description="Удалить фон, сделать его прозрачным и улучшить качество"/>
                 </vbox>
                 <!-- Блок идентификации: название города из контейнера.
                      Подпись типа записи убрана — название выровнено по центру

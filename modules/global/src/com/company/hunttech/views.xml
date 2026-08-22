@@ -9,12 +9,14 @@
         <property name="regionRuName"/>
         <property name="regionCode"/>
         <property name="regionCountry" view="country-picker-view"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_Region" name="region-edit-view" extends="_minimal">
         <property name="regionRuName"/>
         <property name="regionCode"/>
         <property name="regionCountry" view="country-picker-view"/>
         <property name="regionOfCity" view="city-region-child-view"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_Region" name="region-picker-view" extends="_minimal">
         <property name="regionRuName"/>
@@ -24,6 +26,7 @@
         <property name="regionRuName"/>
         <property name="regionCode"/>
         <property name="regionCountry" view="country-picker-view"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-region-child-view" extends="_minimal">
         <property name="cityRuName"/>
@@ -33,11 +36,13 @@
         <property name="countryRuName"/>
         <property name="countryShortName"/>
         <property name="phoneCode"/>
+        <property name="fileFlag"/>
     </view>
     <view entity="hunttech_Country" name="country-edit-view" extends="_minimal">
         <property name="countryRuName"/>
         <property name="countryShortName"/>
         <property name="phoneCode"/>
+        <property name="fileFlag"/>
         <property name="countryOfRegion" view="region-country-child-view"/>
     </view>
     <view entity="hunttech_Country" name="country-picker-view" extends="_minimal">
@@ -631,11 +636,13 @@
         <property name="cityRuName"/>
         <property name="cityPhoneCode"/>
         <property name="cityRegion" view="region-picker-view"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-edit-view" extends="_minimal">
         <property name="cityRuName"/>
         <property name="cityPhoneCode"/>
         <property name="cityRegion" view="region-picker-view"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-picker-view" extends="_minimal">
         <property name="cityRuName"/>

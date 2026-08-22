@@ -1204,13 +1204,19 @@
    * ═══════════════════════════════════════════════════════════════════════════ */
   .candidate-filter-bar {
     display: flex !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px 10px !important;
     min-height: 46px !important;
+    height: auto !important;
     box-sizing: border-box !important;
 
     .filter-buttons-panel {
       display: inline-flex !important;
+      flex-wrap: wrap !important;
       align-items: center !important;
+      gap: 6px !important;
     }
 
     /* Все типы кнопок тулбара: обычные кнопки Button и выпадающие PopupButton */
@@ -1388,6 +1394,36 @@
     border-radius: 6px !important;
     font-size: 12.5px !important;
     font-weight: 600 !important;
+  }
+
+  /* Адаптивные правила для тулбаров и фильтра на разных разрешениях экрана */
+  @media (max-width: 1440px) {
+    .candidate-filter-bar {
+      padding: 6px 8px !important;
+      gap: 6px 8px !important;
+
+      .v-button,
+      .v-popupbutton,
+      .candidate-btn {
+        padding: 0 8px !important;
+        font-size: 12px !important;
+      }
+    }
+
+    .candidate-generic-filter,
+    .c-generic-filter {
+      padding: 4px 8px !important;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .candidate-filter-bar {
+      justify-content: flex-start !important;
+
+      .filter-buttons-panel {
+        width: 100% !important;
+      }
+    }
   }
 
   /* Кнопки тулбара реестра (Создать кандидата, Обновить) */
