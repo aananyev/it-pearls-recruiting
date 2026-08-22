@@ -33,6 +33,7 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
@@ -87,6 +88,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private BackgroundWorker backgroundWorker;
     @Inject
     private SkillAnalysisService skillAnalysisService;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Inject
     private GroupTable<OpenPosition> openPositionsTable;
@@ -814,11 +817,20 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                         priorityFilterPopupButton.setCaption("Приоритет");
                     }));
 
+            priorityFilterPopupButton.addAction(new BaseAction("priorityUnderReview")
+                    .withCaption("На проверку")
+                    .withIcon("CLOCK")
+                    .withHandler(e -> {
+                        openPositionsDl.setParameter("priority", -2);
+                        openPositionsDl.load();
+                        priorityFilterPopupButton.setCaption("На проверку");
+                    }));
+
             priorityFilterPopupButton.addAction(new BaseAction("priorityHigh")
                     .withCaption("Высокий приоритет")
                     .withIcon("CIRCLE")
                     .withHandler(e -> {
-                        openPositionsDl.setParameter("priority", 1);
+                        openPositionsDl.setParameter("priority", 3);
                         openPositionsDl.load();
                         priorityFilterPopupButton.setCaption("Высокий");
                     }));
@@ -1075,51 +1087,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         lbl.setDescriptionAsHtml(true);
         lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-        int p = priority != null ? priority : 2;
-        String html;
-        String desc;
-        switch (p) {
-            case 4: // Критический
-                desc = "<b>Критический приоритет</b><br>Требует немедленного внимания и первоочередного подбора кандидатов.";
-                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(239, 68, 68, 0.18); border: 1.5px solid #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); margin: 0 auto;'>"
-                        + "<svg width='11' height='11' viewBox='0 0 24 24' fill='#ef4444'><path d='M12 2L1 21h22L12 2zm0 3.5L20.3 19H3.7L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z'/></svg>"
-                        + "</div>";
-                break;
-            case 3: // Высокий
-                desc = "<b>Высокий приоритет</b><br>Повышенная срочность закрытия позиции.";
-                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(245, 158, 11, 0.18); border: 1.5px solid #f59e0b; box-shadow: 0 0 5px rgba(245, 158, 11, 0.35); margin: 0 auto;'>"
-                        + "<svg width='11' height='11' viewBox='0 0 24 24' fill='#f59e0b'><path d='M12 4l-7 7h4v8h6v-8h4z'/></svg>"
-                        + "</div>";
-                break;
-            case 1: // Низкий
-                desc = "<b>Низкий приоритет</b><br>Плановый фоновый подбор.";
-                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); border: 1.5px solid #3b82f6; margin: 0 auto;'>"
-                        + "<svg width='11' height='11' viewBox='0 0 24 24' fill='#3b82f6'><path d='M12 20l7-7h-4V5H9v8H5z'/></svg>"
-                        + "</div>";
-                break;
-            case 0: // Приостановлена
-                desc = "<b>Приостановлена</b><br>Работа по вакансии временно приостановлена заказчиком.";
-                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(107, 114, 128, 0.15); border: 1.5px solid #6b7280; margin: 0 auto;'>"
-                        + "<svg width='9' height='9' viewBox='0 0 24 24' fill='#6b7280'><path d='M6 19h4V5H6v14zm8-14v14h4V5h-4z'/></svg>"
-                        + "</div>";
-                break;
-            case -1: // Черновик
-                desc = "<b>Черновик</b><br>Вакансия находится в стадии формирования и не опубликована.";
-                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(148, 163, 184, 0.15); border: 1.5px dashed #94a3b8; margin: 0 auto;'>"
-                        + "<svg width='10' height='10' viewBox='0 0 24 24' fill='#94a3b8'><path d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/></svg>"
-                        + "</div>";
-                break;
-            case 2: // Обычный
-            default:
-                desc = "<b>Обычный приоритет</b><br>Стандартный рабочий приоритет вакансии.";
-                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1.5px solid #10b981; margin: 0 auto;'>"
-                        + "<svg width='8' height='8' viewBox='0 0 24 24' fill='#10b981'><circle cx='12' cy='12' r='10'/></svg>"
-                        + "</div>";
-                break;
-        }
-
-        lbl.setValue(html);
-        lbl.setDescription(desc);
+        OpenPositionPriorityUiHelper.BadgeData badge = OpenPositionPriorityUiHelper.getPriorityBadge(priority, 22, messageBundle);
+        lbl.setValue(badge.getHtml());
+        lbl.setDescription(badge.getDescription());
         return lbl;
     }
 

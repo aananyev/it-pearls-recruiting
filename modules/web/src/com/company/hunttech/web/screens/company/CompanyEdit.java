@@ -256,11 +256,6 @@ public class CompanyEdit extends StandardEditor<Company> {
         openSmartCompanyWizard();
     }
 
-    @Subscribe("smartFillCompanyTabBtn")
-    public void onSmartFillCompanyTabBtnClick(Button.ClickEvent event) {
-        openSmartCompanyWizard();
-    }
-
     @Subscribe("smartUploadRequisitesBtn")
     public void onSmartUploadRequisitesBtnClick(Button.ClickEvent event) {
         openSmartCompanyWizard();

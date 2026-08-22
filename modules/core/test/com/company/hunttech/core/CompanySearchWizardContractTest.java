@@ -76,10 +76,8 @@ public class CompanySearchWizardContractTest {
     public void testCompanyEditHasSmartFillButtons() throws IOException {
         String xml = readProjectFile(COMPANY_EDIT_XML);
 
-        assertTrue("В тулбаре CompanyEdit должна быть кнопка smartFillCompanyBtn",
+        assertTrue("В тулбаре CompanyEdit должна быть кнопка smartFillCompanyBtn над вкладками",
                 xml.contains("id=\"smartFillCompanyBtn\""));
-        assertTrue("На вкладке деталей панель быстрого заполнения должна быть скрыта (visible=\"false\")",
-                xml.contains("id=\"companyDetailsSmartBar\"") && xml.contains("visible=\"false\""));
     }
 
     @Test
@@ -88,8 +86,6 @@ public class CompanySearchWizardContractTest {
 
         assertTrue("CompanyEdit должен содержать обработчик smartFillCompanyBtn",
                 java.contains("@Subscribe(\"smartFillCompanyBtn\")"));
-        assertTrue("CompanyEdit должен содержать обработчик smartFillCompanyTabBtn",
-                java.contains("@Subscribe(\"smartFillCompanyTabBtn\")"));
         assertTrue("CompanyEdit должен передавать параметры поиска в мастер",
                 java.contains("setInitialSearchParams"));
         assertTrue("CompanyEdit должен применять описание компании",

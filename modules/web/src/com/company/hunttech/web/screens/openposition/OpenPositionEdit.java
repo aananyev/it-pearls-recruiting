@@ -210,6 +210,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private LookupField<Integer> priorityField;
     @Inject
+    private Label<String> priorityBadgeLabel;
+    @Inject
     private CheckBox openClosePositionCheckBox;
     @Inject
     private DataManager dataManager;
@@ -551,6 +553,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setOpenCloseStart();
         initProjectNameField();
         initOpenPositionSkillsSidebar();
+        updatePriorityBadge(getEditedEntity().getPriority());
     }
 
     @Subscribe("tabSheetOpenPosition")
@@ -2479,8 +2482,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     Integer startPriorityStatus;
 
     @Subscribe("priorityField")
-    /** Смена приоритета → авто-установка даты закрытия через неделю. */
+    /** Смена приоритета → авто-установка даты закрытия через неделю и обновление цветового бейджа. */
     public void onPriorityFieldValueChange(HasValue.ValueChangeEvent<Integer> event) {
+        updatePriorityBadge(event.getValue());
+
         // event.getValue() может быть null (onSignDraftCheckBoxValueChange снимает
         // «черновик» через priorityField.setValue(null)) — защита от NPE.
         if (event.getValue() != null && event.getValue().equals(OpenPositionPriority.LOW.getId())) {
@@ -2500,7 +2505,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                         if (event.getValue() >= 0) {
                             openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                                    "Изменен приоритет вакансии на " + result.get(),
+                                     result.isPresent() ? ("Изменен приоритет вакансии на " + result.get()) : "Изменен приоритет вакансии",
                                     "Закрыта вакансия",
                                     new Date(),
                                     (ExtUser) userSession.getUser());
@@ -2513,6 +2518,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 }
             }
         }
+    }
+
+    /**
+     * Динамическое обновление SVG/цветового значка приоритета в карточке вакансии
+     * по аналогии с реестром OpenPositionReestrBrowse.
+     */
+    private void updatePriorityBadge(Integer priority) {
+        if (priorityBadgeLabel == null) {
+            return;
+        }
+        OpenPositionPriorityUiHelper.BadgeData badge = OpenPositionPriorityUiHelper.getPriorityBadge(priority, 24, messageBundle);
+        priorityBadgeLabel.setValue(badge.getHtml());
+        priorityBadgeLabel.setDescription(badge.getDescription());
     }
 
     /** Установка closingDate = сегодня + 7 дней. */
@@ -2556,6 +2574,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         registrationForWorkField.setOptionsMap(rwMap);
 
+        priorityMap.put(messageBundle.getMessage("msgUnderReviewPriority"), OpenPositionPriority.UNDER_REVIEW.getId());
         priorityMap.put("Draft", OpenPositionPriority.DRAFT.getId());
         priorityMap.put("Paused", OpenPositionPriority.PAUSED.getId());
         priorityMap.put("Low", OpenPositionPriority.LOW.getId());

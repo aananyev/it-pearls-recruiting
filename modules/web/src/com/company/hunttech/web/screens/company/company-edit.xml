@@ -252,21 +252,6 @@
                                   width="100%"
                                   spacing="true"
                                   stylename="edit-workspace-content">
-                                <!-- Панель быстрого умного заполнения во вкладке скрыта (активна верхняя кнопка) -->
-                                <hbox id="companyDetailsSmartBar"
-                                      width="100%"
-                                      spacing="true"
-                                      align="MIDDLE_LEFT"
-                                      visible="false"
-                                      stylename="candidate-filter-bar edit-card">
-                                    <button id="smartFillCompanyTabBtn"
-                                            caption="msg://msgSmartCompanyFill"
-                                            icon="font-icon:MAGIC"
-                                            stylename="primary candidate-btn candidate-smartload-btn"/>
-                                    <label value="msg://msgSmartCompanyFillHint"
-                                           stylename="edit-help"
-                                           align="MIDDLE_LEFT"/>
-                                </hbox>
                                 <!-- Карточка «Реквизиты компании»: наименования, группа, директор (поле Форма собственности убрано) -->
                                 <groupBox id="companyMainCard"
                                           caption="msg://msgCompanyMainSection"
