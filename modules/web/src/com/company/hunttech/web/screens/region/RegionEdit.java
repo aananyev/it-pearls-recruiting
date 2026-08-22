@@ -124,10 +124,10 @@ public class RegionEdit extends StandardEditor<Region> {
                 newDescriptor.setCreateDate(new java.util.Date());
 
                 fileStorageService.saveFile(newDescriptor, processed.getData());
+                createdUncommittedDescriptors.add(newDescriptor);
                 FileDescriptor mergedDescriptor = dataContext.merge(newDescriptor);
 
                 region.setFileRegionEmblem(mergedDescriptor);
-                createdUncommittedDescriptors.add(newDescriptor);
                 pendingRemovalDescriptors.add(emblemDescriptor);
 
                 notifications.create(Notifications.NotificationType.TRAY)

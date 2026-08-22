@@ -124,10 +124,10 @@ public class CountryEdit extends StandardEditor<Country> {
                 newDescriptor.setCreateDate(new java.util.Date());
 
                 fileStorageService.saveFile(newDescriptor, processed.getData());
+                createdUncommittedDescriptors.add(newDescriptor);
                 FileDescriptor mergedDescriptor = dataContext.merge(newDescriptor);
 
                 country.setFileFlag(mergedDescriptor);
-                createdUncommittedDescriptors.add(newDescriptor);
                 pendingRemovalDescriptors.add(flagDescriptor);
 
                 notifications.create(Notifications.NotificationType.TRAY)
