@@ -61,11 +61,6 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     private static final String COMPANY_LOGO_PROPERTY = "fileCompanyLogo";
 
     /**
-     * Имя свойства сущности Country, для которого выполняется обработка флага.
-     */
-    private static final String COUNTRY_FLAG_PROPERTY = "fileFlag";
-
-    /**
      * Имя свойства сущности City, для которого выполняется обработка герба.
      */
     private static final String CITY_EMBLEM_PROPERTY = "fileCityEmblem";
