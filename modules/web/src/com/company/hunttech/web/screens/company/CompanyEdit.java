@@ -233,15 +233,24 @@ public class CompanyEdit extends StandardEditor<Company> {
                 if (data != null) {
                     // applied возвращается из middleware как десериализованный объект
                     Company applied = companyRequisitesIngestService.applyRequisitesToCompany(getEditedEntity(), data);
-
-                    // Перезагрузка коллекций опций только для измененных сущностей
-                    if (applied.getCompanyOwnership() != null) companyOwnershipsLc.load();
-                    if (applied.getCompanyDirector() != null) companyDirectorsLc.load();
-                    if (applied.getCityOfCompany() != null) cityOfCompaniesLc.load();
-                    if (applied.getRegionOfCompany() != null) regionOfCompaniesLc.load();
-                    if (applied.getCountryOfCompany() != null) countryOfCompaniesLc.load();
-
                     Company target = getEditedEntity();
+
+                    // Перезагрузка коллекций опций только при изменении связанных сущностей
+                    if (applied.getCompanyOwnership() != null && !java.util.Objects.equals(applied.getCompanyOwnership(), target.getCompanyOwnership())) {
+                        companyOwnershipsLc.load();
+                    }
+                    if (applied.getCompanyDirector() != null && !java.util.Objects.equals(applied.getCompanyDirector(), target.getCompanyDirector())) {
+                        companyDirectorsLc.load();
+                    }
+                    if (applied.getCityOfCompany() != null && !java.util.Objects.equals(applied.getCityOfCompany(), target.getCityOfCompany())) {
+                        cityOfCompaniesLc.load();
+                    }
+                    if (applied.getRegionOfCompany() != null && !java.util.Objects.equals(applied.getRegionOfCompany(), target.getRegionOfCompany())) {
+                        regionOfCompaniesLc.load();
+                    }
+                    if (applied.getCountryOfCompany() != null && !java.util.Objects.equals(applied.getCountryOfCompany(), target.getCountryOfCompany())) {
+                        countryOfCompaniesLc.load();
+                    }
                     if (applied.getInn() != null) target.setInn(applied.getInn());
                     if (applied.getKpp() != null) target.setKpp(applied.getKpp());
                     if (applied.getOgrn() != null) target.setOgrn(applied.getOgrn());
