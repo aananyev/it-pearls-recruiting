@@ -4,14 +4,17 @@ import com.company.hunttech.entity.Company;
 import com.company.hunttech.entity.Person;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -37,7 +40,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
         String searchInn = inn != null ? inn.replaceAll("[^0-9]", "").trim() : "";
         String combinedQuery = (searchName + " " + searchInn).trim();
 
-        // 1. Поиск в открытых интернет-реестрах (ЕГРЮЛ) и Wikipedia
+        // 1. Опрос открытых реестров (ЕГРЮЛ) и энциклопедии (Wikipedia)
         CompanyRequisitesParsedData egrulData = null;
         if (!searchInn.isEmpty()) {
             egrulData = fetchEgrulData(searchInn);
@@ -50,12 +53,12 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
 
         // 2. Подготовка обогащенного контекста для AI
         StringBuilder webContext = new StringBuilder();
-        webContext.append("Поиск в интернете и реестрах организации: ").append(searchName);
+        webContext.append("Поиск в интернете и реестрах сведений об организации: ").append(searchName);
         if (!searchInn.isEmpty()) {
             webContext.append(", ИНН ").append(searchInn);
         }
         if (egrulData != null) {
-            webContext.append("\n\nСведения из ЕГРЮЛ: ");
+            webContext.append("\n\nОфициальные сведения ЕГРЮЛ: ");
             if (egrulData.getLegalEntityName() != null) webContext.append("Юр. лицо: ").append(egrulData.getLegalEntityName()).append("; ");
             if (egrulData.getInn() != null) webContext.append("ИНН: ").append(egrulData.getInn()).append("; ");
             if (egrulData.getOgrn() != null) webContext.append("ОГРН: ").append(egrulData.getOgrn()).append("; ");
@@ -68,7 +71,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             webContext.append("\n\nСправка из открытой энциклопедии:\n").append(wikiExtract);
         }
 
-        // 3. Вызов AI-функции анализа и структурирования
+        // 3. Вызов специализированной AI-функции
         AiExecutionResult aiResult = null;
         try {
             Map<String, Object> context = new LinkedHashMap<>();
@@ -90,11 +93,11 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                 fallbackCtx.put("callerSource", "CompanySearchAiService (fallback)");
                 aiResult = aiExecutionService.executeText(CompanyRequisitesIngestService.FUNCTION_COMPANY_REQUISITES_PARSE_JSON, fallbackCtx);
             } catch (Exception e) {
-                log.info("Резервный AI-вызов также завершился: {}", e.getMessage());
+                log.info("Резервный AI-вызов завершился: {}", e.getMessage());
             }
         }
 
-        // 4. Парсинг ответа AI (если AI вернул результат)
+        // 4. Парсинг ответа AI (при наличии ответа)
         if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
             try {
                 String json = cleanJson(aiResult.getText().trim());
@@ -183,16 +186,26 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             }
         }
 
-        // 5. Обогащение из проверенной базы знаний и веб-реестров при отсутствии/неполноте ответа AI
+        // 5. Обогащение при отсутствии результатов AI: проверка экспертной базы знаний, ЕГРЮЛ и Wikipedia
         if (results.isEmpty()) {
             List<CompanyRequisitesParsedData> known = getKnownCompanyKnowledge(searchName, searchInn);
             if (!known.isEmpty()) {
+                if (egrulData != null) {
+                    for (CompanyRequisitesParsedData k : known) {
+                        if (searchInn.equals(k.getInn())) {
+                            if (k.getOgrn() == null && egrulData.getOgrn() != null) k.setOgrn(egrulData.getOgrn());
+                            if (k.getKpp() == null && egrulData.getKpp() != null) k.setKpp(egrulData.getKpp());
+                            if (k.getOkpo() == null && egrulData.getOkpo() != null) k.setOkpo(egrulData.getOkpo());
+                            if (k.getOkved() == null && egrulData.getOkved() != null) k.setOkved(egrulData.getOkved());
+                        }
+                    }
+                }
                 results.addAll(known);
             } else if (egrulData != null) {
                 if (wikiExtract != null && !wikiExtract.isEmpty()) {
                     egrulData.setCompanyDescription(wikiExtract);
                 }
-                egrulData.setWorkingConditions("Трудоустройство по ТК РФ, социальный пакет, гибкий график.");
+                egrulData.setWorkingConditions("Официальное оформление по ТК РФ, социальный пакет.");
                 results.add(egrulData);
             } else {
                 CompanyRequisitesParsedData generated = generateStructuredCandidate(searchName, searchInn, wikiExtract);
@@ -200,7 +213,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             }
         }
 
-        // 6. Дообогащение описаний и условий
+        // 6. Обогащение описаний и условий
         for (CompanyRequisitesParsedData item : results) {
             if ((item.getCompanyDescription() == null || item.getCompanyDescription().trim().isEmpty()) && wikiExtract != null) {
                 item.setCompanyDescription(wikiExtract);
@@ -219,12 +232,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
     private CompanyRequisitesParsedData fetchEgrulData(String inn) {
         try {
             String url = "https://htmlweb.ru/json/service/org?inn=" + inn.trim();
-            Document doc = Jsoup.connect(url)
-                    .userAgent("HuntTech-HRM/1.0")
-                    .timeout(3500)
-                    .ignoreContentType(true)
-                    .get();
-            String text = doc.body().text();
+            String text = fetchHttpText(url, 3000);
             if (text != null && text.contains("\"name\"")) {
                 JsonNode root = objectMapper.readTree(text);
                 CompanyRequisitesParsedData data = new CompanyRequisitesParsedData();
@@ -235,7 +243,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                 }
                 String shortName = textOrNull(root, "name");
                 if (shortName != null) {
-                    data.setCompanyShortName(shortName.replaceAll("(?i)^(ооо|ао|пао|ип|зао)\\s+", "").replace("\"", "").trim());
+                    data.setCompanyShortName(shortName.replaceAll("(?i)^(ооо|ао|пао|ип|зао|оао)\\s+", "").replace("\"", "").trim());
                     data.setCompanyName(data.getCompanyShortName());
                 }
                 data.setOgrn(textOrNull(root, "ogrn"));
@@ -255,11 +263,11 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                 }
                 String seoPost = textOrNull(root, "seo_post");
                 data.setDirectorPosition(seoPost != null ? capitalize(seoPost) : "Генеральный директор");
-                data.setRawFoundSnippet("Официальные данные ЕГРЮЛ (ИНН " + inn + ", ОГРН " + data.getOgrn() + ").");
+                data.setRawFoundSnippet("Официальные данные ЕГРЮЛ (ИНН " + inn + ", ОГРН " + (data.getOgrn() != null ? data.getOgrn() : "") + ").");
                 return data;
             }
         } catch (Exception e) {
-            log.info("Онлайн-запрос в ЕГРЮЛ по ИНН {} не выполнен: {}", inn, e.getMessage());
+            log.info("Запрос в ЕГРЮЛ по ИНН {} не вернул данных: {}", inn, e.getMessage());
         }
         return null;
     }
@@ -268,12 +276,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
         try {
             String encoded = URLEncoder.encode(companyName.trim(), StandardCharsets.UTF_8.name());
             String url = "https://ru.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=" + encoded + "&format=json";
-            Document doc = Jsoup.connect(url)
-                    .userAgent("HuntTech-HRM/1.0")
-                    .timeout(3500)
-                    .ignoreContentType(true)
-                    .get();
-            String json = doc.body().text();
+            String json = fetchHttpText(url, 3000);
             if (json != null && json.contains("\"extract\"")) {
                 JsonNode root = objectMapper.readTree(json);
                 JsonNode pages = root.path("query").path("pages");
@@ -289,9 +292,62 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                 }
             }
         } catch (Exception e) {
-            log.info("Онлайн-запрос в энциклопедию по названию {} не выполнен: {}", companyName, e.getMessage());
+            log.info("Запрос в Wikipedia по названию {} не вернул данных: {}", companyName, e.getMessage());
         }
         return null;
+    }
+
+    private String fetchHttpText(String urlStr, int timeoutMs) {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(urlStr);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "HuntTech-HRM/1.0");
+            conn.setInstanceFollowRedirects(true);
+            conn.setConnectTimeout(timeoutMs);
+            conn.setReadTimeout(timeoutMs);
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 200 && responseCode < 300) {
+                String contentType = conn.getContentType();
+                Charset charset = StandardCharsets.UTF_8;
+                if (contentType != null) {
+                    for (String param : contentType.replace(" ", "").split(";")) {
+                        if (param.toLowerCase().startsWith("charset=")) {
+                            try {
+                                charset = Charset.forName(param.substring(8));
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                }
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), charset))) {
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line).append("\n");
+                    }
+                    return sb.toString();
+                }
+            } else {
+                log.warn("HTTP-запрос к {} вернул код {}", maskUrlForLogging(urlStr), responseCode);
+            }
+        } catch (Exception e) {
+            log.warn("Ошибка HTTP-запроса к {}: {}", maskUrlForLogging(urlStr), e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.disconnect();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return null;
+    }
+
+    private String maskUrlForLogging(String urlStr) {
+        if (urlStr == null) return "";
+        return urlStr.replaceAll("(?i)inn=[0-9]+", "inn=***");
     }
 
     private List<CompanyRequisitesParsedData> getKnownCompanyKnowledge(String name, String inn) {
@@ -323,7 +379,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             y.setDirectorPosition("Генеральный директор");
             y.setCompanyDescription("Крупнейшая российская технологическая компания, развивающая экосистему поисковых, рекламных, облачных, транспортных (Такси, Драйв, Доставка), e-commerce и медиа-сервисов (Кинопоиск, Музыка). Лидер в сфере искусственного интеллекта (YandexGPT).");
             y.setWorkingConditions("Гибридный/удаленный формат работы, ДМС со стоматологией, комфортные офисы класса А, компенсация питания, программы релокации, техника на выбор (MacBook/ThinkPad), внутренние конференции.");
-            y.setRawFoundSnippet("ООО «Яндекс» (ИНН 7736207543, ОГРН 1027700229193). Официальный реестр ЕГРЮЛ.");
+            y.setRawFoundSnippet("Справка об экосистеме «Яндекс». Юридическое лицо: ООО «Яндекс» (ИНН 7736207543, ОГРН 1027700229193).");
             list.add(y);
             return list;
         }
@@ -352,7 +408,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             s.setDirectorPosition("Президент, Председатель Правления");
             s.setCompanyDescription("Крупнейший банк и технологический лидер России, развивающий цифровую экосистему для физических и юридических лиц, финтех-решения, генеративный AI (GigaChat), облачные технологии (Cloud.ru) и кибербезопасность.");
             s.setWorkingConditions("Официальное оформление по ТК РФ, льготная ипотека для сотрудников, расширенный ДМС, корпоративный университет Сбера, гибкий график, годовые бонусы.");
-            s.setRawFoundSnippet("ПАО Сбербанк (ИНН 7707083893, ОГРН 1027700132195).");
+            s.setRawFoundSnippet("Справка об экосистеме «Сбербанк». Юридическое лицо: ПАО Сбербанк (ИНН 7707083893, ОГРН 1027700132195).");
             list.add(s);
             return list;
         }
@@ -363,7 +419,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             ht.setCompanyShortName("ХантТек");
             ht.setLegalEntityName("ООО «ХАНТТЕК»");
             ht.setOwnership("ООО");
-            ht.setInn(inn.isEmpty() ? "7701987654" : inn);
+            ht.setInn(!inn.isEmpty() ? inn : "7701987654");
             ht.setKpp("770101001");
             ht.setOgrn("1217700456789");
             ht.setOkved("62.01 Разработка компьютерного программного обеспечения");
@@ -410,7 +466,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             ozon.setDirectorPosition("Генеральный директор");
             ozon.setCompanyDescription("Один из ведущих российских e-commerce маркетплейсов и финтех-экосистем, предоставляющий миллионам покупателей доступ к миллионам товаров, быструю логистику Ozon Rocket и банковские сервисы Ozon Банк.");
             ozon.setWorkingConditions("Удаленный и гибридный формат работы, ДМС с первого месяца, скидки на покупки на маркетплейсе, современный офис в Москва-Сити, участие в масштабных финтех и highload проектах.");
-            ozon.setRawFoundSnippet("ООО «Интернет Решения» (Ozon) ИНН 7704217370, ОГРН 1027739244741.");
+            ozon.setRawFoundSnippet("Справка об экосистеме Ozon. Юридическое лицо: ООО «Интернет Решения» (ИНН 7704217370, ОГРН 1027739244741).");
             list.add(ozon);
             return list;
         }
@@ -439,7 +495,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             vk.setDirectorPosition("Генеральный директор");
             vk.setCompanyDescription("Крупнейшая российская технологическая корпорация, объединяющая социальные сети (ВКонтакте, Одноклассники), контентные и медиа-платформы (VK Музыка, VK Видео, VK Клипы, Дзен), почтовый сервис Mail.ru и образовательные сервисы.");
             vk.setWorkingConditions("Гибридный график, ДМС со стоматологией, комфортный офис на Ленинградке с лаундж-зонами, спортзалом и фреш-барами, техника на выбор, участие в масштабных проектах.");
-            vk.setRawFoundSnippet("ООО «ВК» (ИНН 7743001840, ОГРН 1027739850962).");
+            vk.setRawFoundSnippet("Справка об экосистеме VK. Юридическое лицо: ООО «ВК» (ИНН 7743001840, ОГРН 1027739850962).");
             list.add(vk);
             return list;
         }
@@ -468,7 +524,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             tb.setDirectorPosition("Председатель Правления");
             tb.setCompanyDescription("Ведущий российский онлайн-банк и экосистема финансовых и лайфстайл-услуг, обслуживающий более 40 млн клиентов без отделений через мобильное приложение и сеть представителей.");
             tb.setWorkingConditions("Удаленный и гибридный формат работы, ДМС с телемедициной, корпоративные скидки, современный стек разработки, возможность профессионального роста.");
-            tb.setRawFoundSnippet("АО «ТБанк» (ИНН 7710140679, ОГРН 1027739642281).");
+            tb.setRawFoundSnippet("Справка об экосистеме «Т-Банк». Юридическое лицо: АО «ТБанк» (ИНН 7710140679, ОГРН 1027739642281).");
             list.add(tb);
             return list;
         }
@@ -497,7 +553,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             hh.setDirectorPosition("Генеральный директор");
             hh.setCompanyDescription("Крупнейшая российская платформа онлайн-рекрутинга и HR-tech сервисов, соединяющая работодателей и соискателей по всей России и СНГ.");
             hh.setWorkingConditions("Гибридный график, ДМС, комфортный офис, современные инструменты разработки и анализа больших данных.");
-            hh.setRawFoundSnippet("ООО «Хэдхантер» (ИНН 7704259848, ОГРН 1027700207391).");
+            hh.setRawFoundSnippet("Справка о сервисе HeadHunter. Юридическое лицо: ООО «Хэдхантер» (ИНН 7704259848, ОГРН 1027700207391).");
             list.add(hh);
             return list;
         }
@@ -507,24 +563,38 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
 
     private CompanyRequisitesParsedData generateStructuredCandidate(String name, String inn, String wikiExtract) {
         String baseName = !name.isEmpty() ? name : "Организация " + inn;
-        String legalName = baseName.toUpperCase().startsWith("ООО") || baseName.toUpperCase().startsWith("АО") || baseName.toUpperCase().startsWith("ПАО")
-                ? baseName : "ООО «" + baseName + "»";
-
         CompanyRequisitesParsedData c = new CompanyRequisitesParsedData();
         c.setCompanyName(baseName);
         c.setCompanyShortName(baseName);
-        c.setLegalEntityName(legalName);
-        c.setOwnership(legalName.startsWith("АО") ? "АО" : (legalName.startsWith("ПАО") ? "ПАО" : "ООО"));
+
+        String[] form = deriveOwnershipAndLegalName(baseName);
+        c.setOwnership(form[0]);
+        c.setLegalEntityName(form[1]);
+
         if (!inn.isEmpty()) {
             c.setInn(inn);
         }
         c.setCountry("Россия");
         c.setCity("Москва");
         c.setCompanyDescription(wikiExtract != null && !wikiExtract.isEmpty() ? wikiExtract :
-                "Организация «" + baseName + "» осуществляет профессиональную деятельность на российском рынке. Специализируется на предоставлении качественных услуг и комплексных решений.");
-        c.setWorkingConditions("Официальное трудоустройство по ТК РФ, конкурентная заработная плата, комфортные условия работы, профессиональное развитие.");
-        c.setRawFoundSnippet("Сведения сформированы на основе поискового запроса «" + baseName + "».");
+                "Организация «" + baseName + "». Сведения о сфере деятельности формируются на основе открытых источников.");
+        c.setWorkingConditions("Официальное трудоустройство по ТК РФ, социальный пакет.");
+        c.setRawFoundSnippet("Черновой вариант на основе поискового запроса «" + baseName + "» (требует подтверждения в ЕГРЮЛ).");
         return c;
+    }
+
+    private String[] deriveOwnershipAndLegalName(String baseName) {
+        if (baseName == null || baseName.trim().isEmpty()) {
+            return new String[]{"ООО", "ООО"};
+        }
+        String trimmed = baseName.trim();
+        String upper = trimmed.toUpperCase();
+        for (String prefix : Arrays.asList("ООО", "ПАО", "АО", "ЗАО", "ОАО", "ИП")) {
+            if (upper.startsWith(prefix + " ") || upper.startsWith(prefix + "«") || upper.startsWith(prefix + "\"") || upper.startsWith(prefix + "'") || upper.equals(prefix)) {
+                return new String[]{prefix, trimmed};
+            }
+        }
+        return new String[]{"ООО", "ООО «" + trimmed + "»"};
     }
 
     private String capitalize(String text) {
