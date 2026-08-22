@@ -94,8 +94,10 @@
                       width="100%"
                       spacing="true"
                       align="MIDDLE_CENTER">
-                    <!-- Обёртка аватара: 176×176 -->
+                    <!-- Обёртка аватара: 176×176 правильный круг -->
                     <vbox id="companyLogoPicBox"
+                          width="176px"
+                          height="176px"
                           spacing="false"
                           align="MIDDLE_CENTER">
                         <ovaFallbackImage id="companyLogoFileImage"
@@ -109,7 +111,7 @@
                                           fallbackThemePath="icons/no-company.png"
                                           visible="true"
                                           align="MIDDLE_CENTER"
-                                          stylename="company-editor-logo-image"
+                                          stylename="company-editor-logo-image job-candidate-avatar"
                                           scaleMode="SCALE_DOWN"/>
                     </vbox>
                     <!-- Загрузчик логотипа: файл IMMEDIATE пишется в fileCompanyLogo -->
@@ -803,36 +805,45 @@
                     <tab id="tabCompanyDepartament"
                          caption="mainMsg://msgCompanyDepartament"
                          spacing="true"
-                         expand="companyDepartmentsCard"
+                         expand="companyDepartmentsScroll"
                          stylename="company-departments-tab">
-                        <groupBox id="companyDepartmentsCard"
-                                  caption="msg://msgCompanyDepartmentsSection"
-                                  stylename="edit-card"
-                                  showAsPanel="true"
-                                  width="100%"
-                                  height="100%"
-                                  expand="departmentOfCompanyTable">
-                            <dataGrid id="departmentOfCompanyTable"
-                                      dataContainer="departmentOfCompanyDc"
+                        <scrollBox id="companyDepartmentsScroll"
+                                   width="100%"
+                                   height="100%"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   stylename="edit-workspace edit-workspace-scroll">
+                            <groupBox id="companyDepartmentsCard"
+                                      caption="msg://msgCompanyDepartmentsSection"
+                                      stylename="edit-card"
+                                      showAsPanel="true"
                                       width="100%"
-                                      height="100%">
-                                <actions>
-                                    <action id="create" type="create"/>
-                                    <action id="edit" type="edit"/>
-                                    <action id="remove" type="remove"/>
-                                </actions>
-                                <columns>
-                                    <column id="departamentRuName" property="departamentRuName"/>
-                                    <column id="departamentDirector" property="departamentDirector"/>
-                                    <column id="departamentHrDirector" property="departamentHrDirector"/>
-                                </columns>
-                                <buttonsPanel>
-                                    <button action="departmentOfCompanyTable.create"/>
-                                    <button action="departmentOfCompanyTable.edit"/>
-                                    <button action="departmentOfCompanyTable.remove"/>
-                                </buttonsPanel>
-                            </dataGrid>
-                        </groupBox>
+                                      height="100%"
+                                      minHeight="360px"
+                                      expand="departmentOfCompanyTable">
+                                <dataGrid id="departmentOfCompanyTable"
+                                          dataContainer="departmentOfCompanyDc"
+                                          width="100%"
+                                          height="100%"
+                                          minHeight="280px">
+                                    <actions>
+                                        <action id="create" type="create"/>
+                                        <action id="edit" type="edit"/>
+                                        <action id="remove" type="remove"/>
+                                    </actions>
+                                    <columns>
+                                        <column id="departamentRuName" property="departamentRuName"/>
+                                        <column id="departamentDirector" property="departamentDirector"/>
+                                        <column id="departamentHrDirector" property="departamentHrDirector"/>
+                                    </columns>
+                                    <buttonsPanel>
+                                        <button action="departmentOfCompanyTable.create"/>
+                                        <button action="departmentOfCompanyTable.edit"/>
+                                        <button action="departmentOfCompanyTable.remove"/>
+                                    </buttonsPanel>
+                                </dataGrid>
+                            </groupBox>
+                        </scrollBox>
                     </tab>
                 </tabSheet>
                 <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю. -->

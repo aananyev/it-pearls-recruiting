@@ -47,4 +47,12 @@ public interface CompanySearchAiService {
      * @return обновленная компания
      */
     Company applyCompanyData(Company company, CompanyRequisitesParsedData data);
+
+    /**
+     * Отдельная ветка алгоритма: поиск официального сайта компании и прямое извлечение логотипа из HTML (apple-touch-icon, og:image, header brand logo).
+     *
+     * @param websiteUrl адрес официального сайта компании
+     * @return прямой URL найденного логотипа в высоком качестве или null
+     */
+    String extractLogoFromWebsite(String websiteUrl);
 }

@@ -133,6 +133,17 @@ public class CompanySearchWizardContractTest {
         assertNotNull("Сниппет о статусе данных должен присутствовать", candidate.getRawFoundSnippet());
     }
 
+    @Test
+    public void testWebsiteLogoBranchDiscovery() {
+        CompanySearchAiServiceBean serviceBean = new CompanySearchAiServiceBean();
+        // Проверка защиты от private host
+        String privateResult = serviceBean.extractLogoFromWebsite("http://127.0.0.1:8080");
+        assertNull("Запрос к приватному хосту должен блокироваться", privateResult);
+
+        String invalidResult = serviceBean.extractLogoFromWebsite(null);
+        assertNull("Null URL должен безопасно возвращать null", invalidResult);
+    }
+
     private static String readProjectFile(String relativePath) throws IOException {
         return new String(
                 Files.readAllBytes(projectRoot().resolve(relativePath)),

@@ -94,13 +94,31 @@
       justify-content: center !important;
     }
 
-    // Круглый логотип проекта: border-radius 50% при object-fit FILL (PNG с
-    // прозрачностью), без рамки и тени.
+    // Круглый логотип компании 176×176: правильный круг без обрезки по бокам,
+    // точное вписывание изображения-заглушки и загруженных логотипов.
     .company-editor-logo-image,
-    .company-editor-logo-image.v-embedded {
-      box-sizing: border-box;
+    .company-editor-logo-image.v-embedded,
+    .company-editor-logo-image.v-image,
+    .company-editor-logo-image img,
+    .company-editor-logo-image .v-image-element,
+    .company-editor-logo-image .v-embedded-image {
+      box-sizing: border-box !important;
+      width: 176px !important;
+      height: 176px !important;
+      min-width: 176px !important;
+      min-height: 176px !important;
+      max-width: 176px !important;
+      max-height: 176px !important;
       border-radius: 50% !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      display: block !important;
+    }
+
+    .company-editor-logo-image {
+      margin: 0 auto !important;
       overflow: hidden !important;
+      border-radius: 50% !important;
     }
 
     // Пара кнопок загрузчика логотипа 96×36 — канон контракта §4.1: полупрозрачный
@@ -294,12 +312,26 @@
       max-width: 100%;
     }
 
-    // Таблица вакансий (dataGrid): Grid внутри flex-карточки без min-width: 0
-    // выталкивает ширину за границы вкладки (приём open-position-editor-table-variant5).
-    .v-grid {
-      box-sizing: border-box;
-      min-width: 0 !important;
-      max-width: 100% !important;
+    // Гарантированный вертикальный скроллинг содержимого вкладок
+    .edit-workspace-scroll,
+    .edit-workspace-scroll > .v-scrollable,
+    .v-scrollbox.edit-workspace-scroll,
+    .v-scrollbox.edit-workspace-scroll > .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .edit-workspace-content,
+    .v-verticallayout.edit-workspace-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: min-content !important;
     }
   }
 }

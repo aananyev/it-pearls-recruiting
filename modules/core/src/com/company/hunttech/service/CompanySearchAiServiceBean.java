@@ -215,7 +215,7 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
             }
         }
 
-        // 6. Обогащение описаний, условий и логотипов
+        // 6. Обогащение описаний, условий, официального сайта и логотипов
         for (int i = 0; i < results.size(); i++) {
             CompanyRequisitesParsedData item = results.get(i);
             boolean isMatchingSearch = isNameMatching(item, searchName);
@@ -223,11 +223,29 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                 if ((item.getCompanyDescription() == null || item.getCompanyDescription().trim().isEmpty()) && wikiExtract != null) {
                     item.setCompanyDescription(wikiExtract);
                 }
-                // Применять логотип только к первому подходящему кандидату, исключая дублирование на несвязанные сущности
+                // Применять логотип из Wikipedia только к первому подходящему кандидату
                 if (i == 0 && (item.getLogoUrl() == null || item.getLogoUrl().trim().isEmpty()) && wikiLogo != null) {
                     item.setLogoUrl(wikiLogo);
                 }
             }
+
+            // Отдельная ветка алгоритма: определение официального сайта и прямое извлечение логотипа из HTML сайта
+            if (item.getWebsite() == null || item.getWebsite().trim().isEmpty()) {
+                String inferredSite = inferCompanyWebsite(item.getCompanyName(), item.getCompanyShortName());
+                if (inferredSite != null) {
+                    item.setWebsite(inferredSite);
+                }
+            }
+
+            if (item.getWebsite() != null && !item.getWebsite().trim().isEmpty()) {
+                if (item.getLogoUrl() == null || item.getLogoUrl().trim().isEmpty()) {
+                    String siteLogo = extractLogoFromWebsite(item.getWebsite());
+                    if (siteLogo != null) {
+                        item.setLogoUrl(siteLogo);
+                    }
+                }
+            }
+
             if (item.getWorkingConditions() == null || item.getWorkingConditions().trim().isEmpty()) {
                 item.setWorkingConditions("Оформление по ТК РФ, конкурентная заработная плата, социальный пакет, комфортные условия труда.");
             }
@@ -237,6 +255,118 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
         }
 
         return results;
+    }
+
+    /**
+     * Отдельная ветка алгоритма: поиск официального сайта компании и прямое извлечение логотипа из HTML (apple-touch-icon, og:image, brand SVG/PNG).
+     */
+    @Override
+    public String extractLogoFromWebsite(String websiteUrl) {
+        if (websiteUrl == null || websiteUrl.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            String targetUrl = websiteUrl.trim();
+            if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+                targetUrl = "https://" + targetUrl;
+            }
+            URL baseUrl = new URL(targetUrl);
+            String host = baseUrl.getHost();
+            if (isPrivateHost(host)) {
+                return null;
+            }
+
+            HttpURLConnection conn = (HttpURLConnection) baseUrl.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 HuntTech-HRM/1.0");
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(3000);
+            conn.setInstanceFollowRedirects(true);
+
+            int code = conn.getResponseCode();
+            if (code < 200 || code >= 400) {
+                return null;
+            }
+
+            String contentType = conn.getContentType();
+            if (contentType != null && !contentType.toLowerCase().contains("html")) {
+                return null;
+            }
+
+            StringBuilder html = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                char[] buf = new char[4096];
+                int n;
+                int total = 0;
+                while ((n = reader.read(buf)) != -1 && total < 131072) { // 128 KB
+                    html.append(buf, 0, n);
+                    total += n;
+                }
+            }
+
+            String pageContent = html.toString();
+
+            // 1. Поиск apple-touch-icon (высокое разрешение 180x180 или 192x192)
+            String logo = findPattern(pageContent, "<link[^>]+rel=[\"'](?:apple-touch-icon(?:-precomposed)?|icon)[\"'][^>]+href=[\"']([^\"']+)[\"']");
+            if (logo == null) {
+                logo = findPattern(pageContent, "<link[^>]+href=[\"']([^\"']+)[\"'][^>]+rel=[\"'](?:apple-touch-icon(?:-precomposed)?|icon)[\"']");
+            }
+            // 2. Поиск OpenGraph image
+            if (logo == null) {
+                logo = findPattern(pageContent, "<meta[^>]+property=[\"']og:image[\"'][^>]+content=[\"']([^\"']+)[\"']");
+            }
+            // 3. Поиск <img> с логотипом в разметке
+            if (logo == null) {
+                logo = findPattern(pageContent, "<img[^>]+src=[\"']([^\"']*(?:logo|brand)[^\"']*)[\"']");
+            }
+
+            if (logo != null && !logo.trim().isEmpty()) {
+                logo = logo.trim();
+                if (logo.startsWith("//")) {
+                    logo = baseUrl.getProtocol() + ":" + logo;
+                } else if (logo.startsWith("/")) {
+                    logo = baseUrl.getProtocol() + "://" + baseUrl.getHost() + (baseUrl.getPort() > 0 && baseUrl.getPort() != 80 && baseUrl.getPort() != 443 ? ":" + baseUrl.getPort() : "") + logo;
+                } else if (!logo.startsWith("http://") && !logo.startsWith("https://")) {
+                    logo = new URL(baseUrl, logo).toString();
+                }
+                log.info("Ветка обнаружения логотипа с официального сайта {}: найден URL логотипа {}", targetUrl, logo);
+                return logo;
+            }
+        } catch (Exception e) {
+            log.info("Извлечение логотипа с сайта {} завершилось: {}", websiteUrl, e.getMessage());
+        }
+        return null;
+    }
+
+    private String findPattern(String text, String regex) {
+        try {
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex, java.util.regex.Pattern.CASE_INSENSITIVE);
+            java.util.regex.Matcher matcher = pattern.matcher(text);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private boolean isPrivateHost(String host) {
+        if (host == null || host.trim().isEmpty()) return true;
+        String h = host.trim().toLowerCase();
+        return h.equals("localhost") || h.endsWith(".local") || h.equals("127.0.0.1") || h.startsWith("10.") || h.startsWith("192.168.");
+    }
+
+    private String inferCompanyWebsite(String companyName, String shortName) {
+        String name = shortName != null && !shortName.isEmpty() ? shortName : companyName;
+        if (name == null || name.trim().isEmpty()) return null;
+        String n = name.trim().toLowerCase();
+        if (n.contains("яндекс") || n.contains("yandex")) return "https://yandex.ru";
+        if (n.contains("сбер") || n.contains("sber")) return "https://sberbank.ru";
+        if (n.contains("озон") || n.contains("ozon")) return "https://ozon.ru";
+        if (n.contains("тинькофф") || n.contains("т-банк") || n.contains("t-bank") || n.contains("tbank")) return "https://tbank.ru";
+        if (n.contains("вконтакте") || n.equals("вк") || n.equals("vk")) return "https://vk.company";
+        if (n.contains("хэдхантер") || n.contains("headhunter") || n.equals("hh")) return "https://hh.ru";
+        if (n.contains("ханттек") || n.contains("hunttech")) return "https://hunttech.ru";
+        return null;
     }
 
     private boolean isNameMatching(CompanyRequisitesParsedData item, String searchName) {
