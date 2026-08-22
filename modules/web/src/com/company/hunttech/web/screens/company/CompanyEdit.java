@@ -330,6 +330,22 @@ public class CompanyEdit extends StandardEditor<Company> {
         screen.show();
     }
 
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        updateSidebarTitle();
+    }
+
+    private void updateSidebarTitle() {
+        if (companySidebarTitle != null) {
+            String name = getEditedEntity().getComanyName();
+            if (name != null && !name.trim().isEmpty()) {
+                companySidebarTitle.setValue(name);
+            } else {
+                companySidebarTitle.setValue(messages.getMessage(getClass(), "browseCaption"));
+            }
+        }
+    }
+
     @Subscribe("enhanceCompanyLogoBtn")
     public void onEnhanceCompanyLogoBtnClick(Button.ClickEvent event) {
         Company company = getEditedEntity();
@@ -353,7 +369,8 @@ public class CompanyEdit extends StandardEditor<Company> {
 
             if (processed != null && processed.isProcessed() && processed.getData() != null) {
                 FileDescriptor newDescriptor = metadata.create(FileDescriptor.class);
-                newDescriptor.setName(processed.getName() + "." + processed.getExtension());
+                String uniqueName = processed.getName() + "-" + newDescriptor.getId() + "." + processed.getExtension();
+                newDescriptor.setName(uniqueName);
                 newDescriptor.setExtension(processed.getExtension());
                 newDescriptor.setSize((long) processed.getData().length);
                 newDescriptor.setCreateDate(new java.util.Date());
@@ -363,14 +380,22 @@ public class CompanyEdit extends StandardEditor<Company> {
 
                 company.setFileCompanyLogo(dataContext.merge(committedDescriptor));
 
+                // Удаляем старый замененный дескриптор и файл из хранилища
+                try {
+                    fileStorageService.removeFile(logoDescriptor);
+                    dataManager.remove(logoDescriptor);
+                } catch (Exception ex) {
+                    // non-fatal
+                }
+
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withCaption("Логотип успешно обработан")
                         .withDescription("Улучшено качество, удален фон и выполнено вписывание в круг")
                         .show();
             } else {
                 notifications.create(Notifications.NotificationType.HUMANIZED)
-                        .withCaption("Обработка не требуется")
-                        .withDescription("Изображение уже оптимизировано")
+                        .withCaption("Обработка не выполнена")
+                        .withDescription("Файл не является поддерживаемым растровым изображением или уже оптимизирован")
                         .show();
             }
         } catch (Exception e) {

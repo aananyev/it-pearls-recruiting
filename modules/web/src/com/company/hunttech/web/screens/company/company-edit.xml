@@ -136,11 +136,12 @@
                       spacing="false">
                     <label id="companySidebarTitle"
                            stylename="edit-sidebar-title"
-                           width="100%"/>
+                           width="100%"
+                           value="msg://browseCaption"/>
                 </vbox>
                 <!-- Разделы (label-навигация): 4 вкладки компании -->
                 <vbox id="companyEditorSidebarNavigation"
-                      stylename="label-navigation company-editor-navigation"
+                      stylename="label-navigation"
                       width="100%"
                       spacing="false">
                     <label value="Разделы"

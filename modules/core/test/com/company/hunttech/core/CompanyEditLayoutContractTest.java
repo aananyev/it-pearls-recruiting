@@ -99,7 +99,7 @@ public class CompanyEditLayoutContractTest {
         // Каждый типовой input несёт общий stylename контракта (атрибуты XML
         // многострочные — проверяем id и stylename по отдельности, в пределах
         // 600 символов от открывающего тега поля).
-        String[] controls = {"companyOwnershipField", "comanyNameField",
+        String[] controls = {"companyOwnershipRequisitesField", "comanyNameField",
                 "companyShortNameField", "companyGroupLookupPickerField",
                 "companyDirectorField", "cityOfCompanyField",
                 "regionOfCompanyField", "countryOfCompanyField",
@@ -113,8 +113,8 @@ public class CompanyEditLayoutContractTest {
                     stylenameIdx > idx && stylenameIdx - idx < 600);
         }
 
-        // Captions полей сохранены (1:1 со старым дескриптором).
-        assertTrue(xml.contains("caption=\"mainMsg://msgOwnership\""));
+        // Captions полей сохранены
+        assertTrue(xml.contains("caption=\"Форма собственности\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyName\""));
         assertTrue(xml.contains("caption=\"mainMsg://msgCountryShortName\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyGroup\""));
@@ -211,7 +211,7 @@ public class CompanyEditLayoutContractTest {
         assertTrue(xml.contains("caption=\"mainMsg://msgCompanyDetail\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyDescription\""));
         assertTrue(xml.contains("caption=\"mainMsg://msgCompanyDepartament\""));
-        assertTrue(xml.contains("focusComponent=\"companyOwnershipField\""));
+        assertTrue(xml.contains("focusComponent=\"comanyNameField\""));
 
         // Java: клик по пункту навигации переключает вкладку TabSheet,
         // активный пункт синхронизируется по SelectedTabChange.
