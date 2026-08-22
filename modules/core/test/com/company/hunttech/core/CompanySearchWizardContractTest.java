@@ -129,6 +129,7 @@ public class CompanySearchWizardContractTest {
         assertEquals("Яндекс", candidate.getCompanyName());
         assertEquals("7736207543", candidate.getInn());
         assertNotNull("Логотип должен быть сформирован для кандидата", candidate.getLogoUrl());
+        assertNotNull("Официальный сайт должен быть сформирован для кандидата", candidate.getWebsite());
         assertNotNull("Сниппет о статусе данных должен присутствовать", candidate.getRawFoundSnippet());
     }
 

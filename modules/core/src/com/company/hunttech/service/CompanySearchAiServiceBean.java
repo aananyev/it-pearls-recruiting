@@ -275,6 +275,20 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                 data.setActualAddress(data.getLegalAddress());
                 data.setCountry("Россия");
 
+                String site = textOrNull(root, "site");
+                if (site == null) site = textOrNull(root, "website");
+                if (site == null) site = textOrNull(root, "url");
+                if (site != null) {
+                    if (!site.startsWith("http://") && !site.startsWith("https://")) {
+                        site = "https://" + site;
+                    }
+                    data.setWebsite(site);
+                }
+                data.setEmail(textOrNull(root, "email"));
+                String phone = textOrNull(root, "phone");
+                if (phone == null) phone = textOrNull(root, "tel");
+                data.setPhone(phone);
+
                 String seoName = textOrNull(root, "seo_name");
                 if (seoName != null) {
                     String[] parts = seoName.trim().split("\\s+");
@@ -304,17 +318,38 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
     }
 
     private WikiInfo fetchWikipediaData(String companyName) {
+        if (companyName == null || companyName.trim().isEmpty()) return null;
         try {
-            String encoded = URLEncoder.encode(companyName.trim(), StandardCharsets.UTF_8.name());
-            String url = "https://ru.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=original|thumbnail&pithumbsize=400&titles=" + encoded + "&format=json";
-            String json = fetchHttpText(url, 3000);
-            if (json != null && (json.contains("\"extract\"") || json.contains("\"thumbnail\"") || json.contains("\"original\""))) {
-                JsonNode root = objectMapper.readTree(json);
-                JsonNode pages = root.path("query").path("pages");
-                if (pages.isObject()) {
-                    Iterator<JsonNode> it = pages.elements();
-                    if (it.hasNext()) {
-                        JsonNode page = it.next();
+            String cleanName = companyName.trim();
+            String encoded = URLEncoder.encode(cleanName, StandardCharsets.UTF_8.name());
+            String titleUrl = "https://ru.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=original|thumbnail&pithumbsize=400&titles=" + encoded + "&format=json";
+            WikiInfo info = parseWikiResponse(titleUrl);
+            if (info != null && (info.extract != null || info.logoUrl != null)) {
+                return info;
+            }
+
+            String searchUrl = "https://ru.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=" + encoded + "&gsrlimit=1&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=original|thumbnail&pithumbsize=400&format=json";
+            info = parseWikiResponse(searchUrl);
+            if (info != null && (info.extract != null || info.logoUrl != null)) {
+                return info;
+            }
+        } catch (Exception e) {
+            log.info("Запрос в Wikipedia по названию {} не вернул данных: {}", companyName, e.getMessage());
+        }
+        return null;
+    }
+
+    private WikiInfo parseWikiResponse(String urlStr) {
+        String json = fetchHttpText(urlStr, 3000);
+        if (json == null || !json.contains("\"pages\"")) return null;
+        try {
+            JsonNode root = objectMapper.readTree(json);
+            JsonNode pages = root.path("query").path("pages");
+            if (pages.isObject()) {
+                Iterator<JsonNode> it = pages.elements();
+                while (it.hasNext()) {
+                    JsonNode page = it.next();
+                    if (page.has("pageid") && page.get("pageid").asInt() > 0) {
                         String extract = textOrNull(page, "extract");
                         if (extract != null && extract.length() > 1000) {
                             extract = extract.substring(0, 1000) + "...";
@@ -325,12 +360,13 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
                         } else if (page.has("original") && page.get("original").has("source")) {
                             logoUrl = page.get("original").get("source").asText();
                         }
-                        return new WikiInfo(extract, logoUrl);
+                        if (extract != null || logoUrl != null) {
+                            return new WikiInfo(extract, logoUrl);
+                        }
                     }
                 }
             }
-        } catch (Exception e) {
-            log.info("Запрос в Wikipedia по названию {} не вернул данных: {}", companyName, e.getMessage());
+        } catch (Exception ignored) {
         }
         return null;
     }
