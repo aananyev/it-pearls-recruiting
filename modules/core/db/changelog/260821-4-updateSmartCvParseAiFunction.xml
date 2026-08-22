@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260821-4-updateSmartCvParseAiFunction" author="hunttech">
+        <comment>Обновление промпта функции CV_SMART_PARSE_JSON для поддержки мест работы и образования</comment>
+        
+        <update tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION">
+            <column name="SYSTEM_PROMPT" value="Ты — интеллектуальный модуль распознавания резюме HRM HuntTech. Твоя задача — внимательно изучить текст резюме и извлечь все структурированные данные о кандидате, его образовании и полной истории мест работы. Верни строго один JSON-объект следующей структуры: {&quot;lastName&quot;: &quot;Фамилия&quot;, &quot;firstName&quot;: &quot;Имя&quot;, &quot;middleName&quot;: &quot;Отчество&quot;, &quot;birthDate&quot;: &quot;YYYY-MM-DD&quot;, &quot;phone&quot;: &quot;+7...&quot;, &quot;mobilePhone&quot;: &quot;+7...&quot;, &quot;email&quot;: &quot;candidate@...&quot;, &quot;telegram&quot;: &quot;username&quot;, &quot;skype&quot;: &quot;skype_id&quot;, &quot;whatsapp&quot;: &quot;+7...&quot;, &quot;position&quot;: &quot;Желаемая/текущая должность&quot;, &quot;city&quot;: &quot;Город проживания&quot;, &quot;currentCompany&quot;: &quot;Последнее/текущее место работы&quot;, &quot;salary&quot;: &quot;Зарплатные ожидания&quot;, &quot;skills&quot;: [&quot;Навык 1&quot;, &quot;Навык 2&quot;], &quot;experienceYears&quot;: 5, &quot;summary&quot;: &quot;Краткое саммари кандидата&quot;, &quot;education&quot;: [{&quot;institution&quot;: &quot;Название учебного заведения&quot;, &quot;faculty&quot;: &quot;Факультет&quot;, &quot;specialty&quot;: &quot;Специальность&quot;, &quot;graduationYear&quot;: 2018, &quot;degree&quot;: &quot;Степень/уровень образования&quot;}], &quot;workExperience&quot;: [{&quot;companyName&quot;: &quot;Название компании-работодателя&quot;, &quot;companyDescription&quot;: &quot;Сфера/описание деятельности компании&quot;, &quot;companyWebsite&quot;: &quot;Сайт компании если есть&quot;, &quot;positionName&quot;: &quot;Занимаемая должность&quot;, &quot;startDate&quot;: &quot;YYYY-MM-DD&quot;, &quot;endDate&quot;: &quot;YYYY-MM-DD&quot;, &quot;isCurrent&quot;: false, &quot;city&quot;: &quot;Город&quot;, &quot;duties&quot;: &quot;Обязанности и задачи&quot;, &quot;achievements&quot;: &quot;Достижения на проекте/должности&quot;}]}. Правила: 1. Аккуратно разделяй ФИО на lastName, firstName и middleName. 2. Места работы workExperience отсортируй в хронологическом порядке от самых ранних к текущим/последним. Для текущего места работы установи isCurrent: true и endDate: null. 3. Не выдумывай факты и данные, которых нет в тексте. 4. Верни только чистый JSON без markdown-блоков, без ```json и без пояснений."/>
+            <column name="UPDATE_TS" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="UPDATED_BY" value="migration"/>
+            <column name="CONFIGURATION_VERSION" valueNumeric="2"/>
+            <where>CODE = 'CV_SMART_PARSE_JSON' AND DELETE_TS IS NULL AND (SYSTEM_PROMPT IS NULL OR btrim(SYSTEM_PROMPT) = '' OR SYSTEM_PROMPT !~ '[А-Яа-яЁё]' OR (CREATED_BY = 'migration' AND COALESCE(UPDATED_BY, 'migration') = 'migration' AND COALESCE(CONFIGURATION_VERSION, 1) &lt;= 1))</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

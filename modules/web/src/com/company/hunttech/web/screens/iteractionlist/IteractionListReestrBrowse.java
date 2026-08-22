@@ -140,9 +140,15 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         iteractionListsTable.addGeneratedColumn("candidate", item -> {
             JobCandidate c = item != null ? item.getCandidate() : null;
             String name = (c != null && c.getFullName() != null) ? c.getFullName() : "Без имени";
+            String pos = (c != null && c.getPersonPosition() != null && c.getPersonPosition().getPositionRuName() != null)
+                    ? c.getPersonPosition().getPositionRuName() : null;
             StringBuilder sub = new StringBuilder();
+            if (pos != null && !pos.isEmpty()) {
+                sub.append("💼 ").append(pos);
+            }
             if (c != null) {
                 if (c.getCityOfResidence() != null && c.getCityOfResidence().getCityRuName() != null) {
+                    if (sub.length() > 0) sub.append(" • ");
                     sub.append("📍 ").append(c.getCityOfResidence().getCityRuName());
                 }
                 if (c.getTelegramName() != null && !c.getTelegramName().trim().isEmpty()) {
@@ -153,8 +159,8 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
                     sub.append(c.getEmail().trim());
                 }
             }
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
-                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub.toString() + "</div>" : "") + "</div>";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>" + sub.toString() + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");
@@ -165,9 +171,10 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         iteractionListsTable.addGeneratedColumn("iteractionType", item -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String typeName = (item != null && item.getIteractionType() != null && item.getIteractionType().getIterationName() != null)
                     ? item.getIteractionType().getIterationName() : "Взаимодействие";
-            lbl.setValue("<span style='background: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.25); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + typeName + "</span>");
+            lbl.setValue("<span style='background: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.25); padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block; white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + typeName + "</span>");
             return lbl;
         });
 
@@ -202,8 +209,8 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
             }
             String vName = v.getVacansyName() != null ? v.getVacansyName() : "Вакансия";
             String pName = v.getProjectName() != null ? v.getProjectName().getProjectName() : "";
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px;'>" + vName + "</div>" +
-                    (!pName.isEmpty() ? "<div style='font-size: 11px; color: #64748b;'>📁 " + pName + "</div>" : "") + "</div>";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + vName + "</div>" +
+                    (!pName.isEmpty() ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>📁 " + pName + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");
@@ -239,8 +246,9 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         iteractionListsTable.addGeneratedColumn("recrutier", item -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String recName = (item != null && item.getRecrutier() != null) ? item.getRecrutier().getInstanceName() : "-";
-            lbl.setValue("<span style='font-size: 12px; color: #475569;'>👤 " + (recName != null ? recName : "-") + "</span>");
+            lbl.setValue("<div style='font-size: 12px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>👤 " + (recName != null ? recName : "-") + "</div>");
             return lbl;
         });
 

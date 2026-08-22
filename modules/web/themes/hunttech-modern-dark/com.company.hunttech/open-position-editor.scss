@@ -1682,6 +1682,13 @@
       min-width: 150px !important;
     }
 
+    .open-position-editor-priority-badge-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
+    }
+
     /* Инфокарточка «Информация» (openPositionEditorInfoCard): фон = фон sidebar —
        прозрачный, сквозь карточку виден тот же градиент .edit-sidebar; рамка,
        радиус и тень карточки (edit-accordion-section) сохраняются. */

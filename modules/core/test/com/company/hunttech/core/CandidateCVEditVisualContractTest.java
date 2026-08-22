@@ -53,7 +53,7 @@ public class CandidateCVEditVisualContractTest {
          */
         assertEquals("59a4f65ab467b8e2b0a636d17d476644d4395e2e",
                 gitBlobSha1(readProjectBytes(ENTITY)));
-        assertEquals("62df9c724150a91770ba3eef11f132209108157c",
+        assertEquals("4508385c05dd65631f762fbd023ea6c648dbb6d0",
                 gitBlobSha1(readProjectBytes(VIEWS)));
     }
 
@@ -83,9 +83,9 @@ public class CandidateCVEditVisualContractTest {
                 "textFieldHuntTechCV", "HuntTechCVLink", "fileCVField",
                 "candidatePic", "fileImageFaceUpload",
                 "cvActionsPopupButton",
-                "candidateCVRichTextArea", "cvResomandation",
+                "candidateCVRichTextArea",
                 "questionLetterRichTextArea", "letterRichTextArea", "commentLetterRichTextArea",
-                "letterRecommendation", "rescanResume", "checkSkillFromJD", "skillTreesTable",
+                "letterRecommendation", "skillActionsPopupButton", "skillTreesTable",
                 "cvVbox", "candidateCVHBox", "letterHBox", "letterVbox", "skillBox",
                 "someFilesTable", "datePostField", "editActions"
         );
@@ -217,9 +217,7 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("id=\"candidateCvSkillTreeNav\" caption=\"msg://candidateCvNavSkillTree\" icon=\"font-icon:SITEMAP\""));
         assertTrue(xml.contains("id=\"candidateCvFilesTableNav\" caption=\"msg://candidateCvNavFiles\" icon=\"font-icon:FOLDER_O\""));
         assertTrue(xml.contains("icon=\"font-icon:REPEAT\""));
-        assertTrue(xml.contains("icon=\"font-icon:SEARCH\""));
-        assertTrue(xml.contains("icon=\"font-icon:CHECK\""));
-        assertTrue(xml.contains("icon=\"font-icon:TIMES\""));
+        assertTrue(xml.contains("icon=\"font-icon:MAGIC\""));
 
         assertTrue(controller.contains("syncSidebarSectionNavigation();"));
         assertTrue(controller.contains("candidateCvCandidateNavigation.setVisible(\"tabCandidate\".equals(selectedTabName))"));
@@ -274,11 +272,8 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("<action id=\"lookup\" type=\"picker_lookup\"/>"));
         assertTrue(xml.contains("<action id=\"open\" type=\"picker_open\"/>"));
 
-        for (String invoke : Arrays.asList(
-                "loadToCVTextArea", "rescanCV", "checkSkillFromJD")) {
-            assertTrue("Отсутствует invoke-контракт: " + invoke,
-                    xml.contains("invoke=\"" + invoke + "\""));
-        }
+        assertTrue("Отсутствует invoke-контракт: loadToCVTextArea",
+                xml.contains("invoke=\"loadToCVTextArea\""));
 
         // Действия toolbar «Действия» (popupButton) заменили прежние отдельные invoke-кнопки
         // «Распознавание»/«Преобразовать»/«Исходное»: контракт сохраняется через action id.

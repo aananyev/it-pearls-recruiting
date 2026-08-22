@@ -33,6 +33,7 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     protected void initComponent(CubaImage image) {
         super.initComponent(image);
         ovalDelegate.applyOvalStyle();
+        image.addStyleName("ht-oval-fallback-image");
     }
 
     @Override

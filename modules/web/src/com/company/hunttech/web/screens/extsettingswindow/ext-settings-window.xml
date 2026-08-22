@@ -503,6 +503,99 @@
                     </vbox>
                 </hbox>
             </tab>
+            <tab id="geoApiAccessTab" caption="msg://msgGeoApiSettings" margin="true" spacing="true">
+                <!-- Вкладка Geo-API: двухпанельный интерфейс настроек подключения к гео-сервисам -->
+                <hbox id="geoSettingsMainBox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      expand="geoSettingsContent"
+                      stylename="ai-settings-editor">
+                    <vbox id="geoSettingsSidebar"
+                          width="270px"
+                          height="100%"
+                          spacing="true"
+                          expand="geoSettingsSidebarSpacer"
+                          stylename="ai-settings-sidebar edit-sidebar">
+                        <label value="GEO" align="TOP_LEFT" stylename="ai-settings-mark"/>
+                        <vbox id="geoSettingsSidebarIdentity" width="100%" spacing="false">
+                            <label value="msg://geoSettingsSidebarTitle" width="100%" stylename="h2 ai-settings-sidebar-title"/>
+                            <label value="msg://geoSettingsSidebarDescription" width="100%" stylename="ai-settings-help"/>
+                        </vbox>
+                        <vbox id="geoSettingsNavigation" width="100%" spacing="false" stylename="ai-settings-navigation label-navigation">
+                            <label value="msg://geoSettingsNavigationTitle" width="100%" stylename="ai-settings-navigation-title label-nav-title"/>
+                            <label value="msg://geoSettingsDaDataSection" width="100%" stylename="ai-settings-nav-item ai-settings-nav-item-active label-nav-item label-nav-item-active"/>
+                        </vbox>
+                        <label id="geoSettingsSidebarSpacer"/>
+                        <vbox id="geoSettingsHelpBox" width="100%" spacing="false" stylename="ai-settings-security">
+                            <label value="msg://geoSettingsSecurityHint" width="100%" stylename="ai-settings-help"/>
+                        </vbox>
+                    </vbox>
+                    <vbox id="geoSettingsContent"
+                          width="100%"
+                          height="100%"
+                          spacing="true"
+                          stylename="ai-settings-content edit-workspace">
+                        <hbox id="geoSettingsToolbar"
+                              width="100%"
+                              spacing="true"
+                              expand="geoSettingsTitleBox"
+                              stylename="ai-settings-toolbar edit-toolbar">
+                            <vbox id="geoSettingsTitleBox" width="100%" spacing="false">
+                                <label value="msg://geoSettingsPageTitle" stylename="h1"/>
+                                <label value="msg://geoSettingsPageDescription" width="100%" stylename="ai-settings-help"/>
+                            </vbox>
+                            <buttonsPanel id="geoButtonsPanel" align="BOTTOM_RIGHT" stylename="edit-toolbar-actions">
+                                <button id="testGeoApiBtn"
+                                        caption="msg://msgTestGeoConnection"
+                                        icon="KEY"
+                                        stylename="friendly"
+                                        invoke="onTestGeoApiBtnClick"/>
+                            </buttonsPanel>
+                        </hbox>
+                        <!-- Карточка параметров DaData API -->
+                        <vbox id="geoDaDataCard"
+                              spacing="true"
+                              width="100%"
+                              stylename="ai-settings-card edit-card">
+                            <label value="msg://geoDaDataCardTitle" stylename="h3 ai-settings-card-title edit-card-title"/>
+                            <form id="geoSettingsForm" datasource="userSettingsDs" width="100%">
+                                <column width="100%">
+                                    <passwordField id="geoApiKeyField"
+                                                   property="geoApiKey"
+                                                   caption="msg://msgGeoApiKey"
+                                                   width="100%"
+                                                   stylename="edit-form-control"/>
+                                    <passwordField id="geoApiSecretField"
+                                                   property="geoApiSecret"
+                                                   caption="msg://msgGeoApiSecret"
+                                                   width="100%"
+                                                   stylename="edit-form-control"/>
+                                    <textField id="geoApiUrlField"
+                                               property="geoApiUrl"
+                                               caption="msg://msgGeoApiUrl"
+                                               width="100%"
+                                               stylename="edit-form-control"
+                                               inputPrompt="https://suggestions.dadata.ru/suggestions/api/4_1/rs"/>
+                                </column>
+                            </form>
+                        </vbox>
+                        <!-- Карточка опций автообогащения -->
+                        <vbox id="geoOptionsCard"
+                              spacing="true"
+                              width="100%"
+                              stylename="ai-settings-card edit-card">
+                            <label value="msg://geoOptionsCardTitle" stylename="h3 ai-settings-card-title edit-card-title"/>
+                            <checkBox id="geoAutoFetchFlagsField"
+                                      datasource="userSettingsDs"
+                                      property="geoAutoFetchFlags"
+                                      caption="msg://msgGeoAutoFetchFlags"
+                                      stylename="ai-settings-preference-checkbox"/>
+                            <label value="msg://msgGeoAutoFetchFlagsHint" width="100%" stylename="ai-settings-help"/>
+                        </vbox>
+                    </vbox>
+                </hbox>
+            </tab>
         </tabSheet>
         <vbox id="buttons" margin="true;false;false;false" stylename="ext-settings-footer">
             <buttonsPanel><button id="okBtn" icon="icons/ok.png"/><button id="cancelBtn" icon="icons/cancel.png"/></buttonsPanel>

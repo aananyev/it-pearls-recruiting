@@ -852,7 +852,7 @@
                               spacing="true"
                               width="100%"
                               stylename="open-position-editor-field-row open-position-editor-row-half">
-<!-- Приоритет позиции (обязательный): влияет на сортировку и срочные списки. -->
+<!-- Приоритет позиции (обязательный) с визуальным цветовым бейджем-значком. -->
                             <lookupField id="priorityField"
                                          dataContainer="openPositionDc"
                                          property="priority"
@@ -862,6 +862,13 @@
                                          align="BOTTOM_LEFT"
                                          stylename="edit-form-control open-position-editor-priority-field"
                                          width="AUTO"/>
+                            <label id="priorityBadgeLabel"
+                                   htmlEnabled="true"
+                                   descriptionAsHtml="true"
+                                   align="BOTTOM_LEFT"
+                                   stylename="open-position-editor-priority-badge-label"
+                                   width="30px"
+                                   height="32px"/>
 <!-- Формат удалённой работы (remoteWork, обязательный). -->
                             <lookupField id="remoteWorkField"
                                          dataContainer="openPositionDc"

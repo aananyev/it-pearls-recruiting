@@ -108,6 +108,29 @@
       overflow: hidden;
     }
 
+    /* Прямоугольный флаг государства (CountryEdit): 200×120 со скруглением 6px без обрезки */
+    .country-flag-rectangular-image {
+      box-sizing: border-box;
+      width: 200px !important;
+      height: 120px !important;
+      min-width: 200px !important;
+      min-height: 120px !important;
+      max-width: 200px !important;
+      max-height: 120px !important;
+      border-radius: 6px !important;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+
+    .country-flag-rectangular-image img,
+    .country-flag-rectangular-image .v-image-element {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+    }
+
     // Компактная сводка sidebar (регион города) в тёмной палитре.
     .edit-sidebar-summary {
       box-sizing: border-box;

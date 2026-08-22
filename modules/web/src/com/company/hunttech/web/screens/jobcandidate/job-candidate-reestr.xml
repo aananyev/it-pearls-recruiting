@@ -138,9 +138,9 @@
             <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="candidatesTableCard" margin="true,true,true,false">
                 
                 <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
                     <!-- Левая группа основных действий: Создать кандидата, Умная загрузка (с выпадающим списком форматов), Редактировать, Удалить -->
-                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
                         <popupButton id="quickLoadCV"
                                      caption="Умная загрузка"
@@ -156,13 +156,10 @@
                         </popupButton>
                         <button id="editCandidateToolbarBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
                         <button id="removeCandidateToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
-                    </hbox>
-
-                    <!-- Распорка для выравнивания правых кнопок по правому краю -->
-                    <hbox id="toolbarSpacer" width="100%"/>
+                    </cssLayout>
 
                     <!-- Правая группа фильтров и сервисных действий: Фильтр кандидатов, Фильтр по меткам, Метки, Действия -->
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
                         <popupButton id="candidatesFilterPopupButton"
                                      caption="Все кандидаты"
                                      icon="USERS"
@@ -209,8 +206,8 @@
                                 <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
                             </actions>
                         </popupButton>
-                    </hbox>
-                </hbox>
+                    </cssLayout>
+                </cssLayout>
 
                 <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
                 <filter id="filter"

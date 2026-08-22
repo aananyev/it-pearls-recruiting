@@ -1,7 +1,9 @@
 package com.company.hunttech.web.screens.extuser;
 
 import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.service.TelegramIntegrationService;
 import com.haulmont.bali.util.ParamsMap;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.app.security.user.edit.UserEditor;
@@ -10,9 +12,12 @@ import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.FieldGroup;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TabSheet;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.security.entity.User;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -20,15 +25,20 @@ import java.util.List;
 
 /**
  * Расширяет штатный редактор пользователя CUBA presentation-навигацией по вкладкам
- * правой части экрана и запуском стандартного диалога смены пароля HRM HuntTech.
+ * правой части экрана, интеграцией с Telegram для загрузки аватарок и запуском диалога смены пароля.
  */
 public class ExtUserEditor extends UserEditor {
+
+    private static final Logger log = LoggerFactory.getLogger(ExtUserEditor.class);
 
     private static final String ACTIVE_NAV_STYLE = "label-nav-item-active";
 
     private static final String GENERAL_TAB = "generalSettingsTab";
     private static final String EMAIL_TAB = "emailSettingsTab";
     private static final String AI_TAB = "aiSettingsTab";
+
+    @Inject
+    private TelegramIntegrationService telegramIntegrationService;
 
     @Inject
     private Button changePasswordBtn;
@@ -58,6 +68,11 @@ public class ExtUserEditor extends UserEditor {
     private Label<String> loginDetailLabel;
     @Inject
     private Label<String> positionDetailLabel;
+
+    @Inject
+    private TextField<String> telegramField;
+    @Inject
+    private Button fetchTelegramPhotoBtn;
 
     @Inject
     private FieldGroup contactsFieldGroup;
@@ -106,7 +121,75 @@ public class ExtUserEditor extends UserEditor {
         // Sidebar-лейблы профиля (ФИО, login, статус, Email, должность) заполняются из userDs;
         // при смене item (открытие другого пользователя, переcommit) значения обновляются повторно.
         userDs.addItemChangeListener(e -> refreshProfileLabels());
+        if (telegramField != null) {
+            telegramField.addValueChangeListener(e -> refreshProfileLabels());
+        }
         refreshProfileLabels();
+    }
+
+    /**
+     * Загружает фотографию пользователя из Telegram по указанному Telegram ID или @username
+     * и сохраняет её в профиль пользователя (officialPhoto / userAvatar).
+     */
+    public void fetchTelegramPhoto() {
+        User user = getItem();
+        String userLogin = user != null ? user.getLogin() : "unknown";
+        log.info("fetchTelegramPhoto action triggered for user: '{}'", userLogin);
+
+        if (!(user instanceof ExtUser)) {
+            log.warn("fetchTelegramPhoto: user entity is not an instance of ExtUser (login='{}')", userLogin);
+            showNotification(String.format(getMessage("msgTelegramPhotoError"), "пользователь не является ExtUser"), NotificationType.WARNING);
+            return;
+        }
+
+        ExtUser extUser = (ExtUser) user;
+        String rawTelegram = telegramField != null && StringUtils.isNotBlank(telegramField.getValue())
+                ? telegramField.getValue()
+                : extUser.getTelegram();
+
+        if (StringUtils.isBlank(rawTelegram)) {
+            log.warn("fetchTelegramPhoto: Telegram field is empty for user '{}'", userLogin);
+            showNotification(getMessage("msgTelegramPhotoEmpty"), NotificationType.WARNING);
+            return;
+        }
+
+        String telegramIdentifier = rawTelegram.trim();
+        log.info("fetchTelegramPhoto: requesting photo for Telegram identifier '{}' (user '{}')",
+                telegramIdentifier, userLogin);
+
+        if (!telegramIntegrationService.isConfigured()) {
+            log.warn("fetchTelegramPhoto: TelegramIntegrationService is not configured or bot disabled");
+            showNotification(getMessage("msgTelegramNotConfigured"), NotificationType.ERROR);
+            return;
+        }
+
+        try {
+            String safeLogin = extUser.getLogin() != null
+                    ? extUser.getLogin().replaceAll("[^a-zA-Z0-9_.-]", "_")
+                    : "user";
+            String fileName = "user_avatar_" + safeLogin + "_" + System.currentTimeMillis() + ".jpg";
+            log.info("Calling TelegramIntegrationService.saveUserProfilePhotoToFileStorage('{}', '{}')",
+                    telegramIdentifier, fileName);
+
+            FileDescriptor photoFd = telegramIntegrationService.saveUserProfilePhotoToFileStorage(telegramIdentifier, fileName);
+
+            if (photoFd != null) {
+                log.info("Telegram profile photo successfully saved: FileDescriptor ID={}, name='{}', size={} bytes",
+                        photoFd.getId(), photoFd.getName(), photoFd.getSize());
+
+                extUser.setOfficialPhoto(photoFd);
+                extUser.setUserAvatar(photoFd);
+
+                refreshProfileLabels();
+                showNotification(getMessage("msgTelegramPhotoSuccess"), NotificationType.HUMANIZED);
+            } else {
+                log.warn("Telegram photo not found or failed to download for identifier '{}'", telegramIdentifier);
+                showNotification(getMessage("msgTelegramPhotoNotFound"), NotificationType.WARNING);
+            }
+        } catch (Exception e) {
+            log.error("Exception during fetchTelegramPhoto for identifier '{}': {}", telegramIdentifier, e.getMessage(), e);
+            showNotification(String.format(getMessage("msgTelegramPhotoError"), e.getMessage()), NotificationType.ERROR);
+        }
     }
 
     /**
@@ -223,7 +306,9 @@ public class ExtUserEditor extends UserEditor {
             positionDetailLabel.setValue(user.getPosition() != null && !user.getPosition().trim().isEmpty() ? user.getPosition() : "-");
         }
         if (telegramLabel != null) {
-            String tg = user instanceof ExtUser ? ((ExtUser) user).getTelegram() : null;
+            String tg = telegramField != null && StringUtils.isNotBlank(telegramField.getValue())
+                    ? telegramField.getValue()
+                    : (user instanceof ExtUser ? ((ExtUser) user).getTelegram() : null);
             if (StringUtils.isNotBlank(tg)) {
                 String cleanTg = tg.trim();
                 telegramLabel.setValue(cleanTg.startsWith("@") ? cleanTg : "@" + cleanTg);
@@ -261,3 +346,4 @@ public class ExtUserEditor extends UserEditor {
         return sb.length() > 0 ? sb.toString() : user.getLogin();
     }
 }
+

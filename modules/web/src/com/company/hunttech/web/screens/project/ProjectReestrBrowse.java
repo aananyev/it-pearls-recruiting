@@ -117,7 +117,7 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
             image.setStyleName("icon-no-border-20px");
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (project.getProjectLogo() != null) {
+            if (project != null && project.getProjectLogo() != null) {
                 image.setSource(FileDescriptorResource.class).setFileDescriptor(project.getProjectLogo());
             } else {
                 image.setSource(ThemeResource.class).setPath("icons/no-company.png");
@@ -128,32 +128,42 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         });
 
         projectsTable.addGeneratedColumn("projectName", project -> {
-            HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
-            retHBox.setWidthFull();
-            retHBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            retHBox.setHeightFull();
-            retHBox.setSpacing(true);
-
+            String name = (project != null && project.getProjectName() != null) ? project.getProjectName() : "Без названия";
+            
             // Бейдж «Новый»
+            boolean isNew = false;
             GregorianCalendar gregorianCalendar = new GregorianCalendar();
             gregorianCalendar.setTime(new Date());
             gregorianCalendar.add(Calendar.DAY_OF_MONTH, -14);
-            if (project.getStartProjectDate() != null && project.getStartProjectDate().after(gregorianCalendar.getTime())) {
-                Label newBadge = uiComponents.create(Label.class);
-                newBadge.setHtmlEnabled(true);
-                newBadge.setValue("<span style='background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 700;'>НОВЫЙ</span>");
-                newBadge.setAlignment(Component.Alignment.MIDDLE_LEFT);
-                retHBox.add(newBadge);
+            if (project != null && project.getStartProjectDate() != null && project.getStartProjectDate().after(gregorianCalendar.getTime())) {
+                isNew = true;
             }
 
-            Label nameLabel = uiComponents.create(Label.class);
-            nameLabel.setValue(project.getProjectName() != null ? project.getProjectName() : "");
-            nameLabel.setStyleName("bold");
-            nameLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            retHBox.add(nameLabel);
-            retHBox.expand(nameLabel);
+            StringBuilder sub = new StringBuilder();
+            if (project != null && project.getProjectDepartment() != null) {
+                if (project.getProjectDepartment().getDepartamentRuName() != null) {
+                    sub.append("📁 ").append(project.getProjectDepartment().getDepartamentRuName());
+                }
+                if (project.getProjectDepartment().getCompanyName() != null) {
+                    String compName = project.getProjectDepartment().getCompanyName().getComanyName() != null ?
+                            project.getProjectDepartment().getCompanyName().getComanyName() :
+                            project.getProjectDepartment().getCompanyName().getCompanyShortName();
+                    if (compName != null && !compName.isEmpty()) {
+                        if (sub.length() > 0) sub.append(" • ");
+                        sub.append("🏢 ").append(compName);
+                    }
+                }
+            }
 
-            return retHBox;
+            String badgeHtml = isNew ? "<span style='background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px; font-size: 9.5px; font-weight: 700; margin-right: 6px;'>НОВЫЙ</span>" : "";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + badgeHtml + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>" + sub.toString() + "</div>" : "") + "</div>";
+
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
         });
 
         projectsTable.addGeneratedColumn("projectStatus", project -> {
@@ -166,14 +176,33 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
             label.setHtmlEnabled(true);
             label.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (Boolean.TRUE.equals(project.getProjectIsClosed())) {
-                label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыт</span>");
+            if (project != null && Boolean.TRUE.equals(project.getProjectIsClosed())) {
+                label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>Закрыт</span>");
             } else {
-                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыт</span>");
+                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>Открыт</span>");
             }
 
             box.add(label);
             return box;
+        });
+
+        projectsTable.addGeneratedColumn("projectDates", project -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
+            String start = (project != null && project.getStartProjectDate() != null) ? DATE_FORMAT.format(project.getStartProjectDate()) : "—";
+            String end = (project != null && project.getEndProjectDate() != null) ? DATE_FORMAT.format(project.getEndProjectDate()) : "—";
+            lbl.setValue("<div style='font-size: 11.5px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>📅 " + start + " – " + end + "</div>");
+            return lbl;
+        });
+
+        projectsTable.addGeneratedColumn("projectOwner", project -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
+            String ownerName = (project != null && project.getProjectOwner() != null) ? project.getProjectOwner().getInstanceName() : "-";
+            lbl.setValue("<div style='font-size: 12px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>👤 " + (ownerName != null ? ownerName : "-") + "</div>");
+            return lbl;
         });
 
         projectsTable.addGeneratedColumn("openPositionsCountColumn", project -> {

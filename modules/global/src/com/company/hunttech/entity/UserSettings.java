@@ -192,6 +192,50 @@ public class UserSettings extends StandardEntity {
         this.pop3Server = pop3Server;
     }
 
+    @Column(name = "GEO_API_KEY", length = 255)
+    private String geoApiKey;
+
+    @Column(name = "GEO_API_SECRET", length = 255)
+    private String geoApiSecret;
+
+    @Column(name = "GEO_API_URL", length = 255)
+    private String geoApiUrl;
+
+    @Column(name = "GEO_AUTO_FETCH_FLAGS")
+    private Boolean geoAutoFetchFlags = true;
+
+    public String getGeoApiKey() {
+        return geoApiKey;
+    }
+
+    public void setGeoApiKey(String geoApiKey) {
+        this.geoApiKey = geoApiKey;
+    }
+
+    public String getGeoApiSecret() {
+        return geoApiSecret;
+    }
+
+    public void setGeoApiSecret(String geoApiSecret) {
+        this.geoApiSecret = geoApiSecret;
+    }
+
+    public String getGeoApiUrl() {
+        return geoApiUrl;
+    }
+
+    public void setGeoApiUrl(String geoApiUrl) {
+        this.geoApiUrl = geoApiUrl;
+    }
+
+    public Boolean getGeoAutoFetchFlags() {
+        return geoAutoFetchFlags;
+    }
+
+    public void setGeoAutoFetchFlags(Boolean geoAutoFetchFlags) {
+        this.geoAutoFetchFlags = geoAutoFetchFlags;
+    }
+
     public String getSmtpServer() {
         return smtpServer;
     }

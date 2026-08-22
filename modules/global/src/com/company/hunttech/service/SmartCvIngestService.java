@@ -1,5 +1,6 @@
 package com.company.hunttech.service;
 
+import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.JobCandidate;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -36,4 +37,9 @@ public interface SmartCvIngestService {
      * Привязка новой версии резюме к уже существующему кандидату (без затирания старых данных).
      */
     SmartCvIngestResult attachCvToExistingCandidate(UUID existingCandidateId, SmartCvParsedData data, FileDescriptor fileDescriptor, FileDescriptor faceImage, ExtUser recruiter);
+
+    /**
+     * Применение распознанных данных к существующей карточке резюме CandidateCV (заполнение полей, мест работы JobHistory, образования).
+     */
+    SmartCvIngestResult applyParsedDataToCandidateCv(CandidateCV candidateCv, SmartCvParsedData data, ExtUser recruiter);
 }

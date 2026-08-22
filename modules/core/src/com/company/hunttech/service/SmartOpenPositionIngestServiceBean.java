@@ -299,7 +299,8 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setNumberPosition(data.getNumberPosition() != null ? data.getNumberPosition() : 1);
             openPosition.setSalaryMin(data.getSalaryMin());
             openPosition.setSalaryMax(data.getSalaryMax());
-            openPosition.setPriority(data.getPriority() != null ? data.getPriority() : 2);
+            // Все вакансии, созданные через умную ИИ-загрузку, получают статус «На проверку» (-2)
+            openPosition.setPriority(OpenPositionPriority.UNDER_REVIEW.getId());
             openPosition.setComment(data.getComment() != null ? data.getComment() : data.getRawText());
             openPosition.setShortDescription(data.getShortDescription() != null && data.getShortDescription().length() <= 250
                     ? data.getShortDescription() : (openPosition.getVacansyName().length() <= 250 ? openPosition.getVacansyName() : openPosition.getVacansyName().substring(0, 250)));

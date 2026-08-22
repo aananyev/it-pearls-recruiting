@@ -131,20 +131,19 @@ description: >-
             <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
             <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
                 
-                <!-- Командный тулбар -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
-                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                <!-- Командный тулбар (адаптивный Flexbox на cssLayout) -->
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createBtn" caption="Создать" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
                         <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
                         <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" enabled="false"/>
                         <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" enabled="false"/>
-                    </hbox>
-                    <hbox id="toolbarSpacer" width="100%"/>
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                    </cssLayout>
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
                         <popupButton id="filterPopupButton" caption="Все записи" icon="FILTER" stylename="secondary candidate-btn"/>
                         <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn"/>
-                    </hbox>
-                </hbox>
+                    </cssLayout>
+                </cssLayout>
 
                 <!-- Generic Filter -->
                 <filter id="filter" applyTo="entitiesTable" dataLoader="entitiesDl" defaultMode="generic" width="100%" collapsable="true" collapsed="true" stylename="candidate-generic-filter">
@@ -265,7 +264,7 @@ private String fetchTextFromUrl(String urlString) throws Exception {
 2. **Безопасность геттеров**:
    Все свойства, читаемые в генераторах колонок или сайдбаре (`grade`, `projectName.projectDepartment.companyName`), декларируются во `<view>`.
 3. **Генераторы колонок**:
-   - `priority` — цветная иконка `Image` (18x18px) без текста с `setDescription(...)`.
+   - `priority` — векторный SVG/HTML индикатор (22x22px) с мягким фоновым свечением, уникальной геометрической пиктограммой для каждого уровня (восклицательный знак, стрелка вверх/вниз, точка, пауза, карандаш) и тултипом.
    - `salary` — максимум по ТК (`до 250 000 ₽`), либо `По запросу кандидата`, либо `Не определено`.
    - `mainSkills` — цветные чипы (до 3 шт. + бейдж `+N`).
    - `statusBadge` — бейдж `Открыта` (зеленый) / `Закрыта` (красный).

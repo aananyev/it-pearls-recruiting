@@ -11,7 +11,10 @@
             <view extends="project-browse-view">
                 <property name="projectDepartment" view="_minimal">
                     <property name="departamentRuName"/>
-                    <property name="companyName" view="_minimal"/>
+                    <property name="companyName" view="_minimal">
+                        <property name="comanyName"/>
+                        <property name="companyShortName"/>
+                    </property>
                 </property>
                 <property name="projectOwner" view="_minimal">
                     <property name="firstName"/>
@@ -158,13 +161,11 @@
                         </actions>
                         <columns>
                             <column id="projectLogoColumn" caption="Лого" width="50px" sortable="false"/>
-                            <column id="projectName" caption="Наименование проекта" expandRatio="2"/>
-                            <column id="projectStatus" caption="Статус" width="100px" sortable="false"/>
-                            <column id="startProjectDate" caption="Дата старта" width="110px"/>
-                            <column id="endProjectDate" caption="Дата окончания" width="120px"/>
-                            <column id="projectDepartment" caption="Департамент / Компания" expandRatio="1"/>
-                            <column id="projectOwner" caption="Куратор" width="160px"/>
-                            <column id="openPositionsCountColumn" caption="Вакансии" width="90px" sortable="false"/>
+                            <column id="projectName" caption="Проект" expandRatio="2"/>
+                            <column id="projectStatus" caption="Статус" width="95px" sortable="false"/>
+                            <column id="projectDates" caption="Сроки проекта" width="150px" sortable="false"/>
+                            <column id="projectOwner" caption="Куратор" width="155px"/>
+                            <column id="openPositionsCountColumn" caption="Вакансии" width="95px" sortable="false"/>
                         </columns>
                         <rowsCount/>
                     </groupTable>

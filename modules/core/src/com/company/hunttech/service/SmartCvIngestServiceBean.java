@@ -179,6 +179,39 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                     }
                     data.setSkills(skillsList);
                 }
+
+                if (root.has("workExperience") && root.get("workExperience").isArray()) {
+                    List<com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto> expList = new ArrayList<>();
+                    for (JsonNode wn : root.get("workExperience")) {
+                        com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto dto = new com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto();
+                        if (wn.hasNonNull("companyName")) dto.setCompanyName(wn.get("companyName").asText().trim());
+                        if (wn.hasNonNull("companyDescription")) dto.setCompanyDescription(wn.get("companyDescription").asText().trim());
+                        if (wn.hasNonNull("companyWebsite")) dto.setCompanyWebsite(wn.get("companyWebsite").asText().trim());
+                        if (wn.hasNonNull("positionName")) dto.setPositionName(wn.get("positionName").asText().trim());
+                        if (wn.hasNonNull("startDate")) dto.setStartDate(wn.get("startDate").asText().trim());
+                        if (wn.hasNonNull("endDate")) dto.setEndDate(wn.get("endDate").asText().trim());
+                        if (wn.hasNonNull("isCurrent")) dto.setIsCurrent(wn.get("isCurrent").asBoolean());
+                        if (wn.hasNonNull("city")) dto.setCity(wn.get("city").asText().trim());
+                        if (wn.hasNonNull("duties")) dto.setDuties(wn.get("duties").asText().trim());
+                        if (wn.hasNonNull("achievements")) dto.setAchievements(wn.get("achievements").asText().trim());
+                        expList.add(dto);
+                    }
+                    data.setWorkExperience(expList);
+                }
+
+                if (root.has("education") && root.get("education").isArray()) {
+                    List<com.company.hunttech.service.dto.cv.SmartCvEducationDto> eduList = new ArrayList<>();
+                    for (JsonNode en : root.get("education")) {
+                        com.company.hunttech.service.dto.cv.SmartCvEducationDto dto = new com.company.hunttech.service.dto.cv.SmartCvEducationDto();
+                        if (en.hasNonNull("institution")) dto.setInstitution(en.get("institution").asText().trim());
+                        if (en.hasNonNull("faculty")) dto.setFaculty(en.get("faculty").asText().trim());
+                        if (en.hasNonNull("specialty")) dto.setSpecialty(en.get("specialty").asText().trim());
+                        if (en.hasNonNull("graduationYear")) dto.setGraduationYear(en.get("graduationYear").asInt());
+                        if (en.hasNonNull("degree")) dto.setDegree(en.get("degree").asText().trim());
+                        eduList.add(dto);
+                    }
+                    data.setEducation(eduList);
+                }
             } catch (Exception e) {
                 log.error("Ошибка парсинга JSON ответа AI: " + e.getMessage(), e);
             }
@@ -291,19 +324,11 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         candidate.setFileImageFace(faceImage);
 
         if (data.getBirthDate() != null && !data.getBirthDate().isEmpty()) {
-            try {
-                String bd = data.getBirthDate().trim();
-                SimpleDateFormat sdf = bd.contains("-")
-                        ? new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT)
-                        : new SimpleDateFormat("dd.MM.yyyy", Locale.ROOT);
-                candidate.setBirdhDate(sdf.parse(bd));
-            } catch (Exception e) {
-                log.warn("Некорректный формат даты рождения '{}': {}", data.getBirthDate(), e.getMessage());
-            }
+            candidate.setBirdhDate(parseDateSafe(data.getBirthDate()));
         }
 
-        // Разрешение подчиненных справочников
-        Position position = resolvePosition(data.getPosition(), commitContext);
+        // Поиск существующей должности (без автосоздания: если нет - null + нотификация)
+        Position position = findExistingPosition(data.getPosition(), data);
         if (position != null) {
             candidate.setPersonPosition(position);
         }
@@ -313,7 +338,7 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
             candidate.setCityOfResidence(city);
         }
 
-        Company company = resolveCompany(data.getCurrentCompany(), commitContext);
+        Company company = resolveCompanyByName(data.getCurrentCompany(), commitContext);
         if (company != null) {
             candidate.setCurrentCompany(company);
         }
@@ -332,13 +357,16 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         cv.setOwner(recruiter);
         commitContext.addInstanceToCommit(cv);
 
+        // Создание мест работы (JobHistory)
+        createJobHistoryRecords(candidate, data, commitContext);
+
         // Создание CandidateSkills
         if (data.getSkills() != null && !data.getSkills().isEmpty()) {
             Set<UUID> addedSkills = new HashSet<>();
             for (String sName : data.getSkills()) {
                 SkillTree skill = resolveSkill(sName, commitContext);
                 if (skill != null && addedSkills.add(skill.getId())) {
-                    CandidateSkill cs = metadata.create(CandidateSkill.class);
+                    com.company.hunttech.entity.CandidateSkill cs = metadata.create(com.company.hunttech.entity.CandidateSkill.class);
                     cs.setCandidate(candidate);
                     cs.setSkill(skill);
                     cs.setPriority(CandidateSkillPriority.MAIN);
@@ -399,9 +427,16 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
             }
         }
         if (existing.getCurrentCompany() == null && data.getCurrentCompany() != null) {
-            Company company = resolveCompany(data.getCurrentCompany(), commitContext);
+            Company company = resolveCompanyByName(data.getCurrentCompany(), commitContext);
             if (company != null) {
                 existing.setCurrentCompany(company);
+                updated = true;
+            }
+        }
+        if (existing.getPersonPosition() == null && data.getPosition() != null) {
+            Position pos = findExistingPosition(data.getPosition(), data);
+            if (pos != null) {
+                existing.setPersonPosition(pos);
                 updated = true;
             }
         }
@@ -417,7 +452,7 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         // Создаем новую версию CandidateCV
         CandidateCV cv = metadata.create(CandidateCV.class);
         cv.setCandidate(existing);
-        cv.setResumePosition(resolvePosition(data.getPosition(), commitContext));
+        cv.setResumePosition(findExistingPosition(data.getPosition(), data));
         cv.setTextCV(data.getRawText() != null ? data.getRawText() : "");
         cv.setFileCV(fileDescriptor);
         cv.setOriginalFileCV(fileDescriptor);
@@ -425,6 +460,9 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         cv.setDatePost(new Date());
         cv.setOwner(recruiter);
         commitContext.addInstanceToCommit(cv);
+
+        // Создание мест работы (JobHistory)
+        createJobHistoryRecords(existing, data, commitContext);
 
         // Добавляем новое взаимодействие об обновлении резюме
         Iteraction interactionType = resolveNewCandidateInteractionType();
@@ -447,6 +485,217 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         return SmartCvIngestResult.success(existing, cv, data, missing, null);
     }
 
+    @Override
+    public SmartCvIngestResult applyParsedDataToCandidateCv(CandidateCV candidateCv, SmartCvParsedData data, ExtUser recruiter) {
+        if (candidateCv == null || data == null) {
+            return SmartCvIngestResult.error("Карточка резюме или данные для применения не заданы");
+        }
+
+        JobCandidate candidate = candidateCv.getCandidate();
+        CommitContext commitContext = new CommitContext();
+
+        if (candidate != null) {
+            boolean updated = false;
+            if (candidate.getFirstName() == null || candidate.getFirstName().isEmpty() || "Кандидат".equals(candidate.getFirstName())) {
+                if (data.getFirstName() != null && !data.getFirstName().isEmpty()) {
+                    candidate.setFirstName(data.getFirstName());
+                    updated = true;
+                }
+            }
+            if (candidate.getSecondName() == null || candidate.getSecondName().isEmpty() || "Новый".equals(candidate.getSecondName())) {
+                if (data.getLastName() != null && !data.getLastName().isEmpty()) {
+                    candidate.setSecondName(data.getLastName());
+                    updated = true;
+                }
+            }
+            if (candidate.getMiddleName() == null && data.getMiddleName() != null) {
+                candidate.setMiddleName(data.getMiddleName());
+                updated = true;
+            }
+            if (updated) {
+                candidate.setFullName(candidate.getSecondName() + " " + candidate.getFirstName() + (candidate.getMiddleName() != null ? " " + candidate.getMiddleName() : ""));
+            }
+            if (candidate.getPhone() == null && data.getPhone() != null) {
+                candidate.setPhone(data.getPhone());
+                updated = true;
+            }
+            if (candidate.getMobilePhone() == null && data.getMobilePhone() != null) {
+                candidate.setMobilePhone(data.getMobilePhone());
+                updated = true;
+            }
+            if (candidate.getEmail() == null && data.getEmail() != null) {
+                candidate.setEmail(data.getEmail());
+                updated = true;
+            }
+            if (candidate.getTelegramName() == null && data.getTelegram() != null) {
+                candidate.setTelegramName(data.getTelegram());
+                updated = true;
+            }
+            if (candidate.getCityOfResidence() == null && data.getCity() != null) {
+                City city = resolveCity(data.getCity(), commitContext);
+                if (city != null) {
+                    candidate.setCityOfResidence(city);
+                    updated = true;
+                }
+            }
+            if (candidate.getCurrentCompany() == null && data.getCurrentCompany() != null) {
+                Company company = resolveCompanyByName(data.getCurrentCompany(), commitContext);
+                if (company != null) {
+                    candidate.setCurrentCompany(company);
+                    updated = true;
+                }
+            }
+            if (candidate.getPersonPosition() == null && data.getPosition() != null) {
+                Position pos = findExistingPosition(data.getPosition(), data);
+                if (pos != null) {
+                    candidate.setPersonPosition(pos);
+                    updated = true;
+                }
+            }
+            if (candidate.getBirdhDate() == null && data.getBirthDate() != null) {
+                Date bd = parseDateSafe(data.getBirthDate());
+                if (bd != null) {
+                    candidate.setBirdhDate(bd);
+                    updated = true;
+                }
+            }
+
+            if (updated) {
+                commitContext.addInstanceToCommit(candidate);
+            }
+
+            // Места работы (JobHistory)
+            createJobHistoryRecords(candidate, data, commitContext);
+
+            // Навыки кандидата
+            if (data.getSkills() != null && !data.getSkills().isEmpty()) {
+                Set<UUID> addedSkills = new HashSet<>();
+                for (String sName : data.getSkills()) {
+                    SkillTree skill = resolveSkill(sName, commitContext);
+                    if (skill != null && addedSkills.add(skill.getId())) {
+                        com.company.hunttech.entity.CandidateSkill cs = metadata.create(com.company.hunttech.entity.CandidateSkill.class);
+                        cs.setCandidate(candidate);
+                        cs.setSkill(skill);
+                        cs.setPriority(CandidateSkillPriority.MAIN);
+                        commitContext.addInstanceToCommit(cs);
+                    }
+                }
+            }
+        }
+
+        // Обновление CandidateCV
+        Position resumePos = findExistingPosition(data.getPosition(), data);
+        if (resumePos != null && candidateCv.getResumePosition() == null) {
+            candidateCv.setResumePosition(resumePos);
+        }
+        if (candidateCv.getTextCV() == null || candidateCv.getTextCV().trim().isEmpty()) {
+            if (data.getRawText() != null && !data.getRawText().trim().isEmpty()) {
+                candidateCv.setTextCV(data.getRawText());
+            }
+        }
+        commitContext.addInstanceToCommit(candidateCv);
+
+        dataManager.commit(commitContext);
+
+        List<String> missing = candidate != null ? validateMissingFields(candidate) : new ArrayList<>();
+        return SmartCvIngestResult.success(candidate, candidateCv, data, missing, null);
+    }
+
+    private void createJobHistoryRecords(JobCandidate candidate, SmartCvParsedData data, CommitContext commitContext) {
+        if (data.getWorkExperience() == null || data.getWorkExperience().isEmpty()) {
+            return;
+        }
+
+        // Загружаем уже существующие места работы кандидата для предотвращения дубликатов
+        List<com.company.hunttech.entity.JobHistory> existingHistory = Collections.emptyList();
+        if (candidate.getId() != null) {
+            existingHistory = dataManager.load(com.company.hunttech.entity.JobHistory.class)
+                    .query("select e from hunttech_JobHistory e where e.candidate = :candidate")
+                    .parameter("candidate", candidate)
+                    .view("jobHistory-view")
+                    .list();
+        }
+
+        for (com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto exp : data.getWorkExperience()) {
+            if (exp.getCompanyName() == null || exp.getCompanyName().trim().isEmpty()) {
+                continue;
+            }
+
+            Date start = parseDateSafe(exp.getStartDate());
+            Date end = parseDateSafe(exp.getEndDate());
+
+            // 1. Поиск или создание компании
+            Company comp = resolveOrCreateCompany(exp, commitContext);
+
+            // Проверяем, не существует ли уже запись с такой же компанией
+            boolean duplicateExists = false;
+            for (com.company.hunttech.entity.JobHistory eh : existingHistory) {
+                if (eh.getCurrentCompany() != null && comp != null && eh.getCurrentCompany().getId().equals(comp.getId())) {
+                    duplicateExists = true;
+                    break;
+                }
+                if (eh.getRawCompanyName() != null && eh.getRawCompanyName().equalsIgnoreCase(exp.getCompanyName().trim())) {
+                    duplicateExists = true;
+                    break;
+                }
+            }
+
+            if (!duplicateExists) {
+                com.company.hunttech.entity.JobHistory jh = metadata.create(com.company.hunttech.entity.JobHistory.class);
+                jh.setCandidate(candidate);
+                String rawComp = exp.getCompanyName();
+                if (rawComp != null && rawComp.length() > 255) rawComp = rawComp.substring(0, 255);
+                jh.setRawCompanyName(rawComp);
+
+                String rawPos = exp.getPositionName();
+                if (rawPos != null && rawPos.length() > 255) rawPos = rawPos.substring(0, 255);
+                jh.setRawPositionName(rawPos);
+
+                jh.setCurrentCompany(comp);
+
+                // 2. Поиск должности только в существующем справочнике (без автосоздания)
+                Position pos = findExistingPosition(exp.getPositionName(), data);
+                jh.setCurrentPosition(pos);
+
+                // 3. Даты работы
+                jh.setStartDate(start);
+                jh.setEndDate(end);
+                jh.setDateNewsPosition(start != null ? start : new Date());
+
+                // 4. Обязанности и достижения
+                jh.setDuties(exp.getFullDescription());
+
+                commitContext.addInstanceToCommit(jh);
+            }
+
+            // Если у кандидата еще не заполнена текущая компания и это актуальное место
+            if (candidate.getCurrentCompany() == null && (Boolean.TRUE.equals(exp.getIsCurrent()) || end == null)) {
+                candidate.setCurrentCompany(comp);
+                commitContext.addInstanceToCommit(candidate);
+            }
+            Position pos = findExistingPosition(exp.getPositionName(), data);
+            if (candidate.getPersonPosition() == null && pos != null && (Boolean.TRUE.equals(exp.getIsCurrent()) || end == null)) {
+                candidate.setPersonPosition(pos);
+                commitContext.addInstanceToCommit(candidate);
+            }
+        }
+    }
+
+    private Date parseDateSafe(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        dateStr = dateStr.trim();
+        String[] patterns = {"yyyy-MM-dd", "dd.MM.yyyy", "yyyy-MM", "MM.yyyy", "yyyy"};
+        for (String pat : patterns) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(pat, Locale.ROOT);
+                sdf.setLenient(true);
+                return sdf.parse(dateStr);
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
     private List<String> validateMissingFields(JobCandidate c) {
         List<String> missing = new ArrayList<>();
         if (c.getFirstName() == null || c.getFirstName().trim().isEmpty() || "Кандидат".equals(c.getFirstName())) {
@@ -467,7 +716,11 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         return missing;
     }
 
-    private Position resolvePosition(String name, CommitContext commitContext) {
+    /**
+     * Ищет должность в справочнике hunttech_Position.
+     * Если не найдена - возвращает null и регистрирует в списке missingPositions (без автосоздания).
+     */
+    private Position findExistingPosition(String name, SmartCvParsedData data) {
         if (name == null || name.trim().isEmpty()) return null;
         name = name.trim();
         List<Position> list = dataManager.load(Position.class)
@@ -477,14 +730,12 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         if (!list.isEmpty()) {
             return list.get(0);
         }
-        Position pos = metadata.create(Position.class);
-        pos.setPositionRuName(name.length() > 80 ? name.substring(0, 80) : name);
-        if (commitContext != null) {
-            commitContext.addInstanceToCommit(pos);
-        } else {
-            dataManager.commit(pos);
+
+        // Должность не найдена в справочнике - фиксируем для нотификации пользователю
+        if (data != null && !data.getMissingPositions().contains(name)) {
+            data.getMissingPositions().add(name);
         }
-        return pos;
+        return null;
     }
 
     private City resolveCity(String name, CommitContext commitContext) {
@@ -507,24 +758,63 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         return city;
     }
 
-    private Company resolveCompany(String name, CommitContext commitContext) {
-        if (name == null || name.trim().isEmpty()) return null;
-        name = name.trim();
+    /**
+     * Поиск или автоматическое создание компании по данным места работы из резюме.
+     */
+    private Company resolveOrCreateCompany(com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto exp, CommitContext commitContext) {
+        if (exp == null || exp.getCompanyName() == null || exp.getCompanyName().trim().isEmpty()) {
+            return null;
+        }
+        String name = exp.getCompanyName().trim();
+        String cleaned = cleanCompanyName(name);
+
         List<Company> list = dataManager.load(Company.class)
-                .query("select e from hunttech_Company e where lower(e.comanyName) = :name or lower(e.companyShortName) = :name")
+                .query("select e from hunttech_Company e where lower(e.comanyName) = :name or lower(e.companyShortName) = :name or lower(e.comanyName) = :clean or lower(e.companyShortName) = :clean")
                 .parameter("name", name.toLowerCase())
+                .parameter("clean", cleaned.toLowerCase())
                 .list();
         if (!list.isEmpty()) {
             return list.get(0);
         }
+
         Company comp = metadata.create(Company.class);
         comp.setComanyName(name.length() > 80 ? name.substring(0, 80) : name);
+        comp.setCompanyShortName(cleaned.length() > 80 ? cleaned.substring(0, 80) : cleaned);
+        if (exp.getCompanyDescription() != null && !exp.getCompanyDescription().trim().isEmpty()) {
+            comp.setCompanyDescription(exp.getCompanyDescription().trim());
+        }
+        if (exp.getCompanyWebsite() != null && !exp.getCompanyWebsite().trim().isEmpty()) {
+            comp.setWebsite(exp.getCompanyWebsite().trim());
+        }
+        if (exp.getCity() != null && !exp.getCity().trim().isEmpty()) {
+            City c = resolveCity(exp.getCity().trim(), commitContext);
+            if (c != null) {
+                comp.setCityOfCompany(c);
+            }
+        }
+        comp.setOurClient(false);
+        comp.setOurLegalEntity(false);
+
         if (commitContext != null) {
             commitContext.addInstanceToCommit(comp);
         } else {
             dataManager.commit(comp);
         }
         return comp;
+    }
+
+    private Company resolveCompanyByName(String name, CommitContext commitContext) {
+        if (name == null || name.trim().isEmpty()) return null;
+        com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto dto = new com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto();
+        dto.setCompanyName(name.trim());
+        return resolveOrCreateCompany(dto, commitContext);
+    }
+
+    private String cleanCompanyName(String raw) {
+        if (raw == null) return "";
+        return raw.replaceAll("(?i)(ооо|зао|пао|ао|ип|нко|ltd|llc|inc|gmbh|corp)\\b", "")
+                .replaceAll("[\"«»'„“]", "")
+                .trim();
     }
 
     private SkillTree resolveSkill(String name, CommitContext commitContext) {

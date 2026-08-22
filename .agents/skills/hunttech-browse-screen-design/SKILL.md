@@ -68,19 +68,18 @@ description: >-
             <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
             <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
                 
-                <!-- 1. Главный командный тулбар -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
-                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                <!-- 1. Главный командный тулбар (адаптивный Flexbox на cssLayout) -->
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createBtn" caption="Создать" icon="CREATE_ACTION" stylename="primary candidate-btn"/>
                         <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" enabled="false"/>
                         <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" enabled="false"/>
-                    </hbox>
-                    <hbox id="toolbarSpacer" width="100%"/>
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                    </cssLayout>
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
                         <popupButton id="filterPopupButton" caption="Все записи" icon="FILTER" stylename="secondary candidate-btn"/>
                         <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary"/>
-                    </hbox>
-                </hbox>
+                    </cssLayout>
+                </cssLayout>
 
                 <!-- 2. Generic Filter -->
                 <filter id="filter"

@@ -159,9 +159,9 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
 
     public enum InteractionStatus {
-        FREE("🟢 Свободен (> 1 мес)", "#27ae60", "rgba(39, 174, 96, 0.15)"),
-        MY_CANDIDATE("🟡 В вашей работе (< 1 мес)", "#f39c12", "rgba(243, 156, 18, 0.15)"),
-        OTHER_RECRUITER("🔴 В работе у другого рекрутера", "#e74c3c", "rgba(231, 76, 60, 0.15)");
+        FREE("🟢 Свободен", "#27ae60", "rgba(39, 174, 96, 0.15)"),
+        MY_CANDIDATE("🟡 В вашей работе", "#f39c12", "rgba(243, 156, 18, 0.15)"),
+        OTHER_RECRUITER("🔴 В работе у другого", "#e74c3c", "rgba(231, 76, 60, 0.15)");
 
         private final String label;
         private final String color;

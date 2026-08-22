@@ -33,6 +33,7 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
@@ -87,6 +88,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private BackgroundWorker backgroundWorker;
     @Inject
     private SkillAnalysisService skillAnalysisService;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Inject
     private GroupTable<OpenPosition> openPositionsTable;
@@ -220,48 +223,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private void initTableColumns() {
         if (openPositionsTable == null) return;
 
-        // Колонка 1: Приоритет (индикатор без текста)
-        openPositionsTable.addGeneratedColumn("priority", position -> {
-            Integer p = position.getPriority();
-            String iconPath = com.company.hunttech.web.StandartPriorityVacancy.NORMAL_ICON;
-            String desc = "Обычный";
-            if (p != null) {
-                switch (p) {
-                    case -1:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.DRAFT_ICON;
-                        desc = "Черновик";
-                        break;
-                    case 0:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.PAUSED_ICON;
-                        desc = "Приостановлена";
-                        break;
-                    case 1:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.LOW_ICON;
-                        desc = "Низкий";
-                        break;
-                    case 2:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.NORMAL_ICON;
-                        desc = "Обычный";
-                        break;
-                    case 3:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.HIGH_ICON;
-                        desc = "Высокий";
-                        break;
-                    case 4:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.CRITICAL_ICON;
-                        desc = "Критический";
-                        break;
-                }
-            }
-            Image img = uiComponents.create(Image.class);
-            img.setWidth("18px");
-            img.setHeight("18px");
-            img.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            img.setSource(com.haulmont.cuba.gui.components.ThemeResource.class).setPath(iconPath);
-            img.setDescription(desc);
-            img.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            return img;
-        });
+        // Колонка 1: Приоритет (векторный индикатор с подсветкой и подсказкой)
+        openPositionsTable.addGeneratedColumn("priority", position -> renderPriorityBadge(position.getPriority()));
 
         // Колонка 2: Логотип проекта/компании (36px oval)
         openPositionsTable.addGeneratedColumn("logo", position -> {
@@ -294,8 +257,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");
             lbl.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            lbl.setValue("<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + vName + "</div>" +
-                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
+            lbl.setValue("<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + vName + "</div>" +
+                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d; white-space: normal; word-break: break-word; line-height: 1.35;'>" + sub + "</div>" : "") + "</div>");
             return lbl;
         });
 
@@ -303,6 +266,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         openPositionsTable.addGeneratedColumn("positionType", position -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String pos = "Специалист";
             try {
                 if (position.getPositionType() != null && position.getPositionType().getPositionRuName() != null) {
@@ -310,7 +274,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 }
             } catch (Exception ignored) {
             }
-            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block; white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + pos + "</span>");
             return lbl;
         });
 
@@ -853,11 +817,20 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                         priorityFilterPopupButton.setCaption("Приоритет");
                     }));
 
+            priorityFilterPopupButton.addAction(new BaseAction("priorityUnderReview")
+                    .withCaption("На проверку")
+                    .withIcon("CLOCK")
+                    .withHandler(e -> {
+                        openPositionsDl.setParameter("priority", -2);
+                        openPositionsDl.load();
+                        priorityFilterPopupButton.setCaption("На проверку");
+                    }));
+
             priorityFilterPopupButton.addAction(new BaseAction("priorityHigh")
                     .withCaption("Высокий приоритет")
                     .withIcon("CIRCLE")
                     .withHandler(e -> {
-                        openPositionsDl.setParameter("priority", 1);
+                        openPositionsDl.setParameter("priority", 3);
                         openPositionsDl.load();
                         priorityFilterPopupButton.setCaption("Высокий");
                     }));
@@ -1106,6 +1079,18 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             this.statsDescription = statsDescription;
             this.aiExecution = aiExecution;
         }
+    }
+
+    private Component renderPriorityBadge(Integer priority) {
+        Label<String> lbl = uiComponents.create(Label.NAME);
+        lbl.setHtmlEnabled(true);
+        lbl.setDescriptionAsHtml(true);
+        lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        OpenPositionPriorityUiHelper.BadgeData badge = OpenPositionPriorityUiHelper.getPriorityBadge(priority, 22, messageBundle);
+        lbl.setValue(badge.getHtml());
+        lbl.setDescription(badge.getDescription());
+        return lbl;
     }
 
     @SafeVarargs

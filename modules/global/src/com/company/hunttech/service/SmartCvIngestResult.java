@@ -84,6 +84,10 @@ public class SmartCvIngestResult implements Serializable {
         return candidateCv;
     }
 
+    public CandidateCV getCv() {
+        return candidateCv;
+    }
+
     public void setCandidateCv(CandidateCV candidateCv) {
         this.candidateCv = candidateCv;
     }

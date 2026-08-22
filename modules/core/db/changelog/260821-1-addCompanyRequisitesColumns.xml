@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260821-1-addCompanyRequisitesColumns" author="HRM HuntTech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_COMPANY"/>
+            <not>
+                <columnExists tableName="HUNTTECH_COMPANY" columnName="INN"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_COMPANY">
+            <column name="INN" type="varchar(12)"/>
+            <column name="KPP" type="varchar(9)"/>
+            <column name="OGRN" type="varchar(15)"/>
+            <column name="OKPO" type="varchar(10)"/>
+            <column name="OKTMO" type="varchar(11)"/>
+            <column name="OKVED" type="varchar(100)"/>
+            <column name="LEGAL_ADDRESS" type="clob"/>
+            <column name="ACTUAL_ADDRESS" type="clob"/>
+            <column name="POSTAL_ADDRESS" type="clob"/>
+            <column name="BIK" type="varchar(9)"/>
+            <column name="BANK_NAME" type="varchar(255)"/>
+            <column name="SETTLEMENT_ACCOUNT" type="varchar(20)"/>
+            <column name="CORRESPONDENT_ACCOUNT" type="varchar(20)"/>
+            <column name="PHONE" type="varchar(50)"/>
+            <column name="EMAIL" type="varchar(100)"/>
+            <column name="WEBSITE" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
