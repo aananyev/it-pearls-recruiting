@@ -104,6 +104,10 @@ public class CompanySearchWizardContractTest {
                 java.contains("searchCompanyInWeb"));
         assertTrue("CompanySearchAiServiceBean должен обрабатывать fallback",
                 java.contains("isValidCandidate"));
+
+        String webSpring = readProjectFile("modules/web/src/com/company/hunttech/web-spring.xml");
+        assertTrue("Сервис должен быть зарегистрирован в web-spring.xml как remoteProxy",
+                webSpring.contains("hunttech_CompanySearchAiService"));
     }
 
     private static String readProjectFile(String relativePath) throws IOException {
