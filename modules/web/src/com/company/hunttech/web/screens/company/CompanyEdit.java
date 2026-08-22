@@ -8,8 +8,14 @@ import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.Region;
 import com.company.hunttech.service.CompanyRequisitesIngestService;
 import com.company.hunttech.service.CompanyRequisitesParsedData;
+import com.company.hunttech.app.ProcessedImage;
+import com.company.hunttech.app.ProjectLogoImageProcessingService;
+import com.haulmont.cuba.core.app.FileStorageService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Notifications;
@@ -19,8 +25,10 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import org.apache.commons.io.IOUtils;
 
 import javax.inject.Inject;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +45,14 @@ public class CompanyEdit extends StandardEditor<Company> {
     private WebOvaFallbackImage companyLogoFileImage;
     @Inject
     private FileUploadField companyLogoFileUpload;
+    @Inject
+    private ProjectLogoImageProcessingService projectLogoImageProcessingService;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
+    private FileStorageService fileStorageService;
+    @Inject
+    private Metadata metadata;
     @Inject
     private DataManager dataManager;
     @Inject
@@ -312,6 +328,57 @@ public class CompanyEdit extends StandardEditor<Company> {
             }
         });
         screen.show();
+    }
+
+    @Subscribe("enhanceCompanyLogoBtn")
+    public void onEnhanceCompanyLogoBtnClick(Button.ClickEvent event) {
+        Company company = getEditedEntity();
+        FileDescriptor logoDescriptor = company.getFileCompanyLogo();
+        if (logoDescriptor == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Логотип отсутствует")
+                    .withDescription("Сначала выберите или загрузите изображение логотипа компании")
+                    .show();
+            return;
+        }
+
+        try {
+            byte[] originalBytes;
+            try (InputStream is = fileLoader.openStream(logoDescriptor)) {
+                originalBytes = IOUtils.toByteArray(is);
+            }
+
+            ProcessedImage processed = projectLogoImageProcessingService.process(
+                    originalBytes, logoDescriptor.getName(), false);
+
+            if (processed != null && processed.isProcessed() && processed.getData() != null) {
+                FileDescriptor newDescriptor = metadata.create(FileDescriptor.class);
+                newDescriptor.setName(processed.getName() + "." + processed.getExtension());
+                newDescriptor.setExtension(processed.getExtension());
+                newDescriptor.setSize((long) processed.getData().length);
+                newDescriptor.setCreateDate(new java.util.Date());
+
+                fileStorageService.saveFile(newDescriptor, processed.getData());
+                FileDescriptor committedDescriptor = dataManager.commit(newDescriptor);
+
+                company.setFileCompanyLogo(dataContext.merge(committedDescriptor));
+
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Логотип успешно обработан")
+                        .withDescription("Улучшено качество, удален фон и выполнено вписывание в круг")
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption("Обработка не требуется")
+                        .withDescription("Изображение уже оптимизировано")
+                        .show();
+            }
+        } catch (Exception e) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка обработки изображения")
+                    .withDescription(e.getMessage())
+                    .show();
+        }
     }
 
     @Subscribe("mainTab")
