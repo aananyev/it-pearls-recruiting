@@ -153,6 +153,7 @@ public class CompanyEdit extends StandardEditor<Company> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
+        updateSidebarTitle();
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setOurClient(false);
         } else if (!addressLoaded) {
@@ -330,11 +331,6 @@ public class CompanyEdit extends StandardEditor<Company> {
         screen.show();
     }
 
-    @Subscribe
-    public void onAfterShow(AfterShowEvent event) {
-        updateSidebarTitle();
-    }
-
     private void updateSidebarTitle() {
         if (companySidebarTitle != null) {
             String name = getEditedEntity().getComanyName();
@@ -342,6 +338,22 @@ public class CompanyEdit extends StandardEditor<Company> {
                 companySidebarTitle.setValue(name);
             } else {
                 companySidebarTitle.setValue(messages.getMessage(getClass(), "browseCaption"));
+            }
+        }
+    }
+
+    private FileDescriptor pendingRemovalLogoDescriptor;
+
+    @Subscribe
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        if (pendingRemovalLogoDescriptor != null) {
+            try {
+                fileStorageService.removeFile(pendingRemovalLogoDescriptor);
+                dataManager.remove(pendingRemovalLogoDescriptor);
+            } catch (Exception ex) {
+                // non-fatal
+            } finally {
+                pendingRemovalLogoDescriptor = null;
             }
         }
     }
@@ -379,14 +391,7 @@ public class CompanyEdit extends StandardEditor<Company> {
                 FileDescriptor committedDescriptor = dataManager.commit(newDescriptor);
 
                 company.setFileCompanyLogo(dataContext.merge(committedDescriptor));
-
-                // Удаляем старый замененный дескриптор и файл из хранилища
-                try {
-                    fileStorageService.removeFile(logoDescriptor);
-                    dataManager.remove(logoDescriptor);
-                } catch (Exception ex) {
-                    // non-fatal
-                }
+                pendingRemovalLogoDescriptor = logoDescriptor;
 
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withCaption("Логотип успешно обработан")
