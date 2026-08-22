@@ -302,7 +302,7 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
     @Override
     public Company applyRequisitesToCompany(Company company, CompanyRequisitesParsedData data) {
         if (company == null) {
-            company = metadata != null ? metadata.create(Company.class) : new Company();
+            company = metadata.create(Company.class);
         }
         if (data == null) return company;
 

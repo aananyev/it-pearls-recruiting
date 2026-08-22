@@ -231,14 +231,15 @@ public class CompanyEdit extends StandardEditor<Company> {
             if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
                 CompanyRequisitesParsedData data = screen.getParsedData();
                 if (data != null) {
+                    // applied возвращается из middleware как десериализованный объект
                     Company applied = companyRequisitesIngestService.applyRequisitesToCompany(getEditedEntity(), data);
 
-                    // Перезагрузка коллекций опций на случай создания новых записей
-                    if (companyOwnershipsLc != null) companyOwnershipsLc.load();
-                    if (companyDirectorsLc != null) companyDirectorsLc.load();
-                    if (cityOfCompaniesLc != null) cityOfCompaniesLc.load();
-                    if (regionOfCompaniesLc != null) regionOfCompaniesLc.load();
-                    if (countryOfCompaniesLc != null) countryOfCompaniesLc.load();
+                    // Перезагрузка коллекций опций только для измененных сущностей
+                    if (applied.getCompanyOwnership() != null) companyOwnershipsLc.load();
+                    if (applied.getCompanyDirector() != null) companyDirectorsLc.load();
+                    if (applied.getCityOfCompany() != null) cityOfCompaniesLc.load();
+                    if (applied.getRegionOfCompany() != null) regionOfCompaniesLc.load();
+                    if (applied.getCountryOfCompany() != null) countryOfCompaniesLc.load();
 
                     Company target = getEditedEntity();
                     if (applied.getInn() != null) target.setInn(applied.getInn());
