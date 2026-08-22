@@ -342,19 +342,20 @@ public class CompanyEdit extends StandardEditor<Company> {
         }
     }
 
-    private FileDescriptor pendingRemovalLogoDescriptor;
+    private final Set<FileDescriptor> pendingRemovalLogoDescriptors = new HashSet<>();
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if (pendingRemovalLogoDescriptor != null) {
-            try {
-                fileStorageService.removeFile(pendingRemovalLogoDescriptor);
-                dataManager.remove(pendingRemovalLogoDescriptor);
-            } catch (Exception ex) {
-                // non-fatal
-            } finally {
-                pendingRemovalLogoDescriptor = null;
+        if (!pendingRemovalLogoDescriptors.isEmpty()) {
+            for (FileDescriptor descriptor : pendingRemovalLogoDescriptors) {
+                try {
+                    fileStorageService.removeFile(descriptor);
+                    dataManager.remove(descriptor);
+                } catch (Exception ex) {
+                    // non-fatal
+                }
             }
+            pendingRemovalLogoDescriptors.clear();
         }
     }
 
@@ -391,7 +392,7 @@ public class CompanyEdit extends StandardEditor<Company> {
                 FileDescriptor committedDescriptor = dataManager.commit(newDescriptor);
 
                 company.setFileCompanyLogo(dataContext.merge(committedDescriptor));
-                pendingRemovalLogoDescriptor = logoDescriptor;
+                pendingRemovalLogoDescriptors.add(logoDescriptor);
 
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withCaption("Логотип успешно обработан")
