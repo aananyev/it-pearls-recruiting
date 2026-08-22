@@ -42,22 +42,6 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
         fallbackDelegate.initDefaultFromConfig();
     }
 
-    @Override
-    public void setWidth(String width) {
-        super.setWidth(width);
-        if (ovalDelegate != null) {
-            ovalDelegate.setOvalWidth(width);
-        }
-    }
-
-    @Override
-    public void setHeight(String height) {
-        super.setHeight(height);
-        if (ovalDelegate != null) {
-            ovalDelegate.setOvalHeight(height);
-        }
-    }
-
     // --- OvalImageHost / OvalImage delegation ---
 
     @Override
@@ -68,7 +52,6 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void setOvalWidth(String width) {
         ovalDelegate.setOvalWidth(width);
-        super.setWidth(width);
     }
 
     @Override
@@ -79,7 +62,6 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void setOvalHeight(String height) {
         ovalDelegate.setOvalHeight(height);
-        super.setHeight(height);
     }
 
     // --- OvalImage background delegation ---
