@@ -48,6 +48,8 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.text.DecimalFormat;
@@ -65,6 +67,7 @@ import java.util.*;
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
 public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
+    private static final Logger log = LoggerFactory.getLogger(OpenPositionReestrBrowse.class);
 
     private static final DecimalFormat SALARY_FORMAT = new DecimalFormat("#,###");
 
@@ -724,12 +727,15 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         }
         if (smartUploadBtn != null) {
             smartUploadBtn.addClickListener(e -> {
+                log.info("[SMART_VACANCY_OPENING_UI] Открытие диалога умной загрузки вакансий SmartOpenPositionUploadScreen");
                 SmartOpenPositionUploadScreen screen = screenBuilders.screen(this)
                         .withScreenClass(SmartOpenPositionUploadScreen.class)
                         .withOpenMode(OpenMode.DIALOG)
                         .build();
                 screen.addAfterCloseListener(closeEvent -> {
+                    log.info("[SMART_VACANCY_OPENING_UI] Диалог умной загрузки закрыт с результатом: {}", closeEvent.getCloseAction());
                     if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                        log.info("[SMART_VACANCY_OPENING_UI] Обновление реестра вакансий (openPositionsDl.load()) после успешного открытия");
                         openPositionsDl.load();
                     }
                 });

@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -119,13 +120,17 @@ public class SmartOpenPositionUploadScreen extends Screen {
         uploadField.addFileUploadSucceedListener(e -> {
             File file = fileUploadingAPI.getFile(uploadField.getFileId());
             if (file != null) {
+                log.info("[SMART_VACANCY_OPENING_UI] Пользователь загрузил файл: '{}' (размер: {} байт)", e.getFileName(), file.length());
                 statusLabel.setValue("Файл загружен (" + e.getFileName() + "). Распознавание требований вакансии...");
                 progressBar.setVisible(true);
                 runAsyncFileAnalysis(file);
+            } else {
+                log.warn("[SMART_VACANCY_OPENING_UI] Файл не найден в fileUploadingAPI для fileId: {}", uploadField.getFileId());
             }
         });
 
         uploadField.addFileUploadErrorListener(e -> {
+            log.error("[SMART_VACANCY_OPENING_UI] Ошибка при загрузке файла через FileUploadField: {}", e.getCause().getMessage(), e.getCause());
             statusLabel.setValue("Ошибка при загрузке файла: " + e.getCause().getMessage());
             progressBar.setVisible(false);
         });
@@ -135,18 +140,21 @@ public class SmartOpenPositionUploadScreen extends Screen {
         analyzeTextBtn.addClickListener(e -> {
             String text = vacancyRichTextArea.getValue();
             if (text == null || text.trim().isEmpty()) {
+                log.warn("[SMART_VACANCY_OPENING_UI] Нажата кнопка анализа текста, но поле ввода пусто");
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withCaption("Пустой текст")
                         .withDescription("Вставьте текст описания вакансии для распознавания")
                         .show();
                 return;
             }
+            log.info("[SMART_VACANCY_OPENING_UI] Пользователь инициировал AI-анализ текста (длина: {} символов)", text.length());
             statusLabel.setValue("AI-анализ текста вакансии...");
             progressBar.setVisible(true);
             runAsyncTextAnalysis(text);
         });
 
         clearTextBtn.addClickListener(e -> {
+            log.info("[SMART_VACANCY_OPENING_UI] Очистка текста вакансии и сброс превью");
             vacancyRichTextArea.clear();
             resetPreview();
             statusLabel.setValue("Поле текста очищено");
@@ -154,6 +162,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
 
         if (clearUrlBtn != null) {
             clearUrlBtn.addClickListener(e -> {
+                log.info("[SMART_VACANCY_OPENING_UI] Очистка поля ссылки");
                 if (urlField != null) urlField.setValue("");
                 statusLabel.setValue("Поле ссылки очищено");
             });
@@ -163,12 +172,14 @@ public class SmartOpenPositionUploadScreen extends Screen {
             loadFromUrlBtn.addClickListener(e -> {
                 String url = urlField != null ? urlField.getValue() : null;
                 if (url == null || url.trim().isEmpty()) {
+                    log.warn("[SMART_VACANCY_OPENING_UI] Нажата кнопка загрузки по ссылке, но URL не введен");
                     notifications.create(Notifications.NotificationType.WARNING)
                             .withCaption("Укажите ссылку")
                             .withDescription("Пожалуйста, введите интернет-ссылку на вакансию")
                             .show();
                     return;
                 }
+                log.info("[SMART_VACANCY_OPENING_UI] Пользователь инициировал загрузку по ссылке: '{}'", url.trim());
                 statusLabel.setValue("Загрузка страницы по ссылке и AI-анализ...");
                 progressBar.setVisible(true);
                 runAsyncUrlAnalysis(url.trim());
@@ -176,10 +187,14 @@ public class SmartOpenPositionUploadScreen extends Screen {
         }
 
         saveNewPositionBtn.addClickListener(e -> onSaveNewPositionClick());
-        cancelBtn.addClickListener(e -> close(StandardOutcome.CLOSE));
+        cancelBtn.addClickListener(e -> {
+            log.info("[SMART_VACANCY_OPENING_UI] Пользователь отменил создание вакансии и закрыл диалог");
+            close(StandardOutcome.CLOSE);
+        });
     }
 
     private void runAsyncUrlAnalysis(String urlString) {
+        log.info("[SMART_VACANCY_OPENING_UI] Запуск фоновой задачи анализа URL: {}", urlString);
         BackgroundTask<Integer, SmartOpenPositionParsedData> task = new BackgroundTask<Integer, SmartOpenPositionParsedData>(120, this) {
             @Override
             public SmartOpenPositionParsedData run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
@@ -187,11 +202,13 @@ public class SmartOpenPositionUploadScreen extends Screen {
                 if (rawText == null || rawText.trim().isEmpty()) {
                     throw new IllegalStateException("Не удалось извлечь текст по указанной ссылке: " + urlString);
                 }
+                log.info("[SMART_VACANCY_OPENING_UI] Текст по ссылке '{}' успешно получен (длина: {} символов). Запуск парсинга...", urlString, rawText.length());
                 return smartOpenPositionIngestService.parseVacancyText(rawText);
             }
 
             @Override
             public void done(SmartOpenPositionParsedData result) {
+                log.info("[SMART_VACANCY_OPENING_UI] Фоновый анализ URL успешно завершен. Результат: {}", result != null ? result.getVacansyName() : "null");
                 progressBar.setVisible(false);
                 displayAnalysisResult(result);
             }
@@ -200,7 +217,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
             public boolean handleException(Exception ex) {
                 progressBar.setVisible(false);
                 statusLabel.setValue("Ошибка загрузки по ссылке: " + ex.getMessage());
-                log.error("Ошибка при загрузке вакансии по URL", ex);
+                log.error("[SMART_VACANCY_OPENING_UI] ✘ Исключение при загрузке/анализе вакансии по URL: " + urlString, ex);
                 notifications.create(Notifications.NotificationType.ERROR)
                         .withCaption("Ошибка загрузки по ссылке")
                         .withDescription(ex.getMessage())
@@ -219,64 +236,65 @@ public class SmartOpenPositionUploadScreen extends Screen {
             cleanUrl = "https://" + cleanUrl;
         }
 
-        org.jsoup.nodes.Document doc = org.jsoup.Jsoup.connect(cleanUrl)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .header("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
-                .referrer("https://www.google.com")
-                .timeout(20000)
-                .followRedirects(true)
-                .get();
+        log.info("[SMART_VACANCY_OPENING_UI] HTTP GET запрос к странице вакансии: {}", cleanUrl);
+        java.net.URL url = new java.net.URL(cleanUrl);
+        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(20000);
 
-        doc.select("script, style, noscript, svg, nav, footer, header, .cookie-banner, .advertisement").remove();
-
-        String title = doc.title();
-        String mainContent = "";
-        org.jsoup.nodes.Element contentEl = doc.selectFirst("[data-qa='vacancy-description'], [data-qa='resume-block-container'], main, article, .vacancy-section, .job-description, .content, #content, body");
-        if (contentEl != null) {
-            mainContent = contentEl.text();
-        } else if (doc.body() != null) {
-            mainContent = doc.body().text();
-        } else {
-            mainContent = doc.text();
+        int code = conn.getResponseCode();
+        log.info("[SMART_VACANCY_OPENING_UI] HTTP статус ответа для {}: {}", cleanUrl, code);
+        if (code >= 400) {
+            throw new IllegalStateException("HTTP ошибка " + code + " при открытии страницы");
         }
 
-        StringBuilder result = new StringBuilder();
-        if (title != null && !title.isEmpty()) {
-            result.append(title).append("\n\n");
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            String html = sb.toString();
+            // Простое извлечение видимого текста
+            String text = html.replaceAll("(?is)<script.*?</script>", " ")
+                    .replaceAll("(?is)<style.*?</style>", " ")
+                    .replaceAll("<[^>]+>", " ")
+                    .replaceAll("&nbsp;", " ")
+                    .replaceAll("&quot;", "\"")
+                    .replaceAll("&amp;", "&")
+                    .replaceAll("\\s+", " ")
+                    .trim();
+            log.info("[SMART_VACANCY_OPENING_UI] Извлечен видимый текст со страницы (длина: {} символов)", text.length());
+            return text;
         }
-        result.append(mainContent);
-        return result.toString();
     }
 
     private void runAsyncFileAnalysis(File file) {
-        byte[] fileBytes = null;
-        FileDescriptor committedFd = null;
-        try {
-            try (InputStream is = new FileInputStream(file)) {
-                fileBytes = is.readAllBytes();
-            }
-            FileDescriptor fd = uploadField.getFileDescriptor();
-            if (fd != null) {
-                fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), fd);
-                committedFd = dataManager.commit(fd);
-            }
-        } catch (Exception ex) {
-            log.error("Ошибка чтения или сохранения файла", ex);
+        log.info("[SMART_VACANCY_OPENING_UI] Запуск фоновой задачи анализа файла: '{}' (размер: {} байт)", file.getName(), file.length());
+        FileDescriptor fd = uploadField.getValue();
+        byte[] bytes;
+        try (InputStream is = new FileInputStream(file)) {
+            bytes = is.readAllBytes();
+        } catch (Exception e) {
+            log.error("[SMART_VACANCY_OPENING_UI] ✘ Не удалось прочитать локальный файл " + file.getAbsolutePath(), e);
+            statusLabel.setValue("Ошибка чтения файла: " + e.getMessage());
+            progressBar.setVisible(false);
+            return;
         }
-
-        final byte[] bytes = fileBytes;
-        final FileDescriptor fd = committedFd;
 
         BackgroundTask<Integer, SmartOpenPositionParsedData> task = new BackgroundTask<Integer, SmartOpenPositionParsedData>(120, this) {
             @Override
             public SmartOpenPositionParsedData run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
                 String rawText = smartOpenPositionIngestService.extractTextFromFile(fd, bytes);
+                log.info("[SMART_VACANCY_OPENING_UI] Текст из файла извлечен (длина: {}). Запуск парсинга...", rawText != null ? rawText.length() : 0);
                 return smartOpenPositionIngestService.parseVacancyText(rawText);
             }
 
             @Override
             public void done(SmartOpenPositionParsedData result) {
+                log.info("[SMART_VACANCY_OPENING_UI] Фоновый анализ файла завершен. Позиция: '{}'", result != null ? result.getVacansyName() : "null");
                 progressBar.setVisible(false);
                 displayAnalysisResult(result);
             }
@@ -285,7 +303,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
             public boolean handleException(Exception ex) {
                 progressBar.setVisible(false);
                 statusLabel.setValue("Ошибка анализа: " + ex.getMessage());
-                log.error("Ошибка при AI-распознавании файла вакансии", ex);
+                log.error("[SMART_VACANCY_OPENING_UI] ✘ Ошибка при AI-распознавании файла вакансии", ex);
                 return true;
             }
         };
@@ -294,6 +312,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
     }
 
     private void runAsyncTextAnalysis(String rawText) {
+        log.info("[SMART_VACANCY_OPENING_UI] Запуск фоновой задачи анализа текста вакансии...");
         BackgroundTask<Integer, SmartOpenPositionParsedData> task = new BackgroundTask<Integer, SmartOpenPositionParsedData>(120, this) {
             @Override
             public SmartOpenPositionParsedData run(TaskLifeCycle<Integer> taskLifeCycle) {
@@ -302,6 +321,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
 
             @Override
             public void done(SmartOpenPositionParsedData result) {
+                log.info("[SMART_VACANCY_OPENING_UI] Фоновый анализ текста завершен. Позиция: '{}'", result != null ? result.getVacansyName() : "null");
                 progressBar.setVisible(false);
                 displayAnalysisResult(result);
             }
@@ -310,7 +330,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
             public boolean handleException(Exception ex) {
                 progressBar.setVisible(false);
                 statusLabel.setValue("Ошибка анализа: " + ex.getMessage());
-                log.error("Ошибка при AI-распознавании текста вакансии", ex);
+                log.error("[SMART_VACANCY_OPENING_UI] ✘ Ошибка при AI-распознавании текста вакансии", ex);
                 return true;
             }
         };
@@ -321,9 +341,13 @@ public class SmartOpenPositionUploadScreen extends Screen {
     private void displayAnalysisResult(SmartOpenPositionParsedData data) {
         this.currentParsedData = data;
         if (data == null) {
+            log.warn("[SMART_VACANCY_OPENING_UI] displayAnalysisResult вызван с data = null");
             statusLabel.setValue("Не удалось извлечь данные");
             return;
         }
+
+        log.info("[SMART_VACANCY_OPENING_UI] Отображение карточки превью: vacansyName='{}', project='{}', company='{}', salary={}-{}, skills={}",
+                data.getVacansyName(), data.getProjectName(), data.getCompanyName(), data.getSalaryMin(), data.getSalaryMax(), data.getRequiredSkills());
 
         statusLabel.setValue("✓ Данные вакансии успешно распознаны");
 
@@ -375,6 +399,8 @@ public class SmartOpenPositionUploadScreen extends Screen {
         // 2. Проверка дубликатов
         existingDuplicatePosition = smartOpenPositionIngestService.findDuplicate(data);
         if (existingDuplicatePosition != null) {
+            log.info("[SMART_VACANCY_OPENING_UI] Отображено предупреждение о дубликате: ID={}, name='{}'",
+                    existingDuplicatePosition.getVacansyID(), existingDuplicatePosition.getVacansyName());
             duplicateInfoLabel.setValue("В базе уже существует открытая вакансия с похожим наименованием: <b>" +
                     existingDuplicatePosition.getVacansyName() + "</b> (ID: " + (existingDuplicatePosition.getVacansyID() != null ? existingDuplicatePosition.getVacansyID() : "") + ")");
             duplicateBox.setVisible(true);
@@ -384,6 +410,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
 
         // 3. Недостающие поля
         if (data.getMissingFields() != null && !data.getMissingFields().isEmpty()) {
+            log.info("[SMART_VACANCY_OPENING_UI] Отображение недостающих полей: {}", data.getMissingFields());
             StringBuilder sb = new StringBuilder("<b>Обратите внимание:</b><ul>");
             for (String mf : data.getMissingFields()) {
                 sb.append("<li>").append(mf).append("</li>");
@@ -408,12 +435,20 @@ public class SmartOpenPositionUploadScreen extends Screen {
     }
 
     private void onSaveNewPositionClick() {
-        if (currentParsedData == null) return;
+        if (currentParsedData == null) {
+            log.warn("[SMART_VACANCY_OPENING_UI] onSaveNewPositionClick вызван при currentParsedData == null");
+            return;
+        }
         ExtUser currentUser = (ExtUser) userSession.getCurrentOrSubstitutedUser();
+        log.info("[SMART_VACANCY_OPENING_UI] Нажата кнопка 'Открыть позицию'. Текущий пользователь: '{}', Вакансия: '{}'",
+                currentUser != null ? currentUser.getLogin() : "null", currentParsedData.getVacansyName());
+
         SmartOpenPositionIngestResult result = smartOpenPositionIngestService.createOpenPosition(currentParsedData, currentUser);
 
         if (result.isSuccess()) {
             this.createdPosition = result.getOpenPosition();
+            log.info("[SMART_VACANCY_OPENING_UI] ✓ Вакансия успешно открыта! ID={}, Сообщение: '{}'",
+                    createdPosition != null ? createdPosition.getId() : "null", result.getMessage());
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Вакансия открыта")
                     .withDescription(result.getMessage())
