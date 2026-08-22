@@ -932,4 +932,119 @@ public class CompanySearchAiServiceBean implements CompanySearchAiService {
         }
         return result;
     }
+
+    @Override
+    public List<CompanySiteLogoInnCandidate> findCompanySiteLogoInnCandidates(String companyName) {
+        List<CompanySiteLogoInnCandidate> candidates = new ArrayList<>();
+        if (companyName == null || companyName.trim().isEmpty()) {
+            return candidates;
+        }
+
+        String searchName = companyName.trim();
+        log.info("ИИ-поиск вариантов (сайт + логотип + ИНН) для компании: '{}'", searchName);
+
+        // 1. Поиск вариантов через ИИ-запрос к нейросети
+        try {
+            Map<String, Object> context = new LinkedHashMap<>();
+            context.put("companyName", searchName);
+            context.put("searchQuery", searchName);
+            context.put("callerSource", "CompanySearchAiService (findCompanySiteLogoInnCandidates)");
+            context.put("sourceText", "Найди официальный сайт, прямой URL логотипа и ИНН для организации/бренда: " + searchName +
+                    ". Если существуют холдинги, дочерние структуры или компании с похожим названием, верни список всех подходящих вариантов в JSON массиве 'candidates'.");
+
+            AiExecutionResult aiResult = null;
+            try {
+                aiResult = aiExecutionService.executeText(FUNCTION_COMPANY_WEB_SEARCH_PARSE_JSON, context);
+            } catch (Exception e) {
+                log.warn("Ошибка при вызове AI-функции для поиска сайта/логотипа/ИНН: {}", e.getMessage());
+            }
+
+            if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
+                String json = cleanJson(aiResult.getText().trim());
+                JsonNode root = objectMapper.readTree(json);
+
+                List<JsonNode> candidateNodes = new ArrayList<>();
+                if (root.isArray()) {
+                    for (JsonNode item : root) candidateNodes.add(item);
+                } else if (root.isObject()) {
+                    if (root.has("candidates") && root.get("candidates").isArray()) {
+                        for (JsonNode item : root.get("candidates")) candidateNodes.add(item);
+                    } else if (root.has("items") && root.get("items").isArray()) {
+                        for (JsonNode item : root.get("items")) candidateNodes.add(item);
+                    } else {
+                        candidateNodes.add(root);
+                    }
+                }
+
+                for (JsonNode item : candidateNodes) {
+                    if (item == null || !item.isObject()) continue;
+                    CompanySiteLogoInnCandidate c = new CompanySiteLogoInnCandidate();
+                    c.setCompanyName(textOrNull(item, "companyName"));
+                    c.setLegalEntityName(textOrNull(item, "legalEntityName"));
+                    String rawInn = textOrNull(item, "inn");
+                    if (rawInn != null) c.setInn(rawInn.replaceAll("[^0-9]", "").trim());
+                    String rawOgrn = textOrNull(item, "ogrn");
+                    if (rawOgrn != null) c.setOgrn(rawOgrn.replaceAll("[^0-9]", "").trim());
+                    c.setWebsite(textOrNull(item, "website"));
+                    c.setLogoUrl(textOrNull(item, "logoUrl"));
+                    c.setCountry(textOrNull(item, "country"));
+                    c.setCity(textOrNull(item, "city"));
+                    c.setDescription(textOrNull(item, "description"));
+                    c.setSource("AI Web Search");
+
+                    if ((c.getCompanyName() != null && !c.getCompanyName().isEmpty()) ||
+                            (c.getInn() != null && !c.getInn().isEmpty()) ||
+                            (c.getWebsite() != null && !c.getWebsite().isEmpty())) {
+                        candidates.add(c);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.warn("Ошибка при ИИ-поиске пар сайт/логотип/ИНН для '{}': {}", searchName, ex.getMessage());
+        }
+
+        // 2. Fallback: если ИИ не вернул вариантов, используем общий метод searchCompanyInWeb
+        if (candidates.isEmpty()) {
+            List<CompanyRequisitesParsedData> parsedList = searchCompanyInWeb(searchName, null);
+            if (parsedList != null) {
+                for (CompanyRequisitesParsedData p : parsedList) {
+                    CompanySiteLogoInnCandidate c = new CompanySiteLogoInnCandidate();
+                    c.setCompanyName(p.getCompanyName() != null ? p.getCompanyName() : searchName);
+                    c.setLegalEntityName(p.getLegalEntityName());
+                    c.setInn(p.getInn());
+                    c.setOgrn(p.getOgrn());
+                    c.setWebsite(p.getWebsite());
+                    c.setLogoUrl(p.getLogoUrl());
+                    c.setCountry(p.getCountry());
+                    c.setCity(p.getCity());
+                    c.setDescription(p.getCompanyDescription());
+                    c.setSource("Registry & Web Search");
+                    candidates.add(c);
+                }
+            }
+        }
+
+        // 3. Дополнительное извлечение логотипа с официального сайта для кандидатов (ограничено первыми 5)
+        int logoProcessed = 0;
+        for (CompanySiteLogoInnCandidate cand : candidates) {
+            if (logoProcessed >= 5) break;
+            if ((cand.getLogoUrl() == null || cand.getLogoUrl().trim().isEmpty()) &&
+                    cand.getWebsite() != null && !cand.getWebsite().trim().isEmpty()) {
+                String extractedLogo = extractLogoFromWebsite(cand.getWebsite());
+                if (extractedLogo != null && !extractedLogo.isEmpty()) {
+                    cand.setLogoUrl(extractedLogo);
+                }
+                logoProcessed++;
+            }
+            if (cand.getLogoUrl() == null || cand.getLogoUrl().trim().isEmpty()) {
+                WikiInfo wiki = fetchWikipediaData(cand.getCompanyName() != null ? cand.getCompanyName() : searchName);
+                if (wiki != null && wiki.logoUrl != null && !wiki.logoUrl.isEmpty()) {
+                    cand.setLogoUrl(wiki.logoUrl);
+                }
+            }
+        }
+
+        log.info("Найдено {} вариантов для компании '{}'", candidates.size(), searchName);
+        return candidates;
+    }
 }

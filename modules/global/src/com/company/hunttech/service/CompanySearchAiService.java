@@ -55,4 +55,14 @@ public interface CompanySearchAiService {
      * @return прямой URL найденного логотипа в высоком качестве или null
      */
     String extractLogoFromWebsite(String websiteUrl);
+
+    /**
+     * ИИ-поиск вариантов пар (Официальный сайт + Логотип + ИНН) по наименованию компании.
+     * Если найдено несколько вариантов (холдинги, дочерние структуры, компании с похожим названием),
+     * возвращает структурированную коллекцию кандидатов.
+     *
+     * @param companyName наименование компании или бренда
+     * @return список найденных вариантов с официальным сайтом, логотипом и ИНН
+     */
+    List<CompanySiteLogoInnCandidate> findCompanySiteLogoInnCandidates(String companyName);
 }
