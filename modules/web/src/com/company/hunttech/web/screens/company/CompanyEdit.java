@@ -231,24 +231,30 @@ public class CompanyEdit extends StandardEditor<Company> {
             if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
                 CompanyRequisitesParsedData data = screen.getParsedData();
                 if (data != null) {
-                    // applied возвращается из middleware как десериализованный объект
-                    Company applied = companyRequisitesIngestService.applyRequisitesToCompany(getEditedEntity(), data);
                     Company target = getEditedEntity();
+                    Ownershup oldOwnership = target.getCompanyOwnership();
+                    Person oldDirector = target.getCompanyDirector();
+                    City oldCity = target.getCityOfCompany();
+                    Region oldRegion = target.getRegionOfCompany();
+                    Country oldCountry = target.getCountryOfCompany();
 
-                    // Перезагрузка коллекций опций только при изменении связанных сущностей
-                    if (applied.getCompanyOwnership() != null && !java.util.Objects.equals(applied.getCompanyOwnership(), target.getCompanyOwnership())) {
+                    // applied возвращается из middleware
+                    Company applied = companyRequisitesIngestService.applyRequisitesToCompany(target, data);
+
+                    // Перезагрузка коллекций опций только при фактическом изменении связанных сущностей
+                    if (applied.getCompanyOwnership() != null && !java.util.Objects.equals(applied.getCompanyOwnership(), oldOwnership)) {
                         companyOwnershipsLc.load();
                     }
-                    if (applied.getCompanyDirector() != null && !java.util.Objects.equals(applied.getCompanyDirector(), target.getCompanyDirector())) {
+                    if (applied.getCompanyDirector() != null && !java.util.Objects.equals(applied.getCompanyDirector(), oldDirector)) {
                         companyDirectorsLc.load();
                     }
-                    if (applied.getCityOfCompany() != null && !java.util.Objects.equals(applied.getCityOfCompany(), target.getCityOfCompany())) {
+                    if (applied.getCityOfCompany() != null && !java.util.Objects.equals(applied.getCityOfCompany(), oldCity)) {
                         cityOfCompaniesLc.load();
                     }
-                    if (applied.getRegionOfCompany() != null && !java.util.Objects.equals(applied.getRegionOfCompany(), target.getRegionOfCompany())) {
+                    if (applied.getRegionOfCompany() != null && !java.util.Objects.equals(applied.getRegionOfCompany(), oldRegion)) {
                         regionOfCompaniesLc.load();
                     }
-                    if (applied.getCountryOfCompany() != null && !java.util.Objects.equals(applied.getCountryOfCompany(), target.getCountryOfCompany())) {
+                    if (applied.getCountryOfCompany() != null && !java.util.Objects.equals(applied.getCountryOfCompany(), oldCountry)) {
                         countryOfCompaniesLc.load();
                     }
                     if (applied.getInn() != null) target.setInn(applied.getInn());
