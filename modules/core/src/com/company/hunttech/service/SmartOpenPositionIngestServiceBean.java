@@ -313,10 +313,14 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 if (node.isNumber()) {
                     return BigDecimal.valueOf(node.asDouble());
                 } else if (node.isTextual()) {
-                    String clean = node.asText().replaceAll("[^\\d.]", "");
-                    if (!clean.isEmpty()) {
+                    String text = node.asText().trim();
+                    // Извлекаем первое число из строки (защита от склеивания диапазонов "150 000 - 200 000")
+                    Pattern numPat = Pattern.compile("(\\d[\\d\\s]*[.,]?\\d*)");
+                    Matcher numMat = numPat.matcher(text.replaceAll("\\s+", ""));
+                    if (numMat.find()) {
                         try {
-                            return new BigDecimal(clean);
+                            String numStr = numMat.group(1).replace(",", ".");
+                            return new BigDecimal(numStr);
                         } catch (Exception ignored) {}
                     }
                 }
@@ -688,5 +692,4 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         String oneLine = s.replaceAll("\\s+", " ").trim();
         return oneLine.length() <= maxLen ? oneLine : oneLine.substring(0, maxLen) + "...";
     }
-}
 }
