@@ -13,6 +13,7 @@ import com.company.hunttech.entity.SkillTree;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.core.StarsAndOtherService;
 import com.company.hunttech.web.screens.fragments.OnlyTextPersonPosition;
 import com.company.hunttech.web.screens.fragments.OnlyTextPersonPositionLoadPdf;
 import com.company.hunttech.web.screens.signicons.SignIconsBrowse;
@@ -136,6 +137,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private BackgroundWorker backgroundWorker;
 
     @Inject
+    private StarsAndOtherService starsAndOtherService;
+
+    @Inject
     private DataContext dataContext;
 
     @Inject
@@ -162,6 +166,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private Label<String> detailInteractionsInfo;
     @Inject
     private Label<String> detailSkillsLabels;
+    @Inject
+    private Label<String> detailRating;
+    @Inject
+    private Label<String> detailVacancyStatus;
     @Inject
     private Button editCandidateBtn;
     @Inject
@@ -940,6 +948,12 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         if (detailSkillsLabels != null) {
             detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
         }
+        if (detailRating != null) {
+            detailRating.setValue("-");
+        }
+        if (detailVacancyStatus != null) {
+            detailVacancyStatus.setValue("-");
+        }
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
     }
@@ -970,9 +984,53 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             detailSalary.setVisible(false);
         }
 
+        // Рейтинг и статус вакансии из последнего взаимодействия
+        updateRatingAndVacancyStatus(candidate);
+
         updateCandidateSkillsSidebar(candidate);
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);
+    }
+
+    private void updateRatingAndVacancyStatus(JobCandidate candidate) {
+        if (detailRating == null || detailVacancyStatus == null) {
+            return;
+        }
+        try {
+            List<IteractionList> interactions = dataManager.load(IteractionList.class)
+                    .query("select e from hunttech_IteractionList e where e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
+                    .parameter("cand", candidate)
+                    .view("iteractionList-view")
+                    .list();
+
+            if (!interactions.isEmpty()) {
+                IteractionList last = interactions.get(0);
+
+                // Рейтинг
+                if (last.getRating() != null && last.getRating() > 0 && starsAndOtherService != null) {
+                    detailRating.setValue(starsAndOtherService.setStars(last.getRating()));
+                } else {
+                    detailRating.setValue("Не оценен");
+                }
+
+                // Статус вакансии
+                if (last.getVacancy() != null) {
+                    if (Boolean.TRUE.equals(last.getVacancy().getOpenClose())) {
+                        detailVacancyStatus.setValue("Закрыта");
+                    } else {
+                        detailVacancyStatus.setValue("Открыта");
+                    }
+                } else {
+                    detailVacancyStatus.setValue("Вакансия не указана");
+                }
+            } else {
+                detailRating.setValue("Нет взаимодействий");
+                detailVacancyStatus.setValue("Нет взаимодействий");
+            }
+        } catch (Exception ex) {
+            detailRating.setValue("Ошибка загрузки");
+            detailVacancyStatus.setValue("Ошибка загрузки");
+        }
     }
 
     private void updateCandidateSkillsSidebar(JobCandidate candidate) {

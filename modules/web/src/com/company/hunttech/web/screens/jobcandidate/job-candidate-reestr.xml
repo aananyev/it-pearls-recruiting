@@ -114,6 +114,14 @@
                                         <label id="detailSalaryCaption" value="Ожидания:" stylename="bold" visible="false"/>
                                         <label id="detailSalary" value="-" visible="false"/>
                                     </row>
+                                    <row>
+                                        <label value="Рейтинг:" stylename="bold"/>
+                                        <label id="detailRating" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Статус вакансии:" stylename="bold"/>
+                                        <label id="detailVacancyStatus" value="-"/>
+                                    </row>
                                 </rows>
                             </grid>
                         </vbox>
