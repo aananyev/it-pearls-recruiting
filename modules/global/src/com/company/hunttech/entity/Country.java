@@ -52,6 +52,9 @@ public class Country extends StandardEntity {
     @Column(name = "FLAG_IMAGE")
     protected byte[] flagImage;
 
+    @Column(name = "FLAG_URL", length = 500)
+    protected String flagUrl;
+
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "regionCountry")
@@ -111,6 +114,14 @@ public class Country extends StandardEntity {
 
     public void setFlagImage(byte[] flagImage) {
         this.flagImage = flagImage;
+    }
+
+    public String getFlagUrl() {
+        return flagUrl;
+    }
+
+    public void setFlagUrl(String flagUrl) {
+        this.flagUrl = flagUrl;
     }
 
     public List<Region> getCountryOfRegion() {

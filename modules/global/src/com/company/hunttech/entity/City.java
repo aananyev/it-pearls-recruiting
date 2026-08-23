@@ -53,6 +53,9 @@ public class City extends StandardEntity {
     @Column(name = "EMBLEM_IMAGE")
     protected byte[] emblemImage;
 
+    @Column(name = "EMBLEM_URL", length = 500)
+    protected String emblemUrl;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_REGION_ID")
@@ -132,6 +135,14 @@ public class City extends StandardEntity {
 
     public void setEmblemImage(byte[] emblemImage) {
         this.emblemImage = emblemImage;
+    }
+
+    public String getEmblemUrl() {
+        return emblemUrl;
+    }
+
+    public void setEmblemUrl(String emblemUrl) {
+        this.emblemUrl = emblemUrl;
     }
 
     public Region getCityRegion() {

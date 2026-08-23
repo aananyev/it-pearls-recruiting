@@ -320,8 +320,18 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             if (url.startsWith("//")) {
                 url = "https:" + url;
             }
+            // SSRF защита: только HTTPS, блок внутренних адресов
+            if (!isAllowedImageUrl(url)) {
+                log.warn("Заблокирован запрос к недопустимому URL: {}", url);
+                return null;
+            }
             byte[] imageBytes = fetchHttpBytes(url, 5000);
             if (imageBytes == null || imageBytes.length == 0) {
+                return null;
+            }
+            // Ограничение размера: 1MB
+            if (imageBytes.length > 1048576) {
+                log.warn("Изображение слишком большое ({} байт), пропущено", imageBytes.length);
                 return null;
             }
             log.debug("Гео-изображение скачано: {} байт", imageBytes.length);
@@ -329,6 +339,32 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
         } catch (Exception e) {
             log.warn("Не удалось скачать изображение по URL '{}': {}", imageUrl, e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Проверка URL на безопасность (SSRF защита): только HTTPS, нет localhost/private IP
+     */
+    private boolean isAllowedImageUrl(String url) {
+        try {
+            java.net.URI uri = new java.net.URI(url);
+            if (!"https".equalsIgnoreCase(uri.getScheme())) {
+                return false;
+            }
+            String host = uri.getHost();
+            if (host == null) return false;
+            // Блок localhost и private ranges
+            if (host.equalsIgnoreCase("localhost") || host.startsWith("127.") ||
+                host.startsWith("10.") || host.startsWith("192.168.") ||
+                host.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*") ||
+                host.startsWith("169.254.") || // link-local
+                host.endsWith(".internal") || // cloud metadata
+                host.equals("metadata.google.internal")) {
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -369,6 +405,50 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             dataManager.commit(city);
             log.info("Герб города '{}' сохранён в БД ({} байт)", city.getCityRuName(), imageBytes.length);
         }
+    }
+
+    /**
+     * Пакетное сохранение флагов/гербов для списка сущностей (одна транзакция).
+     * Используйте для bulk-обогащения справочников.
+     */
+    public void saveImagesBatch(List<Country> countries, List<Region> regions, List<City> cities) {
+        if ((countries == null || countries.isEmpty()) &&
+            (regions == null || regions.isEmpty()) &&
+            (cities == null || cities.isEmpty())) {
+            return;
+        }
+        // CUBA dataManager.commit(Entity...) принимает varargs
+        if (countries != null) {
+            for (Country c : countries) {
+                if (c.getFlagImage() == null && c.getFlagUrl() != null) {
+                    byte[] bytes = downloadImageAsBytes(c.getFlagUrl());
+                    if (bytes != null) c.setFlagImage(bytes);
+                }
+            }
+            dataManager.commit(countries.toArray(new Country[0]));
+        }
+        if (regions != null) {
+            for (Region r : regions) {
+                if (r.getEmblemImage() == null && r.getEmblemUrl() != null) {
+                    byte[] bytes = downloadImageAsBytes(r.getEmblemUrl());
+                    if (bytes != null) r.setEmblemImage(bytes);
+                }
+            }
+            dataManager.commit(regions.toArray(new Region[0]));
+        }
+        if (cities != null) {
+            for (City c : cities) {
+                if (c.getEmblemImage() == null && c.getEmblemUrl() != null) {
+                    byte[] bytes = downloadImageAsBytes(c.getEmblemUrl());
+                    if (bytes != null) c.setEmblemImage(bytes);
+                }
+            }
+            dataManager.commit(cities.toArray(new City[0]));
+        }
+        log.info("Пакетное сохранение гео-изображений: countries={}, regions={}, cities={}",
+                countries != null ? countries.size() : 0,
+                regions != null ? regions.size() : 0,
+                cities != null ? cities.size() : 0);
     }
 
     /**

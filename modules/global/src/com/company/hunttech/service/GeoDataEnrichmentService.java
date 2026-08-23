@@ -2,6 +2,7 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.entity.*;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import java.util.List;
 
 public interface GeoDataEnrichmentService {
     String NAME = "hunttech_GeoDataEnrichmentService";
@@ -47,6 +48,12 @@ public interface GeoDataEnrichmentService {
      */
     @Deprecated
     FileDescriptor downloadAndSaveImage(String imageUrl, String fileName);
+
+    /**
+     * Пакетное сохранение флагов/гербов для списка сущностей (одна транзакция).
+     * Используйте для bulk-обогащения справочников.
+     */
+    void saveImagesBatch(List<Country> countries, List<Region> regions, List<City> cities);
 
     /**
      * Проверка доступности подключения к Geo API (например DaData).

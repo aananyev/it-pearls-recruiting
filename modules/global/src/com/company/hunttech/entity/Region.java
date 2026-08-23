@@ -39,6 +39,9 @@ public class Region extends StandardEntity {
     @Column(name = "EMBLEM_IMAGE")
     protected byte[] emblemImage;
 
+    @Column(name = "EMBLEM_URL", length = 500)
+    protected String emblemUrl;
+
     @Composition
     @OneToMany(mappedBy = "cityRegion")
     protected List<City> regionOfCity;
@@ -123,6 +126,14 @@ public class Region extends StandardEntity {
 
     public void setEmblemImage(byte[] emblemImage) {
         this.emblemImage = emblemImage;
+    }
+
+    public String getEmblemUrl() {
+        return emblemUrl;
+    }
+
+    public void setEmblemUrl(String emblemUrl) {
+        this.emblemUrl = emblemUrl;
     }
 
     public List<City> getRegionOfCity() {
