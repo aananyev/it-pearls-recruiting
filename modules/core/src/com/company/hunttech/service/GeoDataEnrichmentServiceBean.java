@@ -815,6 +815,17 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             d.setCapital("Берлин");
             d.setFlagUrl("https://flagcdn.com/w320/de.png");
             return d;
+        } else if (q.contains("бельги") || q.contains("belgium") || q.equals("be") || q.equals("bel")) {
+            d.setCountryRuName("Бельгия");
+            d.setCountryEngName("Belgium");
+            d.setCountryShortName("BE");
+            d.setAlpha3Code("BEL");
+            d.setNumericCode("056");
+            d.setPhoneCode(32);
+            d.setCurrencyCode("EUR");
+            d.setCapital("Брюссель");
+            d.setFlagUrl("https://flagcdn.com/w320/be.png");
+            return d;
         }
         return null;
     }
