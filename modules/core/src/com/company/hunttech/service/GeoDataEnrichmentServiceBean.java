@@ -307,122 +307,131 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     }
 
     /**
-         * Скачивает изображение по URL и сохраняет байты в поле сущности (BLOB в БД).
-         * Заменяет downloadAndSaveImage который сохранял в FileDescriptor.
-         */
-        @Override
-        public byte[] downloadImageAsBytes(String imageUrl) {
-            if (imageUrl == null || imageUrl.trim().isEmpty()) {
-                return null;
-            }
-            try {
-                String url = imageUrl.trim();
-                if (url.startsWith("//")) {
-                    url = "https:" + url;
-                }
-                // SSRF защита: только HTTPS, блок внутренних адресов, запрет редиректов
-                if (!isAllowedImageUrl(url)) {
-                    log.warn("Заблокирован запрос к недопустимому URL: {}", url);
-                    return null;
-                }
-                byte[] imageBytes = fetchHttpBytes(url, 5000, 1048576); // лимит 1MB при чтении
-                if (imageBytes == null || imageBytes.length == 0) {
-                    return null;
-                }
-                log.debug("Гео-изображение скачано: {} байт", imageBytes.length);
-                return imageBytes;
-            } catch (Exception e) {
-                log.warn("Не удалось скачать изображение по URL '{}': {}", imageUrl, e.getMessage());
-                return null;
-            }
+     * Скачивает изображение по URL и сохраняет байты в поле сущности (BLOB в БД).
+     * Заменяет downloadAndSaveImage который сохранял в FileDescriptor.
+     */
+    @Override
+    public byte[] downloadImageAsBytes(String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            return null;
         }
+        try {
+            String url = imageUrl.trim();
+            if (url.startsWith("//")) {
+                url = "https:" + url;
+            }
+            // SSRF защита: только HTTPS, блок внутренних адресов, запрет редиректов
+            if (!isAllowedImageUrl(url)) {
+                log.warn("Заблокирован запрос к недопустимому URL: {}", url);
+                return null;
+            }
+            byte[] imageBytes = fetchHttpBytes(url, 5000, 1048576); // лимит 1MB при чтении
+            if (imageBytes == null || imageBytes.length == 0) {
+                return null;
+            }
+            log.debug("Гео-изображение скачано: {} байт", imageBytes.length);
+            return imageBytes;
+        } catch (Exception e) {
+            log.warn("Не удалось скачать изображение по URL '{}': {}", imageUrl, e.getMessage());
+            return null;
+        }
+    }
 
-        /**
-         * Проверка URL на безопасность (SSRF защита): только HTTPS, резолвим хост в IP,
-         * блокируем localhost/private/link-local/metadata адреса
-         */
-        private boolean isAllowedImageUrl(String url) {
-            try {
-                java.net.URI uri = new java.net.URI(url);
-                if (!"https".equalsIgnoreCase(uri.getScheme())) {
-                    return false;
-                }
-                String host = uri.getHost();
-                if (host == null) return false;
-
-                // Резолвим хост в IP адреса и проверяем каждый
-                java.net.InetAddress[] addresses = java.net.InetAddress.getAllByName(host);
-                for (java.net.InetAddress addr : addresses) {
-                    if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() ||
-                        addr.isSiteLocalAddress() || addr.isMulticastAddress()) {
-                        return false;
-                    }
-                    String ip = addr.getHostAddress();
-                    // Блок IPv4 private ranges
-                    if (ip.startsWith("10.") || ip.startsWith("192.168.") ||
-                        ip.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*") ||
-                        ip.startsWith("169.254.") || ip.startsWith("127.")) {
-                        return false;
-                    }
-                    // Блок IPv6: ::1, fe80::/10, fc00::/7 (ULA), ::ffff:127.0.0.1 (IPv4-mapped)
-                    if (ip.equals("::1") || ip.startsWith("fe80:") || ip.startsWith("fc") || ip.startsWith("fd") ||
-                        ip.startsWith("::ffff:127.") || ip.startsWith("::ffff:10.") || ip.startsWith("::ffff:192.168.")) {
-                        return false;
-                    }
-                }
-                return true;
-            } catch (Exception e) {
+    /**
+     * Проверка URL на безопасность (SSRF защита): только HTTPS, резолвим хост в IP,
+     * блокируем localhost/private/link-local/metadata адреса
+     */
+    private boolean isAllowedImageUrl(String url) {
+        try {
+            java.net.URI uri = new java.net.URI(url);
+            if (!"https".equalsIgnoreCase(uri.getScheme())) {
                 return false;
             }
-        }
+            String host = uri.getHost();
+            if (host == null) return false;
 
-        /**
-         * Скачивает байты с лимитом размера и без следования редиректам (SSRF защита)
-         */
-        private byte[] fetchHttpBytes(String urlStr, int timeoutMs, int maxBytes) {
-            try {
-                java.net.URL url = new java.net.URL(urlStr);
-                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                conn.setRequestProperty("User-Agent", "HuntTech-HRM/1.0 (Geoapify Provider)");
-                conn.setConnectTimeout(timeoutMs);
-                conn.setReadTimeout(timeoutMs);
-                conn.setInstanceFollowRedirects(false); // Запрет редиректов для SSRF защиты
-                int code = conn.getResponseCode();
-                if (code < 200 || code >= 400) {
-                    log.debug("HTTP {}", code);
-                    return null;
+            // Резолвим хост в IP адреса и проверяем каждый
+            java.net.InetAddress[] addresses = java.net.InetAddress.getAllByName(host);
+            for (java.net.InetAddress addr : addresses) {
+                if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() ||
+                    addr.isSiteLocalAddress() || addr.isMulticastAddress()) {
+                    return false;
                 }
-                // Проверяем Content-Length если есть
-                String contentLengthStr = conn.getHeaderField("Content-Length");
-                if (contentLengthStr != null) {
-                    try {
-                        long cl = Long.parseLong(contentLengthStr);
-                        if (cl > maxBytes) {
-                            log.warn("Content-Length {} превышает лимит {}", cl, maxBytes);
-                            return null;
-                        }
-                    } catch (NumberFormatException ignored) {}
+                String ip = addr.getHostAddress();
+                // Блок IPv4 private ranges
+                if (ip.startsWith("10.") || ip.startsWith("192.168.") ||
+                    ip.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*") ||
+                    ip.startsWith("169.254.") || ip.startsWith("127.")) {
+                    return false;
                 }
-                try (java.io.InputStream in = conn.getInputStream();
-                     java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
-                    byte[] buf = new byte[8192];
-                    int n;
-                    int total = 0;
-                    while ((n = in.read(buf)) != -1) {
-                        total += n;
-                        if (total > maxBytes) {
-                            log.warn("Размер изображения превышает лимит {} байт", maxBytes);
-                            return null;
-                        }
-                        out.write(buf, 0, n);
-                    }
-                    return out.toByteArray();
+                // Блок IPv6: ::1, fe80::/10, fc00::/7 (ULA), ::ffff:127.0.0.1 (IPv4-mapped)
+                if (ip.equals("::1") || ip.startsWith("fe80:") || ip.startsWith("fc") || ip.startsWith("fd") ||
+                    ip.startsWith("::ffff:127.") || ip.startsWith("::ffff:10.") || ip.startsWith("::ffff:192.168.")) {
+                    return false;
                 }
-            } catch (Exception e) {
-                log.debug("fetchHttpBytes error: {}", e.getMessage());
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Скачивает байты с лимитом размера и без следования редиректам (SSRF защита)
+     */
+    private byte[] fetchHttpBytes(String urlStr, int timeoutMs, int maxBytes) {
+        java.net.HttpURLConnection conn = null;
+        try {
+            java.net.URL url = new java.net.URL(urlStr);
+            conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "HuntTech-HRM/1.0 (Geoapify Provider)");
+            conn.setConnectTimeout(timeoutMs);
+            conn.setReadTimeout(timeoutMs);
+            conn.setInstanceFollowRedirects(false); // Запрет редиректов для SSRF защиты
+            int code = conn.getResponseCode();
+            if (code < 200 || code >= 400) {
+                // Читаем error stream перед закрытием
+                try (java.io.InputStream err = conn.getErrorStream()) {
+                    if (err != null) err.readAllBytes();
+                }
+                log.debug("HTTP {}", code);
                 return null;
             }
+            // Проверяем Content-Length если есть
+            String contentLengthStr = conn.getHeaderField("Content-Length");
+            if (contentLengthStr != null) {
+                try {
+                    long cl = Long.parseLong(contentLengthStr);
+                    if (cl > maxBytes) {
+                        log.warn("Content-Length {} превышает лимит {}", cl, maxBytes);
+                        return null;
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+            try (java.io.InputStream in = conn.getInputStream();
+                 java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+                byte[] buf = new byte[8192];
+                int n;
+                int total = 0;
+                while ((n = in.read(buf)) != -1) {
+                    total += n;
+                    if (total > maxBytes) {
+                        log.warn("Размер изображения превышает лимит {} байт", maxBytes);
+                        return null;
+                    }
+                    out.write(buf, 0, n);
+                }
+                return out.toByteArray();
+            }
+        } catch (Exception e) {
+            log.debug("fetchHttpBytes error: {}", e.getMessage());
+            return null;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
+    }
 
     /**
      * Сохраняет флаг страны в БД (byte[])
