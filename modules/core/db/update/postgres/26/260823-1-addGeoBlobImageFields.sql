@@ -2,21 +2,21 @@
 -- Добавление BLOB полей для хранения флагов и гербов в БД (для миграции без файлового хранилища)
 
 -- HUNTTECH_COUNTRY
-alter table HUNTTECH_COUNTRY add column if not exists FLAG_IMAGE bytea;
-alter table HUNTTECH_COUNTRY add column if not exists FLAG_URL varchar(500);
+ALTER TABLE HUNTTECH_COUNTRY ADD COLUMN IF NOT EXISTS FLAG_IMAGE BYTEA;
+ALTER TABLE HUNTTECH_COUNTRY ADD COLUMN IF NOT EXISTS FLAG_URL VARCHAR(500);
 
 -- HUNTTECH_REGION
-alter table HUNTTECH_REGION add column if not exists EMBLEM_IMAGE bytea;
-alter table HUNTTECH_REGION add column if not exists EMBLEM_URL varchar(500);
+ALTER TABLE HUNTTECH_REGION ADD COLUMN IF NOT EXISTS EMBLEM_IMAGE BYTEA;
+ALTER TABLE HUNTTECH_REGION ADD COLUMN IF NOT EXISTS EMBLEM_URL VARCHAR(500);
 
 -- HUNTTECH_CITY
-alter table HUNTTECH_CITY add column if not exists EMBLEM_IMAGE bytea;
-alter table HUNTTECH_CITY add column if not exists EMBLEM_URL varchar(500);
+ALTER TABLE HUNTTECH_CITY ADD COLUMN IF NOT EXISTS EMBLEM_IMAGE BYTEA;
+ALTER TABLE HUNTTECH_CITY ADD COLUMN IF NOT EXISTS EMBLEM_URL VARCHAR(500);
 
 -- Комментарии для документации схемы
-comment on column HUNTTECH_COUNTRY.FLAG_IMAGE is 'Флаг страны в байтах (BLOB) — хранится в БД для упрощения миграций';
-comment on column HUNTTECH_COUNTRY.FLAG_URL is 'Исходный URL флага для повторной загрузки';
-comment on column HUNTTECH_REGION.EMBLEM_IMAGE is 'Герб региона в байтах (BLOB)';
-comment on column HUNTTECH_REGION.EMBLEM_URL is 'Исходный URL герба региона';
-comment on column HUNTTECH_CITY.EMBLEM_IMAGE is 'Герб города в байтах (BLOB)';
-comment on column HUNTTECH_CITY.EMBLEM_URL is 'Исходный URL герба города';
+COMMENT ON COLUMN HUNTTECH_COUNTRY.FLAG_IMAGE IS 'Флаг страны в байтах (BLOB) — хранится в БД для упрощения миграций';
+COMMENT ON COLUMN HUNTTECH_COUNTRY.FLAG_URL IS 'Исходный URL флага для повторной загрузки';
+COMMENT ON COLUMN HUNTTECH_REGION.EMBLEM_IMAGE IS 'Герб региона в байтах (BLOB)';
+COMMENT ON COLUMN HUNTTECH_REGION.EMBLEM_URL IS 'Исходный URL герба региона';
+COMMENT ON COLUMN HUNTTECH_CITY.EMBLEM_IMAGE IS 'Герб города в байтах (BLOB)';
+COMMENT ON COLUMN HUNTTECH_CITY.EMBLEM_URL IS 'Исходный URL герба города';
