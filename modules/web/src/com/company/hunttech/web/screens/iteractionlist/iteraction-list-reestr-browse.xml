@@ -72,7 +72,7 @@
                         <!-- Шапка профиля кандидата / взаимодействия -->
                         <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
                             <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
-                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="SCALE_DOWN"/>
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="SCALE_TO_FIT"/>
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
                                 <label id="detailTitle" value="Выберите запись" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
                                 <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
@@ -105,15 +105,15 @@
                                     </row>
                                     <row>
                                         <label value="Рейтинг:" stylename="edit-help"/>
-                                        <label id="detailRating" value="-"/>
+                                        <label id="detailRating" value="-" htmlEnabled="true" stylename="bold"/>
                                     </row>
                                     <row>
                                         <label value="Вакансия:" stylename="edit-help"/>
-                                        <label id="detailVacancy" value="-"/>
+                                        <label id="detailVacancy" value="-" stylename="bold"/>
                                     </row>
                                     <row>
                                         <label value="Статус вакансии:" stylename="edit-help"/>
-                                        <label id="detailVacancyStatus" value="-"/>
+                                        <label id="detailVacancyStatus" value="-" htmlEnabled="true" stylename="bold"/>
                                     </row>
                                     <row>
                                         <label value="Рекрутер:" stylename="edit-help"/>
