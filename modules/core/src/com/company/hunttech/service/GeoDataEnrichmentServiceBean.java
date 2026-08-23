@@ -903,7 +903,7 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             d.setCapital("Берн");
             d.setFlagUrl("https://flagcdn.com/w320/ch.png");
             return d;
-        } else if (q.contains("груз") || q.contains("georgia") || q.equals("ge") || q.equals("geo")) {
+        } else if (q.contains("грузи") || q.contains("georgia") || q.equals("ge") || q.equals("geo")) {
             d.setCountryRuName("Грузия");
             d.setCountryEngName("Georgia");
             d.setCountryShortName("GE");
@@ -936,7 +936,7 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             d.setCapital("Баку");
             d.setFlagUrl("https://flagcdn.com/w320/az.png");
             return d;
-        } else if (q.contains("турции") || q.contains("turkey") || q.equals("tr") || q.equals("tur")) {
+        } else if (q.contains("турц") || q.contains("turkey") || q.equals("tr") || q.equals("tur")) {
             d.setCountryRuName("Турция");
             d.setCountryEngName("Turkey");
             d.setCountryShortName("TR");
