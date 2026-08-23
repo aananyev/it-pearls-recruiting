@@ -272,12 +272,8 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
         CountryDTO dto = new CountryDTO();
         dto.setIso2(props.path("country_code").asText(null));
         dto.setIso3(props.path("country_code3").asText(null));
-        // Используем язык для выбора названия
-        if ("ru".equals(lang)) {
-            dto.setNameRu(props.path("country").asText(null));
-        } else {
-            dto.setNameEn(props.path("country_en").asText(null));
-        }
+        // nameRu всегда заполняем (API возвращает country на языке запроса lang)
+        dto.setNameRu(props.path("country").asText(null));
         dto.setNameEn(props.path("country_en").asText(null));
         dto.setCapitalRu(props.path("capital").asText(null));
         dto.setCapitalEn(props.path("capital_en").asText(null));
@@ -318,11 +314,7 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
         RegionDTO dto = new RegionDTO();
         dto.setCountryIso2(countryIso2);
         dto.setCode(props.path("state_code").asText(null));
-        if ("ru".equals(lang)) {
-            dto.setNameRu(props.path("state").asText(null));
-        } else {
-            dto.setNameEn(props.path("state_en").asText(null));
-        }
+        dto.setNameRu(props.path("state").asText(null));
         dto.setNameEn(props.path("state_en").asText(null));
         dto.setType(mapRegionType(props.path("type").asText()));
         dto.setCapitalRu(props.path("capital").asText(null));
@@ -356,11 +348,7 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
         CityDTO dto = new CityDTO();
         dto.setCountryIso2(countryIso2);
         dto.setRegionCode(regionCode != null ? regionCode : props.path("state_code").asText(null));
-        if ("ru".equals(lang)) {
-            dto.setNameRu(props.path("city").asText(null));
-        } else {
-            dto.setNameEn(props.path("city_en").asText(null));
-        }
+        dto.setNameRu(props.path("city").asText(null));
         dto.setNameEn(props.path("city_en").asText(null));
         dto.setNameAlt(props.path("suburb").asText(null));
         dto.setLatitude(props.path("lat").isNumber() ? props.path("lat").asDouble() : null);
@@ -422,11 +410,6 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
             sb.append(e.getKey()).append("=").append(URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8));
         }
         return sb.toString();
-    }
-
-    private String redactUrl(String url) {
-        if (url == null) return null;
-        return url.replaceAll("apiKey=[^&]*", "apiKey=***");
     }
 
     private String fetchHttpText(String urlStr, int timeoutMs) {

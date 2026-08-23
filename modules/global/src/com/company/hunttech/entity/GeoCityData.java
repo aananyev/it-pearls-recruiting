@@ -136,14 +136,6 @@ public class GeoCityData extends BaseUuidEntity implements Serializable {
         this.airportCodeIcao = airportCodeIcao;
     }
 
-    public Boolean getIsCapital() {
-        return capital;
-    }
-
-    public void setIsCapital(Boolean isCapital) {
-        this.capital = isCapital;
-    }
-
     public Boolean isCapital() {
         return capital;
     }

@@ -82,7 +82,7 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     }
 
     /**
-     * Generic fallback helper: iterates providers and returns first non-null DTO
+     * Generic fallback helper: iterates providers and returns first DTO with non-null nameRu
      */
     private <T> T fetchFromProviders(Function<GeoDataProvider, T> fetcher, String query, String providerType) {
         List<GeoDataProvider> providers = getProvidersInOrder();
@@ -95,8 +95,20 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
                 log.debug("Попытка {} '{}' через провайдер: {}", providerType, query, provider.getProviderCode());
                 T dto = fetcher.apply(provider);
                 if (dto != null) {
-                    log.info("{} '{}' успешно обработан через провайдер: {}", providerType, query, provider.getProviderCode());
-                    return dto;
+                    // Проверяем наличие русского названия — признак валидного результата
+                    boolean hasNameRu = false;
+                    if (dto instanceof GeoDataProvider.CountryDTO) {
+                        hasNameRu = ((GeoDataProvider.CountryDTO) dto).getNameRu() != null;
+                    } else if (dto instanceof GeoDataProvider.RegionDTO) {
+                        hasNameRu = ((GeoDataProvider.RegionDTO) dto).getNameRu() != null;
+                    } else if (dto instanceof GeoDataProvider.CityDTO) {
+                        hasNameRu = ((GeoDataProvider.CityDTO) dto).getNameRu() != null;
+                    }
+                    if (hasNameRu) {
+                        log.info("{} '{}' успешно обработан через провайдер: {}", providerType, query, provider.getProviderCode());
+                        return dto;
+                    }
+                    log.debug("Провайдер {} вернул DTO без nameRu для {} '{}', пробуем следующий", provider.getProviderCode(), providerType, query);
                 }
             } catch (Exception e) {
                 log.warn("Провайдер {} ошибка для {} '{}': {}", provider.getProviderCode(), providerType, query, e.getMessage());
@@ -274,7 +286,7 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
         if (dto.getAirportIcao() != null) data.setAirportCodeIcao(dto.getAirportIcao());
         if (dto.getGeonameId() != null) data.setGeonameId(dto.getGeonameId());
         if (dto.getWikiLink() != null) data.setWikiLink(dto.getWikiLink());
-        if (dto.getCapital() != null) data.setIsCapital(dto.getCapital());
+        if (dto.getCapital() != null) data.setCapital(dto.getCapital());
     }
 
     /**
