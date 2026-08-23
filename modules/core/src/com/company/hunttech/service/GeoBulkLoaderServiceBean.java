@@ -2,6 +2,8 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.entity.Country;
 import com.company.hunttech.entity.GeoCountryData;
+import com.company.hunttech.entity.GeoRegionData;
+import com.company.hunttech.entity.Region;
 import com.company.hunttech.service.geo.GeoDataProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +39,9 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
     private static final Logger log = LoggerFactory.getLogger(GeoBulkLoaderServiceBean.class);
 
     private static final String REST_COUNTRIES_URL =
-            "https://restcountries.com/v3.1/all?fields=cca2,cca3,ccn3,name,translations,capital,currencies,idd,flags";
+            "https://raw.githubusercontent.com/mledoze/countries/master/countries.json";
+
+    private static final String FLAG_CDN_URL = "https://flagcdn.com/w320/";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -158,7 +162,7 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
     }
 
     /**
-     * Парсинг одной страны restcountries.com в GeoCountryData.
+     * Парсинг одной страны mledoze/countries.json в GeoCountryData.
      */
     private GeoCountryData parseRestCountry(JsonNode node) {
         try {
@@ -201,11 +205,14 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
                 }
             }
 
-            // Телефонный код (корень idd)
+            // Телефонный код (корень idd + первый суффикс)
             JsonNode idd = node.path("idd");
             String phone = "";
             if (idd.has("root")) {
                 phone = idd.get("root").asText().replace("+", "");
+            }
+            if (idd.has("suffixes") && idd.get("suffixes").isArray() && idd.get("suffixes").size() > 0) {
+                // Для стран с единым кодом суффикс пустой; используем корень
             }
             if (!phone.isEmpty()) {
                 try {
@@ -215,17 +222,12 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
                 }
             }
 
-            // Флаг (PNG предпочтительно)
-            JsonNode flags = node.path("flags");
-            if (flags.has("png")) {
-                data.setFlagUrl(flags.get("png").asText(null));
-            } else if (flags.has("svg")) {
-                data.setFlagUrl(flags.get("svg").asText(null));
-            }
+            // Флаг: flagcdn.com по ISO-2 (бесплатный CDN, PNG 320px)
+            data.setFlagUrl(FLAG_CDN_URL + data.getCountryShortName().toLowerCase() + ".png");
 
             return data;
         } catch (Exception e) {
-            log.debug("Ошибка парсинга restcountries: {}", e.getMessage());
+            log.debug("Ошибка парсинга страны: {}", e.getMessage());
             return null;
         }
     }
@@ -286,12 +288,20 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
 
         String iso2 = geoData.getCountryShortName().toUpperCase();
 
-        // Ищем существующую страну (deduplication по ISO-2)
+        // Ищем существующую страну: сначала по ISO-2, затем по русскому имени (у старых записей ISO может отсутствовать)
         Country existing = dataManager.load(Country.class)
                 .query("select e from hunttech_Country e where upper(e.countryShortName) = :iso2 and e.deleteTs is null")
                 .parameter("iso2", iso2)
                 .optional()
                 .orElse(null);
+
+        if (existing == null && geoData.getCountryRuName() != null && !geoData.getCountryRuName().isEmpty()) {
+            existing = dataManager.load(Country.class)
+                    .query("select e from hunttech_Country e where e.countryRuName = :name and e.deleteTs is null")
+                    .parameter("name", geoData.getCountryRuName())
+                    .optional()
+                    .orElse(null);
+        }
 
         Country country;
         if (existing != null) {
@@ -442,5 +452,237 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
             log.debug("fetchHttpText error: {}", e.getMessage());
             return null;
         }
+    }
+
+    // =========================================================================
+    // ЗАГРУЗКА РЕГИОНОВ РОССИИ
+    // =========================================================================
+
+    @Override
+    public String loadAllRegionsForRussia() {
+        long startedAt = System.currentTimeMillis();
+        log.info("Начинаем массовую загрузку регионов России...");
+        LoadAccumulator acc = new LoadAccumulator();
+
+        // Получаем страну Россия
+        Country russia = dataManager.load(Country.class)
+                .query("select e from hunttech_Country e where e.countryShortName = 'RU' and e.deleteTs is null")
+                .optional()
+                .orElse(null);
+        if (russia == null) {
+            acc.errors.add("Страна Россия (RU) не найдена в справочнике");
+            return buildSummary(acc, System.currentTimeMillis() - startedAt, "регионов");
+        }
+
+        // 1. Провайдеры: Geoapify boundaries level=1 для RU
+        if (hasAvailableProviders()) {
+            loadRegionsFromProviders(russia, acc);
+        }
+
+        // 2. Локальный справочник популярных регионов (fallback)
+        loadRegionsFromLocalCatalog(russia, acc);
+
+        // 3. Пакетное скачивание гербов в BLOB
+        saveEmblemsBatch(russia, acc);
+
+        long durationMs = System.currentTimeMillis() - startedAt;
+        String summary = buildSummary(acc, durationMs, "регионов");
+        log.info("Массовая загрузка регионов России завершена: {}", summary);
+        return summary;
+    }
+
+    private void loadRegionsFromProviders(Country russia, LoadAccumulator acc) {
+        List<GeoDataProvider> providers = getProvidersInOrder();
+        if (providers.isEmpty()) {
+            log.warn("Нет доступных GeoDataProvider для загрузки регионов");
+            return;
+        }
+
+        GeoDataProvider primaryProvider = providers.get(0);
+        log.info("Загрузка регионов России через провайдер: {}", primaryProvider.getProviderName());
+
+        try {
+            List<GeoDataProvider.RegionDTO> allRegions = primaryProvider.fetchRegionsForCountry("RU", "ru");
+            log.info("Получено регионов от провайдера: {}", allRegions.size());
+
+            for (GeoDataProvider.RegionDTO dto : allRegions) {
+                if (dto.getCode() == null || dto.getNameRu() == null) continue;
+
+                String isoCode = dto.getCode().toUpperCase(); // RU-MOW, RU-SPE, etc.
+                if (existsRegionByIsoCode(isoCode)) {
+                    acc.skipped++;
+                    continue;
+                }
+
+                GeoRegionData geoData = new GeoRegionData();
+                geoData.setRegionRuName(dto.getNameRu());
+                geoData.setRegionEngName(dto.getNameEn());
+                geoData.setIsoCode(isoCode);
+                geoData.setRegionType(dto.getType());
+                geoData.setCapital(dto.getCapitalRu() != null ? dto.getCapitalRu() : dto.getCapitalEn());
+                geoData.setTimeZone(dto.getTimezone());
+                geoData.setKladrCode(dto.getKladrCode());
+                geoData.setOkato(dto.getOkato());
+                geoData.setOktmo(dto.getOktmo());
+                geoData.setFiasId(dto.getFiasId());
+                geoData.setCountryName("Россия");
+
+                saveOrUpdateRegion(geoData, russia, acc);
+            }
+        } catch (Exception e) {
+            log.error("Ошибка загрузки регионов через провайдер {}: {}", primaryProvider.getProviderCode(), e.getMessage());
+            acc.errors.add("provider:" + primaryProvider.getProviderCode() + ": " + e.getMessage());
+        }
+    }
+
+    private void loadRegionsFromLocalCatalog(Country russia, LoadAccumulator acc) {
+        log.info("Загрузка регионов из локального справочника...");
+        // Вызываем enrichRegion для популярных регионов
+        String[] regions = {
+                "Москва", "Санкт-Петербург", "Московская область", "Республика Татарстан",
+                "Свердловская область", "Новосибирская область", "Краснодарский край",
+                "Ростовская область", "Башкортостан", "Челябинская область", "Нижегородская область"
+        };
+
+        for (String regionName : regions) {
+            try {
+                GeoRegionData geoData = geoDataEnrichmentService.enrichRegion(regionName, russia);
+                if (geoData != null) {
+                    geoData.setCountryName("Россия");
+                    saveOrUpdateRegion(geoData, russia, acc);
+                }
+            } catch (Exception e) {
+                log.warn("Ошибка загрузки региона '{}': {}", regionName, e.getMessage());
+                acc.errors.add(regionName + ": " + e.getMessage());
+            }
+        }
+    }
+
+    private void saveOrUpdateRegion(GeoRegionData geoData, Country russia, LoadAccumulator acc) {
+        if (geoData.getRegionRuName() == null || geoData.getRegionRuName().isEmpty()) {
+            acc.errors.add("регион без названия: " + (geoData.getIsoCode() != null ? geoData.getIsoCode() : "unknown"));
+            return;
+        }
+
+        // Ищем существующий регион: сначала по ISO коду, затем по названию + стране
+        Region existing = null;
+        if (geoData.getIsoCode() != null && !geoData.getIsoCode().isEmpty()) {
+            existing = dataManager.load(Region.class)
+                    .query("select e from hunttech_Region e where e.isoCode = :isoCode and e.deleteTs is null")
+                    .parameter("isoCode", geoData.getIsoCode().toUpperCase())
+                    .optional()
+                    .orElse(null);
+        }
+        if (existing == null) {
+            existing = dataManager.load(Region.class)
+                    .query("select e from hunttech_Region e where e.regionRuName = :name and e.regionCountry = :country and e.deleteTs is null")
+                    .parameter("name", geoData.getRegionRuName())
+                    .parameter("country", russia)
+                    .optional()
+                    .orElse(null);
+        }
+
+        Region region;
+        if (existing != null) {
+            region = existing;
+            acc.updated++;
+        } else {
+            region = metadata.create(Region.class);
+            region.setRegionCountry(russia);
+            if (geoData.getIsoCode() != null) region.setIsoCode(geoData.getIsoCode().toUpperCase());
+            acc.created++;
+        }
+
+        if (geoData.getRegionRuName() != null && !geoData.getRegionRuName().isEmpty()) {
+            region.setRegionRuName(geoData.getRegionRuName());
+        }
+        if (geoData.getRegionEngName() != null && !geoData.getRegionEngName().isEmpty()) {
+            region.setRegionEngName(geoData.getRegionEngName());
+        }
+        if (geoData.getRegionType() != null && !geoData.getRegionType().isEmpty()) {
+            region.setRegionType(geoData.getRegionType());
+        }
+        if (geoData.getCapital() != null && !geoData.getCapital().isEmpty()) {
+            region.setCapital(geoData.getCapital());
+        }
+        if (geoData.getTimeZone() != null && !geoData.getTimeZone().isEmpty()) {
+            region.setTimeZone(geoData.getTimeZone());
+        }
+        if (geoData.getFiasId() != null && !geoData.getFiasId().isEmpty()) {
+            region.setFiasId(geoData.getFiasId());
+        }
+        if (geoData.getEmblemUrl() != null && !geoData.getEmblemUrl().isEmpty()) {
+            region.setEmblemUrl(geoData.getEmblemUrl());
+        }
+
+        dataManager.commit(region);
+
+        if (existing == null) {
+            log.debug("Создан новый регион: {} ({})", region.getRegionRuName(), region.getIsoCode());
+        } else {
+            log.debug("Обновлён регион: {} ({})", region.getRegionRuName(), region.getIsoCode());
+        }
+    }
+
+    private boolean existsRegionByIsoCode(String isoCode) {
+        return dataManager.loadValue(
+                        "select count(e) from hunttech_Region e where upper(e.isoCode) = :isoCode and e.deleteTs is null",
+                        Long.class)
+                .parameter("isoCode", isoCode.toUpperCase())
+                .optional()
+                .orElse(0L) > 0;
+    }
+
+    private void saveEmblemsBatch(Country russia, LoadAccumulator acc) {
+        log.info("Пакетное скачивание гербов для регионов без герба...");
+        List<Region> regionsWithoutEmblem = dataManager.load(Region.class)
+                .query("select e from hunttech_Region e where e.emblemImage is null and e.emblemUrl is not null and e.regionCountry = :country and e.deleteTs is null")
+                .parameter("country", russia)
+                .list();
+
+        if (regionsWithoutEmblem.isEmpty()) {
+            log.info("Все регионы уже имеют гербы");
+            return;
+        }
+
+        log.info("Найдено регионов без герба: {}", regionsWithoutEmblem.size());
+        for (Region region : regionsWithoutEmblem) {
+            try {
+                byte[] emblemBytes = geoDataEnrichmentService.downloadImageAsBytes(region.getEmblemUrl());
+                if (emblemBytes != null && emblemBytes.length > 0) {
+                    region.setEmblemImage(emblemBytes);
+                    dataManager.commit(region);
+                    acc.flagsSaved++; // используем поле flagsSaved как emblemsSaved
+                    log.debug("Герб сохранён для {}: {} байт", region.getRegionRuName(), emblemBytes.length);
+                }
+            } catch (Exception e) {
+                log.warn("Не удалось сохранить герб для {}: {}", region.getRegionRuName(), e.getMessage());
+            }
+        }
+    }
+
+    private String buildSummary(LoadAccumulator acc, long durationMs, String entityType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Загрузка ").append(entityType).append(" завершена за ").append(durationMs / 1000).append(" сек.\n");
+        sb.append("Создано новых: ").append(acc.created).append("\n");
+        sb.append("Обновлено: ").append(acc.updated).append("\n");
+        sb.append("Пропущено (уже есть): ").append(acc.skipped).append("\n");
+        sb.append("Гербов сохранено: ").append(acc.flagsSaved).append("\n");
+        sb.append("Всего в справочнике: ").append(countTotalRegions()).append("\n");
+        if (!acc.errors.isEmpty()) {
+            sb.append("Ошибки (").append(acc.errors.size()).append("):\n");
+            for (String e : acc.errors) {
+                sb.append("- ").append(e).append("\n");
+            }
+        }
+        return sb.toString().trim();
+    }
+
+    private int countTotalRegions() {
+        return dataManager.loadValue(
+                        "select count(e) from hunttech_Region e where e.deleteTs is null",
+                        Integer.class)
+                .optional()
+                .orElse(0);
     }
 }

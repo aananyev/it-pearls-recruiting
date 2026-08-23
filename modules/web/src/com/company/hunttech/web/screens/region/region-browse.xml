@@ -49,6 +49,7 @@ order by e.regionRuName]]>
                 <button id="createBtn" action="regionsTable.create"/>
                 <button id="editBtn" action="regionsTable.edit"/>
                 <button id="removeBtn" action="regionsTable.remove"/>
+                <button id="loadRegionsRussiaBtn" caption="msg://msgLoadRegionsRussia"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">
