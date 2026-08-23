@@ -155,10 +155,10 @@ public class CityEdit extends StandardEditor<City> {
                 }
 
                 notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption("Реквизиты города успешно заполнены")
-                        .withDescription(emblemLoaded
+                        .withCaption(anyFieldFilled ? "Реквизиты города успешно заполнены" : "Реквизиты города уже заполнены")
+                        .withDescription((emblemLoaded
                                 ? "Телефонный код, индекс, население, координаты и герб получены."
-                                : "Телефонный код, индекс, население и координаты получены.")
+                                : "Телефонный код, индекс, население и координаты получены.") + (anyFieldFilled ? "" : " (все поля уже были заполнены)"))
                         .show();
             } else {
                 notifications.create(Notifications.NotificationType.HUMANIZED)

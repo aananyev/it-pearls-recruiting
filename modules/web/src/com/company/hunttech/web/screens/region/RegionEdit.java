@@ -143,10 +143,10 @@ public class RegionEdit extends StandardEditor<Region> {
                 }
 
                 notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption("Реквизиты региона успешно заполнены")
-                        .withDescription(emblemLoaded
+                        .withCaption(anyFieldFilled ? "Реквизиты региона успешно заполнены" : "Реквизиты региона уже заполнены")
+                        .withDescription((emblemLoaded
                                 ? "Коды, тип региона, столица и герб получены."
-                                : "Коды, тип региона и столица получены.")
+                                : "Коды, тип региона и столица получены.") + (anyFieldFilled ? "" : " (все поля уже были заполнены)"))
                         .show();
             } else {
                 notifications.create(Notifications.NotificationType.HUMANIZED)

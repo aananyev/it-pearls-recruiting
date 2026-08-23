@@ -156,10 +156,10 @@ public class CountryEdit extends StandardEditor<Country> {
                 }
 
                 notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.TRAY)
-                        .withCaption("Реквизиты страны успешно заполнены")
-                        .withDescription(flagLoaded
+                        .withCaption(anyFieldFilled ? "Реквизиты страны успешно заполнены" : "Реквизиты страны уже заполнены")
+                        .withDescription((flagLoaded
                                 ? "Коды ISO, валюта, столица и официальный флаг государства загружены."
-                                : "Коды ISO, валюта и столица государства получены.")
+                                : "Коды ISO, валюта и столица государства получены.") + (anyFieldFilled ? "" : " (все поля уже были заполнены)"))
                         .show();
             } else {
                 notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.HUMANIZED)
