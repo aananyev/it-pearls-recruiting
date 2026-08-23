@@ -167,6 +167,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onInit(Screen.InitEvent event) {
+        // Выравнивание заголовков сайдбара по центру
+        detailVacancyName.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailProjectName.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailCompanyName.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailLocationAndFormat.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         initTableColumns();
         initToolbarActions();
         initFilterPopupActions();
