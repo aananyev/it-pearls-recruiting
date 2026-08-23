@@ -86,17 +86,17 @@
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
                                 <label id="detailVacancyName"
                                        value="Выберите вакансию"
-                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
                                        width="100%"
                                        align="MIDDLE_CENTER"/>
                                 <label id="detailProjectName"
                                        value="-"
-                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
                                        width="100%"
                                        align="MIDDLE_CENTER"/>
                                 <label id="detailCompanyName"
                                        value="-"
-                                       stylename="edit-help candidate-sidebar-city"
+                                       stylename="edit-help candidate-sidebar-city bold"
                                        width="100%"
                                        align="MIDDLE_CENTER"/>
                                 <label id="detailLocationAndFormat"

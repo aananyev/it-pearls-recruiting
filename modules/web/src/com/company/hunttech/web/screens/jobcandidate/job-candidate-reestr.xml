@@ -71,11 +71,11 @@
                             <!-- Текстовый блок заголовка профиля с автопереносом строк и центрированием -->
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
                                 <!-- Подпись с ФИО выбранного кандидата (+30% шрифт, центрировано) -->
-                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
+                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold" align="MIDDLE_CENTER"/>
                                 <!-- Подпись с текущей должностью кандидата -->
-                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
+                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold" align="MIDDLE_CENTER"/>
                                 <!-- Подпись с городом проживания кандидата (+30% шрифт, центрировано) -->
-                                <label id="detailCity" value="" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
+                                <label id="detailCity" value="" stylename="edit-help candidate-sidebar-city bold" align="MIDDLE_CENTER"/>
                             </vbox>
                         </vbox>
 
