@@ -128,6 +128,7 @@ public class RegionEdit extends StandardEditor<Region> {
                         region.setEmblemImage(emblemBytes);
                         region.setEmblemUrl(data.getEmblemUrl());
                         emblemLoaded = true;
+                        anyFieldFilled = true;
                     }
 
                     // 2. Создаём FileDescriptor для отображения в fallbackImage (обратная совместимость)

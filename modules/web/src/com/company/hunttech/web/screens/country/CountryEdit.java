@@ -141,6 +141,7 @@ public class CountryEdit extends StandardEditor<Country> {
                         country.setFlagImage(flagBytes);
                         country.setFlagUrl(data.getFlagUrl());
                         flagLoaded = true;
+                        anyFieldFilled = true;
                     }
 
                     // 2. Создаём FileDescriptor для отображения в fallbackImage (обратная совместимость)

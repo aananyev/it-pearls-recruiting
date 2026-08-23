@@ -140,6 +140,7 @@ public class CityEdit extends StandardEditor<City> {
                         city.setEmblemImage(emblemBytes);
                         city.setEmblemUrl(data.getEmblemUrl());
                         emblemLoaded = true;
+                        anyFieldFilled = true;
                     }
 
                     // 2. Создаём FileDescriptor для отображения в fallbackImage (обратная совместимость)
