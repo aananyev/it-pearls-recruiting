@@ -26,6 +26,15 @@ public class GeoRegionData extends BaseUuidEntity implements Serializable {
     private String fiasId;
 
     @MetaProperty
+    private String kladrCode;
+
+    @MetaProperty
+    private String okato;
+
+    @MetaProperty
+    private String oktmo;
+
+    @MetaProperty
     private String regionType;
 
     @MetaProperty
@@ -81,6 +90,30 @@ public class GeoRegionData extends BaseUuidEntity implements Serializable {
 
     public void setFiasId(String fiasId) {
         this.fiasId = fiasId;
+    }
+
+    public String getKladrCode() {
+        return kladrCode;
+    }
+
+    public void setKladrCode(String kladrCode) {
+        this.kladrCode = kladrCode;
+    }
+
+    public String getOkato() {
+        return okato;
+    }
+
+    public void setOkato(String okato) {
+        this.okato = okato;
+    }
+
+    public String getOktmo() {
+        return oktmo;
+    }
+
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
     }
 
     public String getRegionType() {

@@ -26,6 +26,21 @@ public class GeoCityData extends BaseUuidEntity implements Serializable {
     private String fiasId;
 
     @MetaProperty
+    private Long geonameId;
+
+    @MetaProperty
+    private String wikiLink;
+
+    @MetaProperty
+    private String airportCodeIata;
+
+    @MetaProperty
+    private String airportCodeIcao;
+
+    @MetaProperty
+    private Boolean isCapital;
+
+    @MetaProperty
     private Long population;
 
     @MetaProperty
@@ -87,6 +102,46 @@ public class GeoCityData extends BaseUuidEntity implements Serializable {
 
     public void setFiasId(String fiasId) {
         this.fiasId = fiasId;
+    }
+
+    public Long getGeonameId() {
+        return geonameId;
+    }
+
+    public void setGeonameId(Long geonameId) {
+        this.geonameId = geonameId;
+    }
+
+    public String getWikiLink() {
+        return wikiLink;
+    }
+
+    public void setWikiLink(String wikiLink) {
+        this.wikiLink = wikiLink;
+    }
+
+    public String getAirportCodeIata() {
+        return airportCodeIata;
+    }
+
+    public void setAirportCodeIata(String airportCodeIata) {
+        this.airportCodeIata = airportCodeIata;
+    }
+
+    public String getAirportCodeIcao() {
+        return airportCodeIcao;
+    }
+
+    public void setAirportCodeIcao(String airportCodeIcao) {
+        this.airportCodeIcao = airportCodeIcao;
+    }
+
+    public Boolean getIsCapital() {
+        return isCapital;
+    }
+
+    public void setIsCapital(Boolean isCapital) {
+        this.isCapital = isCapital;
     }
 
     public Long getPopulation() {

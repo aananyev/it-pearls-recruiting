@@ -1,6 +1,8 @@
 package com.company.hunttech.service;
 
 import com.company.hunttech.entity.*;
+import com.company.hunttech.service.geo.GeoDataProvider;
+import com.company.hunttech.service.geo.GeoapifyGeoProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -10,6 +12,7 @@ import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -19,6 +22,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service(GeoDataEnrichmentService.NAME)
 public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
@@ -33,6 +37,16 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     @Inject
     protected FileLoader fileLoader;
 
+    @Autowired(required = false)
+    private List<GeoDataProvider> geoProviders;
+
+    // Порядок fallback провайдеров (можно переопределить через конфигурацию)
+    private static final List<String> DEFAULT_PROVIDER_ORDER = Arrays.asList(
+            "geoapify",  // основной: русские названия, работает из РФ, 3000 req/day free
+            "htmlweb",   // fallback: 20 req/day free
+            "geonames"   // fallback: 3000 req/day free, нужен username
+    );
+
     @Override
     public GeoCountryData enrichCountry(String countryNameOrCode) {
         if (countryNameOrCode == null || countryNameOrCode.trim().isEmpty()) {
@@ -44,13 +58,60 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
         GeoCountryData data = new GeoCountryData();
         data.setCountryRuName(query);
 
-        // 1. Поиск во встроенном справочнике популярных стран
+        // 1. Поиск во встроенном справочнике популярных стран (быстрый локальный)
         GeoCountryData localMatch = lookupLocalCountry(query);
         if (localMatch != null) {
             copyProperties(localMatch, data);
         }
 
-        // 2. Онлайн-запрос к restcountries.com API
+        // 2. Онлайн-запрос через цепочку провайдеров
+        enrichCountryFromProviders(query, data);
+
+        // 3. Fallback: поиск флага через Wikipedia/Wikimedia, если URL флага не получен
+        if (data.getFlagUrl() == null || data.getFlagUrl().isEmpty()) {
+            String wikiFlag = fetchWikipediaThumbnail("Флаг_" + (data.getCountryRuName() != null ? data.getCountryRuName() : query));
+            if (wikiFlag != null) {
+                data.setFlagUrl(wikiFlag);
+            }
+        }
+
+        data.setRawSnippet("Получены данные страны: " + (data.getCountryRuName() != null ? data.getCountryRuName() : query)
+                + " (ISO: " + (data.getCountryShortName() != null ? data.getCountryShortName() : "-") + ")");
+        return data;
+    }
+
+    /**
+     * Обогащение страны через цепочку провайдеров
+     */
+    private void enrichCountryFromProviders(String query, GeoCountryData data) {
+        List<GeoDataProvider> providers = getProvidersInOrder();
+        if (providers.isEmpty()) {
+            log.warn("Нет доступных GeoDataProvider для обогащения страны: {}", query);
+            // Fallback на старый restcountries.com
+            enrichCountryFromRestCountries(query, data);
+            return;
+        }
+
+        for (GeoDataProvider provider : providers) {
+            if (!provider.supportsCountries()) continue;
+            try {
+                log.debug("Попытка обогащения страны '{}' через провайдер: {}", query, provider.getProviderCode());
+                GeoDataProvider.CountryDTO dto = provider.findCountry(query, "ru");
+                if (dto != null && dto.getNameRu() != null) {
+                    mapCountryDTO(dto, data);
+                    log.info("Страна '{}' успешно обогащена через провайдер: {}", query, provider.getProviderCode());
+                    return; // успех — прерываем цепочку
+                }
+            } catch (Exception e) {
+                log.warn("Провайдер {} ошибка для страны '{}': {}", provider.getProviderCode(), query, e.getMessage());
+            }
+        }
+        log.warn("Все провайдеры не смогли обогатить страну: {}", query);
+        // Последний fallback
+        enrichCountryFromRestCountries(query, data);
+    }
+
+    private void enrichCountryFromRestCountries(String query, GeoCountryData data) {
         try {
             String urlStr = query.length() <= 3 && isAscii(query)
                     ? "https://restcountries.com/v3.1/alpha/" + URLEncoder.encode(query, "UTF-8")
@@ -67,18 +128,19 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
         } catch (Exception e) {
             log.info("Запрос к restcountries.com для '{}' завершился: {}", query, e.getMessage());
         }
+    }
 
-        // 3. Fallback: поиск флага через Wikipedia/Wikimedia, если URL флага не получен
-        if (data.getFlagUrl() == null || data.getFlagUrl().isEmpty()) {
-            String wikiFlag = fetchWikipediaThumbnail("Флаг_" + (data.getCountryRuName() != null ? data.getCountryRuName() : query));
-            if (wikiFlag != null) {
-                data.setFlagUrl(wikiFlag);
-            }
-        }
-
-        data.setRawSnippet("Получены данные страны: " + (data.getCountryRuName() != null ? data.getCountryRuName() : query)
-                + " (ISO: " + (data.getCountryShortName() != null ? data.getCountryShortName() : "-") + ")");
-        return data;
+    private void mapCountryDTO(GeoDataProvider.CountryDTO dto, GeoCountryData data) {
+        if (dto.getNameRu() != null) data.setCountryRuName(dto.getNameRu());
+        if (dto.getNameEn() != null) data.setCountryEngName(dto.getNameEn());
+        if (dto.getIso2() != null) data.setCountryShortName(dto.getIso2());
+        if (dto.getIso3() != null) data.setAlpha3Code(dto.getIso3());
+        if (dto.getNumericCode() != null) data.setNumericCode(dto.getNumericCode().toString());
+        if (dto.getPhoneCode() != null) data.setPhoneCode(dto.getPhoneCode());
+        if (dto.getCapitalRu() != null) data.setCapital(dto.getCapitalRu());
+        else if (dto.getCapitalEn() != null) data.setCapital(dto.getCapitalEn());
+        if (dto.getCurrencyCode() != null) data.setCurrencyCode(dto.getCurrencyCode());
+        if (dto.getFlagUrl() != null) data.setFlagUrl(dto.getFlagUrl());
     }
 
     @Override
@@ -95,10 +157,15 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             data.setCountryName(country.getCountryRuName());
         }
 
-        // 1. Определение типа региона и столицы по справочнику
+        // 1. Локальный справочник для РФ
         lookupLocalRegion(query, data);
 
-        // 2. Поиск герба региона через Wikipedia, если не задан в локальной базе
+        // 2. Провайдеры для регионов (если локальный не дал результат)
+        if (data.getRegionType() == null || data.getEmblemUrl() == null) {
+            enrichRegionFromProviders(query, country, data);
+        }
+
+        // 3. Fallback: герб через Wikipedia
         if (data.getEmblemUrl() == null || data.getEmblemUrl().isEmpty()) {
             String emblemUrl = fetchWikipediaThumbnail("Герб_" + query);
             if (emblemUrl != null) {
@@ -108,6 +175,38 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
 
         data.setRawSnippet("Получены данные региона: " + query + " (" + (data.getRegionType() != null ? data.getRegionType() : "регион") + ")");
         return data;
+    }
+
+    private void enrichRegionFromProviders(String query, Country country, GeoRegionData data) {
+        List<GeoDataProvider> providers = getProvidersInOrder();
+        String countryIso2 = country != null ? country.getCountryShortName() : null;
+
+        for (GeoDataProvider provider : providers) {
+            if (!provider.supportsRegions()) continue;
+            try {
+                GeoDataProvider.RegionDTO dto = provider.findRegion(query, countryIso2, "ru");
+                if (dto != null && dto.getNameRu() != null) {
+                    mapRegionDTO(dto, data);
+                    log.info("Регион '{}' обогащён через провайдер: {}", query, provider.getProviderCode());
+                    break;
+                }
+            } catch (Exception e) {
+                log.warn("Провайдер {} ошибка для региона '{}': {}", provider.getProviderCode(), query, e.getMessage());
+            }
+        }
+    }
+
+    private void mapRegionDTO(GeoDataProvider.RegionDTO dto, GeoRegionData data) {
+        if (dto.getNameRu() != null) data.setRegionRuName(dto.getNameRu());
+        if (dto.getNameEn() != null) data.setRegionEngName(dto.getNameEn());
+        if (dto.getCode() != null) data.setIsoCode(dto.getCode());
+        if (dto.getType() != null) data.setRegionType(dto.getType());
+        if (dto.getCapitalRu() != null) data.setCapital(dto.getCapitalRu());
+        if (dto.getTimezone() != null) data.setTimeZone(dto.getTimezone());
+        if (dto.getKladrCode() != null) data.setKladrCode(dto.getKladrCode());
+        if (dto.getOkato() != null) data.setOkato(dto.getOkato());
+        if (dto.getOktmo() != null) data.setOktmo(dto.getOktmo());
+        if (dto.getFiasId() != null) data.setFiasId(dto.getFiasId());
     }
 
     @Override
@@ -127,10 +226,15 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             data.setCountryName(country.getCountryRuName());
         }
 
-        // 1. Локальные данные для крупных городов
+        // 1. Локальный справочник для крупных городов
         lookupLocalCity(query, data);
 
-        // 2. Поиск герба города через Wikipedia, если не задан в локальной базе
+        // 2. Провайдеры для городов
+        if (data.getLatitude() == null || data.getEmblemUrl() == null) {
+            enrichCityFromProviders(query, region, country, data);
+        }
+
+        // 3. Fallback: герб через Wikipedia
         if (data.getEmblemUrl() == null || data.getEmblemUrl().isEmpty()) {
             String emblemUrl = fetchWikipediaThumbnail("Герб_" + query);
             if (emblemUrl != null) {
@@ -140,6 +244,59 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
 
         data.setRawSnippet("Получены данные города: " + query);
         return data;
+    }
+
+    private void enrichCityFromProviders(String query, Region region, Country country, GeoCityData data) {
+        List<GeoDataProvider> providers = getProvidersInOrder();
+        String regionCode = region != null ? region.getIsoCode() : null;
+        String countryIso2 = country != null ? country.getCountryShortName() : null;
+
+        for (GeoDataProvider provider : providers) {
+            if (!provider.supportsCities()) continue;
+            try {
+                GeoDataProvider.CityDTO dto = provider.findCity(query, regionCode, countryIso2, "ru");
+                if (dto != null && dto.getNameRu() != null) {
+                    mapCityDTO(dto, data);
+                    log.info("Город '{}' обогащён через провайдер: {}", query, provider.getProviderCode());
+                    break;
+                }
+            } catch (Exception e) {
+                log.warn("Провайдер {} ошибка для города '{}': {}", provider.getProviderCode(), query, e.getMessage());
+            }
+        }
+    }
+
+    private void mapCityDTO(GeoDataProvider.CityDTO dto, GeoCityData data) {
+        if (dto.getNameRu() != null) data.setCityRuName(dto.getNameRu());
+        if (dto.getNameEn() != null) data.setCityEngName(dto.getNameEn());
+        if (dto.getLatitude() != null) data.setLatitude(dto.getLatitude());
+        if (dto.getLongitude() != null) data.setLongitude(dto.getLongitude());
+        if (dto.getPopulation() != null) data.setPopulation(dto.getPopulation());
+        if (dto.getTimezone() != null) data.setTimeZone(dto.getTimezone());
+        if (dto.getPostalCode() != null) data.setPostalCode(dto.getPostalCode());
+        if (dto.getPhoneCode() != null) data.setCityPhoneCode(dto.getPhoneCode());
+        if (dto.getAirportIata() != null) data.setAirportCodeIata(dto.getAirportIata());
+        if (dto.getAirportIcao() != null) data.setAirportCodeIcao(dto.getAirportIcao());
+        if (dto.getGeonameId() != null) data.setGeonameId(dto.getGeonameId());
+        if (dto.getWikiLink() != null) data.setWikiLink(dto.getWikiLink());
+        if (dto.getIsCapital() != null) data.setIsCapital(dto.getIsCapital());
+    }
+
+    /**
+     * Возвращает список провайдеров в порядке приоритета (fallback)
+     */
+    private List<GeoDataProvider> getProvidersInOrder() {
+        if (geoProviders == null || geoProviders.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Сортируем по DEFAULT_PROVIDER_ORDER
+        return geoProviders.stream()
+                .filter(p -> p != null)
+                .sorted(Comparator.comparingInt(p -> {
+                    int idx = DEFAULT_PROVIDER_ORDER.indexOf(p.getProviderCode());
+                    return idx >= 0 ? idx : 999;
+                }))
+                .collect(Collectors.toList());
     }
 
     @Override
