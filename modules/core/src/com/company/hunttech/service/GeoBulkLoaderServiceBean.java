@@ -639,7 +639,9 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
             new RegionLocalEntry("RU-YAN", "Ямало-Ненецкий автономный округ", "Автономный округ", "Салехард", "UTC+5", "https://upload.wikimedia.org/wikipedia/commons/1/1a/Coat_of_arms_of_Yamalo-Nenets_Autonomous_Okrug.svg"),
             new RegionLocalEntry("RU-YAR", "Ярославская область", "Область", "Ярославль", "UTC+3", "https://upload.wikimedia.org/wikipedia/commons/7/7b/Coat_of_arms_of_Yaroslavl_Oblast.svg"),
             new RegionLocalEntry("RU-YEV", "Еврейская автономная область", "Автономная область", "Биробиджан", "UTC+10", "https://upload.wikimedia.org/wikipedia/commons/4/4b/Coat_of_arms_of_Jewish_Autonomous_Oblast.svg"),
-            new RegionLocalEntry("RU-ZAB", "Забайкальский край", "Край", "Чита", "UTC+9", "https://upload.wikimedia.org/wikipedia/commons/c/c4/Coat_of_arms_of_Zabaykalsky_Krai.svg")
+            new RegionLocalEntry("RU-ZAB", "Забайкальский край", "Край", "Чита", "UTC+9", "https://upload.wikimedia.org/wikipedia/commons/c/c4/Coat_of_arms_of_Zabaykalsky_Krai.svg"),
+            new RegionLocalEntry("RU-CR", "Республика Крым", "Республика", "Симферополь", "UTC+3", "https://upload.wikimedia.org/wikipedia/commons/8/86/Gerb_kryma.svg"),
+            new RegionLocalEntry("RU-SEV", "Севастополь", "Город федерального значения", "Севастополь", "UTC+3", "https://upload.wikimedia.org/wikipedia/commons/1/19/Coat_of_Arms_of_Sevastopol.svg")
     );
 
     private void loadRegionsFromLocalCatalog(Country russia, LoadAccumulator acc) {
@@ -670,7 +672,9 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
             return;
         }
 
-        // Ищем существующий регион: сначала по ISO коду, затем по названию + стране
+        // Ищем существующий регион: сначала по ISO коду, затем по названию (без фильтра
+        // страны — у старых записей region_country может быть NULL, но unique constraint
+        // на region_ru_name глобальный, поэтому поиск только по имени обязателен).
         Region existing = null;
         if (geoData.getIsoCode() != null && !geoData.getIsoCode().isEmpty()) {
             existing = dataManager.load(Region.class)
@@ -681,9 +685,8 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
         }
         if (existing == null) {
             existing = dataManager.load(Region.class)
-                    .query("select e from hunttech_Region e where e.regionRuName = :name and e.regionCountry = :country and e.deleteTs is null")
+                    .query("select e from hunttech_Region e where e.regionRuName = :name and e.deleteTs is null")
                     .parameter("name", geoData.getRegionRuName())
-                    .parameter("country", russia)
                     .optional()
                     .orElse(null);
         }
@@ -691,6 +694,9 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
         Region region;
         if (existing != null) {
             region = existing;
+            if (region.getRegionCountry() == null) {
+                region.setRegionCountry(russia);
+            }
             acc.updated++;
         } else {
             region = metadata.create(Region.class);
