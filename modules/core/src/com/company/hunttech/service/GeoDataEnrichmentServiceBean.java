@@ -307,66 +307,122 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     }
 
     /**
-     * Скачивает изображение по URL и сохраняет байты в поле сущности (BLOB в БД).
-     * Заменяет downloadAndSaveImage который сохранял в FileDescriptor.
-     */
-    @Override
-    public byte[] downloadImageAsBytes(String imageUrl) {
-        if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            return null;
+         * Скачивает изображение по URL и сохраняет байты в поле сущности (BLOB в БД).
+         * Заменяет downloadAndSaveImage который сохранял в FileDescriptor.
+         */
+        @Override
+        public byte[] downloadImageAsBytes(String imageUrl) {
+            if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                return null;
+            }
+            try {
+                String url = imageUrl.trim();
+                if (url.startsWith("//")) {
+                    url = "https:" + url;
+                }
+                // SSRF защита: только HTTPS, блок внутренних адресов, запрет редиректов
+                if (!isAllowedImageUrl(url)) {
+                    log.warn("Заблокирован запрос к недопустимому URL: {}", url);
+                    return null;
+                }
+                byte[] imageBytes = fetchHttpBytes(url, 5000, 1048576); // лимит 1MB при чтении
+                if (imageBytes == null || imageBytes.length == 0) {
+                    return null;
+                }
+                log.debug("Гео-изображение скачано: {} байт", imageBytes.length);
+                return imageBytes;
+            } catch (Exception e) {
+                log.warn("Не удалось скачать изображение по URL '{}': {}", imageUrl, e.getMessage());
+                return null;
+            }
         }
-        try {
-            String url = imageUrl.trim();
-            if (url.startsWith("//")) {
-                url = "https:" + url;
-            }
-            // SSRF защита: только HTTPS, блок внутренних адресов
-            if (!isAllowedImageUrl(url)) {
-                log.warn("Заблокирован запрос к недопустимому URL: {}", url);
-                return null;
-            }
-            byte[] imageBytes = fetchHttpBytes(url, 5000);
-            if (imageBytes == null || imageBytes.length == 0) {
-                return null;
-            }
-            // Ограничение размера: 1MB
-            if (imageBytes.length > 1048576) {
-                log.warn("Изображение слишком большое ({} байт), пропущено", imageBytes.length);
-                return null;
-            }
-            log.debug("Гео-изображение скачано: {} байт", imageBytes.length);
-            return imageBytes;
-        } catch (Exception e) {
-            log.warn("Не удалось скачать изображение по URL '{}': {}", imageUrl, e.getMessage());
-            return null;
-        }
-    }
 
-    /**
-     * Проверка URL на безопасность (SSRF защита): только HTTPS, нет localhost/private IP
-     */
-    private boolean isAllowedImageUrl(String url) {
-        try {
-            java.net.URI uri = new java.net.URI(url);
-            if (!"https".equalsIgnoreCase(uri.getScheme())) {
+        /**
+         * Проверка URL на безопасность (SSRF защита): только HTTPS, резолвим хост в IP,
+         * блокируем localhost/private/link-local/metadata адреса
+         */
+        private boolean isAllowedImageUrl(String url) {
+            try {
+                java.net.URI uri = new java.net.URI(url);
+                if (!"https".equalsIgnoreCase(uri.getScheme())) {
+                    return false;
+                }
+                String host = uri.getHost();
+                if (host == null) return false;
+
+                // Резолвим хост в IP адреса и проверяем каждый
+                java.net.InetAddress[] addresses = java.net.InetAddress.getAllByName(host);
+                for (java.net.InetAddress addr : addresses) {
+                    if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() ||
+                        addr.isSiteLocalAddress() || addr.isMulticastAddress()) {
+                        return false;
+                    }
+                    String ip = addr.getHostAddress();
+                    // Блок IPv4 private ranges
+                    if (ip.startsWith("10.") || ip.startsWith("192.168.") ||
+                        ip.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*") ||
+                        ip.startsWith("169.254.") || ip.startsWith("127.")) {
+                        return false;
+                    }
+                    // Блок IPv6: ::1, fe80::/10, fc00::/7 (ULA), ::ffff:127.0.0.1 (IPv4-mapped)
+                    if (ip.equals("::1") || ip.startsWith("fe80:") || ip.startsWith("fc") || ip.startsWith("fd") ||
+                        ip.startsWith("::ffff:127.") || ip.startsWith("::ffff:10.") || ip.startsWith("::ffff:192.168.")) {
+                        return false;
+                    }
+                }
+                return true;
+            } catch (Exception e) {
                 return false;
             }
-            String host = uri.getHost();
-            if (host == null) return false;
-            // Блок localhost и private ranges
-            if (host.equalsIgnoreCase("localhost") || host.startsWith("127.") ||
-                host.startsWith("10.") || host.startsWith("192.168.") ||
-                host.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*") ||
-                host.startsWith("169.254.") || // link-local
-                host.endsWith(".internal") || // cloud metadata
-                host.equals("metadata.google.internal")) {
-                return false;
-            }
-            return true;
-        } catch (Exception e) {
-            return false;
         }
-    }
+
+        /**
+         * Скачивает байты с лимитом размера и без следования редиректам (SSRF защита)
+         */
+        private byte[] fetchHttpBytes(String urlStr, int timeoutMs, int maxBytes) {
+            try {
+                java.net.URL url = new java.net.URL(urlStr);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("User-Agent", "HuntTech-HRM/1.0 (Geoapify Provider)");
+                conn.setConnectTimeout(timeoutMs);
+                conn.setReadTimeout(timeoutMs);
+                conn.setInstanceFollowRedirects(false); // Запрет редиректов для SSRF защиты
+                int code = conn.getResponseCode();
+                if (code < 200 || code >= 400) {
+                    log.debug("HTTP {}", code);
+                    return null;
+                }
+                // Проверяем Content-Length если есть
+                String contentLengthStr = conn.getHeaderField("Content-Length");
+                if (contentLengthStr != null) {
+                    try {
+                        long cl = Long.parseLong(contentLengthStr);
+                        if (cl > maxBytes) {
+                            log.warn("Content-Length {} превышает лимит {}", cl, maxBytes);
+                            return null;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+                try (java.io.InputStream in = conn.getInputStream();
+                     java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+                    byte[] buf = new byte[8192];
+                    int n;
+                    int total = 0;
+                    while ((n = in.read(buf)) != -1) {
+                        total += n;
+                        if (total > maxBytes) {
+                            log.warn("Размер изображения превышает лимит {} байт", maxBytes);
+                            return null;
+                        }
+                        out.write(buf, 0, n);
+                    }
+                    return out.toByteArray();
+                }
+            } catch (Exception e) {
+                log.debug("fetchHttpBytes error: {}", e.getMessage());
+                return null;
+            }
+        }
 
     /**
      * Сохраняет флаг страны в БД (byte[])
@@ -408,24 +464,26 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     }
 
     /**
-     * Пакетное сохранение флагов/гербов для списка сущностей (одна транзакция).
+     * Пакетное сохранение флагов/гербов для списка сущностей в одной транзакции.
      * Используйте для bulk-обогащения справочников.
      */
+    @Override
     public void saveImagesBatch(List<Country> countries, List<Region> regions, List<City> cities) {
         if ((countries == null || countries.isEmpty()) &&
             (regions == null || regions.isEmpty()) &&
             (cities == null || cities.isEmpty())) {
             return;
         }
-        // CUBA dataManager.commit(Entity...) принимает varargs
+        // CUBA: используем CommitContext для атомарного commit всех сущностей
+        com.haulmont.cuba.core.global.CommitContext commitContext = new com.haulmont.cuba.core.global.CommitContext();
         if (countries != null) {
             for (Country c : countries) {
                 if (c.getFlagImage() == null && c.getFlagUrl() != null) {
                     byte[] bytes = downloadImageAsBytes(c.getFlagUrl());
                     if (bytes != null) c.setFlagImage(bytes);
                 }
+                commitContext.addInstanceToCommit(c);
             }
-            dataManager.commit(countries.toArray(new Country[0]));
         }
         if (regions != null) {
             for (Region r : regions) {
@@ -433,8 +491,8 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
                     byte[] bytes = downloadImageAsBytes(r.getEmblemUrl());
                     if (bytes != null) r.setEmblemImage(bytes);
                 }
+                commitContext.addInstanceToCommit(r);
             }
-            dataManager.commit(regions.toArray(new Region[0]));
         }
         if (cities != null) {
             for (City c : cities) {
@@ -442,10 +500,11 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
                     byte[] bytes = downloadImageAsBytes(c.getEmblemUrl());
                     if (bytes != null) c.setEmblemImage(bytes);
                 }
+                commitContext.addInstanceToCommit(c);
             }
-            dataManager.commit(cities.toArray(new City[0]));
         }
-        log.info("Пакетное сохранение гео-изображений: countries={}, regions={}, cities={}",
+        dataManager.commit(commitContext);
+        log.info("Пакетное сохранение гео-изображений (одна транзакция): countries={}, regions={}, cities={}",
                 countries != null ? countries.size() : 0,
                 regions != null ? regions.size() : 0,
                 cities != null ? cities.size() : 0);
