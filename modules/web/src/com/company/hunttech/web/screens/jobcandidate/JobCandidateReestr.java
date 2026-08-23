@@ -60,6 +60,8 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -81,6 +83,8 @@ import java.util.UUID;
 @LookupComponent("candidatesTable")
 @LoadDataBeforeShow
 public class JobCandidateReestr extends StandardLookup<JobCandidate> {
+
+    private static final Logger log = LoggerFactory.getLogger(JobCandidateReestr.class);
 
     private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
             "select e from hunttech_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate order by e.createTs";
@@ -170,6 +174,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private Label<String> detailRating;
     @Inject
     private Label<String> detailVacancyStatus;
+    @Inject
+    private Label<String> detailNumber;
     @Inject
     private Button editCandidateBtn;
     @Inject
@@ -954,6 +960,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         if (detailVacancyStatus != null) {
             detailVacancyStatus.setValue("-");
         }
+        if (detailNumber != null) {
+            detailNumber.setValue("-");
+        }
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
     }
@@ -1001,6 +1010,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     .query("select e from hunttech_IteractionList e where e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
                     .parameter("cand", candidate)
                     .view("iteractionList-view")
+                    .maxResults(1)
                     .list();
 
             if (!interactions.isEmpty()) {
@@ -1023,13 +1033,27 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 } else {
                     detailVacancyStatus.setValue("Вакансия не указана");
                 }
+
+                // Номер взаимодействия (целое число без точки и нулей)
+                if (detailNumber != null && last.getNumberIteraction() != null) {
+                    detailNumber.setValue(last.getNumberIteraction().toBigInteger().toString());
+                } else if (detailNumber != null) {
+                    detailNumber.setValue("-");
+                }
             } else {
                 detailRating.setValue("Нет взаимодействий");
                 detailVacancyStatus.setValue("Нет взаимодействий");
+                if (detailNumber != null) {
+                    detailNumber.setValue("-");
+                }
             }
         } catch (Exception ex) {
+            log.warn("Failed to load interaction data for candidate {}", candidate != null ? candidate.getId() : null, ex);
             detailRating.setValue("Ошибка загрузки");
             detailVacancyStatus.setValue("Ошибка загрузки");
+            if (detailNumber != null) {
+                detailNumber.setValue("Ошибка загрузки");
+            }
         }
     }
 

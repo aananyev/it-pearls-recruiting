@@ -122,6 +122,10 @@
                                         <label value="Статус вакансии:" stylename="bold"/>
                                         <label id="detailVacancyStatus" value="-"/>
                                     </row>
+                                    <row>
+                                        <label value="Номер:" stylename="bold"/>
+                                        <label id="detailNumber" value="-"/>
+                                    </row>
                                 </rows>
                             </grid>
                         </vbox>
