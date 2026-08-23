@@ -49,6 +49,10 @@ public class City extends StandardEntity {
     @JoinColumn(name = "FILE_CITY_EMBLEM_ID")
     protected FileDescriptor fileCityEmblem;
 
+    @Lob
+    @Column(name = "EMBLEM_IMAGE")
+    protected byte[] emblemImage;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_REGION_ID")
@@ -120,6 +124,14 @@ public class City extends StandardEntity {
 
     public void setFileCityEmblem(FileDescriptor fileCityEmblem) {
         this.fileCityEmblem = fileCityEmblem;
+    }
+
+    public byte[] getEmblemImage() {
+        return emblemImage;
+    }
+
+    public void setEmblemImage(byte[] emblemImage) {
+        this.emblemImage = emblemImage;
     }
 
     public Region getCityRegion() {

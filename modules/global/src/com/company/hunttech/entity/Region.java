@@ -35,6 +35,10 @@ public class Region extends StandardEntity {
     @JoinColumn(name = "FILE_REGION_EMBLEM_ID")
     protected FileDescriptor fileRegionEmblem;
 
+    @Lob
+    @Column(name = "EMBLEM_IMAGE")
+    protected byte[] emblemImage;
+
     @Composition
     @OneToMany(mappedBy = "cityRegion")
     protected List<City> regionOfCity;
@@ -111,6 +115,14 @@ public class Region extends StandardEntity {
 
     public void setFileRegionEmblem(FileDescriptor fileRegionEmblem) {
         this.fileRegionEmblem = fileRegionEmblem;
+    }
+
+    public byte[] getEmblemImage() {
+        return emblemImage;
+    }
+
+    public void setEmblemImage(byte[] emblemImage) {
+        this.emblemImage = emblemImage;
     }
 
     public List<City> getRegionOfCity() {

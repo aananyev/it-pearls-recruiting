@@ -22,8 +22,30 @@ public interface GeoDataEnrichmentService {
     GeoCityData enrichCity(String cityName, Region region, Country country);
 
     /**
+     * Скачивает изображение по URL и возвращает байты для сохранения в БД (BLOB).
+     */
+    byte[] downloadImageAsBytes(String imageUrl);
+
+    /**
+     * Сохраняет флаг страны в БД (byte[])
+     */
+    void saveCountryFlag(Country country, String flagUrl);
+
+    /**
+     * Сохраняет герб региона в БД (byte[])
+     */
+    void saveRegionEmblem(Region region, String emblemUrl);
+
+    /**
+     * Сохраняет герб города в БД (byte[])
+     */
+    void saveCityEmblem(City city, String emblemUrl);
+
+    /**
+     * @deprecated Используйте downloadImageAsBytes + saveCountryFlag/saveRegionEmblem/saveCityEmblem
      * Скачивание изображения (флага, герба) по URL и сохранение как FileDescriptor.
      */
+    @Deprecated
     FileDescriptor downloadAndSaveImage(String imageUrl, String fileName);
 
     /**

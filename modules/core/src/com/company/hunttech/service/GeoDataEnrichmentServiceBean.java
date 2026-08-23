@@ -306,6 +306,76 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Скачивает изображение по URL и сохраняет байты в поле сущности (BLOB в БД).
+     * Заменяет downloadAndSaveImage который сохранял в FileDescriptor.
+     */
+    @Override
+    public byte[] downloadImageAsBytes(String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            String url = imageUrl.trim();
+            if (url.startsWith("//")) {
+                url = "https:" + url;
+            }
+            byte[] imageBytes = fetchHttpBytes(url, 5000);
+            if (imageBytes == null || imageBytes.length == 0) {
+                return null;
+            }
+            log.debug("Гео-изображение скачано: {} байт", imageBytes.length);
+            return imageBytes;
+        } catch (Exception e) {
+            log.warn("Не удалось скачать изображение по URL '{}': {}", imageUrl, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Сохраняет флаг страны в БД (byte[])
+     */
+    public void saveCountryFlag(Country country, String flagUrl) {
+        if (country == null || flagUrl == null || flagUrl.isEmpty()) return;
+        byte[] imageBytes = downloadImageAsBytes(flagUrl);
+        if (imageBytes != null) {
+            country.setFlagImage(imageBytes);
+            dataManager.commit(country);
+            log.info("Флаг страны '{}' сохранён в БД ({} байт)", country.getCountryRuName(), imageBytes.length);
+        }
+    }
+
+    /**
+     * Сохраняет герб региона в БД (byte[])
+     */
+    public void saveRegionEmblem(Region region, String emblemUrl) {
+        if (region == null || emblemUrl == null || emblemUrl.isEmpty()) return;
+        byte[] imageBytes = downloadImageAsBytes(emblemUrl);
+        if (imageBytes != null) {
+            region.setEmblemImage(imageBytes);
+            dataManager.commit(region);
+            log.info("Герб региона '{}' сохранён в БД ({} байт)", region.getRegionRuName(), imageBytes.length);
+        }
+    }
+
+    /**
+     * Сохраняет герб города в БД (byte[])
+     */
+    public void saveCityEmblem(City city, String emblemUrl) {
+        if (city == null || emblemUrl == null || emblemUrl.isEmpty()) return;
+        byte[] imageBytes = downloadImageAsBytes(emblemUrl);
+        if (imageBytes != null) {
+            city.setEmblemImage(imageBytes);
+            dataManager.commit(city);
+            log.info("Герб города '{}' сохранён в БД ({} байт)", city.getCityRuName(), imageBytes.length);
+        }
+    }
+
+    /**
+     * @deprecated Используйте downloadImageAsBytes + saveCountryFlag/saveRegionEmblem/saveCityEmblem
+     * Сохраняет изображение в FileDescriptor (файловое хранилище) — оставлено для совместимости
+     */
+    @Deprecated
     @Override
     public FileDescriptor downloadAndSaveImage(String imageUrl, String fileName) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {

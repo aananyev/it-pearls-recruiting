@@ -48,6 +48,10 @@ public class Country extends StandardEntity {
     @JoinColumn(name = "FILE_FLAG_ID")
     protected FileDescriptor fileFlag;
 
+    @Lob
+    @Column(name = "FLAG_IMAGE")
+    protected byte[] flagImage;
+
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "regionCountry")
@@ -99,6 +103,14 @@ public class Country extends StandardEntity {
 
     public void setFileFlag(FileDescriptor fileFlag) {
         this.fileFlag = fileFlag;
+    }
+
+    public byte[] getFlagImage() {
+        return flagImage;
+    }
+
+    public void setFlagImage(byte[] flagImage) {
+        this.flagImage = flagImage;
     }
 
     public List<Region> getCountryOfRegion() {
