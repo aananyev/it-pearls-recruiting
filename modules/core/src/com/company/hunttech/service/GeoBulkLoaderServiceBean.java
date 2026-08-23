@@ -675,10 +675,13 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
         // Ищем существующий регион: сначала по ISO коду, затем по названию (без фильтра
         // страны — у старых записей region_country может быть NULL, но unique constraint
         // на region_ru_name глобальный, поэтому поиск только по имени обязателен).
+        // View включает regionCountry: чтение региона и проверка страны не должны
+        // вызывать Unfetched Attribute Access (правило Data View Integrity).
         Region existing = null;
         if (geoData.getIsoCode() != null && !geoData.getIsoCode().isEmpty()) {
             existing = dataManager.load(Region.class)
                     .query("select e from hunttech_Region e where e.isoCode = :isoCode and e.deleteTs is null")
+                    .view("region-edit-view")
                     .parameter("isoCode", geoData.getIsoCode().toUpperCase())
                     .optional()
                     .orElse(null);
@@ -686,6 +689,7 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
         if (existing == null) {
             existing = dataManager.load(Region.class)
                     .query("select e from hunttech_Region e where e.regionRuName = :name and e.deleteTs is null")
+                    .view("region-edit-view")
                     .parameter("name", geoData.getRegionRuName())
                     .optional()
                     .orElse(null);
@@ -758,19 +762,53 @@ public class GeoBulkLoaderServiceBean implements GeoBulkLoaderService {
         }
 
         log.info("Найдено регионов без герба: {}", regionsWithoutEmblem.size());
+        int idx = 0;
         for (Region region : regionsWithoutEmblem) {
             try {
-                byte[] emblemBytes = geoDataEnrichmentService.downloadImageAsBytes(region.getEmblemUrl());
+                // Wikimedia rate limit (429): пауза между запросами и ретрай при 429
+                idx++;
+                byte[] emblemBytes = downloadEmblemWithRetry(region.getEmblemUrl(), idx);
                 if (emblemBytes != null && emblemBytes.length > 0) {
                     region.setEmblemImage(emblemBytes);
                     dataManager.commit(region);
                     acc.flagsSaved++; // используем поле flagsSaved как emblemsSaved
-                    log.debug("Герб сохранён для {}: {} байт", region.getRegionRuName(), emblemBytes.length);
+                    log.info("Герб сохранён для {}: {} байт", region.getRegionRuName(), emblemBytes.length);
+                } else {
+                    log.warn("Не удалось скачать герб для {} (url={})", region.getRegionRuName(), region.getEmblemUrl());
                 }
             } catch (Exception e) {
                 log.warn("Не удалось сохранить герб для {}: {}", region.getRegionRuName(), e.getMessage());
             }
+            // Пауза между запросами: Wikimedia ограничивает частоту (429 Too Many Requests)
+            try {
+                Thread.sleep(1200);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
+    }
+
+    /**
+     * Скачивает герб с ретраями при HTTP 429 (Wikimedia rate limit).
+     * После первого 429 ждёт 10 секунд и повторяет до 3 раз.
+     */
+    private byte[] downloadEmblemWithRetry(String url, int index) {
+        byte[] result = null;
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            result = geoDataEnrichmentService.downloadImageAsBytes(url);
+            if (result != null && result.length > 0) {
+                return result;
+            }
+            log.warn("Попытка {}/3 скачать герб #{} не удалась (вероятно 429), пауза 10 сек...", attempt, index);
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+        }
+        return result;
     }
 
     private String buildSummary(LoadAccumulator acc, long durationMs, String entityType) {
