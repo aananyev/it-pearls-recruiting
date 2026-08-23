@@ -390,9 +390,16 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             conn.setInstanceFollowRedirects(false); // Запрет редиректов для SSRF защиты
             int code = conn.getResponseCode();
             if (code < 200 || code >= 400) {
-                // Читаем error stream перед закрытием
+                // Читаем error stream перед закрытием (с лимитом maxBytes)
                 try (java.io.InputStream err = conn.getErrorStream()) {
-                    if (err != null) err.readAllBytes();
+                    if (err != null) {
+                        byte[] buf = new byte[8192];
+                        int n;
+                        int drained = 0;
+                        while (drained < maxBytes && (n = err.read(buf)) != -1) {
+                            drained += n;
+                        }
+                    }
                 }
                 log.debug("HTTP {}", code);
                 return null;
