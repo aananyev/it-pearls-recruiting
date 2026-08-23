@@ -64,6 +64,8 @@
                        value="com.company.hunttech.service.CompanySearchAiService"/>
                 <entry key="hunttech_GeoDataEnrichmentService"
                        value="com.company.hunttech.service.GeoDataEnrichmentService"/>
+                <entry key="hunttech_GeoBulkLoaderService"
+                       value="com.company.hunttech.service.GeoBulkLoaderService"/>
             </map>
         </property>
     </bean>

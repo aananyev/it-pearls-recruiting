@@ -48,6 +48,7 @@ order by e.countryRuName]]>
                 <button id="createBtn" action="countriesTable.create"/>
                 <button id="editBtn" action="countriesTable.edit"/>
                 <button id="removeBtn" action="countriesTable.remove"/>
+                <button id="loadAllCountriesBtn" caption="msg://msgLoadAllCountries"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">
