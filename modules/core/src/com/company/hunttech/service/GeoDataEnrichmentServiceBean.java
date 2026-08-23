@@ -826,6 +826,160 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
             d.setCapital("Брюссель");
             d.setFlagUrl("https://flagcdn.com/w320/be.png");
             return d;
+        } else if (q.contains("франц") || q.contains("france") || q.equals("fr") || q.equals("fra")) {
+            d.setCountryRuName("Франция");
+            d.setCountryEngName("France");
+            d.setCountryShortName("FR");
+            d.setAlpha3Code("FRA");
+            d.setNumericCode("250");
+            d.setPhoneCode(33);
+            d.setCurrencyCode("EUR");
+            d.setCapital("Париж");
+            d.setFlagUrl("https://flagcdn.com/w320/fr.png");
+            return d;
+        } else if (q.contains("итали") || q.contains("italy") || q.equals("it") || q.equals("ita")) {
+            d.setCountryRuName("Италия");
+            d.setCountryEngName("Italy");
+            d.setCountryShortName("IT");
+            d.setAlpha3Code("ITA");
+            d.setNumericCode("380");
+            d.setPhoneCode(39);
+            d.setCurrencyCode("EUR");
+            d.setCapital("Рим");
+            d.setFlagUrl("https://flagcdn.com/w320/it.png");
+            return d;
+        } else if (q.contains("испан") || q.contains("spain") || q.equals("es") || q.equals("esp")) {
+            d.setCountryRuName("Испания");
+            d.setCountryEngName("Spain");
+            d.setCountryShortName("ES");
+            d.setAlpha3Code("ESP");
+            d.setNumericCode("724");
+            d.setPhoneCode(34);
+            d.setCurrencyCode("EUR");
+            d.setCapital("Мадрид");
+            d.setFlagUrl("https://flagcdn.com/w320/es.png");
+            return d;
+        } else if (q.contains("польш") || q.contains("poland") || q.equals("pl") || q.equals("pol")) {
+            d.setCountryRuName("Польша");
+            d.setCountryEngName("Poland");
+            d.setCountryShortName("PL");
+            d.setAlpha3Code("POL");
+            d.setNumericCode("616");
+            d.setPhoneCode(48);
+            d.setCurrencyCode("PLN");
+            d.setCapital("Варшава");
+            d.setFlagUrl("https://flagcdn.com/w320/pl.png");
+            return d;
+        } else if (q.contains("чехи") || q.contains("czech") || q.equals("cz") || q.equals("cze")) {
+            d.setCountryRuName("Чехия");
+            d.setCountryEngName("Czech Republic");
+            d.setCountryShortName("CZ");
+            d.setAlpha3Code("CZE");
+            d.setNumericCode("203");
+            d.setPhoneCode(420);
+            d.setCurrencyCode("CZK");
+            d.setCapital("Прага");
+            d.setFlagUrl("https://flagcdn.com/w320/cz.png");
+            return d;
+        } else if (q.contains("австри") || q.contains("austria") || q.equals("at") || q.equals("aut")) {
+            d.setCountryRuName("Австрия");
+            d.setCountryEngName("Austria");
+            d.setCountryShortName("AT");
+            d.setAlpha3Code("AUT");
+            d.setNumericCode("040");
+            d.setPhoneCode(43);
+            d.setCurrencyCode("EUR");
+            d.setCapital("Вена");
+            d.setFlagUrl("https://flagcdn.com/w320/at.png");
+            return d;
+        } else if (q.contains("швейцар") || q.contains("switzerland") || q.equals("ch") || q.equals("che")) {
+            d.setCountryRuName("Швейцария");
+            d.setCountryEngName("Switzerland");
+            d.setCountryShortName("CH");
+            d.setAlpha3Code("CHE");
+            d.setNumericCode("756");
+            d.setPhoneCode(41);
+            d.setCurrencyCode("CHF");
+            d.setCapital("Берн");
+            d.setFlagUrl("https://flagcdn.com/w320/ch.png");
+            return d;
+        } else if (q.contains("груз") || q.contains("georgia") || q.equals("ge") || q.equals("geo")) {
+            d.setCountryRuName("Грузия");
+            d.setCountryEngName("Georgia");
+            d.setCountryShortName("GE");
+            d.setAlpha3Code("GEO");
+            d.setNumericCode("268");
+            d.setPhoneCode(995);
+            d.setCurrencyCode("GEL");
+            d.setCapital("Тбилиси");
+            d.setFlagUrl("https://flagcdn.com/w320/ge.png");
+            return d;
+        } else if (q.contains("армени") || q.contains("armenia") || q.equals("am") || q.equals("arm")) {
+            d.setCountryRuName("Армения");
+            d.setCountryEngName("Armenia");
+            d.setCountryShortName("AM");
+            d.setAlpha3Code("ARM");
+            d.setNumericCode("051");
+            d.setPhoneCode(374);
+            d.setCurrencyCode("AMD");
+            d.setCapital("Ереван");
+            d.setFlagUrl("https://flagcdn.com/w320/am.png");
+            return d;
+        } else if (q.contains("азербайдж") || q.contains("azerbaijan") || q.equals("az") || q.equals("aze")) {
+            d.setCountryRuName("Азербайджан");
+            d.setCountryEngName("Azerbaijan");
+            d.setCountryShortName("AZ");
+            d.setAlpha3Code("AZE");
+            d.setNumericCode("031");
+            d.setPhoneCode(994);
+            d.setCurrencyCode("AZN");
+            d.setCapital("Баку");
+            d.setFlagUrl("https://flagcdn.com/w320/az.png");
+            return d;
+        } else if (q.contains("турции") || q.contains("turkey") || q.equals("tr") || q.equals("tur")) {
+            d.setCountryRuName("Турция");
+            d.setCountryEngName("Turkey");
+            d.setCountryShortName("TR");
+            d.setAlpha3Code("TUR");
+            d.setNumericCode("792");
+            d.setPhoneCode(90);
+            d.setCurrencyCode("TRY");
+            d.setCapital("Анкара");
+            d.setFlagUrl("https://flagcdn.com/w320/tr.png");
+            return d;
+        } else if (q.contains("украин") || q.contains("ukraine") || q.equals("ua") || q.equals("ukr")) {
+            d.setCountryRuName("Украина");
+            d.setCountryEngName("Ukraine");
+            d.setCountryShortName("UA");
+            d.setAlpha3Code("UKR");
+            d.setNumericCode("804");
+            d.setPhoneCode(380);
+            d.setCurrencyCode("UAH");
+            d.setCapital("Киев");
+            d.setFlagUrl("https://flagcdn.com/w320/ua.png");
+            return d;
+        } else if (q.contains("молдов") || q.contains("moldova") || q.equals("md") || q.equals("mda")) {
+            d.setCountryRuName("Молдова");
+            d.setCountryEngName("Moldova");
+            d.setCountryShortName("MD");
+            d.setAlpha3Code("MDA");
+            d.setNumericCode("498");
+            d.setPhoneCode(373);
+            d.setCurrencyCode("MDL");
+            d.setCapital("Кишинёв");
+            d.setFlagUrl("https://flagcdn.com/w320/md.png");
+            return d;
+        } else if (q.contains("узбек") || q.contains("uzbek") || q.equals("uz") || q.equals("uzb")) {
+            d.setCountryRuName("Узбекистан");
+            d.setCountryEngName("Uzbekistan");
+            d.setCountryShortName("UZ");
+            d.setAlpha3Code("UZB");
+            d.setNumericCode("860");
+            d.setPhoneCode(998);
+            d.setCurrencyCode("UZS");
+            d.setCapital("Ташкент");
+            d.setFlagUrl("https://flagcdn.com/w320/uz.png");
+            return d;
         }
         return null;
     }
