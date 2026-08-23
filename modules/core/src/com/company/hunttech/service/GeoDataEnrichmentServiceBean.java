@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service(GeoDataEnrichmentService.NAME)
@@ -81,32 +82,42 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     }
 
     /**
+     * Generic fallback helper: iterates providers and returns first non-null DTO
+     */
+    private <T> T fetchFromProviders(Function<GeoDataProvider, T> fetcher, String query, String providerType) {
+        List<GeoDataProvider> providers = getProvidersInOrder();
+        if (providers.isEmpty()) {
+            log.warn("Нет доступных GeoDataProvider для {}: {}", providerType, query);
+            return null;
+        }
+        for (GeoDataProvider provider : providers) {
+            try {
+                log.debug("Попытка {} '{}' через провайдер: {}", providerType, query, provider.getProviderCode());
+                T dto = fetcher.apply(provider);
+                if (dto != null) {
+                    log.info("{} '{}' успешно обработан через провайдер: {}", providerType, query, provider.getProviderCode());
+                    return dto;
+                }
+            } catch (Exception e) {
+                log.warn("Провайдер {} ошибка для {} '{}': {}", provider.getProviderCode(), providerType, query, e.getMessage());
+            }
+        }
+        log.warn("Все провайдеры не смогли обработать {}: {}", providerType, query);
+        return null;
+    }
+
+    /**
      * Обогащение страны через цепочку провайдеров
      */
     private void enrichCountryFromProviders(String query, GeoCountryData data) {
-        List<GeoDataProvider> providers = getProvidersInOrder();
-        if (providers.isEmpty()) {
-            log.warn("Нет доступных GeoDataProvider для обогащения страны: {}", query);
-            // Fallback на старый restcountries.com
-            enrichCountryFromRestCountries(query, data);
+        GeoDataProvider.CountryDTO dto = fetchFromProviders(
+                p -> p.findCountry(query, "ru"),
+                query, "страну"
+        );
+        if (dto != null && dto.getNameRu() != null) {
+            mapCountryDTO(dto, data);
             return;
         }
-
-        for (GeoDataProvider provider : providers) {
-            if (!provider.supportsCountries()) continue;
-            try {
-                log.debug("Попытка обогащения страны '{}' через провайдер: {}", query, provider.getProviderCode());
-                GeoDataProvider.CountryDTO dto = provider.findCountry(query, "ru");
-                if (dto != null && dto.getNameRu() != null) {
-                    mapCountryDTO(dto, data);
-                    log.info("Страна '{}' успешно обогащена через провайдер: {}", query, provider.getProviderCode());
-                    return; // успех — прерываем цепочку
-                }
-            } catch (Exception e) {
-                log.warn("Провайдер {} ошибка для страны '{}': {}", provider.getProviderCode(), query, e.getMessage());
-            }
-        }
-        log.warn("Все провайдеры не смогли обогатить страну: {}", query);
         // Последний fallback
         enrichCountryFromRestCountries(query, data);
     }
@@ -178,21 +189,13 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     }
 
     private void enrichRegionFromProviders(String query, Country country, GeoRegionData data) {
-        List<GeoDataProvider> providers = getProvidersInOrder();
         String countryIso2 = country != null ? country.getCountryShortName() : null;
-
-        for (GeoDataProvider provider : providers) {
-            if (!provider.supportsRegions()) continue;
-            try {
-                GeoDataProvider.RegionDTO dto = provider.findRegion(query, countryIso2, "ru");
-                if (dto != null && dto.getNameRu() != null) {
-                    mapRegionDTO(dto, data);
-                    log.info("Регион '{}' обогащён через провайдер: {}", query, provider.getProviderCode());
-                    break;
-                }
-            } catch (Exception e) {
-                log.warn("Провайдер {} ошибка для региона '{}': {}", provider.getProviderCode(), query, e.getMessage());
-            }
+        GeoDataProvider.RegionDTO dto = fetchFromProviders(
+                p -> p.findRegion(query, countryIso2, "ru"),
+                query, "регион"
+        );
+        if (dto != null && dto.getNameRu() != null) {
+            mapRegionDTO(dto, data);
         }
     }
 
@@ -247,22 +250,14 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
     }
 
     private void enrichCityFromProviders(String query, Region region, Country country, GeoCityData data) {
-        List<GeoDataProvider> providers = getProvidersInOrder();
         String regionCode = region != null ? region.getIsoCode() : null;
         String countryIso2 = country != null ? country.getCountryShortName() : null;
-
-        for (GeoDataProvider provider : providers) {
-            if (!provider.supportsCities()) continue;
-            try {
-                GeoDataProvider.CityDTO dto = provider.findCity(query, regionCode, countryIso2, "ru");
-                if (dto != null && dto.getNameRu() != null) {
-                    mapCityDTO(dto, data);
-                    log.info("Город '{}' обогащён через провайдер: {}", query, provider.getProviderCode());
-                    break;
-                }
-            } catch (Exception e) {
-                log.warn("Провайдер {} ошибка для города '{}': {}", provider.getProviderCode(), query, e.getMessage());
-            }
+        GeoDataProvider.CityDTO dto = fetchFromProviders(
+                p -> p.findCity(query, regionCode, countryIso2, "ru"),
+                query, "город"
+        );
+        if (dto != null && dto.getNameRu() != null) {
+            mapCityDTO(dto, data);
         }
     }
 
@@ -279,7 +274,7 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
         if (dto.getAirportIcao() != null) data.setAirportCodeIcao(dto.getAirportIcao());
         if (dto.getGeonameId() != null) data.setGeonameId(dto.getGeonameId());
         if (dto.getWikiLink() != null) data.setWikiLink(dto.getWikiLink());
-        if (dto.getIsCapital() != null) data.setIsCapital(dto.getIsCapital());
+        if (dto.getCapital() != null) data.setIsCapital(dto.getCapital());
     }
 
     /**
@@ -294,7 +289,7 @@ public class GeoDataEnrichmentServiceBean implements GeoDataEnrichmentService {
                 .filter(p -> p != null)
                 .sorted(Comparator.comparingInt(p -> {
                     int idx = DEFAULT_PROVIDER_ORDER.indexOf(p.getProviderCode());
-                    return idx >= 0 ? idx : 999;
+                    return idx >= 0 ? idx : Integer.MAX_VALUE;
                 }))
                 .collect(Collectors.toList());
     }

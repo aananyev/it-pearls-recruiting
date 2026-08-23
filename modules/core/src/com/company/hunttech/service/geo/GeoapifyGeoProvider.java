@@ -16,14 +16,14 @@ import java.util.stream.Collectors;
 
 /**
  * Geoapify Geo Provider — провайдер гео-данных через Geoapify API.
- * 
+ *
  * Особенности:
  * - Русские названия (lang=ru)
  * - Работает из РФ без VPN
  * - Бесплатный тариф: 3000 запросов/день
  * - Поддерживает страны, регионы, города, границы (GeoJSON)
  * - API ключ шифруется через AiSecretService
- * 
+ *
  * @see <a href="https://apidocs.geoapify.com/docs/geocoding/forward-geocoding">Geoapify Geocoding API</a>
  * @see <a href="https://geoapify.com/boundaries-api">Geoapify Boundaries API</a>
  */
@@ -42,7 +42,7 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
     protected AiSecretService secretService;
 
     @Autowired(required = false)
-    private String geoapifyApiKey; // читается из конфигурации/БД
+    private String geoapifyApiKeyEncrypted; // зашифрованный ключ из конфигурации/БД
 
     @Override
     public String getProviderCode() {
@@ -234,7 +234,8 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
     @Override
     public List<CityDTO> fetchCitiesForRegion(String regionCode, String countryIso2, String language) {
         // Geoapify не имеет прямого эндпоинта для городов региона через boundaries
-        // Используем geocoding с фильтром по региону
+        // Используем geocoding с фильтром по региону — пока возвращаем пустой список
+        // TODO: реализовать через geocoding с bbox региона
         return Collections.emptyList();
     }
 
@@ -256,7 +257,9 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
                     "apiKey", apiKey
             ));
             String response = fetchHttpText(url, 3000);
-            return response != null && response.contains("features");
+            if (response == null) return false;
+            JsonNode root = objectMapper.readTree(response);
+            return root.path("features").isArray();
         } catch (Exception e) {
             log.warn("Geoapify testConnection error: {}", e.getMessage());
             return false;
@@ -269,7 +272,12 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
         CountryDTO dto = new CountryDTO();
         dto.setIso2(props.path("country_code").asText(null));
         dto.setIso3(props.path("country_code3").asText(null));
-        dto.setNameRu(props.path("country").asText(null));
+        // Используем язык для выбора названия
+        if ("ru".equals(lang)) {
+            dto.setNameRu(props.path("country").asText(null));
+        } else {
+            dto.setNameEn(props.path("country_en").asText(null));
+        }
         dto.setNameEn(props.path("country_en").asText(null));
         dto.setCapitalRu(props.path("capital").asText(null));
         dto.setCapitalEn(props.path("capital_en").asText(null));
@@ -310,7 +318,11 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
         RegionDTO dto = new RegionDTO();
         dto.setCountryIso2(countryIso2);
         dto.setCode(props.path("state_code").asText(null));
-        dto.setNameRu(props.path("state").asText(null));
+        if ("ru".equals(lang)) {
+            dto.setNameRu(props.path("state").asText(null));
+        } else {
+            dto.setNameEn(props.path("state_en").asText(null));
+        }
         dto.setNameEn(props.path("state_en").asText(null));
         dto.setType(mapRegionType(props.path("type").asText()));
         dto.setCapitalRu(props.path("capital").asText(null));
@@ -344,7 +356,11 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
         CityDTO dto = new CityDTO();
         dto.setCountryIso2(countryIso2);
         dto.setRegionCode(regionCode != null ? regionCode : props.path("state_code").asText(null));
-        dto.setNameRu(props.path("city").asText(null));
+        if ("ru".equals(lang)) {
+            dto.setNameRu(props.path("city").asText(null));
+        } else {
+            dto.setNameEn(props.path("city_en").asText(null));
+        }
         dto.setNameEn(props.path("city_en").asText(null));
         dto.setNameAlt(props.path("suburb").asText(null));
         dto.setLatitude(props.path("lat").isNumber() ? props.path("lat").asDouble() : null);
@@ -362,11 +378,15 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
     // ===== Helpers =====
 
     private String getApiKey() {
-        if (geoapifyApiKey != null && !geoapifyApiKey.isEmpty()) {
-            return geoapifyApiKey;
+        // 1. Попытка расшифровать из конфигурации
+        if (geoapifyApiKeyEncrypted != null && !geoapifyApiKeyEncrypted.isEmpty()) {
+            try {
+                return secretService.decrypt(geoapifyApiKeyEncrypted);
+            } catch (Exception e) {
+                log.warn("Не удалось расшифровать Geoapify API ключ: {}", e.getMessage());
+            }
         }
-        // Пытаемся получить из UserSettings (geoApiKey)
-        // TODO: интеграция с AdminGeoConfiguration когда будет готова
+        // 2. Fallback: переменная окружения (для dev)
         return System.getenv("GEOAPIFY_API_KEY");
     }
 
@@ -404,6 +424,11 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
         return sb.toString();
     }
 
+    private String redactUrl(String url) {
+        if (url == null) return null;
+        return url.replaceAll("apiKey=[^&]*", "apiKey=***");
+    }
+
     private String fetchHttpText(String urlStr, int timeoutMs) {
         try {
             java.net.URL url = new java.net.URL(urlStr);
@@ -414,7 +439,7 @@ public class GeoapifyGeoProvider implements GeoDataProvider {
             conn.setInstanceFollowRedirects(true);
             int code = conn.getResponseCode();
             if (code < 200 || code >= 400) {
-                log.debug("Geoapify HTTP {}: {}", code, urlStr);
+                log.debug("Geoapify HTTP {}", code);
                 return null;
             }
             try (java.io.InputStream in = conn.getInputStream();

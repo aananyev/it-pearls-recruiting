@@ -1,9 +1,5 @@
 package com.company.hunttech.service.geo;
 
-import com.company.hunttech.entity.Country;
-import com.company.hunttech.entity.Region;
-import com.company.hunttech.entity.City;
-
 import java.util.List;
 import java.util.Map;
 
@@ -230,7 +226,7 @@ public interface GeoDataProvider {
         private String airportIcao;    // UUEE
         private Long geonameId;        // ID в GeoNames
         private String wikiLink;       // https://ru.wikipedia.org/wiki/Москва
-        private Boolean isCapital;     // true/false
+        private Boolean capital;       // true/false
         private Map<String, Object> providerSpecific;
 
         // Getters/Setters
@@ -264,8 +260,8 @@ public interface GeoDataProvider {
         public void setGeonameId(Long geonameId) { this.geonameId = geonameId; }
         public String getWikiLink() { return wikiLink; }
         public void setWikiLink(String wikiLink) { this.wikiLink = wikiLink; }
-        public Boolean getIsCapital() { return isCapital; }
-        public void setIsCapital(Boolean isCapital) { this.isCapital = isCapital; }
+        public Boolean getCapital() { return capital; }
+        public void setCapital(Boolean capital) { this.capital = capital; }
         public Map<String, Object> getProviderSpecific() { return providerSpecific; }
         public void setProviderSpecific(Map<String, Object> providerSpecific) { this.providerSpecific = providerSpecific; }
     }

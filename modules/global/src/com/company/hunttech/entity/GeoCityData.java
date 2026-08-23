@@ -38,7 +38,7 @@ public class GeoCityData extends BaseUuidEntity implements Serializable {
     private String airportCodeIcao;
 
     @MetaProperty
-    private Boolean isCapital;
+    private Boolean capital;
 
     @MetaProperty
     private Long population;
@@ -137,11 +137,19 @@ public class GeoCityData extends BaseUuidEntity implements Serializable {
     }
 
     public Boolean getIsCapital() {
-        return isCapital;
+        return capital;
     }
 
     public void setIsCapital(Boolean isCapital) {
-        this.isCapital = isCapital;
+        this.capital = isCapital;
+    }
+
+    public Boolean isCapital() {
+        return capital;
+    }
+
+    public void setCapital(Boolean capital) {
+        this.capital = capital;
     }
 
     public Long getPopulation() {
