@@ -71,6 +71,7 @@ public class CityEdit extends StandardEditor<City> {
 
     /**
      * Умное автозаполнение реквизитов города по API и поиск герба.
+     * Заполняет все поля формы и скачивает герб в BLOB (emblemImage) и FileDescriptor (fileCityEmblem) для отображения.
      */
     public void onEnrichCityByApi() {
         City city = getEditedEntity();
@@ -91,44 +92,65 @@ public class CityEdit extends StandardEditor<City> {
             com.company.hunttech.entity.Country country = region != null ? region.getRegionCountry() : null;
             com.company.hunttech.entity.GeoCityData data = geoDataEnrichmentService.enrichCity(query, region, country);
             if (data != null) {
+                boolean anyFieldFilled = false;
+
                 if (data.getCityRuName() != null && (city.getCityRuName() == null || city.getCityRuName().trim().isEmpty())) {
                     city.setCityRuName(data.getCityRuName());
+                    anyFieldFilled = true;
                 }
                 if (data.getCityEngName() != null && (city.getCityEngName() == null || city.getCityEngName().trim().isEmpty())) {
                     city.setCityEngName(data.getCityEngName());
+                    anyFieldFilled = true;
                 }
                 if (data.getCityPhoneCode() != null && (city.getCityPhoneCode() == null || city.getCityPhoneCode().trim().isEmpty())) {
                     city.setCityPhoneCode(data.getCityPhoneCode());
+                    anyFieldFilled = true;
                 }
                 if (data.getPostalCode() != null && (city.getPostalCode() == null || city.getPostalCode().trim().isEmpty())) {
                     city.setPostalCode(data.getPostalCode());
+                    anyFieldFilled = true;
                 }
                 if (data.getPopulation() != null && city.getPopulation() == null) {
                     city.setPopulation(data.getPopulation());
+                    anyFieldFilled = true;
                 }
                 if (data.getLatitude() != null && city.getLatitude() == null) {
                     city.setLatitude(data.getLatitude());
+                    anyFieldFilled = true;
                 }
                 if (data.getLongitude() != null && city.getLongitude() == null) {
                     city.setLongitude(data.getLongitude());
+                    anyFieldFilled = true;
                 }
                 if (data.getTimeZone() != null && (city.getTimeZone() == null || city.getTimeZone().trim().isEmpty())) {
                     city.setTimeZone(data.getTimeZone());
+                    anyFieldFilled = true;
                 }
                 if (data.getFiasId() != null && (city.getFiasId() == null || city.getFiasId().trim().isEmpty())) {
                     city.setFiasId(data.getFiasId());
+                    anyFieldFilled = true;
                 }
 
-                // Скачивание и привязка герба города
+                // Скачивание герба: сохраняем в BLOB (emblemImage) для миграции и в FileDescriptor (fileCityEmblem) для отображения в UI
                 boolean emblemLoaded = false;
-                if (data.getEmblemUrl() != null && !data.getEmblemUrl().isEmpty() && city.getFileCityEmblem() == null) {
-                    FileDescriptor emblemFd = geoDataEnrichmentService.downloadAndSaveImage(
-                            data.getEmblemUrl(),
-                            "emblem_city_" + System.currentTimeMillis() + ".png");
-                    if (emblemFd != null) {
-                        createdUncommittedDescriptors.add(emblemFd);
-                        city.setFileCityEmblem(dataContext.merge(emblemFd));
+                if (data.getEmblemUrl() != null && !data.getEmblemUrl().isEmpty()) {
+                    // 1. Скачиваем байты герба (BLOB)
+                    byte[] emblemBytes = geoDataEnrichmentService.downloadImageAsBytes(data.getEmblemUrl());
+                    if (emblemBytes != null && emblemBytes.length > 0) {
+                        city.setEmblemImage(emblemBytes);
+                        city.setEmblemUrl(data.getEmblemUrl());
                         emblemLoaded = true;
+                    }
+
+                    // 2. Создаём FileDescriptor для отображения в fallbackImage (обратная совместимость)
+                    if (city.getFileCityEmblem() == null) {
+                        FileDescriptor emblemFd = geoDataEnrichmentService.downloadAndSaveImage(
+                                data.getEmblemUrl(),
+                                "emblem_city_" + System.currentTimeMillis() + ".png");
+                        if (emblemFd != null) {
+                            createdUncommittedDescriptors.add(emblemFd);
+                            city.setFileCityEmblem(dataContext.merge(emblemFd));
+                        }
                     }
                 }
 

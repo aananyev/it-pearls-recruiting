@@ -65,6 +65,7 @@ public class RegionEdit extends StandardEditor<Region> {
 
     /**
      * Умное автозаполнение реквизитов региона по API и поиск герба.
+     * Заполняет все поля формы и скачивает герб в BLOB (emblemImage) и FileDescriptor (fileRegionEmblem) для отображения.
      */
     public void onEnrichRegionByApi() {
         Region region = getEditedEntity();
@@ -83,41 +84,61 @@ public class RegionEdit extends StandardEditor<Region> {
         try {
             com.company.hunttech.entity.GeoRegionData data = geoDataEnrichmentService.enrichRegion(query, region.getRegionCountry());
             if (data != null) {
+                boolean anyFieldFilled = false;
+
                 if (data.getRegionRuName() != null && (region.getRegionRuName() == null || region.getRegionRuName().trim().isEmpty())) {
                     region.setRegionRuName(data.getRegionRuName());
+                    anyFieldFilled = true;
                 }
                 if (data.getRegionEngName() != null && (region.getRegionEngName() == null || region.getRegionEngName().trim().isEmpty())) {
                     region.setRegionEngName(data.getRegionEngName());
+                    anyFieldFilled = true;
                 }
                 if (data.getRegionCode() != null && region.getRegionCode() == null) {
                     region.setRegionCode(data.getRegionCode());
+                    anyFieldFilled = true;
                 }
                 if (data.getIsoCode() != null && (region.getIsoCode() == null || region.getIsoCode().trim().isEmpty())) {
                     region.setIsoCode(data.getIsoCode());
+                    anyFieldFilled = true;
                 }
                 if (data.getRegionType() != null && (region.getRegionType() == null || region.getRegionType().trim().isEmpty())) {
                     region.setRegionType(data.getRegionType());
+                    anyFieldFilled = true;
                 }
                 if (data.getCapital() != null && (region.getCapital() == null || region.getCapital().trim().isEmpty())) {
                     region.setCapital(data.getCapital());
+                    anyFieldFilled = true;
                 }
                 if (data.getTimeZone() != null && (region.getTimeZone() == null || region.getTimeZone().trim().isEmpty())) {
                     region.setTimeZone(data.getTimeZone());
+                    anyFieldFilled = true;
                 }
                 if (data.getFiasId() != null && (region.getFiasId() == null || region.getFiasId().trim().isEmpty())) {
                     region.setFiasId(data.getFiasId());
+                    anyFieldFilled = true;
                 }
 
-                // Скачивание и привязка герба региона
+                // Скачивание герба: сохраняем в BLOB (emblemImage) для миграции и в FileDescriptor (fileRegionEmblem) для отображения в UI
                 boolean emblemLoaded = false;
-                if (data.getEmblemUrl() != null && !data.getEmblemUrl().isEmpty() && region.getFileRegionEmblem() == null) {
-                    FileDescriptor emblemFd = geoDataEnrichmentService.downloadAndSaveImage(
-                            data.getEmblemUrl(),
-                            "emblem_region_" + (data.getIsoCode() != null ? data.getIsoCode().toLowerCase() : "region") + ".png");
-                    if (emblemFd != null) {
-                        createdUncommittedDescriptors.add(emblemFd);
-                        region.setFileRegionEmblem(dataContext.merge(emblemFd));
+                if (data.getEmblemUrl() != null && !data.getEmblemUrl().isEmpty()) {
+                    // 1. Скачиваем байты герба (BLOB)
+                    byte[] emblemBytes = geoDataEnrichmentService.downloadImageAsBytes(data.getEmblemUrl());
+                    if (emblemBytes != null && emblemBytes.length > 0) {
+                        region.setEmblemImage(emblemBytes);
+                        region.setEmblemUrl(data.getEmblemUrl());
                         emblemLoaded = true;
+                    }
+
+                    // 2. Создаём FileDescriptor для отображения в fallbackImage (обратная совместимость)
+                    if (region.getFileRegionEmblem() == null) {
+                        FileDescriptor emblemFd = geoDataEnrichmentService.downloadAndSaveImage(
+                                data.getEmblemUrl(),
+                                "emblem_region_" + (data.getIsoCode() != null ? data.getIsoCode().toLowerCase() : "region") + ".png");
+                        if (emblemFd != null) {
+                            createdUncommittedDescriptors.add(emblemFd);
+                            region.setFileRegionEmblem(dataContext.merge(emblemFd));
+                        }
                     }
                 }
 

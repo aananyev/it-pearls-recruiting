@@ -75,6 +75,7 @@ public class CountryEdit extends StandardEditor<Country> {
 
     /**
      * Умное автозаполнение реквизитов страны по API и скачивание флага государства из интернета.
+     * Заполняет все поля формы и скачивает флаг в BLOB (flagImage) и FileDescriptor (fileFlag) для отображения.
      */
     public void onEnrichCountryByApi() {
         Country country = getEditedEntity();
@@ -96,41 +97,61 @@ public class CountryEdit extends StandardEditor<Country> {
         try {
             com.company.hunttech.entity.GeoCountryData data = geoDataEnrichmentService.enrichCountry(query);
             if (data != null) {
+                boolean anyFieldFilled = false;
+
                 if (data.getCountryRuName() != null && (country.getCountryRuName() == null || country.getCountryRuName().trim().isEmpty())) {
                     country.setCountryRuName(data.getCountryRuName());
+                    anyFieldFilled = true;
                 }
                 if (data.getCountryEngName() != null && (country.getCountryEngName() == null || country.getCountryEngName().trim().isEmpty())) {
                     country.setCountryEngName(data.getCountryEngName());
+                    anyFieldFilled = true;
                 }
                 if (data.getCountryShortName() != null && (country.getCountryShortName() == null || country.getCountryShortName().trim().isEmpty())) {
                     country.setCountryShortName(data.getCountryShortName());
+                    anyFieldFilled = true;
                 }
                 if (data.getAlpha3Code() != null && (country.getAlpha3Code() == null || country.getAlpha3Code().trim().isEmpty())) {
                     country.setAlpha3Code(data.getAlpha3Code());
+                    anyFieldFilled = true;
                 }
                 if (data.getNumericCode() != null && (country.getNumericCode() == null || country.getNumericCode().trim().isEmpty())) {
                     country.setNumericCode(data.getNumericCode());
+                    anyFieldFilled = true;
                 }
                 if (data.getCurrencyCode() != null && (country.getCurrencyCode() == null || country.getCurrencyCode().trim().isEmpty())) {
                     country.setCurrencyCode(data.getCurrencyCode());
+                    anyFieldFilled = true;
                 }
                 if (data.getCapital() != null && (country.getCapital() == null || country.getCapital().trim().isEmpty())) {
                     country.setCapital(data.getCapital());
+                    anyFieldFilled = true;
                 }
                 if (data.getPhoneCode() != null && country.getPhoneCode() == null) {
                     country.setPhoneCode(data.getPhoneCode());
+                    anyFieldFilled = true;
                 }
 
-                // Скачивание и привязка флага государства
+                // Скачивание флага: сохраняем в BLOB (flagImage) для миграции и в FileDescriptor (fileFlag) для отображения в UI
                 boolean flagLoaded = false;
-                if (data.getFlagUrl() != null && !data.getFlagUrl().isEmpty() && country.getFileFlag() == null) {
-                    com.haulmont.cuba.core.entity.FileDescriptor flagFd = geoDataEnrichmentService.downloadAndSaveImage(
-                            data.getFlagUrl(),
-                            "flag_" + (data.getCountryShortName() != null ? data.getCountryShortName().toLowerCase() : "country") + ".png");
-                    if (flagFd != null) {
-                        createdUncommittedDescriptors.add(flagFd);
-                        country.setFileFlag(dataContext.merge(flagFd));
+                if (data.getFlagUrl() != null && !data.getFlagUrl().isEmpty()) {
+                    // 1. Скачиваем байты флага (BLOB)
+                    byte[] flagBytes = geoDataEnrichmentService.downloadImageAsBytes(data.getFlagUrl());
+                    if (flagBytes != null && flagBytes.length > 0) {
+                        country.setFlagImage(flagBytes);
+                        country.setFlagUrl(data.getFlagUrl());
                         flagLoaded = true;
+                    }
+
+                    // 2. Создаём FileDescriptor для отображения в fallbackImage (обратная совместимость)
+                    if (country.getFileFlag() == null) {
+                        com.haulmont.cuba.core.entity.FileDescriptor flagFd = geoDataEnrichmentService.downloadAndSaveImage(
+                                data.getFlagUrl(),
+                                "flag_" + (data.getCountryShortName() != null ? data.getCountryShortName().toLowerCase() : "country") + ".png");
+                        if (flagFd != null) {
+                            createdUncommittedDescriptors.add(flagFd);
+                            country.setFileFlag(dataContext.merge(flagFd));
+                        }
                     }
                 }
 
