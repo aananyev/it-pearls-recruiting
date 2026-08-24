@@ -87,19 +87,19 @@
                                 <rows>
                                     <row>
                                         <label value="Готовность:" stylename="edit-help"/>
-                                        <label id="detailCvReady" value="-" stylename="bold"/>
+                                        <label id="detailCvReady" value="-" htmlEnabled="true" stylename="bold"/>
                                     </row>
                                     <row>
                                         <label value="Вакансия:" stylename="edit-help"/>
-                                        <label id="detailToVacancy" value="-" stylename="bold"/>
+                                        <label id="detailToVacancy" value="-" stylename="bold" align="MIDDLE_CENTER"/>
                                     </row>
                                     <row>
                                         <label value="Проект:" stylename="edit-help"/>
-                                        <label id="detailProject" value="-"/>
+                                        <label id="detailProject" value="-" align="MIDDLE_CENTER"/>
                                     </row>
                                     <row>
                                         <label value="Рекрутер:" stylename="edit-help"/>
-                                        <label id="detailOwner" value="-"/>
+                                        <label id="detailOwner" value="-" align="MIDDLE_CENTER"/>
                                     </row>
                                     <row>
                                         <label value="Дата:" stylename="edit-help"/>
@@ -120,11 +120,11 @@
                                 <rows>
                                     <row>
                                         <label value="Оригинал:" stylename="edit-help"/>
-                                        <label id="detailOriginalFile" value="-"/>
+                                        <label id="detailOriginalFile" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="HuntTech:" stylename="edit-help"/>
-                                        <label id="detailHuntTechFile" value="-"/>
+                                        <label id="detailHuntTechFile" value="-" htmlEnabled="true"/>
                                     </row>
                                 </rows>
                             </grid>

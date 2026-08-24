@@ -97,6 +97,11 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+        
+        // Выравнивание заголовков сайдбара по центру
+        detailToVacancy.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailProject.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailOwner.setAlignment(Component.Alignment.MIDDLE_CENTER);
     }
 
     private void setupTableColumns() {
@@ -463,18 +468,21 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         }
 
         if (cv.getToVacancy() != null) {
-            detailToVacancy.setValue(cv.getToVacancy().getVacansyName());
+            String vacName = cv.getToVacancy().getVacansyName();
+            detailToVacancy.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (vacName != null ? vacName : "—") + "</div>");
             if (cv.getToVacancy().getProjectName() != null) {
-                detailProject.setValue(cv.getToVacancy().getProjectName().getProjectName());
+                String projName = cv.getToVacancy().getProjectName().getProjectName();
+                detailProject.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (projName != null ? projName : "—") + "</div>");
             } else {
-                detailProject.setValue("-");
+                detailProject.setValue("—");
             }
         } else {
             detailToVacancy.setValue("Не привязано к вакансии");
-            detailProject.setValue("-");
+            detailProject.setValue("—");
         }
 
-        detailOwner.setValue(cv.getOwner() != null ? cv.getOwner().getInstanceName() : (cv.getCreatedBy() != null ? cv.getCreatedBy() : "-"));
+        String ownerName = cv.getOwner() != null ? cv.getOwner().getInstanceName() : (cv.getCreatedBy() != null ? cv.getCreatedBy() : "—");
+        detailOwner.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + ownerName + "</div>");
         detailDatePost.setValue(cv.getDatePost() != null ? DATE_FORMAT.format(cv.getDatePost()) : "-");
 
         // Документы
