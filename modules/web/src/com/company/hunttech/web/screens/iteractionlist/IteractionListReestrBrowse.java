@@ -439,49 +439,49 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
 
         // Заголовки
         if (candidate != null && candidate.getFullName() != null) {
-            detailTitle.setValue(candidate.getFullName());
+            detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + candidate.getFullName() + "</div>");
         } else {
-            detailTitle.setValue("Кандидат не указан");
+            detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Кандидат не указан</div>");
         }
 
         if (item.getIteractionType() != null) {
-            detailSubtitle.setValue(item.getIteractionType().getIterationName());
+            detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + item.getIteractionType().getIterationName() + "</div>");
         } else {
-            detailSubtitle.setValue("-");
+            detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         }
 
         if (item.getVacancy() != null && item.getVacancy().getProjectName() != null) {
-            detailLocation.setValue("Проект: " + item.getVacancy().getProjectName().getProjectName());
+            detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Проект: " + item.getVacancy().getProjectName().getProjectName() + "</div>");
         } else if (candidate != null && candidate.getCityOfResidence() != null) {
-            detailLocation.setValue(candidate.getCityOfResidence().getCityRuName());
+            detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + candidate.getCityOfResidence().getCityRuName() + "</div>");
         } else {
-            detailLocation.setValue("-");
+            detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         }
 
         // Детали
-        detailNumber.setValue(item.getNumberIteraction() != null ? String.valueOf(item.getNumberIteraction()) : "-");
-        detailDate.setValue(item.getDateIteraction() != null ? DATE_FORMAT.format(item.getDateIteraction()) : "-");
+        detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (item.getNumberIteraction() != null ? String.valueOf(item.getNumberIteraction()) : "—") + "</div>");
+        detailDate.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (item.getDateIteraction() != null ? DATE_FORMAT.format(item.getDateIteraction()) : "—") + "</div>");
 
         if (item.getRating() != null && item.getRating() > 0) {
-            detailRating.setValue(starsAndOtherService.setStars(item.getRating()));
+            detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + starsAndOtherService.setStars(item.getRating()) + "</div>");
         } else {
-            detailRating.setValue("<span style='color: #94a3b8;'>Не оценен</span>");
+            detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Не оценен</span></div>");
         }
 
         if (item.getVacancy() != null) {
-            detailVacancy.setValue(item.getVacancy().getVacansyName());
+            detailVacancy.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + item.getVacancy().getVacansyName() + "</div>");
             if (Boolean.TRUE.equals(item.getVacancy().getOpenClose())) {
-                detailVacancyStatus.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыта</span>");
+                detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыта</span></div>");
             } else {
-                detailVacancyStatus.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыта</span>");
+                detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыта</span></div>");
             }
         } else {
-            detailVacancy.setValue("-");
-            detailVacancyStatus.setValue("-");
+            detailVacancy.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+            detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         }
 
-        detailRecruiter.setValue(item.getRecrutier() != null ? item.getRecrutier().getInstanceName() : "-");
-        detailCommMethod.setValue(item.getCommunicationMethod() != null ? item.getCommunicationMethod() : "-");
+        detailRecruiter.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (item.getRecrutier() != null ? item.getRecrutier().getInstanceName() : "—") + "</div>");
+        detailCommMethod.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (item.getCommunicationMethod() != null ? item.getCommunicationMethod() : "—") + "</div>");
 
         // Комментарий
         if (item.getComment() != null && !item.getComment().trim().isEmpty()) {
@@ -496,16 +496,16 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         openEditCardBtn.setEnabled(false);
         openCandidateCardBtn.setEnabled(false);
         logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        detailTitle.setValue("Выберите запись");
-        detailSubtitle.setValue("-");
-        detailLocation.setValue("-");
-        detailNumber.setValue("-");
-        detailDate.setValue("-");
-        detailRating.setValue("-");
-        detailVacancy.setValue("-");
-        detailVacancyStatus.setValue("-");
-        detailRecruiter.setValue("-");
-        detailCommMethod.setValue("-");
+        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Выберите запись</div>");
+        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailDate.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailVacancy.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailRecruiter.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
+        detailCommMethod.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         detailComment.setValue("<span style='color: #94a3b8;'>Запись не выбрана</span>");
     }
 }

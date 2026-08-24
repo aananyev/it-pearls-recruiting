@@ -95,15 +95,15 @@
                                     </row>
                                     <row>
                                         <label value="Проект:" stylename="edit-help"/>
-                                        <label id="detailProject" value="-" align="MIDDLE_CENTER"/>
+                                        <label id="detailProject" value="-" align="MIDDLE_CENTER" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Рекрутер:" stylename="edit-help"/>
-                                        <label id="detailOwner" value="-" align="MIDDLE_CENTER"/>
+                                        <label id="detailOwner" value="-" align="MIDDLE_CENTER" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Дата:" stylename="edit-help"/>
-                                        <label id="detailDatePost" value="-"/>
+                                        <label id="detailDatePost" value="-" htmlEnabled="true"/>
                                     </row>
                                 </rows>
                             </grid>

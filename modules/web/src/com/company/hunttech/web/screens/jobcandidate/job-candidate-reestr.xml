@@ -96,35 +96,35 @@
                                 <rows>
                                     <row>
                                         <label value="Телефон:" stylename="bold"/>
-                                        <label id="detailPhone" value="-"/>
+                                        <label id="detailPhone" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Email:" stylename="bold"/>
-                                        <label id="detailEmail" value="-"/>
+                                        <label id="detailEmail" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Telegram:" stylename="bold"/>
-                                        <label id="detailTelegram" value="-"/>
+                                        <label id="detailTelegram" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Компания:" stylename="bold"/>
-                                        <label id="detailCompany" value="-"/>
+                                        <label id="detailCompany" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label id="detailSalaryCaption" value="Ожидания:" stylename="bold" visible="false"/>
-                                        <label id="detailSalary" value="-" visible="false"/>
+                                        <label id="detailSalary" value="-" visible="false" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Рейтинг:" stylename="bold"/>
-                                        <label id="detailRating" value="-"/>
+                                        <label id="detailRating" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Статус вакансии:" stylename="bold"/>
-                                        <label id="detailVacancyStatus" value="-"/>
+                                        <label id="detailVacancyStatus" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Номер:" stylename="bold"/>
-                                        <label id="detailNumber" value="-"/>
+                                        <label id="detailNumber" value="-" htmlEnabled="true"/>
                                     </row>
                                 </rows>
                             </grid>

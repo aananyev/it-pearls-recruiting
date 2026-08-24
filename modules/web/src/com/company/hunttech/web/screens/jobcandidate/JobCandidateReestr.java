@@ -974,24 +974,24 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
 
     private void populateDetailPane(JobCandidate candidate) {
         FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
-        detailFullName.setValue(candidate.getFullName() != null ? candidate.getFullName() : "Без имени");
-        detailPosition.setValue(candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Должность не указана");
-        detailCity.setValue(candidate.getCityOfResidence() != null ? "📍 " + candidate.getCityOfResidence().getCityRuName() : "");
-        detailPhone.setValue(candidate.getPhone() != null ? candidate.getPhone() : (candidate.getMobilePhone() != null ? candidate.getMobilePhone() : "-"));
-        detailEmail.setValue(candidate.getEmail() != null ? candidate.getEmail() : "-");
-        detailTelegram.setValue(candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() : "-");
+        detailFullName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (candidate.getFullName() != null ? candidate.getFullName() : "Без имени") + "</div>");
+        detailPosition.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Должность не указана") + "</div>");
+        detailCity.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (candidate.getCityOfResidence() != null ? "📍 " + candidate.getCityOfResidence().getCityRuName() : "") + "</div>");
+        detailPhone.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (candidate.getPhone() != null ? candidate.getPhone() : (candidate.getMobilePhone() != null ? candidate.getMobilePhone() : "—")) + "</div>");
+        detailEmail.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (candidate.getEmail() != null ? candidate.getEmail() : "—") + "</div>");
+        detailTelegram.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() : "—") + "</div>");
         if (candidate.getCurrentCompany() != null) {
             String company = candidate.getCurrentCompany().getComanyName() != null ?
                     candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
-            detailCompany.setValue(company != null ? company : "-");
+            detailCompany.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (company != null ? company : "—") + "</div>");
         } else {
-            detailCompany.setValue("-");
+            detailCompany.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         }
 
         String salary = resolveCandidateSalary(candidate);
         if (salary != null && !salary.isEmpty()) {
             detailSalaryCaption.setVisible(true);
-            detailSalary.setValue(salary);
+            detailSalary.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + salary + "</div>");
             detailSalary.setVisible(true);
         } else {
             detailSalaryCaption.setVisible(false);
@@ -1023,31 +1023,31 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
 
                 // Рейтинг
                 if (last.getRating() != null && last.getRating() > 0 && starsAndOtherService != null) {
-                    detailRating.setValue(starsAndOtherService.setStars(last.getRating()));
+                    detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + starsAndOtherService.setStars(last.getRating()) + "</div>");
                 } else {
-                    detailRating.setValue("Не оценен");
+                    detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Не оценен</div>");
                 }
 
                 // Статус вакансии
                 if (last.getVacancy() != null) {
                     if (Boolean.TRUE.equals(last.getVacancy().getOpenClose())) {
-                        detailVacancyStatus.setValue("Закрыта");
+                        detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыта</span></div>");
                     } else {
-                        detailVacancyStatus.setValue("Открыта");
+                        detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыта</span></div>");
                     }
                 } else {
-                    detailVacancyStatus.setValue("Вакансия не указана");
+                    detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Вакансия не указана</div>");
                 }
 
                 // Номер взаимодействия (целое число без точки и нулей)
                 if (detailNumber != null && last.getNumberIteraction() != null) {
-                    detailNumber.setValue(last.getNumberIteraction().toBigInteger().toString());
+                    detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + last.getNumberIteraction().toBigInteger().toString() + "</div>");
                 } else if (detailNumber != null) {
-                    detailNumber.setValue("-");
+                    detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
                 }
             } else {
-                detailRating.setValue("Нет взаимодействий");
-                detailVacancyStatus.setValue("Нет взаимодействий");
+                detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Нет взаимодействий</div>");
+                detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Нет взаимодействий</div>");
                 if (detailNumber != null) {
                     detailNumber.setValue("-");
                 }

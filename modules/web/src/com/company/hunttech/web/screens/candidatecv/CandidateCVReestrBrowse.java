@@ -483,7 +483,7 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
 
         String ownerName = cv.getOwner() != null ? cv.getOwner().getInstanceName() : (cv.getCreatedBy() != null ? cv.getCreatedBy() : "—");
         detailOwner.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + ownerName + "</div>");
-        detailDatePost.setValue(cv.getDatePost() != null ? DATE_FORMAT.format(cv.getDatePost()) : "-");
+        detailDatePost.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (cv.getDatePost() != null ? DATE_FORMAT.format(cv.getDatePost()) : "—") + "</div>");
 
         // Документы
         if (cv.getOriginalFileCV() != null) {

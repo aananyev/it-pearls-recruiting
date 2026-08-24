@@ -97,11 +97,11 @@
                                 <rows>
                                     <row>
                                         <label value="Номер:" stylename="edit-help"/>
-                                        <label id="detailNumber" value="-" stylename="bold"/>
+                                        <label id="detailNumber" value="-" stylename="bold" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Дата:" stylename="edit-help"/>
-                                        <label id="detailDate" value="-" stylename="bold"/>
+                                        <label id="detailDate" value="-" stylename="bold" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Рейтинг:" stylename="edit-help"/>
@@ -109,7 +109,7 @@
                                     </row>
                                     <row>
                                         <label value="Вакансия:" stylename="edit-help"/>
-                                        <label id="detailVacancy" value="-" stylename="bold"/>
+                                        <label id="detailVacancy" value="-" stylename="bold" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Статус вакансии:" stylename="edit-help"/>
@@ -117,11 +117,11 @@
                                     </row>
                                     <row>
                                         <label value="Рекрутер:" stylename="edit-help"/>
-                                        <label id="detailRecruiter" value="-"/>
+                                        <label id="detailRecruiter" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Канал связи:" stylename="edit-help"/>
-                                        <label id="detailCommMethod" value="-"/>
+                                        <label id="detailCommMethod" value="-" htmlEnabled="true"/>
                                     </row>
                                 </rows>
                             </grid>

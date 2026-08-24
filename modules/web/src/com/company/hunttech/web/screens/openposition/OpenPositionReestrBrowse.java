@@ -472,7 +472,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ignored) {
         }
-        detailVacancyName.setValue(posName);
+        detailVacancyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + posName + "</div>");
 
         String prjName = "—";
         String compName = "—";
@@ -487,8 +487,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ignored) {
         }
-        detailProjectName.setValue(prjName);
-        detailCompanyName.setValue(compName != null ? compName : "—");
+        detailProjectName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + prjName + "</div>");
+        detailCompanyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (compName != null ? compName : "—") + "</div>");
 
         // Локация и формат работы
         String cityStr = "Локация не указана";
@@ -499,7 +499,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         } catch (Exception ignored) {
         }
         String remoteStr = formatRemoteWorkString(position.getRemoteWork());
-        detailLocationAndFormat.setValue(cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr));
+        detailLocationAndFormat.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr) + "</div>");
 
         // Зарплата по ТК (подробная вилка)
         if (detailSalaryTk != null) {
@@ -513,25 +513,25 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 } else {
                     sb.append("от ").append(SALARY_FORMAT.format(position.getSalaryMin())).append(" ₽");
                 }
-                detailSalaryTk.setValue(sb.toString());
+                detailSalaryTk.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + sb.toString() + "</div>");
             } else if (Boolean.TRUE.equals(position.getSalaryCandidateRequest())) {
-                detailSalaryTk.setValue("По запросу кандидата");
+                detailSalaryTk.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>По запросу кандидата</div>");
             } else {
-                detailSalaryTk.setValue("Не определено");
+                detailSalaryTk.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Не определено</div>");
             }
         }
 
         // Ставка по ИП
         if (detailSalaryIe != null) {
             if (position.getSalaryIE() != null) {
-                detailSalaryIe.setValue(SALARY_FORMAT.format(position.getSalaryIE()) + " ₽");
+                detailSalaryIe.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + SALARY_FORMAT.format(position.getSalaryIE()) + " ₽</div>");
             } else {
-                detailSalaryIe.setValue("—");
+                detailSalaryIe.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
             }
         }
 
         // Опыт работы
-        detailExperience.setValue(position.getWorkExperience() != null ? position.getWorkExperience().toString() + " г." : "Не указан");
+        detailExperience.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (position.getWorkExperience() != null ? position.getWorkExperience().toString() + " г." : "Не указан") + "</div>");
 
         // Грейд
         String gradeName = "Не указан";
@@ -542,12 +542,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         } catch (Exception ignored) {
         }
         if (detailGrade != null) {
-            detailGrade.setValue(gradeName);
+            detailGrade.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + gradeName + "</div>");
         }
 
-        detailRemoteWork.setValue(remoteStr.isEmpty() ? "Офис / Удаленно" : remoteStr);
-        detailOpenClose.setValue(Boolean.TRUE.equals(position.getOpenClose()) ? "Закрыта" : "Открыта");
-        detailNumberPosition.setValue(position.getNumberPosition() != null ? position.getNumberPosition() + " шт." : "1 шт.");
+        detailRemoteWork.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (remoteStr.isEmpty() ? "Офис / Удаленно" : remoteStr) + "</div>");
+        detailOpenClose.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (Boolean.TRUE.equals(position.getOpenClose()) ? "Закрыта" : "Открыта") + "</div>");
+        detailNumberPosition.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (position.getNumberPosition() != null ? position.getNumberPosition() + " шт." : "1 шт.") + "</div>");
 
         // Куратор и автор
         String pOwner = "—";
@@ -560,9 +560,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ignored) {
         }
-        detailProjectOwner.setValue(pOwner);
-        detailOwner.setValue(position.getOwner() != null ? position.getOwner().getName() : "—");
-        detailCreatedBy.setValue(position.getCreatedBy() != null ? position.getCreatedBy() : "—");
+        detailProjectOwner.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + pOwner + "</div>");
+        detailOwner.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (position.getOwner() != null ? position.getOwner().getName() : "—") + "</div>");
+        detailCreatedBy.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (position.getCreatedBy() != null ? position.getCreatedBy() : "—") + "</div>");
 
         // Индикаторы готовности
         StringBuilder ind = new StringBuilder();

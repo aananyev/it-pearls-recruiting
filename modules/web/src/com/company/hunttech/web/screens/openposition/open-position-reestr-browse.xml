@@ -135,31 +135,31 @@
                                 <rows>
                                     <row>
                                         <label value="Вилка по ТК:" stylename="bold"/>
-                                        <label id="detailSalaryTk" value="-" stylename="bold"/>
+                                        <label id="detailSalaryTk" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Ставка по ИП:" stylename="bold"/>
-                                        <label id="detailSalaryIe" value="-"/>
+                                        <label id="detailSalaryIe" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Опыт работы:" stylename="bold"/>
-                                        <label id="detailExperience" value="-"/>
+                                        <label id="detailExperience" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Грейд:" stylename="bold"/>
-                                        <label id="detailGrade" value="-"/>
+                                        <label id="detailGrade" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Формат работы:" stylename="bold"/>
-                                        <label id="detailRemoteWork" value="-"/>
+                                        <label id="detailRemoteWork" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Статус:" stylename="bold"/>
-                                        <label id="detailOpenClose" value="-"/>
+                                        <label id="detailOpenClose" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Позиций:" stylename="bold"/>
-                                        <label id="detailNumberPosition" value="-"/>
+                                        <label id="detailNumberPosition" value="-" htmlEnabled="true"/>
                                     </row>
                                 </rows>
                             </grid>
@@ -173,15 +173,15 @@
                                 <rows>
                                     <row>
                                         <label value="Куратор проекта:" stylename="bold"/>
-                                        <label id="detailProjectOwner" value="-"/>
+                                        <label id="detailProjectOwner" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Владелец:" stylename="bold"/>
-                                        <label id="detailOwner" value="-"/>
+                                        <label id="detailOwner" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Создатель:" stylename="bold"/>
-                                        <label id="detailCreatedBy" value="-"/>
+                                        <label id="detailCreatedBy" value="-" htmlEnabled="true"/>
                                     </row>
                                 </rows>
                             </grid>
