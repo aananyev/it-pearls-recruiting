@@ -4,17 +4,31 @@ import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.Project;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
-import com.haulmont.chile.core.model.MetaPropertyPath;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.MessageTools;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.FileDescriptorResource;
+import com.haulmont.cuba.gui.components.ThemeResource;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.MessageTools;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.service.ProjectAiService;
+import com.company.hunttech.web.util.AiOperationNotifier;
+import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -84,8 +98,30 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
     private Label<String> detailCuratorDept;
     @Inject
     private Label<String> detailCuratorContacts;
+
     @Inject
     private Label<String> detailDescription;
+
+    @Inject
+    private VBoxLayout shortDescriptionBox;
+
+    @Inject
+    private Label<String> detailShortDescription;
+
+    @Inject
+    private ProjectAiService projectAiService;
+
+    @Inject
+    private BackgroundWorker backgroundWorker;
+
+    @Inject
+    private Notifications notifications;
+
+    @Inject
+    private Messages messages;
+
+    @Inject
+    private UserSession userSession;
 
     private Map<UUID, Integer> openPositionCountCache = Collections.emptyMap();
     private Map<UUID, String> projectDescriptionCache = Collections.emptyMap();
@@ -301,6 +337,77 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         }
     }
 
+    @Subscribe("actionsPopupButton.generateShortDescriptionAction")
+    public void onGenerateShortDescriptionAction(Action.ActionPerformedEvent event) {
+        Project selected = projectsTable.getSingleSelected();
+        if (selected == null) {
+            return;
+        }
+        // Получаем полное описание проекта
+        String projectDescription = selected.getProjectDescription();
+        if (projectDescription == null || projectDescription.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Нет описания проекта для генерации краткого описания")
+                    .show();
+            return;
+        }
+        
+        String projectName = selected.getProjectName();
+        
+        // Показываем прогресс
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Генерация краткого описания…");
+        
+        BackgroundTask<Integer, AiExecutionResult> task = new BackgroundTask<Integer, AiExecutionResult>(120, this) {
+            @Override
+            public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                return projectAiService.generateShortDescription(projectName, projectDescription);
+            }
+
+            @Override
+            public void done(AiExecutionResult result) {
+                AiOperationNotifier.closeProgress(progressDialog);
+                selected.setShortDescription(result.getText());
+                dataManager.commit(selected);
+                // Обновляем sidebar
+                updateShortDescriptionInSidebar(selected.getShortDescription());
+                // Нотификация
+                AiOperationNotifier.show(notifications, result,
+                        messages.getMessage(ProjectReestrBrowse.class, "msgProjectShortDescriptionDone"),
+                        null);
+            }
+
+            @Override
+            public boolean handleException(Exception exception) {
+                AiOperationNotifier.closeProgress(progressDialog);
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption(messages.getMessage(ProjectReestrBrowse.class, "msgProjectShortDescriptionFailed"))
+                        .withDescription("Генерация краткого описания не выполнена: " + exception.getClass().getSimpleName())
+                        .show();
+                return true;
+            }
+
+            @Override
+            public boolean handleTimeoutException() {
+                AiOperationNotifier.closeProgress(progressDialog);
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption(messages.getMessage(ProjectReestrBrowse.class, "msgProjectShortDescriptionFailed"))
+                        .withDescription("Генерация краткого описания превысила допустимое время выполнения.")
+                        .show();
+                return true;
+            }
+        };
+        backgroundWorker.handle(task).execute();
+    }
+
+    /** Показывает/скрывает блок «КРАТКО» в sidebar и заполняет его. */
+    private void updateShortDescriptionInSidebar(String shortDescription) {
+        boolean visible = shortDescription != null && !shortDescription.trim().isEmpty();
+        shortDescriptionBox.setVisible(visible);
+        if (visible) {
+            detailShortDescription.setValue(shortDescription);
+        }
+    }
+
     @Subscribe(id = "projectsDl", target = Target.DATA_LOADER)
     private void onProjectsDlPostLoad(CollectionLoader.PostLoadEvent<Project> event) {
         refreshOpenPositionCountCache(event.getLoadedEntities());
@@ -433,6 +540,10 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         } else {
             detailDescription.setValue("<span style='color: #94a3b8;'>Описание проекта не заполнено</span>");
         }
+        
+        // Краткое описание (AI)
+        String shortDesc = project.getShortDescription();
+        updateShortDescriptionInSidebar(shortDesc);
     }
 
     private void clearSidebarDetails() {
@@ -451,5 +562,8 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         detailCuratorDept.setValue("-");
         detailCuratorContacts.setValue("-");
         detailDescription.setValue("<span style='color: #94a3b8;'>Проект не выбран</span>");
+        // Краткое описание
+        shortDescriptionBox.setVisible(false);
+        detailShortDescription.setValue("");
     }
 }

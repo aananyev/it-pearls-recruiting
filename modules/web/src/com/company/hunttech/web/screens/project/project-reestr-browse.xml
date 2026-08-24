@@ -99,6 +99,10 @@
                         <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="ОПИСАНИЕ ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
                             <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <vbox id="shortDescriptionBox" width="100%" spacing="true" visible="false" stylename="edit-sidebar-summary">
+                                <label value="КРАТКО:" width="100%" stylename="bold edit-help"/>
+                                <label id="detailShortDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            </vbox>
                         </vbox>
                     </vbox>
                 </scrollBox>
@@ -127,6 +131,7 @@
                             <actions>
                                 <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
                                 <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                                <action id="generateShortDescriptionAction" caption="ИТ-генерация краткого описания" icon="font-icon:MAGIC"/>
                             </actions>
                         </popupButton>
                     </hbox>
