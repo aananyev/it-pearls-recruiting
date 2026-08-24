@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 @LoadDataBeforeShow
 public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
 
-    private static final int DEFAULT_DATE_FILTER_DAYS = 90;
     private static final String QUERY_OUTSTAFFING_TYPES =
             "select e from hunttech_Iteraction e where e.outstaffingSign = true";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm");
@@ -59,8 +58,6 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
     @Inject
     private Notifications notifications;
 
-    @Inject
-    private DateField<Date> dateFromField;
     @Inject
     private PopupButton filterPopupButton;
 
@@ -94,19 +91,12 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
     private Label<String> detailComment;
 
     private Set<UUID> outstaffingTypeIdsCache;
-    private boolean suppressDateFromReload;
 
     @Subscribe
     public void onInit(InitEvent event) {
         iteractionListsDl.setMaxResults(100);
-        suppressDateFromReload = true;
-        try {
-            dateFromField.setValue(getDefaultDateFrom());
-            applyDateFromFilter();
-            applyInternalProjectFilter();
-        } finally {
-            suppressDateFromReload = false;
-        }
+
+        applyInternalProjectFilter();
 
         setupTableColumns();
         setupTableSelection();
@@ -261,21 +251,6 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         });
     }
 
-    private Date getDefaultDateFrom() {
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.add(GregorianCalendar.DAY_OF_MONTH, -DEFAULT_DATE_FILTER_DAYS);
-        return calendar.getTime();
-    }
-
-    private void applyDateFromFilter() {
-        Date dateFrom = dateFromField.getValue();
-        if (dateFrom != null) {
-            iteractionListsDl.setParameter("dateFrom", dateFrom);
-        } else {
-            iteractionListsDl.removeParameter("dateFrom");
-        }
-    }
-
     private void applyInternalProjectFilter() {
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
@@ -297,13 +272,6 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
                     .collect(Collectors.toSet());
         }
         return outstaffingTypeIdsCache;
-    }
-
-    @Subscribe("dateFromField")
-    public void onDateFromFieldValueChange(HasValue.ValueChangeEvent<Date> event) {
-        if (suppressDateFromReload) return;
-        applyDateFromFilter();
-        iteractionListsDl.load();
     }
 
     private void setupTableSelection() {

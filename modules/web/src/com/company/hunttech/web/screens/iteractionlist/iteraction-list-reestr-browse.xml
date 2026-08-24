@@ -148,8 +148,6 @@
                     </hbox>
                     <hbox id="toolbarSpacer" width="100%"/>
                     <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
-                        <label value="С даты:" align="MIDDLE_LEFT" stylename="edit-help"/>
-                        <dateField id="dateFromField" width="125px"/>
                         <popupButton id="filterPopupButton" caption="Все взаимодействия" icon="FILTER" stylename="secondary candidate-btn">
                             <actions>
                                 <action id="filterAll" caption="Все взаимодействия"/>
@@ -163,7 +161,6 @@
                             <actions>
                                 <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
                                 <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
-                                <action id="copyCandidateSummaryAction" caption="Скопировать саммари" icon="COPY"/>
                             </actions>
                         </popupButton>
                     </hbox>
