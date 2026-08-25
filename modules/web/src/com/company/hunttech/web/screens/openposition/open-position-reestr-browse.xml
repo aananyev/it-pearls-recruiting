@@ -88,22 +88,26 @@
                                        value="Выберите вакансию"
                                        stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
                                        width="100%"
-                                       align="MIDDLE_CENTER"/>
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
                                 <label id="detailProjectName"
                                        value="-"
                                        stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
                                        width="100%"
-                                       align="MIDDLE_CENTER"/>
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
                                 <label id="detailCompanyName"
                                        value="-"
                                        stylename="edit-help candidate-sidebar-city bold"
                                        width="100%"
-                                       align="MIDDLE_CENTER"/>
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
                                 <label id="detailLocationAndFormat"
                                        value="-"
                                        stylename="edit-help candidate-sidebar-city"
                                        width="100%"
-                                       align="MIDDLE_CENTER"/>
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
                             </vbox>
                         </vbox>
 
@@ -129,7 +133,7 @@
 
                         <!-- Секция 1: Условия и реквизиты -->
                         <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="УСЛОВИЯ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="УСЛОВИЯ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -167,7 +171,7 @@
 
                         <!-- Секция 2: Проект и кураторы -->
                         <vbox id="projectDetailsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ПРОЕКТ И КУРАТОРЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="ПРОЕКТ И КУРАТОРЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="projectGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -189,14 +193,14 @@
 
                         <!-- Секция 3: Индикаторы готовности и рейтинг -->
                         <vbox id="readinessCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailIndicators" htmlEnabled="true" width="100%" stylename="edit-help"/>
                             <label id="detailRating" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
 
                         <!-- Секция 4: Требуемые навыки -->
                         <vbox id="skillsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ТРЕБУЕМЫЕ НАВЫКИ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="ТРЕБУЕМЫЕ НАВЫКИ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailSkills" htmlEnabled="true" width="100%" stylename="candidate-skills-chips"/>
                         </vbox>
 

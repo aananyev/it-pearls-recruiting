@@ -78,7 +78,7 @@
 
                         <!-- Секция: Реквизиты и статус -->
                         <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="РЕКВИЗИТЫ И СТАТУС" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="РЕКВИЗИТЫ И СТАТУС" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -93,7 +93,7 @@
 
                         <!-- Секция: Активность и статистика -->
                         <vbox id="statsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="СТАТИСТИКА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="СТАТИСТИКА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="statsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -105,7 +105,7 @@
 
                         <!-- Секция: Описание компании -->
                         <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ОПИСАНИЕ И УСЛОВИЯ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="ОПИСАНИЕ И УСЛОВИЯ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>

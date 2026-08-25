@@ -64,9 +64,9 @@
                             <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
                                               align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="SCALE_DOWN"/>
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
-                                <label id="detailTitle" value="Выберите резюме" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
-                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
-                                <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
+                                <label id="detailTitle" value="Выберите резюме" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER" htmlEnabled="true"/>
                             </vbox>
                         </vbox>
 
@@ -78,7 +78,7 @@
 
                         <!-- Секция: Основные данные -->
                         <vbox id="mainDataCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ОСНОВНЫЕ ДАННЫЕ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="ОСНОВНЫЕ ДАННЫЕ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="mainDataGrid" width="100%" spacing="true" stylename="edit-sidebar-grid">
                                 <columns>
                                     <column width="100px"/>
@@ -111,7 +111,7 @@
 
                         <!-- Секция: Файлы -->
                         <vbox id="filesCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ПРИКРЕПЛЕННЫЕ ФАЙЛЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="ПРИКРЕПЛЕННЫЕ ФАЙЛЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="filesGrid" width="100%" spacing="true" stylename="edit-sidebar-grid">
                                 <columns>
                                     <column width="100px"/>
@@ -132,7 +132,7 @@
 
                         <!-- Секция: Сопроводительное письмо -->
                         <vbox id="letterCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="СОПРОВОДИТЕЛЬНОЕ ПИСЬМО" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="СОПРОВОДИТЕЛЬНОЕ ПИСЬМО" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailLetter" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>

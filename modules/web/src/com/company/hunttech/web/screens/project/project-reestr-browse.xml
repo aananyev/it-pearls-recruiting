@@ -73,7 +73,7 @@
 
                         <!-- Секция: Сроки и статус -->
                         <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="СРОКИ И СТАТУС" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="СРОКИ И СТАТУС" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -87,7 +87,7 @@
 
                         <!-- Секция: Куратор проекта -->
                         <vbox id="curatorCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="КУРАТОР ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="КУРАТОР ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <vbox spacing="false" width="100%" stylename="edit-sidebar-summary">
                                 <label id="detailCuratorName" value="-" stylename="bold" width="100%"/>
                                 <label id="detailCuratorPosition" value="-" stylename="edit-help" width="100%"/>
@@ -102,7 +102,7 @@
                              либо секция скрыта целиком. Заголовок секции и видимость
                              компонентов управляются контроллером ProjectReestrBrowse. -->
                         <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label id="descriptionCardTitle" value="ОПИСАНИЕ ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label id="descriptionCardTitle" value="ОПИСАНИЕ ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailShortDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
                             <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>

@@ -69,7 +69,7 @@
 
                         <!-- Секция: Контактные данные -->
                         <vbox id="contactsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="КОНТАКТЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="КОНТАКТЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="contactsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -85,7 +85,7 @@
 
                         <!-- Секция: Место работы -->
                         <vbox id="workCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="МЕСТО РАБОТЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="МЕСТО РАБОТЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <vbox spacing="false" width="100%" stylename="edit-sidebar-summary">
                                 <label id="detailCompany" value="-" stylename="bold" width="100%"/>
                                 <label id="detailDepartment" value="-" stylename="edit-help" width="100%"/>

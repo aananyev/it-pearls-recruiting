@@ -19,7 +19,6 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
-import com.vaadin.ui.JavaScript;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -101,6 +100,11 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+
+        // Выравнивание заголовков профиля (под OvalFallbackImage) по центру
+        detailTitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailSubtitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailLocation.setAlignment(Component.Alignment.MIDDLE_CENTER);
     }
 
     private void setupTableColumns() {
@@ -344,39 +348,6 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         Action excel = iteractionListsTable.getAction("excel");
         if (excel != null) {
             excel.actionPerform(iteractionListsTable);
-        }
-    }
-
-    @Subscribe("actionsPopupButton.copyCandidateSummaryAction")
-    public void onCopyCandidateSummaryAction(Action.ActionPerformedEvent event) {
-        IteractionList selected = iteractionListsTable.getSingleSelected();
-        if (selected == null) {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("Выберите запись")
-                    .show();
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (selected.getCandidate() != null) {
-            sb.append("Кандидат: ").append(selected.getCandidate().getFullName()).append("\n");
-        }
-        if (selected.getVacancy() != null) {
-            sb.append("Вакансия: ").append(selected.getVacancy().getVacansyName()).append("\n");
-        }
-        if (selected.getIteractionType() != null) {
-            sb.append("Тип: ").append(selected.getIteractionType().getIterationName()).append("\n");
-        }
-        if (selected.getComment() != null) {
-            sb.append("Комментарий:\n").append(Jsoup.parse(selected.getComment()).text());
-        }
-
-        try {
-            JavaScript.getCurrent().execute("navigator.clipboard.writeText(`" + sb.toString().replace("`", "\\`") + "`);");
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Скопировано в буфер обмена")
-                    .show();
-        } catch (Exception ignored) {
         }
     }
 

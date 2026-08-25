@@ -136,6 +136,11 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        // Выравнивание заголовков профиля (под OvalFallbackImage) по центру
+        detailTitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailSubtitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailLocation.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         initDefaultFilters();
         setupTableColumns();
         setupTableSelection();

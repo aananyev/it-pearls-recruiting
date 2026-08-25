@@ -59,6 +59,10 @@ public class CompanyGroupReestrBrowse extends StandardLookup<CompanyGroup> {
         setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+
+        // Выравнивание заголовков профиля (под OvalFallbackImage) по центру
+        detailTitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailSubtitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
     }
 
     private void setupTableColumns() {

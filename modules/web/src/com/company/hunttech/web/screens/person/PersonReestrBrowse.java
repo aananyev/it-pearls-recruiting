@@ -62,6 +62,11 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
         setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+
+        // Выравнивание заголовков профиля (под OvalFallbackImage) по центру
+        detailTitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailSubtitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailLocation.setAlignment(Component.Alignment.MIDDLE_CENTER);
     }
 
     private void setupTableColumns() {

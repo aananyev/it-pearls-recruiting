@@ -42,7 +42,7 @@
 
                         <!-- Секция: Статистика холдинга -->
                         <vbox id="statsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="СТАТИСТИКА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="СТАТИСТИКА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <grid id="statsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -53,7 +53,7 @@
 
                         <!-- Секция: Список компаний холдинга -->
                         <vbox id="companiesListCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="КОМПАНИИ ХОЛДИНГА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label value="КОМПАНИИ ХОЛДИНГА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailCompaniesList" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>

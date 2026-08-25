@@ -97,7 +97,12 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
-        
+
+        // Выравнивание заголовков профиля (под OvalFallbackImage) по центру
+        detailTitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailSubtitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailLocation.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         // Выравнивание заголовков сайдбара по центру
         detailToVacancy.setAlignment(Component.Alignment.MIDDLE_CENTER);
         detailProject.setAlignment(Component.Alignment.MIDDLE_CENTER);
