@@ -259,6 +259,11 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe
     public void onInit(Screen.InitEvent event) {
+        // Выравнивание заголовков профиля (под OvalFallbackImage) по центру
+        detailFullName.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailPosition.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailCity.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         // Колонка 1: Миниатюра фото кандидата (36px oval)
         candidatesTable.addGeneratedColumn("avatar", candidate -> {
             WebOvaFallbackImage avatarImg = uiComponents.create(WebOvaFallbackImage.class);
