@@ -75,6 +75,41 @@ public class ProjectShortDescriptionAiContractTest {
     }
 
     @Test
+    public void projectReestrBrowseLoadsShortDescriptionAndUsesCacheForDescription() throws IOException {
+        String xml = read("modules/web/src/com/company/hunttech/web/screens/project/project-reestr-browse.xml");
+        String java = read("modules/web/src/com/company/hunttech/web/screens/project/ProjectReestrBrowse.java");
+
+        // Data View Integrity: sidebar читает getShortDescription() — поле обязано быть
+        // в inline view экрана (в общий project-browse-view его намеренно не добавляют:
+        // CLOB не тащится в список, см. docs/ui/ProjectReestrBrowse_Spec.md).
+        int viewIdx = xml.indexOf("<view extends=\"project-browse-view\">");
+        assertTrue("inline view экрана не найден", viewIdx >= 0);
+        int shortDescIdx = xml.indexOf("<property name=\"shortDescription\"/>", viewIdx);
+        assertTrue("shortDescription отсутствует в inline view project-reestr-browse.xml",
+                shortDescIdx > viewIdx);
+
+        // projectDescription остаётся вне browse-view: контроллер читает его из кэша
+        // loadValues (QUERY_PROJECT_DESCRIPTIONS_BY_IDS), а не геттером detached-сущности.
+        assertTrue("Нет чтения projectDescription из кэша",
+                java.contains("projectDescriptionCache.get(project.getId())"));
+        assertFalse("Прямой геттер projectDescription на detached-сущности запрещён",
+                java.contains("selected.getProjectDescription()"));
+
+        // Алгоритм блока описания владельца (2026-08-25):
+        // краткое описание → блок «Краткое описание»; иначе описание проекта;
+        // иначе секция скрыта целиком.
+        assertTrue("Нет общего метода блока описания", java.contains("updateDescriptionSection"));
+        assertTrue("Секция не скрывается целиком", java.contains("descriptionCard.setVisible"));
+        assertTrue("Заголовок секции не переключается",
+                java.contains("descriptionCardTitle.setValue"));
+        assertTrue("Нет заголовка «Краткое описание»",
+                java.contains("SHORT_DESCRIPTION_SECTION_TITLE"));
+        // После успешной генерации sidebar перерисовывается целиком.
+        assertTrue("После генерации sidebar не перерисовывается",
+                java.contains("updateSidebarDetails(selected)"));
+    }
+
+    @Test
     public void aiFacadeDeclaresShortDescriptionFunction() throws IOException {
         String service = read("modules/global/src/com/company/hunttech/service/ProjectAiService.java");
         String bean = read("modules/core/src/com/company/hunttech/service/ProjectAiServiceBean.java");

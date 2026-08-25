@@ -52,6 +52,11 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
+    /** Заголовок секции sidebar, когда показывается краткое описание проекта (AI). */
+    private static final String SHORT_DESCRIPTION_SECTION_TITLE = "КРАТКОЕ ОПИСАНИЕ";
+    /** Заголовок секции sidebar, когда показывается полное описание проекта. */
+    private static final String DESCRIPTION_SECTION_TITLE = "ОПИСАНИЕ ПРОЕКТА";
+
     @Inject
     private CollectionContainer<Project> projectsDc;
     @Inject
@@ -103,7 +108,10 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
     private Label<String> detailDescription;
 
     @Inject
-    private VBoxLayout shortDescriptionBox;
+    private VBoxLayout descriptionCard;
+
+    @Inject
+    private Label<String> descriptionCardTitle;
 
     @Inject
     private Label<String> detailShortDescription;
@@ -343,8 +351,10 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         if (selected == null) {
             return;
         }
-        // Получаем полное описание проекта
-        String projectDescription = selected.getProjectDescription();
+        // Получаем полное описание проекта. projectDescription НЕ входит в browse-view
+        // (LOB не тащится в список); кэш наполняется в onProjectsDlPostLoad
+        // (QUERY_PROJECT_DESCRIPTIONS_BY_IDS) для всех загруженных проектов.
+        String projectDescription = selected.getId() != null ? projectDescriptionCache.get(selected.getId()) : null;
         if (projectDescription == null || projectDescription.trim().isEmpty()) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("Нет описания проекта для генерации краткого описания")
@@ -368,8 +378,9 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
                 AiOperationNotifier.closeProgress(progressDialog);
                 selected.setShortDescription(result.getText());
                 dataManager.commit(selected);
-                // Обновляем sidebar
-                updateShortDescriptionInSidebar(selected.getShortDescription());
+                // Обновляем sidebar целиком — блок описания перерисовывается по
+                // алгоритму владельца (краткое описание → блок «Краткое описание»).
+                updateSidebarDetails(selected);
                 // Нотификация
                 AiOperationNotifier.show(notifications, result,
                         messages.getMessage(ProjectReestrBrowse.class, "msgProjectShortDescriptionDone"),
@@ -399,12 +410,37 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         backgroundWorker.handle(task).execute();
     }
 
-    /** Показывает/скрывает блок «КРАТКО» в sidebar и заполняет его. */
-    private void updateShortDescriptionInSidebar(String shortDescription) {
-        boolean visible = shortDescription != null && !shortDescription.trim().isEmpty();
-        shortDescriptionBox.setVisible(visible);
-        if (visible) {
+    /**
+     * Блок описания в sidebar — по алгоритму владельца:
+     * 1) непустое краткое описание (shortDescription) → блок «Краткое описание»;
+     * 2) иначе непустое описание проекта (projectDescription) → блок «ОПИСАНИЕ ПРОЕКТА»
+     *    (текст, обрезанный до 300 символов);
+     * 3) иначе секция описания скрыта целиком (без placeholder'ов).
+     */
+    private void updateDescriptionSection(String shortDescription, String projectDescription) {
+        boolean hasShort = shortDescription != null && !shortDescription.trim().isEmpty();
+        boolean hasDescription = projectDescription != null && !projectDescription.trim().isEmpty();
+
+        if (hasShort) {
+            descriptionCard.setVisible(true);
+            descriptionCardTitle.setValue(SHORT_DESCRIPTION_SECTION_TITLE);
+            detailShortDescription.setVisible(true);
             detailShortDescription.setValue(shortDescription);
+            detailDescription.setVisible(false);
+        } else if (hasDescription) {
+            descriptionCard.setVisible(true);
+            descriptionCardTitle.setValue(DESCRIPTION_SECTION_TITLE);
+            detailShortDescription.setVisible(false);
+            detailShortDescription.setValue("");
+            detailDescription.setVisible(true);
+            String plain = Jsoup.parse(projectDescription).text();
+            detailDescription.setValue(plain.length() > 300 ? plain.substring(0, 300) + "..." : plain);
+        } else {
+            descriptionCard.setVisible(false);
+            detailShortDescription.setVisible(false);
+            detailShortDescription.setValue("");
+            detailDescription.setVisible(false);
+            detailDescription.setValue("");
         }
     }
 
@@ -532,18 +568,11 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
             detailCuratorContacts.setValue("-");
         }
 
-        // Описание
+        // Описание проекта / краткое описание (AI) — блок по алгоритму владельца
+        // (см. updateDescriptionSection). projectDescription читается из кэша loadValues
+        // (LOB вне browse-view), shortDescription — из view экрана (Data View Integrity).
         String desc = project.getId() != null ? projectDescriptionCache.get(project.getId()) : null;
-        if (desc != null && !desc.trim().isEmpty()) {
-            String plain = Jsoup.parse(desc).text();
-            detailDescription.setValue(plain.length() > 300 ? plain.substring(0, 300) + "..." : plain);
-        } else {
-            detailDescription.setValue("<span style='color: #94a3b8;'>Описание проекта не заполнено</span>");
-        }
-        
-        // Краткое описание (AI)
-        String shortDesc = project.getShortDescription();
-        updateShortDescriptionInSidebar(shortDesc);
+        updateDescriptionSection(project.getShortDescription(), desc);
     }
 
     private void clearSidebarDetails() {
@@ -561,9 +590,12 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         detailCuratorPosition.setValue("-");
         detailCuratorDept.setValue("-");
         detailCuratorContacts.setValue("-");
-        detailDescription.setValue("<span style='color: #94a3b8;'>Проект не выбран</span>");
-        // Краткое описание
-        shortDescriptionBox.setVisible(false);
+        // Блок описания: при отсутствии выбранного проекта секция скрыта целиком
+        descriptionCard.setVisible(false);
+        descriptionCardTitle.setValue(DESCRIPTION_SECTION_TITLE);
+        detailShortDescription.setVisible(false);
         detailShortDescription.setValue("");
+        detailDescription.setVisible(false);
+        detailDescription.setValue("");
     }
 }
