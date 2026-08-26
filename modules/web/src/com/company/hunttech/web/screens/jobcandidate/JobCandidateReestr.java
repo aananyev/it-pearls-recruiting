@@ -175,13 +175,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Inject
     private Label<String> detailRating;
     @Inject
-    private Label<String> detailVacancyStatus;
-    @Inject
     private Label<String> detailNumber;
     @Inject
     private Label<String> detailReadiness;
-    @Inject
-    private Label<String> detailSentCandidates;
     @Inject
     private Button editCandidateBtn;
     @Inject
@@ -1104,17 +1100,11 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         if (detailRating != null) {
             detailRating.setValue("-");
         }
-        if (detailVacancyStatus != null) {
-            detailVacancyStatus.setValue("-");
-        }
         if (detailNumber != null) {
             detailNumber.setValue("-");
         }
         if (detailReadiness != null) {
             detailReadiness.setValue("-");
-        }
-        if (detailSentCandidates != null) {
-            detailSentCandidates.setValue("-");
         }
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
@@ -1146,8 +1136,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             detailSalary.setVisible(false);
         }
 
-        // Рейтинг и статус вакансии из последнего взаимодействия
-        updateRatingAndVacancyStatus(candidate);
+        // Номер взаимодействия из последнего взаимодействия
+        updateInteractionNumber(candidate);
 
         updateCandidateSkillsSidebar(candidate);
         updateReadinessRatingAndSent(candidate);
@@ -1155,54 +1145,23 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         createInteractionBtn.setEnabled(true);
     }
 
-    private void updateRatingAndVacancyStatus(JobCandidate candidate) {
-        if (detailRating == null || detailVacancyStatus == null) {
+    private void updateInteractionNumber(JobCandidate candidate) {
+        if (detailNumber == null) {
             return;
         }
         try {
             // Используем кэш последнего взаимодействия вместо N+1 запроса
             IteractionList last = lastInteractionByCandidateId.get(candidate.getId());
 
-            if (last != null) {
-
-                // Рейтинг
-                if (last.getRating() != null && last.getRating() > 0 && starsAndOtherService != null) {
-                    detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + starsAndOtherService.setStars(last.getRating()) + "</div>");
-                } else {
-                    detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Не оценен</div>");
-                }
-
-                // Статус вакансии
-                if (last.getVacancy() != null) {
-                    if (Boolean.TRUE.equals(last.getVacancy().getOpenClose())) {
-                        detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыта</span></div>");
-                    } else {
-                        detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыта</span></div>");
-                    }
-                } else {
-                    detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Вакансия не указана</div>");
-                }
-
-                // Номер взаимодействия (целое число без точки и нулей)
-                if (detailNumber != null && last.getNumberIteraction() != null) {
-                    detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + last.getNumberIteraction().toBigInteger().toString() + "</div>");
-                } else if (detailNumber != null) {
-                    detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
-                }
+            // Номер взаимодействия (целое число без точки и нулей)
+            if (last != null && last.getNumberIteraction() != null) {
+                detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + last.getNumberIteraction().toBigInteger().toString() + "</div>");
             } else {
-                detailRating.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Нет взаимодействий</div>");
-                detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Нет взаимодействий</div>");
-                if (detailNumber != null) {
-                    detailNumber.setValue("-");
-                }
+                detailNumber.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
             }
         } catch (Exception ex) {
             log.warn("Failed to load interaction data for candidate {}", candidate != null ? candidate.getId() : null, ex);
-            detailRating.setValue("Ошибка загрузки");
-            detailVacancyStatus.setValue("Ошибка загрузки");
-            if (detailNumber != null) {
-                detailNumber.setValue("Ошибка загрузки");
-            }
+            detailNumber.setValue("Ошибка загрузки");
         }
     }
 
@@ -1569,10 +1528,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
          * Обновляет блок «Готовность и рейтинг» в sidebar:
          * - индикаторы готовности (✓ Резюме / ✓ Активность / ✓ В резерве)
          * - звёзды рейтинга крупным шрифтом (20px) + цифра (14px)
-         * - счётчик «Отправлено кандидатов» с раскраской (<3 зелёный, <5 жёлтый, >=5 красный)
          */
         private void updateReadinessRatingAndSent(JobCandidate candidate) {
-            if (detailReadiness == null && detailRating == null && detailSentCandidates == null) {
+            if (detailReadiness == null && detailRating == null) {
                 return;
             }
             try {
@@ -1636,32 +1594,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                         detailRating.setValue("<span style='color: #9ca3af; font-size: 14px;'>Не оценен</span>");
                     }
                 }
-
-                // 3. Счётчик отправленных на сторону заказчика с раскраской
-                if (detailSentCandidates != null) {
-                    Integer sentCount = sentCvCountByCandidateId.getOrDefault(candidate.getId(), 0);
-                    String color, bg;
-                    if (sentCount < 3) {
-                        color = "#16a34a";
-                        bg = "rgba(34, 197, 94, 0.12)";
-                    } else if (sentCount < 5) {
-                        color = "#ca8a04";
-                        bg = "rgba(250, 204, 21, 0.15)";
-                    } else {
-                        color = "#dc2626";
-                        bg = "rgba(239, 68, 68, 0.12)";
-                    }
-                    detailSentCandidates.setValue(String.format(
-                            "<div style='display: flex; align-items: center; gap: 6px; font-size: 13px;'>" +
-                                    "<span>Отправлено кандидатов:</span>" +
-                                    "<span style='background: %s; color: %s; padding: 2px 10px; border-radius: 10px; font-weight: 700; font-size: 12px;'>%d</span>" +
-                                    "</div>", bg, color, sentCount));
-                }
             } catch (Exception ex) {
-                log.warn("Failed to update readiness/rating/sent for candidate {}", candidate != null ? candidate.getId() : null, ex);
+                log.warn("Failed to update readiness/rating for candidate {}", candidate != null ? candidate.getId() : null, ex);
                 if (detailReadiness != null) detailReadiness.setValue("Ошибка загрузки");
                 if (detailRating != null) detailRating.setValue("Ошибка загрузки");
-                if (detailSentCandidates != null) detailSentCandidates.setValue("Ошибка загрузки");
             }
         }
 

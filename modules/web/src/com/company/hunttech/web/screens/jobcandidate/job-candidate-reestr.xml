@@ -88,14 +88,12 @@
                         </vbox>
 
                         <!-- Секция: Готовность и рейтинг -->
-                        <vbox id="readinessCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
-                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                        <vbox id="readinessCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <!-- Индикаторы готовности -->
                             <label id="detailReadiness" width="100%" htmlEnabled="true" stylename="job-candidate-readiness"/>
                             <!-- Рейтинг: звёзды + цифра -->
                             <label id="detailRating" width="100%" htmlEnabled="true" stylename="job-candidate-rating"/>
-                            <!-- Счётчик отправленных кандидатов -->
-                            <label id="detailSentCandidates" width="100%" htmlEnabled="true" stylename="job-candidate-sent-count"/>
                         </vbox>
 
                         <!-- Блок ключевой контактной информации кандидата (стиль Edit-форм с линиями) -->
@@ -124,14 +122,6 @@
                                     <row>
                                         <label id="detailSalaryCaption" value="Ожидания:" stylename="bold" visible="false"/>
                                         <label id="detailSalary" value="-" visible="false" htmlEnabled="true"/>
-                                    </row>
-                                    <row>
-                                        <label value="Рейтинг:" stylename="bold"/>
-                                        <label id="detailRating" value="-" htmlEnabled="true"/>
-                                    </row>
-                                    <row>
-                                        <label value="Статус вакансии:" stylename="bold"/>
-                                        <label id="detailVacancyStatus" value="-" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Номер:" stylename="bold"/>
