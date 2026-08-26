@@ -92,4 +92,58 @@
     <include file="260816-4-updateTextProcessingHtmlPrompt.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Консолидированная миграция административных AI-промптов (2026-08-18):
+         создаёт таблицы AI Control Plane, если они отсутствуют (прод-снапшот
+         get_base.sh 2026-08-18 их не содержит), и загружает ВСЕ канонические
+         административные промпты AI-функций (последние редакции 260813-1..260816-5
+         + новая STANDARDIZE_VACANCY по legacy-контракту 260812-4).
+         Административные настройки, изменённые администратором, не перезаписываются.
+         Ручной деплой на прод: 260818-1-addAdminAiPromptSeed.sql. -->
+    <include file="260818-1-addAdminAiPromptSeed.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- SmartCvIngestService: AI-функция умного парсинга резюме из произвольного файла в JSON. -->
+    <include file="260820-1-addSmartCvParseAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- ExtUser: добавление поля TELEGRAM для пользователей. -->
+    <include file="260820-2-addTelegramToSecUser.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- SmartOpenPositionIngestService: AI-функция умного парсинга описания вакансии и проекта в JSON. -->
+    <include file="260820-3-addSmartVacancyParseAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Company: добавление колонок официальных реквизитов компании. -->
+    <include file="260821-1-addCompanyRequisitesColumns.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- CompanyRequisitesIngestService: AI-функция парсинга реквизитов компании из карточки в JSON. -->
+    <include file="260821-2-addCompanyRequisitesAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- JobHistory: снятие NOT NULL с CURRENT_POSITION_ID и добавление полей опыта кандидата. -->
+    <include file="260821-3-addJobHistoryFields.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- SmartCvIngestService: обновление AI-функции CV_SMART_PARSE_JSON для поддержки мест работы и образования. -->
+    <include file="260821-4-updateSmartCvParseAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- CompanyRequisitesIngestService: обновление AI-функции COMPANY_REQUISITES_PARSE_JSON с гео-разбиением. -->
+    <include file="260821-5-updateCompanyRequisitesAiFunctionWithGeo.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Company: добавление колонки LEGAL_ENTITY_NAME (Юридическое лицо). -->
+    <include file="260821-6-addCompanyLegalEntityName.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- ApplicationSetup: настройка и активация Telegram бота. -->
+    <include file="260821-7-configureTelegramBotSetup.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- CompanySearchAiService: Seed AI-функции COMPANY_WEB_SEARCH_PARSE_JSON для интеллектуального поиска компаний в интернете. -->
+    <include file="260822-2-addCompanyWebSearchAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

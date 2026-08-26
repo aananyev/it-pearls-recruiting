@@ -9,6 +9,7 @@
             where (e.openClose is null or e.openClose = false)
               and (e.signDraft is null or e.signDraft = false)
               and e.internalProject = false
+              and (e.priority is null or e.priority <> -2)
             order by e.vacansyName
         ]]></jpql>
     </query>

@@ -4,6 +4,7 @@
 *.iml
 *.iws
 build/*
+deploy
 deploy/*
 modules/*/build/*
 .idea/*

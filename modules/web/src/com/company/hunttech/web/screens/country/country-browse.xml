@@ -34,8 +34,12 @@ order by e.countryRuName]]>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="countryRuName" caption="msg://msgNumber"/>
+                <column id="countryRuName" caption="msg://msgCountry"/>
+                <column id="countryEngName" caption="msg://msgCountryEngName"/>
                 <column id="countryShortName" caption="msg://msgCountryShortName"/>
+                <column id="alpha3Code" caption="msg://msgAlpha3Code"/>
+                <column id="capital" caption="msg://msgCapital"/>
+                <column id="currencyCode" caption="msg://msgCurrencyCode"/>
                 <column id="phoneCode" caption="msg://msgPhoneCode"/>
             </columns>
             <rowsCount/>
@@ -44,6 +48,7 @@ order by e.countryRuName]]>
                 <button id="createBtn" action="countriesTable.create"/>
                 <button id="editBtn" action="countriesTable.edit"/>
                 <button id="removeBtn" action="countriesTable.remove"/>
+                <button id="loadAllCountriesBtn" caption="msg://msgLoadAllCountries"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

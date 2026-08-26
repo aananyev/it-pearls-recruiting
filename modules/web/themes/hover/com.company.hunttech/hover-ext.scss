@@ -1654,19 +1654,49 @@ rating_battery_yellow_3:before {
       color: #2c3e50 !important;
     }
 
-    /* ── Menubar: тёмно-синий графит ── */
+    /* ── Menubar: современный дизайн ── */
     .cuba-app-menubar,
+    .c-app-menubar,
     .v-menubar {
       background-color: #1e293b !important;
       border-color: #1e293b !important;
+      height: 42px !important;
+      min-height: 42px !important;
+      line-height: 42px !important;
+      display: flex !important;
+      align-items: center !important;
 
-      .v-menubar-menuitem {
+      > .v-menubar-menuitem {
         color: #c8d1de !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        line-height: 34px !important;
+        padding: 0 12px !important;
+        margin: 0 2px !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.15px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        transition: background 0.15s ease, color 0.15s ease !important;
+
+        .v-icon {
+          font-size: 14px !important;
+          margin-right: 8px !important;
+          color: #94a3b8 !important;
+          transition: color 0.15s ease, transform 0.15s ease !important;
+        }
 
         &:hover,
         &.v-menubar-menuitem-selected {
-          background-color: rgba(255, 255, 255, 0.06) !important;
+          background-color: rgba(255, 255, 255, 0.1) !important;
           color: #ffffff !important;
+
+          .v-icon {
+            color: #38bdf8 !important;
+            transform: scale(1.08);
+          }
         }
       }
     }
@@ -1677,16 +1707,36 @@ rating_battery_yellow_3:before {
 
       .v-side-menu-item {
         color: #c8d1de !important;
-        border-radius: 4px !important;
-        transition: background 0.12s ease !important;
+        border-radius: 6px !important;
+        margin: 2px 6px !important;
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        transition: background 0.12s ease, color 0.12s ease !important;
+
+        .v-icon {
+          font-size: 14px !important;
+          margin-right: 10px !important;
+          color: #94a3b8 !important;
+        }
 
         &:hover {
-          background: rgba(255, 255, 255, 0.06) !important;
+          background: rgba(255, 255, 255, 0.08) !important;
+          color: #ffffff !important;
+
+          .v-icon {
+            color: #38bdf8 !important;
+          }
         }
 
         &.v-side-menu-item-selected {
-          background: rgba(12, 102, 228, 0.2) !important;
+          background: rgba(12, 102, 228, 0.25) !important;
           color: #ffffff !important;
+          font-weight: 600 !important;
+
+          .v-icon {
+            color: #38bdf8 !important;
+          }
         }
       }
     }
@@ -1810,39 +1860,89 @@ rating_battery_yellow_3:before {
       color: #e3e3e3 !important;
     }
 
-    /* ── Menubar ── */
+    /* ── Menubar: современный дизайн (dark) ── */
     .cuba-app-menubar,
+    .c-app-menubar,
     .v-menubar {
       background-color: #0d0d0d !important;
       border-color: #0d0d0d !important;
+      height: 42px !important;
+      min-height: 42px !important;
+      line-height: 42px !important;
+      display: flex !important;
+      align-items: center !important;
 
-      .v-menubar-menuitem {
+      > .v-menubar-menuitem {
         color: #a8b0bc !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        line-height: 34px !important;
+        padding: 0 12px !important;
+        margin: 0 2px !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.15px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        transition: background 0.15s ease, color 0.15s ease !important;
+
+        .v-icon {
+          font-size: 14px !important;
+          margin-right: 8px !important;
+          color: #64748b !important;
+          transition: color 0.15s ease, transform 0.15s ease !important;
+        }
 
         &:hover,
         &.v-menubar-menuitem-selected {
-          background-color: rgba(255, 255, 255, 0.05) !important;
+          background-color: rgba(255, 255, 255, 0.08) !important;
           color: #ffffff !important;
+
+          .v-icon {
+            color: #38bdf8 !important;
+            transform: scale(1.08);
+          }
         }
       }
     }
 
-    /* ── SideMenu ── */
+    /* ── SideMenu (dark) ── */
     .c-sidemenu {
       background: #0d0d0d !important;
 
       .v-side-menu-item {
         color: #a8b0bc !important;
-        border-radius: 4px !important;
-        transition: background 0.12s ease !important;
+        border-radius: 6px !important;
+        margin: 2px 6px !important;
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        transition: background 0.12s ease, color 0.12s ease !important;
+
+        .v-icon {
+          font-size: 14px !important;
+          margin-right: 10px !important;
+          color: #64748b !important;
+        }
 
         &:hover {
-          background: rgba(255, 255, 255, 0.05) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+          color: #ffffff !important;
+
+          .v-icon {
+            color: #38bdf8 !important;
+          }
         }
 
         &.v-side-menu-item-selected {
-          background: rgba(53, 126, 199, 0.2) !important;
+          background: rgba(53, 126, 199, 0.25) !important;
           color: #ffffff !important;
+          font-weight: 600 !important;
+
+          .v-icon {
+            color: #38bdf8 !important;
+          }
         }
       }
     }

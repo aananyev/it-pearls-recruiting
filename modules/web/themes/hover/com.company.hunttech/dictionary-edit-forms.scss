@@ -1,22 +1,12 @@
-/*
- * Справочные Edit-формы HRM HuntTech (FileTypeEdit, SocialNetworkTypeEdit,
- * GradeEdit, CurrencyEdit, OutstaffingRatesEdit, EmployeeWorkStatusEdit,
- * SignIconsEdit) — локальный визуальный слой поверх общего контракта
- * Edit-экранов.
- *
- * Общие edit-* и label-* stylename задаёт edit-screen-shared-styles (геометрия,
- * светлые карточки и поля рабочей области). Этот partial добавляет фирменную
- * тёмную sidebar и каноническую label-навигацию по эталону IteractionListEdit
- * (контракт §3.1): hover — белый текст на rgba(255,255,255,.08),
- * active — жёлтый #ffb11b на rgba(255,177,27,.12) с жёлтой левой границей;
- * полоса-заголовок «Разделы» — с inset-линиями (§4.1); штатная заглушка
- * логотипа HRM HuntTech в sidebar — круглый OvaFallbackImage 176×176
- * (размер candidatePic эталона JobCandidateEdit).
- *
- * Все правила ограничены локальными namespace форм и не затрагивают
- * глобальные Vaadin-селекторы и другие экраны.
- */
-@mixin dictionary-edit-forms-theme {
+/* * Справочные Edit-формы HRM HuntTech (FileTypeEdit, SocialNetworkTypeEdit,
+  * GradeEdit, CurrencyEdit, OutstaffingRatesEdit, EmployeeWorkStatusEdit,
+  * SignIconsEdit) — локальный визуальный слой поверх общего контракта * Edit-экранов. * * Общие edit-* и label-* stylename задаёт edit-screen-shared-styles (геометрия,
+  * светлые карточки и поля рабочей области). Этот partial добавляет фирменную * тёмную sidebar и каноническую label-навигацию по эталону IteractionListEdit * (контракт §3.1): hover — белый текст на rgba(255, 255, 255, .08),
+* active — жёлтый #ffb11b на rgba(255, 177, 27, .12) с жёлтой левой границей;
+* полоса-заголовок «Разделы» — с inset-линиями (§4.1);
+
+штатная заглушка * логотипа HRM HuntTech в sidebar — круглый OvaFallbackImage 176×176 * (размер candidatePic эталона JobCandidateEdit). * * Все правила ограничены локальными namespace форм и не затрагивают * глобальные Vaadin-селекторы и другие экраны. */ @mixin dictionary-edit-forms-theme {
+
   .file-type-editor,
   .social-network-type-editor,
   .grade-editor,
@@ -27,6 +17,7 @@
   .specialisation-editor,
   .ownershup-editor,
   .position-editor {
+
     // Фирменная тёмная sidebar: совпадает с эталоном HRM HuntTech.
     // background-color и background-image задаются раздельно: SCSS-шорткат
     // background: linear-gradient(...) компилируется в невалидный CSS.
@@ -160,7 +151,7 @@
       background: rgba(255, 255, 255, 0.045) !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
       box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
-                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+        rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
       white-space: normal !important;
       visibility: visible !important;
       opacity: 1 !important;

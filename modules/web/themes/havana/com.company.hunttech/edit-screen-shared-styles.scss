@@ -68,6 +68,28 @@
     overflow-wrap: anywhere;
   }
 
+  .edit-sidebar-title,
+  .edit-sidebar-title.v-label,
+  .candidate-sidebar-fullname,
+  .job-candidate-sidebar .candidate-sidebar-fullname,
+  .job-candidate-sidebar .edit-sidebar-title {
+    color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+    font-weight: 700 !important;
+  }
+
+  .edit-sidebar-subtitle,
+  .edit-sidebar-subtitle.v-label,
+  .candidate-sidebar-position,
+  .job-candidate-sidebar .candidate-sidebar-position {
+    color: $v-selection-color !important;
+    font-weight: 600 !important;
+  }
+
+  .candidate-sidebar-city,
+  .job-candidate-sidebar .candidate-sidebar-city {
+    color: rgba($v-font-color, 0.85) !important;
+  }
+
   .label-navigation,
   .v-slot-label-navigation {
     box-sizing: border-box;
@@ -506,6 +528,363 @@
       width: 250px !important;
       min-width: 250px !important;
       max-width: 250px !important;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * PopupButton, Context Menu & Action Dropdowns (Theme-aware Modern UI)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+
+  .v-popupbutton-popup,
+  .c-popupbutton-popup,
+  .c-cm-container,
+  .v-popupview-popup,
+  .v-contextmenu,
+  .v-menubar-popup {
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.14) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.12) !important;
+    padding: 6px 4px !important;
+    min-width: 180px;
+    box-sizing: border-box !important;
+
+    .c-popupbutton-layout,
+    .v-scrollable {
+      padding: 0 !important;
+      overflow-x: hidden !important;
+    }
+  }
+
+  .c-cm-button,
+  .v-button.c-cm-button,
+  .v-popupbutton-popup .v-button,
+  .c-popupbutton-popup .v-button,
+  .v-contextmenu .gwt-MenuItem,
+  .v-menubar-popup .v-menubar-menuitem {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    padding: 2px 12px !important;
+    margin: 1px 0 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: mix($v-font-color, $v-panel-background-color, 85%) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.15px !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    transition: background 0.12s ease-in-out, color 0.12s ease-in-out, transform 0.08s ease !important;
+
+    &:after {
+      display: none !important;
+    }
+
+    .v-button-caption,
+    .c-cm-button-caption {
+      color: inherit !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 1.3 !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      flex: 1 1 auto !important;
+    }
+
+    .v-icon,
+    .c-cm-button-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 18px !important;
+      min-width: 18px !important;
+      font-size: 13.5px !important;
+      margin-right: 10px !important;
+      color: rgba($v-font-color, 0.60) !important;
+      transition: color 0.12s ease-in-out, transform 0.12s ease !important;
+    }
+
+    &:hover:not(.v-disabled),
+    &.c-cm-button-selected:not(.v-disabled),
+    &.v-button-focus:not(.v-disabled),
+    &.gwt-MenuItem-selected:not(.v-disabled),
+    &.v-menubar-menuitem-selected:not(.v-disabled) {
+      background: rgba($v-selection-color, 0.10) !important;
+      color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+
+      .v-icon,
+      .c-cm-button-icon {
+        color: $v-selection-color !important;
+        transform: scale(1.08);
+      }
+    }
+
+    &:active:not(.v-disabled) {
+      background: rgba($v-selection-color, 0.16) !important;
+      transform: scale(0.99);
+    }
+
+    &.v-disabled,
+    &[disabled] {
+      opacity: 0.45 !important;
+      cursor: not-allowed !important;
+      background: transparent !important;
+      color: rgba($v-font-color, 0.35) !important;
+
+      .v-icon,
+      .c-cm-button-icon {
+        color: rgba($v-font-color, 0.35) !important;
+      }
+    }
+  }
+
+  .c-cm-separator,
+  .v-menubar-separator {
+    height: 1px !important;
+    background: rgba($v-font-color, 0.12) !important;
+    margin: 4px 6px !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  /* Счетчик строк и пагинация над/под таблицами (rowsCount в DataGrid / TreeDataGrid / Table) */
+  .c-simplepagination,
+  .c-rows-count,
+  .v-slot-c-rows-count,
+  .c-paging,
+  .v-table-footer-container .c-rows-count,
+  .v-grid-footer-container .c-rows-count {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 4px !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+
+    /* Текст статуса строк (например, 1 - 100 из ...) */
+    .c-simplepagination-status,
+    .c-rows-count-label,
+    .v-label {
+      font-size: 12px !important;
+      line-height: 28px !important;
+      color: rgba($v-font-color, 0.72) !important;
+      padding: 0 6px !important;
+      white-space: nowrap !important;
+      vertical-align: middle !important;
+      margin: 0 !important;
+      height: 28px !important;
+    }
+
+    /* Кнопка ссылки подсчета общего количества (из 350) */
+    .c-simplepagination-count,
+    .c-rows-count-count,
+    .v-button-link {
+      height: 24px !important;
+      min-height: 24px !important;
+      line-height: 24px !important;
+      font-size: 12px !important;
+      padding: 0 4px !important;
+      margin: 0 !important;
+      vertical-align: middle !important;
+      color: $v-selection-color !important;
+    }
+
+    /* Стрелки пагинации влево / вправо / в начало / в конец */
+    .v-button,
+    .c-simplepagination-first,
+    .c-simplepagination-prev,
+    .c-simplepagination-next,
+    .c-simplepagination-last,
+    .c-rows-count-first,
+    .c-rows-count-prev,
+    .c-rows-count-next,
+    .c-rows-count-last {
+      height: 24px !important;
+      min-height: 24px !important;
+      max-height: 24px !important;
+      width: 24px !important;
+      min-width: 24px !important;
+      max-width: 24px !important;
+      padding: 0 !important;
+      margin: 0 2px !important;
+      border: 1px solid rgba($v-font-color, 0.14) !important;
+      border-radius: 4px !important;
+      background: rgba($v-font-color, 0.04) !important;
+      color: $v-font-color !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+      box-shadow: none !important;
+
+      .v-icon {
+        font-size: 11px !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: $v-font-color !important;
+      }
+
+      .v-button-wrap {
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      &:hover:not(.v-disabled) {
+        background: rgba($v-font-color, 0.09) !important;
+        border-color: rgba($v-font-color, 0.24) !important;
+      }
+
+      &.v-disabled {
+        opacity: 0.3 !important;
+        cursor: default !important;
+        background: transparent !important;
+        border-color: transparent !important;
+      }
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * Главное меню приложения (App Menubar, Main Menu, SideMenu)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  .c-app-menubar,
+  .cuba-app-menubar,
+  .c-main-menu,
+  .v-menubar.c-app-menubar {
+    height: 42px !important;
+    min-height: 42px !important;
+    line-height: 42px !important;
+    border: none !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+
+    > .v-menubar-menuitem {
+      height: 34px !important;
+      min-height: 34px !important;
+      line-height: 34px !important;
+      padding: 0 12px !important;
+      margin: 0 2px !important;
+      border-radius: 6px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.15px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+      transition: background 0.15s ease, color 0.15s ease !important;
+
+      .v-icon {
+        font-size: 14px !important;
+        line-height: 1 !important;
+        margin-right: 8px !important;
+        color: rgba($v-font-color, 0.72) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: color 0.15s ease, transform 0.15s ease !important;
+      }
+
+      .v-menubar-menuitem-caption {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        vertical-align: middle !important;
+        display: inline-block !important;
+      }
+
+      .v-menubar-submenu-indicator {
+        margin-left: 6px !important;
+        opacity: 0.65 !important;
+        font-size: 11px !important;
+      }
+
+      &:hover:not(.v-menubar-menuitem-disabled),
+      &.v-menubar-menuitem-selected,
+      &.v-menubar-menuitem-highlight {
+        background: rgba($v-selection-color, 0.12) !important;
+        color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+          transform: scale(1.08);
+        }
+      }
+    }
+  }
+
+  /* Боковое меню приложения SideMenu */
+  .c-sidemenu {
+    .v-side-menu-item {
+      border-radius: 6px !important;
+      margin: 2px 6px !important;
+      padding: 6px 12px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      transition: background 0.15s ease, color 0.15s ease !important;
+
+      .v-icon {
+        font-size: 14px !important;
+        margin-right: 10px !important;
+        color: rgba($v-font-color, 0.7) !important;
+      }
+
+      &:hover {
+        background: rgba($v-selection-color, 0.08) !important;
+        color: mix($v-font-color, $v-panel-background-color, 95%) !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+        }
+      }
+
+      &.v-side-menu-item-selected {
+        background: rgba($v-selection-color, 0.16) !important;
+        color: mix($v-font-color, $v-panel-background-color, 100%) !important;
+        font-weight: 600 !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+        }
+      }
+    }
+  }
+
+  /* Таблицы реестров (увеличение высоты строк на 20% + поддержка переноса текста) */
+  .candidate-browse-grid {
+    .v-table-cell-content {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      min-height: 38px !important;
+      vertical-align: middle !important;
+    }
+
+    .v-table-cell-wrapper {
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+    }
+
+    .v-table-row,
+    .v-table-row-odd {
+      min-height: 38px !important;
     }
   }
 }

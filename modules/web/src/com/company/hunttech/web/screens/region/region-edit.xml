@@ -32,20 +32,38 @@ order by e.countryRuName]]></query>
         <hbox id="regionMainLayout" stylename="edit-screen-layout" expand="regionWorkspace" spacing="false" width="100%" height="100%">
             <!-- Левая контекстная панель 270px: логотип, идентификация, label-навигация, подсказка. -->
             <vbox id="regionSidebar" stylename="edit-sidebar" width="270px" height="100%" spacing="true" expand="regionSidebarSpacer">
-                <!-- Визуальный блок sidebar: круглая иллюстрация региона
-                     (без привязки к данным — загрузка изображения формой не предусмотрена). -->
+                <!-- Визуальный блок sidebar: круглый герб региона 176×176 с fallback icons/dictionaries/region.png,
+                     загрузка файла и кнопка умной обработки герба. -->
                 <vbox id="regionVisual" stylename="edit-sidebar-visual" width="100%" spacing="true" align="MIDDLE_CENTER">
-                    <ovalImage id="regionLogoImage"
-                               width="176px"
-                               height="176px"
-                               ovalWidth="176px"
-                               ovalHeight="176px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               scaleMode="SCALE_DOWN"
-                               stylename="dictionary-logo-image">
-                        <theme path="icons/dictionaries/region.png"/>
-                    </ovalImage>
+                    <vbox id="regionLogoPicBox" spacing="false" align="MIDDLE_CENTER">
+                        <ovaFallbackImage id="regionEmblemFileImage"
+                                          dataContainer="regionDc"
+                                          property="fileRegionEmblem"
+                                          width="176px"
+                                          height="176px"
+                                          ovalWidth="176px"
+                                          ovalHeight="176px"
+                                          ovalBackground="#3a3e44"
+                                          fallbackThemePath="icons/dictionaries/region.png"
+                                          visible="true"
+                                          align="MIDDLE_CENTER"
+                                          stylename="dictionary-logo-image"
+                                          scaleMode="SCALE_DOWN"/>
+                    </vbox>
+                    <upload id="regionEmblemFileUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="regionDc"
+                            align="MIDDLE_CENTER"
+                            showFileName="false"
+                            dropZone="regionVisual"
+                            showClearButton="true"
+                            property="fileRegionEmblem"/>
+                    <button id="enhanceRegionEmblemBtn"
+                            caption="msg://enhanceRegionEmblemCaption"
+                            icon="font-icon:MAGIC"
+                            stylename="secondary candidate-btn"
+                            width="100%"
+                            description="msg://enhanceRegionEmblemDescription"/>
                 </vbox>
                 <!-- Блок идентификации: название региона из контейнера.
                      Подпись типа записи убрана — название выровнено по центру
@@ -75,13 +93,20 @@ order by e.countryRuName]]></query>
             </vbox>
             <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
             <vbox id="regionWorkspace" stylename="edit-workspace" expand="regionWorkspaceScroll" width="100%" height="100%" spacing="false">
-                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <!-- Toolbar с заголовком карточки, описанием и кнопкой автозаполнения по API. -->
                 <hbox id="regionToolbar" stylename="edit-toolbar" width="100%" spacing="true">
                     <!-- Текстовый блок toolbar: заголовок и описание. -->
                     <vbox id="regionToolbarText" width="100%" spacing="false">
                         <label value="Карточка региона" stylename="edit-toolbar-title"/>
-                        <label value="Принадлежность стране, код и перечень городов" stylename="edit-toolbar-description"/>
+                        <label value="Принадлежность стране, коды, герб и перечень городов" stylename="edit-toolbar-description"/>
                     </vbox>
+                    <!-- Кнопка умного автозаполнения по API / AI -->
+                    <button id="enrichRegionByApiBtn"
+                            caption="Умное заполнение по API"
+                            icon="MAGIC"
+                            stylename="friendly company-search-ai-btn"
+                            align="MIDDLE_RIGHT"
+                            invoke="onEnrichRegionByApi"/>
                 </hbox>
                 <!-- Прокручиваемая область контента рабочей области. -->
                 <scrollBox id="regionWorkspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
@@ -92,14 +117,26 @@ order by e.countryRuName]]></query>
                             <!-- Форма региона с полями, привязанными к regionDc. -->
                             <form id="form" dataContainer="regionDc" width="100%">
                                 <column width="100%">
-                                    <!-- Название региона. -->
+                                    <!-- Название региона на русском. -->
                                     <textField id="regionRuNameField" property="regionRuName" caption="mainMsg://msgRegionRuName" width="100%" stylename="edit-form-control"/>
+                                    <!-- Международное наименование региона. -->
+                                    <textField id="regionEngNameField" property="regionEngName" caption="mainMsg://msgRegionEngName" width="100%" stylename="edit-form-control"/>
                                     <!-- Страна региона (picker из кэшируемого справочника стран). -->
                                     <lookupPickerField id="regionCountryField" optionsContainer="regionCountriesDc" property="regionCountry" caption="mainMsg://msgCountry" width="100%" stylename="edit-form-control">
                                         <actions><action id="lookup" type="picker_lookup"/></actions>
                                     </lookupPickerField>
-                                    <!-- Код региона. -->
+                                    <!-- Тип региона (область, республика, штат...). -->
+                                    <textField id="regionTypeField" property="regionType" caption="mainMsg://msgRegionType" width="100%" stylename="edit-form-control"/>
+                                    <!-- Административный центр / столица региона. -->
+                                    <textField id="capitalField" property="capital" caption="mainMsg://msgAdministrativeCenter" width="100%" stylename="edit-form-control"/>
+                                    <!-- Код региона (автомобильный / территориальный). -->
                                     <textField id="regionCodeField" property="regionCode" caption="mainMsg://msgRegionCode" width="100%" stylename="edit-form-control"/>
+                                    <!-- Код ISO 3166-2. -->
+                                    <textField id="isoCodeField" property="isoCode" caption="mainMsg://msgIsoCode" width="100%" stylename="edit-form-control"/>
+                                    <!-- Часовой пояс. -->
+                                    <textField id="timeZoneField" property="timeZone" caption="mainMsg://msgTimeZone" width="100%" stylename="edit-form-control"/>
+                                    <!-- Идентификатор ФИАС / КЛАДР. -->
+                                    <textField id="fiasIdField" property="fiasId" caption="mainMsg://msgFiasId" width="100%" stylename="edit-form-control"/>
                                 </column>
                             </form>
                         </groupBox>

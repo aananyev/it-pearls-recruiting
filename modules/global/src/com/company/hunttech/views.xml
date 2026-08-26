@@ -3,46 +3,97 @@
 
     <view entity="hunttech_Region" name="region-country-child-view" extends="_minimal">
         <property name="regionRuName"/>
+        <property name="regionEngName"/>
         <property name="regionCode"/>
+        <property name="isoCode"/>
+        <property name="regionType"/>
+        <property name="capital"/>
+        <property name="timeZone"/>
     </view>
     <view entity="hunttech_Region" name="region-browse-view" extends="_minimal">
         <property name="regionRuName"/>
+        <property name="regionEngName"/>
         <property name="regionCode"/>
+        <property name="isoCode"/>
+        <property name="regionType"/>
+        <property name="capital"/>
+        <property name="timeZone"/>
+        <property name="fiasId"/>
         <property name="regionCountry" view="country-picker-view"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_Region" name="region-edit-view" extends="_minimal">
         <property name="regionRuName"/>
+        <property name="regionEngName"/>
         <property name="regionCode"/>
+        <property name="isoCode"/>
+        <property name="regionType"/>
+        <property name="capital"/>
+        <property name="timeZone"/>
+        <property name="fiasId"/>
         <property name="regionCountry" view="country-picker-view"/>
         <property name="regionOfCity" view="city-region-child-view"/>
+        <property name="fileRegionEmblem"/>
+        <property name="emblemImage"/>
+        <property name="emblemUrl"/>
     </view>
     <view entity="hunttech_Region" name="region-picker-view" extends="_minimal">
         <property name="regionRuName"/>
+        <property name="regionEngName"/>
         <property name="regionCode"/>
+        <property name="isoCode"/>
     </view>
     <view entity="hunttech_Region" name="region-view" extends="_minimal">
         <property name="regionRuName"/>
+        <property name="regionEngName"/>
         <property name="regionCode"/>
+        <property name="isoCode"/>
+        <property name="regionType"/>
+        <property name="capital"/>
+        <property name="timeZone"/>
+        <property name="fiasId"/>
         <property name="regionCountry" view="country-picker-view"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-region-child-view" extends="_minimal">
         <property name="cityRuName"/>
+        <property name="cityEngName"/>
         <property name="cityPhoneCode"/>
+        <property name="postalCode"/>
+        <property name="fiasId"/>
+        <property name="population"/>
+        <property name="timeZone"/>
     </view>
     <view entity="hunttech_Country" name="country-browse-view" extends="_minimal">
         <property name="countryRuName"/>
+        <property name="countryEngName"/>
         <property name="countryShortName"/>
+        <property name="alpha3Code"/>
+        <property name="numericCode"/>
+        <property name="currencyCode"/>
+        <property name="capital"/>
         <property name="phoneCode"/>
+        <property name="fileFlag"/>
     </view>
     <view entity="hunttech_Country" name="country-edit-view" extends="_minimal">
         <property name="countryRuName"/>
+        <property name="countryEngName"/>
         <property name="countryShortName"/>
+        <property name="alpha3Code"/>
+        <property name="numericCode"/>
+        <property name="currencyCode"/>
+        <property name="capital"/>
         <property name="phoneCode"/>
+        <property name="fileFlag"/>
+        <property name="flagImage"/>
+        <property name="flagUrl"/>
         <property name="countryOfRegion" view="region-country-child-view"/>
     </view>
     <view entity="hunttech_Country" name="country-picker-view" extends="_minimal">
         <property name="countryRuName"/>
+        <property name="countryEngName"/>
         <property name="countryShortName"/>
+        <property name="alpha3Code"/>
     </view>
     <view entity="hunttech_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
@@ -629,20 +680,38 @@
     </view>
     <view entity="hunttech_City" name="city-browse-view" extends="_minimal">
         <property name="cityRuName"/>
+        <property name="cityEngName"/>
         <property name="cityPhoneCode"/>
-        <property name="cityRegion" view="region-picker-view"/>
+        <property name="postalCode"/>
+        <property name="population"/>
+        <property name="timeZone"/>
+        <property name="fiasId"/>
+        <property name="cityRegion" view="region-browse-view"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-edit-view" extends="_minimal">
         <property name="cityRuName"/>
+        <property name="cityEngName"/>
         <property name="cityPhoneCode"/>
-        <property name="cityRegion" view="region-picker-view"/>
+        <property name="postalCode"/>
+        <property name="fiasId"/>
+        <property name="population"/>
+        <property name="latitude"/>
+        <property name="longitude"/>
+        <property name="timeZone"/>
+        <property name="cityRegion" view="region-browse-view"/>
+        <property name="fileCityEmblem"/>
+        <property name="emblemImage"/>
+        <property name="emblemUrl"/>
     </view>
     <view entity="hunttech_City" name="city-picker-view" extends="_minimal">
         <property name="cityRuName"/>
+        <property name="cityEngName"/>
         <property name="cityPhoneCode"/>
     </view>
     <view entity="hunttech_City" name="city-location-view" extends="_minimal">
         <property name="cityRuName"/>
+        <property name="cityEngName"/>
         <property name="cityRegion" view="region-browse-view"/>
     </view>
     <view entity="hunttech_City" name="city-view" extends="_local">
@@ -665,6 +734,7 @@
     <view entity="hunttech_Company" name="company-edit-view" extends="_minimal">
         <property name="comanyName"/>
         <property name="companyShortName"/>
+        <property name="legalEntityName"/>
         <property name="ourClient"/>
         <property name="ourLegalEntity"/>
         <property name="companyGroup" view="companyGroup-picker-view"/>
@@ -675,10 +745,27 @@
         <property name="countryOfCompany" view="country-picker-view"/>
         <property name="fileCompanyLogo" view="_minimal"/>
         <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
+        <property name="inn"/>
+        <property name="kpp"/>
+        <property name="ogrn"/>
+        <property name="okpo"/>
+        <property name="oktmo"/>
+        <property name="okved"/>
+        <property name="legalAddress"/>
+        <property name="actualAddress"/>
+        <property name="postalAddress"/>
+        <property name="bik"/>
+        <property name="bankName"/>
+        <property name="settlementAccount"/>
+        <property name="correspondentAccount"/>
+        <property name="phone"/>
+        <property name="email"/>
+        <property name="website"/>
     </view>
     <view entity="hunttech_Company" name="company-picker-view" extends="_minimal">
         <property name="comanyName"/>
         <property name="companyShortName"/>
+        <property name="legalEntityName"/>
         <property name="ourClient"/>
         <property name="ourLegalEntity"/>
         <property name="fileCompanyLogo" view="_minimal"/>

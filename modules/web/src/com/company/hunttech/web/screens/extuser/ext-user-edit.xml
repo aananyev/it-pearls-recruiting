@@ -29,43 +29,47 @@
     <layout expand="mainSplit" spacing="false" width="100%" height="100%" stylename="ext-user-editor">
         <!-- Общая двухпанельная композиция фиксирует sidebar и отдаёт оставшуюся ширину workspace. -->
         <hbox id="mainSplit" width="100%" height="100%" expand="userWorkspace" stylename="edit-screen-layout">
-            <!-- Постоянная sidebar показывает профиль, контекст и navigation активной вкладки; растянута на всю высоту окна (без margin — эталон OpenPositionEdit) и прокручивается вертикально при переполнении. -->
-            <vbox id="profilePanel" width="270px" height="100%" spacing="true" expand="profilePanelSpacer" stylename="edit-sidebar">
+            <!-- Постоянная sidebar показывает профиль, контекст и navigation активной вкладки (270px со стилями JobCandidateReestr). -->
+            <vbox id="profilePanel" width="270px" height="100%" spacing="true" expand="profilePanelSpacer" stylename="edit-sidebar job-candidate-sidebar">
                 <!-- Визуальный блок сохраняет upload/drop-zone и стабильный размер фотографии пользователя. -->
                 <vbox id="dropZone" spacing="true" width="100%" align="TOP_CENTER" stylename="dropzone-container edit-sidebar-visual">
                     <!-- OvaFallbackImage читает userDs.officialPhoto и показывает fallback при отсутствии файла (размер 176×176 — эталон JobCandidateEdit). -->
-                    <ovaFallbackImage id="userPic" width="176px" height="176px" ovalWidth="176px" ovalHeight="176px" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" datasource="userDs" property="officialPhoto" fallbackThemePath="icons/no-programmer.jpeg" stylename="ext-user-editor-avatar"/>
+                    <ovaFallbackImage id="userPic" width="176px" height="176px" ovalWidth="176px" ovalHeight="176px" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" datasource="userDs" property="officialPhoto" fallbackThemePath="icons/no-programmer.jpeg" stylename="ext-user-editor-avatar job-candidate-avatar"/>
                     <!-- Upload сохраняет прежние datasource/property и immediate file-storage contract. -->
                     <upload id="officialPhotoUpload" fileStoragePutMode="IMMEDIATE" datasource="userDs" align="BOTTOM_CENTER" showFileName="false" dropZone="dropZone" showClearButton="true" property="officialPhoto"/>
                 </vbox>
                 <!-- Identity-блок показывает основное имя пользователя и его login без дублирования полей справа. -->
                 <vbox id="profileLabelsVBox" spacing="false" align="TOP_CENTER" width="100%" stylename="edit-sidebar-identity">
                     <!-- Основное человекочитаемое имя пользователя является title sidebar. -->
-                    <label id="fioLabel" stylename="h1 edit-sidebar-title" align="MIDDLE_CENTER" width="100%"/>
+                    <label id="fioLabel" stylename="h1 edit-sidebar-title candidate-sidebar-fullname" align="MIDDLE_CENTER" width="100%"/>
                     <!-- Login сохраняется как вторичный постоянный контекст пользователя. -->
-                    <label id="loginLabel" stylename="large edit-sidebar-subtitle" align="MIDDLE_CENTER" width="100%"/>
+                    <label id="loginLabel" stylename="large edit-sidebar-subtitle candidate-sidebar-position" align="MIDDLE_CENTER" width="100%"/>
                 </vbox>
                 <!-- Единая label-навигация повторяет вкладки правого tabsheet; пункт переключает вкладку, активный = текущая вкладка. -->
-                <vbox id="tabNavigation" width="100%" spacing="false" stylename="label-navigation">
+                <vbox id="tabNavigation" width="100%" spacing="false" stylename="label-navigation job-candidate-navigation">
                     <!-- Заголовок объясняет назначение вертикального индекса вкладок и оформлен полосой-заголовком контракта §4.1. -->
                     <label value="msg://msgNavigationTitle" width="100%" stylename="label-nav-title ext-user-editor-navigation-title"/>
                     <!-- Пункт открывает вкладку «Общие настройки» правой части экрана. -->
-                    <button id="generalTabNav" caption="msg://msgGeneralSettings" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
+                    <button id="generalTabNav" caption="msg://msgGeneralSettings" icon="font-icon:USER" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
                     <!-- Пункт открывает вкладку «Настройки почты» правой части экрана. -->
-                    <button id="emailTabNav" caption="msg://msgEmailSettings" width="100%" stylename="borderless label-nav-item"/>
+                    <button id="emailTabNav" caption="msg://msgEmailSettings" icon="font-icon:ENVELOPE_O" width="100%" stylename="borderless label-nav-item"/>
                     <!-- Пункт открывает вкладку «Персональный ИИ» правой части экрана. -->
-                    <button id="aiTabNav" caption="msg://msgAiSettings" width="100%" stylename="borderless label-nav-item"/>
+                    <button id="aiTabNav" caption="msg://msgAiSettings" icon="font-icon:MAGIC" width="100%" stylename="borderless label-nav-item"/>
                 </vbox>
-                <!-- Сводка «Профиль» располагается после navigation и показывает статус учётной записи и основную информацию из вкладки «Общие настройки» (Email, Должность). -->
-                <vbox id="profileSummaryBox" width="100%" spacing="false" stylename="edit-sidebar-summary">
+                <!-- Сводка «Профиль» располагается после navigation и показывает статус учётной записи и реквизиты (Email, Telegram, Должность). -->
+                <vbox id="profileSummaryBox" width="100%" spacing="false" stylename="edit-sidebar-summary job-candidate-navigation">
                     <!-- Заголовок «Профиль» — полоса-заголовок контракта §4.1, 1:1 с заголовком «Разделы»: две inset-линии, жёлтый текст 15px/700; растянут на ширину карточки отрицательными margin. -->
                     <label value="msg://msgProfile" width="100%" stylename="label-nav-title ext-user-editor-profile-title"/>
                     <!-- Статус отражает active пользователя; значение заполняет ExtUserEditor (msgStatusActive/msgStatusBlocked). -->
-                    <label id="statusLabel" width="100%" stylename="ext-user-editor-profile-status"/>
+                    <label id="statusLabel" width="100%" htmlEnabled="true" stylename="ext-user-editor-profile-status"/>
                     <!-- Подпись контактных данных пользователя (карточка «Контакты» вкладки «Общие настройки»). -->
                     <label value="msg://msgEmail" width="100%" stylename="ext-user-editor-profile-caption"/>
                     <!-- Email пользователя из userDs.email; заполняется ExtUserEditor в refreshProfileLabels. -->
                     <label id="emailLabel" width="100%" stylename="ext-user-editor-profile-value"/>
+                    <!-- Подпись Telegram пользователя. -->
+                    <label value="msg://msgTelegram" width="100%" stylename="ext-user-editor-profile-caption"/>
+                    <!-- Telegram пользователя из userDs.telegram; заполняется ExtUserEditor в refreshProfileLabels. -->
+                    <label id="telegramLabel" width="100%" stylename="ext-user-editor-profile-value"/>
                     <!-- Подпись должности пользователя (карточка «Региональные настройки» вкладки «Общие настройки»). -->
                     <label value="msg://msgPosition" width="100%" stylename="ext-user-editor-profile-caption"/>
                     <!-- Должность пользователя из userDs.position; заполняется ExtUserEditor в refreshProfileLabels. -->
@@ -134,6 +138,16 @@
                                             <field id="email">
                                                 <!-- EmailValidator не допускает сохранение некорректного адреса. -->
                                                 <validator class="com.haulmont.cuba.gui.components.validators.EmailValidator" message="msg://email.alert"/>
+                                            </field>
+                                            <!-- Telegram сохраняется в userDs.telegram и позволяет загрузить аватарку по ID -->
+                                            <field id="telegram" caption="msg://msgTelegram">
+                                                <!-- Контейнер для поля ввода Telegram и кнопки получения фото -->
+                                                <hbox id="telegramBox" width="100%" spacing="true" expand="telegramField" align="MIDDLE_LEFT" stylename="ext-user-telegram-box">
+                                                    <!-- Поле ввода Telegram ID или username пользователя -->
+                                                    <textField id="telegramField" datasource="userDs" property="telegram" width="100%" inputPrompt="msg://msgTelegramPrompt" stylename="edit-form-control"/>
+                                                    <!-- Кнопка загрузки фотографии пользователя из Telegram в профиль -->
+                                                    <button id="fetchTelegramPhotoBtn" caption="msg://msgFetchPhoto" icon="font-icon:CAMERA" invoke="fetchTelegramPhoto" stylename="primary ext-user-editor-primary-action telegram-fetch-photo-btn"/>
+                                                </hbox>
                                             </field>
                                         </column>
                                     </fieldGroup>

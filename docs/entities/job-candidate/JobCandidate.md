@@ -148,7 +148,7 @@ erDiagram
 
 **`CandidateCV`** — см. `CandidateCV.java`; LOB-поля `TEXT_CV`, `LETTER`, `COMMENT_LETTER` не должны попадать в browse-view.
 
-**`JobCandidateSignIcon`** — связь кандидата со значком `SignIcons` для пользователя (`USER_ID`).
+**`JobCandidateSignIcon`** — связь кандидата со значком `SignIcons` для пользователя (`USER_ID`). Метки визуализируются в реестре кандидатов (`JobCandidateReestr`, колонка «Кандидат» справа) и в каноническом browse (status column).
 
 ### 1.4 Аннотации entity
 
@@ -267,7 +267,7 @@ erDiagram
 | Browse, производные колонки | Batch cache через `loadValues` / targeted loads | `lastIteraction`, CV и employee status не запускают запросы на каждую строку |
 | Справочники в Edit | LAZY + отложенный `load()` | Не грузить Company/City/Position при открытии карточки |
 | LOB (`CandidateCV.textCV`) | Не включать в browse/edit DC view | Только на вкладке резюме при необходимости |
-| SignIcons в status column | Отдельный `DataManager.load` с `cacheable(true)` | **Потенциальный N+1** — известный backlog |
+| SignIcons в status column / колонке «Кандидат» реестра | Отдельный `DataManager.load` с `cacheable(true)` | **Потенциальный N+1** — известный backlog (реестр `JobCandidateReestr` читает `JobCandidateSignIcon` per-row) |
 | Фото | `FileDescriptorResource` / `_minimal` на `fileImageFace` | Без загрузки байтов в tooltip |
 
 ---

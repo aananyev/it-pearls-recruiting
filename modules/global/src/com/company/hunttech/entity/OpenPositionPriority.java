@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 public enum OpenPositionPriority implements EnumClass<Integer> {
 
+    UNDER_REVIEW(-2),
     DRAFT(-1),
     PAUSED(0),
     LOW(1),

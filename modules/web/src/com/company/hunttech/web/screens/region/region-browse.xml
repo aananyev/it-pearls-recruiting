@@ -34,9 +34,14 @@ order by e.regionRuName]]>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="regionRuName"/>
-                <column id="regionCountry"/>
-                <column id="regionCode"/>
+                <column id="regionRuName" caption="mainMsg://msgRegionRuName"/>
+                <column id="regionEngName" caption="mainMsg://msgRegionEngName"/>
+                <column id="regionCountry" caption="mainMsg://msgCountry"/>
+                <column id="regionType" caption="mainMsg://msgRegionType"/>
+                <column id="capital" caption="mainMsg://msgAdministrativeCenter"/>
+                <column id="regionCode" caption="mainMsg://msgRegionCode"/>
+                <column id="isoCode" caption="mainMsg://msgIsoCode"/>
+                <column id="timeZone" caption="mainMsg://msgTimeZone"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -44,6 +49,7 @@ order by e.regionRuName]]>
                 <button id="createBtn" action="regionsTable.create"/>
                 <button id="editBtn" action="regionsTable.edit"/>
                 <button id="removeBtn" action="regionsTable.remove"/>
+                <button id="loadRegionsRussiaBtn" caption="msg://msgLoadRegionsRussia"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

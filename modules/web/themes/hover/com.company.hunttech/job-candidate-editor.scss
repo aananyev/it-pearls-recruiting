@@ -101,7 +101,6 @@
       height: 100% !important;
     }
 
-    
     .job-candidate-sidebar .v-label {
       font-weight: normal !important;
       font-size: 13px !important;
@@ -1109,8 +1108,37 @@
     white-space: nowrap !important;
   }
 
+
+  /* Стилизация блока «Последняя активность» в сайдбаре на стандартном фоне */
+  .candidate-activity-sidebar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px 2px !important;
+    font-size: 12.5px !important;
+    line-height: 1.55 !important;
+    color: rgba(248, 250, 252, 0.85) !important;
+  }
+
+  /* Стилизация шапки кандидата в сайдбаре (светлые контрастные цвета) */
+  .candidate-sidebar-fullname,
+  .job-candidate-sidebar .candidate-sidebar-fullname {
+    color: #f8fafc !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .candidate-sidebar-position,
+  .job-candidate-sidebar .candidate-sidebar-position {
+    color: #93c5fd !important;
+  }
+
+  .candidate-sidebar-city,
+  .job-candidate-sidebar .candidate-sidebar-city {
+    color: #cbd5e1 !important;
+  }
+
   /* =========================================================================
-   * Реестр кандидатов (JobCandidateTest1Browse): блок фильтров сверху экрана
+   * Реестр кандидатов (JobCandidateReestr): блок фильтров сверху экрана
    * ========================================================================= */
 
   /* Панель быстрых фильтров (tableFilterBar): белая карточка в стиле edit-card */
@@ -1170,15 +1198,193 @@
     padding: 0 14px !important;
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * Тулбар действий и быстрых фильтров (таблицы JobCandidate и OpenPosition)
+   * Единая высота 34px и строгое вертикальное выравнивание для всех кнопок
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  .candidate-filter-bar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px 12px !important;
+    min-height: 48px !important;
+    height: auto !important;
+    padding: 8px 12px !important;
+    box-sizing: border-box !important;
+
+    .filter-buttons-panel {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 6px 8px !important;
+      min-width: 0 !important;
+    }
+
+    .left-action-buttons {
+      justify-content: flex-start !important;
+      flex: 1 1 auto !important;
+    }
+
+    .right-action-buttons {
+      justify-content: flex-end !important;
+      flex: 0 1 auto !important;
+      margin-left: auto !important;
+    }
+
+    /* Все типы кнопок тулбара: обычные кнопки Button и выпадающие PopupButton */
+    .v-button,
+    .v-popupbutton,
+    .candidate-btn {
+      height: 34px !important;
+      min-height: 34px !important;
+      max-height: 34px !important;
+      line-height: 32px !important;
+      border-radius: 6px !important;
+      font-size: 12.5px !important;
+      font-weight: 600 !important;
+      padding: 0 10px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      vertical-align: middle !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+
+      .v-button-wrap {
+        height: 100% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .v-button-caption {
+        display: inline-block !important;
+        vertical-align: middle !important;
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        line-height: 1 !important;
+      }
+
+      .v-icon {
+        margin-right: 5px !important;
+        font-size: 13px !important;
+        line-height: 1 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      .v-popup-indicator {
+        margin-left: 4px !important;
+        padding-left: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        opacity: 0.75 !important;
+        background: none !important;
+        background-image: none !important;
+
+        &:before {
+          display: none !important;
+          content: none !important;
+        }
+
+        &:after {
+          font-family: FontAwesome !important;
+          content: "\f107" !important;
+          font-size: 12px !important;
+          line-height: 1 !important;
+        }
+      }
+    }
+
+    /* Первичные кнопки (Создать кандидата, Действия) */
+    .v-button.v-button-primary,
+    .v-button.primary,
+    .v-popupbutton.v-button-primary,
+    .v-popupbutton.primary,
+    .candidate-btn.primary {
+      background: #4d7ab2 !important;
+      border: 1px solid #4d7ab2 !important;
+      color: #ffffff !important;
+
+      .v-icon,
+      .v-button-caption,
+      .v-popup-indicator:after {
+        color: #ffffff !important;
+      }
+
+      &:hover:not(.v-disabled) {
+        background: #3d689e !important;
+        border-color: #3d689e !important;
+      }
+
+      &.v-disabled {
+        opacity: 0.5 !important;
+        cursor: default !important;
+        pointer-events: none !important;
+      }
+    }
+
+    /* Вторичные кнопки (Редактировать, Удалить, Фильтры, Метки) */
+    .v-button.v-button-secondary,
+    .v-button.secondary,
+    .v-popupbutton.v-button-secondary,
+    .v-popupbutton.secondary,
+    .candidate-btn.secondary {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #475569 !important;
+
+      .v-icon,
+      .v-button-caption,
+      .v-popup-indicator:after {
+        color: #475569 !important;
+      }
+
+      &:hover:not(.v-disabled) {
+        background: #e2e8f0 !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+
+        .v-icon,
+        .v-button-caption,
+        .v-popup-indicator:after {
+          color: #0f172a !important;
+        }
+      }
+
+      &.v-disabled {
+        opacity: 0.5 !important;
+        cursor: default !important;
+        pointer-events: none !important;
+      }
+    }
+  }
+
+  /* Рабочая область реестра (отступы сверху, справа, снизу) */
+  .candidate-reestr-workspace {
+    padding-top: 10px !important;
+    padding-right: 14px !important;
+    padding-bottom: 10px !important;
+    box-sizing: border-box !important;
+  }
+
   /* Generic Filter CUBA (класс платформы c-generic-filter + наш stylename) */
   .candidate-generic-filter,
   .c-generic-filter {
     background: #ffffff !important;
     border: 1px solid rgba(15, 23, 42, 0.12) !important;
     border-radius: 8px !important;
-    padding: 8px 12px !important;
+    padding: 6px 12px !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
-    margin-bottom: 8px !important;
+    margin-top: 2px !important;
+    margin-bottom: 6px !important;
     box-sizing: border-box !important;
   }
 
@@ -1204,6 +1410,76 @@
     font-weight: 600 !important;
   }
 
+  /* Адаптивные правила для тулбаров и фильтра на разных разрешениях экрана */
+  @media (max-width: 1440px) {
+    .candidate-filter-bar {
+      padding: 6px 10px !important;
+      gap: 6px 10px !important;
+
+      .filter-buttons-panel {
+        gap: 5px 6px !important;
+      }
+
+      .v-button,
+      .v-popupbutton,
+      .candidate-btn {
+        padding: 0 8px !important;
+        font-size: 12px !important;
+
+        .v-button-caption {
+          font-size: 12px !important;
+        }
+      }
+    }
+
+    .candidate-generic-filter,
+    .c-generic-filter {
+      padding: 4px 8px !important;
+    }
+  }
+
+  @media (max-width: 1240px) {
+    .candidate-filter-bar {
+      justify-content: flex-start !important;
+
+      .left-action-buttons {
+        width: 100% !important;
+        justify-content: flex-start !important;
+      }
+
+      .right-action-buttons {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-left: 0 !important;
+        margin-top: 2px !important;
+        padding-top: 4px !important;
+        border-top: 1px dashed rgba(15, 23, 42, 0.08) !important;
+      }
+
+      .filter-buttons-panel {
+        width: 100% !important;
+      }
+    }
+  }
+
+  @media (max-width: 900px) {
+    .candidate-filter-bar {
+      padding: 6px 8px !important;
+      gap: 4px 6px !important;
+
+      .v-button,
+      .v-popupbutton,
+      .candidate-btn {
+        padding: 0 6px !important;
+        font-size: 11.5px !important;
+
+        .v-button-caption {
+          font-size: 11.5px !important;
+        }
+      }
+    }
+  }
+
   /* Кнопки тулбара реестра (Создать кандидата, Обновить) */
   .candidate-toolbar-actions .candidate-btn {
     height: 34px !important;
@@ -1212,6 +1488,27 @@
     font-size: 12.5px !important;
     font-weight: 600 !important;
     padding: 0 14px !important;
+  }
+
+  /* Таблица реестров кандидатов и резюме (увеличение высоты строк на 20% + поддержка многострочного переноса) */
+  .candidate-browse-grid {
+    .v-table-cell-content {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      min-height: 38px !important;
+      vertical-align: middle !important;
+    }
+
+    .v-table-cell-wrapper {
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+    }
+
+    .v-table-row,
+    .v-table-row-odd {
+      min-height: 38px !important;
+    }
   }
 
   @media (max-width: 1100px) {

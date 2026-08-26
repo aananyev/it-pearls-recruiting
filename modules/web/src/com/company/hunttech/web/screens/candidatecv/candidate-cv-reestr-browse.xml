@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://candidateCVReestrCaption"
+        focusComponent="candidateCVsTable"
+        messagesPack="com.company.hunttech.web.screens.candidatecv"
+        icon="FILE_TEXT_O">
+    <data readOnly="true">
+        <collection id="candidateCVsDc"
+                    class="com.company.hunttech.entity.CandidateCV">
+            <view extends="candidateCV-browse-view">
+                <property name="candidate" view="_minimal">
+                    <property name="fullName"/>
+                    <property name="telegramName"/>
+                    <property name="email"/>
+                    <property name="personPosition" view="_minimal">
+                        <property name="positionRuName"/>
+                    </property>
+                    <property name="cityOfResidence" view="_minimal">
+                        <property name="cityRuName"/>
+                    </property>
+                    <property name="fileImageFace" view="_minimal"/>
+                </property>
+                <property name="toVacancy" view="_minimal">
+                    <property name="vacansyName"/>
+                    <property name="projectName" view="_minimal">
+                        <property name="projectName"/>
+                    </property>
+                </property>
+                <property name="resumePosition" view="_minimal">
+                    <property name="positionRuName"/>
+                </property>
+                <property name="owner" view="_minimal"/>
+                <property name="originalFileCV" view="_minimal"/>
+                <property name="fileCV" view="_minimal"/>
+            </view>
+            <loader id="candidateCVsDl">
+                <query><![CDATA[select e from hunttech_CandidateCV e order by e.datePost desc, e.candidate.fullName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.createdBy like :userName</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.toVacancy is not null</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px) -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+                        <!-- Шапка профиля кандидата / резюме -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailTitle" value="Выберите резюме" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопка перехода к редактированию -->
+                        <vbox id="sidebarActionBox" width="100%" spacing="true" stylename="edit-sidebar-actions">
+                            <button id="openEditCardBtn" caption="Открыть карточку резюме" icon="EDIT_ACTION" width="100%" stylename="primary candidate-btn candidate-sidebar-btn" enabled="false"/>
+                            <button id="openCandidateCardBtn" caption="Карточка кандидата" icon="USER" width="100%" stylename="secondary candidate-btn candidate-sidebar-btn" enabled="false"/>
+                        </vbox>
+
+                        <!-- Секция: Основные данные -->
+                        <vbox id="mainDataCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ОСНОВНЫЕ ДАННЫЕ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="mainDataGrid" width="100%" spacing="true" stylename="edit-sidebar-grid">
+                                <columns>
+                                    <column width="100px"/>
+                                    <column flex="1"/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="Готовность:" stylename="edit-help"/>
+                                        <label id="detailCvReady" value="-" htmlEnabled="true" stylename="bold"/>
+                                    </row>
+                                    <row>
+                                        <label value="Вакансия:" stylename="edit-help"/>
+                                        <label id="detailToVacancy" value="-" stylename="bold" align="MIDDLE_CENTER"/>
+                                    </row>
+                                    <row>
+                                        <label value="Проект:" stylename="edit-help"/>
+                                        <label id="detailProject" value="-" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Рекрутер:" stylename="edit-help"/>
+                                        <label id="detailOwner" value="-" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Дата:" stylename="edit-help"/>
+                                        <label id="detailDatePost" value="-" htmlEnabled="true"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Файлы -->
+                        <vbox id="filesCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ПРИКРЕПЛЕННЫЕ ФАЙЛЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="filesGrid" width="100%" spacing="true" stylename="edit-sidebar-grid">
+                                <columns>
+                                    <column width="100px"/>
+                                    <column flex="1"/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="Оригинал:" stylename="edit-help"/>
+                                        <label id="detailOriginalFile" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="HuntTech:" stylename="edit-help"/>
+                                        <label id="detailHuntTechFile" value="-" htmlEnabled="true"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Сопроводительное письмо -->
+                        <vbox id="letterCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="СОПРОВОДИТЕЛЬНОЕ ПИСЬМО" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailLetter" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
+                
+                <!-- Командный тулбар -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createBtn" caption="Создать резюме" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="candidateCVsTable.create"/>
+                        <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="candidateCVsTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="candidateCVsTable.remove"/>
+                    </hbox>
+                    <hbox id="toolbarSpacer" width="100%"/>
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                        <popupButton id="filterPopupButton" caption="Все резюме" icon="FILTER" stylename="secondary candidate-btn">
+                            <actions>
+                                <action id="filterAll" caption="Все резюме"/>
+                                <action id="filterMyOnly" caption="Только мои резюме"/>
+                                <action id="filterWithVacancyOnly" caption="С привязкой к вакансии"/>
+                            </actions>
+                        </popupButton>
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
+                                <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="candidateCVsTable"
+                        dataLoader="candidateCVsDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                exclude="letter|lintToCloudFile|textCV|fileCV|linkHuntTechCV|linkOriginalCv|originalFileCV|id"
+                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="candidateCVsTable">
+                    <groupTable id="candidateCVsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="candidateCVsDc"
+                                stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excel"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <column id="candidate" caption="Кандидат" expandRatio="2"/>
+                            <column id="resumePosition" caption="Должность" width="160px"/>
+                            <column id="toVacancy" caption="Целевая вакансия" expandRatio="2"/>
+                            <column id="cvReady" caption="Готовность" width="105px" sortable="false"/>
+                            <column id="originalFileColumn" caption="Оригинал" width="95px" sortable="false"/>
+                            <column id="huntTechFileColumn" caption="HuntTech" width="95px" sortable="false"/>
+                            <column id="owner" caption="Рекрутер" width="135px"/>
+                            <column id="datePost" caption="Дата" width="110px"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

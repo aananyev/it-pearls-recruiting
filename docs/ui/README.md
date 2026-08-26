@@ -87,6 +87,7 @@ Living-документация экранов, окон, фрагментов �
 | Image face | `itpearls_JobCandidateImageFace` | [itpearls_JobCandidateImageFace_Spec.md](itpearls_JobCandidateImageFace_Spec.md) |
 | Select positions | `itpearls_SelectPersonPositions` | [itpearls_SelectPersonPositions_Spec.md](itpearls_SelectPersonPositions_Spec.md) |
 | Test Screens / Sketches | `hunttech_JobCandidateTest*.browse` | [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) |
+| Browse (реестр) | `hunttech_JobCandidateReestr.browse` | Реестр кандидатов Split-View: таблица (фото, ФИО+метки, должность, город, компания, навыки, статус) и профильный сайдбар; метки пользователя выводятся в колонке «Кандидат» справа |
 
 ### CandidateCV
 
@@ -128,6 +129,7 @@ Living-документация экранов, окон, фрагментов �
 |-------|------------|----------|
 | Browse | `itpearls_Project.browse` | [itpearls_Project.browse_Spec.md](itpearls_Project.browse_Spec.md) |
 | Edit | `itpearls_Project.edit` | [itpearls_Project.edit_Spec.md](itpearls_Project.edit_Spec.md) |
+| Browse (реестр) | `hunttech_ProjectReestr.browse` | [ProjectReestrBrowse_Spec.md](ProjectReestrBrowse_Spec.md) | Реестр проектов: таблица + профильный сайдбар (312px), фильтры, ИТ-генерация краткого описания, блок описания по алгоритму владельца |
 
 ### Person
 
@@ -256,6 +258,9 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-25 | В каталог добавлена спецификация реестра проектов `hunttech_ProjectReestr.browse`: Split-View таблица + профильный сайдбар (312px), фильтры реестра, ИТ-генерация краткого описания, блок описания по алгоритму владельца |
+| 2026-08-20 | Редизайн выпадающих меню `PopupButton` («Действия», «Метки») в стиле Halo и реестре кандидатов: парящие пункты, карточка с тенью `0 10px 25px`, синхронизация по 7 темам |
+| 2026-08-18 | В каталог добавлен реестр кандидатов `hunttech_JobCandidateReestr.browse`: Split-View таблица + сайдбар, метки пользователя в колонке «Кандидат» справа |
 | 2026-08-15 | Добавлена спецификация и схемы пяти эскизов экранов просмотра кандидатов [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) |
 | 2026-08-13 | Добавлена спецификация серии справочных Edit-форм [DictionaryEditForms_Spec.md](DictionaryEditForms_Spec.md) (FileType, SocialNetworkType, Grade, Currency, OutstaffingRates, EmployeeWorkStatus, SignIcons); обновлён OutstaffingRatesEdit_Spec под двухпанельную композицию |
 | 2026-08-01 | Добавлена спецификация изолированного `OpenPositionEditPreview` без замены legacy-экрана, menu/browse integration и изменения бизнес-логики. |

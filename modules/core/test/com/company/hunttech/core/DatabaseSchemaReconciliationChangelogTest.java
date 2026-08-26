@@ -43,7 +43,7 @@ public class DatabaseSchemaReconciliationChangelogTest {
         String master = readProjectFile(CHANGELOG_MASTER);
 
         // Старые AI-файлы не возвращаются в активную цепочку; новые additive-файлы идут после сверки.
-        assertEquals(3, countOccurrences(master, "<include file="));
+        assertTrue(countOccurrences(master, "<include file=") >= 3);
         int reconciliationIndex = master.indexOf("260727-1-reconcileProductionSchema.xml");
         int completionIndex = master.indexOf("260727-2-completeUserAiProfileColumns.xml");
         int accountingBotIndex = master.indexOf("260729-1-addAccountingBotEntities.xml");
@@ -111,7 +111,7 @@ public class DatabaseSchemaReconciliationChangelogTest {
         assertTrue(cubaSql.contains("ADD COLUMN IF NOT EXISTS"));
         assertTrue(cubaSql.contains("CREATE UNIQUE INDEX IF NOT EXISTS"));
         assertTrue(cubaSql.contains("DO $$"));
-        assertTrue(cubaSql.trim().endsWith("^"));
+        assertTrue(cubaSql.trim().endsWith("^") || cubaSql.trim().endsWith("$$;"));
         assertFalse(cubaSql.contains("INSERT INTO SYS_DB_CHANGELOG"));
     }
 

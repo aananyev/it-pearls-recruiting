@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260821-6-addCompanyLegalEntityName" author="hunttech">
+        <comment>Добавление колонки LEGAL_ENTITY_NAME (Юридическое лицо) в таблицу HUNTTECH_COMPANY</comment>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="HUNTTECH_COMPANY" columnName="LEGAL_ENTITY_NAME"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_COMPANY">
+            <column name="LEGAL_ENTITY_NAME" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

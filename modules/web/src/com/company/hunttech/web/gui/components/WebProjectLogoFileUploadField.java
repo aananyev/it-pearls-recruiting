@@ -61,6 +61,16 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     private static final String COMPANY_LOGO_PROPERTY = "fileCompanyLogo";
 
     /**
+     * Имя свойства сущности City, для которого выполняется обработка герба.
+     */
+    private static final String CITY_EMBLEM_PROPERTY = "fileCityEmblem";
+
+    /**
+     * Имя свойства сущности Region, для которого выполняется обработка герба.
+     */
+    private static final String REGION_EMBLEM_PROPERTY = "fileRegionEmblem";
+
+    /**
      * Имя свойства сущности JobCandidate, для которого выполняется обработка фотографии.
      */
     private static final String CANDIDATE_PHOTO_PROPERTY = "fileImageFace";
@@ -174,7 +184,10 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
         if (valueSource instanceof ContainerValueSource) {
             ContainerValueSource<?, ?> containerSource = (ContainerValueSource<?, ?>) valueSource;
             String property = containerSource.getMetaPropertyPath().getMetaProperty().getName();
-            if (PROJECT_LOGO_PROPERTY.equals(property) || COMPANY_LOGO_PROPERTY.equals(property)) {
+            if (PROJECT_LOGO_PROPERTY.equals(property)
+                    || COMPANY_LOGO_PROPERTY.equals(property)
+                    || CITY_EMBLEM_PROPERTY.equals(property)
+                    || REGION_EMBLEM_PROPERTY.equals(property)) {
                 return ProcessingMode.LOGO;
             }
             if (CANDIDATE_PHOTO_PROPERTY.equals(property)) {

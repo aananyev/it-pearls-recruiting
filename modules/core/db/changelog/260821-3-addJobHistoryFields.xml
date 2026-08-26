@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260821-3-dropNotNullCurrentPosition" author="hunttech">
+        <comment>Снятие NOT NULL с CURRENT_POSITION_ID в HUNTTECH_JOB_HISTORY</comment>
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="HUNTTECH_JOB_HISTORY" columnName="CURRENT_POSITION_ID"/>
+        </preConditions>
+        <dropNotNullConstraint tableName="HUNTTECH_JOB_HISTORY" columnName="CURRENT_POSITION_ID" columnDataType="uuid"/>
+    </changeSet>
+
+    <changeSet id="260821-3-addStartDate" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="HUNTTECH_JOB_HISTORY" columnName="START_DATE"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_JOB_HISTORY">
+            <column name="START_DATE" type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260821-3-addEndDate" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="HUNTTECH_JOB_HISTORY" columnName="END_DATE"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_JOB_HISTORY">
+            <column name="END_DATE" type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260821-3-addDuties" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="HUNTTECH_JOB_HISTORY" columnName="DUTIES"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_JOB_HISTORY">
+            <column name="DUTIES" type="clob">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260821-3-addRawPositionName" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="HUNTTECH_JOB_HISTORY" columnName="RAW_POSITION_NAME"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_JOB_HISTORY">
+            <column name="RAW_POSITION_NAME" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260821-3-addRawCompanyName" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="HUNTTECH_JOB_HISTORY" columnName="RAW_COMPANY_NAME"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_JOB_HISTORY">
+            <column name="RAW_COMPANY_NAME" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

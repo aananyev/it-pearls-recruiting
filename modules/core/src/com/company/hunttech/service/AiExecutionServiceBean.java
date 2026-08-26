@@ -167,8 +167,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
     private AiExecutionResult executeWithAdminImage(AiFunctionConfiguration function, String prompt,
                                                     byte[] sourceImage, String sourceMimeType,
                                                     User currentUser, String callerSource, long startTime) {
-        AdminAiConfiguration configuration = function.getAdminConfiguration();
-        if (!isUsableAdminConfiguration(configuration)) {
+        AdminAiConfiguration configuration = resolveAdminConfiguration(function);
+        if (configuration == null) {
             throw new DevelopmentException(
                     "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
         }
@@ -216,8 +216,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
     private AiExecutionResult executeWithAdmin(AiFunctionConfiguration function, String prompt,
                                                User currentUser, String callerSource, long startTime) {
-        AdminAiConfiguration configuration = function.getAdminConfiguration();
-        if (!isUsableAdminConfiguration(configuration)) {
+        AdminAiConfiguration configuration = resolveAdminConfiguration(function);
+        if (configuration == null) {
             throw new DevelopmentException(
                     "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
         }
@@ -392,6 +392,19 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 && Boolean.TRUE.equals(configuration.getIsActive())
                 && isConfigured(configuration.getProviderCode())
                 && isConfigured(configuration.getApiKey());
+    }
+
+    private AdminAiConfiguration resolveAdminConfiguration(AiFunctionConfiguration function) {
+        AdminAiConfiguration configuration = function.getAdminConfiguration();
+        if (isUsableAdminConfiguration(configuration)) {
+            return configuration;
+        }
+        return dataManager.load(AdminAiConfiguration.class)
+                .query("select c from hunttech_AdminAiConfiguration c where c.active = true order by c.priority desc")
+                .view("admin-ai-configuration-secret-view")
+                .optional()
+                .filter(this::isUsableAdminConfiguration)
+                .orElse(null);
     }
 
     private boolean isUsableAdminConfiguration(AdminAiConfiguration configuration) {
