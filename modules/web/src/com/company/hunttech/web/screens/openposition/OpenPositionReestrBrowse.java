@@ -242,7 +242,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             lbl.setWidth("100%");
             lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
             String id = position.getVacansyID() != null ? position.getVacansyID() : "—";
-            lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #2b82c9; font-family: monospace;'>" + id + "</span>");
+            lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #2b82c9; font-family: monospace; white-space: normal; word-break: break-word;'>" + id + "</span>");
             return lbl;
         });
 
@@ -303,12 +303,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             if (position.getSalaryMax() != null) {
-                lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #1e3a8a;'>до "
+                lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #1e3a8a; white-space: normal; word-break: break-word;'>до "
                         + SALARY_FORMAT.format(position.getSalaryMax()) + " ₽</span>");
             } else if (Boolean.TRUE.equals(position.getSalaryCandidateRequest())) {
-                lbl.setValue("<span style='font-size: 11px; color: #4b5563;'>По запросу кандидата</span>");
+                lbl.setValue("<span style='font-size: 11px; color: #4b5563; white-space: normal; word-break: break-word;'>По запросу кандидата</span>");
             } else {
-                lbl.setValue("<span style='font-size: 11px; color: #94a3b8;'>Не определено</span>");
+                lbl.setValue("<span style='font-size: 11px; color: #94a3b8; white-space: normal; word-break: break-word;'>Не определено</span>");
             }
             return lbl;
         });
@@ -357,7 +357,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             String color = closed ? "#ef4444" : "#16a34a";
             String text = closed ? "Закрыта" : "Открыта";
             lbl.setValue(String.format(
-                    "<span style='background: %s; color: %s; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: nowrap; display: inline-block;'>%s</span>",
+                    "<span style='background: %s; color: %s; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: normal; word-break: break-word; display: inline-block;'>%s</span>",
                     bg, color, text
             ));
             return lbl;
