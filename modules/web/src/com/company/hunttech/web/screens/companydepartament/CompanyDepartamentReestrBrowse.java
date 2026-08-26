@@ -248,34 +248,34 @@ public class CompanyDepartamentReestrBrowse extends StandardLookup<CompanyDepart
             logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
         }
 
-        detailTitle.setValue(dept.getDepartamentRuName() != null ? dept.getDepartamentRuName() : "Без названия");
-        detailSubtitle.setValue(dept.getCompanyName() != null ? dept.getCompanyName().getComanyName() : "-");
+        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (dept.getDepartamentRuName() != null ? dept.getDepartamentRuName() : "Без названия") + "</div>");
+        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (dept.getCompanyName() != null ? dept.getCompanyName().getComanyName() : "-") + "</div>");
 
-        detailDirector.setValue(dept.getDepartamentDirector() != null ? dept.getDepartamentDirector().getInstanceName() : "-");
-        detailHrDirector.setValue(dept.getDepartamentHrDirector() != null ? dept.getDepartamentHrDirector().getInstanceName() : "-");
-        detailStaffCount.setValue(dept.getDepartamentNumberOfProgrammers() != null ? String.valueOf(dept.getDepartamentNumberOfProgrammers()) : "-");
+        detailDirector.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (dept.getDepartamentDirector() != null ? dept.getDepartamentDirector().getInstanceName() : "-") + "</div>");
+        detailHrDirector.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (dept.getDepartamentHrDirector() != null ? dept.getDepartamentHrDirector().getInstanceName() : "-") + "</div>");
+        detailStaffCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (dept.getDepartamentNumberOfProgrammers() != null ? String.valueOf(dept.getDepartamentNumberOfProgrammers()) : "-") + "</div>");
 
         int projCount = dept.getId() != null ? deptProjectsCountCache.getOrDefault(dept.getId(), 0) : 0;
-        detailProjectsCount.setValue(String.valueOf(projCount));
+        detailProjectsCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + String.valueOf(projCount) + "</div>");
 
         String desc = dept.getId() != null ? deptDescriptionCache.get(dept.getId()) : null;
         if (desc != null && !desc.trim().isEmpty()) {
             String plain = Jsoup.parse(desc).text();
-            detailDescription.setValue(plain.length() > 300 ? plain.substring(0, 300) + "..." : plain);
+            detailDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (plain.length() > 300 ? plain.substring(0, 300) + "..." : plain) + "</div>");
         } else {
-            detailDescription.setValue("<span style='color: #94a3b8;'>Описание подразделения отсутствует</span>");
+            detailDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Описание подразделения отсутствует</span></div>");
         }
     }
 
     private void clearSidebarDetails() {
         openEditCardBtn.setEnabled(false);
         logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        detailTitle.setValue("Выберите департамент");
-        detailSubtitle.setValue("-");
-        detailDirector.setValue("-");
-        detailHrDirector.setValue("-");
-        detailStaffCount.setValue("-");
-        detailProjectsCount.setValue("0");
-        detailDescription.setValue("<span style='color: #94a3b8;'>Департамент не выбран</span>");
+        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Выберите департамент</div>");
+        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+        detailDirector.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+        detailHrDirector.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+        detailStaffCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+        detailProjectsCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>0</div>");
+        detailDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Департамент не выбран</span></div>");
     }
 }
