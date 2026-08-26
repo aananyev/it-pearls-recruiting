@@ -218,6 +218,18 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     /** Пакетно загруженные Employee (в штате) кандидатов (устранение N+1). */
     private Map<UUID, Employee> employeeByCandidateId = Collections.emptyMap();
 
+    /** Пакетно загруженные кандидаты с CV (устранение N+1 для индикатора ✓ Резюме). */
+    private Set<UUID> candidatesWithCv = Collections.emptySet();
+
+    /** Пакетно загруженные даты последнего взаимодействия (устранение N+1 для индикатора ✓ Активность). */
+    private Map<UUID, Date> lastInteractionDateByCandidateId = Collections.emptyMap();
+
+    /** Пакетно загруженные зарплатные ожидания (устранение N+1). */
+    private Map<UUID, String> salaryByCandidateId = Collections.emptyMap();
+
+    /** Пакетно загруженное последнее взаимодействие кандидата (устранение N+1 для рейтинга/статуса вакансии). */
+    private Map<UUID, IteractionList> lastInteractionByCandidateId = Collections.emptyMap();
+
     public enum InteractionStatus {
         FREE("🟢 Свободен", "#27ae60", "rgba(39, 174, 96, 0.15)"),
         MY_CANDIDATE("🟡 В вашей работе", "#f39c12", "rgba(243, 156, 18, 0.15)"),
@@ -303,18 +315,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         if (candidate == null) {
             return null;
         }
-        try {
-            List<IteractionList> list = dataManager.load(IteractionList.class)
-                    .query("select e from hunttech_IteractionList e where e.iteractionType.iteractionTree.iteractionRuName like :name and e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
-                    .parameter("name", "%Зарплатные ожидания%")
-                    .parameter("cand", candidate)
-                    .view("iteractionList-view")
-                    .list();
-            if (!list.isEmpty() && list.get(0).getAddString() != null && !list.get(0).getAddString().trim().isEmpty()) {
-                return list.get(0).getAddString().trim();
-            }
-        } catch (Exception ignored) {}
-        return null;
+        // Используем кэш зарплатных ожиданий вместо N+1 запроса
+        return salaryByCandidateId.get(candidate.getId());
     }
 
     /* =========================================================================
@@ -395,6 +397,76 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             }
         }
         employeeByCandidateId = empMap;
+
+        // Пакетная загрузка последнего взаимодействия (rating, vacancy, numberIteraction, addString для зарплатных ожиданий)
+        List<IteractionList> lastInteractions = dataManager.load(IteractionList.class)
+                .query("select e from hunttech_IteractionList e where e.candidate in :candidates " +
+                        "order by e.candidate.id, e.dateIteraction desc, e.createTs desc")
+                .parameter("candidates", candidates)
+                .view("iteractionList-view")  // должен включать vacancy, rating, addString
+                .list();
+
+        Map<UUID, IteractionList> lastInterMap = new HashMap<>();
+        for (IteractionList il : lastInteractions) {
+            if (il.getCandidate() != null && il.getCandidate().getId() != null) {
+                lastInterMap.putIfAbsent(il.getCandidate().getId(), il);
+            }
+        }
+        // Переиспользуем lastInteractionByCandidateId (уже существует в классе) для кэша последнего взаимодействия
+        lastInteractionByCandidateId = lastInterMap;
+
+        // Пакетная загрузка зарплатных ожиданий (по interaction type "Зарплатные ожидания")
+        List<IteractionList> salaryInteractions = dataManager.load(IteractionList.class)
+                .query("select e from hunttech_IteractionList e " +
+                        "where e.candidate in :candidates " +
+                        "and e.iteractionType.iteractionTree.iteractionRuName like :name " +
+                        "order by e.dateIteraction desc, e.createTs desc")
+                .parameter("candidates", candidates)
+                .parameter("name", "%Зарплатные ожидания%")
+                .view("iteractionList-view")
+                .maxResults(candidates.size()) // максимум 1 на кандидата
+                .list();
+
+        Map<UUID, String> salaryMap = new HashMap<>();
+                for (IteractionList il : salaryInteractions) {
+                    if (il.getCandidate() != null && il.getCandidate().getId() != null 
+                            && il.getAddString() != null && !il.getAddString().trim().isEmpty()) {
+                        salaryMap.putIfAbsent(il.getCandidate().getId(), il.getAddString().trim());
+                    }
+                }
+                salaryByCandidateId = salaryMap;
+
+                // Пакетная загрузка кандидатов с CV (1 SQL-запрос)
+        List<com.haulmont.cuba.core.entity.KeyValueEntity> cvRows = dataManager.loadValues(
+                "select e.candidate.id as candId from hunttech_CandidateCV e where e.candidate in :candidates group by e.candidate.id")
+                .parameter("candidates", candidates)
+                .list();
+
+        Set<UUID> cvMap = new HashSet<>();
+        for (com.haulmont.cuba.core.entity.KeyValueEntity row : cvRows) {
+            UUID candId = row.getValue("candId");
+            if (candId != null) {
+                cvMap.add(candId);
+            }
+        }
+        candidatesWithCv = cvMap;
+
+        // Пакетная загрузка дат последнего взаимодействия (1 SQL-запрос)
+        List<com.haulmont.cuba.core.entity.KeyValueEntity> interRows = dataManager.loadValues(
+                "select e.candidate.id as candId, max(e.dateIteraction) as lastDate from hunttech_IteractionList e " +
+                        "where e.candidate in :candidates group by e.candidate.id")
+                .parameter("candidates", candidates)
+                .list();
+
+        Map<UUID, Date> interMap = new HashMap<>();
+        for (com.haulmont.cuba.core.entity.KeyValueEntity row : interRows) {
+            UUID candId = row.getValue("candId");
+            Date lastDate = row.getValue("lastDate");
+            if (candId != null && lastDate != null) {
+                interMap.put(candId, lastDate);
+            }
+        }
+        lastInteractionDateByCandidateId = interMap;
     }
 
     /* =========================================================================
@@ -426,7 +498,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
             String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
                     (candidate.getEmail() != null ? candidate.getEmail() : "");
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+            String textHtml = "<div style='text-align: left; white-space: normal; word-break: break-word;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
                     (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>";
 
             // Метки кандидата берутся из предварительно сформированной пакетной карты (без N+1)
@@ -490,35 +562,35 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         });
 
         // Колонка 4: Должность
-        candidatesTable.addGeneratedColumn("personPosition", candidate -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
-            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
-            return lbl;
-        });
+                candidatesTable.addGeneratedColumn("personPosition", candidate -> {
+                    Label<String> lbl = uiComponents.create(Label.NAME);
+                    lbl.setHtmlEnabled(true);
+                    String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
+                    lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block; white-space: normal; word-break: break-word;'>" + pos + "</span>");
+                    return lbl;
+                });
 
-        // Колонка 5: Город
-        candidatesTable.addGeneratedColumn("cityOfResidence", candidate -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
-            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>📍 " + city + "</span>");
-            return lbl;
-        });
+                // Колонка 5: Город
+                candidatesTable.addGeneratedColumn("cityOfResidence", candidate -> {
+                    Label<String> lbl = uiComponents.create(Label.NAME);
+                    lbl.setHtmlEnabled(true);
+                    String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+                    lbl.setValue("<span style='font-size: 12px; color: #34495e; white-space: normal; word-break: break-word;'>📍 " + city + "</span>");
+                    return lbl;
+                });
 
-        // Колонка 6: Компания
-        candidatesTable.addGeneratedColumn("currentCompany", candidate -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String company = "-";
-            if (candidate.getCurrentCompany() != null) {
-                company = candidate.getCurrentCompany().getComanyName() != null ?
-                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
-            }
-            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>" + (company != null ? company : "-") + "</span>");
-            return lbl;
-        });
+                // Колонка 6: Компания
+                candidatesTable.addGeneratedColumn("currentCompany", candidate -> {
+                    Label<String> lbl = uiComponents.create(Label.NAME);
+                    lbl.setHtmlEnabled(true);
+                    String company = "-";
+                    if (candidate.getCurrentCompany() != null) {
+                        company = candidate.getCurrentCompany().getComanyName() != null ?
+                                candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+                    }
+                    lbl.setValue("<span style='font-size: 12px; color: #34495e; white-space: normal; word-break: break-word;'>" + (company != null ? company : "-") + "</span>");
+                    return lbl;
+                });
 
         // Колонка 7: Ключевые навыки (чипы из пакетной карты без N+1)
         candidatesTable.addGeneratedColumn("mainSkills", candidate -> {
@@ -584,7 +656,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             lbl.setHtmlEnabled(true);
             InteractionStatus status = calculateInteractionStatus(candidate);
             lbl.setValue(String.format(
-                    "<span style='background: %s; color: %s; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: nowrap; display: inline-block;'>%s</span>",
+                    "<span style='background: %s; color: %s; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: normal; word-break: break-word; display: inline-block;'>%s</span>",
                     status.getBgColor(), status.getColor(), status.getLabel()
             ));
             return lbl;
@@ -1088,15 +1160,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             return;
         }
         try {
-            List<IteractionList> interactions = dataManager.load(IteractionList.class)
-                    .query("select e from hunttech_IteractionList e where e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
-                    .parameter("cand", candidate)
-                    .view("iteractionList-view")
-                    .maxResults(1)
-                    .list();
+            // Используем кэш последнего взаимодействия вместо N+1 запроса
+            IteractionList last = lastInteractionByCandidateId.get(candidate.getId());
 
-            if (!interactions.isEmpty()) {
-                IteractionList last = interactions.get(0);
+            if (last != null) {
 
                 // Рейтинг
                 if (last.getRating() != null && last.getRating() > 0 && starsAndOtherService != null) {
@@ -1509,31 +1576,26 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 return;
             }
             try {
-                List<IteractionList> interactions = candidate.getIteractionList();
+                // Используем кэши вместо N+1 запросов
                 // 1. Индикаторы готовности
                 if (detailReadiness != null) {
                     StringBuilder ind = new StringBuilder("<div style='display: flex; gap: 8px; font-size: 13px; flex-wrap: wrap;'>");
                 
-                    // ✓ Резюме
-                    boolean hasCv = candidate.getCandidateCv() != null && !candidate.getCandidateCv().isEmpty();
+                    // ✓ Резюме (из кэша candidatesWithCv)
+                    boolean hasCv = candidatesWithCv.contains(candidate.getId());
                     ind.append(hasCv
                             ? "<span style='color: #16a34a;'>✓ Резюме</span>"
                             : "<span style='color: #9ca3af;'>✕ Резюме</span>");
                 
-                    // ✓ Активность (есть взаимодействие за последний месяц)
+                    // ✓ Активность (из кэша lastInteractionDateByCandidateId)
                     boolean hasRecentInteraction = false;
-                    if (interactions != null && !interactions.isEmpty()) {
-                        for (IteractionList il : interactions) {
-                            Date date = il.getDateIteraction() != null ? il.getDateIteraction() : il.getCreateTs();
-                            if (date != null) {
-                                java.util.Calendar threshold = java.util.Calendar.getInstance();
-                                threshold.setTime(date);
-                                threshold.add(java.util.Calendar.MONTH, 1);
-                                if (java.util.Calendar.getInstance().before(threshold)) {
-                                    hasRecentInteraction = true;
-                                    break;
-                                }
-                            }
+                    Date lastDate = lastInteractionDateByCandidateId.get(candidate.getId());
+                    if (lastDate != null) {
+                        java.util.Calendar threshold = java.util.Calendar.getInstance();
+                        threshold.setTime(lastDate);
+                        threshold.add(java.util.Calendar.MONTH, 1);
+                        if (java.util.Calendar.getInstance().before(threshold)) {
+                            hasRecentInteraction = true;
                         }
                     }
                     ind.append(hasRecentInteraction
@@ -1558,11 +1620,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 // 2. Рейтинг: звёзды 20px + цифра 14px
                 if (detailRating != null && starsAndOtherService != null) {
                     Integer rating = null;
-                    if (interactions != null && !interactions.isEmpty()) {
-                        IteractionList last = interactions.get(0);
-                        if (last.getRating() != null && last.getRating() > 0) {
-                            rating = last.getRating();
-                        }
+                    // Используем кэш последнего взаимодействия вместо N+1
+                    IteractionList lastInter = lastInteractionByCandidateId.get(candidate.getId());
+                    if (lastInter != null && lastInter.getRating() != null && lastInter.getRating() > 0) {
+                        rating = lastInter.getRating();
                     }
                     if (rating != null) {
                         String stars = starsAndOtherService.setStars(rating);
