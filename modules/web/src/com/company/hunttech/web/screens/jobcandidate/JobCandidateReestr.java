@@ -4,6 +4,7 @@ import com.company.hunttech.core.ParseCVService;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.CandidateSkillPriority;
+import com.company.hunttech.entity.Employee;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
@@ -47,6 +48,7 @@ import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.OpenMode;
@@ -177,6 +179,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Inject
     private Label<String> detailNumber;
     @Inject
+    private Label<String> detailReadiness;
+    @Inject
+    private Label<String> detailSentCandidates;
+    @Inject
     private Button editCandidateBtn;
     @Inject
     private Button createInteractionBtn;
@@ -205,6 +211,12 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
 
     /** Пакетно загруженные навыки кандидатов (устранение N+1). */
     private Map<UUID, List<CandidateSkill>> skillsByCandidateId = Collections.emptyMap();
+
+    /** Пакетно загруженное количество отправленных на сторону заказчика (signSendToClient=true). */
+    private Map<UUID, Integer> sentCvCountByCandidateId = Collections.emptyMap();
+
+    /** Пакетно загруженные Employee (в штате) кандидатов (устранение N+1). */
+    private Map<UUID, Employee> employeeByCandidateId = Collections.emptyMap();
 
     public enum InteractionStatus {
         FREE("🟢 Свободен", "#27ae60", "rgba(39, 174, 96, 0.15)"),
@@ -347,6 +359,42 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             }
         }
         skillsByCandidateId = skillsMap;
+
+        // Пакетная загрузка счётчика отправленных на сторону заказчика (signSendToClient=true)
+        List<com.haulmont.cuba.core.entity.KeyValueEntity> sentRows = dataManager.loadValues(
+                "select e.candidate.id as candId, count(e) as cnt from hunttech_IteractionList e " +
+                        "where e.candidate in :candidates and e.iteractionType.signSendToClient = true " +
+                        "group by e.candidate.id")
+                .parameter("candidates", candidates)
+                .list();
+
+        Map<UUID, Integer> sentMap = new HashMap<>();
+        for (com.haulmont.cuba.core.entity.KeyValueEntity row : sentRows) {
+            UUID candId = row.getValue("candId");
+            Long cnt = row.getValue("cnt");
+            if (candId != null && cnt != null) {
+                sentMap.put(candId, cnt.intValue());
+            }
+        }
+        sentCvCountByCandidateId = sentMap;
+
+        // Пакетная загрузка Employee (в штате) для индикатора «В резерве» (1 SQL-запрос)
+        List<Employee> allEmployees = dataManager.load(Employee.class)
+                .query("select e from hunttech_Employee e where e.jobCandidate in :candidates")
+                .parameter("candidates", candidates)
+                .view(ViewBuilder.of(Employee.class)
+                        .add("jobCandidate", "_minimal")
+                        .add("workStatus", workStatusView -> workStatusView.add("inStaff"))
+                        .build())
+                .list();
+
+        Map<UUID, Employee> empMap = new HashMap<>();
+        for (Employee emp : allEmployees) {
+            if (emp.getJobCandidate() != null && emp.getJobCandidate().getId() != null) {
+                empMap.put(emp.getJobCandidate().getId(), emp);
+            }
+        }
+        employeeByCandidateId = empMap;
     }
 
     /* =========================================================================
@@ -505,6 +553,28 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             } catch (Exception ex) {
                 lbl.setValue("<span style='color: #a0aec0; font-size: 11px;'>—</span>");
             }
+            return lbl;
+        });
+
+        // Колонка: Отправлено (счётчик кандидатов, отправленных на сторону заказчика)
+        candidatesTable.addGeneratedColumn("sentCount", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            Integer sentCount = sentCvCountByCandidateId.getOrDefault(candidate.getId(), 0);
+            String color, bg;
+            if (sentCount < 3) {
+                color = "#16a34a";
+                bg = "rgba(34, 197, 94, 0.12)";
+            } else if (sentCount < 5) {
+                color = "#ca8a04";
+                bg = "rgba(250, 204, 21, 0.15)";
+            } else {
+                color = "#dc2626";
+                bg = "rgba(239, 68, 68, 0.12)";
+            }
+            lbl.setValue(String.format(
+                    "<span style='background: %s; color: %s; padding: 2px 10px; border-radius: 10px; font-weight: 700; font-size: 11px; white-space: nowrap; display: inline-block;'>%d</span>",
+                    bg, color, sentCount));
             return lbl;
         });
 
@@ -968,6 +1038,12 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         if (detailNumber != null) {
             detailNumber.setValue("-");
         }
+        if (detailReadiness != null) {
+            detailReadiness.setValue("-");
+        }
+        if (detailSentCandidates != null) {
+            detailSentCandidates.setValue("-");
+        }
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
     }
@@ -1002,6 +1078,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         updateRatingAndVacancyStatus(candidate);
 
         updateCandidateSkillsSidebar(candidate);
+        updateReadinessRatingAndSent(candidate);
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);
     }
@@ -1407,21 +1484,127 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     }
 
     private String loadLastCvText(UUID candidateId) {
-        if (candidateId == null) {
-            return null;
+            if (candidateId == null) {
+                return null;
+            }
+            return dataManager.loadValue(
+                    "select e.textCV from hunttech_CandidateCV e " +
+                            "where e.candidate.id = :candidateId " +
+                            "order by e.datePost desc",
+                    String.class)
+                    .parameter("candidateId", candidateId)
+                    .maxResults(1)
+                    .optional()
+                    .orElse(null);
         }
-        return dataManager.loadValue(
-                "select e.textCV from hunttech_CandidateCV e " +
-                "where e.candidate.id = :candidateId " +
-                "order by e.datePost desc",
-                String.class)
-                .parameter("candidateId", candidateId)
-                .maxResults(1)
-                .optional()
-                .orElse(null);
-    }
 
-    private static class SkillScanOutcome {
+        /**
+         * Обновляет блок «Готовность и рейтинг» в sidebar:
+         * - индикаторы готовности (✓ Резюме / ✓ Активность / ✓ В резерве)
+         * - звёзды рейтинга крупным шрифтом (20px) + цифра (14px)
+         * - счётчик «Отправлено кандидатов» с раскраской (<3 зелёный, <5 жёлтый, >=5 красный)
+         */
+        private void updateReadinessRatingAndSent(JobCandidate candidate) {
+            if (detailReadiness == null && detailRating == null && detailSentCandidates == null) {
+                return;
+            }
+            try {
+                List<IteractionList> interactions = candidate.getIteractionList();
+                // 1. Индикаторы готовности
+                if (detailReadiness != null) {
+                    StringBuilder ind = new StringBuilder("<div style='display: flex; gap: 8px; font-size: 13px; flex-wrap: wrap;'>");
+                
+                    // ✓ Резюме
+                    boolean hasCv = candidate.getCandidateCv() != null && !candidate.getCandidateCv().isEmpty();
+                    ind.append(hasCv
+                            ? "<span style='color: #16a34a;'>✓ Резюме</span>"
+                            : "<span style='color: #9ca3af;'>✕ Резюме</span>");
+                
+                    // ✓ Активность (есть взаимодействие за последний месяц)
+                    boolean hasRecentInteraction = false;
+                    if (interactions != null && !interactions.isEmpty()) {
+                        for (IteractionList il : interactions) {
+                            Date date = il.getDateIteraction() != null ? il.getDateIteraction() : il.getCreateTs();
+                            if (date != null) {
+                                java.util.Calendar threshold = java.util.Calendar.getInstance();
+                                threshold.setTime(date);
+                                threshold.add(java.util.Calendar.MONTH, 1);
+                                if (java.util.Calendar.getInstance().before(threshold)) {
+                                    hasRecentInteraction = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    ind.append(hasRecentInteraction
+                            ? "<span style='color: #16a34a;'>✓ Активность</span>"
+                            : "<span style='color: #9ca3af;'>✕ Активность</span>");
+                
+                    // ✓ В резерве (Employee с workStatus.inStaff=true из пакетного кэша)
+                    boolean inReserve = false;
+                    Employee emp = employeeByCandidateId.get(candidate.getId());
+                    if (emp != null && emp.getWorkStatus() != null
+                            && Boolean.TRUE.equals(emp.getWorkStatus().getInStaff())) {
+                        inReserve = true;
+                    }
+                    ind.append(inReserve
+                            ? "<span style='color: #16a34a;'>✓ В резерве</span>"
+                            : "<span style='color: #9ca3af;'>✕ В резерве</span>");
+                
+                    ind.append("</div>");
+                    detailReadiness.setValue(ind.toString());
+                }
+
+                // 2. Рейтинг: звёзды 20px + цифра 14px
+                if (detailRating != null && starsAndOtherService != null) {
+                    Integer rating = null;
+                    if (interactions != null && !interactions.isEmpty()) {
+                        IteractionList last = interactions.get(0);
+                        if (last.getRating() != null && last.getRating() > 0) {
+                            rating = last.getRating();
+                        }
+                    }
+                    if (rating != null) {
+                        String stars = starsAndOtherService.setStars(rating);
+                        detailRating.setValue(String.format(
+                                "<div style='display: flex; align-items: center; gap: 4px; font-size: 14px;'>" +
+                                        "<span style='color: #f59e0b; font-size: 20px;'>%s</span>" +
+                                        "<span style='font-weight: 700; color: #1f2937;'>%d</span>" +
+                                        "</div>", stars, rating));
+                    } else {
+                        detailRating.setValue("<span style='color: #9ca3af; font-size: 14px;'>Не оценен</span>");
+                    }
+                }
+
+                // 3. Счётчик отправленных на сторону заказчика с раскраской
+                if (detailSentCandidates != null) {
+                    Integer sentCount = sentCvCountByCandidateId.getOrDefault(candidate.getId(), 0);
+                    String color, bg;
+                    if (sentCount < 3) {
+                        color = "#16a34a";
+                        bg = "rgba(34, 197, 94, 0.12)";
+                    } else if (sentCount < 5) {
+                        color = "#ca8a04";
+                        bg = "rgba(250, 204, 21, 0.15)";
+                    } else {
+                        color = "#dc2626";
+                        bg = "rgba(239, 68, 68, 0.12)";
+                    }
+                    detailSentCandidates.setValue(String.format(
+                            "<div style='display: flex; align-items: center; gap: 6px; font-size: 13px;'>" +
+                                    "<span>Отправлено кандидатов:</span>" +
+                                    "<span style='background: %s; color: %s; padding: 2px 10px; border-radius: 10px; font-weight: 700; font-size: 12px;'>%d</span>" +
+                                    "</div>", bg, color, sentCount));
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to update readiness/rating/sent for candidate {}", candidate != null ? candidate.getId() : null, ex);
+                if (detailReadiness != null) detailReadiness.setValue("Ошибка загрузки");
+                if (detailRating != null) detailRating.setValue("Ошибка загрузки");
+                if (detailSentCandidates != null) detailSentCandidates.setValue("Ошибка загрузки");
+            }
+        }
+
+        private static class SkillScanOutcome {
         final String statsDescription;
         final AiExecutionResult aiExecution;
 
