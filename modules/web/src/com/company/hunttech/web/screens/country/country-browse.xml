@@ -3,6 +3,7 @@
         caption="msg://browseCaption"
         focusComponent="countriesTable"
         messagesPack="com.company.hunttech.web.screens.country" icon="SUPPORT">
+    <!-- Данные: справочник стран (кэшируемый loader, browse-view) -->
     <data readOnly="true">
         <collection id="countriesDc"
                     class="com.company.hunttech.entity.Country"
@@ -15,42 +16,65 @@ order by e.countryRuName]]>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="countriesTable"
-            spacing="true">
+    <dialogMode height="700"
+                width="1000"/>
+    <layout expand="tableCard"
+            spacing="true"
+            width="100%"
+            height="100%"
+            stylename="edit-screen-layout">
+
+        <!-- Фильтр (сворачиваемый, стиль реестров) -->
         <filter id="filter"
                 applyTo="countriesTable"
-                dataLoader="countriesDl">
+                dataLoader="countriesDl"
+                defaultMode="generic"
+                width="100%"
+                collapsable="true"
+                collapsed="true"
+                stylename="candidate-generic-filter">
             <properties include=".*"
                         excludeProperties="countryOfRegion,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="countriesTable"
-                    width="100%"
-                    dataContainer="countriesDc">
-            <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
-                <action id="remove" type="remove"/>
-            </actions>
-            <columns>
-                <column id="countryRuName" caption="msg://msgCountry"/>
-                <column id="countryEngName" caption="msg://msgCountryEngName"/>
-                <column id="countryShortName" caption="msg://msgCountryShortName"/>
-                <column id="alpha3Code" caption="msg://msgAlpha3Code"/>
-                <column id="capital" caption="msg://msgCapital"/>
-                <column id="currencyCode" caption="msg://msgCurrencyCode"/>
-                <column id="phoneCode" caption="msg://msgPhoneCode"/>
-            </columns>
-            <rowsCount/>
-            <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
-                <button id="createBtn" action="countriesTable.create"/>
-                <button id="editBtn" action="countriesTable.edit"/>
-                <button id="removeBtn" action="countriesTable.remove"/>
-                <button id="loadAllCountriesBtn" caption="msg://msgLoadAllCountries"/>
-            </buttonsPanel>
-        </groupTable>
+
+        <!-- Карточка таблицы с rowsCount -->
+        <vbox id="tableCard"
+              width="100%"
+              height="100%"
+              spacing="false"
+              stylename="edit-card candidate-table-card"
+              expand="countriesTable">
+            <groupTable id="countriesTable"
+                        width="100%"
+                        height="100%"
+                        dataContainer="countriesDc"
+                        stylename="borderless grid candidate-browse-grid">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                    <action id="excel" type="excel"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <columns>
+                    <column id="countryRuName" caption="msg://msgCountry" width="200px"/>
+                    <column id="countryEngName" caption="msg://msgCountryEngName" width="200px"/>
+                    <column id="countryShortName" caption="msg://msgCountryShortName" width="130px"/>
+                    <column id="alpha3Code" caption="msg://msgAlpha3Code" width="90px" align="CENTER"/>
+                    <column id="capital" caption="msg://msgCapital" width="160px"/>
+                    <column id="currencyCode" caption="msg://msgCurrencyCode" width="110px" align="CENTER"/>
+                    <column id="phoneCode" caption="msg://msgPhoneCode" width="110px" align="CENTER"/>
+                </columns>
+                <rowsCount/>
+                <buttonsPanel id="buttonsPanel"
+                              alwaysVisible="true">
+                    <button id="createBtn" caption="Создать" icon="CREATE_ACTION" action="countriesTable.create" stylename="primary candidate-btn candidate-create-btn"/>
+                    <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" action="countriesTable.edit" stylename="secondary candidate-btn"/>
+                    <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" action="countriesTable.remove" stylename="secondary candidate-btn"/>
+                    <button id="loadAllCountriesBtn" caption="msg://msgLoadAllCountries" icon="CLOUD_DOWNLOAD" stylename="secondary candidate-btn"/>
+                </buttonsPanel>
+            </groupTable>
+        </vbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
