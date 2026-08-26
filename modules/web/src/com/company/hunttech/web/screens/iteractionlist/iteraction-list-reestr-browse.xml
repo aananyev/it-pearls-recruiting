@@ -26,6 +26,7 @@
                     <property name="openClose"/>
                     <property name="projectName" view="_minimal">
                         <property name="projectName"/>
+                        <property name="shortDescription"/>
                     </property>
                 </property>
                 <property name="iteractionType" view="_minimal">
@@ -75,7 +76,7 @@
                                               align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="FILL"/>
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
                                 <label id="detailTitle" value="Выберите запись" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER" htmlEnabled="true"/>
-                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold" align="MIDDLE_CENTER" htmlEnabled="true"/>
                                 <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER" htmlEnabled="true"/>
                             </vbox>
                         </vbox>
@@ -125,6 +126,12 @@
                                     </row>
                                 </rows>
                             </grid>
+                        </vbox>
+
+                        <!-- Секция: Описание проекта (как в ProjectReestrBrowse / OpenPositionReestrBrowse) -->
+                        <vbox id="projectDescriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation" visible="false">
+                            <label value="ОПИСАНИЕ ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailProjectDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
 
                         <!-- Секция: Комментарий -->

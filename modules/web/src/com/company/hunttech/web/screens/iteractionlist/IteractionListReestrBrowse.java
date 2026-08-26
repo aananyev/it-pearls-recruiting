@@ -14,6 +14,7 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -88,6 +89,10 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
     private Label<String> detailCommMethod;
     @Inject
     private Label<String> detailComment;
+    @Inject
+    private Label<String> detailProjectDescription;
+    @Inject
+    private VBoxLayout projectDescriptionCard;
 
     private Set<UUID> outstaffingTypeIdsCache;
 
@@ -419,13 +424,17 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
             detailVacancyStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         }
 
+        // Описание проекта (алгоритм ProjectReestrBrowse: shortDescription → projectDescription → скрыть)
+        updateProjectDescription(item);
+
         detailRecruiter.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (item.getRecrutier() != null ? item.getRecrutier().getInstanceName() : "—") + "</div>");
         detailCommMethod.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (item.getCommunicationMethod() != null ? item.getCommunicationMethod() : "—") + "</div>");
 
         // Комментарий
         if (item.getComment() != null && !item.getComment().trim().isEmpty()) {
             String plain = Jsoup.parse(item.getComment()).text();
-            detailComment.setValue(plain.length() > 300 ? plain.substring(0, 300) + "..." : plain);
+            String shown = plain.length() > 300 ? plain.substring(0, 300) + "..." : plain;
+            detailComment.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + shown + "</div>");
         } else {
             detailComment.setValue("<span style='color: #94a3b8;'>Комментарий отсутствует</span>");
         }
@@ -446,5 +455,33 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         detailRecruiter.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         detailCommMethod.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>—</div>");
         detailComment.setValue("<span style='color: #94a3b8;'>Запись не выбрана</span>");
+        detailProjectDescription.setValue("");
+        projectDescriptionCard.setVisible(false);
+    }
+
+    private void updateProjectDescription(IteractionList item) {
+        if (item.getVacancy() != null && item.getVacancy().getProjectName() != null) {
+            String shortDesc = item.getVacancy().getProjectName().getShortDescription();
+            if (shortDesc != null && !shortDesc.trim().isEmpty()) {
+                detailProjectDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + shortDesc + "</div>");
+                projectDescriptionCard.setVisible(true);
+                return;
+            }
+            // Если нет shortDescription — грузим projectDescription пакетно
+            UUID projectId = item.getVacancy().getProjectName().getId();
+            KeyValueEntity entity = dataManager.loadValues("select e.projectDescription from hunttech_Project e where e.id = :id")
+                    .parameter("id", projectId)
+                    .property("projectDescription")
+                    .one();
+            String desc = entity != null ? entity.getValue("projectDescription") : null;
+            if (desc != null && !desc.trim().isEmpty()) {
+                String plain = Jsoup.parse(desc).text();
+                String shown = plain.length() > 300 ? plain.substring(0, 300) + "..." : plain;
+                detailProjectDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + shown + "</div>");
+                projectDescriptionCard.setVisible(true);
+                return;
+            }
+        }
+        projectDescriptionCard.setVisible(false);
     }
 }
