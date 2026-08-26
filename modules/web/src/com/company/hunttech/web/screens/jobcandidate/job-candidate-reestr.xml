@@ -84,7 +84,9 @@
                             <!-- Кнопка перехода к полному редактированию карточки -->
                             <button id="editCandidateBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
                             <!-- Кнопка быстрой регистрации нового взаимодействия -->
-                            <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false" width="100%"/>
+                            <button id="createInteractionBtn" caption="Добавить взаимодействие" icon="PLUS" enabled="false" width="100%"/>
+                            <!-- Кнопка добавления нового резюме кандидата -->
+                            <button id="createCVBtn" caption="Добавить резюме" icon="FILE_TEXT_O" enabled="false" width="100%"/>
                         </vbox>
 
                         <!-- Секция: Готовность и рейтинг -->

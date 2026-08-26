@@ -17,6 +17,7 @@ import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.core.StarsAndOtherService;
 import com.company.hunttech.web.screens.fragments.OnlyTextPersonPosition;
 import com.company.hunttech.web.screens.fragments.OnlyTextPersonPositionLoadPdf;
+import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
 import com.company.hunttech.web.screens.signicons.SignIconsBrowse;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
@@ -182,6 +183,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private Button editCandidateBtn;
     @Inject
     private Button createInteractionBtn;
+    @Inject
+    private Button createCVBtn;
 
     @Inject
     private Button createCandidateBtn;
@@ -1108,6 +1111,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         }
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
+        createCVBtn.setEnabled(false);
     }
 
     private void populateDetailPane(JobCandidate candidate) {
@@ -1143,6 +1147,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         updateReadinessRatingAndSent(candidate);
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);
+        createCVBtn.setEnabled(true);
     }
 
     private void updateInteractionNumber(JobCandidate candidate) {
@@ -1298,6 +1303,28 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     .withOpenMode(OpenMode.DIALOG)
                     .show();
         }
+    }
+
+    @Subscribe("createCVBtn")
+    public void onCreateCVBtnClick(Button.ClickEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Выберите кандидата")
+                    .withDescription("Для добавления резюме выберите кандидата из таблицы")
+                    .show();
+            return;
+        }
+        // Новое резюме: кандидат — текущий выбранный, автор (owner) — текущий пользователь системы
+        screenBuilders.editor(CandidateCV.class, this)
+                .withScreenClass(CandidateCVEdit.class)
+                .newEntity()
+                .withInitializer(candidateCV -> {
+                    candidateCV.setCandidate(selected);
+                    candidateCV.setOwner((ExtUser) userSession.getUser());
+                })
+                .build()
+                .show();
     }
 
     @Subscribe("actionsWithCandidateButton.findSuitableAction")
