@@ -141,16 +141,16 @@
                                 <columns count="2"/>
                                 <rows>
                                     <row>
-                                        <label value="Последнее взаимодействие:" stylename="bold"/>
-                                        <label id="detailLastInteractionDate" value="-" htmlEnabled="true"/>
+                                        <label value="Последнее взаимодействие:" stylename="bold" htmlEnabled="true" width="100%"/>
+                                        <label id="detailLastInteractionDate" value="-" htmlEnabled="true" width="100%"/>
                                     </row>
                                     <row>
-                                        <label value="Проект:" stylename="bold"/>
-                                        <label id="detailLastInteractionVacancy" value="-" htmlEnabled="true"/>
+                                        <label value="Проект:" stylename="bold" htmlEnabled="true" width="100%"/>
+                                        <label id="detailLastInteractionVacancy" value="-" htmlEnabled="true" width="100%"/>
                                     </row>
                                     <row>
-                                        <label value="Последний рекрутер:" stylename="bold"/>
-                                        <label id="detailLastInteractionRecruiter" value="-" htmlEnabled="true"/>
+                                        <label value="Последний рекрутер:" stylename="bold" htmlEnabled="true" width="100%"/>
+                                        <label id="detailLastInteractionRecruiter" value="-" htmlEnabled="true" width="100%"/>
                                     </row>
                                 </rows>
                             </grid>
