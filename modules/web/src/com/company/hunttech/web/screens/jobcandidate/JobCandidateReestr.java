@@ -1,6 +1,5 @@
 package com.company.hunttech.web.screens.jobcandidate;
 
-import com.company.hunttech.core.ParseCVService;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.CandidateSkillPriority;
@@ -15,8 +14,6 @@ import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.core.StarsAndOtherService;
-import com.company.hunttech.web.screens.fragments.OnlyTextPersonPosition;
-import com.company.hunttech.web.screens.fragments.OnlyTextPersonPositionLoadPdf;
 import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
 import com.company.hunttech.web.screens.signicons.SignIconsBrowse;
 import com.company.hunttech.web.util.AiOperationNotifier;
@@ -138,9 +135,6 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private SkillAnalysisService skillAnalysisService;
 
     @Inject
-    private ParseCVService parseCVService;
-
-    @Inject
     private BackgroundWorker backgroundWorker;
 
     @Inject
@@ -193,7 +187,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Inject
     private Button removeCandidateToolbarBtn;
     @Inject
-    private PopupButton quickLoadCV;
+    private Button smartUploadBtn;
     @Inject
     private PopupButton candidatesFilterPopupButton;
     @Inject
@@ -905,11 +899,11 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     }
 
     /* =========================================================================
-     * Быстрая и умная загрузка резюме (quickLoadCV)
+     * Умная загрузка резюме (smartUploadBtn) — визард SmartCvUploadScreen
      * ========================================================================= */
 
-    @Subscribe("quickLoadCV.smartLoad")
-    public void onQuickLoadCVSmartLoad(Action.ActionPerformedEvent event) {
+    @Subscribe("smartUploadBtn")
+    public void onSmartUploadBtnClick(Button.ClickEvent event) {
         openSmartCvUploadDialog();
     }
 
@@ -930,105 +924,6 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             }
         });
         screen.show();
-    }
-
-    @Subscribe("quickLoadCV.loadFromPdf")
-    public void onQuickLoadCVLoadFromPdf(Action.ActionPerformedEvent event) {
-        OnlyTextPersonPositionLoadPdf screen = screenBuilders.screen(this)
-                .withScreenClass(OnlyTextPersonPositionLoadPdf.class)
-                .withOpenMode(OpenMode.NEW_TAB)
-                .build();
-
-        screen.addAfterCloseListener(afterCloseEvent -> {
-            jobCandidatesDl.load();
-        });
-
-        screen.show();
-    }
-
-    @Subscribe("quickLoadCV.loadFromClipboard")
-    public void onQuickLoadCVLoadFromClipboard(Action.ActionPerformedEvent event) {
-        OnlyTextPersonPosition screenOnlytext = screenBuilders.screen(this)
-                .withScreenClass(OnlyTextPersonPosition.class)
-                .withOpenMode(OpenMode.NEW_TAB)
-                .build();
-
-        screenOnlytext.addAfterCloseListener(afterCloseEvent -> {
-            if (Boolean.TRUE.equals(screenOnlytext.getCancel())) {
-                return;
-            }
-            String textCV = screenOnlytext.getResultText();
-            if (textCV != null && !textCV.trim().isEmpty()) {
-                Screen jobCandidateEdit = screenBuilders.editor(JobCandidate.class, this)
-                        .withOpenMode(OpenMode.NEW_TAB)
-                        .withScreenClass(JobCandidateEdit.class)
-                        .withAfterCloseListener(eventAfterClose -> {
-                            jobCandidatesDl.load();
-                        })
-                        .withInitializer(e -> {
-                            selectFirstNames(textCV, e);
-                            selectMiddleNames(textCV, e);
-                            selectSecondNames(textCV, e);
-
-                            if (parseCVService != null) {
-                                e.setEmail(parseCVService.parseEmail(textCV));
-                                e.setPhone(parseCVService.parsePhone(textCV));
-                                e.setBirdhDate(parseCVService.parseDate(textCV));
-                                e.setCurrentCompany(parseCVService.parseCompany(textCV));
-                                e.setCityOfResidence(parseCVService.parseCity(textCV));
-                                e.setPersonPosition(screenOnlytext.getPersonPosition());
-                                e.setTelegramName(parseCVService.parseTelegram(textCV));
-                                e.setSkypeName(parseCVService.parseSkype(textCV));
-                            }
-
-                            CandidateCV candidateCV = metadata.create(CandidateCV.class);
-                            candidateCV.setResumePosition(e.getPersonPosition());
-                            candidateCV.setTextCV(textCV);
-                            if (userSession.getUser() instanceof ExtUser) {
-                                candidateCV.setOwner((ExtUser) userSession.getUser());
-                            }
-                            candidateCV.setCandidate(e);
-                            candidateCV.setDatePost(new Date());
-
-                            List<CandidateCV> candidateCVS = new ArrayList<>();
-                            candidateCVS.add(candidateCV);
-                            e.setCandidateCv(candidateCVS);
-                        })
-                        .build();
-                jobCandidateEdit.show();
-            }
-        });
-
-        screenOnlytext.show();
-    }
-
-    @Subscribe("quickLoadCV.loadFromWord")
-    public void onQuickLoadCVLoadFromWord(Action.ActionPerformedEvent event) {
-        onQuickLoadCVLoadFromClipboard(event);
-    }
-
-    private void selectFirstNames(String textCV, JobCandidate e) {
-        if (parseCVService == null) return;
-        List<String> namesList = parseCVService.getFirstNameList(textCV);
-        if (namesList != null && !namesList.isEmpty()) {
-            e.setFirstName(namesList.get(0));
-        }
-    }
-
-    private void selectMiddleNames(String textCV, JobCandidate e) {
-        if (parseCVService == null) return;
-        List<String> namesList = parseCVService.getMiddleNameList(textCV);
-        if (namesList != null && !namesList.isEmpty()) {
-            e.setMiddleName(namesList.get(0));
-        }
-    }
-
-    private void selectSecondNames(String textCV, JobCandidate e) {
-        if (parseCVService == null) return;
-        List<String> namesList = parseCVService.getSecondNameList(textCV);
-        if (namesList != null && !namesList.isEmpty()) {
-            e.setSecondName(namesList.get(0));
-        }
     }
 
     /* =========================================================================

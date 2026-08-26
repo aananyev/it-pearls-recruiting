@@ -154,21 +154,10 @@
                 
                 <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
                 <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
-                    <!-- Левая группа основных действий: Создать кандидата, Умная загрузка (с выпадающим списком форматов), Редактировать, Удалить -->
+                    <!-- Левая группа основных действий: Создать кандидата, Умная загрузка (визард), Редактировать, Удалить -->
                     <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
-                        <popupButton id="quickLoadCV"
-                                     caption="Умная загрузка"
-                                     icon="font-icon:MAGIC"
-                                     showActionIcons="true"
-                                     stylename="primary candidate-btn candidate-smartload-btn">
-                            <actions>
-                                <action id="smartLoad" caption="Умная AI-загрузка резюме..." icon="font-icon:MAGIC"/>
-                                <action id="loadFromPdf" caption="Из файла PDF..." icon="FILE_PDF_O"/>
-                                <action id="loadFromWord" caption="Из файла Word..." icon="FILE_WORD_O"/>
-                                <action id="loadFromClipboard" caption="Из буфера обмена..." icon="CLIPBOARD"/>
-                            </actions>
-                        </popupButton>
+                        <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
                         <button id="editCandidateToolbarBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
                         <button id="removeCandidateToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
                     </cssLayout>
