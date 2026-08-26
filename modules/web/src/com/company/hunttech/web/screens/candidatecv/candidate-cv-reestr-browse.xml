@@ -91,7 +91,7 @@
                                     </row>
                                     <row>
                                         <label value="Вакансия:" stylename="edit-help"/>
-                                        <label id="detailToVacancy" value="-" stylename="bold" align="MIDDLE_CENTER"/>
+                                        <label id="detailToVacancy" value="-" stylename="bold" align="MIDDLE_CENTER" htmlEnabled="true"/>
                                     </row>
                                     <row>
                                         <label value="Проект:" stylename="edit-help"/>

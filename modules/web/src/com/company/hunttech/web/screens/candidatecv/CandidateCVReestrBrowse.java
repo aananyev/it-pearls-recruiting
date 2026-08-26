@@ -149,7 +149,7 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
                     sub.append(c.getEmail().trim());
                 }
             }
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+            String textHtml = "<div style='text-align: left; white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
                     (sub.length() > 0 ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub.toString() + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -179,7 +179,7 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
             }
             String vName = v.getVacansyName() != null ? v.getVacansyName() : "Вакансия";
             String pName = v.getProjectName() != null ? v.getProjectName().getProjectName() : "";
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px;'>" + vName + "</div>" +
+            String textHtml = "<div style='text-align: left; white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px;'>" + vName + "</div>" +
                     (!pName.isEmpty() ? "<div style='font-size: 11px; color: #64748b;'>📁 " + pName + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -442,25 +442,25 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
             logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
         }
 
-        // Заголовки
+        // Заголовки (word-break для длинных ФИО/должности/города)
         if (candidate != null && candidate.getFullName() != null) {
-            detailTitle.setValue(candidate.getFullName());
+            detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + candidate.getFullName() + "</div>");
         } else {
-            detailTitle.setValue("Кандидат не указан");
+            detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Кандидат не указан</div>");
         }
 
         if (cv.getResumePosition() != null) {
-            detailSubtitle.setValue(cv.getResumePosition().getPositionRuName());
+            detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + cv.getResumePosition().getPositionRuName() + "</div>");
         } else if (candidate != null && candidate.getPersonPosition() != null) {
-            detailSubtitle.setValue(candidate.getPersonPosition().getPositionRuName());
+            detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + candidate.getPersonPosition().getPositionRuName() + "</div>");
         } else {
-            detailSubtitle.setValue("-");
+            detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
         }
 
         if (candidate != null && candidate.getCityOfResidence() != null) {
-            detailLocation.setValue(candidate.getCityOfResidence().getCityRuName());
+            detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>📍 " + candidate.getCityOfResidence().getCityRuName() + "</div>");
         } else {
-            detailLocation.setValue("-");
+            detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
         }
 
         // Готовность
@@ -511,7 +511,8 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         String letterText = cv.getId() != null ? cvLettersCache.get(cv.getId()) : null;
         if (letterText != null && !letterText.trim().isEmpty()) {
             String plain = Jsoup.parse(letterText).text();
-            detailLetter.setValue(plain.length() > 300 ? plain.substring(0, 300) + "..." : plain);
+            String shown = plain.length() > 300 ? plain.substring(0, 300) + "..." : plain;
+            detailLetter.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + shown + "</div>");
         } else {
             detailLetter.setValue("<span style='color: #94a3b8;'>Сопроводительное письмо отсутствует</span>");
         }

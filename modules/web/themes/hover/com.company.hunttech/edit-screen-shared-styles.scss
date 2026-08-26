@@ -75,6 +75,13 @@
     word-break: break-word !important;
   }
 
+  /* Grid labels в edit-sidebar-grid (реестр резюме: Основные данные, Файлы) — перенос по словам */
+  .edit-sidebar-grid .v-grid-row .v-label {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
   .edit-sidebar-title,
   .edit-sidebar-title.v-label,
   .candidate-sidebar-fullname,
