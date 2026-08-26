@@ -867,12 +867,13 @@
     }
   }
 
-  /* Таблицы реестров (увеличение высоты строк на 20% + поддержка переноса текста) */
+  /* Таблицы реестров (поддержка переноса текста + динамическая высота строк) */
   .candidate-browse-grid {
     .v-table-cell-content {
       padding-top: 6px !important;
       padding-bottom: 6px !important;
       min-height: 38px !important;
+      height: auto !important;
       vertical-align: middle !important;
     }
 
@@ -880,11 +881,13 @@
       white-space: normal !important;
       line-height: 1.35 !important;
       word-break: break-word !important;
+      height: auto !important;
     }
 
     .v-table-row,
     .v-table-row-odd {
       min-height: 38px !important;
+      height: auto !important;
     }
   }
 }
