@@ -483,7 +483,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ignored) {
         }
-        detailVacancyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + posName + "</div>");
+        detailVacancyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center; font-weight: 600;'>" + posName + "</div>");
 
         String prjName = "—";
         String compName = "—";
@@ -498,8 +498,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ignored) {
         }
-        detailProjectName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + prjName + "</div>");
-        detailCompanyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (compName != null ? compName : "—") + "</div>");
+        detailProjectName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center;'>" + prjName + "</div>");
+        detailCompanyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center;'>" + (compName != null ? compName : "—") + "</div>");
 
         // Локация и формат работы
         String cityStr = "Локация не указана";
@@ -510,7 +510,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         } catch (Exception ignored) {
         }
         String remoteStr = formatRemoteWorkString(position.getRemoteWork());
-        detailLocationAndFormat.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr) + "</div>");
+        detailLocationAndFormat.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center;'>" + cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr) + "</div>");
 
         // Зарплата по ТК (подробная вилка)
         if (detailSalaryTk != null) {
