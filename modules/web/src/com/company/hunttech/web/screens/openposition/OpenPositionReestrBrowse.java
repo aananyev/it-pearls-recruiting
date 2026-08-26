@@ -615,12 +615,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 StringBuilder sb = new StringBuilder("<div style='display: flex; align-items: center; gap: 3px; margin-top: 3px;'>");
                 for (int i = 1; i <= 5; i++) {
                     if (i <= rounded) {
-                        sb.append("<span style='color: #f59e0b; font-size: 15px;'>★</span>");
+                        sb.append("<span style='color: #f59e0b; font-size: 20px;'>★</span>");
                     } else {
-                        sb.append("<span style='color: #cbd5e1; font-size: 15px;'>★</span>");
+                        sb.append("<span style='color: #cbd5e1; font-size: 20px;'>★</span>");
                     }
                 }
-                sb.append(String.format("<span style='font-size: 12px; font-weight: 700; color: #334155; margin-left: 5px;'>%.1f</span>", avgRating));
+                sb.append(String.format("<span style='font-size: 14px; font-weight: 700; color: #334155; margin-left: 5px;'>%.1f</span>", avgRating));
                 sb.append("</div>");
                 detailRating.setValue(sb.toString());
             } else {

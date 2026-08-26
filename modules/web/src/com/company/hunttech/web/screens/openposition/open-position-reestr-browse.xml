@@ -131,6 +131,13 @@
                                     width="100%"/>
                         </vbox>
 
+                        <!-- Секция 3: Индикаторы готовности и рейтинг (перемещена под кнопку Подписаться) -->
+                        <vbox id="readinessCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailIndicators" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailRating" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                        </vbox>
+
                         <!-- Секция 1: Условия и реквизиты -->
                         <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="УСЛОВИЯ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
@@ -189,13 +196,6 @@
                                     </row>
                                 </rows>
                             </grid>
-                        </vbox>
-
-                        <!-- Секция 3: Индикаторы готовности и рейтинг -->
-                        <vbox id="readinessCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
-                            <label id="detailIndicators" htmlEnabled="true" width="100%" stylename="edit-help"/>
-                            <label id="detailRating" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
 
                         <!-- Секция 4: Требуемые навыки -->
