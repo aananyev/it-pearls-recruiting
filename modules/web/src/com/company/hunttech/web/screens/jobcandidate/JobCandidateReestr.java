@@ -418,7 +418,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         List<IteractionList> salaryInteractions = dataManager.load(IteractionList.class)
                 .query("select e from hunttech_IteractionList e " +
                         "where e.candidate in :candidates " +
-                        "and e.iteractionType.iteractionTree.iteractionRuName like :name " +
+                        "and e.iteractionType.iterationName like :name " +
                         "order by e.dateIteraction desc, e.createTs desc")
                 .parameter("candidates", candidates)
                 .parameter("name", "%Зарплатные ожидания%")
