@@ -235,7 +235,18 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         // Колонка 1: Приоритет (векторный индикатор с подсветкой и подсказкой)
         openPositionsTable.addGeneratedColumn("priority", position -> renderPriorityBadge(position.getPriority()));
 
-        // Колонка 2: Логотип проекта/компании (36px oval)
+        // Колонка 2: Номер вакансии (ID)
+        openPositionsTable.addGeneratedColumn("vacansyID", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            String id = position.getVacansyID() != null ? position.getVacansyID() : "—";
+            lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #2b82c9; font-family: monospace;'>" + id + "</span>");
+            return lbl;
+        });
+
+        // Колонка 3: Логотип проекта/компании (36px oval)
         openPositionsTable.addGeneratedColumn("logo", position -> {
             WebOvaFallbackImage logoImg = uiComponents.create(WebOvaFallbackImage.class);
             logoImg.setWidth("36px");
