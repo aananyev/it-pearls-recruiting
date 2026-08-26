@@ -149,7 +149,7 @@
                                         <label id="detailLastInteractionVacancy" value="-" htmlEnabled="true" width="100%"/>
                                     </row>
                                     <row>
-                                        <label value="Последний рекрутер:" stylename="bold" htmlEnabled="true" width="100%"/>
+                                        <label value="Рекрутер:" stylename="bold" htmlEnabled="true" width="100%"/>
                                         <label id="detailLastInteractionRecruiter" value="-" htmlEnabled="true" width="100%"/>
                                     </row>
                                 </rows>
