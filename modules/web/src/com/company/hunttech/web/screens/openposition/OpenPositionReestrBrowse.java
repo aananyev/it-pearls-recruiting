@@ -74,6 +74,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
     private static final DecimalFormat SALARY_FORMAT = new DecimalFormat("#,###");
 
+    private static final String QUERY_SENT_CV_COUNT_BY_POSITIONS =
+            "select e.vacancy.id as vacancyId, count(e) as cnt from hunttech_IteractionList e "
+                    + "where e.vacancy.id in :ids and e.iteractionType.signSendToClient = true "
+                    + "and e.vacancy.lastOpenDate < e.dateIteraction "
+                    + "group by e.vacancy.id";
+
     @Inject
     private Notifications notifications;
     @Inject
@@ -155,6 +161,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Label<String> detailRating;
     @Inject
+    private Label<String> detailSentCandidates;
+    @Inject
     private Label<String> detailSkills;
     @Inject
     private VBoxLayout projectDescriptionCard;
@@ -175,6 +183,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private Map<UUID, List<OpenPositionSkill>> skillsByPositionId = Collections.emptyMap();
     /** Кэш среднего рейтинга для всех видимых вакансий (Zero N+1) */
     private Map<UUID, Double> avgRatingByPositionId = Collections.emptyMap();
+    /** Кэш количества отправленных кандидатов на сторону заказчика (Zero N+1) */
+    private Map<UUID, Integer> sentCvCountByPosition = Collections.emptyMap();
     /** Кэш краткого описания и полного описания проекта для всех видимых вакансий (Zero N+1) */
     private Map<UUID, String> projectShortDescriptionCache = Collections.emptyMap();
     private Map<UUID, String> projectDescriptionCache = Collections.emptyMap();
@@ -199,6 +209,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         if (positions == null || positions.isEmpty()) {
             skillsByPositionId = Collections.emptyMap();
             avgRatingByPositionId = Collections.emptyMap();
+            sentCvCountByPosition = Collections.emptyMap();
             return;
         }
 
@@ -240,6 +251,31 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             avgRatingByPositionId = ratingsMap;
         } catch (Exception ignored) {
             avgRatingByPositionId = Collections.emptyMap();
+        }
+
+        // Кэш количества отправленных кандидатов на сторону заказчика (signSendToClient)
+        try {
+            List<UUID> ids = positions.stream()
+                    .map(OpenPosition::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            Map<UUID, Integer> sentCvCount = new HashMap<>();
+            if (!ids.isEmpty()) {
+                List<com.haulmont.cuba.core.entity.KeyValueEntity> rows = dataManager.loadValues(QUERY_SENT_CV_COUNT_BY_POSITIONS)
+                        .properties("vacancyId", "cnt")
+                        .parameter("ids", ids)
+                        .list();
+                for (com.haulmont.cuba.core.entity.KeyValueEntity row : rows) {
+                    UUID vacancyId = row.getValue("vacancyId");
+                    Number cnt = row.getValue("cnt");
+                    if (vacancyId != null && cnt != null) {
+                        sentCvCount.put(vacancyId, cnt.intValue());
+                    }
+                }
+            }
+            sentCvCountByPosition = sentCvCount;
+        } catch (Exception ignored) {
+            sentCvCountByPosition = Collections.emptyMap();
         }
 
         // Кэш краткого описания и полного описания проекта (как в ProjectReestrBrowse)
@@ -417,6 +453,32 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             ));
             return lbl;
         });
+
+        // Колонка 8: Отправлено кандидатов (счётчик на основе IteractionList / signSendToClient)
+        openPositionsTable.addGeneratedColumn("sentCandidates", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            int count = position.getId() != null ? sentCvCountByPosition.getOrDefault(position.getId(), 0) : 0;
+            String color;
+            String bg;
+            if (count < 3) {
+                color = "#16a34a";
+                bg = "rgba(34, 197, 94, 0.12)";
+            } else if (count < 5) {
+                color = "#ca8a04";
+                bg = "rgba(250, 204, 21, 0.15)";
+            } else {
+                color = "#dc2626";
+                bg = "rgba(239, 68, 68, 0.12)";
+            }
+            lbl.setValue(String.format(
+                    "<span style='background: %s; color: %s; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; white-space: normal; word-break: break-word; display: inline-block;'>%d</span>",
+                    bg, color, count
+            ));
+            return lbl;
+        });
     }
 
     @Subscribe
@@ -512,6 +574,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             detailCreatedBy.setValue("—");
             detailIndicators.setValue("<span style='color: #9ca3af;'>Нет данных</span>");
             if (detailRating != null) detailRating.setValue("");
+            if (detailSentCandidates != null) detailSentCandidates.setValue("");
             detailSkills.setValue("<span style='color: #9ca3af;'>Навыки не указаны</span>");
             if (projectDescriptionCard != null) projectDescriptionCard.setVisible(false);
             if (detailProjectShortDescription != null) detailProjectShortDescription.setVisible(false);
@@ -639,7 +702,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         boolean hasExercise = position.getExercise() != null && !position.getExercise().trim().isEmpty();
         boolean hasTemplate = position.getTemplateLetter() != null && !position.getTemplateLetter().trim().isEmpty();
 
-        ind.append("<div style='display: flex; gap: 8px; font-size: 11px;'>");
+        ind.append("<div style='display: flex; gap: 8px; font-size: 13px;'>");
         ind.append(hasDesc ? "<span style='color: #16a34a;'>✓ Описание</span>" : "<span style='color: #9ca3af;'>✕ Описание</span>");
         ind.append(hasExercise ? "<span style='color: #16a34a;'>✓ Тестовое</span>" : "<span style='color: #9ca3af;'>✕ Тестовое</span>");
         ind.append(hasTemplate ? "<span style='color: #16a34a;'>✓ Памятка</span>" : "<span style='color: #9ca3af;'>✕ Памятка</span>");
@@ -686,6 +749,27 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ex) {
             detailRating.setValue("<span style='color: #9ca3af; font-size: 11px;'>Нет оценок вакансии</span>");
+        }
+
+        // Отправлено кандидатов на сторону заказчика (счётчик с раскраской, как в колонке таблицы)
+        if (detailSentCandidates != null) {
+            int sentCount = position.getId() != null ? sentCvCountByPosition.getOrDefault(position.getId(), 0) : 0;
+            String sentColor;
+            String sentBg;
+            if (sentCount < 3) {
+                sentColor = "#16a34a";
+                sentBg = "rgba(34, 197, 94, 0.12)";
+            } else if (sentCount < 5) {
+                sentColor = "#ca8a04";
+                sentBg = "rgba(250, 204, 21, 0.15)";
+            } else {
+                sentColor = "#dc2626";
+                sentBg = "rgba(239, 68, 68, 0.12)";
+            }
+            detailSentCandidates.setValue(String.format(
+                    "<div style='font-size: 12px; line-height: 1.5;'>Отправлено кандидатов: <span style='background: %s; color: %s; padding: 1px 8px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-block;'>%d</span></div>",
+                    sentBg, sentColor, sentCount
+            ));
         }
 
         // Описание проекта (краткое / полное) — по алгоритму ProjectReestrBrowse

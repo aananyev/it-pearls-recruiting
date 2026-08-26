@@ -138,6 +138,7 @@
                             <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailIndicators" htmlEnabled="true" width="100%" stylename="edit-help"/>
                             <label id="detailRating" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailSentCandidates" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
 
                         <!-- Секция: Краткое описание проекта / Описание проекта (по алгоритму ProjectReestrBrowse) -->
@@ -320,6 +321,7 @@
                             <column id="salary" caption="Зарплата" width="150px"/>
                             <column id="mainSkills" caption="Требуемые навыки" width="220px" sortable="false"/>
                             <column id="statusBadge" caption="Статус" width="110px" sortable="false"/>
+                            <column id="sentCandidates" caption="Отправлено" width="95px" align="CENTER" sortable="false"/>
                         </columns>
                         <rowsCount/>
                     </groupTable>
