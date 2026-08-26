@@ -5,6 +5,7 @@ import com.company.hunttech.entity.CandidateSkillPriority;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.OpenPositionSkill;
 import com.company.hunttech.entity.Person;
+import com.company.hunttech.entity.Project;
 import com.company.hunttech.entity.SkillTree;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
@@ -29,6 +30,7 @@ import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.PopupButton;
+import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
@@ -54,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Контроллер Split-View реестра открытых вакансий ({@code hunttech_OpenPositionReestr.browse}).
@@ -154,6 +157,14 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Label<String> detailSkills;
     @Inject
+    private VBoxLayout projectDescriptionCard;
+    @Inject
+    private Label<String> projectDescriptionCardTitle;
+    @Inject
+    private Label<String> detailProjectShortDescription;
+    @Inject
+    private Label<String> detailProjectDescription;
+    @Inject
     private Button openEditCardBtn;
     @Inject
     private Button suggestCandidatesBtn;
@@ -164,6 +175,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private Map<UUID, List<OpenPositionSkill>> skillsByPositionId = Collections.emptyMap();
     /** Кэш среднего рейтинга для всех видимых вакансий (Zero N+1) */
     private Map<UUID, Double> avgRatingByPositionId = Collections.emptyMap();
+    /** Кэш краткого описания и полного описания проекта для всех видимых вакансий (Zero N+1) */
+    private Map<UUID, String> projectShortDescriptionCache = Collections.emptyMap();
+    private Map<UUID, String> projectDescriptionCache = Collections.emptyMap();
 
     @Subscribe
     public void onInit(Screen.InitEvent event) {
@@ -226,6 +240,47 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             avgRatingByPositionId = ratingsMap;
         } catch (Exception ignored) {
             avgRatingByPositionId = Collections.emptyMap();
+        }
+
+        // Кэш краткого описания и полного описания проекта (как в ProjectReestrBrowse)
+        try {
+            List<UUID> projectIds = positions.stream()
+                    .map(OpenPosition::getProjectName)
+                    .filter(Objects::nonNull)
+                    .map(Project::getId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (!projectIds.isEmpty()) {
+                List<com.haulmont.cuba.core.entity.KeyValueEntity> descRows = dataManager.loadValues(
+                        "select e.id, e.shortDescription, e.projectDescription from hunttech_Project e where e.id in :ids")
+                        .parameter("ids", projectIds)
+                        .properties("id", "shortDescription", "projectDescription")
+                        .list();
+                Map<UUID, String> shortDescCache = new HashMap<>();
+                Map<UUID, String> descCache = new HashMap<>();
+                for (com.haulmont.cuba.core.entity.KeyValueEntity row : descRows) {
+                    UUID pid = row.getValue("id");
+                    String shortDesc = row.getValue("shortDescription");
+                    String fullDesc = row.getValue("projectDescription");
+                    if (pid != null) {
+                        if (shortDesc != null && !shortDesc.trim().isEmpty()) {
+                            shortDescCache.put(pid, shortDesc);
+                        }
+                        if (fullDesc != null && !fullDesc.trim().isEmpty()) {
+                            descCache.put(pid, fullDesc);
+                        }
+                    }
+                }
+                projectShortDescriptionCache = shortDescCache;
+                projectDescriptionCache = descCache;
+            } else {
+                projectShortDescriptionCache = Collections.emptyMap();
+                projectDescriptionCache = Collections.emptyMap();
+            }
+        } catch (Exception ignored) {
+            projectShortDescriptionCache = Collections.emptyMap();
+            projectDescriptionCache = Collections.emptyMap();
         }
     }
 
@@ -458,6 +513,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             detailIndicators.setValue("<span style='color: #9ca3af;'>Нет данных</span>");
             if (detailRating != null) detailRating.setValue("");
             detailSkills.setValue("<span style='color: #9ca3af;'>Навыки не указаны</span>");
+            if (projectDescriptionCard != null) projectDescriptionCard.setVisible(false);
+            if (detailProjectShortDescription != null) detailProjectShortDescription.setVisible(false);
+            if (detailProjectDescription != null) detailProjectDescription.setVisible(false);
             return;
         }
 
@@ -628,6 +686,44 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ex) {
             detailRating.setValue("<span style='color: #9ca3af; font-size: 11px;'>Нет оценок вакансии</span>");
+        }
+
+        // Описание проекта (краткое / полное) — по алгоритму ProjectReestrBrowse
+        if (projectDescriptionCard != null && projectDescriptionCardTitle != null
+                && detailProjectShortDescription != null && detailProjectDescription != null) {
+            String projectShortDesc = null;
+            String projectFullDesc = null;
+            try {
+                if (position.getProjectName() != null && position.getProjectName().getId() != null) {
+                    UUID projectId = position.getProjectName().getId();
+                    projectShortDesc = projectShortDescriptionCache.get(projectId);
+                    projectFullDesc = projectDescriptionCache.get(projectId);
+                }
+            } catch (Exception ignored) {
+            }
+            boolean hasShort = projectShortDesc != null && !projectShortDesc.trim().isEmpty();
+            boolean hasFull = projectFullDesc != null && !projectFullDesc.trim().isEmpty();
+            if (hasShort) {
+                projectDescriptionCard.setVisible(true);
+                projectDescriptionCardTitle.setValue("КРАТКОЕ ОПИСАНИЕ");
+                detailProjectShortDescription.setVisible(true);
+                detailProjectShortDescription.setValue(projectShortDesc);
+                detailProjectDescription.setVisible(false);
+            } else if (hasFull) {
+                projectDescriptionCard.setVisible(true);
+                projectDescriptionCardTitle.setValue("ОПИСАНИЕ ПРОЕКТА");
+                detailProjectShortDescription.setVisible(false);
+                detailProjectShortDescription.setValue("");
+                detailProjectDescription.setVisible(true);
+                String plain = Jsoup.parse(projectFullDesc).text();
+                detailProjectDescription.setValue(plain.length() > 300 ? plain.substring(0, 300) + "..." : plain);
+            } else {
+                projectDescriptionCard.setVisible(false);
+                detailProjectShortDescription.setVisible(false);
+                detailProjectShortDescription.setValue("");
+                detailProjectDescription.setVisible(false);
+                detailProjectDescription.setValue("");
+            }
         }
 
         // Навыки, сгруппированные по 3 категориям (Обязательные, Желательные, Прочие)

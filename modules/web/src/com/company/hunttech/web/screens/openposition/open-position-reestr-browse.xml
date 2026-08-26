@@ -18,6 +18,8 @@
                         <property name="companyName" view="company-picker-view"/>
                     </property>
                     <property name="projectOwner" view="person-owner-view"/>
+                    <property name="shortDescription"/>
+                    <property name="projectDescription"/>
                 </property>
                 <property name="positionType" fetch="BATCH" view="position-picker-view"/>
                 <property name="owner" fetch="BATCH" view="extUser-picker-view"/>
@@ -136,6 +138,13 @@
                             <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailIndicators" htmlEnabled="true" width="100%" stylename="edit-help"/>
                             <label id="detailRating" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                        </vbox>
+
+                        <!-- Секция: Краткое описание проекта / Описание проекта (по алгоритму ProjectReestrBrowse) -->
+                        <vbox id="projectDescriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label id="projectDescriptionCardTitle" value="КРАТКОЕ ОПИСАНИЕ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailProjectShortDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailProjectDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
 
                         <!-- Секция 1: Условия и реквизиты -->
