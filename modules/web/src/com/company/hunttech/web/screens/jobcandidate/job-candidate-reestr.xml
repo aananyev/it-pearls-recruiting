@@ -87,6 +87,17 @@
                             <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false" width="100%"/>
                         </vbox>
 
+                        <!-- Секция: Готовность и рейтинг -->
+                        <vbox id="readinessCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <!-- Индикаторы готовности -->
+                            <label id="detailReadiness" width="100%" htmlEnabled="true" stylename="job-candidate-readiness"/>
+                            <!-- Рейтинг: звёзды + цифра -->
+                            <label id="detailRating" width="100%" htmlEnabled="true" stylename="job-candidate-rating"/>
+                            <!-- Счётчик отправленных кандидатов -->
+                            <label id="detailSentCandidates" width="100%" htmlEnabled="true" stylename="job-candidate-sent-count"/>
+                        </vbox>
+
                         <!-- Блок ключевой контактной информации кандидата (стиль Edit-форм с линиями) -->
                         <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="КОНТАКТЫ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
@@ -262,6 +273,8 @@
                             <column id="currentCompany" caption="Компания" width="180px"/>
                             <!-- Генерируемая колонка ключевых навыков кандидата с чипами и всплывающим окном всех навыков -->
                             <column id="mainSkills" caption="Ключевые навыки" width="220px" sortable="false"/>
+                            <!-- Колонка: Отправлено (счётчик кандидатов на сторону заказчика) -->
+                            <column id="sentCount" caption="Отправлено" width="90px" sortable="false"/>
                             <!-- Компактная генерируемая колонка даты последнего взаимодействия со светофорным статусом -->
                             <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px" sortable="false"/>
                         </columns>
