@@ -5,4 +5,5 @@
     <screen id="sec$User.edit" template="com/company/hunttech/web/screens/extuser/ext-user-edit.xml"/>
     <!-- Расширение добавляет настройку персонального фона, наследуя действующую компоновку SettingsWindow. -->
     <screen id="settings" template="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-main-background.xml"/>
+    <screen id="hunttech_AboutHrmScreen" template="com/company/hunttech/web/screens/about/about-hrm-screen.xml"/>
 </screen-config>

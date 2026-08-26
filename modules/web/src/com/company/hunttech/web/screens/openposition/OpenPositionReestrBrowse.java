@@ -235,7 +235,18 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         // Колонка 1: Приоритет (векторный индикатор с подсветкой и подсказкой)
         openPositionsTable.addGeneratedColumn("priority", position -> renderPriorityBadge(position.getPriority()));
 
-        // Колонка 2: Логотип проекта/компании (36px oval)
+        // Колонка 2: Номер вакансии (ID)
+        openPositionsTable.addGeneratedColumn("vacansyID", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            String id = position.getVacansyID() != null ? position.getVacansyID() : "—";
+            lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #2b82c9; font-family: monospace; white-space: normal; word-break: break-word;'>" + id + "</span>");
+            return lbl;
+        });
+
+        // Колонка 3: Логотип проекта/компании (36px oval)
         openPositionsTable.addGeneratedColumn("logo", position -> {
             WebOvaFallbackImage logoImg = uiComponents.create(WebOvaFallbackImage.class);
             logoImg.setWidth("36px");
@@ -292,12 +303,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             if (position.getSalaryMax() != null) {
-                lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #1e3a8a;'>до "
+                lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #1e3a8a; white-space: normal; word-break: break-word;'>до "
                         + SALARY_FORMAT.format(position.getSalaryMax()) + " ₽</span>");
             } else if (Boolean.TRUE.equals(position.getSalaryCandidateRequest())) {
-                lbl.setValue("<span style='font-size: 11px; color: #4b5563;'>По запросу кандидата</span>");
+                lbl.setValue("<span style='font-size: 11px; color: #4b5563; white-space: normal; word-break: break-word;'>По запросу кандидата</span>");
             } else {
-                lbl.setValue("<span style='font-size: 11px; color: #94a3b8;'>Не определено</span>");
+                lbl.setValue("<span style='font-size: 11px; color: #94a3b8; white-space: normal; word-break: break-word;'>Не определено</span>");
             }
             return lbl;
         });
@@ -346,7 +357,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             String color = closed ? "#ef4444" : "#16a34a";
             String text = closed ? "Закрыта" : "Открыта";
             lbl.setValue(String.format(
-                    "<span style='background: %s; color: %s; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: nowrap; display: inline-block;'>%s</span>",
+                    "<span style='background: %s; color: %s; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: normal; word-break: break-word; display: inline-block;'>%s</span>",
                     bg, color, text
             ));
             return lbl;
@@ -472,7 +483,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ignored) {
         }
-        detailVacancyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + posName + "</div>");
+        detailVacancyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center; font-weight: 600;'>" + posName + "</div>");
 
         String prjName = "—";
         String compName = "—";
@@ -487,8 +498,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         } catch (Exception ignored) {
         }
-        detailProjectName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + prjName + "</div>");
-        detailCompanyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (compName != null ? compName : "—") + "</div>");
+        detailProjectName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center;'>" + prjName + "</div>");
+        detailCompanyName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center;'>" + (compName != null ? compName : "—") + "</div>");
 
         // Локация и формат работы
         String cityStr = "Локация не указана";
@@ -499,7 +510,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         } catch (Exception ignored) {
         }
         String remoteStr = formatRemoteWorkString(position.getRemoteWork());
-        detailLocationAndFormat.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr) + "</div>");
+        detailLocationAndFormat.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%; text-align: center;'>" + cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr) + "</div>");
 
         // Зарплата по ТК (подробная вилка)
         if (detailSalaryTk != null) {
@@ -604,12 +615,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 StringBuilder sb = new StringBuilder("<div style='display: flex; align-items: center; gap: 3px; margin-top: 3px;'>");
                 for (int i = 1; i <= 5; i++) {
                     if (i <= rounded) {
-                        sb.append("<span style='color: #f59e0b; font-size: 15px;'>★</span>");
+                        sb.append("<span style='color: #f59e0b; font-size: 20px;'>★</span>");
                     } else {
-                        sb.append("<span style='color: #cbd5e1; font-size: 15px;'>★</span>");
+                        sb.append("<span style='color: #cbd5e1; font-size: 20px;'>★</span>");
                     }
                 }
-                sb.append(String.format("<span style='font-size: 12px; font-weight: 700; color: #334155; margin-left: 5px;'>%.1f</span>", avgRating));
+                sb.append(String.format("<span style='font-size: 14px; font-weight: 700; color: #334155; margin-left: 5px;'>%.1f</span>", avgRating));
                 sb.append("</div>");
                 detailRating.setValue(sb.toString());
             } else {
