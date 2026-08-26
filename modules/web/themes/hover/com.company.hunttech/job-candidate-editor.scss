@@ -1120,21 +1120,24 @@
     color: rgba(248, 250, 252, 0.85) !important;
   }
 
-  /* Стилизация шапки кандидата в сайдбаре (светлые контрастные цвета) */
+  /* Стилизация шапки кандидата в сайдбаре (светлые контрастные цвета, центрирование HTML-контента) */
   .candidate-sidebar-fullname,
   .job-candidate-sidebar .candidate-sidebar-fullname {
     color: #f8fafc !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    text-align: center !important;
   }
 
   .candidate-sidebar-position,
   .job-candidate-sidebar .candidate-sidebar-position {
     color: #93c5fd !important;
+    text-align: center !important;
   }
 
   .candidate-sidebar-city,
   .job-candidate-sidebar .candidate-sidebar-city {
     color: #cbd5e1 !important;
+    text-align: center !important;
   }
 
   /* =========================================================================

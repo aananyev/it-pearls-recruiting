@@ -136,6 +136,24 @@
                         <!-- Блок истории взаимодействий кандидата (стиль Edit-форм с линиями) -->
                         <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="ПОСЛЕДНЯЯ АКТИВНОСТЬ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <!-- Сетка деталей последнего взаимодействия -->
+                            <grid id="lastInteractionGrid" spacing="true" width="100%" stylename="edit-sidebar-summary" visible="false">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Последнее взаимодействие:" stylename="bold"/>
+                                        <label id="detailLastInteractionDate" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Проект:" stylename="bold"/>
+                                        <label id="detailLastInteractionVacancy" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Последний рекрутер:" stylename="bold"/>
+                                        <label id="detailLastInteractionRecruiter" value="-" htmlEnabled="true"/>
+                                    </row>
+                                </rows>
+                            </grid>
                             <!-- Текстовое описание последних действий рекрутера -->
                             <label id="detailInteractionsInfo" value="Выберите кандидата в таблице справа для просмотра истории." width="100%" stylename="edit-help"/>
                         </vbox>

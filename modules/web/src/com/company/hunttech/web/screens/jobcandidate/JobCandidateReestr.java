@@ -33,6 +33,7 @@ import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.DialogAction;
 import com.haulmont.cuba.gui.components.GroupTable;
+import com.haulmont.cuba.gui.components.GridLayout;
 import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
@@ -165,6 +166,14 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private Label<String> detailSalary;
     @Inject
     private Label<String> detailInteractionsInfo;
+    @Inject
+    private GridLayout lastInteractionGrid;
+    @Inject
+    private Label<String> detailLastInteractionDate;
+    @Inject
+    private Label<String> detailLastInteractionVacancy;
+    @Inject
+    private Label<String> detailLastInteractionRecruiter;
     @Inject
     private Label<String> detailSkillsLabels;
     @Inject
@@ -992,6 +1001,18 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         detailSalaryCaption.setVisible(false);
         detailSalary.setVisible(false);
         detailInteractionsInfo.setValue("Выберите кандидата в таблице для просмотра истории.");
+        if (lastInteractionGrid != null) {
+            lastInteractionGrid.setVisible(false);
+        }
+        if (detailLastInteractionDate != null) {
+            detailLastInteractionDate.setValue("-");
+        }
+        if (detailLastInteractionVacancy != null) {
+            detailLastInteractionVacancy.setValue("-");
+        }
+        if (detailLastInteractionRecruiter != null) {
+            detailLastInteractionRecruiter.setValue("-");
+        }
         if (detailSkillsLabels != null) {
             detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
         }
@@ -1038,6 +1059,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         // Номер взаимодействия из последнего взаимодействия
         updateInteractionNumber(candidate);
 
+        updateLastInteractionInfo(candidate);
+
         updateCandidateSkillsSidebar(candidate);
         updateReadinessRatingAndSent(candidate);
         editCandidateBtn.setEnabled(true);
@@ -1062,6 +1085,83 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         } catch (Exception ex) {
             log.warn("Failed to load interaction data for candidate {}", candidate != null ? candidate.getId() : null, ex);
             detailNumber.setValue("Ошибка загрузки");
+        }
+    }
+
+    /**
+     * Обновляет блок «Последняя активность» в sidebar:
+     * - дата последнего взаимодействия
+     * - проект (вакансия), по которому проходило последнее взаимодействие
+     * - последний рекрутер (HuntTech), проводивший собеседование
+     */
+    private void updateLastInteractionInfo(JobCandidate candidate) {
+        if (lastInteractionGrid == null || candidate == null) {
+            return;
+        }
+        try {
+            IteractionList last = lastInteractionByCandidateId.get(candidate.getId());
+
+            if (last == null) {
+                lastInteractionGrid.setVisible(false);
+                detailInteractionsInfo.setValue("По кандидату ещё не было взаимодействий.");
+                return;
+            }
+
+            lastInteractionGrid.setVisible(true);
+            detailInteractionsInfo.setValue("");
+
+            // Дата последнего взаимодействия
+            if (detailLastInteractionDate != null) {
+                String dateStr = "-";
+                if (last.getDateIteraction() != null) {
+                    try {
+                        dateStr = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm").format(last.getDateIteraction());
+                    } catch (Exception ignored) {
+                        dateStr = last.getDateIteraction().toString();
+                    }
+                }
+                detailLastInteractionDate.setValue(
+                        "<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + dateStr + "</div>");
+            }
+
+            // Проект / вакансия последнего взаимодействия
+            if (detailLastInteractionVacancy != null) {
+                String vacancyName = "-";
+                if (last.getVacancy() != null) {
+                    String name = last.getVacancy().getVacansyName();
+                    String id = last.getVacancy().getVacansyID();
+                    StringBuilder sb = new StringBuilder();
+                    if (name != null && !name.trim().isEmpty()) {
+                        sb.append(name.trim());
+                    }
+                    if (id != null && !id.trim().isEmpty()) {
+                        if (sb.length() > 0) sb.append(" ");
+                        sb.append("(").append(id.trim()).append(")");
+                    }
+                    if (sb.length() > 0) {
+                        vacancyName = sb.toString();
+                    }
+                }
+                detailLastInteractionVacancy.setValue(
+                        "<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + vacancyName + "</div>");
+            }
+
+            // Последний рекрутер (HuntTech) — проводивший собеседование
+            if (detailLastInteractionRecruiter != null) {
+                String recruiterName = "-";
+                if (last.getRecrutier() != null) {
+                    String name = last.getRecrutier().getName();
+                    if (name != null && !name.trim().isEmpty()) {
+                        recruiterName = name.trim();
+                    }
+                }
+                detailLastInteractionRecruiter.setValue(
+                        "<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + recruiterName + "</div>");
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to update last interaction info for candidate {}", candidate.getId(), ex);
+            lastInteractionGrid.setVisible(false);
+            detailInteractionsInfo.setValue("Ошибка загрузки");
         }
     }
 
