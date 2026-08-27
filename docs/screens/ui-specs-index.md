@@ -47,6 +47,12 @@ Living-документация экранов, окон, фрагментов �
 | Image face | `hunttech_JobCandidateImageFace` | [hunttech_JobCandidateImageFace_Spec.md](job-candidate/hunttech_JobCandidateImageFace_Spec.md) |
 | Select positions | `hunttech_SelectPersonPositions` | [hunttech_SelectPersonPositions_Spec.md](person/hunttech_SelectPersonPositions_Spec.md) |
 
+### CandidateCV
+
+| Форма | Controller | Документ |
+|-------|------------|----------|
+| Browse (реестр) | `hunttech_CandidateCVReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](../ui/ReestrBrowseFallbackNoCandidate_Spec.md) |
+
 ### OpenPosition
 
 | Форма | Controller | Документ |
@@ -63,6 +69,7 @@ Living-документация экранов, окон, фрагментов �
 | Edit | `hunttech_IteractionList.edit` | [hunttech_IteractionList.edit_Spec.md](iteraction-list/hunttech_IteractionList.edit_Spec.md) |
 | Simple browse | `hunttech_IteractionListSimple.browse` | [hunttech_IteractionListSimple.browse_Spec.md](iteraction-list/hunttech_IteractionListSimple.browse_Spec.md) |
 | Fragment (jobcandidate) | `hunttech_IteractionListBrowse` | [hunttech_IteractionListBrowse_Spec.md](iteraction-list/hunttech_IteractionListBrowse_Spec.md) |
+| Browse (реестр) | `hunttech_IteractionListReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](../ui/ReestrBrowseFallbackNoCandidate_Spec.md) |
 
 ### Iteraction
 
@@ -196,6 +203,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-27 | В каталог добавлены реестры `hunttech_IteractionListReestr.browse` (взаимодействия) и `hunttech_CandidateCVReestr.browse` (резюме): контракт sidebar-аватара `logoPic` 120×120 — fallback `icons/no-candidate.png`, `SCALE_TO_FIT` ([ReestrBrowseFallbackNoCandidate_Spec.md](../ui/ReestrBrowseFallbackNoCandidate_Spec.md)) |
 | 2026-07-05 | Добавлены подтемы hunttech-modern-light и hunttech-modern-dark в стиле Jmix Default/Dark, настроена регистрация в web-app.properties (cuba.theme.hover.modes) |
 | 2026-06-29 | Документация кастомного компонента FallbackImage |
 | 2026-06-27 | AI-администрирование: VacancyPromptTemplate browse/edit, UserAiConfiguration browse, меню aiAdministration |

@@ -184,6 +184,7 @@ Helper сначала сбрасывает прежний `ValueSource`, про�
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-27 | Реестры `IteractionListReestrBrowse` (`hunttech_IteractionListReestr.browse`) и `CandidateCVReestrBrowse` (`hunttech_CandidateCVReestr.browse`): sidebar-аватар `logoPic` 120×120 (oval) переведён с fallback `icons/no-company.png` на `icons/no-candidate.png` + `scaleMode=SCALE_TO_FIT`; контроллеры в `updateSidebarDetails`/`clearSidebarDetails` ставят `ThemeResource icons/no-candidate.png`; новый ресурс `icons/no-candidate.png` (PNG-силуэт человека) добавлен во все 7 тем. Контракт: [ReestrBrowseFallbackNoCandidate_Spec.md](../../ui/ReestrBrowseFallbackNoCandidate_Spec.md) |
 | 2026-08-14 | `OvaFallbackImageLoader` читает XML-атрибут `ovalBackground` (фон-подложка под прозрачные изображения), вызов `setOvalBackground(...)`; в `ProjectEdit` логотипу проекта задан тёмно-серый фон `#3a3e44` |
 | 2026-08-14 | Унаследован атрибут `ovalBackground` от `OvalImage` (фон-подложка под прозрачные изображения); `WebOvaFallbackImage` реализует его через общий `OvalImageBackgroundSupport` |
 | 2026-08-13 | Статичный fallback без `dataContainer`/`property` применяется сразу в `setFallbackThemePath()` (`updateComponent` у компонента без valueSource не вызывается); guard `host.getSource() == null` — не затирает ручной `setSource(...)` контроллера; в `FallbackImageHost` добавлен `getSource()` |

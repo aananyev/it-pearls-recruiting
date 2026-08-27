@@ -686,6 +686,8 @@
         <property name="population"/>
         <property name="timeZone"/>
         <property name="fiasId"/>
+        <property name="latitude"/>
+        <property name="longitude"/>
         <property name="cityRegion" view="region-browse-view"/>
         <property name="fileCityEmblem"/>
     </view>
