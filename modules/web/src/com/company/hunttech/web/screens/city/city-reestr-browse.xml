@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://cityReestrCaption"
+        focusComponent="citiesTable"
+        messagesPack="com.company.hunttech.web.screens.city"
+        icon="MAP_MARKER">
+    <data readOnly="true">
+        <collection id="citiesDc"
+                    class="com.company.hunttech.entity.City"
+                    view="city-browse-view">
+            <loader id="citiesDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_City e
+order by e.cityRuName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px) -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+                        <!-- Шапка профиля города -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/dictionaries/city.png" scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailTitle" value="Выберите город" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
+                                <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция: Реквизиты города -->
+                        <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="РЕКВИЗИТЫ ГОРОДА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Регион:" stylename="bold"/><label id="detailRegion" value="-"/></row>
+                                    <row><label value="Страна:" stylename="bold"/><label id="detailCountry" value="-"/></row>
+                                    <row><label value="Телефонный код:" stylename="bold"/><label id="detailPhoneCode" value="-"/></row>
+                                    <row><label value="Индекс:" stylename="bold"/><label id="detailPostalCode" value="-"/></row>
+                                    <row><label value="Население:" stylename="bold"/><label id="detailPopulation" value="-"/></row>
+                                    <row><label value="Часовой пояс:" stylename="bold"/><label id="detailTimeZone" value="-"/></row>
+                                    <row><label value="Координаты:" stylename="bold"/><label id="detailCoordinates" value="-"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Герб -->
+                        <vbox id="emblemCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ГЕРБ ГОРОДА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <vbox id="emblemContainer" width="100%" spacing="true" align="MIDDLE_CENTER">
+                                <ovaFallbackImage id="detailEmblemImage" width="140px" height="140px" ovalWidth="140px" ovalHeight="140px"
+                                                  align="MIDDLE_CENTER" stylename="dictionary-logo-image" fallbackThemePath="icons/dictionaries/city.png" scaleMode="SCALE_DOWN"/>
+                            </vbox>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
+
+                <!-- Командный тулбар -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createBtn" caption="Создать город" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="citiesTable.create"/>
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="citiesTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="citiesTable.remove"/>
+                    </hbox>
+                    <hbox id="toolbarSpacer" width="100%"/>
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
+                                <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="citiesTable"
+                        dataLoader="citiesDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                excludeProperties="openPosition,cityRegion.regionOfCity,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="citiesTable">
+                    <groupTable id="citiesTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="citiesDc"
+                                stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excel"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="cityEmblemColumn" caption="Герб" width="50px" sortable="false"/>
+                            <column id="cityRuName" caption="Название" expandRatio="2"/>
+                            <column id="cityRegion" caption="Регион" width="180px"/>
+                            <column id="cityPhoneCode" caption="Тел. код" width="100px" align="CENTER"/>
+                            <column id="postalCode" caption="Индекс" width="100px" align="CENTER"/>
+                            <column id="population" caption="Население" width="120px" align="CENTER"/>
+                            <column id="timeZone" caption="Часовой пояс" width="130px"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://countryReestrCaption"
+        focusComponent="countriesTable"
+        messagesPack="com.company.hunttech.web.screens.country"
+        icon="GLOBE">
+    <data readOnly="true">
+        <collection id="countriesDc"
+                    class="com.company.hunttech.entity.Country"
+                    view="country-browse-view">
+            <loader id="countriesDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_Country e
+order by e.countryRuName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px) -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+                        <!-- Шапка профиля страны -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/dictionaries/country.png" scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailTitle" value="Выберите страну" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
+                                <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция: Реквизиты страны -->
+                        <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="РЕКВИЗИТЫ СТРАНЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Код ISO Alpha-2:" stylename="bold"/><label id="detailShortName" value="-"/></row>
+                                    <row><label value="Код ISO Alpha-3:" stylename="bold"/><label id="detailAlpha3Code" value="-"/></row>
+                                    <row><label value="Числовой код ISO:" stylename="bold"/><label id="detailNumericCode" value="-"/></row>
+                                    <row><label value="Столица:" stylename="bold"/><label id="detailCapital" value="-"/></row>
+                                    <row><label value="Валюта:" stylename="bold"/><label id="detailCurrencyCode" value="-"/></row>
+                                    <row><label value="Телефонный код:" stylename="bold"/><label id="detailPhoneCode" value="-"/></row>
+                                    <row><label value="Международное название:" stylename="bold"/><label id="detailEngName" value="-"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Статистика -->
+                        <vbox id="statsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="СТАТИСТИКА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="statsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Кол-во регионов:" stylename="bold"/><label id="detailRegionsCount" value="0" stylename="bold"/></row>
+                                    <row><label value="Кол-во городов:" stylename="bold"/><label id="detailCitiesCount" value="0" stylename="bold"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Флаг -->
+                        <vbox id="flagCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ФЛАГ СТРАНЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <vbox id="flagContainer" width="100%" spacing="true" align="MIDDLE_CENTER">
+                                <fallbackImage id="detailFlagImage"
+                                               width="200px"
+                                               height="120px"
+                                               fallbackThemePath="icons/dictionaries/country.png"
+                                               align="MIDDLE_CENTER"
+                                               stylename="country-flag-rectangular-image"
+                                               scaleMode="CONTAIN"/>
+                            </vbox>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
+
+                <!-- Командный тулбар -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createBtn" caption="Создать страну" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="countriesTable.create"/>
+                        <button id="loadAllCountriesBtn" caption="Загрузить все страны" icon="CLOUD_DOWNLOAD" stylename="primary candidate-btn candidate-smartload-btn"/>
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="countriesTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="countriesTable.remove"/>
+                    </hbox>
+                    <hbox id="toolbarSpacer" width="100%"/>
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
+                                <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="countriesTable"
+                        dataLoader="countriesDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                excludeProperties="countryOfRegion,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="countriesTable">
+                    <groupTable id="countriesTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="countriesDc"
+                                stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excel"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="countryFlagColumn" caption="Флаг" width="50px" sortable="false"/>
+                            <column id="countryRuName" caption="Название" expandRatio="2"/>
+                            <column id="countryShortName" caption="ISO Alpha-2" width="120px"/>
+                            <column id="alpha3Code" caption="ISO Alpha-3" width="120px" align="CENTER"/>
+                            <column id="capital" caption="Столица" width="150px"/>
+                            <column id="currencyCode" caption="Валюта" width="100px" align="CENTER"/>
+                            <column id="phoneCode" caption="Тел. код" width="100px" align="CENTER"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>
