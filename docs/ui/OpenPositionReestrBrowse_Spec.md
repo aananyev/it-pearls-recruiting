@@ -116,6 +116,13 @@
    - Заголовок `ТРЕБУЕМЫЕ НАВЫКИ`.
    - Чипсы навыков `detailSkillsLabels` (стиль `candidate-skills-chips`).
 
+7. **Секция «Описание проекта» (`label-navigation`, в конце сайдбара)**:
+   - Заголовок `КРАТКОЕ ОПИСАНИЕ` / `ОПИСАНИЕ ПРОЕКТА` (`id="projectDescriptionCardTitle"`).
+   - Алгоритм по ProjectReestrBrowse: приоритет краткого описания проекта (`shortDescription`) → полное описание (`projectDescription`, до 300 симв.) → секция скрыта.
+   - `label` (`id="detailProjectShortDescription"`) — краткое описание проекта.
+   - `label` (`id="detailProjectDescription"`) — полное описание проекта (plain text, обрезается до 300 симв.).
+   - Данные берутся из кэша `projectShortDescriptionCache` / `projectDescriptionCache` (Zero N+1, Data View Integrity).
+
 ---
 
 ### 3.2 Верхний тулбар рабочей области (`tableFilterBar`)

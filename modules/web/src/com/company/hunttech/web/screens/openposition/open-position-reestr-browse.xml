@@ -141,13 +141,6 @@
                             <label id="detailSentCandidates" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
 
-                        <!-- Секция: Краткое описание проекта / Описание проекта (по алгоритму ProjectReestrBrowse) -->
-                        <vbox id="projectDescriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label id="projectDescriptionCardTitle" value="КРАТКОЕ ОПИСАНИЕ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
-                            <label id="detailProjectShortDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
-                            <label id="detailProjectDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
-                        </vbox>
-
                         <!-- Секция 1: Условия и реквизиты -->
                         <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="УСЛОВИЯ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
@@ -212,6 +205,13 @@
                         <vbox id="skillsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="ТРЕБУЕМЫЕ НАВЫКИ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <label id="detailSkills" htmlEnabled="true" width="100%" stylename="candidate-skills-chips"/>
+                        </vbox>
+
+                        <!-- Секция 5: Краткое описание проекта / Описание проекта (перемещена в конец сайдбара, по алгоритму ProjectReestrBrowse) -->
+                        <vbox id="projectDescriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label id="projectDescriptionCardTitle" value="КРАТКОЕ ОПИСАНИЕ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailProjectShortDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailProjectDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
                         </vbox>
 
                     </vbox>
