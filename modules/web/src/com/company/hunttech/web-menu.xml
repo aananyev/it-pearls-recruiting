@@ -84,9 +84,10 @@
         <item screen="hunttech_SkillTree.browse" icon="CODE_FORK"/>
         <item screen="hunttech_Country.browse" icon="GLOBE"/>
         <item screen="hunttech_CountryReestr.browse" caption="Реестр стран" icon="GLOBE"/>
+        <item screen="hunttech_Region.browse" icon="MAP_O"/>
+        <item screen="hunttech_RegionReestr.browse" caption="Реестр регионов" icon="MAP_O"/>
         <item screen="hunttech_City.browse" icon="MAP_MARKER"/>
         <item screen="hunttech_CityReestr.browse" caption="Реестр городов" icon="MAP_MARKER"/>
-        <item screen="hunttech_Region.browse" icon="MAP_O"/>
         <item screen="hunttech_Ownershup.browse" icon="TAGS"/>
         <item screen="hunttech_Position.browse" icon="ID_CARD_O"/>
         <item screen="hunttech_FileType.browse" icon="FILE_ARCHIVE_O"/>
