@@ -439,7 +439,7 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         if (candidate != null && candidate.getFileImageFace() != null) {
             logoPic.setSource(FileDescriptorResource.class).setFileDescriptor(candidate.getFileImageFace());
         } else {
-            logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            logoPic.setSource(ThemeResource.class).setPath("icons/no-candidate.png");
         }
 
         // Заголовки (word-break для длинных ФИО/должности/города)
@@ -521,7 +521,7 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
     private void clearSidebarDetails() {
         openEditCardBtn.setEnabled(false);
         openCandidateCardBtn.setEnabled(false);
-        logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        logoPic.setSource(ThemeResource.class).setPath("icons/no-candidate.png");
         detailTitle.setValue("Выберите резюме");
         detailSubtitle.setValue("-");
         detailLocation.setValue("-");

@@ -73,7 +73,7 @@
                         <!-- Шапка профиля кандидата / взаимодействия -->
                         <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
                             <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
-                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="FILL"/>
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-candidate.png" scaleMode="SCALE_TO_FIT"/>
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
                                 <label id="detailTitle" value="Выберите запись" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER" htmlEnabled="true"/>
                                 <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold" align="MIDDLE_CENTER" htmlEnabled="true"/>
