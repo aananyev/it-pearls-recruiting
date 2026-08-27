@@ -276,22 +276,22 @@ public class CountryReestrBrowse extends StandardLookup<Country> {
             logoPic.applyFallback();
         }
 
-        detailTitle.setValue(html(country.getCountryRuName() != null ? country.getCountryRuName() : "Без названия"));
-        detailSubtitle.setValue(html(country.getCountryEngName() != null ? country.getCountryEngName() : "-"));
-        detailLocation.setValue(html(country.getCapital() != null ? "Столица: " + country.getCapital() : "-"));
+        detailTitle.setValue(country.getCountryRuName() != null ? country.getCountryRuName() : "Без названия");
+        detailSubtitle.setValue(country.getCountryEngName() != null ? country.getCountryEngName() : "-");
+        detailLocation.setValue(country.getCapital() != null ? "Столица: " + country.getCapital() : "-");
 
-        detailShortName.setValue(html(nvl(country.getCountryShortName())));
-        detailAlpha3Code.setValue(html(nvl(country.getAlpha3Code())));
-        detailNumericCode.setValue(html(nvl(country.getNumericCode())));
-        detailCapital.setValue(html(nvl(country.getCapital())));
-        detailCurrencyCode.setValue(html(nvl(country.getCurrencyCode())));
-        detailPhoneCode.setValue(html(country.getPhoneCode() != null ? String.valueOf(country.getPhoneCode()) : "-"));
-        detailEngName.setValue(html(nvl(country.getCountryEngName())));
+        detailShortName.setValue(nvl(country.getCountryShortName()));
+        detailAlpha3Code.setValue(nvl(country.getAlpha3Code()));
+        detailNumericCode.setValue(nvl(country.getNumericCode()));
+        detailCapital.setValue(nvl(country.getCapital()));
+        detailCurrencyCode.setValue(nvl(country.getCurrencyCode()));
+        detailPhoneCode.setValue(country.getPhoneCode() != null ? String.valueOf(country.getPhoneCode()) : "-");
+        detailEngName.setValue(nvl(country.getCountryEngName()));
 
         int regionsCount = country.getId() != null ? regionsCountCache.getOrDefault(country.getId(), 0) : 0;
-        detailRegionsCount.setValue(html(String.valueOf(regionsCount)));
+        detailRegionsCount.setValue(String.valueOf(regionsCount));
         int citiesCount = country.getId() != null ? citiesCountCache.getOrDefault(country.getId(), 0) : 0;
-        detailCitiesCount.setValue(html(String.valueOf(citiesCount)));
+        detailCitiesCount.setValue(String.valueOf(citiesCount));
 
         // Флаг в секции «ФЛАГ СТРАНЫ»
         if (country.getFileFlag() != null) {
@@ -305,22 +305,18 @@ public class CountryReestrBrowse extends StandardLookup<Country> {
         openEditCardBtn.setEnabled(false);
         logoPic.applyFallback();
         detailFlagImage.applyFallback();
-        detailTitle.setValue(html("Выберите страну"));
-        detailSubtitle.setValue(html("-"));
-        detailLocation.setValue(html("-"));
-        detailShortName.setValue(html("-"));
-        detailAlpha3Code.setValue(html("-"));
-        detailNumericCode.setValue(html("-"));
-        detailCapital.setValue(html("-"));
-        detailCurrencyCode.setValue(html("-"));
-        detailPhoneCode.setValue(html("-"));
-        detailEngName.setValue(html("-"));
-        detailRegionsCount.setValue(html("0"));
-        detailCitiesCount.setValue(html("0"));
-    }
-
-    private String html(String value) {
-        return "<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + value + "</div>";
+        detailTitle.setValue("Выберите страну");
+        detailSubtitle.setValue("-");
+        detailLocation.setValue("-");
+        detailShortName.setValue("-");
+        detailAlpha3Code.setValue("-");
+        detailNumericCode.setValue("-");
+        detailCapital.setValue("-");
+        detailCurrencyCode.setValue("-");
+        detailPhoneCode.setValue("-");
+        detailEngName.setValue("-");
+        detailRegionsCount.setValue("0");
+        detailCitiesCount.setValue("0");
     }
 
     private String nvl(String value) {

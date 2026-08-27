@@ -154,22 +154,22 @@ public class CityReestrBrowse extends StandardLookup<City> {
             logoPic.applyFallback();
         }
 
-        detailTitle.setValue(html(city.getCityRuName() != null ? city.getCityRuName() : "Без названия"));
-        detailSubtitle.setValue(html(city.getCityEngName() != null ? city.getCityEngName() : "-"));
-        detailLocation.setValue(html(city.getCityRegion() != null && city.getCityRegion().getRegionRuName() != null
-                ? "Регион: " + city.getCityRegion().getRegionRuName() : "-"));
+        detailTitle.setValue(city.getCityRuName() != null ? city.getCityRuName() : "Без названия");
+        detailSubtitle.setValue(city.getCityEngName() != null ? city.getCityEngName() : "-");
+        detailLocation.setValue(city.getCityRegion() != null && city.getCityRegion().getRegionRuName() != null
+                ? "Регион: " + city.getCityRegion().getRegionRuName() : "-");
 
-        detailRegion.setValue(html(city.getCityRegion() != null && city.getCityRegion().getRegionRuName() != null
-                ? city.getCityRegion().getRegionRuName() : "-"));
-        detailCountry.setValue(html(city.getCityRegion() != null && city.getCityRegion().getRegionCountry() != null
+        detailRegion.setValue(city.getCityRegion() != null && city.getCityRegion().getRegionRuName() != null
+                ? city.getCityRegion().getRegionRuName() : "-");
+        detailCountry.setValue(city.getCityRegion() != null && city.getCityRegion().getRegionCountry() != null
                 && city.getCityRegion().getRegionCountry().getCountryRuName() != null
-                ? city.getCityRegion().getRegionCountry().getCountryRuName() : "-"));
-        detailPhoneCode.setValue(html(nvl(city.getCityPhoneCode())));
-        detailPostalCode.setValue(html(nvl(city.getPostalCode())));
-        detailPopulation.setValue(html(city.getPopulation() != null ? String.valueOf(city.getPopulation()) : "-"));
-        detailTimeZone.setValue(html(nvl(city.getTimeZone())));
-        detailCoordinates.setValue(html(city.getLatitude() != null && city.getLongitude() != null
-                ? String.format("%.4f, %.4f", city.getLatitude(), city.getLongitude()) : "-"));
+                ? city.getCityRegion().getRegionCountry().getCountryRuName() : "-");
+        detailPhoneCode.setValue(nvl(city.getCityPhoneCode()));
+        detailPostalCode.setValue(nvl(city.getPostalCode()));
+        detailPopulation.setValue(city.getPopulation() != null ? String.valueOf(city.getPopulation()) : "-");
+        detailTimeZone.setValue(nvl(city.getTimeZone()));
+        detailCoordinates.setValue(city.getLatitude() != null && city.getLongitude() != null
+                ? String.format("%.4f, %.4f", city.getLatitude(), city.getLongitude()) : "-");
 
         // Герб в секции «ГЕРБ ГОРОДА»
         if (city.getFileCityEmblem() != null) {
@@ -183,20 +183,16 @@ public class CityReestrBrowse extends StandardLookup<City> {
         openEditCardBtn.setEnabled(false);
         logoPic.applyFallback();
         detailEmblemImage.applyFallback();
-        detailTitle.setValue(html("Выберите город"));
-        detailSubtitle.setValue(html("-"));
-        detailLocation.setValue(html("-"));
-        detailRegion.setValue(html("-"));
-        detailCountry.setValue(html("-"));
-        detailPhoneCode.setValue(html("-"));
-        detailPostalCode.setValue(html("-"));
-        detailPopulation.setValue(html("-"));
-        detailTimeZone.setValue(html("-"));
-        detailCoordinates.setValue(html("-"));
-    }
-
-    private String html(String value) {
-        return "<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + value + "</div>";
+        detailTitle.setValue("Выберите город");
+        detailSubtitle.setValue("-");
+        detailLocation.setValue("-");
+        detailRegion.setValue("-");
+        detailCountry.setValue("-");
+        detailPhoneCode.setValue("-");
+        detailPostalCode.setValue("-");
+        detailPopulation.setValue("-");
+        detailTimeZone.setValue("-");
+        detailCoordinates.setValue("-");
     }
 
     private String nvl(String value) {
