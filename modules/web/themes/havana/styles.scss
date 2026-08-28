@@ -31,6 +31,7 @@
 @import "com.company.hunttech/iteraction-editor";
 @import "com.company.hunttech/project-editor";
 @import "com.company.hunttech/company-departament-editor";
+@import "com.company.hunttech/company-group-editor";
 @import "com.company.hunttech/company-editor";
 @import "com.company.hunttech/ai-dashboard-styles";
 @import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
@@ -71,6 +72,7 @@
   @include iteraction-editor-theme;
   @include project-editor-theme;
 @include company-departament-editor-theme;
+  @include company-group-editor-theme;
 @include company-editor-theme;
   @include ai-dashboard-styles;
 }

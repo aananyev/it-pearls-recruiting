@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Окно редактирования группы компаний (hunttech_CompanyGroup.edit): полноэкранный
+     модальный редактор по стандарту Edit-форм — sidebar (статичная иллюстрация +
+     идентификация + label-навигация «Разделы») и workspace (toolbar + карточки +
+     footer-действия). -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
-        messagesPack="com.company.hunttech.web.screens.companygroup" icon="BUILDING_O">
+        focusComponent="companyRuGroupNameField"
+        messagesPack="com.company.hunttech.web.screens.companygroup"
+        icon="BUILDING_O">
+    <!-- Контейнеры данных формы: экземпляр группы компаний с companyGroup-edit-view. -->
     <data>
         <instance id="companyGroupDc"
                   class="com.company.hunttech.entity.CompanyGroup"
@@ -10,18 +16,189 @@
             <loader/>
         </instance>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="companyGroupDc">
-            <column width="250px">
-                <textField id="companyRuGroupNameField" property="companyRuGroupName"
-                           caption="mainMsg://msgCompanyGroup"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+    <!-- Полноэкранный модальный режим диалога (контракт §5.3). -->
+    <dialogMode height="100%"
+                width="100%"
+                modal="true"/>
+    <!-- Корневой layout: локальный namespace company-group-editor + общий контракт edit-screen-layout;
+         слева sidebar 270px, справа workspace (toolbar + карточки + footer). -->
+    <layout stylename="company-group-editor"
+            expand="companyGroupEditorMainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <hbox id="companyGroupEditorMainLayout"
+              stylename="edit-screen-layout"
+              width="100%"
+              height="100%"
+              expand="companyGroupEditorWorkspace"
+              spacing="false">
+            <!-- Sidebar группы компаний: визуальный блок (логотип), идентификация,
+                 label-навигация «Разделы», spacer и подсказка. -->
+            <vbox id="companyGroupEditorSidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="companyGroupSidebarSpacer">
+                <!-- Визуальный блок: круглая иллюстрация группы компаний 176×176. -->
+                <vbox id="companyGroupEditorSidebarVisual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <vbox id="companyGroupLogoPicBox"
+                          spacing="false"
+                          align="MIDDLE_CENTER">
+                        <ovalImage id="companyGroupLogoImage"
+                                   width="176px"
+                                   height="176px"
+                                   ovalWidth="176px"
+                                   ovalHeight="176px"
+                                   visible="true"
+                                   align="MIDDLE_CENTER"
+                                   stylename="dictionary-logo-image"
+                                   scaleMode="SCALE_DOWN">
+                            <!-- Тематическая иконка справочника группы компаний. -->
+                            <theme path="icons/dictionaries/company-group.png"/>
+                        </ovalImage>
+                    </vbox>
+                </vbox>
+                <!-- Идентификация: наименование группы компаний по центру. -->
+                <vbox id="companyGroupEditorSidebarIdentity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="false"
+                      align="MIDDLE_CENTER">
+                    <label id="companyGroupSidebarTitle"
+                           dataContainer="companyGroupDc"
+                           property="companyRuGroupName"
+                           stylename="edit-sidebar-title"
+                           width="100%"/>
+                </vbox>
+                <!-- Навигация по разделам формы. -->
+                <vbox id="companyGroupNavigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <!-- Заголовок навигации «Разделы». -->
+                    <label value="msg://msgNavTitle"
+                           stylename="label-nav-title company-group-navigation-title"
+                           width="100%"/>
+                    <!-- Кнопка навигации к основному разделу. -->
+                    <button id="companyGroupMainNav"
+                            caption="msg://msgNavMain"
+                            stylename="borderless label-nav-item label-nav-item-active"
+                            width="100%"/>
+                </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
+                <vbox id="companyGroupSidebarSpacer"
+                      stylename="edit-sidebar-spacer"
+                      width="100%"
+                      height="100%"/>
+                <!-- Подсказка внизу sidebar. -->
+                <label value="msg://msgSidebarHint"
+                       stylename="edit-sidebar-hint"
+                       width="100%"/>
+            </vbox>
+            <!-- Правая рабочая область: toolbar, карточки полей и footer-действия. -->
+            <vbox id="companyGroupEditorWorkspace"
+                  stylename="edit-workspace"
+                  width="100%"
+                  height="100%"
+                  spacing="false"
+                  expand="companyGroupWorkspaceScroll">
+                <!-- Верхний тулбар: заголовок и краткое описание формы. -->
+                <hbox id="companyGroupToolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_LEFT">
+                    <vbox id="companyGroupToolbarText"
+                          width="100%"
+                          spacing="false">
+                        <!-- Заголовок тулбара. -->
+                        <label value="msg://editorCaption"
+                               stylename="edit-toolbar-title"/>
+                        <!-- Описание тулбара. -->
+                        <label value="msg://msgToolbarDescription"
+                               stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Прокручиваемая область с карточками полей. -->
+                <scrollBox id="companyGroupWorkspaceScroll"
+                           orientation="vertical"
+                           width="100%"
+                           height="100%"
+                           stylename="edit-workspace-scroll">
+                    <!-- Внутренний контейнер карточек формы. -->
+                    <vbox id="companyGroupWorkspaceContent"
+                          width="100%"
+                          spacing="true"
+                          stylename="edit-workspace-content">
+                        <!-- Основная карточка: наименование группы компаний. -->
+                        <vbox id="companyGroupMainCard"
+                              stylename="edit-card"
+                              width="100%"
+                              spacing="true">
+                            <!-- Заголовок карточки. -->
+                            <hbox id="companyGroupMainCardHeader"
+                                  width="100%"
+                                  align="MIDDLE_LEFT"
+                                  stylename="edit-card-heading">
+                                <label value="msg://msgMainCardTitle"
+                                       stylename="edit-card-title"/>
+                            </hbox>
+                            <!-- Поле ввода наименования группы компаний. -->
+                            <hbox id="companyGroupNameRow"
+                                  width="100%"
+                                  spacing="true"
+                                  align="MIDDLE_LEFT"
+                                  expand="companyRuGroupNameField"
+                                  stylename="edit-form-row">
+                                <label value="msg://companyRuGroupName"
+                                       width="160px"
+                                       stylename="small"/>
+                                <textField id="companyRuGroupNameField"
+                                           dataContainer="companyGroupDc"
+                                           property="companyRuGroupName"
+                                           width="100%"
+                                           stylename="edit-form-control"
+                                           required="true"/>
+                            </hbox>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+                <!-- Нижняя панель действий (footer): Сохранить и закрыть (primary), Отмена (secondary). -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      spacing="false"
+                      align="MIDDLE_RIGHT"
+                      expand="bottomActionsSpacer">
+                    <!-- Распорка, прижимающая кнопки действий к правому краю. -->
+                    <vbox id="bottomActionsSpacer"
+                          width="100%"
+                          height="100%"/>
+                    <!-- Группа кнопок действий. -->
+                    <hbox id="bottomActionsGroup"
+                          spacing="true"
+                          align="MIDDLE_RIGHT">
+                        <!-- Основная кнопка сохранения. -->
+                        <button id="commitAndCloseBtn"
+                                action="windowCommitAndClose"
+                                caption="msg://commitAndClose"
+                                icon="CHECK"
+                                stylename="primary"/>
+                        <!-- Кнопка закрытия/отмены. -->
+                        <button id="closeBtn"
+                                action="windowClose"
+                                caption="msg://close"
+                                icon="BAN"
+                                stylename="secondary"/>
+                    </hbox>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
