@@ -255,7 +255,7 @@
                                  dataContainer="jobCandidatesDc"
                                  stylename="borderless grid candidate-browse-grid">
                         <actions>
-                            <action id="edit" type="edit"/>
+                            <action id="edit" type="edit" openMode="NEW_TAB"/>
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <!-- Колонки таблицы с привязкой к свойствам сущности для стандартной сортировки -->

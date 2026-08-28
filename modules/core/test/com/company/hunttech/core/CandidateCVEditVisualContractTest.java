@@ -53,7 +53,7 @@ public class CandidateCVEditVisualContractTest {
          */
         assertEquals("59a4f65ab467b8e2b0a636d17d476644d4395e2e",
                 gitBlobSha1(readProjectBytes(ENTITY)));
-        assertEquals("4508385c05dd65631f762fbd023ea6c648dbb6d0",
+        assertEquals("fa561a050e4f8df7cca89ad793d46d62302bd4a2",
                 gitBlobSha1(readProjectBytes(VIEWS)));
     }
 

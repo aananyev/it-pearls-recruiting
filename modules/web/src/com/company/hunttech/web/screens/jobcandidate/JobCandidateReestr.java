@@ -1254,7 +1254,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     public void onCreateCandidateBtnClick(Button.ClickEvent event) {
         screenBuilders.editor(candidatesTable)
                 .newEntity()
-                .withOpenMode(OpenMode.DIALOG)
+                .withOpenMode(OpenMode.NEW_TAB)
                 .show();
     }
 
@@ -1289,13 +1289,18 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         jobCandidatesDl.load();
     }
 
+    @Subscribe("actionsWithCandidateButton.editCandidateAction")
+    public void onActionsWithCandidateButtonEditCandidateAction(Action.ActionPerformedEvent event) {
+        onEditCandidateBtnClick(null);
+    }
+
     @Subscribe("editCandidateBtn")
     public void onEditCandidateBtnClick(Button.ClickEvent event) {
         JobCandidate selected = candidatesTable.getSingleSelected();
         if (selected != null) {
             screenBuilders.editor(candidatesTable)
                     .editEntity(selected)
-                    .withOpenMode(OpenMode.DIALOG)
+                    .withOpenMode(OpenMode.NEW_TAB)
                     .show();
         }
     }

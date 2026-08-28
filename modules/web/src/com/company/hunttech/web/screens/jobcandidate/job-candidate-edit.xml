@@ -697,12 +697,21 @@
                     <tab id="tabMain"
                          caption="msg://msgTabMain"
                          spacing="true"
-                         margin="false">
-                        <!-- Аккордеон-секция вкладки «Основное» (заголовок + контент). -->
-                        <vbox id="jobCandidateMainSection"
-                              width="100%"
-                              spacing="true"
-                              stylename="job-candidate-accordion-section job-candidate-accordion-open edit-accordion-section">
+                         margin="false"
+                         expand="mainTabScrollBox">
+                        <!-- Прокручиваемый контейнер вкладки: обеспечивает доступ ко всем карточкам данных (персональные и профессиональные). -->
+                        <scrollBox id="mainTabScrollBox"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   width="100%"
+                                   height="100%"
+                                   spacing="false"
+                                   stylename="edit-workspace-scroll">
+                            <!-- Аккордеон-секция вкладки «Основное» (заголовок + контент). -->
+                            <vbox id="jobCandidateMainSection"
+                                  width="100%"
+                                  spacing="true"
+                                  stylename="job-candidate-accordion-section job-candidate-accordion-open edit-accordion-section">
 
                             <!-- Заголовок аккордеона с названием раздела. -->
                             <hbox id="jobCandidateMainSectionHeader"
@@ -962,7 +971,7 @@
                                     </grid>
                                 </vbox>
                             </vbox>
-                        </vbox>
+                        </scrollBox>
                     </tab>
 
                     <!-- TAB: Контакты -->
