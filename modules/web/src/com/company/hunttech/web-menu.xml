@@ -55,6 +55,7 @@
     <menu id="application-hunting" icon="SEARCH" insertBefore="application-hadbook">
         <item screen="hunttech_OpenPosition.browse" icon="BRIEFCASE"/>
         <item screen="hunttech_OpenPositionReestr.browse" caption="Реестр открытых вакансий" icon="TABLE"/>
+        <item screen="hunttech_PositionReestr.browse" caption="Реестр должностей" icon="ID_BADGE"/>
         <item screen="hunttech_JobCandidate.browse" icon="USER"/>
         <item screen="hunttech_JobCandidateReestr.browse" caption="Реестр кандидатов" icon="USERS"/>
         <item screen="hunttech_CandidateCV.browse" icon="FILE_TEXT_O"/>
@@ -90,7 +91,6 @@
         <item screen="hunttech_CityReestr.browse" caption="Реестр городов" icon="BUILDING_O"/>
         <item screen="hunttech_Ownershup.browse" icon="TAGS"/>
         <item screen="hunttech_Position.browse" icon="ID_CARD_O"/>
-        <item screen="hunttech_PositionReestr.browse" caption="Реестр должностей" icon="ID_BADGE"/>
         <item screen="hunttech_FileType.browse" icon="FILE_ARCHIVE_O"/>
         <item screen="hunttech_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="SHARE_ALT"/>

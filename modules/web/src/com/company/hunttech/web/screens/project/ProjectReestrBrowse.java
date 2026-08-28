@@ -430,7 +430,8 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
             descriptionCard.setVisible(true);
             descriptionCardTitle.setValue(SHORT_DESCRIPTION_SECTION_TITLE);
             detailShortDescription.setVisible(true);
-            detailShortDescription.setValue(shortDescription);
+            String plainShort = Jsoup.parse(shortDescription).text();
+            detailShortDescription.setValue(plainShort);
             detailDescription.setVisible(false);
         } else if (hasDescription) {
             descriptionCard.setVisible(true);
@@ -520,29 +521,29 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         }
 
         // Заголовки
-        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (project.getProjectName() != null ? project.getProjectName() : "Без названия") + "</div>");
+        detailTitle.setValue(project.getProjectName() != null ? project.getProjectName() : "Без названия");
 
         if (project.getProjectDepartment() != null) {
             String deptStr = project.getProjectDepartment().getDepartamentRuName();
             if (project.getProjectDepartment().getCompanyName() != null) {
                 deptStr = project.getProjectDepartment().getCompanyName().getComanyName() + " (" + deptStr + ")";
             }
-            detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + deptStr + "</div>");
+            detailSubtitle.setValue(deptStr);
         } else {
-            detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+            detailSubtitle.setValue("-");
         }
 
         if (project.getProjectOwner() != null) {
-            detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Куратор: " + project.getProjectOwner().getInstanceName() + "</div>");
+            detailLocation.setValue("Куратор: " + project.getProjectOwner().getInstanceName());
         } else {
-            detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Куратор не назначен</div>");
+            detailLocation.setValue("Куратор не назначен");
         }
 
         // Сроки и статус
         if (Boolean.TRUE.equals(project.getProjectIsClosed())) {
-            detailStatus.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыт</span>");
+            detailStatus.setValue("Закрыт");
         } else {
-            detailStatus.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыт</span>");
+            detailStatus.setValue("Открыт");
         }
 
         detailStartDate.setValue(project.getStartProjectDate() != null ? DATE_FORMAT.format(project.getStartProjectDate()) : "Не указана");
@@ -554,9 +555,9 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         // Куратор
         Person curator = project.getProjectOwner();
         if (curator != null) {
-            detailCuratorName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + curator.getInstanceName() + "</div>");
-            detailCuratorPosition.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (curator.getPersonPosition() != null ? curator.getPersonPosition().getPositionRuName() : "Должность не указана") + "</div>");
-            detailCuratorDept.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (curator.getCompanyDepartment() != null ? curator.getCompanyDepartment().getDepartamentRuName() : "Отдел не указан") + "</div>");
+            detailCuratorName.setValue(curator.getInstanceName());
+            detailCuratorPosition.setValue(curator.getPersonPosition() != null ? curator.getPersonPosition().getPositionRuName() : "Должность не указана");
+            detailCuratorDept.setValue(curator.getCompanyDepartment() != null ? curator.getCompanyDepartment().getDepartamentRuName() : "Отдел не указан");
 
             StringBuilder contacts = new StringBuilder();
             String ph = curator.getMobPhone() != null ? curator.getMobPhone() : curator.getPhone();
@@ -565,12 +566,12 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
                 if (contacts.length() > 0) contacts.append(" | ");
                 contacts.append("✉ ").append(curator.getEmail());
             }
-            detailCuratorContacts.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (contacts.length() > 0 ? contacts.toString() : "-") + "</div>");
+            detailCuratorContacts.setValue(contacts.length() > 0 ? contacts.toString() : "-");
         } else {
-            detailCuratorName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Куратор не назначен</div>");
-            detailCuratorPosition.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-            detailCuratorDept.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-            detailCuratorContacts.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+            detailCuratorName.setValue("Куратор не назначен");
+            detailCuratorPosition.setValue("-");
+            detailCuratorDept.setValue("-");
+            detailCuratorContacts.setValue("-");
         }
 
         // Описание проекта / краткое описание (AI) — блок по алгоритму владельца
@@ -584,17 +585,17 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         openEditCardBtn.setEnabled(false);
         createPositionForProjectBtn.setEnabled(false);
         logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Выберите проект</div>");
-        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailStatus.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailStartDate.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailEndDate.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailOpenPositionsCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>0</div>");
-        detailCuratorName.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailCuratorPosition.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailCuratorDept.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailCuratorContacts.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+        detailTitle.setValue("Выберите проект");
+        detailSubtitle.setValue("-");
+        detailLocation.setValue("-");
+        detailStatus.setValue("-");
+        detailStartDate.setValue("-");
+        detailEndDate.setValue("-");
+        detailOpenPositionsCount.setValue("0");
+        detailCuratorName.setValue("-");
+        detailCuratorPosition.setValue("-");
+        detailCuratorDept.setValue("-");
+        detailCuratorContacts.setValue("-");
         // Блок описания: при отсутствии выбранного проекта секция скрыта целиком
         descriptionCard.setVisible(false);
         descriptionCardTitle.setValue(DESCRIPTION_SECTION_TITLE);
