@@ -77,7 +77,7 @@
                             <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
-                                    <row><label value="Статус проекта:" stylename="bold"/><label id="detailStatus" htmlEnabled="true" value="-"/></row>
+                                    <row><label value="Статус проекта:" stylename="bold"/><label id="detailStatus" value="-"/></row>
                                     <row><label value="Дата старта:" stylename="bold"/><label id="detailStartDate" value="-"/></row>
                                     <row><label value="Дата окончания:" stylename="bold"/><label id="detailEndDate" value="-"/></row>
                                     <row><label value="Вакансий в работе:" stylename="bold"/><label id="detailOpenPositionsCount" value="0" stylename="bold" css="color: #2563eb;"/></row>
@@ -103,8 +103,8 @@
                              компонентов управляются контроллером ProjectReestrBrowse. -->
                         <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label id="descriptionCardTitle" value="ОПИСАНИЕ ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
-                            <label id="detailShortDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
-                            <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailShortDescription" width="100%" stylename="edit-help"/>
+                            <label id="detailDescription" width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>
                 </scrollBox>
