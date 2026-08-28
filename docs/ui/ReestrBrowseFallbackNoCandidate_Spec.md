@@ -1,4 +1,4 @@
-# ReestrBrowse: sidebar-аватар кандидата (fallback `icons/no-candidate.png`, `SCALE_TO_FIT`)
+# ReestrBrowse: sidebar-аватар кандидата (fallback `icons/no-candidate.png`, `SCALE_DOWN`)
 
 > Контракт sidebar-изображения реестров **взаимодействий** и **резюме**: `IteractionListReestrBrowse` (`hunttech_IteractionListReestr.browse`) и `CandidateCVReestrBrowse` (`hunttech_CandidateCVReestr.browse`).
 > Компонент: [OvaFallbackImage](../screens/components/OvaFallbackImage.md). Образцы реестров: [ProjectReestrBrowse_Spec.md](ProjectReestrBrowse_Spec.md), [OpenPositionReestrBrowse_Spec.md](OpenPositionReestrBrowse_Spec.md).
@@ -7,7 +7,7 @@
 
 ### Назначение и Бизнес-смысл (What & Why)
 
-Обе Reestr-формы показывают в левом sidebar (Split-View, 312px) круглый аватар кандидата 120×120px. Если у кандидата нет фотографии (`fileImageFace == null`) или файл недоступен, вместо логотипа компании (`icons/no-company.png`) должен показываться **силуэт человека** (`icons/no-candidate.png`) — аватар по смыслу относится к кандидату, а не к компании/проекту. Изображение масштабируется по размеру элемента (`SCALE_TO_FIT`), а не по исходному размеру файла.
+Обе Reestr-формы показывают в левом sidebar (Split-View, 312px) круглый аватар кандидата 120×120px. Если у кандидата нет фотографии (`fileImageFace == null`) или файл недоступен, вместо логотипа компании (`icons/no-company.png`) должен показываться **силуэт человека** (`icons/no-candidate.png`) — аватар по смыслу относится к кандидату, а не к компании/проекту. Изображение масштабируется по размеру элемента (`SCALE_DOWN`), а не по исходному размеру файла.
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
@@ -37,7 +37,7 @@
 ```xml
 <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
                   align="TOP_CENTER" stylename="job-candidate-avatar"
-                  fallbackThemePath="icons/no-candidate.png" scaleMode="SCALE_TO_FIT"/>
+                  fallbackThemePath="icons/no-candidate.png" scaleMode="SCALE_DOWN"/>
 ```
 
 | Атрибут | Значение | Комментарий |
@@ -47,7 +47,7 @@
 | `ovalWidth` / `ovalHeight` | `120px` | круглая геометрия (`ht-oval-image`, `border-radius: 50%`) |
 | `stylename` | `job-candidate-avatar` | стиль аватара кандидата |
 | `fallbackThemePath` | `icons/no-candidate.png` | **замена `icons/no-company.png`** — силуэт человека, а не логотип компании |
-| `scaleMode` | `SCALE_TO_FIT` | **замена `SCALE_DOWN`** — масштабирование по размеру элемента 120×120px |
+|| `scaleMode` | `SCALE_DOWN` | масштабирование по размеру элемента 120×120px (валидное значение enum Image.ScaleMode в CUBA 7.3) |
 
 `ovaFallbackImage` объявлен **без** `dataContainer`/`property` (статичный fallback-контракт): при загрузке XML применяется `fallbackThemePath`, далее источник управляет Java-контроллер.
 
@@ -76,7 +76,7 @@
 
 1. Открыть реестр взаимодействий / резюме без выбранной записи → в sidebar круглая заглушка `no-candidate.png` (силуэт человека), 120×120, без искажений.
 2. Выбрать кандидата с фото → отображается фото (`FileDescriptorResource`).
-3. Выбрать кандидата без фото → заглушка `no-candidate.png` (`SCALE_TO_FIT`).
+3. Выбрать кандидата без фото → заглушка `no-candidate.png` (`SCALE_DOWN`).
 4. Файл фото недоступен в FileStorage → fallback `no-candidate.png`, экран не падает (механика `OvaFallbackImage`).
 5. Проверка во всех 7 темах.
 
@@ -84,4 +84,4 @@
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-08-27 | Fallback sidebar-аватара `logoPic` реестров `IteractionListReestrBrowse` / `CandidateCVReestrBrowse` переведён с `icons/no-company.png` на `icons/no-candidate.png`; `scaleMode` изменён на `SCALE_TO_FIT` (120×120px). Java-контроллеры (`updateSidebarDetails`/`clearSidebarDetails`) ставят `ThemeResource icons/no-candidate.png`. Новый ресурс `icons/no-candidate.png` (PNG-силуэт человека) добавлен во все 7 тем. Первичная публикация контракта. |
+| 2026-08-28 | Fallback sidebar-аватара `logoPic` реестров `IteractionListReestrBrowse` / `CandidateCVReestrBrowse` переведён с `icons/no-company.png` на `icons/no-candidate.png`; `scaleMode` изменён на `SCALE_DOWN` (валидное значение enum Image.ScaleMode в CUBA 7.3, 120×120px). Java-контроллеры (`updateSidebarDetails`/`clearSidebarDetails`) ставят `ThemeResource icons/no-candidate.png`. Новый ресурс `icons/no-candidate.png` (PNG-силуэт человека) добавлен во все 7 тем. |

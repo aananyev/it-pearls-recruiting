@@ -94,7 +94,7 @@ Living-документация экранов, окон, фрагментов �
 | Форма | Controller | Документ |
 |-------|------------|----------|
 | Edit | `hunttech_CandidateCV.edit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) |
-| Browse (реестр) | `hunttech_CandidateCVReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](ReestrBrowseFallbackNoCandidate_Spec.md) | Реестр резюме Split-View: таблица + профильный сайдбар (312px), аватар кандидата `logoPic` 120×120 с fallback `icons/no-candidate.png` (`SCALE_TO_FIT`) |
+| Browse (реестр) | `hunttech_CandidateCVReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](ReestrBrowseFallbackNoCandidate_Spec.md) | Реестр резюме Split-View: таблица + профильный сайдбар (312px), аватар кандидата `logoPic` 120×120 с fallback `icons/no-candidate.png` (`SCALE_DOWN`) |
 
 ### OpenPosition
 
@@ -113,7 +113,7 @@ Living-документация экранов, окон, фрагментов �
 | Edit | `itpearls_IteractionList.edit` | [itpearls_IteractionList.edit_Spec.md](itpearls_IteractionList.edit_Spec.md) · [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) |
 | Simple browse | `itpearls_IteractionListSimple.browse` | [itpearls_IteractionListSimple.browse_Spec.md](itpearls_IteractionListSimple.browse_Spec.md) |
 | Fragment (jobcandidate) | `itpearls_IteractionListBrowse` | [itpearls_IteractionListBrowse_Spec.md](itpearls_IteractionListBrowse_Spec.md) |
-| Browse (реестр) | `hunttech_IteractionListReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](ReestrBrowseFallbackNoCandidate_Spec.md) | Реестр взаимодействий Split-View: таблица + профильный сайдбар (312px), аватар кандидата `logoPic` 120×120 с fallback `icons/no-candidate.png` (`SCALE_TO_FIT`) |
+| Browse (реестр) | `hunttech_IteractionListReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](ReestrBrowseFallbackNoCandidate_Spec.md) | Реестр взаимодействий Split-View: таблица + профильный сайдбар (312px), аватар кандидата `logoPic` 120×120 с fallback `icons/no-candidate.png` (`SCALE_DOWN`) |
 
 ### Iteraction
 
@@ -260,7 +260,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-08-27 | Добавлен контракт sidebar-fallback реестров `hunttech_IteractionListReestr.browse` и `hunttech_CandidateCVReestr.browse`: аватар `logoPic` 120×120 (ovaFallbackImage, oval) переведён с `icons/no-company.png` на `icons/no-candidate.png`, `scaleMode=SCALE_TO_FIT`; контроллеры в `updateSidebarDetails`/`clearSidebarDetails` ставят `ThemeResource icons/no-candidate.png`; ресурс добавлен во все 7 тем |
+| 2026-08-28 | Исправлен `scaleMode` с `SCALE_TO_FIT` на `SCALE_DOWN` (валидное значение enum Image.ScaleMode в CUBA 7.3) в реестрах `hunttech_IteractionListReestr.browse` и `hunttech_CandidateCVReestr.browse` |
 | 2026-08-25 | В каталог добавлена спецификация реестра проектов `hunttech_ProjectReestr.browse`: Split-View таблица + профильный сайдбар (312px), фильтры реестра, ИТ-генерация краткого описания, блок описания по алгоритму владельца |
 | 2026-08-20 | Редизайн выпадающих меню `PopupButton` («Действия», «Метки») в стиле Halo и реестре кандидатов: парящие пункты, карточка с тенью `0 10px 25px`, синхронизация по 7 темам |
 | 2026-08-18 | В каталог добавлен реестр кандидатов `hunttech_JobCandidateReestr.browse`: Split-View таблица + сайдбар, метки пользователя в колонке «Кандидат» справа |

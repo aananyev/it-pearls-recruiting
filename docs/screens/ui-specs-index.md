@@ -203,7 +203,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-08-27 | В каталог добавлены реестры `hunttech_IteractionListReestr.browse` (взаимодействия) и `hunttech_CandidateCVReestr.browse` (резюме): контракт sidebar-аватара `logoPic` 120×120 — fallback `icons/no-candidate.png`, `SCALE_TO_FIT` ([ReestrBrowseFallbackNoCandidate_Spec.md](../ui/ReestrBrowseFallbackNoCandidate_Spec.md)) |
+| 2026-08-28 | В каталог добавлены реестры `hunttech_IteractionListReestr.browse` (взаимодействия) и `hunttech_CandidateCVReestr.browse` (резюме): контракт sidebar-аватара `logoPic` 120×120 — fallback `icons/no-candidate.png`, `SCALE_DOWN` ([ReestrBrowseFallbackNoCandidate_Spec.md](../ui/ReestrBrowseFallbackNoCandidate_Spec.md)) |
 | 2026-07-05 | Добавлены подтемы hunttech-modern-light и hunttech-modern-dark в стиле Jmix Default/Dark, настроена регистрация в web-app.properties (cuba.theme.hover.modes) |
 | 2026-06-29 | Документация кастомного компонента FallbackImage |
 | 2026-06-27 | AI-администрирование: VacancyPromptTemplate browse/edit, UserAiConfiguration browse, меню aiAdministration |
