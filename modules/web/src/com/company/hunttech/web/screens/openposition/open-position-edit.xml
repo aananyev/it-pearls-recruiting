@@ -276,11 +276,16 @@
                visible="false"/>
     <!-- Двухпанельная композиция формы: постоянная левая панель контекста и правая рабочая область. -->
     <vbox id="openPositionSidebar"
-          width="270px"
+          width="312px"
           height="100%"
-          spacing="true"
-          expand="openPositionSidebarSpacer"
+          spacing="false"
           stylename="edit-sidebar">
+        <!-- Скроллер для комфортного просмотра всех карточек и навигации в сайдбаре -->
+        <scrollBox id="openPositionSidebarScroll"
+                   width="100%"
+                   height="100%"
+                   orientation="vertical">
+            <vbox width="100%" spacing="true">
         <!-- Визуальный образ позиции: логотип проекта и аватар владельца одинакового размера рядом. -->
         <vbox id="openPositionSidebarVisual"
               width="100%"
@@ -721,9 +726,21 @@
                    stylename="candidate-skills-chips"/>
             <!-- Скрытые элементы обратной совместимости -->
             <label id="citiesLabel" visible="false"/>
-            <label id="contextGradeLabel" visible="false"/>
-            <label id="contextRegistrationLabel" visible="false"/>
-            <label id="contextStatusLabel" visible="false"/>
+            <label id="contextGradeLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"
+                   visible="false"/>
+            <label id="contextRegistrationLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"
+                   visible="false"/>
+            <label id="contextStatusLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"
+                   visible="false"/>
             <label id="labelTopComissionRecrutier" visible="false"/>
             <label id="labelTopComissionResearcher" visible="false"/>
         </vbox>
@@ -732,11 +749,13 @@
                width="100%"
                icon="WARNING"
                stylename="edit-sidebar-warning"/>
-        <!-- Служебный expand-компонент: отделяет сводку от нижней границы sidebar и уводит переполнение в scroll. -->
+        <!-- Служебный spacer: обеспечивает нижний отступ 16px в конце скролла sidebar. -->
         <vbox id="openPositionSidebarSpacer"
               width="100%"
-              height="100%"
+              height="16px"
               stylename="edit-sidebar-spacer"/>
+            </vbox>
+        </scrollBox>
     </vbox>
     <!-- Рабочая область: toolbar → вкладки → прокручиваемый контент → постоянный footer. -->
     <vbox id="openPositionWorkspace"
@@ -774,7 +793,7 @@
                  количество персонала и заработная плата. -->
             <tab id="tabOpenPosition"
                  caption="msg://msgVacansy"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  icon="USERS">
                 <!-- Прокрутка содержимого вкладки «Вакансия». -->
@@ -1241,7 +1260,7 @@
             <!-- Вкладка «Трудовой договор»: параметры оформления, таблица соглашений и платёжные секции. -->
             <tab id="laborAgreementTab"
                  caption="msg://msgLaborAgreementTab"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  icon="CUBES">
                 <!-- Прокрутка содержимого вкладки трудовых соглашений. -->
@@ -1255,7 +1274,7 @@
                     <vbox id="openPositionLaborTabContent"
                           width="100%"
                           spacing="true"
-                          margin="true"
+                          margin="false"
                           stylename="open-position-editor-labor-tab-content edit-workspace-content">
                         <!-- Секция трудовых соглашений: параметры оформления и редактируемая таблица. -->
                         <groupBox id="laborAgreementGroupBox"
@@ -1448,14 +1467,14 @@
                  Видимость управляется Java; контент перенесён во вкладку «Трудовой договор». -->
             <tab id="tabPayments"
                  caption="msg://msgPayments"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  visible="false"
                  icon="BULK_EDIT_ACTION"/>
             <!-- Вкладка «Описание должности»: опыт, аккордеон описаний (RU/EN/стандартное/«кто это») и короткое описание. -->
             <tab id="tabJobDescription"
                  caption="mainMsg://msgJobDescription"
-                 margin="true,true,true,true"
+                 margin="false"
                  expand="jobDescriptionVBox"
                  spacing="true"
                  icon="DRIVERS_LICENSE">
@@ -1604,7 +1623,7 @@
             <tab id="tabFiles"
                  icon="FILE_O"
                  caption="mainMsg://msgFiles"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="someFilesVbox">
                 <!-- Контейнер таблицы файлов позиции. -->
@@ -1644,7 +1663,7 @@
             <!-- Вкладка «Тестовое задание»: признак необходимости и редактор задания. -->
             <tab id="tabExercise"
                  caption="msg://msgExercise"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="exerciseVbox"
                  icon="ADJUST">
@@ -1672,7 +1691,7 @@
             <!-- Вкладка «Памятка кандидату»: признак и редактор памятки. -->
             <tab id="tabMemoForInterview"
                  caption="msg://msgMemoForInterview"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="memoVbox"
                  icon="ADJUST">
@@ -1700,7 +1719,7 @@
             <!-- Вкладка «Шаблон сопроводительного письма»: признак и редактор шаблона. -->
             <tab id="tabTemplateLetter"
                  caption="msg://msgTemplateLetter"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="templateLetterBox"
                  icon="font-icon:MAIL_FORWARD">
@@ -1729,7 +1748,7 @@
             <!-- Вкладка «Требуемые Навыки»: дерево навыков позиции и кнопка пересканирования описания. -->
             <tab id="tabSkills"
                  caption="msg://msgSkilsPosition"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="skillsBox"
                  icon="FILTER">
@@ -1794,7 +1813,7 @@
             <!-- Вкладка «Новости»: лента новостей позиции. -->
             <tab id="tabOpenPositionNews"
                  caption="msg://msgOpenPositionNews"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="openPostitonNewsBrowseBox"
                  icon="NEWSPAPER_O">
@@ -1840,7 +1859,7 @@
             <!-- Вкладка «Согласование»: BPM-процесс согласования позиции. -->
             <tab id="tabApproval"
                  caption="msg://msgOpenPositionApprovall"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="procActionsBox"
                  icon="NEWSPAPER_O">
@@ -1860,7 +1879,7 @@
             <!-- Вкладка «Комментарии»: лента комментариев-рейтингов позиции. -->
             <tab id="commentsTab"
                  caption="msg://msgComments"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="commentsScrollBox"
                  icon="STAR_O">
