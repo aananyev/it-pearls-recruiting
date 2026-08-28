@@ -109,6 +109,10 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     @Inject
     private LookupField defaultScreenField;
 
+    @Inject
+    private TabSheet settingsTabSheet;
+
+    private boolean initialized;
     private Button emailSettingsSmtpNav;
     private Button emailSettingsPop3Nav;
     private Button emailSettingsImapNav;
@@ -132,6 +136,31 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         initAiSettingsNavigation();
         initUserAiProfileNavigation();
         initInterfaceSettingsNavigation();
+        initTabSheetSync();
+        this.initialized = true;
+    }
+
+    private void initTabSheetSync() {
+        if (settingsTabSheet != null) {
+            settingsTabSheet.addSelectedTabChangeListener(event -> {
+                TabSheet.Tab selectedTab = event.getSelectedTab();
+                if (selectedTab == null || selectedTab.getName() == null) {
+                    return;
+                }
+                String tabName = selectedTab.getName();
+                if ("msgMyInfo".equals(tabName)) {
+                    updateUserAiProfileNavigationStyles(userAiProfileProfessionalNav);
+                } else if ("msgInterface".equals(tabName)) {
+                    updateInterfaceNavigationStyles(interfaceSettingsWindowNav);
+                } else if ("mailAccessTab".equals(tabName)) {
+                    if (emailSettingsSmtpNav != null) emailSettingsSmtpNav.setStyleName(ACTIVE_NAVIGATION_STYLE);
+                    if (emailSettingsPop3Nav != null) emailSettingsPop3Nav.setStyleName(NAVIGATION_STYLE);
+                    if (emailSettingsImapNav != null) emailSettingsImapNav.setStyleName(NAVIGATION_STYLE);
+                } else if ("aiAccessTab".equals(tabName)) {
+                    updateAiNavigationStyles(aiSettingsSourceNav);
+                }
+            });
+        }
     }
 
     /**
@@ -318,6 +347,9 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
      * Фокус является только UI-навигацией и не изменяет значение checkbox.
      */
     public void selectAiSourceSettings() {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("aiAccessTab");
+        }
         updateAiNavigationStyles(aiSettingsSourceNav);
         preferPersonalAiApiSettingsField.focus();
     }
@@ -327,6 +359,9 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
      * Выбранная строка и состояние кнопок редактирования при этом не меняются.
      */
     public void selectAiConnectionsSettings() {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("aiAccessTab");
+        }
         updateAiNavigationStyles(aiSettingsConnectionsNav);
         aiConfigsTable.focus();
     }
@@ -362,21 +397,33 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     }
 
     public void selectInterfaceWindowSettings() {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("msgInterface");
+        }
         updateInterfaceNavigationStyles(interfaceSettingsWindowNav);
         modeOptions.focus();
     }
 
     public void selectInterfaceAppearanceSettings() {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("msgInterface");
+        }
         updateInterfaceNavigationStyles(interfaceSettingsAppearanceNav);
         appThemeField.focus();
     }
 
     public void selectInterfaceRegionalSettings() {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("msgInterface");
+        }
         updateInterfaceNavigationStyles(interfaceSettingsRegionalNav);
         appLangField.focus();
     }
 
     public void selectInterfaceStartupSettings() {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("msgInterface");
+        }
         updateInterfaceNavigationStyles(interfaceSettingsStartupNav);
         defaultScreenField.focus();
     }
@@ -390,6 +437,9 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private void selectEmailSettingsSection(GroupBoxLayout selectedSection,
                                             TextField<String> selectedFirstField,
                                             Button selectedNavigationButton) {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("mailAccessTab");
+        }
         smtpSettingsSection.setExpanded(smtpSettingsSection == selectedSection);
         pop3SettingsSection.setExpanded(pop3SettingsSection == selectedSection);
         imapSettingsSection.setExpanded(imapSettingsSection == selectedSection);
@@ -401,7 +451,9 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         emailSettingsImapNav.setStyleName(
                 emailSettingsImapNav == selectedNavigationButton ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
 
-        selectedFirstField.focus();
+        if (initialized) {
+            selectedFirstField.focus();
+        }
     }
 
     /**
@@ -411,6 +463,9 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private void selectUserAiProfileSection(GroupBoxLayout selectedSection,
                                             Button selectedNavigationButton,
                                             Runnable focusHandler) {
+        if (initialized && settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab("msgMyInfo");
+        }
         professionalProfileGroup.setExpanded(professionalProfileGroup == selectedSection);
         recruitingProfileGroup.setExpanded(recruitingProfileGroup == selectedSection);
         responsePreferencesGroup.setExpanded(responsePreferencesGroup == selectedSection);
@@ -419,7 +474,9 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         previewGroup.setExpanded(previewGroup == selectedSection);
 
         updateUserAiProfileNavigationStyles(selectedNavigationButton);
-        focusHandler.run();
+        if (initialized) {
+            focusHandler.run();
+        }
     }
 
     private void updateAiNavigationStyles(Button selectedNavigationButton) {
