@@ -54,7 +54,7 @@
     </menu>
     <menu id="application-hunting" icon="SEARCH" insertBefore="application-hadbook">
         <item screen="hunttech_OpenPosition.browse" icon="BRIEFCASE"/>
-        <item screen="hunttech_OpenPositionReestr.browse" caption="Реестр открытых вакансий" icon="BRIEFCASE"/>
+        <item screen="hunttech_OpenPositionReestr.browse" caption="Реестр открытых вакансий" icon="TABLE"/>
         <item screen="hunttech_JobCandidate.browse" icon="USER"/>
         <item screen="hunttech_JobCandidateReestr.browse" caption="Реестр кандидатов" icon="USERS"/>
         <item screen="hunttech_CandidateCV.browse" icon="FILE_TEXT_O"/>
@@ -64,15 +64,15 @@
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
         <item screen="hunttech_Project.browse" icon="FOLDER_OPEN_O"/>
-        <item screen="hunttech_ProjectReestr.browse" caption="Реестр проектов" icon="FOLDER_OPEN_O"/>
+        <item screen="hunttech_ProjectReestr.browse" caption="Реестр проектов" icon="TH"/>
         <item screen="hunttech_Person.browse" icon="USER"/>
-        <item screen="hunttech_PersonReestr.browse" caption="Реестр людей" icon="USERS"/>
+        <item screen="hunttech_PersonReestr.browse" caption="Реестр людей" icon="LIST_UL"/>
         <item screen="hunttech_CompanyDepartament.browse" icon="SITEMAP"/>
-        <item screen="hunttech_CompanyDepartamentReestr.browse" caption="Реестр департаментов" icon="SITEMAP"/>
+        <item screen="hunttech_CompanyDepartamentReestr.browse" caption="Реестр департаментов" icon="INSTITUTION"/>
         <item screen="hunttech_Company.browse" icon="BUILDING"/>
-        <item screen="hunttech_CompanyReestr.browse" caption="Реестр компаний" icon="BUILDING"/>
+        <item screen="hunttech_CompanyReestr.browse" caption="Реестр компаний" icon="BANK"/>
         <item screen="hunttech_CompanyGroup.browse" icon="BUILDING_O"/>
-        <item screen="hunttech_CompanyGroupReestr.browse" caption="Реестр групп компаний" icon="SITEMAP"/>
+        <item screen="hunttech_CompanyGroupReestr.browse" caption="Реестр групп компаний" icon="CUBES"/>
     </menu>
     <menu id="application-researching" icon="SEARCH_PLUS" insertAfter="application-project">
         <item screen="hunttech_RecrutiesTasks.browse" icon="TASKS"/>
@@ -83,11 +83,11 @@
         <item screen="hunttech_Specialisation.browse" icon="GRADUATION_CAP"/>
         <item screen="hunttech_SkillTree.browse" icon="CODE_FORK"/>
         <item screen="hunttech_Country.browse" icon="GLOBE"/>
-        <item screen="hunttech_CountryReestr.browse" caption="Реестр стран" icon="GLOBE"/>
+        <item screen="hunttech_CountryReestr.browse" caption="Реестр стран" icon="WORLD"/>
         <item screen="hunttech_Region.browse" icon="MAP_O"/>
-        <item screen="hunttech_RegionReestr.browse" caption="Реестр регионов" icon="MAP_O"/>
+        <item screen="hunttech_RegionReestr.browse" caption="Реестр регионов" icon="MAP"/>
         <item screen="hunttech_City.browse" icon="MAP_MARKER"/>
-        <item screen="hunttech_CityReestr.browse" caption="Реестр городов" icon="MAP_MARKER"/>
+        <item screen="hunttech_CityReestr.browse" caption="Реестр городов" icon="BUILDING_O"/>
         <item screen="hunttech_Ownershup.browse" icon="TAGS"/>
         <item screen="hunttech_Position.browse" icon="ID_CARD_O"/>
         <item screen="hunttech_FileType.browse" icon="FILE_ARCHIVE_O"/>
