@@ -83,7 +83,7 @@
         <item screen="hunttech_Specialisation.browse" icon="GRADUATION_CAP"/>
         <item screen="hunttech_SkillTree.browse" icon="CODE_FORK"/>
         <item screen="hunttech_Country.browse" icon="GLOBE"/>
-        <item screen="hunttech_CountryReestr.browse" caption="Реестр стран" icon="WORLD"/>
+        <item screen="hunttech_CountryReestr.browse" caption="Реестр стран" icon="LANGUAGE"/>
         <item screen="hunttech_Region.browse" icon="MAP_O"/>
         <item screen="hunttech_RegionReestr.browse" caption="Реестр регионов" icon="MAP"/>
         <item screen="hunttech_City.browse" icon="MAP_MARKER"/>
