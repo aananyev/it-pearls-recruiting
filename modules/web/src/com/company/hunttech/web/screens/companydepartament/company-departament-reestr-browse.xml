@@ -76,7 +76,7 @@
                         <!-- Секция: Описание подразделения -->
                         <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="ОПИСАНИЕ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
-                            <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailDescription" width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>
                 </scrollBox>

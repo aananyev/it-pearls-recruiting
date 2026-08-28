@@ -193,30 +193,25 @@ public class CompanyGroupReestrBrowse extends StandardLookup<CompanyGroup> {
         openEditCardBtn.setEnabled(true);
         logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
 
-        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (group.getCompanyRuGroupName() != null ? group.getCompanyRuGroupName() : "Без названия") + "</div>");
-        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Холдинг / Группа компаний</div>");
+        detailTitle.setValue(group.getCompanyRuGroupName() != null ? group.getCompanyRuGroupName() : "Без названия");
+        detailSubtitle.setValue("Холдинг / Группа компаний");
 
         List<String> companies = group.getId() != null ? groupCompaniesCache.getOrDefault(group.getId(), Collections.emptyList()) : Collections.emptyList();
-        detailCompaniesCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + String.valueOf(companies.size()) + "</div>");
+        detailCompaniesCount.setValue(String.valueOf(companies.size()));
 
         if (!companies.isEmpty()) {
-            StringBuilder sb = new StringBuilder("<ul style='padding-left: 16px; margin: 0;'>");
-            for (String comp : companies) {
-                sb.append("<li style='margin-bottom: 4px;'><b>").append(comp).append("</b></li>");
-            }
-            sb.append("</ul>");
-            detailCompaniesList.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + sb.toString() + "</div>");
+            detailCompaniesList.setValue(String.join(", ", companies));
         } else {
-            detailCompaniesList.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>В группу пока не добавлено ни одной компании</span></div>");
+            detailCompaniesList.setValue("В группу пока не добавлено ни одной компании");
         }
     }
 
     private void clearSidebarDetails() {
         openEditCardBtn.setEnabled(false);
         logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Выберите группу</div>");
-        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Холдинг / Группа компаний</div>");
-        detailCompaniesCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>0</div>");
-        detailCompaniesList.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Группа не выбрана</span></div>");
+        detailTitle.setValue("Выберите группу");
+        detailSubtitle.setValue("Холдинг / Группа компаний");
+        detailCompaniesCount.setValue("0");
+        detailCompaniesList.setValue("Группа не выбрана");
     }
 }

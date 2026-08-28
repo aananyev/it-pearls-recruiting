@@ -82,8 +82,8 @@
                             <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
-                                    <row><label value="Наш клиент:" stylename="bold"/><label id="detailOurClient" htmlEnabled="true" value="-"/></row>
-                                    <row><label value="Наше юр. лицо:" stylename="bold"/><label id="detailOurLegalEntity" htmlEnabled="true" value="-"/></row>
+                                    <row><label value="Наш клиент:" stylename="bold"/><label id="detailOurClient" value="-"/></row>
+                                    <row><label value="Наше юр. лицо:" stylename="bold"/><label id="detailOurLegalEntity" value="-"/></row>
                                     <row><label value="Холдинг / Группа:" stylename="bold"/><label id="detailCompanyGroup" value="-"/></row>
                                     <row><label value="Форма собств.:" stylename="bold"/><label id="detailOwnership" value="-"/></row>
                                     <row><label value="Руководитель:" stylename="bold"/><label id="detailDirector" value="-"/></row>
@@ -106,7 +106,7 @@
                         <!-- Секция: Описание компании -->
                         <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="ОПИСАНИЕ И УСЛОВИЯ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
-                            <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailDescription" width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>
                 </scrollBox>
