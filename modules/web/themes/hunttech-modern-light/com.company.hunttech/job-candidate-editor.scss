@@ -181,12 +181,12 @@
     .job-candidate-avatar,
     .job-candidate-avatar img,
     .job-candidate-avatar .v-image-element {
-      width: 176px !important;
-      height: 176px !important;
-      min-width: 176px !important;
-      min-height: 176px !important;
-      max-width: 176px !important;
-      max-height: 176px !important;
+      width: 120px !important;
+      height: 120px !important;
+      min-width: 120px !important;
+      min-height: 120px !important;
+      max-width: 120px !important;
+      max-height: 120px !important;
       border-radius: 50% !important;
       object-fit: cover !important;
     }
@@ -389,7 +389,6 @@
       box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
                   rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
       white-space: normal !important;
-      text-align: center !important;
     }
 
     /* Эталон label-навигации — IteractionListEdit (iteraction-list-visual-alignment.scss:112–161):
@@ -1051,12 +1050,12 @@
       .job-candidate-avatar,
       .job-candidate-avatar img,
       .job-candidate-avatar .v-image-element {
-        width: 154px !important;
-        height: 154px !important;
-        min-width: 154px !important;
-        min-height: 154px !important;
-        max-width: 154px !important;
-        max-height: 154px !important;
+        width: 110px !important;
+        height: 110px !important;
+        min-width: 110px !important;
+        min-height: 110px !important;
+        max-width: 110px !important;
+        max-height: 110px !important;
       }
 
       .job-candidate-tabs .v-caption {
@@ -1121,21 +1120,24 @@
     color: rgba(248, 250, 252, 0.85) !important;
   }
 
-  /* Стилизация шапки кандидата в сайдбаре (светлые контрастные цвета) */
+  /* Стилизация шапки кандидата в сайдбаре (светлые контрастные цвета, центрирование HTML-контента) */
   .candidate-sidebar-fullname,
   .job-candidate-sidebar .candidate-sidebar-fullname {
     color: #f8fafc !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    text-align: center !important;
   }
 
   .candidate-sidebar-position,
   .job-candidate-sidebar .candidate-sidebar-position {
     color: #93c5fd !important;
+    text-align: center !important;
   }
 
   .candidate-sidebar-city,
   .job-candidate-sidebar .candidate-sidebar-city {
     color: #cbd5e1 !important;
+    text-align: center !important;
   }
 
   /* =========================================================================

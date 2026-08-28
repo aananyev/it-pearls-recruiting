@@ -3720,7 +3720,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
      * class is restored first and the state-specific h2/h2-red class is added separately.
      */
     void updateFullNameStyle(boolean blocked) {
-        fullNameField.setStyleName("job-candidate-profile-name edit-sidebar-title");
+        fullNameField.removeStyleName("h2-red");
+        fullNameField.removeStyleName("h2");
         fullNameField.addStyleName(blocked ? "h2-red" : "h2");
     }
 

@@ -148,10 +148,12 @@ views, loaders, JPQL, actions, invoke, required/visible/enabled и Java-конт
 
 ```text
 layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
-├── vbox openPositionSidebar (edit-sidebar, 270px / 250px ≤1366px — из shared)
-│   ├── vbox openPositionSidebarVisual (edit-sidebar-visual)
-│   │   ├── hbox openPositionEditorLogoBox (open-position-editor-logo-box, height AUTO) — изображения рядом по центру
-│   │   │   ├── projectLogoImage (96×96) + projectOwnerImage (96×96, оба oval 96, MIDDLE_CENTER)
+├── vbox openPositionSidebar (edit-sidebar, 312px)
+│   └── scrollBox openPositionSidebarScroll (width 100%, height 100%, orientation vertical)
+│       └── vbox (width 100%, spacing true)
+│           ├── vbox openPositionSidebarVisual (edit-sidebar-visual)
+│           │   ├── hbox openPositionEditorLogoBox (open-position-editor-logo-box, height AUTO) — изображения рядом по центру
+│           │   │   ├── projectLogoImage (96×96) + projectOwnerImage (96×96, оба oval 96, MIDDLE_CENTER)
 │   │   └── vbox openPositionSidebarIdentity (edit-sidebar-identity)
 │   │       ├── labelOpenPosition (edit-sidebar-title + open-position-editor-title-clamp; значение — название должности positionType.getInstanceName(), по центру)
 │   │       └── signDraftLabel (edit-sidebar-subtitle)

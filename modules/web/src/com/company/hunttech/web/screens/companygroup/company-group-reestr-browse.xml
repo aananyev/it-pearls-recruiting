@@ -54,7 +54,7 @@
                         <!-- Секция: Список компаний холдинга -->
                         <vbox id="companiesListCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="КОМПАНИИ ХОЛДИНГА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
-                            <label id="detailCompaniesList" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailCompaniesList" width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>
                 </scrollBox>

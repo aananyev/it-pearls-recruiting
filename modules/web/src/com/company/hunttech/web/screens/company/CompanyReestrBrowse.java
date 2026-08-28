@@ -464,8 +464,8 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
         }
 
         // Заголовки
-        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (company.getComanyName() != null ? company.getComanyName() : "Без названия") + "</div>");
-        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (company.getCompanyShortName() != null ? company.getCompanyShortName() : "-") + "</div>");
+        detailTitle.setValue(company.getComanyName() != null ? company.getComanyName() : "Без названия");
+        detailSubtitle.setValue(company.getCompanyShortName() != null ? company.getCompanyShortName() : "-");
 
         StringBuilder loc = new StringBuilder();
         if (company.getCountryOfCompany() != null && company.getCountryOfCompany().getCountryRuName() != null) {
@@ -475,43 +475,43 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
             if (loc.length() > 0) loc.append(", ");
             loc.append(company.getCityOfCompany().getCityRuName());
         }
-        detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (loc.length() > 0 ? loc.toString() : "-") + "</div>");
+        detailLocation.setValue(loc.length() > 0 ? loc.toString() : "-");
 
         // Реквизиты и статус
         if (Boolean.TRUE.equals(company.getOurClient())) {
-            detailOurClient.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #16a34a; font-weight: 600;'>✓ Да (Клиент)</span></div>");
+            detailOurClient.setValue("✓ Да (Клиент)");
         } else {
-            detailOurClient.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Нет</span></div>");
+            detailOurClient.setValue("Нет");
         }
 
         if (Boolean.TRUE.equals(company.getOurLegalEntity())) {
-            detailOurLegalEntity.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #2563eb; font-weight: 600;'>✓ Наше юр. лицо</span></div>");
+            detailOurLegalEntity.setValue("✓ Наше юр. лицо");
         } else {
-            detailOurLegalEntity.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Нет</span></div>");
+            detailOurLegalEntity.setValue("Нет");
         }
 
-        detailCompanyGroup.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (company.getCompanyGroup() != null ? company.getCompanyGroup().getCompanyRuGroupName() : "-") + "</div>");
-        detailOwnership.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (company.getCompanyOwnership() != null ? company.getCompanyOwnership().getLongType() : "-") + "</div>");
+        detailCompanyGroup.setValue(company.getCompanyGroup() != null ? company.getCompanyGroup().getCompanyRuGroupName() : "-");
+        detailOwnership.setValue(company.getCompanyOwnership() != null ? company.getCompanyOwnership().getLongType() : "-");
 
         if (company.getCompanyDirector() != null) {
-            detailDirector.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + company.getCompanyDirector().getInstanceName() + "</div>");
+            detailDirector.setValue(company.getCompanyDirector().getInstanceName());
         } else {
-            detailDirector.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
+            detailDirector.setValue("-");
         }
 
         // Статистика
         int projCount = company.getId() != null ? projectsCountCache.getOrDefault(company.getId(), 0) : 0;
         int posCount = company.getId() != null ? openPositionsCountCache.getOrDefault(company.getId(), 0) : 0;
-        detailProjectsCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + String.valueOf(projCount) + "</div>");
-        detailPositionsCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + String.valueOf(posCount) + "</div>");
+        detailProjectsCount.setValue(String.valueOf(projCount));
+        detailPositionsCount.setValue(String.valueOf(posCount));
 
         // Описание
         String desc = company.getId() != null ? companyDescriptionCache.get(company.getId()) : null;
         if (desc != null && !desc.trim().isEmpty()) {
             String plain = Jsoup.parse(desc).text();
-            detailDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (plain.length() > 300 ? plain.substring(0, 300) + "..." : plain) + "</div>");
+            detailDescription.setValue(plain.length() > 300 ? plain.substring(0, 300) + "..." : plain);
         } else {
-            detailDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Описание не заполнено</span></div>");
+            detailDescription.setValue("Описание не заполнено");
         }
     }
 
@@ -519,16 +519,16 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
         openEditCardBtn.setEnabled(false);
         createProjectFromCompanyBtn.setEnabled(false);
         logoPic.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        detailTitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>Выберите компанию</div>");
-        detailSubtitle.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailLocation.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailOurClient.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailOurLegalEntity.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailCompanyGroup.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailOwnership.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailDirector.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>-</div>");
-        detailProjectsCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>0</div>");
-        detailPositionsCount.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>0</div>");
-        detailDescription.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'><span style='color: #94a3b8;'>Компания не выбрана</span></div>");
+        detailTitle.setValue("Выберите компанию");
+        detailSubtitle.setValue("-");
+        detailLocation.setValue("-");
+        detailOurClient.setValue("-");
+        detailOurLegalEntity.setValue("-");
+        detailCompanyGroup.setValue("-");
+        detailOwnership.setValue("-");
+        detailDirector.setValue("-");
+        detailProjectsCount.setValue("0");
+        detailPositionsCount.setValue("0");
+        detailDescription.setValue("Компания не выбрана");
     }
 }
