@@ -141,10 +141,10 @@
                            stylename="edit-sidebar-title"
                            width="100%"
                            value="msg://browseCaption"/>
-                    <label id="companySidebarSubtitle"
+                    <label id="companySidebarName"
                            dataContainer="companyDc"
                            property="companyShortName"
-                           stylename="edit-sidebar-subtitle"
+                           stylename="bold"
                            width="100%"/>
                 </vbox>
                 <!-- Сводка ключевых реквизитов компании -->

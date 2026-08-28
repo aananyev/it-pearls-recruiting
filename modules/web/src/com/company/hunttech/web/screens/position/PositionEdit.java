@@ -1,7 +1,6 @@
 package com.company.hunttech.web.screens.position;
 
 import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.RichTextArea;
 import com.haulmont.cuba.gui.components.TextField;
@@ -35,35 +34,43 @@ public class PositionEdit extends StandardEditor<Position> {
     }
 
     @Subscribe("positionEnNameField")
-    public void onPositionEnNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        setLabel();
-    }
-
-    @Subscribe("positionRuNameField")
-    public void onPositionRuNameFieldTextChange1(TextInputField.TextChangeEvent event) {
-        setLabel();
-    }
-
-    @Subscribe("positionEnNameField")
     public void onPositionEnNameFieldTextChange(TextInputField.TextChangeEvent event) {
-        setLabel();
-
+        String en = event.getText();
+        String ru = positionRuNameField.getValue();
+        updateLabelText(en, ru);
     }
 
     @Subscribe("positionRuNameField")
     public void onPositionRuNameFieldTextChange(TextInputField.TextChangeEvent event) {
-        setLabel();
+        String ru = event.getText();
+        String en = positionEnNameField.getValue();
+        updateLabelText(en, ru);
     }
 
     private void setLabel() {
-        String a = positionEnNameField.getValue() + " - " + positionRuNameField.getValue();
+        String en = positionEnNameField.getValue();
+        String ru = positionRuNameField.getValue();
+        updateLabelText(en, ru);
+    }
 
-        textPositionName.setValue( a );
+    private void updateLabelText(String en, String ru) {
+        if (textPositionName == null) {
+            return;
+        }
+        if (en != null && !en.trim().isEmpty() && ru != null && !ru.trim().isEmpty()) {
+            textPositionName.setValue(en.trim() + " — " + ru.trim());
+        } else if (ru != null && !ru.trim().isEmpty()) {
+            textPositionName.setValue(ru.trim());
+        } else if (en != null && !en.trim().isEmpty()) {
+            textPositionName.setValue(en.trim());
+        } else {
+            textPositionName.setValue("");
+        }
     }
 
     /**
      * Презентационная навигация: переводит фокус к русскому наименованию должности
-     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     * и подсвечивает активный пункт sidebar.
      */
     public void focusMainSection() {
         positionRuNameField.focus();
@@ -72,7 +79,7 @@ public class PositionEdit extends StandardEditor<Position> {
 
     /**
      * Презентационная навигация: переводит фокус к редактору общего описания
-     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     * и подсвечивает активный пункт sidebar.
      */
     public void focusDescriptionSection() {
         standartDescriptionTextArea.focus();
@@ -80,6 +87,14 @@ public class PositionEdit extends StandardEditor<Position> {
     }
 
     private void setActiveNavigation(Button activeButton) {
-        activeButton.addStyleName("label-nav-item-active");
+        if (mainNav != null) {
+            mainNav.removeStyleName("label-nav-item-active");
+        }
+        if (descriptionNav != null) {
+            descriptionNav.removeStyleName("label-nav-item-active");
+        }
+        if (activeButton != null) {
+            activeButton.addStyleName("label-nav-item-active");
+        }
     }
 }

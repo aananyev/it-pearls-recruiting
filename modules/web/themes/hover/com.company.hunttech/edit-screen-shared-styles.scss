@@ -68,14 +68,8 @@
     overflow-wrap: anywhere;
   }
 
-  /* Grid labels в edit-sidebar-summary (Контакты и реквизиты, Последняя активность) — перенос по словам */
-  .edit-sidebar-summary .v-grid-row .v-label {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
-  }
-
-  /* Grid labels в edit-sidebar-grid (реестр резюме: Основные данные, Файлы) — перенос по словам */
+    /* Grid labels в edit-sidebar-summary и edit-sidebar-grid — перенос по словам */
+  .edit-sidebar-summary .v-grid-row .v-label,
   .edit-sidebar-grid .v-grid-row .v-label {
     white-space: normal !important;
     overflow-wrap: anywhere !important;

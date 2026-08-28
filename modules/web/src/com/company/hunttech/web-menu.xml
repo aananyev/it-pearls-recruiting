@@ -90,6 +90,7 @@
         <item screen="hunttech_CityReestr.browse" caption="Реестр городов" icon="BUILDING_O"/>
         <item screen="hunttech_Ownershup.browse" icon="TAGS"/>
         <item screen="hunttech_Position.browse" icon="ID_CARD_O"/>
+        <item screen="hunttech_PositionReestr.browse" caption="Реестр должностей" icon="ID_BADGE"/>
         <item screen="hunttech_FileType.browse" icon="FILE_ARCHIVE_O"/>
         <item screen="hunttech_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="SHARE_ALT"/>

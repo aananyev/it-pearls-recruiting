@@ -312,6 +312,13 @@
       max-width: 100%;
     }
 
+    // Ограничение ширины таблиц DataGrid внутри вкладок
+    .v-grid {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
     // Гарантированный вертикальный скроллинг содержимого вкладок
     .edit-workspace-scroll,
     .edit-workspace-scroll > .v-scrollable,
