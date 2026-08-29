@@ -11,6 +11,7 @@ import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.GroupBoxLayout;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.OptionsGroup;
+import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.TextField;
@@ -112,6 +113,11 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     @Inject
     private TabSheet settingsTabSheet;
 
+    @Inject
+    private VBoxLayout geoSettingsNavigation;
+    @Inject
+    private VBoxLayout userAiProfileSensitiveWarningBox;
+
     private boolean initialized;
     private Button emailSettingsSmtpNav;
     private Button emailSettingsPop3Nav;
@@ -137,6 +143,8 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         initUserAiProfileNavigation();
         initInterfaceSettingsNavigation();
         initTabSheetSync();
+        TabSheet.Tab initialTab = settingsTabSheet != null ? settingsTabSheet.getSelectedTab() : null;
+        updateNavigationBlockVisibility(initialTab != null && initialTab.getName() != null ? initialTab.getName() : "msgMyInfo");
         this.initialized = true;
     }
 
@@ -148,6 +156,7 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
                     return;
                 }
                 String tabName = selectedTab.getName();
+                updateNavigationBlockVisibility(tabName);
                 if ("msgMyInfo".equals(tabName)) {
                     updateUserAiProfileNavigationStyles(userAiProfileProfessionalNav);
                 } else if ("msgInterface".equals(tabName)) {
@@ -160,6 +169,27 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
                     updateAiNavigationStyles(aiSettingsSourceNav);
                 }
             });
+        }
+    }
+
+    private void updateNavigationBlockVisibility(String tabName) {
+        if (userAiProfileSectionNavigation != null) {
+            userAiProfileSectionNavigation.setVisible("msgMyInfo".equals(tabName));
+        }
+        if (interfaceSettingsNavigation != null) {
+            interfaceSettingsNavigation.setVisible("msgInterface".equals(tabName));
+        }
+        if (emailSettingsNavigation != null) {
+            emailSettingsNavigation.setVisible("mailAccessTab".equals(tabName));
+        }
+        if (aiSettingsNavigation != null) {
+            aiSettingsNavigation.setVisible("aiAccessTab".equals(tabName));
+        }
+        if (geoSettingsNavigation != null) {
+            geoSettingsNavigation.setVisible("geoApiAccessTab".equals(tabName));
+        }
+        if (userAiProfileSensitiveWarningBox != null) {
+            userAiProfileSensitiveWarningBox.setVisible("msgMyInfo".equals(tabName) || "aiAccessTab".equals(tabName));
         }
     }
 
