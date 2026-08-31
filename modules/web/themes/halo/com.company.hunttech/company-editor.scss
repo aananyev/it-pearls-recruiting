@@ -310,6 +310,14 @@
     .v-richtextarea iframe {
       box-sizing: border-box;
       max-width: 100%;
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
+    }
+
+    .v-richtextarea {
+      font-family: inherit !important;
     }
 
     // Ограничение ширины таблиц DataGrid внутри вкладок

@@ -427,6 +427,54 @@
     max-width: 100% !important;
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Единый шрифт полей ввода: font-size: 15px / line-height: 38px / font-weight: 400
+  // (эталон — поле «Страна» в CompanyEdit: lookupPickerField → c-pickerfield
+  // → v-filterselect-input внутри). Применяется ко всем edit-form-control:
+  // v-textfield, v-filterselect-input, v-datefield-textfield, c-suggestionfield,
+  // c-pickerfield (внутренний input лукапа), v-textarea, v-checkbox, v-richtextarea,
+  // подписи полей (.v-caption). Покрывает все вкладки Edit-форм (CompanyEdit, ProjectEdit,
+  // OpenPositionEdit, JobCandidateEdit, PositionEdit и т.д.).
+  // ═══════════════════════════════════════════════════════════════════════════
+  .edit-form-control .v-filterselect-input,
+  .edit-form-control .v-textfield,
+  .edit-form-control .v-datefield-textfield,
+  .edit-form-control .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-filterselect-input,
+  .edit-form-control .c-pickerfield .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-textfield,
+  .edit-form-control .c-pickerfield .v-datefield-textfield,
+  .edit-form-control .c-pickerfield input,
+  .edit-form-control .v-textarea,
+  .edit-form-control .v-richtextarea,
+  .edit-form-control .v-richtextarea .v-richtextarea-content,
+  .edit-form-control .v-richtextarea iframe,
+  .edit-form-control .v-checkbox,
+  .edit-form-control .v-checkbox .v-checkbox-caption,
+  .edit-form-control .v-caption,
+  .edit-form-control > .v-caption,
+  .edit-form-control .v-has-caption > .v-caption,
+  .edit-form-control .v-has-caption .v-caption {
+    box-sizing: border-box;
+    font-family: inherit !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+  }
+
+  // line-height: 38px только для однострочных полей ввода (высота 38px)
+  .edit-form-control .v-filterselect-input,
+  .edit-form-control .v-textfield,
+  .edit-form-control .v-datefield-textfield,
+  .edit-form-control .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-filterselect-input,
+  .edit-form-control .c-pickerfield .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-textfield,
+  .edit-form-control .c-pickerfield .v-datefield-textfield,
+  .edit-form-control .c-pickerfield input {
+    line-height: 38px !important;
+  }
+
   .edit-form-control .v-filterselect-input,
   .edit-form-control .v-textfield,
   .edit-form-control .v-datefield-textfield,
