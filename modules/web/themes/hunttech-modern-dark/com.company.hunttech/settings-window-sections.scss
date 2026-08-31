@@ -116,7 +116,7 @@
         box-sizing: border-box;
         width: 100% !important;
         height: 100% !important;
-        padding: 24px 20px 18px !important;
+        padding: 14px 16px 12px !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
       }
@@ -132,14 +132,14 @@
     .user-ai-profile-sidebar .v-spacing,
     .settings-section-sidebar .v-spacing,
     .ai-settings-sidebar .v-spacing {
-      height: 15px !important;
+      height: 6px !important;
     }
 
     .settings-section-mark,
     .ai-settings-mark {
       display: inline-block;
       min-width: 52px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #f8fafc !important;
       font-family: Arial, "Segoe UI Symbol", sans-serif !important;
       font-size: 18px !important;
@@ -157,9 +157,9 @@
     .ai-settings-sidebar-title {
       color: #ffb11b !important;
       font-family: Arial, "Segoe UI Symbol", sans-serif !important;
-      font-size: 19px !important;
+      font-size: 17px !important;
       font-weight: 700 !important;
-      line-height: 28px !important;
+      line-height: 24px !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
       word-break: normal;
@@ -170,8 +170,8 @@
     .user-ai-profile-sidebar .user-ai-profile-help,
     .ai-settings-sidebar .ai-settings-help {
       color: rgba(248, 250, 252, 0.76) !important;
-      font-size: 13px !important;
-      line-height: 1.45 !important;
+      font-size: 12px !important;
+      line-height: 1.4 !important;
       opacity: 1 !important;
       white-space: normal !important;
     }
@@ -213,10 +213,10 @@
 
     .user-ai-profile-summary {
       box-sizing: border-box;
-      padding: 14px !important;
+      padding: 8px 10px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
-      border: 1px solid rgba(255, 255, 255, 0.35) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
       border-radius: 8px !important;
     }
 
@@ -233,12 +233,12 @@
       width: 100% !important;
       min-width: 0 !important;
       box-sizing: border-box;
-      padding-top: 8px;
+      padding-top: 6px;
       padding-bottom: 2px;
       border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
     }
 
-    /* Заголовки разделов в sidebar в точности как в OpenPositionReestrBrowse */
+    /* Заголовки разделов в sidebar в точности как в OpenPositionReestrBrowse / OpenPositionEdit */
     .job-candidate-navigation .label-nav-title,
     .job-candidate-navigation .job-candidate-section-title,
     .settings-section-navigation .label-nav-title,
@@ -253,13 +253,13 @@
       box-sizing: border-box;
       display: block !important;
       width: 100% !important;
-      min-height: 36px !important;
+      min-height: 34px !important;
       height: auto !important;
-      padding: 7px 11px !important;
+      padding: 6px 10px !important;
       color: #ffb11b !important;
-      font-size: 15px !important;
+      font-size: 14px !important;
       font-weight: 700 !important;
-      line-height: 21px !important;
+      line-height: 20px !important;
       letter-spacing: normal !important;
       text-transform: none !important;
       text-align: center !important;
@@ -274,7 +274,8 @@
     .user-ai-profile-nav-item,
     .ai-settings-nav-item {
       box-sizing: border-box;
-      padding: 8px 10px;
+      min-height: 24px !important;
+      padding: 4px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
@@ -326,7 +327,7 @@
     .user-ai-profile-sensitive-warning,
     .ai-settings-security {
       box-sizing: border-box;
-      padding: 11px 12px;
+      padding: 8px 10px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
