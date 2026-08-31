@@ -143,11 +143,8 @@ public class ExtMainScreen extends MainScreen {
             return;
         }
         String targetCode = isManagerUser() ? DASHBOARD_CODE_MANAGER : DASHBOARD_CODE_RECRUITER;
-        Dashboard d = mainDashboard.getDashboard();
-        if (d == null || !targetCode.equals(d.getCode())) {
-            mainDashboard.setCode(targetCode);
-            mainDashboard.init(Collections.emptyMap());
-        }
+        mainDashboard.setCode(targetCode);
+        mainDashboard.init(Collections.emptyMap());
     }
 
     private static final String DEFAULT_FAVICON = "./VAADIN/themes/hover/favicon.ico";
