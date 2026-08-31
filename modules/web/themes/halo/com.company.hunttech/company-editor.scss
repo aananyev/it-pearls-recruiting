@@ -474,7 +474,6 @@
     // CDP-фикс: hbox с парой чекбоксов (ourLegalEnityCheckBox + checkBoxOurClient) в
     // первой карточке — каждый чекбокс получает width:100% от Vaadin и вылезает
     // вправо на 1020px. Объединяем оба селектора (новый :has(...) из HEAD и .company-main-tab-top-checks из PR).
-    .edit-workspace-content .v-horizontallayout:has(> .v-slot > .v-checkbox + .v-checkbox),
     .edit-workspace-content .company-main-tab-top-checks {
       box-sizing: border-box !important;
       display: flex !important;
