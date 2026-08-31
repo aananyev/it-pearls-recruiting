@@ -34,8 +34,7 @@
             <vbox id="userAiProfileSidebar"
                   width="270px"
                   height="100%"
-                  spacing="true"
-                  expand="userAiProfileSidebarSpacer"
+                  spacing="false"
                   stylename="user-ai-profile-sidebar edit-sidebar">
                 <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical" scrollBars="vertical">
                     <vbox width="100%" spacing="true">
@@ -46,7 +45,7 @@
                               height="236px"
                               align="TOP_CENTER"
                               expand="picVBox"
-                              stylename="dropzone-container user-ai-profile-avatar">
+                              stylename="dropzone-container user-ai-profile-avatar edit-sidebar-visual">
                             <vbox id="picVBox" align="TOP_CENTER" spacing="true">
                                 <ovaFallbackImage id="userPic"
                                                   width="176px"
@@ -87,7 +86,7 @@
 
                         <!-- Навигация: Профиль и ИИ -->
                         <vbox id="userAiProfileSectionNavigation" width="100%" spacing="false" stylename="user-ai-profile-navigation label-navigation">
-                            <label width="100%" value="msg://aiProfileNavigationTitle" stylename="user-ai-profile-navigation-title label-nav-title"/>
+                            <label width="100%" value="msg://aiProfileNavigationTitle" stylename="label-nav-title job-candidate-section-title user-ai-profile-navigation-title" align="MIDDLE_CENTER"/>
                             <label width="100%" value="msg://professionalProfile" stylename="user-ai-profile-nav-item user-ai-profile-nav-item-active label-nav-item label-nav-item-active"/>
                             <label width="100%" value="msg://recruitingProfile" stylename="user-ai-profile-nav-item label-nav-item"/>
                             <label width="100%" value="msg://responsePreferences" stylename="user-ai-profile-nav-item label-nav-item"/>
@@ -98,7 +97,7 @@
 
                         <!-- Навигация: Интерфейс -->
                         <vbox id="interfaceSettingsNavigation" width="100%" spacing="false" stylename="settings-section-navigation label-navigation">
-                            <label value="msg://interfaceSettingsNavigationTitle" width="100%" stylename="settings-section-navigation-title label-nav-title"/>
+                            <label value="msg://interfaceSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://interfaceSettingsWindowSection" width="100%" stylename="settings-section-nav-item settings-section-nav-item-active label-nav-item label-nav-item-active"/>
                             <label value="msg://interfaceSettingsAppearanceSection" width="100%" stylename="settings-section-nav-item label-nav-item"/>
                             <label value="msg://interfaceSettingsRegionalSection" width="100%" stylename="settings-section-nav-item label-nav-item"/>
@@ -107,7 +106,7 @@
 
                         <!-- Навигация: Почта -->
                         <vbox id="emailSettingsNavigation" width="100%" spacing="false" stylename="settings-section-navigation label-navigation">
-                            <label value="msg://emailSettingsNavigationTitle" width="100%" stylename="settings-section-navigation-title label-nav-title"/>
+                            <label value="msg://emailSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://emailSettingsSmtpSection" width="100%" stylename="settings-section-nav-item settings-section-nav-item-active label-nav-item label-nav-item-active"/>
                             <label value="msg://emailSettingsPop3Section" width="100%" stylename="settings-section-nav-item label-nav-item"/>
                             <label value="msg://emailSettingsImapSection" width="100%" stylename="settings-section-nav-item label-nav-item"/>
@@ -115,14 +114,14 @@
 
                         <!-- Навигация: ИИ Подключения -->
                         <vbox id="aiSettingsNavigation" width="100%" spacing="false" stylename="ai-settings-navigation label-navigation">
-                            <label value="msg://aiSettingsNavigationTitle" width="100%" stylename="ai-settings-navigation-title label-nav-title"/>
+                            <label value="msg://aiSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title ai-settings-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://aiSettingsSourceSection" width="100%" stylename="ai-settings-nav-item ai-settings-nav-item-active label-nav-item label-nav-item-active"/>
                             <label value="msg://aiSettingsConnectionsSection" width="100%" stylename="ai-settings-nav-item label-nav-item"/>
                         </vbox>
 
                         <!-- Навигация: Geo-API -->
                         <vbox id="geoSettingsNavigation" width="100%" spacing="false" stylename="ai-settings-navigation label-navigation">
-                            <label value="msg://geoSettingsNavigationTitle" width="100%" stylename="ai-settings-navigation-title label-nav-title"/>
+                            <label value="msg://geoSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title ai-settings-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://geoSettingsDaDataSection" width="100%" stylename="ai-settings-nav-item ai-settings-nav-item-active label-nav-item label-nav-item-active"/>
                         </vbox>
 
@@ -130,9 +129,11 @@
                         <vbox id="userAiProfileSensitiveWarningBox" width="100%" spacing="false" stylename="user-ai-profile-sensitive-warning">
                             <label width="100%" value="msg://aiProfileSensitiveDataWarning" stylename="user-ai-profile-help"/>
                         </vbox>
+
+                        <!-- Фиксированный спейсер отступа внизу сайдбара -->
+                        <vbox id="userAiProfileSidebarSpacer" width="100%" height="16px" stylename="edit-sidebar-spacer"/>
                     </vbox>
                 </scrollBox>
-                <label id="userAiProfileSidebarSpacer"/>
             </vbox>
 
             <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ С TABSHEET НА ВСЮ ШИРИНУ -->
@@ -153,11 +154,12 @@
                                         <label value="msg://aiProfileTitle" stylename="h1"/>
                                         <label value="msg://aiProfileDescription" width="100%" stylename="user-ai-profile-help"/>
                                     </vbox>
-                                    <hbox id="userAiProfileToolbarActions" spacing="true" align="BOTTOM_RIGHT" stylename="user-ai-profile-toolbar-actions edit-toolbar-actions">
+                                    <hbox id="userAiProfileToolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="user-ai-profile-toolbar-actions edit-toolbar-actions">
                                         <button id="previewAiContextBtn" caption="msg://previewAiContext" stylename="primary" invoke="previewAiContext"/>
                                         <button id="clearAiProfileBtn" caption="msg://clearAiProfile" stylename="danger" invoke="clearAiProfile"/>
                                     </hbox>
                                 </hbox>
+                                <vbox id="userAiProfileToolbarSpacer" width="100%" height="8px"/>
                                 
                                 <groupBox id="professionalProfileGroup" caption="msg://professionalProfile" width="100%" spacing="true" margin="true" collapsable="true" collapsed="false" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
                                     <grid width="100%" spacing="true">
@@ -169,10 +171,10 @@
                                             </row>
                                             <row>
                                                 <lookupField id="seniorityLevelField" datasource="userAiProfileDs" property="seniorityLevel" caption="msg://seniorityLevel" width="100%"/>
-                                                <hbox width="100%" spacing="true">
-                                                    <textField id="professionalExperienceYearsField" datasource="userAiProfileDs" property="professionalExperienceYears" caption="msg://professionalExperienceYears" width="50%"/>
-                                                    <textField id="recruitingExperienceYearsField" datasource="userAiProfileDs" property="recruitingExperienceYears" caption="msg://recruitingExperienceYears" width="50%"/>
-                                                </hbox>
+                                                <textField id="professionalExperienceYearsField" datasource="userAiProfileDs" property="professionalExperienceYears" caption="msg://professionalExperienceYears" width="100%"/>
+                                            </row>
+                                            <row>
+                                                <textField id="recruitingExperienceYearsField" datasource="userAiProfileDs" property="recruitingExperienceYears" caption="msg://recruitingExperienceYears" width="100%" colspan="2"/>
                                             </row>
                                             <row><textArea id="aboutMeField" datasource="userAiProfileDs" property="aboutMe" caption="msg://aboutMe" maxLength="2000" rows="3" width="100%" colspan="2"/></row>
                                             <row>
@@ -334,6 +336,7 @@
                                         <label value="msg://emailSettingsPageDescription" width="100%" stylename="settings-section-help"/>
                                     </vbox>
                                 </hbox>
+                                <vbox id="emailSettingsToolbarSpacer" width="100%" height="8px"/>
                                 <vbox id="emailSettingsAccordion" width="100%" spacing="true">
                                     <groupBox id="smtpSettingsSection"
                                               caption="SMTP"
@@ -418,12 +421,12 @@
                                         <label value="msg://aiSettingsPageTitle" stylename="h1"/>
                                         <label value="msg://aiSettingsPageDescription" width="100%" stylename="ai-settings-help"/>
                                     </vbox>
-                                    <buttonsPanel id="aiConfigsButtonsPanel" align="BOTTOM_RIGHT" stylename="ai-settings-toolbar-actions edit-toolbar-actions">
+                                    <hbox id="aiConfigsButtonsPanel" spacing="true" align="MIDDLE_RIGHT" stylename="ai-settings-toolbar-actions edit-toolbar-actions">
                                         <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION" invoke="onAiConfigsCreateBtnClick"/>
                                         <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT" enable="false" invoke="onAiConfigsEditBtnClick"/>
                                         <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE" enable="false" invoke="onAiConfigsRemoveBtnClick"/>
                                         <button id="aiConfigsTestBtn" caption="msg://msgAiTestConnection" icon="KEY" enable="false" invoke="onAiConfigsTestBtnClick"/>
-                                    </buttonsPanel>
+                                    </hbox>
                                 </hbox>
                                 <vbox id="personalAiApiPreferenceBox"
                                       spacing="true"

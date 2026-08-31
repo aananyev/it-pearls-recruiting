@@ -58,11 +58,12 @@
     }
 
     .ext-settings-tabs > .v-tabsheet-content {
+      box-sizing: border-box !important;
       height: calc(100% - 49px) !important;
-      padding: 16px 18px 18px;
+      padding: 0 !important;
       background: mix($v-app-background-color, $v-panel-background-color, 82%) !important;
       border: 0 !important;
-      overflow: hidden;
+      overflow: hidden !important;
     }
 
     .ext-settings-tabs .v-tabsheet-tabsheetpanel {
@@ -83,7 +84,7 @@
       overflow: hidden;
     }
 
-    // Контекстная панель повторяет подтверждённую композицию JobCandidateEdit:
+    // Контекстная панель 312px по стандарту JobCandidateReestrBrowse:
     // тёмный градиент, контрастный текст, акцентная навигация и заметная боковая тень.
     .v-slot-settings-section-sidebar,
     .v-slot-user-ai-profile-sidebar,
@@ -103,14 +104,22 @@
       min-width: 270px !important;
       max-width: 270px !important;
       height: 100% !important;
-      padding: 22px 18px 16px;
+      padding: 0 !important;
       color: #f8fafc !important;
       border: 0 !important;
       border-right: 1px solid rgba(15, 23, 42, 0.78) !important;
       border-radius: 0 !important;
       box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: hidden !important;
+
+      .v-scrollable {
+        box-sizing: border-box;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 14px 16px 12px !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+      }
     }
 
     .settings-section-sidebar > .v-slot,
@@ -120,11 +129,17 @@
       min-width: 0;
     }
 
+    .user-ai-profile-sidebar .v-spacing,
+    .settings-section-sidebar .v-spacing,
+    .ai-settings-sidebar .v-spacing {
+      height: 6px !important;
+    }
+
     .settings-section-mark,
     .ai-settings-mark {
       display: inline-block;
       min-width: 52px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #f8fafc !important;
       font-family: Arial, "Segoe UI Symbol", sans-serif !important;
       font-size: 18px !important;
@@ -142,12 +157,12 @@
     .ai-settings-sidebar-title {
       color: #ffb11b !important;
       font-family: Arial, "Segoe UI Symbol", sans-serif !important;
-      font-size: 19px !important;
+      font-size: 17px !important;
       font-weight: 700 !important;
-      line-height: 28px !important;
+      line-height: 24px !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
-      word-break: break-word;
+      word-break: normal;
     }
 
     .user-ai-profile-position,
@@ -155,22 +170,50 @@
     .user-ai-profile-sidebar .user-ai-profile-help,
     .ai-settings-sidebar .ai-settings-help {
       color: rgba(248, 250, 252, 0.76) !important;
-      font-size: 13px !important;
-      line-height: 1.45 !important;
+      font-size: 12px !important;
+      line-height: 1.4 !important;
       opacity: 1 !important;
       white-space: normal !important;
     }
 
-    .user-ai-profile-avatar,
-    .user-ai-profile-avatar img,
-    .user-ai-profile-avatar .v-image-element {
-      border-color: rgba(255, 255, 255, 0.92) !important;
-      border-radius: 8px !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+    .user-ai-profile-avatar {
+      box-sizing: border-box;
+      width: 100% !important;
+      margin: 0 auto;
+      text-align: center;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+
+      .v-image,
+      .ht-oval-image,
+      img,
+      .v-image-element {
+        border-radius: 50% !important;
+      }
+
+      .v-image,
+      .ht-oval-image {
+        width: 176px !important;
+        height: 176px !important;
+        margin: 0 auto;
+        overflow: hidden !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 2px solid rgba(255, 255, 255, 0.92) !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+      }
+
+      img,
+      .v-image-element {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+      }
     }
 
     .user-ai-profile-summary {
-      padding: 13px;
+      box-sizing: border-box;
+      padding: 8px 10px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -182,30 +225,57 @@
       white-space: normal !important;
     }
 
+    .job-candidate-navigation,
     .settings-section-navigation,
     .user-ai-profile-navigation,
     .ai-settings-navigation {
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
       box-sizing: border-box;
-      padding-top: 10px;
+      padding-top: 6px;
+      padding-bottom: 2px;
       border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
     }
 
+    /* Заголовки разделов в sidebar в точности как в OpenPositionReestrBrowse / OpenPositionEdit */
+    .job-candidate-navigation .label-nav-title,
+    .job-candidate-navigation .job-candidate-section-title,
+    .settings-section-navigation .label-nav-title,
+    .settings-section-navigation .job-candidate-section-title,
+    .user-ai-profile-navigation .label-nav-title,
+    .user-ai-profile-navigation .job-candidate-section-title,
+    .ai-settings-navigation .label-nav-title,
+    .ai-settings-navigation .job-candidate-section-title,
     .settings-section-navigation-title,
     .user-ai-profile-navigation-title,
     .ai-settings-navigation-title {
-      padding: 6px 10px 8px;
-      color: rgba(248, 250, 252, 0.58) !important;
-      font-size: 11px !important;
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-height: 34px !important;
+      height: auto !important;
+      padding: 6px 10px !important;
+      color: #ffb11b !important;
+      font-size: 14px !important;
       font-weight: 700 !important;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      line-height: 20px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      text-align: center !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset !important;
+      white-space: normal !important;
     }
 
     .settings-section-nav-item,
     .user-ai-profile-nav-item,
     .ai-settings-nav-item {
       box-sizing: border-box;
-      padding: 9px 10px;
+      min-height: 24px !important;
+      padding: 4px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
@@ -215,6 +285,26 @@
       border-radius: 0 5px 5px 0 !important;
       transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
       white-space: normal !important;
+      text-align: left !important;
+
+      .v-button-wrap {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: auto !important;
+        white-space: normal !important;
+      }
+
+      .v-button-caption {
+        display: block !important;
+        width: 100% !important;
+        font-size: 13px !important;
+        line-height: 17px !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: normal !important;
+        text-align: left !important;
+      }
     }
 
     .settings-section-nav-item:hover,
@@ -237,7 +327,7 @@
     .user-ai-profile-sensitive-warning,
     .ai-settings-security {
       box-sizing: border-box;
-      padding: 11px 12px;
+      padding: 8px 10px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -246,13 +336,42 @@
 
     .settings-section-content,
     .user-ai-profile-content,
-    .ai-settings-content {
-      box-sizing: border-box;
+    .ai-settings-content,
+    .edit-workspace-scroll {
+      box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
+      max-width: 100% !important;
       height: 100% !important;
-      padding: 0 6px 0 16px;
       background: transparent !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+
+      > .v-scrollable {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        padding: 16px 18px 32px 18px !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+      }
+    }
+
+    .edit-workspace-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+
+      > .v-slot {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+      }
     }
 
     .settings-section-toolbar,
@@ -261,35 +380,66 @@
       box-sizing: border-box;
       width: 100% !important;
       min-height: 58px;
-      margin-bottom: 4px;
-      padding: 12px 18px 10px;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.14) !important;
       border-radius: 8px !important;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
     }
 
+    .user-ai-profile-toolbar {
+      min-height: 76px;
+    }
+
+    .settings-section-toolbar {
+      min-height: 70px;
+    }
+
     .settings-section-toolbar .h1,
     .user-ai-profile-toolbar .h1,
     .ai-settings-toolbar .h1 {
+      padding: 8px 16px 2px !important;
       color: mix($v-font-color, $v-panel-background-color, 90%) !important;
-      font-size: 20px !important;
+      font-size: 18px !important;
       font-weight: 700 !important;
-      line-height: 26px !important;
+      line-height: 24px !important;
+    }
+
+    .settings-section-toolbar .settings-section-help,
+    .user-ai-profile-toolbar .user-ai-profile-help,
+    .ai-settings-toolbar .ai-settings-help {
+      display: block !important;
+      padding: 0 16px 8px !important;
+      font-size: 13px !important;
+      line-height: 17px !important;
+      color: mix($v-font-color, $v-panel-background-color, 68%) !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      white-space: normal !important;
     }
 
     .settings-section-toolbar-actions,
     .user-ai-profile-toolbar-actions,
     .ai-settings-toolbar-actions {
-      white-space: nowrap;
+      padding-right: 16px !important;
+      white-space: nowrap !important;
+    }
+
+    .ai-settings-toolbar .v-button {
+      min-width: 0 !important;
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+      font-size: 13px !important;
     }
 
     .settings-section-card,
     .ai-settings-card,
-    .user-ai-profile-section {
-      box-sizing: border-box;
+    .user-ai-profile-section,
+    .interface-settings-card,
+    .email-settings-card {
+      box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
+      max-width: 100% !important;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.15) !important;
       border-radius: 8px !important;
@@ -334,10 +484,6 @@
       opacity: 1 !important;
     }
 
-    .interface-settings-card {
-      max-width: 980px;
-    }
-
     .interface-settings-card .v-gridlayout-slot {
       padding-top: 6px;
       padding-bottom: 6px;
@@ -352,9 +498,17 @@
 
     .email-settings-grid,
     .email-settings-grid > div,
-    .email-settings-grid table {
+    .email-settings-grid table,
+    .user-ai-profile-section .v-gridlayout,
+    .user-ai-profile-section .v-gridlayout > div,
+    .user-ai-profile-section .v-gridlayout table,
+    .interface-settings-card .v-gridlayout,
+    .interface-settings-card .v-gridlayout > div,
+    .interface-settings-card .v-gridlayout table {
+      box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
+      max-width: 100% !important;
       table-layout: fixed;
     }
 
@@ -411,6 +565,16 @@
       font-weight: 600 !important;
     }
 
+    .v-checkbox,
+    .v-select-optiongroup {
+      label {
+        color: mix($v-font-color, $v-panel-background-color, 85%) !important;
+        font-size: 14px !important;
+        line-height: 20px !important;
+        cursor: pointer;
+      }
+    }
+
     .v-textfield:focus,
     .v-textarea:focus,
     .v-filterselect-focus,
@@ -425,17 +589,6 @@
     .v-filterselect-readonly,
     .v-readonly {
       background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
-    }
-
-    .v-checkbox {
-      padding: 3px 0;
-    }
-
-    .v-checkbox label,
-    .v-select-optiongroup label {
-      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
-      font-size: 14px !important;
-      line-height: 1.4 !important;
     }
 
     .v-button {
@@ -481,11 +634,15 @@
       .settings-section-sidebar,
       .user-ai-profile-sidebar,
       .ai-settings-sidebar {
-        width: 250px !important;
-        min-width: 250px !important;
-        max-width: 250px !important;
-        padding-left: 16px;
-        padding-right: 16px;
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+        padding: 0 !important;
+
+        .v-scrollable {
+          padding-left: 14px !important;
+          padding-right: 14px !important;
+        }
       }
 
       .settings-section-content,
