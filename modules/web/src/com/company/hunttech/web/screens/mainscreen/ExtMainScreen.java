@@ -138,12 +138,19 @@ public class ExtMainScreen extends MainScreen {
         return false;
     }
 
+    public static final String DASHBOARD_JSON_MANAGER = "com/company/hunttech/web/screens/mainscreen/dashboards/manager-dashboard.json";
+    public static final String DASHBOARD_JSON_RECRUITER = "com/company/hunttech/web/screens/mainscreen/dashboards/recruiter-dashboard.json";
+
     protected void initRoleBasedDashboard() {
         if (mainDashboard == null) {
             return;
         }
-        String targetCode = isManagerUser() ? DASHBOARD_CODE_MANAGER : DASHBOARD_CODE_RECRUITER;
+        boolean isManager = isManagerUser();
+        String targetCode = isManager ? DASHBOARD_CODE_MANAGER : DASHBOARD_CODE_RECRUITER;
+        String targetJson = isManager ? DASHBOARD_JSON_MANAGER : DASHBOARD_JSON_RECRUITER;
+
         mainDashboard.setCode(targetCode);
+        mainDashboard.setJsonPath(targetJson);
         mainDashboard.init(Collections.emptyMap());
     }
 
