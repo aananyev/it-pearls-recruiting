@@ -264,7 +264,8 @@
                                           width="100%"
                                           spacing="true">
                                         <hbox spacing="true"
-                                              width="100%">
+                                              width="100%"
+                                              stylename="company-main-tab-top-checks">
                                             <checkBox id="ourLegalEnityCheckBox"
                                                       dataContainer="companyDc"
                                                       caption="msg://msgOurLegalEntity"
