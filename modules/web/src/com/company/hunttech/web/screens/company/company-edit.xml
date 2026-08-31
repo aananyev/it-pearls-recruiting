@@ -111,7 +111,7 @@
                                           fallbackThemePath="icons/no-company.png"
                                           visible="true"
                                           align="MIDDLE_CENTER"
-                                          stylename="company-editor-logo-image job-candidate-avatar"
+                                          stylename="company-editor-logo-image"
                                           scaleMode="SCALE_DOWN"/>
                     </vbox>
                     <!-- Загрузчик логотипа: файл IMMEDIATE пишется в fileCompanyLogo -->

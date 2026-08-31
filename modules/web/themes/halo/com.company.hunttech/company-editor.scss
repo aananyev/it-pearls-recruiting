@@ -115,6 +115,23 @@
       display: block !important;
     }
 
+    // Fallback image (no-company.png) внутри ovaFallbackImage: масштабирование как у самого элемента
+    .company-editor-logo-image .ht-oval-fallback-image,
+    .company-editor-logo-image .ht-oval-fallback-image img,
+    .company-editor-logo-image .ht-oval-fallback-image .v-image-element {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 100% !important;
+      min-height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      display: block !important;
+    }
+
     .company-editor-logo-image {
       margin: 0 auto !important;
       overflow: hidden !important;
@@ -310,6 +327,14 @@
     .v-richtextarea iframe {
       box-sizing: border-box;
       max-width: 100%;
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
+    }
+
+    .v-richtextarea {
+      font-family: inherit !important;
     }
 
     // Ограничение ширины таблиц DataGrid внутри вкладок
@@ -339,6 +364,61 @@
       width: 100% !important;
       height: auto !important;
       min-height: min-content !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // GridLayout внутри вкладок: ограничение ширины слотов (fix overflow за границы экрана)
+    .edit-workspace-content .v-gridlayout,
+    .edit-workspace-content .v-gridlayout > div,
+    .edit-workspace-content .v-gridlayout table {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      table-layout: fixed !important;
+    }
+
+    .edit-workspace-content .v-gridlayout-slot {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding-top: 5px !important;
+      padding-bottom: 5px !important;
+    }
+
+    .edit-workspace-content .v-gridlayout-slot > .v-widget,
+    .edit-workspace-content .v-gridlayout-slot > .v-csslayout,
+    .edit-workspace-content .v-gridlayout-slot > .v-horizontallayout,
+    .edit-workspace-content .v-gridlayout-slot > .v-verticallayout {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .edit-workspace-content .v-gridlayout-slot .edit-form-control,
+    .edit-workspace-content .v-gridlayout-slot .v-textfield,
+    .edit-workspace-content .v-gridlayout-slot .v-filterselect,
+    .edit-workspace-content .v-gridlayout-slot .v-filterselect-input,
+    .edit-workspace-content .v-gridlayout-slot .c-pickerfield,
+    .edit-workspace-content .v-gridlayout-slot .c-suggestionfield,
+    .edit-workspace-content .v-gridlayout-slot .v-datefield,
+    .edit-workspace-content .v-gridlayout-slot .v-datefield-textfield,
+    .edit-workspace-content .v-gridlayout-slot .v-textarea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // RichTextArea (описание проекта и шаблон письма): iframe Vaadin RTE без
+    // ограничений расширяет карточку за границы вкладки (flex min-width:auto).
+    // Те же ограничения, что open-position-editor-richtext-variant5.
+    .v-richtextarea {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
   }
 }
