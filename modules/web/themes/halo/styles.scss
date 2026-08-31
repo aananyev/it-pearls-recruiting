@@ -35,6 +35,8 @@
 @import "com.company.hunttech/company-editor";
 @import "com.company.hunttech/position-editor";
 @import "com.company.hunttech/ai-dashboard-styles";
+@import "com.company.hunttech/tetris-candidates";
+
 @import "com.company.hunttech/chat-style.css";
 @import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap');
@@ -83,4 +85,6 @@
   @include company-editor-theme;
   @include position-editor-theme;
   @include ai-dashboard-styles;
+  @include tetris-candidates-theme;
+
 }

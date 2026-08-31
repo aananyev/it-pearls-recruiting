@@ -1,0 +1,98 @@
+{
+  "title": "Тетрис с кандидатами",
+  "code": "tetris-candidates-dashboard",
+  "visualModel": {
+    "className": "com.haulmont.addon.dashboard.model.visualmodel.RootLayout",
+    "data": {
+      "children": [
+        {
+          "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+          "data": {
+            "widget": {
+              "showWidgetCaption": false,
+              "widgetId": "MyActiveCandidates",
+              "caption": "Мои активные кандидаты",
+              "name": "My Active Candidateses",
+              "description": "Интерактивная матрица активных кандидатов и вакансий",
+              "parameters": [
+                {
+                  "name": "simpleMode",
+                  "alias": "simpleMode",
+                  "parameterValue": {
+                    "className": "com.haulmont.addon.dashboard.model.paramtypes.BooleanParameterValue",
+                    "data": {
+                      "value": false
+                    }
+                  },
+                  "id": "9c7ac3f5-92a9-4883-a1b5-a4c10e4d7e1a",
+                  "__state": 1,
+                  "__securityState": null,
+                  "dynamicAttributes": null,
+                  "_persistence_fetchGroup": null
+                },
+                {
+                  "name": "detailMode",
+                  "alias": "detailMode",
+                  "parameterValue": {
+                    "className": "com.haulmont.addon.dashboard.model.paramtypes.BooleanParameterValue",
+                    "data": {
+                      "value": true
+                    }
+                  },
+                  "id": "18b68949-60da-403c-9e87-7e2e9c770209",
+                  "__state": 1,
+                  "__securityState": null,
+                  "dynamicAttributes": null,
+                  "_persistence_fetchGroup": null
+                }
+              ],
+              "widgetFields": [],
+              "frameId": "hunttech_MyActiveCandidatesDashboard",
+              "createdBy": "admin",
+              "id": "162219b1-bd81-45f1-9abd-ef390d0d6354",
+              "__state": 1,
+              "__securityState": null,
+              "dynamicAttributes": null,
+              "_persistence_fetchGroup": null
+            },
+            "children": [],
+            "weight": 1,
+            "expand": null,
+            "styleName": null,
+            "width": 100,
+            "height": 100,
+            "widthUnit": "%",
+            "heightUnit": "%",
+            "id": "d0993e04-deac-4945-bd67-a86441e07087",
+            "__state": 1,
+            "__securityState": null,
+            "dynamicAttributes": null,
+            "_persistence_fetchGroup": null
+          }
+        }
+      ],
+      "weight": 1,
+      "expand": null,
+      "styleName": null,
+      "width": 100,
+      "height": 100,
+      "widthUnit": "%",
+      "heightUnit": "%",
+      "id": "d4127fd0-4b14-4ac3-aafc-9ff2dd05db18",
+      "__state": 1,
+      "__securityState": null,
+      "dynamicAttributes": null,
+      "_persistence_fetchGroup": null
+    }
+  },
+  "parameters": [],
+  "isAvailableForAllUsers": true,
+  "createdBy": "admin",
+  "timerDelay": 60,
+  "assistantBeanName": null,
+  "id": "a640927c-87f7-79a6-5a89-9d7f10ab59bb",
+  "__state": 1,
+  "__securityState": null,
+  "dynamicAttributes": null,
+  "_persistence_fetchGroup": null
+}

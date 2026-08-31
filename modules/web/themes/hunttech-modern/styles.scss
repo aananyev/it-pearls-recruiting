@@ -36,6 +36,8 @@
 @import "com.company.hunttech/company-editor";
 @import "com.company.hunttech/position-editor";
 @import "com.company.hunttech/ai-dashboard-styles";
+@import "com.company.hunttech/tetris-candidates";
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern {
@@ -75,4 +77,6 @@
   @include company-editor-theme;
   @include position-editor-theme;
   @include ai-dashboard-styles;
+  @include tetris-candidates-theme;
+
 }
