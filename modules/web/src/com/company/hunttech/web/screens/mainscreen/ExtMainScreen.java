@@ -121,7 +121,10 @@ public class ExtMainScreen extends MainScreen {
         if (user != null && getRoleService != null) {
             if (Boolean.TRUE.equals(getRoleService.isUserRoles(user, StandartRoles.MANAGER))
                     || Boolean.TRUE.equals(getRoleService.isUserRoles(user, StandartRoles.ADMINISTRATOR))
-                    || Boolean.TRUE.equals(getRoleService.isUserRoles(user, StandartRoles.OUSTAFF_NAMAGER))) {
+                    || Boolean.TRUE.equals(getRoleService.isUserRoles(user, StandartRoles.OUSTAFF_NAMAGER))
+                    || Boolean.TRUE.equals(getRoleService.isUserRoles(user, "Руководитель"))
+                    || Boolean.TRUE.equals(getRoleService.isUserRoles(user, "Менеджер"))
+                    || Boolean.TRUE.equals(getRoleService.isUserRoles(user, "Администратор"))) {
                 return true;
             }
         }
@@ -130,7 +133,10 @@ public class ExtMainScreen extends MainScreen {
             for (String role : roles) {
                 if (role != null && (role.contains(StandartRoles.MANAGER)
                         || role.contains(StandartRoles.ADMINISTRATOR)
-                        || role.contains(StandartRoles.OUSTAFF_NAMAGER))) {
+                        || role.contains(StandartRoles.OUSTAFF_NAMAGER)
+                        || role.contains("Руководитель")
+                        || role.contains("Менеджер")
+                        || role.contains("Администратор"))) {
                     return true;
                 }
             }

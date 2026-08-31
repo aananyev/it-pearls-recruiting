@@ -74,7 +74,8 @@ public class WorkSheduleWidget extends ScreenFragment {
 
         try {
             List<SessionLogEntry> sessionLogEntry =
-                    dataManager.loadValue(query, SessionLogEntry.class)
+                    dataManager.load(SessionLogEntry.class)
+                            .query(query)
                             .parameter("user", userSession.getUser())
                             .list();
 
