@@ -1610,7 +1610,8 @@ rating_battery_yellow_3:before {
 
   /* Custom Oval Image Widget Styles */
   .v-image.ht-oval-image,
-  .ht-oval-image {
+  .ht-oval-image,
+  .ht-oval-fallback-image {
     border-radius: 50% !important;
     overflow: hidden !important;
     display: inline-block;
