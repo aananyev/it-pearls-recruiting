@@ -1,0 +1,701 @@
+{
+  "title": "Рабочее место руководителя",
+  "code": "recruiting-dashboard",
+  "visualModel": {
+    "className": "com.haulmont.addon.dashboard.model.visualmodel.RootLayout",
+    "data": {
+      "children": [
+        {
+          "className": "com.haulmont.addon.dashboard.model.visualmodel.VerticalLayout",
+          "data": {
+            "children": [
+              {
+                "className": "com.haulmont.addon.dashboard.model.visualmodel.HorizontalLayout",
+                "data": {
+                  "children": [
+                    {
+                      "className": "com.haulmont.addon.dashboard.model.visualmodel.VerticalLayout",
+                      "data": {
+                        "children": [
+                          {
+                            "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                            "data": {
+                              "widget": {
+                                "showWidgetCaption": false,
+                                "widgetId": "HuntTech",
+                                "caption": "HuntTech",
+                                "name": "Логотип HuntTech",
+                                "description": null,
+                                "parameters": [],
+                                "widgetFields": [],
+                                "frameId": "hunttech_HunttechLogoWidget",
+                                "createdBy": "admin",
+                                "id": "110fef87-54dc-432d-9578-9361a2115cdc",
+                                "__state": 1,
+                                "__securityState": null,
+                                "dynamicAttributes": null,
+                                "_persistence_fetchGroup": null
+                              },
+                              "children": [],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": 100,
+                              "widthUnit": "%",
+                              "heightUnit": "%",
+                              "id": "8b5caaa2-78d0-415b-9fc2-2d114415acdd",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            }
+                          },
+                          {
+                            "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                            "data": {
+                              "widget": {
+                                "showWidgetCaption": false,
+                                "widgetId": "My name",
+                                "caption": "My name",
+                                "name": "Моё имя",
+                                "description": null,
+                                "parameters": [],
+                                "widgetFields": [],
+                                "frameId": "hunttech_MyNameWidget",
+                                "createdBy": "admin",
+                                "id": "02f7b31e-eb06-44e7-a2d8-660d688efef6",
+                                "__state": 1,
+                                "__securityState": null,
+                                "dynamicAttributes": null,
+                                "_persistence_fetchGroup": null
+                              },
+                              "children": [],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": -1,
+                              "widthUnit": "%",
+                              "heightUnit": "px",
+                              "id": "ddf2ae44-f0fa-451e-9d8b-58858eec45e0",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            }
+                          }
+                        ],
+                        "weight": 3,
+                        "expand": null,
+                        "styleName": null,
+                        "width": 100,
+                        "height": -1,
+                        "widthUnit": "%",
+                        "heightUnit": "px",
+                        "id": "c10b490d-99bb-4230-acba-50e61688e7f8",
+                        "__state": 1,
+                        "__securityState": null,
+                        "dynamicAttributes": null,
+                        "_persistence_fetchGroup": null
+                      }
+                    },
+                    {
+                      "className": "com.haulmont.addon.dashboard.model.visualmodel.GridLayout",
+                      "data": {
+                        "rows": 2,
+                        "columns": 2,
+                        "areas": [
+                          {
+                            "component": {
+                              "row": 0,
+                              "column": 0,
+                              "colSpan": 0,
+                              "rowSpan": 0,
+                              "children": [
+                                {
+                                  "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                                  "data": {
+                                    "widget": {
+                                      "showWidgetCaption": false,
+                                      "widgetId": "Interview assigned",
+                                      "caption": "Interview assigned",
+                                      "name": "Собеседования в месяц (назначенные)",
+                                      "description": null,
+                                      "parameters": [],
+                                      "widgetFields": [],
+                                      "frameId": "hunttech_InterviewsPerMonthsWidget",
+                                      "createdBy": "admin",
+                                      "id": "a2880413-a342-4ec5-b113-5dcdbce9ba62",
+                                      "__state": 1,
+                                      "__securityState": null,
+                                      "dynamicAttributes": null,
+                                      "_persistence_fetchGroup": null
+                                    },
+                                    "children": [],
+                                    "weight": 1,
+                                    "expand": null,
+                                    "styleName": null,
+                                    "width": 100,
+                                    "height": 100,
+                                    "widthUnit": "%",
+                                    "heightUnit": "%",
+                                    "id": "a3413cb9-2532-4b6f-9fce-f91c6fde5f20",
+                                    "__state": 1,
+                                    "__securityState": null,
+                                    "dynamicAttributes": null,
+                                    "_persistence_fetchGroup": null
+                                  }
+                                }
+                              ],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": 100,
+                              "widthUnit": "%",
+                              "heightUnit": "%",
+                              "id": "93ee19f9-834f-4857-811f-587717706218",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            },
+                            "row": 0,
+                            "col": 0,
+                            "col2": 0,
+                            "row2": 0,
+                            "id": "317f4cb0-eb17-4336-b027-4938db5c7a30",
+                            "__state": 1,
+                            "__securityState": null,
+                            "dynamicAttributes": null,
+                            "_persistence_fetchGroup": null
+                          },
+                          {
+                            "component": {
+                              "row": 0,
+                              "column": 1,
+                              "colSpan": 0,
+                              "rowSpan": 0,
+                              "children": [
+                                {
+                                  "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                                  "data": {
+                                    "widget": {
+                                      "showWidgetCaption": false,
+                                      "widgetId": "Interview conducted",
+                                      "caption": "Interview conducted",
+                                      "name": "Собеседования в месяц (проведённые)",
+                                      "description": null,
+                                      "parameters": [],
+                                      "widgetFields": [],
+                                      "frameId": "hunttech_InterviewPerMonthConductedWidget",
+                                      "createdBy": "admin",
+                                      "id": "7f1895e2-7ebf-48ea-ba30-5faab0a4c822",
+                                      "__state": 1,
+                                      "__securityState": null,
+                                      "dynamicAttributes": null,
+                                      "_persistence_fetchGroup": null
+                                    },
+                                    "children": [],
+                                    "weight": 1,
+                                    "expand": null,
+                                    "styleName": null,
+                                    "width": 100,
+                                    "height": 100,
+                                    "widthUnit": "%",
+                                    "heightUnit": "%",
+                                    "id": "1df5a76e-0d60-4d87-a85c-3fa4fc5a774d",
+                                    "__state": 1,
+                                    "__securityState": null,
+                                    "dynamicAttributes": null,
+                                    "_persistence_fetchGroup": null
+                                  }
+                                }
+                              ],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": 100,
+                              "widthUnit": "%",
+                              "heightUnit": "%",
+                              "id": "c1debb3d-07c1-4ca4-ae05-b5d8fee02275",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            },
+                            "row": 0,
+                            "col": 1,
+                            "col2": 1,
+                            "row2": 0,
+                            "id": "93a96e03-eab3-4359-9b9d-f4e5302ed7f1",
+                            "__state": 1,
+                            "__securityState": null,
+                            "dynamicAttributes": null,
+                            "_persistence_fetchGroup": null
+                          },
+                          {
+                            "component": {
+                              "row": 1,
+                              "column": 0,
+                              "colSpan": 0,
+                              "rowSpan": 0,
+                              "children": [
+                                {
+                                  "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                                  "data": {
+                                    "widget": {
+                                      "showWidgetCaption": false,
+                                      "widgetId": "Job offer for new candidates",
+                                      "caption": "Job offer for new candidates",
+                                      "name": "Предложение о работе для нового кандидата",
+                                      "description": null,
+                                      "parameters": [],
+                                      "widgetFields": [],
+                                      "frameId": "hunttech_NewJobOfferWidget",
+                                      "createdBy": "admin",
+                                      "id": "d6306c49-aeca-4ca4-94a0-474d07149fab",
+                                      "__state": 1,
+                                      "__securityState": null,
+                                      "dynamicAttributes": null,
+                                      "_persistence_fetchGroup": null
+                                    },
+                                    "children": [],
+                                    "weight": 1,
+                                    "expand": null,
+                                    "styleName": null,
+                                    "width": 100,
+                                    "height": 100,
+                                    "widthUnit": "%",
+                                    "heightUnit": "%",
+                                    "id": "77265247-8548-4148-848d-d6b947e45396",
+                                    "__state": 1,
+                                    "__securityState": null,
+                                    "dynamicAttributes": null,
+                                    "_persistence_fetchGroup": null
+                                  }
+                                }
+                              ],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": 100,
+                              "widthUnit": "%",
+                              "heightUnit": "%",
+                              "id": "9de8c586-bd54-4c6d-9a6d-6c10393e50cb",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            },
+                            "row": 1,
+                            "col": 0,
+                            "col2": 0,
+                            "row2": 1,
+                            "id": "6a8ac59b-5a5b-4319-b715-e11653eec1a4",
+                            "__state": 1,
+                            "__securityState": null,
+                            "dynamicAttributes": null,
+                            "_persistence_fetchGroup": null
+                          },
+                          {
+                            "component": {
+                              "row": 1,
+                              "column": 1,
+                              "colSpan": 0,
+                              "rowSpan": 0,
+                              "children": [
+                                {
+                                  "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                                  "data": {
+                                    "widget": {
+                                      "showWidgetCaption": false,
+                                      "widgetId": "Send email counter",
+                                      "caption": "Send email counter",
+                                      "name": "Отправленные письма",
+                                      "description": null,
+                                      "parameters": [],
+                                      "widgetFields": [],
+                                      "frameId": "hunttech_SendEmailCounterWidget",
+                                      "createdBy": "admin",
+                                      "id": "32944de0-fb1b-4a93-bbd3-217a2f172eec",
+                                      "__state": 1,
+                                      "__securityState": null,
+                                      "dynamicAttributes": null,
+                                      "_persistence_fetchGroup": null
+                                    },
+                                    "children": [],
+                                    "weight": 1,
+                                    "expand": null,
+                                    "styleName": null,
+                                    "width": 100,
+                                    "height": 100,
+                                    "widthUnit": "%",
+                                    "heightUnit": "%",
+                                    "id": "953cac06-8a24-4bcd-ad68-60d5a077fa1c",
+                                    "__state": 1,
+                                    "__securityState": null,
+                                    "dynamicAttributes": null,
+                                    "_persistence_fetchGroup": null
+                                  }
+                                }
+                              ],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": 100,
+                              "widthUnit": "%",
+                              "heightUnit": "%",
+                              "id": "02e86597-9669-4f71-9c29-0bec7f4d5ecc",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            },
+                            "row": 1,
+                            "col": 1,
+                            "col2": 1,
+                            "row2": 1,
+                            "id": "962cb89c-d6db-46d9-85f3-c1a5ef1afac4",
+                            "__state": 1,
+                            "__securityState": null,
+                            "dynamicAttributes": null,
+                            "_persistence_fetchGroup": null
+                          }
+                        ],
+                        "children": [],
+                        "weight": 14,
+                        "expand": null,
+                        "styleName": null,
+                        "width": 100,
+                        "height": 100,
+                        "widthUnit": "%",
+                        "heightUnit": "%",
+                        "id": "bc580498-e007-402e-9fbe-f93db9c61c9f",
+                        "__state": 1,
+                        "__securityState": null,
+                        "dynamicAttributes": null,
+                        "_persistence_fetchGroup": null
+                      }
+                    },
+                    {
+                      "className": "com.haulmont.addon.dashboard.model.visualmodel.VerticalLayout",
+                      "data": {
+                        "children": [
+                          {
+                            "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                            "data": {
+                              "widget": {
+                                "showWidgetCaption": false,
+                                "widgetId": "Date",
+                                "caption": "Date",
+                                "name": "Текущая дата",
+                                "description": null,
+                                "parameters": [],
+                                "widgetFields": [],
+                                "frameId": "hunttech_CurrentDateWidget",
+                                "createdBy": "admin",
+                                "id": "3819f607-4352-480b-b050-45bf1d709240",
+                                "__state": 1,
+                                "__securityState": null,
+                                "dynamicAttributes": null,
+                                "_persistence_fetchGroup": null
+                              },
+                              "children": [],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": 100,
+                              "widthUnit": "%",
+                              "heightUnit": "%",
+                              "id": "41be652b-bf60-426c-91e1-b53e21d09949",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            }
+                          },
+                          {
+                            "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                            "data": {
+                              "widget": {
+                                "showWidgetCaption": false,
+                                "widgetId": "Work Shedule",
+                                "caption": "Work Shedule",
+                                "name": "График работы",
+                                "description": null,
+                                "parameters": [],
+                                "widgetFields": [],
+                                "frameId": "hunttech_WorkSheduleWidget",
+                                "createdBy": "admin",
+                                "id": "543e3b61-ba90-4021-9a73-f91a18950d16",
+                                "__state": 1,
+                                "__securityState": null,
+                                "dynamicAttributes": null,
+                                "_persistence_fetchGroup": null
+                              },
+                              "children": [],
+                              "weight": 1,
+                              "expand": null,
+                              "styleName": null,
+                              "width": 100,
+                              "height": 100,
+                              "widthUnit": "%",
+                              "heightUnit": "%",
+                              "id": "a38b34dc-3ff5-4dcc-9dfb-6cd0f72b4e1c",
+                              "__state": 1,
+                              "__securityState": null,
+                              "dynamicAttributes": null,
+                              "_persistence_fetchGroup": null
+                            }
+                          }
+                        ],
+                        "weight": 3,
+                        "expand": null,
+                        "styleName": null,
+                        "width": 100,
+                        "height": -1,
+                        "widthUnit": "%",
+                        "heightUnit": "px",
+                        "id": "1aa20e13-0d2a-4e4c-8433-6f7ac6f09d09",
+                        "__state": 1,
+                        "__securityState": null,
+                        "dynamicAttributes": null,
+                        "_persistence_fetchGroup": null
+                      }
+                    }
+                  ],
+                  "weight": 1,
+                  "expand": null,
+                  "styleName": null,
+                  "width": 100,
+                  "height": 340,
+                  "widthUnit": "%",
+                  "heightUnit": "px",
+                  "id": "cf898a1c-61a8-4dfc-a4ca-aa764e459588",
+                  "__state": 1,
+                  "__securityState": null,
+                  "dynamicAttributes": null,
+                  "_persistence_fetchGroup": null
+                }
+              },
+              {
+                "className": "com.haulmont.addon.dashboard.model.visualmodel.HorizontalLayout",
+                "data": {
+                  "children": [
+                    {
+                      "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                      "data": {
+                        "widget": {
+                          "showWidgetCaption": false,
+                          "widgetId": "Funnel Hunting All Employee",
+                          "caption": "Funnel Hunting All Employee",
+                          "name": "Воронка подбора по всем сотрудникам",
+                          "description": null,
+                          "parameters": [],
+                          "widgetFields": [],
+                          "frameId": "hunttech_FunnelHuntingAllEmployeeWidget",
+                          "createdBy": "admin",
+                          "id": "5b8f263f-bdd5-489a-b9b5-885360a01a0a",
+                          "__state": 1,
+                          "__securityState": null,
+                          "dynamicAttributes": null,
+                          "_persistence_fetchGroup": null
+                        },
+                        "children": [],
+                        "weight": 12,
+                        "expand": null,
+                        "styleName": null,
+                        "width": 100,
+                        "height": 100,
+                        "widthUnit": "%",
+                        "heightUnit": "%",
+                        "id": "2416575c-ef8a-4ea5-9bae-5b01ac2c1b59",
+                        "__state": 1,
+                        "__securityState": null,
+                        "dynamicAttributes": null,
+                        "_persistence_fetchGroup": null
+                      }
+                    },
+                    {
+                      "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                      "data": {
+                        "widget": {
+                          "showWidgetCaption": false,
+                          "widgetId": "Recruiters Leaders",
+                          "caption": "Лидеры среди рекрутеров",
+                          "name": "Лидеры среди рекрутеров (Назначения + собеседования)",
+                          "description": null,
+                          "parameters": [],
+                          "widgetFields": [],
+                          "frameId": "hunttech_RecrutersLeadersWidget",
+                          "createdBy": "admin",
+                          "id": "891b59a0-543f-409b-96a8-85260c2e2c3d",
+                          "__state": 1,
+                          "__securityState": null,
+                          "dynamicAttributes": null,
+                          "_persistence_fetchGroup": null
+                        },
+                        "children": [],
+                        "weight": 8,
+                        "expand": null,
+                        "styleName": null,
+                        "width": 100,
+                        "height": 100,
+                        "widthUnit": "%",
+                        "heightUnit": "%",
+                        "id": "b55154e0-5165-4c00-9753-f2c49331b6b5",
+                        "__state": 1,
+                        "__securityState": null,
+                        "dynamicAttributes": null,
+                        "_persistence_fetchGroup": null
+                      }
+                    }
+                  ],
+                  "weight": 1,
+                  "expand": null,
+                  "styleName": null,
+                  "width": 100,
+                  "height": 450,
+                  "widthUnit": "%",
+                  "heightUnit": "px",
+                  "id": "cf5e59df-7dbd-451d-b536-3356704087d0",
+                  "__state": 1,
+                  "__securityState": null,
+                  "dynamicAttributes": null,
+                  "_persistence_fetchGroup": null
+                }
+              },
+              {
+                "className": "com.haulmont.addon.dashboard.model.visualmodel.HorizontalLayout",
+                "data": {
+                  "children": [
+                    {
+                      "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                      "data": {
+                        "widget": {
+                          "showWidgetCaption": false,
+                          "widgetId": "Monthly Interview Count",
+                          "caption": "Monthly Interview Count",
+                          "name": "Помесячная динамика собеседований",
+                          "description": null,
+                          "parameters": [],
+                          "widgetFields": [],
+                          "frameId": "hunttech_MonthlyInterviewCountWidget",
+                          "createdBy": "admin",
+                          "id": "9e242524-56fb-4dd6-8610-6d61daa5d1d5",
+                          "__state": 1,
+                          "__securityState": null,
+                          "dynamicAttributes": null,
+                          "_persistence_fetchGroup": null
+                        },
+                        "children": [],
+                        "weight": 10,
+                        "expand": null,
+                        "styleName": null,
+                        "width": 100,
+                        "height": 100,
+                        "widthUnit": "%",
+                        "heightUnit": "%",
+                        "id": "e267491f-d17a-40b7-9ab9-99baee4ad122",
+                        "__state": 1,
+                        "__securityState": null,
+                        "dynamicAttributes": null,
+                        "_persistence_fetchGroup": null
+                      }
+                    },
+                    {
+                      "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                      "data": {
+                        "widget": {
+                          "showWidgetCaption": false,
+                          "widgetId": "Researcher Effectivity",
+                          "caption": "Researcher Effectivity",
+                          "name": "Эффективность ресерчера",
+                          "description": null,
+                          "parameters": [],
+                          "widgetFields": [],
+                          "frameId": "hunttech_Reserachereffectivity",
+                          "createdBy": "admin",
+                          "id": "b2a95f4d-db54-4b88-a843-e6fc4cf8250a",
+                          "__state": 1,
+                          "__securityState": null,
+                          "dynamicAttributes": null,
+                          "_persistence_fetchGroup": null
+                        },
+                        "children": [],
+                        "weight": 10,
+                        "expand": null,
+                        "styleName": null,
+                        "width": 100,
+                        "height": 100,
+                        "widthUnit": "%",
+                        "heightUnit": "%",
+                        "id": "a207f703-531d-494b-bb27-16495bab9ed0",
+                        "__state": 1,
+                        "__securityState": null,
+                        "dynamicAttributes": null,
+                        "_persistence_fetchGroup": null
+                      }
+                    }
+                  ],
+                  "weight": 1,
+                  "expand": null,
+                  "styleName": null,
+                  "width": 100,
+                  "height": 380,
+                  "widthUnit": "%",
+                  "heightUnit": "px",
+                  "id": "c7fe7b6b-7290-471e-98ac-76f3588a442a",
+                  "__state": 1,
+                  "__securityState": null,
+                  "dynamicAttributes": null,
+                  "_persistence_fetchGroup": null
+                }
+              }
+            ],
+            "weight": 1,
+            "expand": null,
+            "styleName": null,
+            "width": 100,
+            "height": 100,
+            "widthUnit": "%",
+            "heightUnit": "%",
+            "id": "4cfc8460-81e6-43f1-8f9e-824441024682",
+            "__state": 1,
+            "__securityState": null,
+            "dynamicAttributes": null,
+            "_persistence_fetchGroup": null
+          }
+        }
+      ],
+      "weight": 1,
+      "expand": null,
+      "styleName": null,
+      "width": 100,
+      "height": 100,
+      "widthUnit": "%",
+      "heightUnit": "%",
+      "id": "7893e5af-0b41-4ffe-969e-9a429e660b60",
+      "__state": 1,
+      "__securityState": null,
+      "dynamicAttributes": null,
+      "_persistence_fetchGroup": null
+    }
+  },
+  "parameters": [],
+  "isAvailableForAllUsers": true,
+  "createdBy": "admin",
+  "timerDelay": 60,
+  "assistantBeanName": null,
+  "id": "f0111f9c-5b41-4afa-8a71-0d47e92208ec",
+  "__state": 1,
+  "__securityState": null,
+  "dynamicAttributes": null,
+  "_persistence_fetchGroup": null
+}

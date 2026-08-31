@@ -7,7 +7,11 @@ import com.company.hunttech.core.SignIconService;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.PersonelReserve;
+import com.company.hunttech.service.GetRoleService;
+import com.company.hunttech.web.StandartRoles;
 import com.company.hunttech.web.extension.ChangeFaviconExtension;
+import com.haulmont.addon.dashboard.gui.components.DashboardFrame;
+import com.haulmont.addon.dashboard.model.Dashboard;
 import com.haulmont.cuba.core.app.ConfigStorageService;
 import com.haulmont.cuba.core.config.AppPropertiesLocator;
 import com.haulmont.cuba.core.config.AppPropertyEntity;
@@ -85,17 +89,65 @@ public class ExtMainScreen extends MainScreen {
     @Inject
     private VBoxLayout mainVBox;
     @Inject
+    protected DashboardFrame mainDashboard;
+    @Inject
+    private GetRoleService getRoleService;
+    @Inject
     private UiComponents uiComponents;
     @Inject
     private Image logoImage;
     @Inject
     private ConfigStorageService configStorageService;
 
+    public static final String DASHBOARD_CODE_MANAGER = "recruiting-dashboard";
+    public static final String DASHBOARD_CODE_RECRUITER = "recruiting-dashboard-recruiter";
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        initRoleBasedDashboard();
         signIconsChecksAndGenerate();
         setApplicationLogo();
         setFavicon();
+    }
+
+    public boolean isManagerUser() {
+        if (userSession == null) {
+            return false;
+        }
+        if (userSession.isSystem()) {
+            return true;
+        }
+        User user = userSession.getUser();
+        if (user != null && getRoleService != null) {
+            if (Boolean.TRUE.equals(getRoleService.isUserRoles(user, StandartRoles.MANAGER))
+                    || Boolean.TRUE.equals(getRoleService.isUserRoles(user, StandartRoles.ADMINISTRATOR))
+                    || Boolean.TRUE.equals(getRoleService.isUserRoles(user, StandartRoles.OUSTAFF_NAMAGER))) {
+                return true;
+            }
+        }
+        Collection<String> roles = userSession.getRoles();
+        if (roles != null) {
+            for (String role : roles) {
+                if (role != null && (role.contains(StandartRoles.MANAGER)
+                        || role.contains(StandartRoles.ADMINISTRATOR)
+                        || role.contains(StandartRoles.OUSTAFF_NAMAGER))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected void initRoleBasedDashboard() {
+        if (mainDashboard == null) {
+            return;
+        }
+        String targetCode = isManagerUser() ? DASHBOARD_CODE_MANAGER : DASHBOARD_CODE_RECRUITER;
+        Dashboard d = mainDashboard.getDashboard();
+        if (d == null || !targetCode.equals(d.getCode())) {
+            mainDashboard.setCode(targetCode);
+            mainDashboard.init(Collections.emptyMap());
+        }
     }
 
     private static final String DEFAULT_FAVICON = "./VAADIN/themes/hover/favicon.ico";
