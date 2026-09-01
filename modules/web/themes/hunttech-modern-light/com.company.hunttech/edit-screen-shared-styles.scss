@@ -483,23 +483,39 @@
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Единый шрифт полей ввода: font-size: 15px / line-height: 38px / font-weight: 400
-  // (эталон — поле «Страна» в CompanyEdit: lookupPickerField → c-pickerfield
-  // → v-filterselect-input внутри). Применяется ко всем edit-form-control:
-  // v-textfield, v-filterselect-input, v-datefield-textfield, c-suggestionfield,
-  // c-pickerfield (внутренний input лукапа), v-textarea, v-checkbox, v-richtextarea,
-  // подписи полей (.v-caption). Покрывает все вкладки Edit-форм (CompanyEdit, ProjectEdit,
-  // OpenPositionEdit, JobCandidateEdit, PositionEdit и т.д.).
+  // (эталон — поле «Страна» в CompanyEdit: lookupPickerField / lookupField / textField).
+  // Применяется ко всем элементам ввода (v-textfield, v-filterselect-input, v-datefield-textfield,
+  // c-suggestionfield, c-pickerfield, v-textarea) как прямым (.v-textfield.edit-form-control),
+  // так и вложенным (.edit-form-control .v-textfield), а также внутри .edit-workspace / .edit-card / .edit-tabs.
   // ═══════════════════════════════════════════════════════════════════════════
-  .edit-form-control .v-filterselect-input,
+  .v-textfield,
+  .v-textfield.edit-form-control,
+  .edit-form-control.v-textfield,
   .edit-form-control .v-textfield,
+  .v-filterselect-input,
+  .edit-form-control .v-filterselect-input,
+  .v-datefield-textfield,
   .edit-form-control .v-datefield-textfield,
+  .c-suggestionfield,
   .edit-form-control .c-suggestionfield,
   .edit-form-control .c-pickerfield .v-filterselect-input,
   .edit-form-control .c-pickerfield .c-suggestionfield,
   .edit-form-control .c-pickerfield .v-textfield,
   .edit-form-control .c-pickerfield .v-datefield-textfield,
   .edit-form-control .c-pickerfield input,
+  .edit-workspace .v-textfield,
+  .edit-workspace .v-filterselect-input,
+  .edit-workspace-content .v-textfield,
+  .edit-workspace-content .v-filterselect-input,
+  .edit-card .v-textfield,
+  .edit-card .v-filterselect-input,
+  .edit-tabs .v-textfield,
+  .edit-tabs .v-filterselect-input,
   .edit-form-control .v-textarea,
+  .edit-workspace .v-textarea,
+  .edit-workspace-content .v-textarea,
+  .edit-card .v-textarea,
+  .edit-tabs .v-textarea,
   .edit-form-control .v-richtextarea,
   .edit-form-control .v-richtextarea .v-richtextarea-content,
   .edit-form-control .v-richtextarea iframe,
@@ -516,23 +532,30 @@
     line-height: 1.45 !important;
   }
 
-  // line-height: 38px только для однострочных полей ввода (высота 38px)
-  .edit-form-control .v-filterselect-input,
+  // line-height: 38px и высота 38px строго для однострочных полей ввода (textField, lookupField, dateField, suggestionField)
+  .v-textfield,
+  .v-textfield.edit-form-control,
+  .edit-form-control.v-textfield,
   .edit-form-control .v-textfield,
+  .v-filterselect-input,
+  .edit-form-control .v-filterselect-input,
+  .v-datefield-textfield,
   .edit-form-control .v-datefield-textfield,
+  .c-suggestionfield,
   .edit-form-control .c-suggestionfield,
   .edit-form-control .c-pickerfield .v-filterselect-input,
   .edit-form-control .c-pickerfield .c-suggestionfield,
   .edit-form-control .c-pickerfield .v-textfield,
   .edit-form-control .c-pickerfield .v-datefield-textfield,
-  .edit-form-control .c-pickerfield input {
-    line-height: 38px !important;
-  }
-
-  .edit-form-control .v-filterselect-input,
-  .edit-form-control .v-textfield,
-  .edit-form-control .v-datefield-textfield,
-  .edit-form-control .c-suggestionfield {
+  .edit-form-control .c-pickerfield input,
+  .edit-workspace .v-textfield,
+  .edit-workspace .v-filterselect-input,
+  .edit-workspace-content .v-textfield,
+  .edit-workspace-content .v-filterselect-input,
+  .edit-card .v-textfield,
+  .edit-card .v-filterselect-input,
+  .edit-tabs .v-textfield,
+  .edit-tabs .v-filterselect-input {
     height: 38px !important;
     min-height: 38px !important;
     padding: 0 10px !important;
