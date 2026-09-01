@@ -497,6 +497,10 @@
 
     // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
     .company-main-tab,
+// ═══════════════════════════════════════════════════════════════════════════
+    // Выравнивание всех элементов ввода по правому краю без выхода за границы
+    // ═══════════════════════════════════════════════════════════════════════════
+    .company-details-tab,
     .company-requisites-tab,
     .company-description-tab,
     .company-departments-tab,
@@ -505,17 +509,46 @@
     .edit-workspace-content,
     .edit-tabs,
     .edit-card,
+    .edit-card .v-panel-content,
+    .edit-card .v-panel-deco,
     .edit-form-control,
+    .v-verticallayout,
+    .v-horizontallayout,
+    .v-slot,
+    .v-slot-edit-form-control,
+    .v-textfield,
+    .v-filterselect,
+    .v-filterselect-input,
+    .c-pickerfield,
+    .c-pickerfield-layout,
+    .c-pickerfield-layout-cell,
+    .v-datefield,
+    .v-datefield-textfield,
+    .c-suggestionfield,
+    .v-textarea,
+    .v-richtextarea,
+    .v-richtextarea-content,
+    .v-richtextarea iframe,
     .v-grid,
-    .v-grid-tablewrapper,
-    .v-richtextarea {
+    .v-grid-tablewrapper {
       box-sizing: border-box !important;
       min-width: 0 !important;
       max-width: 100% !important;
     }
 
+    // Ограничение ширины вертикальных контейнеров и слотов по правому краю карточки
     .edit-workspace-content,
-    .company-requisites-tab .edit-workspace-content {
+    .edit-workspace-content > .v-verticallayout,
+    .edit-card .v-verticallayout,
+    .edit-card .v-verticallayout > .v-slot,
+    .company-details-tab .v-verticallayout,
+    .company-details-tab .v-verticallayout > .v-slot,
+    .company-requisites-tab .v-verticallayout,
+    .company-requisites-tab .v-verticallayout > .v-slot,
+    .company-description-tab .v-verticallayout,
+    .company-description-tab .v-verticallayout > .v-slot,
+    .company-departments-tab .v-verticallayout,
+    .company-departments-tab .v-verticallayout > .v-slot {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
@@ -523,16 +556,52 @@
       overflow-x: hidden !important;
     }
 
-    .edit-workspace-content .v-horizontallayout,
-    .edit-card .v-horizontallayout,
-    .company-requisites-tab .v-horizontallayout {
+    // Все однострочные и многострочные элементы ввода (textField, lookupPickerField, textArea, richTextArea, dataGrid):
+    .edit-workspace-content .v-textfield,
+    .edit-workspace-content .v-filterselect,
+    .edit-workspace-content .c-pickerfield,
+    .edit-workspace-content .v-textarea,
+    .edit-workspace-content .v-richtextarea,
+    .edit-workspace-content .v-grid,
+    .edit-card .v-textfield,
+    .edit-card .v-filterselect,
+    .edit-card .c-pickerfield,
+    .edit-card .v-textarea,
+    .edit-card .v-richtextarea,
+    .edit-card .v-grid {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
     }
 
-    // Двухколоночная верстка: каждая колонка строго 50% ширины
+    // LookupPickerField (c-pickerfield): кнопки действий никогда не выталкивают поле вправо
+    .c-pickerfield,
+    .c-pickerfield-layout {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      table-layout: fixed !important;
+    }
+
+    .c-pickerfield-layout-cell {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+    }
+
+    .c-pickerfield .c-pickerfield-layout-cell:first-child {
+      width: 100% !important;
+    }
+
+    .c-pickerfield .c-pickerfield-button {
+      box-sizing: border-box !important;
+      flex-shrink: 0 !important;
+      width: 34px !important;
+      min-width: 34px !important;
+      max-width: 34px !important;
+    }
+
+        // Двухколоночная верстка: каждая колонка строго 50% ширины
     .edit-workspace-content .v-horizontallayout > .v-expand,
     .edit-card .v-horizontallayout > .v-expand,
     .company-requisites-tab .v-horizontallayout > .v-expand {

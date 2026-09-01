@@ -472,13 +472,26 @@
   }
 
   .edit-form-control .c-pickerfield-layout {
-    table-layout: fixed;
+    table-layout: fixed !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .edit-form-control .c-pickerfield-layout-cell {
     box-sizing: border-box;
     min-width: 0 !important;
-    max-width: 100% !important;
+  }
+
+  .edit-form-control .c-pickerfield-layout-cell:first-child {
+    width: 100% !important;
+  }
+
+  .edit-form-control .c-pickerfield .c-pickerfield-button {
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
