@@ -745,6 +745,8 @@
                                           caption="msg://msgCompanyDescriptionSection"
                                           stylename="edit-card"
                                           showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
                                           width="100%">
                                     <vbox id="companyDescriptionFieldsBox"
                                           width="100%"
@@ -762,6 +764,8 @@
                                           caption="msg://msgCompanyWorkCondition"
                                           stylename="edit-card"
                                           showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
                                           width="100%">
                                     <vbox id="companyWorkingConditionsFieldsBox"
                                           width="100%"
@@ -802,6 +806,8 @@
                                           caption="msg://msgCompanyDepartmentsSection"
                                           stylename="edit-card"
                                           showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
                                           width="100%"
                                           height="100%"
                                           minHeight="360px"
@@ -817,14 +823,14 @@
                                             <action id="remove" type="remove"/>
                                         </actions>
                                         <columns>
-                                            <column id="departamentRuName" property="departamentRuName"/>
-                                            <column id="departamentDirector" property="departamentDirector"/>
-                                            <column id="departamentHrDirector" property="departamentHrDirector"/>
+                                            <column id="departamentRuName" property="departamentRuName" expandRatio="2" minimumWidth="180px"/>
+                                            <column id="departamentDirector" property="departamentDirector" expandRatio="2" minimumWidth="180px"/>
+                                            <column id="departamentHrDirector" property="departamentHrDirector" expandRatio="2" minimumWidth="180px"/>
                                         </columns>
                                         <buttonsPanel>
-                                            <button action="departmentOfCompanyTable.create"/>
-                                            <button action="departmentOfCompanyTable.edit"/>
-                                            <button action="departmentOfCompanyTable.remove"/>
+                                            <button id="createDeptBtn" action="departmentOfCompanyTable.create" stylename="primary candidate-btn candidate-create-btn"/>
+                                            <button id="editDeptBtn" action="departmentOfCompanyTable.edit" stylename="secondary candidate-btn"/>
+                                            <button id="removeDeptBtn" action="departmentOfCompanyTable.remove" stylename="secondary candidate-btn"/>
                                         </buttonsPanel>
                                     </dataGrid>
                                 </groupBox>
