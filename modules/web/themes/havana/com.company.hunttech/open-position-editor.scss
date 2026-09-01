@@ -1624,6 +1624,120 @@
       }
     }
 
+    /* Вкладка «Тестовое задание» (tabExercise): адаптивная компоновка редактора и признака */
+    #exerciseVbox,
+    .open-position-editor #exerciseVbox,
+    #memoVbox,
+    .open-position-editor #memoVbox,
+    #templateLetterBox,
+    .open-position-editor #templateLetterBox {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      overflow-x: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 12px !important;
+
+      > .v-slot {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      > .v-expand {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        min-height: 220px !important;
+      }
+    }
+
+    #needExerciseCheckBox,
+    .open-position-editor #needExerciseCheckBox,
+    #needMemoCheckBox,
+    .open-position-editor #needMemoCheckBox,
+    #needLetterCheckBox,
+    .open-position-editor #needLetterCheckBox {
+      box-sizing: border-box !important;
+      min-height: 38px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      white-space: normal !important;
+      font-weight: 600 !important;
+    }
+
+    #exerciseRichTextArea,
+    .open-position-editor #exerciseRichTextArea,
+    #memoForInterviewRichTextArea,
+    .open-position-editor #memoForInterviewRichTextArea,
+    #templateLetterRichTextArea,
+    .open-position-editor #templateLetterRichTextArea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      min-height: 260px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      border: 1px solid rgba($v-font-color, 0.16) !important;
+      border-radius: 6px !important;
+      background: $v-panel-background-color !important;
+      overflow: hidden !important;
+
+      .v-richtextarea-toolbar {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 4px 6px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        min-height: 42px !important;
+        height: auto !important;
+        padding: 5px 8px !important;
+        border-bottom: 1px solid rgba($v-font-color, 0.13) !important;
+        background: mix($v-app-background-color, $v-panel-background-color, 58%) !important;
+
+        select {
+          box-sizing: border-box !important;
+          max-width: 160px !important;
+          height: 30px !important;
+          font-size: 13px !important;
+          border-radius: 4px !important;
+        }
+
+        .v-button {
+          box-sizing: border-box !important;
+          min-width: 30px !important;
+          height: 30px !important;
+          margin: 0 !important;
+          padding: 0 6px !important;
+          border-radius: 4px !important;
+          flex-shrink: 0 !important;
+        }
+      }
+
+      .v-richtextarea-content,
+      iframe {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        min-height: 220px !important;
+        background: $v-panel-background-color !important;
+      }
+    }
+
+
     /* Лента комментариев. */
     .open-position-editor-comments-scroll {
       box-sizing: border-box;
