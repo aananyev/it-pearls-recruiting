@@ -682,6 +682,16 @@
                        width="100%"
                        htmlEnabled="true"
                        stylename="open-position-editor-summary-value"/>
+                <!-- Компания позиции. -->
+                <label id="infoCompanyLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+                <!-- Департамент компании. -->
+                <label id="infoDepartmentLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
                 <!-- Проект позиции (наименование проекта). -->
                 <label id="infoProjectLabel"
                        width="100%"
@@ -974,12 +984,13 @@
                                         </actions>
                                     </lookupPickerField>
                                 </hbox>
-                                <!-- Строка 3: компания и департамент в одну линию (половина/половина). -->
+                                <!-- Строка 3: компания и департамент (скрыты из формы, отображаются в sidebar «Информация»). -->
                                 <hbox id="vacancyCompanyRow"
                                       spacing="true"
                                       width="100%"
+                                      visible="false"
                                       stylename="open-position-editor-field-row open-position-editor-row-half">
-<!-- Компания позиции (обязательная); при выборе обновляется список департаментов. -->
+                                    <!-- Компания позиции (невидимая, необязательная); при выборе обновляется список департаментов. -->
                                     <lookupPickerField id="companyNameField"
                                                        optionsContainer="companyNamesDc"
                                                        caption="msg://msgCompanyName"
@@ -987,7 +998,7 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"
-                                                       required="true">
+                                                       required="false">
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup"/>
@@ -995,7 +1006,7 @@
                                                     type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
-<!-- Департамент компании (обязательный, options зависят от выбранной компании). -->
+                                    <!-- Департамент компании (невидимый, необязательный, options зависят от выбранной компании). -->
                                     <lookupPickerField id="companyDepartamentField"
                                                        optionsContainer="companyDepartamentsDc"
                                                        caption="msg://msgDepartment"
@@ -1003,7 +1014,7 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"
-                                                       required="true">
+                                                       required="false">
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup"/>

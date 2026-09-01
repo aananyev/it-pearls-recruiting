@@ -88,6 +88,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> infoPositionLabel;
     @Inject
+    private Label<String> infoCompanyLabel;
+    @Inject
+    private Label<String> infoDepartmentLabel;
+    @Inject
     private Label<String> infoProjectLabel;
     @Inject
     private Label<String> infoOwnerLabel;
@@ -1887,6 +1891,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         projectNamesLc.load();
         setTopLabel();
+        refreshSidebarInfoCard();
     }
 
     /** Очистка связанной таблицы персонала. */
@@ -1931,6 +1936,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         companyDepartamentsLc.load();
 
         setTopLabel();
+        refreshSidebarInfoCard();
     }
 
     @Subscribe("commandOrPosition")
@@ -3590,6 +3596,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void refreshSidebarInfoCard() {
         OpenPosition pos = getEditedEntity();
         infoPositionLabel.setValue("<b>Должность:</b> " + esc(pos.getVacansyName()));
+
+        Company company = companyNameField != null && companyNameField.getValue() != null
+                ? companyNameField.getValue()
+                : (pos.getProjectName() != null ? pos.getProjectName().getCompanyName() : null);
+        infoCompanyLabel.setValue("<b>Компания:</b> " + (company != null ? esc(company.getComanyName()) : ""));
+
+        CompanyDepartament dept = companyDepartamentField != null && companyDepartamentField.getValue() != null
+                ? companyDepartamentField.getValue()
+                : (pos.getProjectName() != null ? pos.getProjectName().getProjectDepartment() : null);
+        infoDepartmentLabel.setValue("<b>Департамент:</b> " + (dept != null ? esc(dept.getDepartamentRuName()) : ""));
+
         Project project = pos.getProjectName();
         infoProjectLabel.setValue("<b>Проект:</b> " + (project != null ? esc(project.getProjectName()) : ""));
         Person owner = project != null ? project.getProjectOwner() : null;

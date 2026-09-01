@@ -223,6 +223,8 @@
           <vbox id="openPositionEditorNavigation" width="100%" visible="false"/>
           <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
           <label id="infoPositionLabel" width="100%" visible="false"/>
+          <label id="infoCompanyLabel" width="100%" visible="false"/>
+          <label id="infoDepartmentLabel" width="100%" visible="false"/>
           <label id="infoProjectLabel" width="100%" visible="false"/>
           <label id="infoOwnerLabel" width="100%" visible="false"/>
           <label id="infoCityLabel" width="100%" visible="false"/>
@@ -236,6 +238,9 @@
           <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
           <!-- Скрытый label звёздного рейтинга sidebar (контракт @Inject из основного XML). -->
           <label id="openPositionRatingLabel" width="100%" visible="false"/>
+          <label id="openPositionSkillsLabels" width="100%" visible="false"/>
+          <label id="priorityBadgeLabel" width="100%" visible="false"/>
+          <button id="scanOpenPositionSkillsBtn" visible="false"/>
         </vbox>
         <!-- Ключевые параметры используют только уже загруженные свойства edit-view. -->
         <vbox id="openPositionPreviewSummary" width="100%" spacing="true" stylename="edit-sidebar-summary">
