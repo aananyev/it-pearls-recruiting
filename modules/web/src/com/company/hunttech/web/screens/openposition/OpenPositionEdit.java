@@ -3274,9 +3274,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         // Инициализация загрузчика департаментов компании: если компания уже задана, фильтруем по ней;
         // в противном случае загружаем доступные департаменты, чтобы выпадающий список был активен.
-        if (getEditedEntity().getCompanyName() != null) {
-            companyDepartamentsLc.setParameter("company", getEditedEntity().getCompanyName());
-        } else if (companyNameField.getValue() != null) {
+        if (companyNameField != null && companyNameField.getValue() != null) {
             companyDepartamentsLc.setParameter("company", companyNameField.getValue());
         }
         companyDepartamentsLc.load();
@@ -3657,7 +3655,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         Company company = companyNameField != null && companyNameField.getValue() != null
                 ? companyNameField.getValue()
-                : (pos.getProjectName() != null ? pos.getProjectName().getCompanyName() : null);
+                : (pos.getProjectName() != null && pos.getProjectName().getProjectDepartment() != null
+                        ? pos.getProjectName().getProjectDepartment().getCompanyName()
+                        : null);
         infoCompanyLabel.setValue("<b>Компания:</b> " + (company != null ? esc(company.getComanyName()) : ""));
 
         CompanyDepartament dept = companyDepartamentField != null && companyDepartamentField.getValue() != null
