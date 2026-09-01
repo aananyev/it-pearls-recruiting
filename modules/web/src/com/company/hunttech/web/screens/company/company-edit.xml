@@ -454,6 +454,8 @@
                                             stylename="primary candidate-btn candidate-smartload-btn"/>
                                     <label value="Загрузка и парсинг из файла, текста или URL с автоматическим созданием директора в справочнике Люди"
                                            stylename="edit-help"
+                                           width="100%"
+                                           box.expandRatio="1"
                                            align="MIDDLE_LEFT"/>
                                 </hbox>
 
