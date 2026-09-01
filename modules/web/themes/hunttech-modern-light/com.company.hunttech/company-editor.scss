@@ -498,6 +498,58 @@
     // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
     .company-main-tab,
 // ═══════════════════════════════════════════════════════════════════════════
+    // Единый шрифт, стиль и размер полей ввода (TextField, LookupField, LookupPickerField, DateField, TextArea)
+    // ═══════════════════════════════════════════════════════════════════════════
+    .v-textfield,
+    .v-textfield.edit-form-control,
+    .edit-form-control.v-textfield,
+    .edit-form-control .v-textfield,
+    .v-filterselect-input,
+    .edit-form-control .v-filterselect-input,
+    .v-datefield-textfield,
+    .edit-form-control .v-datefield-textfield,
+    .c-suggestionfield,
+    .edit-form-control .c-suggestionfield,
+    .c-pickerfield .v-filterselect-input,
+    .c-pickerfield .c-suggestionfield,
+    .c-pickerfield .v-textfield,
+    .c-pickerfield .v-datefield-textfield,
+    .c-pickerfield input,
+    input.v-textfield,
+    input.v-filterselect-input {
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 38px !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      padding: 0 10px !important;
+      color: $v-font-color !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    .v-textarea,
+    .v-textarea.edit-form-control,
+    .edit-form-control .v-textarea,
+    textarea.v-textarea {
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
+      padding: 8px 10px !important;
+      color: $v-font-color !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
     // Выравнивание всех элементов ввода по правому краю без выхода за границы
     // ═══════════════════════════════════════════════════════════════════════════
     .company-details-tab,
