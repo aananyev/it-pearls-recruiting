@@ -88,6 +88,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> infoPositionLabel;
     @Inject
+    private Label<String> infoCompanyLabel;
+    @Inject
+    private Label<String> infoDepartmentLabel;
+    @Inject
     private Label<String> infoProjectLabel;
     @Inject
     private Label<String> infoOwnerLabel;
@@ -201,6 +205,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CheckBox needExerciseCheckBox;
     @Inject
     private RichTextArea exerciseRichTextArea;
+    @Inject
+    private RichTextArea interviewPlanRichTextArea;
+    @Inject
+    private RichTextArea searchMapRichTextArea;
     @Inject
     private LookupPickerField<Project> projectNameField;
     @Inject
@@ -440,6 +448,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private VBoxLayout openPositionMemoTabNavigation;
     @Inject
+    private VBoxLayout openPositionInterviewPlanTabNavigation;
+    @Inject
+    private VBoxLayout openPositionSearchMapTabNavigation;
+    @Inject
     private VBoxLayout openPositionTemplateLetterTabNavigation;
     @Inject
     private VBoxLayout openPositionSkillsTabNavigation;
@@ -454,8 +466,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private VBoxLayout openPositionEditorNavigation;
     /* Пункты наборов навигации вкладок «Трудовой договор», «Описание должности», «Файлы»,
-       «Тестовое задание», «Памятка», «Шаблон письма», «Навыки», «Новости», «Согласование»,
-       «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
+       «Тестовое задание», «Памятка», «План собеседования», «Карта поиска», «Шаблон письма», «Навыки»,
+       «Новости», «Согласование», «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
        вкладок без полей ввода — только подсветка). */
     @Inject
     private Button openPositionEditorNavLaborAgreement;
@@ -473,6 +485,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button openPositionEditorNavExercise;
     @Inject
     private Button openPositionEditorNavMemo;
+    @Inject
+    private Button openPositionEditorNavInterviewPlan;
+    @Inject
+    private Button openPositionEditorNavSearchMap;
     @Inject
     private Button openPositionEditorNavTemplateLetter;
     @Inject
@@ -493,6 +509,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private boolean jobDescriptionLobsLoaded;
     private boolean exerciseLoaded;
     private boolean memoLoaded;
+    private boolean interviewPlanLoaded;
+    private boolean searchMapLoaded;
     private boolean templateLetterLoaded;
     private boolean skillsLoaded;
     private boolean filesLoaded;
@@ -580,6 +598,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 loadMemoForInterviewLob();
                 memoLoaded = true;
             }
+            if ("tabInterviewPlan".equals(tabName) && !interviewPlanLoaded) {
+                loadInterviewPlanLob();
+                interviewPlanLoaded = true;
+            }
+            if ("tabSearchMap".equals(tabName) && !searchMapLoaded) {
+                loadSearchMapLob();
+                searchMapLoaded = true;
+            }
             if ("tabTemplateLetter".equals(tabName) && !templateLetterLoaded) {
                 loadTemplateLetterLob();
                 templateLetterLoaded = true;
@@ -636,6 +662,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 openPositionFilesTabNavigation,
                 openPositionExerciseTabNavigation,
                 openPositionMemoTabNavigation,
+                openPositionInterviewPlanTabNavigation,
+                openPositionSearchMapTabNavigation,
                 openPositionTemplateLetterTabNavigation,
                 openPositionSkillsTabNavigation,
                 openPositionNewsTabNavigation,
@@ -660,9 +688,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     /** Вкладки, в контенте которых два и более блока ввода: только для них в sidebar
      *  показывается label-навигация. Вкладки с единственным блоком ввода навигацию не имеют. */
     private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION = new HashSet<>(Arrays.asList(
-            "tabOpenPosition",     // 5 блоков: наименование, параметры, карточка вакансии, команда, зарплата
-            "laborAgreementTab",   // 2 блока: трудовые соглашения, детали оплаты
-            "tabJobDescription")); // 3 блока: опыт, аккордеон описаний, короткое описание
+        "tabOpenPosition",     // 5 блоков: наименование, параметры, карточка вакансии, команда, зарплата
+        "laborAgreementTab",   // 2 блока: трудовые соглашения, детали оплаты
+        "tabJobDescription")); // 3 блока: опыт, аккордеон описаний, короткое описание
 
     /** Показывает label-навигацию sidebar только для вкладок с двумя и более блоками ввода:
      *  контейнер openPositionEditorNavigation (заголовок + наборы пунктов) скрыт целиком на
@@ -677,11 +705,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         openPositionMainTabNavigation.setVisible("tabOpenPosition".equals(selectedTabName));
         openPositionLaborTabNavigation.setVisible("laborAgreementTab".equals(selectedTabName));
         openPositionJobDescriptionTabNavigation.setVisible("tabJobDescription".equals(selectedTabName));
-        // Наборы одноблочных вкладок («Файлы», «Тестовое задание», «Памятка», «Шаблон письма»,
-        // «Навыки», «Новости», «Согласование», «Комментарии») в sidebar не показываются никогда.
+        // Наборы одноблочных вкладок («Файлы», «Тестовое задание», «Памятка», «План собеседования»,
+        // «Карта поиска», «Шаблон письма», «Навыки», «Новости», «Согласование», «Комментарии») в sidebar не показываются никогда.
         openPositionFilesTabNavigation.setVisible(false);
         openPositionExerciseTabNavigation.setVisible(false);
         openPositionMemoTabNavigation.setVisible(false);
+        openPositionInterviewPlanTabNavigation.setVisible(false);
+        openPositionSearchMapTabNavigation.setVisible(false);
         openPositionTemplateLetterTabNavigation.setVisible(false);
         openPositionSkillsTabNavigation.setVisible(false);
         openPositionNewsTabNavigation.setVisible(false);
@@ -802,6 +832,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onOpenPositionEditorNavMemoClick(Button.ClickEvent event) {
         activateNavigationItem(openPositionMemoTabNavigation, openPositionEditorNavMemo);
         needMemoCheckBox.focus();
+    }
+
+    @Subscribe("openPositionEditorNavInterviewPlan")
+    /** label-навигация вкладки «План собеседования»: клик подсвечивает пункт и переводит фокус
+     *  в редактор плана собеседования. */
+    public void onOpenPositionEditorNavInterviewPlanClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionInterviewPlanTabNavigation, openPositionEditorNavInterviewPlan);
+        interviewPlanRichTextArea.focus();
+    }
+
+    @Subscribe("openPositionEditorNavSearchMap")
+    /** label-навигация вкладки «Карта поиска»: клик подсвечивает пункт и переводит фокус
+     *  в редактор карты поиска. */
+    public void onOpenPositionEditorNavSearchMapClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionSearchMapTabNavigation, openPositionEditorNavSearchMap);
+        searchMapRichTextArea.focus();
     }
 
     @Subscribe("openPositionEditorNavTemplateLetter")
@@ -950,6 +996,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .add("memoForInterview")
                 .build());
         getEditedEntity().setMemoForInterview(reloaded.getMemoForInterview());
+    }
+
+    /** Lazy-загрузка плана собеседования при первом открытии вкладки. */
+    private void loadInterviewPlanLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("interviewPlan")
+                .build());
+        getEditedEntity().setInterviewPlan(reloaded.getInterviewPlan());
+    }
+
+    /** Lazy-загрузка карты поиска кандидата при первом открытии вкладки. */
+    private void loadSearchMapLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("searchMap")
+                .build());
+        getEditedEntity().setSearchMap(reloaded.getSearchMap());
     }
 
     /** Lazy-загрузка шаблона сопроводительного письма при первом открытии вкладки. */
@@ -1887,6 +1949,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         projectNamesLc.load();
         setTopLabel();
+        refreshSidebarInfoCard();
     }
 
     /** Очистка связанной таблицы персонала. */
@@ -1931,6 +1994,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         companyDepartamentsLc.load();
 
         setTopLabel();
+        refreshSidebarInfoCard();
     }
 
     @Subscribe("commandOrPosition")
@@ -3582,6 +3646,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void refreshSidebarInfoCard() {
         OpenPosition pos = getEditedEntity();
         infoPositionLabel.setValue("<b>Должность:</b> " + esc(pos.getVacansyName()));
+
+        Company company = companyNameField != null && companyNameField.getValue() != null
+                ? companyNameField.getValue()
+                : (pos.getProjectName() != null ? pos.getProjectName().getCompanyName() : null);
+        infoCompanyLabel.setValue("<b>Компания:</b> " + (company != null ? esc(company.getComanyName()) : ""));
+
+        CompanyDepartament dept = companyDepartamentField != null && companyDepartamentField.getValue() != null
+                ? companyDepartamentField.getValue()
+                : (pos.getProjectName() != null ? pos.getProjectName().getProjectDepartment() : null);
+        infoDepartmentLabel.setValue("<b>Департамент:</b> " + (dept != null ? esc(dept.getDepartamentRuName()) : ""));
+
         Project project = pos.getProjectName();
         infoProjectLabel.setValue("<b>Проект:</b> " + (project != null ? esc(project.getProjectName()) : ""));
         Person owner = project != null ? project.getProjectOwner() : null;
