@@ -35,8 +35,7 @@ SettingsWindow → Интерфейс → Фон главного экрана
 |---|---|---|
 | Открытие главного экрана | Пользовательский descriptor отсутствует | Выбирается случайный системный `ThemeResource` активной темы |
 | Открытие главного экрана | Существует пользовательский фон | Файл читается из FileStorage и применяется как `data:` URI |
-| Создание dashboard | Пользователь с ролью Manager/Administrators | Загружается дашборд руководителя `recruiting-dashboard` (воронка по всем сотрудникам, лидерборд, динамика) |
-| Создание dashboard | Пользователь с ролью Recruiter/Headhunter/Researcher | Загружается дашборд рекрутера `recruiting-dashboard-recruiter` (активные кандидаты, календарь встреч, личная воронка) |
+| Создание dashboard | Найден persistent dashboard `recruiting-dashboard` | Dashboard отображает сохранённую модель и существующие widgets |
 | Применение темы | Активна одна из семи тем | Подключается идентичный `recruiter-dashboard-shared-styles.scss` с theme-aware цветами |
 | Отображение widget | Корень использует `widget-border` или `widget-border-line` | Поверхность получает геометрию `edit-card` без изменения fragment lifecycle |
 | Уменьшение viewport | Ширина не более 1366 px | Сокращаются внешние и внутренние отступы, глобальный horizontal scroll не создаётся |
@@ -48,20 +47,16 @@ SettingsWindow → Интерфейс → Фон главного экрана
 - Root screen: `hrmMainScreen`.
 - Наследование Java: `HrmMainScreen → ExtMainScreen → MainScreen`.
 - Наследование XML: `hrm-main-screen.xml → ext-main-screen.xml → main-screen.xml`.
-- Ролевые дашборды:
-  - `recruiting-dashboard` («Рабочее место руководителя», роли `Manager`, `Administrators`, пользователь `alan`).
-  - `recruiting-dashboard-recruiter` («Рабочее место рекрутера», роли `Recruiter`, `Headhunter`, `Researcher`, пользователь `aten`).
-- `timerDelay="60"`.
+- Начальный dashboard: `mainDashboard`, code `recruiting-dashboard`, `timerDelay="60"`.
 - Поддерживаемые темы: `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark`.
 
 ## 2. Связь с моделью данных
 
-Визуальный контракт не добавляет data containers, loaders, JPQL, views, entity или сервисы. Фактический состав dashboard и параметры widgets продолжают определяться persistent model в таблицах Dashboard Add-on (`DASHBOARD_PERSISTENT_DASHBOARD`).
+Визуальный контракт не добавляет data containers, loaders, JPQL, views, entity или сервисы. Фактический состав dashboard и параметры widgets продолжают определяться persistent model в таблицах Dashboard Add-on.
 
 Не изменяются:
 
-- код `recruiting-dashboard` (базовый код главного экрана);
-- код `recruiting-dashboard-recruiter` (ролевой дашборд рекрутера);
+- код `recruiting-dashboard`;
 - dashboard parameters;
 - frame IDs существующих widgets;
 - `timerDelay`;

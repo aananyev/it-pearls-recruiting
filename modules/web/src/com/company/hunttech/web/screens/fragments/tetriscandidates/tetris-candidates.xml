@@ -8,6 +8,6 @@
                              code="tetris-candidates-dashboard"
                              timerDelay="60"
                              width="100%">
-        </dashboard:dashboard>>
+        </dashboard:dashboard>
     </layout>
 </window>
