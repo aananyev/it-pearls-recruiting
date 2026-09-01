@@ -13,10 +13,13 @@ import com.hunttech.hrm.web.components.delegate.FallbackImageResourceDelegate;
 import com.hunttech.hrm.web.components.delegate.OvalImageHost;
 import com.hunttech.hrm.web.components.delegate.OvalImageShapeDelegate;
 import com.vaadin.ui.AbstractComponent;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Web implementation combining oval sizing ({@code ht-oval-image}) and fallback placeholder logic
  * via composition/delegation to {@link OvalImageShapeDelegate} and {@link FallbackImageResourceDelegate}.
+ * Guarantees that the default fallback image scales along vertical and horizontal dimensions
+ * identically to the main image object.
  */
 public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, OvalImageHost, FallbackImageHost {
 
@@ -34,12 +37,58 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
         super.initComponent(image);
         ovalDelegate.applyOvalStyle();
         image.addStyleName("ht-oval-fallback-image");
+        // По умолчанию режим масштабирования SCALE_DOWN для вписывания по вертикали и горизонтали
+        if (getScaleMode() == null || getScaleMode() == ScaleMode.NONE) {
+            setScaleMode(ScaleMode.SCALE_DOWN);
+        }
     }
 
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
         fallbackDelegate.initDefaultFromConfig();
+        syncScaleMode();
+    }
+
+    // --- Sizing and Scaling Synchronization ---
+
+    @Override
+    public void setWidth(String width) {
+        super.setWidth(width);
+        if (ovalDelegate != null && StringUtils.isNotBlank(width)) {
+            if (StringUtils.isBlank(ovalDelegate.getOvalWidth())) {
+                ovalDelegate.setOvalWidth(width);
+            }
+        }
+        syncScaleMode();
+    }
+
+    @Override
+    public void setHeight(String height) {
+        super.setHeight(height);
+        if (ovalDelegate != null && StringUtils.isNotBlank(height)) {
+            if (StringUtils.isBlank(ovalDelegate.getOvalHeight())) {
+                ovalDelegate.setOvalHeight(height);
+            }
+        }
+        syncScaleMode();
+    }
+
+    @Override
+    public void setScaleMode(ScaleMode scaleMode) {
+        super.setScaleMode(scaleMode);
+        syncScaleMode();
+    }
+
+    private void syncScaleMode() {
+        ScaleMode currentMode = getScaleMode();
+        if (currentMode == null || currentMode == ScaleMode.NONE) {
+            currentMode = ScaleMode.SCALE_DOWN;
+            super.setScaleMode(currentMode);
+        }
+        if (component != null) {
+            component.markAsDirty();
+        }
     }
 
     // --- OvalImageHost / OvalImage delegation ---
@@ -52,6 +101,7 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void setOvalWidth(String width) {
         ovalDelegate.setOvalWidth(width);
+        syncScaleMode();
     }
 
     @Override
@@ -62,6 +112,7 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void setOvalHeight(String height) {
         ovalDelegate.setOvalHeight(height);
+        syncScaleMode();
     }
 
     // --- OvalImage background delegation ---
@@ -96,6 +147,7 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void updateValue(Resource resource) {
         super.updateValue(resource);
+        syncScaleMode();
     }
 
     @Override
@@ -106,11 +158,13 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void setFallbackResource(Resource resource) {
         fallbackDelegate.setFallbackResource(resource);
+        syncScaleMode();
     }
 
     @Override
     public void setFallbackThemePath(String path) {
         fallbackDelegate.setFallbackThemePath(path);
+        syncScaleMode();
     }
 
     @Override
@@ -119,13 +173,16 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
         if (fallback != null) {
             updateValue(fallback);
         }
+        syncScaleMode();
     }
 
     @Override
     protected void updateComponent() {
         if (fallbackDelegate.tryApplyFallback()) {
+            syncScaleMode();
             return;
         }
         super.updateComponent();
+        syncScaleMode();
     }
 }
