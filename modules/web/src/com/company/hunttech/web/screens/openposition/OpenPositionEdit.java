@@ -88,6 +88,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> infoPositionLabel;
     @Inject
+    private Label<String> infoCompanyLabel;
+    @Inject
+    private Label<String> infoDepartmentLabel;
+    @Inject
     private Label<String> infoProjectLabel;
     @Inject
     private Label<String> infoOwnerLabel;
