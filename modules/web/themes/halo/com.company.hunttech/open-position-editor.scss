@@ -1492,17 +1492,20 @@
     }
 
 
-    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) с едиными карточными контейнерами и симметричными отступами */
+    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) с едиными карточными контейнерами, симметричными отступами и максимальной высотой аккордеона */
     #jobDescriptionVBox,
     .open-position-editor #jobDescriptionVBox {
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      height: 100% !important;
       padding: 14px 16px 22px 16px !important;
       margin: 0 !important;
       overflow-x: hidden !important;
       overflow-y: auto !important;
+      display: flex !important;
+      flex-direction: column !important;
 
       > .v-slot,
       > .v-expand {
@@ -1515,6 +1518,14 @@
         margin-left: 0 !important;
         margin-right: 0 !important;
       }
+
+      > .v-expand {
+        flex: 1 1 auto !important;
+        height: 100% !important;
+        min-height: 420px !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
     }
 
     #workExperienceGroupBox,
@@ -1523,6 +1534,7 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      flex: 0 0 auto !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
       overflow-x: hidden !important;
@@ -1595,6 +1607,11 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      height: 100% !important;
+      min-height: 420px !important;
+      flex: 1 1 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
       overflow-x: hidden !important;
@@ -1604,6 +1621,10 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
+        height: 100% !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
         padding: 8px 12px !important;
       }
     }
@@ -1615,6 +1636,10 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      height: 100% !important;
+      flex: 1 1 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
       padding-left: 0 !important;
@@ -1629,6 +1654,10 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
+        height: 100% !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
         margin-left: 0 !important;
@@ -1641,6 +1670,11 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
+        height: 100% !important;
+        min-height: 380px !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
         margin: 0 !important;
         padding: 0 !important;
         border: 1px solid rgba($v-font-color, 0.14) !important;
@@ -1652,6 +1686,15 @@
           width: 100% !important;
           max-width: 100% !important;
           min-width: 0 !important;
+          flex: 0 0 auto;
+
+          &.v-accordion-item-open,
+          &[class*="open"] {
+            flex: 1 1 auto !important;
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
         }
 
         .v-accordion-item-caption {
@@ -1659,6 +1702,7 @@
           width: 100% !important;
           max-width: 100% !important;
           min-width: 0 !important;
+          flex: 0 0 auto !important;
         }
 
         .v-accordion-item-content {
@@ -1666,6 +1710,11 @@
           width: 100% !important;
           max-width: 100% !important;
           min-width: 0 !important;
+          height: 100% !important;
+          min-height: 280px !important;
+          flex: 1 1 auto !important;
+          display: flex !important;
+          flex-direction: column !important;
           overflow-x: hidden !important;
           padding: 0 !important;
           margin: 0 !important;
@@ -1681,6 +1730,10 @@
             width: 100% !important;
             max-width: 100% !important;
             min-width: 0 !important;
+            height: 100% !important;
+            flex: 1 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
             padding-left: 0 !important;
             padding-right: 0 !important;
             margin-left: 0 !important;
@@ -1695,12 +1748,18 @@
     #openPositionStandartDescriptionRichTextArea,
     #openPositionWhoIsThisGuyRichTextArea,
     .open-position-editor-richtext-variant5,
-    .open-position-editor-richtext-variant5.v-richtextarea {
-      box-sizing: border-box;
+    .open-position-editor-richtext-variant5.v-richtextarea,
+    .open-position-editor-richtext-section .v-richtextarea {
+      box-sizing: border-box !important;
       min-width: 0 !important;
+      width: 100% !important;
       max-width: 100% !important;
       margin: 0 !important;
-      min-height: 120px;
+      height: 100% !important;
+      min-height: 280px !important;
+      flex: 1 1 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
       border: none !important;
       background: $v-panel-background-color;
       overflow: hidden;
@@ -1716,6 +1775,7 @@
         min-width: 0 !important;
         min-height: 42px !important;
         height: auto !important;
+        flex: 0 0 auto !important;
         padding: 6px 10px !important;
         border-bottom: 1px solid rgba($v-font-color, 0.13) !important;
         background: mix($v-app-background-color, $v-panel-background-color, 58%) !important;
@@ -1741,9 +1801,12 @@
       }
 
       .v-richtextarea-content,
-      iframe {
+      iframe,
+      .gwt-RichTextArea {
         box-sizing: border-box !important;
-        min-height: 180px;
+        height: 100% !important;
+        min-height: 240px !important;
+        flex: 1 1 auto !important;
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
@@ -1758,6 +1821,7 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      flex: 0 0 auto !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
       overflow-x: hidden !important;

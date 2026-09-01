@@ -1548,6 +1548,7 @@
                               spacing="false"
                               width="100%"
                               height="100%"
+                              expand="openPositionAccordion"
                               stylename="open-position-editor-richtext-section">
                             <!-- Аккордеон описаний позиции (четыре редактора RichTextArea). -->
                             <accordion id="openPositionAccordion"
@@ -1558,13 +1559,12 @@
                                      caption="msg://msgRuComment"
                                      icon="font-icon:LANGUAGE">
                                     <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
-                                    <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
+                                    <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="false" expand="openPositionRichTextArea">
                                         <!-- Редактор русского описания (обязательный). -->
                                         <richTextArea id="openPositionRichTextArea"
                                                       dataContainer="openPositionDc"
                                                       property="comment"
                                                       width="100%"
-                                                      box.expandRatio="1"
                                                       height="100%"
                                                       required="true"
                                                       stylename="edit-form-control open-position-editor-richtext-variant5"/>
@@ -1575,13 +1575,12 @@
                                      caption="msg://msgEnComment"
                                      icon="font-icon:GLOBE">
                                     <!-- Контейнер редактора английского описания на всю высоту вкладки аккордеона. -->
-                                    <vbox id="openPositionEnTabBox" width="100%" height="100%">
+                                    <vbox id="openPositionEnTabBox" width="100%" height="100%" spacing="false" expand="openPositionEnRichTextArea">
                                         <!-- Редактор английского описания. -->
                                         <richTextArea id="openPositionEnRichTextArea"
                                                       dataContainer="openPositionDc"
                                                       property="commentEn"
                                                       width="100%"
-                                                      box.expandRatio="1"
                                                       height="100%"
                                                       required="false"
                                                       stylename="edit-form-control open-position-editor-richtext-variant5"/>
@@ -1592,11 +1591,10 @@
                                      caption="msg://msgStandartDescription"
                                      icon="font-icon:FILE_TEXT_O">
                                     <!-- Контейнер стандартного описания на всю высоту вкладки аккордеона. -->
-                                    <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%">
+                                    <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%" spacing="false" expand="openPositionStandartDescriptionRichTextArea">
                                         <!-- Просмотр стандартного описания (editable=false). -->
                                         <richTextArea id="openPositionStandartDescriptionRichTextArea"
                                                       width="100%"
-                                                      box.expandRatio="1"
                                                       height="100%"
                                                       editable="false"
                                                       stylename="edit-form-control open-position-editor-richtext-variant5"/>
@@ -1607,11 +1605,10 @@
                                      caption="msg://msgWhoIsThisGuy"
                                      icon="font-icon:USER_O">
                                     <!-- Контейнер описания «кто это» на всю высоту вкладки аккордеона. -->
-                                    <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%">
+                                    <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%" spacing="false" expand="openPositionWhoIsThisGuyRichTextArea">
                                         <!-- Просмотр сгенерированного описания «кто это». -->
                                         <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
                                                       width="100%"
-                                                      box.expandRatio="1"
                                                       height="100%"
                                                       editable="false"
                                                       stylename="edit-form-control open-position-editor-richtext-variant5"/>
