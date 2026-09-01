@@ -223,6 +223,8 @@
           <vbox id="openPositionEditorNavigation" width="100%" visible="false"/>
           <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
           <label id="infoPositionLabel" width="100%" visible="false"/>
+          <label id="infoCompanyLabel" width="100%" visible="false"/>
+          <label id="infoDepartmentLabel" width="100%" visible="false"/>
           <label id="infoProjectLabel" width="100%" visible="false"/>
           <label id="infoOwnerLabel" width="100%" visible="false"/>
           <label id="infoCityLabel" width="100%" visible="false"/>
@@ -234,6 +236,8 @@
           <label id="statusOfVacansyLabel" width="100%" visible="false"/>
           <button id="openClosePositionButton" caption="Закрыть вакансию" width="100%" visible="false"/>
           <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
+          <label id="openPositionSkillsLabels" width="100%" visible="false"/>
+          <label id="priorityBadgeLabel" width="100%" visible="false"/>
           <!-- Скрытый label звёздного рейтинга sidebar (контракт @Inject из основного XML). -->
           <label id="openPositionRatingLabel" width="100%" visible="false"/>
         </vbox>
@@ -479,6 +483,7 @@
               <vbox width="100%" height="100%" spacing="true" margin="true" expand="descriptionTextsAccordion" stylename="open-position-preview-description-tab-content">
                 <groupBox id="workExperienceGroupBox" collapsable="true" collapsed="false" caption="msg://msgWorkExperience" stylename="light edit-card open-position-preview-description-experience" spacing="true" width="100%">
                   <radioButtonGroup id="workExperienceRadioButton" orientation="horizontal" required="true" description="msg://msgWorkExperience" dataContainer="openPositionDc" property="workExperience" caption="msg://msgWorkExperience"/>
+                  <button id="scanOpenPositionSkillsBtn" caption="msg://msgScanOpenPositionSkills" icon="MAGIC" stylename="primary" visible="false"/>
                   <radioButtonGroup id="commanExperienceRadioButton" orientation="horizontal" description="msg://msgCommandExperience" dataContainer="openPositionDc" visible="false" property="commandExperience" caption="msg://msgCommandExperience"/>
                 </groupBox>
                 <groupBox id="descriptionTextsAccordion" caption="Тексты описания" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-richtext-section" width="100%" height="100%">

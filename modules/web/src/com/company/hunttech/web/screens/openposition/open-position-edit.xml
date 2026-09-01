@@ -682,6 +682,16 @@
                        width="100%"
                        htmlEnabled="true"
                        stylename="open-position-editor-summary-value"/>
+                <!-- Компания позиции. -->
+                <label id="infoCompanyLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+                <!-- Департамент позиции. -->
+                <label id="infoDepartmentLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
                 <!-- Проект позиции (наименование проекта). -->
                 <label id="infoProjectLabel"
                        width="100%"
