@@ -1492,13 +1492,38 @@
     }
 
 
-    /* Адаптивная раскладка секции «Опыт работы» */
+    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) без горизонтального переполнения */
+    #jobDescriptionVBox,
+    .open-position-editor #jobDescriptionVBox {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+
+      > .v-slot,
+      > .v-expand {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+
     #workExperienceGroupBox,
     .open-position-editor #workExperienceGroupBox {
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      overflow-x: hidden !important;
+
+      .v-groupbox-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
     }
 
     #workExperienceMainHBox,
@@ -1512,6 +1537,12 @@
       align-items: center !important;
       justify-content: space-between !important;
       gap: 12px 16px !important;
+
+      > .v-slot {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
     }
 
     #workExperienceRadioButton,
@@ -1522,15 +1553,19 @@
 
       .v-select-optiongroup-horizontal,
       .v-select-optiongroup {
+        box-sizing: border-box !important;
         display: flex !important;
         flex-wrap: wrap !important;
-        gap: 10px 18px !important;
+        gap: 8px 14px !important;
         align-items: center !important;
+        max-width: 100% !important;
       }
 
       .v-radiobutton {
+        box-sizing: border-box !important;
         flex: 0 0 auto !important;
-        white-space: nowrap !important;
+        white-space: normal !important;
+        max-width: 100% !important;
       }
     }
 
@@ -1542,58 +1577,73 @@
       min-width: 0 !important;
     }
 
-    /* Variant 5: единая поверхность RichTextArea (toolbar 42px, content min-height 220px).
-     * В секции аккордеона вкладки «Описание вакансии» min-height переопределяется ниже:
-     * expand-цепочка растягивает аккордеон на оставшуюся высоту, и жёсткий минимум
-     * секции (360px) выталкивал контент за пределы вкладки на экранах ≤ ~900px. */
-    .open-position-editor-richtext-section > .v-expand,
-    .open-position-editor-richtext-section .v-tabsheet-content,
-    .open-position-editor-richtext-section .v-tabsheet-tabcontainer {
-      min-height: 0;
-      box-sizing: border-box !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 0 !important;
-    }
-
+    #descriptionsAccordionHBox,
+    .open-position-editor #descriptionsAccordionHBox,
     .open-position-editor-richtext-section {
-      min-height: 120px;
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      overflow-x: hidden !important;
+
+      > .v-slot,
+      > .v-expand,
+      .v-tabsheet-content,
+      .v-tabsheet-tabcontainer {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      .v-accordion,
+      #openPositionAccordion {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+
+        .v-accordion-item {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+        }
+
+        .v-accordion-item-caption {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+        }
+
+        .v-accordion-item-content {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          overflow-x: hidden !important;
+
+          > .v-slot,
+          > .v-expand,
+          .v-verticallayout,
+          #openPositionRuTabBox,
+          #openPositionEnTabBox,
+          #openPositionStandartDescriptionTabBox,
+          #openPositionWhoIsThisGuyTabBox {
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+          }
+        }
+      }
     }
 
-    .open-position-editor .v-accordion,
-    .open-position-editor #openPositionAccordion {
-      box-sizing: border-box !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 0 !important;
-
-      .v-accordion-item {
-        box-sizing: border-box !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-      }
-
-      .v-accordion-item-caption {
-        box-sizing: border-box !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-      }
-
-      .v-accordion-item-content {
-        box-sizing: border-box !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        overflow-x: hidden !important;
-      }
-    }
-
+    #openPositionRichTextArea,
+    #openPositionEnRichTextArea,
+    #openPositionStandartDescriptionRichTextArea,
+    #openPositionWhoIsThisGuyRichTextArea,
     .open-position-editor-richtext-variant5,
     .open-position-editor-richtext-variant5.v-richtextarea,
     .open-position-editor-richtext-section .v-richtextarea {
@@ -1601,73 +1651,56 @@
       min-width: 0 !important;
       width: 100% !important;
       max-width: 100% !important;
-      min-height: 260px;
+      min-height: 120px;
       border: 1px solid rgba($v-font-color, 0.16);
       border-radius: 6px;
       background: $v-panel-background-color;
       overflow: hidden;
-    }
 
-    /* Внутри аккордеона вкладки «Описание вакансии» редактор растягивается expand-цепочкой
-     * на всю высоту таба аккордеона — общий минимум 260px (toolbar 42 + content 220) здесь
-     * заменён на 120px, иначе на экранах ≤ ~900px редактор вылезал за границу вкладки. */
-    .open-position-editor-richtext-section .open-position-editor-richtext-variant5,
-    .open-position-editor-richtext-section .open-position-editor-richtext-variant5.v-richtextarea {
-      min-height: 120px;
-    }
-
-    .open-position-editor-richtext-variant5 .v-richtextarea-toolbar,
-    .open-position-editor-richtext-section .v-richtextarea-toolbar {
-      box-sizing: border-box !important;
-      display: flex !important;
-      flex-wrap: wrap !important;
-      align-items: center !important;
-      gap: 4px 6px !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 0 !important;
-      min-height: 42px !important;
-      height: auto !important;
-      padding: 5px 8px !important;
-      border-bottom: 1px solid rgba($v-font-color, 0.13) !important;
-      background: mix($v-app-background-color, $v-panel-background-color, 58%) !important;
-
-      select {
+      .v-richtextarea-toolbar {
         box-sizing: border-box !important;
-        max-width: 160px !important;
-        height: 30px !important;
-        font-size: 13px !important;
-        border-radius: 4px !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 4px 6px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        min-height: 42px !important;
+        height: auto !important;
+        padding: 5px 8px !important;
+        border-bottom: 1px solid rgba($v-font-color, 0.13) !important;
+        background: mix($v-app-background-color, $v-panel-background-color, 58%) !important;
+
+        select {
+          box-sizing: border-box !important;
+          max-width: 150px !important;
+          min-width: 0 !important;
+          height: 30px !important;
+          font-size: 13px !important;
+          border-radius: 4px !important;
+        }
+
+        .v-button {
+          box-sizing: border-box !important;
+          min-width: 30px !important;
+          height: 30px !important;
+          margin: 0 !important;
+          padding: 0 6px !important;
+          border-radius: 4px !important;
+          flex-shrink: 0 !important;
+        }
       }
 
-      .v-button {
+      .v-richtextarea-content,
+      iframe {
         box-sizing: border-box !important;
-        min-width: 30px !important;
-        height: 30px !important;
-        margin: 0 !important;
-        padding: 0 6px !important;
-        border-radius: 4px !important;
-        flex-shrink: 0 !important;
+        min-height: 180px;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        background: $v-panel-background-color !important;
       }
-    }
-
-    .open-position-editor-richtext-variant5 .v-richtextarea-content,
-    .open-position-editor-richtext-variant5 iframe,
-    .open-position-editor-richtext-section .v-richtextarea-content,
-    .open-position-editor-richtext-section iframe {
-      box-sizing: border-box !important;
-      min-height: 220px;
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 0 !important;
-      background: $v-panel-background-color !important;
-    }
-
-    .open-position-editor-richtext-variant5 .v-button {
-      min-width: 32px;
-      min-height: 32px;
-      margin: 0 2px;
-      border-radius: 4px;
     }
 
     #shortDescriptionHBox,
@@ -1680,11 +1713,12 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      overflow-x: hidden !important;
 
       > .v-expand,
       > .v-slot:first-child {
         box-sizing: border-box !important;
-        flex: 1 1 300px !important;
+        flex: 1 1 280px !important;
         min-width: 0 !important;
         max-width: 100% !important;
         width: auto !important;
@@ -1694,6 +1728,20 @@
         box-sizing: border-box !important;
         flex: 0 0 auto !important;
         min-width: 0 !important;
+      }
+
+      #shortDescriptionTextArea,
+      .v-textfield {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      #scanJDButton,
+      .v-button {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
       }
     }
 
