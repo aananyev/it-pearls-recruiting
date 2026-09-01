@@ -492,7 +492,26 @@
     // edit-form-control) получает width:100% от Vaadin inline. Без фикса
     // каждый слот занимает 100% родителя, итого 2 × 100% = 200%, что
     // вылезает за workspace. Принудительно ограничиваем до 50%.
-        // Резиновая верстка (fluid responsive layout) всех горизонтальных строк:
+    
+    // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
+    .company-main-tab,
+    .company-requisites-tab,
+    .company-description-tab,
+    .company-departments-tab,
+    .edit-workspace,
+    .edit-workspace-scroll,
+    .edit-workspace-content,
+    .edit-tabs,
+    .edit-card,
+    .edit-form-control,
+    .v-grid,
+    .v-grid-tablewrapper,
+    .v-richtextarea {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
     .edit-workspace-content .v-horizontallayout,
     .edit-card .v-horizontallayout {
       box-sizing: border-box !important;
@@ -512,6 +531,28 @@
     .edit-workspace-content .v-horizontallayout > .v-slot,
     .edit-card .v-horizontallayout > .v-expand > .v-slot,
     .edit-card .v-horizontallayout > .v-slot {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // Резиновая адаптивность DataGrid и таблиц департаментов:
+    .company-departments-tab .v-grid,
+    .company-departments-tab .v-grid-tablewrapper,
+    .company-departments-tab .v-grid-header,
+    .company-departments-tab .v-grid-body,
+    .company-departments-tab .v-grid-row,
+    .company-departments-tab .v-grid-cell {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // Резиновая адаптивность RichTextArea описания и условий:
+    .company-description-tab .v-richtextarea,
+    .company-description-tab .v-richtextarea .v-richtextarea-content,
+    .company-description-tab .v-richtextarea iframe {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;

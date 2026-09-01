@@ -788,36 +788,43 @@
                                    orientation="vertical"
                                    scrollBars="vertical"
                                    stylename="edit-workspace edit-workspace-scroll">
-                            <groupBox id="companyDepartmentsCard"
-                                      caption="msg://msgCompanyDepartmentsSection"
-                                      stylename="edit-card"
-                                      showAsPanel="true"
-                                      width="100%"
-                                      height="100%"
-                                      minHeight="360px"
-                                      expand="departmentOfCompanyTable">
-                                <dataGrid id="departmentOfCompanyTable"
-                                          dataContainer="departmentOfCompanyDc"
+                            <vbox id="companyDepartmentsContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="companyDepartmentsCard"
+                                  stylename="edit-workspace-content">
+                                <groupBox id="companyDepartmentsCard"
+                                          caption="msg://msgCompanyDepartmentsSection"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
                                           width="100%"
                                           height="100%"
-                                          minHeight="280px">
-                                    <actions>
-                                        <action id="create" type="create"/>
-                                        <action id="edit" type="edit"/>
-                                        <action id="remove" type="remove"/>
-                                    </actions>
-                                    <columns>
-                                        <column id="departamentRuName" property="departamentRuName"/>
-                                        <column id="departamentDirector" property="departamentDirector"/>
-                                        <column id="departamentHrDirector" property="departamentHrDirector"/>
-                                    </columns>
-                                    <buttonsPanel>
-                                        <button action="departmentOfCompanyTable.create"/>
-                                        <button action="departmentOfCompanyTable.edit"/>
-                                        <button action="departmentOfCompanyTable.remove"/>
-                                    </buttonsPanel>
-                                </dataGrid>
-                            </groupBox>
+                                          minHeight="360px"
+                                          expand="departmentOfCompanyTable">
+                                    <dataGrid id="departmentOfCompanyTable"
+                                              dataContainer="departmentOfCompanyDc"
+                                              width="100%"
+                                              height="100%"
+                                              minHeight="280px">
+                                        <actions>
+                                            <action id="create" type="create"/>
+                                            <action id="edit" type="edit"/>
+                                            <action id="remove" type="remove"/>
+                                        </actions>
+                                        <columns>
+                                            <column id="departamentRuName" property="departamentRuName"/>
+                                            <column id="departamentDirector" property="departamentDirector"/>
+                                            <column id="departamentHrDirector" property="departamentHrDirector"/>
+                                        </columns>
+                                        <buttonsPanel>
+                                            <button action="departmentOfCompanyTable.create"/>
+                                            <button action="departmentOfCompanyTable.edit"/>
+                                            <button action="departmentOfCompanyTable.remove"/>
+                                        </buttonsPanel>
+                                    </dataGrid>
+                                </groupBox>
+                            </vbox>
                         </scrollBox>
                     </tab>
                 </tabSheet>
