@@ -493,6 +493,7 @@
     // каждый слот занимает 100% родителя, итого 2 × 100% = 200%, что
     // вылезает за workspace. Принудительно ограничиваем до 50%.
     
+
     // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
     .company-main-tab,
     .company-requisites-tab,
@@ -512,8 +513,18 @@
       max-width: 100% !important;
     }
 
+    .edit-workspace-content,
+    .company-requisites-tab .edit-workspace-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
     .edit-workspace-content .v-horizontallayout,
-    .edit-card .v-horizontallayout {
+    .edit-card .v-horizontallayout,
+    .company-requisites-tab .v-horizontallayout {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
@@ -521,7 +532,8 @@
     }
 
     .edit-workspace-content .v-horizontallayout > .v-expand,
-    .edit-card .v-horizontallayout > .v-expand {
+    .edit-card .v-horizontallayout > .v-expand,
+    .company-requisites-tab .v-horizontallayout > .v-expand {
       box-sizing: border-box !important;
       min-width: 0 !important;
       max-width: 100% !important;
@@ -530,7 +542,49 @@
     .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot,
     .edit-workspace-content .v-horizontallayout > .v-slot,
     .edit-card .v-horizontallayout > .v-expand > .v-slot,
-    .edit-card .v-horizontallayout > .v-slot {
+    .edit-card .v-horizontallayout > .v-slot,
+    .company-requisites-tab .v-horizontallayout > .v-slot,
+    .company-requisites-tab .v-horizontallayout > .v-expand > .v-slot {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // Резиновая верстка тулбара реквизитов и перенос длинных подсказок
+    .company-requisites-tab #requisitesToolbar,
+    .company-requisites-tab .candidate-filter-bar {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .company-requisites-tab #requisitesToolbar .v-label,
+    .company-requisites-tab .edit-help {
+      box-sizing: border-box !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // Резиновая адаптивность карточек реквизитов
+    .company-requisites-tab .edit-card,
+    .company-requisites-tab .v-panel,
+    .company-requisites-tab .v-panel-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    .company-requisites-tab .edit-form-control,
+    .company-requisites-tab .v-textfield,
+    .company-requisites-tab .v-filterselect,
+    .company-requisites-tab .c-pickerfield,
+    .company-requisites-tab .v-textarea {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
