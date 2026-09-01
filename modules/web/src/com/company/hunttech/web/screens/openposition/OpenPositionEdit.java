@@ -208,6 +208,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private RichTextArea interviewPlanRichTextArea;
     @Inject
+    private RichTextArea searchMapRichTextArea;
+    @Inject
     private LookupPickerField<Project> projectNameField;
     @Inject
     private TextField<String> vacansyNameField;
@@ -448,6 +450,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private VBoxLayout openPositionInterviewPlanTabNavigation;
     @Inject
+    private VBoxLayout openPositionSearchMapTabNavigation;
+    @Inject
     private VBoxLayout openPositionTemplateLetterTabNavigation;
     @Inject
     private VBoxLayout openPositionSkillsTabNavigation;
@@ -462,8 +466,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private VBoxLayout openPositionEditorNavigation;
     /* Пункты наборов навигации вкладок «Трудовой договор», «Описание должности», «Файлы»,
-       «Тестовое задание», «Памятка», «План собеседования», «Шаблон письма», «Навыки», «Новости»,
-       «Согласование», «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
+       «Тестовое задание», «Памятка», «План собеседования», «Карта поиска», «Шаблон письма», «Навыки»,
+       «Новости», «Согласование», «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
        вкладок без полей ввода — только подсветка). */
     @Inject
     private Button openPositionEditorNavLaborAgreement;
@@ -483,6 +487,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button openPositionEditorNavMemo;
     @Inject
     private Button openPositionEditorNavInterviewPlan;
+    @Inject
+    private Button openPositionEditorNavSearchMap;
     @Inject
     private Button openPositionEditorNavTemplateLetter;
     @Inject
@@ -504,6 +510,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private boolean exerciseLoaded;
     private boolean memoLoaded;
     private boolean interviewPlanLoaded;
+    private boolean searchMapLoaded;
     private boolean templateLetterLoaded;
     private boolean skillsLoaded;
     private boolean filesLoaded;
@@ -595,6 +602,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 loadInterviewPlanLob();
                 interviewPlanLoaded = true;
             }
+            if ("tabSearchMap".equals(tabName) && !searchMapLoaded) {
+                loadSearchMapLob();
+                searchMapLoaded = true;
+            }
             if ("tabTemplateLetter".equals(tabName) && !templateLetterLoaded) {
                 loadTemplateLetterLob();
                 templateLetterLoaded = true;
@@ -652,6 +663,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 openPositionExerciseTabNavigation,
                 openPositionMemoTabNavigation,
                 openPositionInterviewPlanTabNavigation,
+                openPositionSearchMapTabNavigation,
                 openPositionTemplateLetterTabNavigation,
                 openPositionSkillsTabNavigation,
                 openPositionNewsTabNavigation,
@@ -694,11 +706,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         openPositionLaborTabNavigation.setVisible("laborAgreementTab".equals(selectedTabName));
         openPositionJobDescriptionTabNavigation.setVisible("tabJobDescription".equals(selectedTabName));
         // Наборы одноблочных вкладок («Файлы», «Тестовое задание», «Памятка», «План собеседования»,
-        // «Шаблон письма», «Навыки», «Новости», «Согласование», «Комментарии») в sidebar не показываются никогда.
+        // «Карта поиска», «Шаблон письма», «Навыки», «Новости», «Согласование», «Комментарии») в sidebar не показываются никогда.
         openPositionFilesTabNavigation.setVisible(false);
         openPositionExerciseTabNavigation.setVisible(false);
         openPositionMemoTabNavigation.setVisible(false);
         openPositionInterviewPlanTabNavigation.setVisible(false);
+        openPositionSearchMapTabNavigation.setVisible(false);
         openPositionTemplateLetterTabNavigation.setVisible(false);
         openPositionSkillsTabNavigation.setVisible(false);
         openPositionNewsTabNavigation.setVisible(false);
@@ -827,6 +840,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onOpenPositionEditorNavInterviewPlanClick(Button.ClickEvent event) {
         activateNavigationItem(openPositionInterviewPlanTabNavigation, openPositionEditorNavInterviewPlan);
         interviewPlanRichTextArea.focus();
+    }
+
+    @Subscribe("openPositionEditorNavSearchMap")
+    /** label-навигация вкладки «Карта поиска»: клик подсвечивает пункт и переводит фокус
+     *  в редактор карты поиска. */
+    public void onOpenPositionEditorNavSearchMapClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionSearchMapTabNavigation, openPositionEditorNavSearchMap);
+        searchMapRichTextArea.focus();
     }
 
     @Subscribe("openPositionEditorNavTemplateLetter")
@@ -983,6 +1004,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .add("interviewPlan")
                 .build());
         getEditedEntity().setInterviewPlan(reloaded.getInterviewPlan());
+    }
+
+    /** Lazy-загрузка карты поиска кандидата при первом открытии вкладки. */
+    private void loadSearchMapLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("searchMap")
+                .build());
+        getEditedEntity().setSearchMap(reloaded.getSearchMap());
     }
 
     /** Lazy-загрузка шаблона сопроводительного письма при первом открытии вкладки. */

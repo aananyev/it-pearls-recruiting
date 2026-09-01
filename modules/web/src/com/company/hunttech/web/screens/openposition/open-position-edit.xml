@@ -605,6 +605,19 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
+            <!-- Набор вкладки «Карта поиска» (tabSearchMap): единый раздел — редактор
+                 карты поиска; набор никогда не показывается (вкладка с одним блоком ввода),
+                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
+            <vbox id="openPositionSearchMapTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Карта поиска» — label-навигация контейнера searchMapVBox. -->
+                <button id="openPositionEditorNavSearchMap"
+                        caption="msg://msgSearchMap"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
             <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел;
                  набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
                  структуры набора и Java-контракта (@Named/@Subscribe). -->
@@ -1758,6 +1771,29 @@
                     <richTextArea id="interviewPlanRichTextArea"
                                   dataContainer="openPositionDc"
                                   property="interviewPlan"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
+            </tab>
+            <!-- Вкладка «Карта поиска»: редактор карты поиска кандидата. -->
+            <tab id="tabSearchMap"
+                 caption="msg://msgSearchMap"
+                 margin="false"
+                 spacing="true"
+                 expand="searchMapVBox"
+                 icon="font-icon:MAP_O">
+                <!-- Контейнер вкладки карты поиска. -->
+                <vbox id="searchMapVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="searchMapRichTextArea"
+                      stylename="open-position-editor-tab-content">
+                    <!-- Редактор карты поиска кандидата (lazy). -->
+                    <richTextArea id="searchMapRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="searchMap"
                                   height="100%"
                                   width="100%"
                                   stylename="edit-form-control open-position-editor-richtext-variant5"/>
