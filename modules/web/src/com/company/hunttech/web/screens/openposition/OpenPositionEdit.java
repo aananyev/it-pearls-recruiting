@@ -3207,15 +3207,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // департаменты — при выборе компании (onCompanyNameFieldValueChange).
         preventAutoLoadUntilParameterSet(openPositionNewsLc, "openPosition");
         preventAutoLoadUntilParameterSet(projectNamesLc, "withOpenPosition");
-
-        // Инициализация загрузчика департаментов компании: если компания уже задана, фильтруем по ней;
-        // в противном случае загружаем доступные департаменты, чтобы выпадающий список был активен.
-        if (getEditedEntity().getCompanyName() != null) {
-            companyDepartamentsLc.setParameter("company", getEditedEntity().getCompanyName());
-        } else if (companyNameField.getValue() != null) {
-            companyDepartamentsLc.setParameter("company", companyNameField.getValue());
-        }
-        companyDepartamentsLc.load();
+        preventAutoLoadUntilParameterSet(companyDepartamentsLc, "company");
 
         setRadioButtons();
         setGroupSubscribeButton();
