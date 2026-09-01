@@ -84,121 +84,130 @@
                   stylename="edit-sidebar"
                   width="270px"
                   height="100%"
-                  spacing="true"
-                  expand="companySidebarSpacer">
-                <!-- Визуальный блок: круглый логотип компании 176×176 (эталон
-                     JobCandidateEdit) с fallback icons/no-company.png при отсутствии
-                     файла и кнопки «Загрузить», «Умная обработка» и «Очистить». -->
-                <vbox id="companyEditorSidebarVisual"
-                      stylename="edit-sidebar-visual"
-                      width="100%"
-                      spacing="true"
-                      align="TOP_CENTER">
-                    <!-- Обёртка аватара: 176×176 правильный круг -->
-                    <vbox id="companyLogoPicBox"
-                          width="176px"
-                          height="176px"
-                          spacing="false"
-                          align="TOP_CENTER">
-                        <ovaFallbackImage id="companyLogoFileImage"
-                                          dataContainer="companyDc"
-                                          property="fileCompanyLogo"
-                                          width="176px"
-                                          height="176px"
-                                          ovalWidth="176px"
-                                          ovalHeight="176px"
-                                          ovalBackground="#3a3e44"
-                                          fallbackThemePath="icons/no-company.png"
-                                          visible="true"
-                                          align="MIDDLE_CENTER"
-                                          stylename="company-editor-logo-image"
-                                          scaleMode="SCALE_DOWN"/>
-                    </vbox>
-                    <!-- Загрузчик логотипа: файл IMMEDIATE пишется в fileCompanyLogo -->
-                    <upload id="companyLogoFileUpload"
-                            fileStoragePutMode="IMMEDIATE"
-                            dataContainer="companyDc"
-                            align="MIDDLE_CENTER"
-                            showFileName="false"
-                            dropZone="companyEditorSidebarVisual"
-                            showClearButton="true"
-                            property="fileCompanyLogo"/>
-                    <!-- Кнопка умной обработки логотипа: удаление фона, улучшение качества -->
-                    <button id="enhanceCompanyLogoBtn"
-                            caption="Умная обработка фото"
-                            icon="font-icon:MAGIC"
-                            stylename="secondary candidate-btn enhance-company-logo-btn"
-                            width="100%"
-                            description="Удалить фон, сделать его прозрачным и улучшить качество без изменения логотипа"/>
-                </vbox>
-                <!-- Идентификация: наименование компании и форма собственности -->
-                <vbox id="companyEditorSidebarIdentity"
-                      stylename="edit-sidebar-identity"
-                      width="100%"
-                      spacing="false"
-                      align="TOP_CENTER">
-                    <label id="companySidebarTitle"
-                           stylename="edit-sidebar-title"
+                  spacing="false">
+                <scrollBox id="companySidebarScroll"
                            width="100%"
-                           value="msg://browseCaption"/>
-                    <label id="companySidebarName"
-                           dataContainer="companyDc"
-                           property="companyShortName"
-                           stylename="bold"
-                           width="100%"/>
-                </vbox>
-                <!-- Сводка ключевых реквизитов компании -->
-                <vbox id="companyEditorSidebarSummary"
-                      stylename="edit-sidebar-summary"
-                      width="100%"
-                      spacing="true">
-                    <hbox id="companySidebarInnBox" spacing="true" width="100%">
-                        <label value="ИНН:" stylename="bold"/>
-                        <label id="companySidebarInn" dataContainer="companyDc" property="inn" width="100%"/>
-                    </hbox>
-                    <hbox id="companySidebarCityBox" spacing="true" width="100%">
-                        <label value="Город:" stylename="bold"/>
-                        <label id="companySidebarCity" dataContainer="companyDc" property="cityOfCompany.cityRuName" width="100%"/>
-                    </hbox>
-                </vbox>
-                <!-- Разделы (label-навигация): 4 вкладки компании -->
-                <vbox id="companyEditorSidebarNavigation"
-                      stylename="label-navigation"
-                      width="100%"
-                      spacing="false">
-                    <label value="Разделы"
-                           stylename="label-nav-title company-editor-navigation-title"/>
-                    <button id="companyEditorNavMain"
-                            stylename="borderless label-nav-item label-nav-item-active"
-                            icon="BUILDING"
-                            caption="mainMsg://msgCompanyDetail"
-                            width="100%"/>
-                    <button id="companyEditorNavRequisites"
-                            stylename="borderless label-nav-item"
-                            icon="FILE_TEXT_O"
-                            caption="Официальные реквизиты"
-                            width="100%"/>
-                    <button id="companyEditorNavDescription"
-                            stylename="borderless label-nav-item"
-                            icon="INFO_CIRCLE"
-                            caption="msg://msgCompanyDescription"
-                            width="100%"/>
-                    <button id="companyEditorNavDepartments"
-                            stylename="borderless label-nav-item"
-                            icon="SITEMAP"
-                            caption="mainMsg://msgCompanyDepartament"
-                            width="100%"/>
-                </vbox>
-                <!-- Spacer отделяет навигацию от нижней подсказки (expand в sidebar). -->
-                <vbox id="companySidebarSpacer"
-                      stylename="edit-sidebar-spacer"
-                      width="100%"
-                      height="100%"/>
-                <!-- Подсказка о назначении формы в нижней части sidebar. -->
-                <label id="companySidebarHint"
-                       stylename="edit-sidebar-hint"
-                       width="100%"
-                       value="msg://msgCompanySidebarHint"/>
+                           height="100%"
+                           orientation="vertical"
+                           scrollBars="vertical">
+                    <vbox id="companySidebarScrollContent"
+                          width="100%"
+                          spacing="true">
+                        <!-- Визуальный блок: круглый логотип компании 176×176 (эталон
+                             JobCandidateEdit) с fallback icons/no-company.png при отсутствии
+                             файла и кнопки «Загрузить», «Умная обработка» и «Очистить». -->
+                        <vbox id="companyEditorSidebarVisual"
+                              stylename="edit-sidebar-visual"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER">
+                            <!-- Обёртка аватара: 176×176 правильный круг -->
+                            <vbox id="companyLogoPicBox"
+                                  width="176px"
+                                  height="176px"
+                                  spacing="false"
+                                  align="TOP_CENTER">
+                                <ovaFallbackImage id="companyLogoFileImage"
+                                                  dataContainer="companyDc"
+                                                  property="fileCompanyLogo"
+                                                  width="176px"
+                                                  height="176px"
+                                                  ovalWidth="176px"
+                                                  ovalHeight="176px"
+                                                  ovalBackground="#3a3e44"
+                                                  fallbackThemePath="icons/no-company.png"
+                                                  visible="true"
+                                                  align="MIDDLE_CENTER"
+                                                  stylename="company-editor-logo-image"
+                                                  scaleMode="SCALE_DOWN"/>
+                            </vbox>
+                            <!-- Загрузчик логотипа: файл IMMEDIATE пишется в fileCompanyLogo -->
+                            <upload id="companyLogoFileUpload"
+                                    fileStoragePutMode="IMMEDIATE"
+                                    dataContainer="companyDc"
+                                    align="MIDDLE_CENTER"
+                                    showFileName="false"
+                                    dropZone="companyEditorSidebarVisual"
+                                    showClearButton="true"
+                                    property="fileCompanyLogo"/>
+                            <!-- Кнопка умной обработки логотипа: удаление фона, улучшение качества -->
+                            <button id="enhanceCompanyLogoBtn"
+                                    caption="Умная обработка фото"
+                                    icon="font-icon:MAGIC"
+                                    stylename="secondary candidate-btn enhance-company-logo-btn"
+                                    width="100%"
+                                    description="Удалить фон, сделать его прозрачным и улучшить качество без изменения логотипа"/>
+                        </vbox>
+                        <!-- Идентификация: наименование компании и форма собственности -->
+                        <vbox id="companyEditorSidebarIdentity"
+                              stylename="edit-sidebar-identity"
+                              width="100%"
+                              spacing="false"
+                              align="TOP_CENTER">
+                            <label id="companySidebarTitle"
+                                   stylename="edit-sidebar-title"
+                                   width="100%"
+                                   value="msg://browseCaption"/>
+                            <label id="companySidebarName"
+                                   dataContainer="companyDc"
+                                   property="companyShortName"
+                                   stylename="bold"
+                                   width="100%"/>
+                        </vbox>
+                        <!-- Сводка ключевых реквизитов компании -->
+                        <vbox id="companyEditorSidebarSummary"
+                              stylename="edit-sidebar-summary"
+                              width="100%"
+                              spacing="true">
+                            <hbox id="companySidebarInnBox" spacing="true" width="100%">
+                                <label value="ИНН:" stylename="bold"/>
+                                <label id="companySidebarInn" dataContainer="companyDc" property="inn" width="100%"/>
+                            </hbox>
+                            <hbox id="companySidebarCityBox" spacing="true" width="100%">
+                                <label value="Город:" stylename="bold"/>
+                                <label id="companySidebarCity" dataContainer="companyDc" property="cityOfCompany.cityRuName" width="100%"/>
+                            </hbox>
+                        </vbox>
+                        <!-- Разделы (label-навигация): 4 вкладки компании -->
+                        <vbox id="companyEditorSidebarNavigation"
+                              stylename="label-navigation"
+                              width="100%"
+                              spacing="false">
+                            <label value="Разделы"
+                                   stylename="label-nav-title company-editor-navigation-title"/>
+                            <button id="companyEditorNavMain"
+                                    stylename="borderless label-nav-item label-nav-item-active"
+                                    icon="BUILDING"
+                                    caption="mainMsg://msgCompanyDetail"
+                                    width="100%"/>
+                            <button id="companyEditorNavRequisites"
+                                    stylename="borderless label-nav-item"
+                                    icon="FILE_TEXT_O"
+                                    caption="Официальные реквизиты"
+                                    width="100%"/>
+                            <button id="companyEditorNavDescription"
+                                    stylename="borderless label-nav-item"
+                                    icon="INFO_CIRCLE"
+                                    caption="msg://msgCompanyDescription"
+                                    width="100%"/>
+                            <button id="companyEditorNavDepartments"
+                                    stylename="borderless label-nav-item"
+                                    icon="SITEMAP"
+                                    caption="mainMsg://msgCompanyDepartament"
+                                    width="100%"/>
+                        </vbox>
+                        <!-- Spacer отделяет навигацию от нижней подсказки. -->
+                        <vbox id="companySidebarSpacer"
+                              stylename="edit-sidebar-spacer"
+                              width="100%"
+                              height="100%"/>
+                        <!-- Подсказка о назначении формы в нижней части sidebar. -->
+                        <label id="companySidebarHint"
+                               stylename="edit-sidebar-hint"
+                               width="100%"
+                               value="msg://msgCompanySidebarHint"/>
+                    </vbox>
+                </scrollBox>
             </vbox>
             <!-- Workspace: toolbar с заголовком, вкладки компании и footer-действия ОК/Отмена. -->
             <vbox id="companyEditorWorkspace"
