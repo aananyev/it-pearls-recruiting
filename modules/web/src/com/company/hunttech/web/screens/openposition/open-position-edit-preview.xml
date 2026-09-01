@@ -487,32 +487,32 @@
                   <radioButtonGroup id="commanExperienceRadioButton" orientation="horizontal" description="msg://msgCommandExperience" dataContainer="openPositionDc" visible="false" property="commandExperience" caption="msg://msgCommandExperience"/>
                 </groupBox>
                 <groupBox id="descriptionTextsAccordion" caption="Тексты описания" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-richtext-section" width="100%" height="100%">
-                  <accordion id="openPositionAccordion" width="100%" height="100%">
-                    <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment" icon="font-icon:LANGUAGE">
-                      <!-- Растягивает редактор описания на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                  <tabSheet id="openPositionAccordion" width="100%" height="100%">
+                    <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment" icon="font-icon:LANGUAGE" margin="false">
+                      <!-- Растягивает редактор описания на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionRichTextArea">
                         <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="100%" required="true" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionEnTabAccordion" caption="msg://msgEnComment" icon="font-icon:GLOBE">
-                      <!-- Растягивает англ. редактор описания на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                    <tab id="openPositionEnTabAccordion" caption="msg://msgEnComment" icon="font-icon:GLOBE" margin="false">
+                      <!-- Растягивает англ. редактор описания на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionEnRichTextArea">
                         <richTextArea id="openPositionEnRichTextArea" dataContainer="openPositionDc" property="commentEn" width="100%" height="100%" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionStandartDescriptionAccorden" caption="msg://msgStandartDescription" icon="font-icon:FILE_TEXT_O">
-                      <!-- Растягивает стандартное описание на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                    <tab id="openPositionStandartDescriptionAccorden" caption="msg://msgStandartDescription" icon="font-icon:FILE_TEXT_O" margin="false">
+                      <!-- Растягивает стандартное описание на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionStandartDescriptionRichTextArea">
                         <richTextArea id="openPositionStandartDescriptionRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionWhoIsThisGuyAccorden" caption="msg://msgWhoIsThisGuy" icon="font-icon:USER_O">
-                      <!-- Растягивает описание «Кто этот человек» на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                    <tab id="openPositionWhoIsThisGuyAccorden" caption="msg://msgWhoIsThisGuy" icon="font-icon:USER_O" margin="false">
+                      <!-- Растягивает описание «Кто этот человек» на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionWhoIsThisGuyRichTextArea">
                         <richTextArea id="openPositionWhoIsThisGuyRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                  </accordion>
+                  </tabSheet>
                 </groupBox>
                 <groupBox id="shortDescriptionAccordion" caption="msg://msgShortCaption" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-description-short" width="100%">
                   <hbox width="100%" spacing="true" expand="shortDescriptionTextArea">

@@ -1534,7 +1534,7 @@
                                           property="commandExperience"
                                           caption="msg://msgCommandExperience"/>
                     </groupBox>
-                    <!-- Карточка «Тексты описания» с аккордеоном (RU, EN, стандартное, кто это) -->
+                    <!-- Карточка «Тексты описания» со вкладками TabSheet (RU, EN, стандартное, кто это) -->
                     <groupBox id="descriptionTextsAccordion"
                               caption="msg://msgDescription"
                               collapsable="true"
@@ -1550,15 +1550,17 @@
                               height="100%"
                               expand="openPositionAccordion"
                               stylename="open-position-editor-richtext-section">
-                            <!-- Аккордеон описаний позиции (четыре редактора RichTextArea). -->
-                            <accordion id="openPositionAccordion"
-                                       width="100%"
-                                       height="100%">
+                            <!-- Вкладки описаний позиции TabSheet (четыре редактора RichTextArea). -->
+                            <tabSheet id="openPositionAccordion"
+                                      width="100%"
+                                      height="100%">
                                 <!-- Русскоязычное описание позиции (comment). -->
                                 <tab id="openPositionRuTabAccordion"
                                      caption="msg://msgRuComment"
+                                     margin="false"
+                                     expand="openPositionRuTabBox"
                                      icon="font-icon:LANGUAGE">
-                                    <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
+                                    <!-- Контейнер редактора русского описания на всю высоту вкладки. -->
                                     <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="false" expand="openPositionRichTextArea">
                                         <!-- Редактор русского описания (обязательный). -->
                                         <richTextArea id="openPositionRichTextArea"
@@ -1573,8 +1575,10 @@
                                 <!-- Англоязычное описание позиции (commentEn). -->
                                 <tab id="openPositionEnTabAccordion"
                                      caption="msg://msgEnComment"
+                                     margin="false"
+                                     expand="openPositionEnTabBox"
                                      icon="font-icon:GLOBE">
-                                    <!-- Контейнер редактора английского описания на всю высоту вкладки аккордеона. -->
+                                    <!-- Контейнер редактора английского описания на всю высоту вкладки. -->
                                     <vbox id="openPositionEnTabBox" width="100%" height="100%" spacing="false" expand="openPositionEnRichTextArea">
                                         <!-- Редактор английского описания. -->
                                         <richTextArea id="openPositionEnRichTextArea"
@@ -1589,8 +1593,10 @@
                                 <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
                                 <tab id="openPositionStandartDescriptionAccorden"
                                      caption="msg://msgStandartDescription"
+                                     margin="false"
+                                     expand="openPositionStandartDescriptionTabBox"
                                      icon="font-icon:FILE_TEXT_O">
-                                    <!-- Контейнер стандартного описания на всю высоту вкладки аккордеона. -->
+                                    <!-- Контейнер стандартного описания на всю высоту вкладки. -->
                                     <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%" spacing="false" expand="openPositionStandartDescriptionRichTextArea">
                                         <!-- Просмотр стандартного описания (editable=false). -->
                                         <richTextArea id="openPositionStandartDescriptionRichTextArea"
@@ -1603,8 +1609,10 @@
                                 <!-- Блок «Кто это» (генерируется, только чтение). -->
                                 <tab id="openPositionWhoIsThisGuyAccorden"
                                      caption="msg://msgWhoIsThisGuy"
+                                     margin="false"
+                                     expand="openPositionWhoIsThisGuyTabBox"
                                      icon="font-icon:USER_O">
-                                    <!-- Контейнер описания «кто это» на всю высоту вкладки аккордеона. -->
+                                    <!-- Контейнер описания «кто это» на всю высоту вкладки. -->
                                     <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%" spacing="false" expand="openPositionWhoIsThisGuyRichTextArea">
                                         <!-- Просмотр сгенерированного описания «кто это». -->
                                         <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
@@ -1614,7 +1622,7 @@
                                                       stylename="edit-form-control open-position-editor-richtext-variant5"/>
                                     </vbox>
                                 </tab>
-                            </accordion>
+                            </tabSheet>
                         </hbox>
                     </groupBox>
                     <!-- Карточка короткого описания позиции и сканирование JD. -->

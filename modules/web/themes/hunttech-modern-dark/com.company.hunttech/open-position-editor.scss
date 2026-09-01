@@ -1492,7 +1492,7 @@
     }
 
 
-    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) с едиными карточными контейнерами, симметричными отступами и максимальной высотой аккордеона */
+    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) со вкладками TabSheet и максимальной высотой на 100% родителя */
     #jobDescriptionVBox,
     .open-position-editor #jobDescriptionVBox {
       box-sizing: border-box !important;
@@ -1522,7 +1522,7 @@
       > .v-expand {
         flex: 1 1 auto !important;
         height: 100% !important;
-        min-height: 420px !important;
+        min-height: 440px !important;
         display: flex !important;
         flex-direction: column !important;
       }
@@ -1608,7 +1608,7 @@
       max-width: 100% !important;
       min-width: 0 !important;
       height: 100% !important;
-      min-height: 420px !important;
+      min-height: 440px !important;
       flex: 1 1 auto !important;
       display: flex !important;
       flex-direction: column !important;
@@ -1625,7 +1625,7 @@
         flex: 1 1 auto !important;
         display: flex !important;
         flex-direction: column !important;
-        padding: 8px 12px !important;
+        padding: 8px 12px 12px 12px !important;
       }
     }
 
@@ -1648,13 +1648,14 @@
 
       > .v-slot,
       > .v-expand,
-      .v-tabsheet-content,
-      .v-tabsheet-tabcontainer {
+      .v-tabsheet,
+      #openPositionAccordion {
         box-sizing: border-box !important;
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
         height: 100% !important;
+        min-height: 400px !important;
         flex: 1 1 auto !important;
         display: flex !important;
         flex-direction: column !important;
@@ -1662,65 +1663,36 @@
         padding-right: 0 !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
-      }
+        border: none !important;
 
-      .v-accordion,
-      #openPositionAccordion {
-        box-sizing: border-box !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        height: 100% !important;
-        min-height: 380px !important;
-        flex: 1 1 auto !important;
-        display: flex !important;
-        flex-direction: column !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: 1px solid rgba($v-font-color, 0.14) !important;
-        border-radius: 6px !important;
-        overflow: hidden !important;
-
-        .v-accordion-item {
+        .v-tabsheet-tabcontainer {
           box-sizing: border-box !important;
           width: 100% !important;
-          max-width: 100% !important;
-          min-width: 0 !important;
-          flex: 0 0 auto;
-
-          &.v-accordion-item-open,
-          &[class*="open"] {
-            flex: 1 1 auto !important;
-            height: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-          }
+          background: transparent !important;
+          border-bottom: 1px solid rgba($v-font-color, 0.14) !important;
+          padding: 0 !important;
         }
 
-        .v-accordion-item-caption {
+        .v-tabsheet-content {
           box-sizing: border-box !important;
           width: 100% !important;
-          max-width: 100% !important;
-          min-width: 0 !important;
-          flex: 0 0 auto !important;
-        }
-
-        .v-accordion-item-content {
-          box-sizing: border-box !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          min-width: 0 !important;
           height: 100% !important;
-          min-height: 280px !important;
+          min-height: 340px !important;
           flex: 1 1 auto !important;
           display: flex !important;
           flex-direction: column !important;
-          overflow-x: hidden !important;
-          padding: 0 !important;
-          margin: 0 !important;
+          padding: 8px 0 0 0 !important;
 
-          > .v-slot,
-          > .v-expand,
+          > div,
+          > .v-tabsheet-tabsheetpanel {
+            box-sizing: border-box !important;
+            width: 100% !important;
+            height: 100% !important;
+            flex: 1 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+
           .v-verticallayout,
           #openPositionRuTabBox,
           #openPositionEnTabBox,
@@ -1731,13 +1703,22 @@
             max-width: 100% !important;
             min-width: 0 !important;
             height: 100% !important;
+            min-height: 340px !important;
             flex: 1 1 auto !important;
             display: flex !important;
             flex-direction: column !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+
+            > .v-slot,
+            > .v-expand {
+              box-sizing: border-box !important;
+              width: 100% !important;
+              height: 100% !important;
+              flex: 1 1 auto !important;
+              display: flex !important;
+              flex-direction: column !important;
+            }
           }
         }
       }
@@ -1756,11 +1737,12 @@
       max-width: 100% !important;
       margin: 0 !important;
       height: 100% !important;
-      min-height: 280px !important;
+      min-height: 320px !important;
       flex: 1 1 auto !important;
       display: flex !important;
       flex-direction: column !important;
-      border: none !important;
+      border: 1px solid rgba($v-font-color, 0.14) !important;
+      border-radius: 6px !important;
       background: $v-panel-background-color;
       overflow: hidden;
 
@@ -1805,7 +1787,7 @@
       .gwt-RichTextArea {
         box-sizing: border-box !important;
         height: 100% !important;
-        min-height: 240px !important;
+        min-height: 260px !important;
         flex: 1 1 auto !important;
         width: 100% !important;
         max-width: 100% !important;
