@@ -93,13 +93,13 @@
                       stylename="edit-sidebar-visual"
                       width="100%"
                       spacing="true"
-                      align="MIDDLE_CENTER">
+                      align="TOP_CENTER">
                     <!-- Обёртка аватара: 176×176 правильный круг -->
                     <vbox id="companyLogoPicBox"
                           width="176px"
                           height="176px"
                           spacing="false"
-                          align="MIDDLE_CENTER">
+                          align="TOP_CENTER">
                         <ovaFallbackImage id="companyLogoFileImage"
                                           dataContainer="companyDc"
                                           property="fileCompanyLogo"
@@ -127,7 +127,7 @@
                     <button id="enhanceCompanyLogoBtn"
                             caption="Умная обработка фото"
                             icon="font-icon:MAGIC"
-                            stylename="secondary candidate-btn"
+                            stylename="secondary candidate-btn enhance-company-logo-btn"
                             width="100%"
                             description="Удалить фон, сделать его прозрачным и улучшить качество без изменения логотипа"/>
                 </vbox>
@@ -136,7 +136,7 @@
                       stylename="edit-sidebar-identity"
                       width="100%"
                       spacing="false"
-                      align="MIDDLE_CENTER">
+                      align="TOP_CENTER">
                     <label id="companySidebarTitle"
                            stylename="edit-sidebar-title"
                            width="100%"
