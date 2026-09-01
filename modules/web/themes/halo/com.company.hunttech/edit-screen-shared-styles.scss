@@ -203,6 +203,60 @@
     overflow-x: hidden !important;
   }
 
+  // CDP-фикс (общий для всех Edit-форм HRM HuntTech): Vaadin .v-scrollable
+  // внутри .edit-workspace-scroll позиционируется абсолютно относительно
+  // v-generated-body (offsetParent = root Vaadin), из-за чего его ширина
+  // вычисляется от body (1600px) вместо scrollbox (1060px). Это приводит к
+  // каскадному overflow у gridlayout-slot, textfield, pickerfield, textarea
+  // на 32-100+ px вправо. Ограничиваем v-scrollable шириной родителя.
+  .edit-workspace-scroll > .v-scrollable,
+  .edit-workspace .v-scrollable {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  // CDP-фикс: .v-slot — обёртка Vaadin над layout. Без box-sizing:border-box
+  // и явной width:100% слоты растягиваются по содержимому (1030-3090px),
+  // ломая сетку gridlayout на 2/3 колонки. Запрещаем выход за границы.
+  .edit-workspace .v-slot,
+  .edit-workspace-content .v-slot {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  // CDP-фикс: tabSheet панель должна обрезать содержимое, не выпуская
+  // v-scrollable за свои границы (box-sizing:content-box сдвигает
+  // v-scrollable вправо на ширину border+padding).
+  .edit-workspace .v-tabsheet-tabsheetpanel {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  // CDP-фикс #2 (общий для всех Edit-форм): Vaadin рассчитывает inline 'left'
+  // для v-gridlayout-slot при инициализации. При resize left остаётся прежним,
+  // слоты уезжают за границы. Сбрасываем left:0 и переводим в normal flow.
+  .edit-workspace-content .v-gridlayout-slot {
+    left: 0 !important;
+    top: auto !important;
+    position: relative !important;
+  }
+
+  // CDP-фикс #3 (общий): v-slot в hbox-контейнере с парой edit-form-control
+  // получает width:100% от Vaadin inline. Ограничиваем до 50%.
+  .edit-workspace-content .v-horizontallayout > .v-slot {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 50% !important;
+    width: 50% !important;
+    flex: 0 0 50% !important;
+  }
+
+
   .edit-workspace-content {
     width: 100% !important;
     height: auto !important;

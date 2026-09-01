@@ -1419,6 +1419,56 @@
       border-radius: 4px;
     }
 
+    /* Адаптивная раскладка секции «Опыт работы» */
+    #workExperienceGroupBox,
+    .open-position-editor #workExperienceGroupBox {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    #workExperienceMainHBox,
+    .open-position-editor #workExperienceMainHBox {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 12px 16px !important;
+    }
+
+    #workExperienceRadioButton,
+    .open-position-editor #workExperienceRadioButton {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+
+      .v-select-optiongroup-horizontal,
+      .v-select-optiongroup {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px 18px !important;
+        align-items: center !important;
+      }
+
+      .v-radiobutton {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+      }
+    }
+
+    #workExperienceAiActionBox,
+    .open-position-editor #workExperienceAiActionBox {
+      box-sizing: border-box !important;
+      flex: 0 0 auto !important;
+      margin-left: auto !important;
+      min-width: 0 !important;
+    }
+
     /* Variant 5: единая поверхность RichTextArea (toolbar 42px, content min-height 220px).
      * В секции аккордеона вкладки «Описание вакансии» min-height переопределяется ниже:
      * expand-цепочка растягивает аккордеон на оставшуюся высоту, и жёсткий минимум
@@ -1427,16 +1477,56 @@
     .open-position-editor-richtext-section .v-tabsheet-content,
     .open-position-editor-richtext-section .v-tabsheet-tabcontainer {
       min-height: 0;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
     }
 
     .open-position-editor-richtext-section {
       min-height: 120px;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .open-position-editor .v-accordion,
+    .open-position-editor #openPositionAccordion {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+
+      .v-accordion-item {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      .v-accordion-item-caption {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      .v-accordion-item-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+      }
     }
 
     .open-position-editor-richtext-variant5,
-    .open-position-editor-richtext-variant5.v-richtextarea {
-      box-sizing: border-box;
+    .open-position-editor-richtext-variant5.v-richtextarea,
+    .open-position-editor-richtext-section .v-richtextarea {
+      box-sizing: border-box !important;
       min-width: 0 !important;
+      width: 100% !important;
       max-width: 100% !important;
       min-height: 260px;
       border: 1px solid rgba($v-font-color, 0.16);
@@ -1453,19 +1543,51 @@
       min-height: 120px;
     }
 
-    .open-position-editor-richtext-variant5 .v-richtextarea-toolbar {
-      min-height: 42px;
-      padding: 5px 8px;
-      border-bottom: 1px solid rgba($v-font-color, 0.13);
-      background: mix($v-app-background-color, $v-panel-background-color, 58%);
+    .open-position-editor-richtext-variant5 .v-richtextarea-toolbar,
+    .open-position-editor-richtext-section .v-richtextarea-toolbar {
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 4px 6px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      min-height: 42px !important;
+      height: auto !important;
+      padding: 5px 8px !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.13) !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 58%) !important;
+
+      select {
+        box-sizing: border-box !important;
+        max-width: 160px !important;
+        height: 30px !important;
+        font-size: 13px !important;
+        border-radius: 4px !important;
+      }
+
+      .v-button {
+        box-sizing: border-box !important;
+        min-width: 30px !important;
+        height: 30px !important;
+        margin: 0 !important;
+        padding: 0 6px !important;
+        border-radius: 4px !important;
+        flex-shrink: 0 !important;
+      }
     }
 
     .open-position-editor-richtext-variant5 .v-richtextarea-content,
-    .open-position-editor-richtext-variant5 iframe {
-      box-sizing: border-box;
+    .open-position-editor-richtext-variant5 iframe,
+    .open-position-editor-richtext-section .v-richtextarea-content,
+    .open-position-editor-richtext-section iframe {
+      box-sizing: border-box !important;
       min-height: 220px;
-      max-width: 100%;
-      background: $v-panel-background-color;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      background: $v-panel-background-color !important;
     }
 
     .open-position-editor-richtext-variant5 .v-button {
@@ -1473,6 +1595,33 @@
       min-height: 32px;
       margin: 0 2px;
       border-radius: 4px;
+    }
+
+    #shortDescriptionHBox,
+    .open-position-editor #shortDescriptionHBox {
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: flex-end !important;
+      gap: 10px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+
+      > .v-expand,
+      > .v-slot:first-child {
+        box-sizing: border-box !important;
+        flex: 1 1 300px !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: auto !important;
+      }
+
+      > .v-slot:last-child {
+        box-sizing: border-box !important;
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+      }
     }
 
     /* Лента комментариев. */
