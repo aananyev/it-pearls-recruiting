@@ -222,10 +222,7 @@ public class CompanyEditLayoutContractTest {
         assertTrue(java.contains("mainTab.setSelectedTab(\"companyDescriptionTab\")"));
         assertTrue(java.contains("mainTab.setSelectedTab(\"tabCompanyDepartament\")"));
         assertTrue(java.contains("TAB_TO_NAV_BUTTON"));
-        // Правило 3.6: label-навигация видима только на вкладках с 2+ блоками
-        // (tabConpanyDetails — 3 карточки; companyRequisitesTab — 4 карточки;
-        // companyDescriptionTab — 2 карточки; tabCompanyDepartament — 1 карточка,
-        // контейнер скрывается целиком).
+        // label-навигация видима на всех вкладках формы компании.
         assertTrue("Нет константы TABS_WITH_SIDEBAR_NAVIGATION",
                 java.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
         assertTrue("Контейнер навигации не инжектится",
@@ -239,12 +236,8 @@ public class CompanyEditLayoutContractTest {
                 java.contains("\"companyRequisitesTab\""));
         assertTrue("companyDescriptionTab не в списке вкладок с навигацией",
                 java.contains("\"companyDescriptionTab\""));
-        // tabCompanyDepartament не должен быть в TABS_WITH_SIDEBAR_NAVIGATION (одноблочная вкладка)
-        int navSetStart = java.indexOf("TABS_WITH_SIDEBAR_NAVIGATION");
-        int navSetEnd = java.indexOf("));", navSetStart);
-        String navSetContent = java.substring(navSetStart, navSetEnd);
-        assertTrue("tabCompanyDepartament не должен быть в TABS_WITH_SIDEBAR_NAVIGATION",
-                !navSetContent.contains("tabCompanyDepartament"));
+        assertTrue("tabCompanyDepartament не в списке вкладок с навигацией",
+                java.contains("\"tabCompanyDepartament\""));
         assertTrue("Нет контейнера companyEditorSidebarNavigation в XML",
                 xml.contains("id=\"companyEditorSidebarNavigation\""));
         assertTrue("логотип должен инжектиться как WebOvaFallbackImage (авто-fallback)",
