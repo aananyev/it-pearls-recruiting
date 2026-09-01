@@ -946,4 +946,38 @@
       height: auto !important;
     }
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Стиль выпадающих меню (v-filterselect-suggestpopup, c-suggestionfield-popup):
+  // единый шрифт 15px, отступы и контрастное выделение активного пункта
+  // ═══════════════════════════════════════════════════════════════════════════
+  .v-filterselect-suggestpopup,
+  .c-suggestionfield-popup,
+  .v-filterselect-suggestmenu {
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.15) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
+
+    .gwt-MenuItem,
+    .v-filterselect-suggestmenu .gwt-MenuItem,
+    .c-suggestionfield-popup-content .gwt-MenuItem,
+    td.gwt-MenuItem {
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
+      padding: 6px 12px !important;
+      color: $v-font-color !important;
+    }
+
+    .gwt-MenuItem-selected,
+    .v-filterselect-suggestmenu .gwt-MenuItem-selected,
+    .c-suggestionfield-popup-content .gwt-MenuItem-selected,
+    td.gwt-MenuItem-selected {
+      background: mix($v-selection-color, $v-panel-background-color, 25%) !important;
+      color: $v-font-color !important;
+    }
+  }
+
 }
