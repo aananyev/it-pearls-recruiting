@@ -1492,14 +1492,17 @@
     }
 
 
-    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) без горизонтального переполнения */
+    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) с симметричными отступами слева и справа */
     #jobDescriptionVBox,
     .open-position-editor #jobDescriptionVBox {
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      padding: 14px 16px 22px 16px !important;
+      margin: 0 !important;
       overflow-x: hidden !important;
+      overflow-y: auto !important;
 
       > .v-slot,
       > .v-expand {
@@ -1507,6 +1510,10 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
       }
     }
 
@@ -1516,6 +1523,8 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
       overflow-x: hidden !important;
 
       .v-groupbox-content {
@@ -1523,6 +1532,7 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
+        padding: 10px 14px !important;
       }
     }
 
@@ -1532,6 +1542,7 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      margin: 0 !important;
       display: flex !important;
       flex-wrap: wrap !important;
       align-items: center !important;
@@ -1584,6 +1595,10 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
       overflow-x: hidden !important;
 
       > .v-slot,
@@ -1594,6 +1609,10 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
       }
 
       .v-accordion,
@@ -1602,6 +1621,8 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
 
         .v-accordion-item {
           box-sizing: border-box !important;
@@ -1623,6 +1644,8 @@
           max-width: 100% !important;
           min-width: 0 !important;
           overflow-x: hidden !important;
+          padding: 0 !important;
+          margin: 0 !important;
 
           > .v-slot,
           > .v-expand,
@@ -1635,6 +1658,10 @@
             width: 100% !important;
             max-width: 100% !important;
             min-width: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
           }
         }
       }
@@ -1651,6 +1678,7 @@
       min-width: 0 !important;
       width: 100% !important;
       max-width: 100% !important;
+      margin: 0 !important;
       min-height: 120px;
       border: 1px solid rgba($v-font-color, 0.16);
       border-radius: 6px;
@@ -1713,6 +1741,9 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+      margin: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
       overflow-x: hidden !important;
 
       > .v-expand,
