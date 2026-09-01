@@ -1,5 +1,6 @@
 package com.company.hunttech.web.screens.mainscreen;
 
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.HtmlAttributes;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -39,6 +40,8 @@ public class HrmMainScreen extends ExtMainScreen {
     private UserSession userSession;
     @Inject
     private VBoxLayout mainVBox;
+    @Inject
+    private Component mainDashboard;
     @Inject
     private HtmlAttributes htmlAttributes;
 

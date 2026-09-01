@@ -3,40 +3,11 @@
         xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd"
         caption="msg://tetrisCandidates.caption"
         messagesPack="com.company.hunttech.web.screens.fragments.tetriscandidates">
-    <layout expand="tetrisCandidatesDashboard"
-            spacing="true"
-            width="100%"
-            height="100%"
-            stylename="tetris-candidates-workspace">
-        <hbox id="tetrisHeaderToolbar"
-              width="100%"
-              spacing="true"
-              stylename="tetris-header-toolbar edit-toolbar">
-            <hbox id="tetrisTitleBox"
-                  spacing="true"
-                  align="MIDDLE_LEFT">
-                <label id="tetrisTitleIcon"
-                       icon="TH_LARGE"
-                       stylename="h1 tetris-header-icon"
-                       align="MIDDLE_LEFT"/>
-                <vbox id="tetrisTitleTexts"
-                      spacing="false"
-                      align="MIDDLE_LEFT">
-                    <label id="tetrisHeaderTitle"
-                           value="msg://tetrisCandidates.caption"
-                           stylename="h2 tetris-header-title"/>
-                    <label id="tetrisHeaderSubtitle"
-                           value="Интерактивная матрица распределения кандидатов по открытым вакансиям и стадиям взаимодействия"
-                           stylename="tetris-header-subtitle"/>
-                </vbox>
-            </hbox>
-        </hbox>
+    <layout>
         <dashboard:dashboard id="tetrisCandidatesDashboard"
                              code="tetris-candidates-dashboard"
                              timerDelay="60"
-                             stylename="tetris-candidates-dashboard-root"
-                             width="100%"
-                             height="100%">
+                             width="100%">
         </dashboard:dashboard>
     </layout>
 </window>
