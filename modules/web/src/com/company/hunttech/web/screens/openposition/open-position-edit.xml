@@ -1524,7 +1524,7 @@
                       width="100%"
                       height="100%"
                       spacing="true"
-                      expand="descriptionsAccordionHBox"
+                      expand="descriptionTextsAccordion"
                       stylename="edit-workspace-scroll open-position-editor-tab-content">
                     <!-- Группа «Опыт работы»: опыт коммерческой разработки и командный опыт (свёрнута). -->
                     <groupBox id="workExperienceGroupBox"
@@ -1561,105 +1561,123 @@
                                           property="commandExperience"
                                           caption="msg://msgCommandExperience"/>
                     </groupBox>
-                    <!-- Секция аккордеона описаний позиции: русское, английское, стандартное и «кто это». -->
-                    <hbox id="descriptionsAccordionHBox"
-                          spacing="true"
-                          width="100%"
-                          height="100%"
-                          stylename="open-position-editor-richtext-section">
-                        <!-- Аккордеон описаний позиции (четыре редактора RichTextArea). -->
-                        <accordion id="openPositionAccordion"
-                                   width="100%"
-                                   height="100%">
-                            <!-- Русскоязычное описание позиции (comment). -->
-                            <tab id="openPositionRuTabAccordion"
-                                 caption="msg://msgRuComment"
-                                 icon="font-icon:LANGUAGE">
-                                <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
-                                <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
-                                    <!-- Редактор русского описания (обязательный). -->
-                                    <richTextArea id="openPositionRichTextArea"
-                                                  dataContainer="openPositionDc"
-                                                  property="comment"
-                                                  width="100%"
-                                                  box.expandRatio="1"
-                                                  height="100%"
-                                                  required="true"
-                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                </vbox>
-                            </tab>
-                            <!-- Англоязычное описание позиции (commentEn). -->
-                            <tab id="openPositionEnTabAccordion"
-                                 caption="msg://msgEnComment"
-                                 icon="font-icon:GLOBE">
-                                <!-- Контейнер редактора английского описания на всю высоту вкладки аккордеона. -->
-                                <vbox id="openPositionEnTabBox" width="100%" height="100%">
-                                    <!-- Редактор английского описания. -->
-                                    <richTextArea id="openPositionEnRichTextArea"
-                                                  dataContainer="openPositionDc"
-                                                  property="commentEn"
-                                                  width="100%"
-                                                  box.expandRatio="1"
-                                                  height="100%"
-                                                  required="false"
-                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                </vbox>
-                            </tab>
-                            <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
-                            <tab id="openPositionStandartDescriptionAccorden"
-                                 caption="msg://msgStandartDescription"
-                                 icon="font-icon:FILE_TEXT_O">
-                                <!-- Контейнер стандартного описания на всю высоту вкладки аккордеона. -->
-                                <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%">
-                                    <!-- Просмотр стандартного описания (editable=false). -->
-                                    <richTextArea id="openPositionStandartDescriptionRichTextArea"
-                                                  width="100%"
-                                                  box.expandRatio="1"
-                                                  height="100%"
-                                                  editable="false"
-                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                </vbox>
-                            </tab>
-                            <!-- Блок «Кто это» (генерируется, только чтение). -->
-                            <tab id="openPositionWhoIsThisGuyAccorden"
-                                 caption="msg://msgWhoIsThisGuy"
-                                 icon="font-icon:USER_O">
-                                <!-- Контейнер описания «кто это» на всю высоту вкладки аккордеона. -->
-                                <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%">
-                                    <!-- Просмотр сгенерированного описания «кто это». -->
-                                    <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
-                                                  width="100%"
-                                                  box.expandRatio="1"
-                                                  height="100%"
-                                                  editable="false"
-                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                </vbox>
-                            </tab>
-                        </accordion>
-                    </hbox>
-                    <!-- Ряд короткого описания: краткое описание позиции и сканирование JD. -->
-                    <hbox id="shortDescriptionHBox"
-                          width="100%"
-                          spacing="true"
-                          expand="shortDescriptionTextArea"
-                          stylename="open-position-editor-field-row open-position-editor-row-wide">
-                        <!-- Короткое описание позиции (до 250 символов). -->
-                        <textField id="shortDescriptionTextArea"
-                                   dataContainer="openPositionDc"
-                                   caption="msg://msgShortCaption"
-                                   property="shortDescription"
-                                   maxLength="250"
-                                   stylename="edit-form-control"
-                                   width="100%"/>
-                        <!-- Сканирование описания должности: извлечение короткого описания и навыков (addShortDescription). -->
-                        <button id="scanJDButton"
-                                caption="msg://msgScanJD"
-                                icon="MAGIC"
-                                align="BOTTOM_RIGHT"
-                                description="msg://msgScanJDAndPut"
-                                stylename="secondary"
-                                invoke="addShortDescription"/>
-                    </hbox>
+                    <!-- Карточка «Тексты описания» с аккордеоном (RU, EN, стандартное, кто это) -->
+                    <groupBox id="descriptionTextsAccordion"
+                              caption="msg://msgDescription"
+                              collapsable="true"
+                              collapsed="false"
+                              showAsPanel="true"
+                              stylename="edit-accordion-section open-position-editor-richtext-card"
+                              width="100%"
+                              height="100%"
+                              expand="descriptionsAccordionHBox">
+                        <hbox id="descriptionsAccordionHBox"
+                              spacing="false"
+                              width="100%"
+                              height="100%"
+                              stylename="open-position-editor-richtext-section">
+                            <!-- Аккордеон описаний позиции (четыре редактора RichTextArea). -->
+                            <accordion id="openPositionAccordion"
+                                       width="100%"
+                                       height="100%">
+                                <!-- Русскоязычное описание позиции (comment). -->
+                                <tab id="openPositionRuTabAccordion"
+                                     caption="msg://msgRuComment"
+                                     icon="font-icon:LANGUAGE">
+                                    <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
+                                    <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
+                                        <!-- Редактор русского описания (обязательный). -->
+                                        <richTextArea id="openPositionRichTextArea"
+                                                      dataContainer="openPositionDc"
+                                                      property="comment"
+                                                      width="100%"
+                                                      box.expandRatio="1"
+                                                      height="100%"
+                                                      required="true"
+                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                    </vbox>
+                                </tab>
+                                <!-- Англоязычное описание позиции (commentEn). -->
+                                <tab id="openPositionEnTabAccordion"
+                                     caption="msg://msgEnComment"
+                                     icon="font-icon:GLOBE">
+                                    <!-- Контейнер редактора английского описания на всю высоту вкладки аккордеона. -->
+                                    <vbox id="openPositionEnTabBox" width="100%" height="100%">
+                                        <!-- Редактор английского описания. -->
+                                        <richTextArea id="openPositionEnRichTextArea"
+                                                      dataContainer="openPositionDc"
+                                                      property="commentEn"
+                                                      width="100%"
+                                                      box.expandRatio="1"
+                                                      height="100%"
+                                                      required="false"
+                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                    </vbox>
+                                </tab>
+                                <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
+                                <tab id="openPositionStandartDescriptionAccorden"
+                                     caption="msg://msgStandartDescription"
+                                     icon="font-icon:FILE_TEXT_O">
+                                    <!-- Контейнер стандартного описания на всю высоту вкладки аккордеона. -->
+                                    <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%">
+                                        <!-- Просмотр стандартного описания (editable=false). -->
+                                        <richTextArea id="openPositionStandartDescriptionRichTextArea"
+                                                      width="100%"
+                                                      box.expandRatio="1"
+                                                      height="100%"
+                                                      editable="false"
+                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                    </vbox>
+                                </tab>
+                                <!-- Блок «Кто это» (генерируется, только чтение). -->
+                                <tab id="openPositionWhoIsThisGuyAccorden"
+                                     caption="msg://msgWhoIsThisGuy"
+                                     icon="font-icon:USER_O">
+                                    <!-- Контейнер описания «кто это» на всю высоту вкладки аккордеона. -->
+                                    <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%">
+                                        <!-- Просмотр сгенерированного описания «кто это». -->
+                                        <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
+                                                      width="100%"
+                                                      box.expandRatio="1"
+                                                      height="100%"
+                                                      editable="false"
+                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                    </vbox>
+                                </tab>
+                            </accordion>
+                        </hbox>
+                    </groupBox>
+                    <!-- Карточка короткого описания позиции и сканирование JD. -->
+                    <groupBox id="shortDescriptionAccordion"
+                              caption="msg://msgShortCaption"
+                              collapsable="true"
+                              collapsed="false"
+                              showAsPanel="true"
+                              stylename="edit-accordion-section open-position-editor-description-short"
+                              width="100%">
+                        <hbox id="shortDescriptionHBox"
+                              width="100%"
+                              spacing="true"
+                              expand="shortDescriptionTextArea"
+                              stylename="open-position-editor-field-row open-position-editor-row-wide">
+                            <!-- Короткое описание позиции (до 250 символов). -->
+                            <textField id="shortDescriptionTextArea"
+                                       dataContainer="openPositionDc"
+                                       caption="msg://msgShortCaption"
+                                       property="shortDescription"
+                                       maxLength="250"
+                                       stylename="edit-form-control"
+                                       width="100%"/>
+                            <!-- Сканирование описания должности: извлечение короткого описания и навыков (addShortDescription). -->
+                            <button id="scanJDButton"
+                                    caption="msg://msgScanJD"
+                                    icon="MAGIC"
+                                    align="BOTTOM_RIGHT"
+                                    description="msg://msgScanJDAndPut"
+                                    stylename="secondary"
+                                    invoke="addShortDescription"/>
+                        </hbox>
+                    </groupBox>
                 </vbox>
             </tab>
             <!-- Вкладка «Файлы»: таблица файлов позиции. -->

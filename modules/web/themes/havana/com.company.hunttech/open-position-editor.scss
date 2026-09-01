@@ -1492,7 +1492,7 @@
     }
 
 
-    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) с симметричными отступами слева и справа */
+    /* Адаптивная раскладка вкладки «Описание вакансии» (tabJobDescription) с едиными карточными контейнерами и симметричными отступами */
     #jobDescriptionVBox,
     .open-position-editor #jobDescriptionVBox {
       box-sizing: border-box !important;
@@ -1588,6 +1588,26 @@
       min-width: 0 !important;
     }
 
+    #descriptionTextsAccordion,
+    .open-position-editor #descriptionTextsAccordion,
+    .open-position-editor-richtext-card {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      overflow-x: hidden !important;
+
+      .v-groupbox-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 8px 12px !important;
+      }
+    }
+
     #descriptionsAccordionHBox,
     .open-position-editor #descriptionsAccordionHBox,
     .open-position-editor-richtext-section {
@@ -1623,6 +1643,9 @@
         min-width: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        border: 1px solid rgba($v-font-color, 0.14) !important;
+        border-radius: 6px !important;
+        overflow: hidden !important;
 
         .v-accordion-item {
           box-sizing: border-box !important;
@@ -1680,8 +1703,7 @@
       max-width: 100% !important;
       margin: 0 !important;
       min-height: 120px;
-      border: 1px solid rgba($v-font-color, 0.16);
-      border-radius: 6px;
+      border: none !important;
       background: $v-panel-background-color;
       overflow: hidden;
 
@@ -1696,7 +1718,7 @@
         min-width: 0 !important;
         min-height: 42px !important;
         height: auto !important;
-        padding: 5px 8px !important;
+        padding: 6px 10px !important;
         border-bottom: 1px solid rgba($v-font-color, 0.13) !important;
         background: mix($v-app-background-color, $v-panel-background-color, 58%) !important;
 
@@ -1728,6 +1750,26 @@
         max-width: 100% !important;
         min-width: 0 !important;
         background: $v-panel-background-color !important;
+      }
+    }
+
+    #shortDescriptionAccordion,
+    .open-position-editor #shortDescriptionAccordion,
+    .open-position-editor-description-short {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      overflow-x: hidden !important;
+
+      .v-groupbox-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 10px 14px !important;
       }
     }
 
