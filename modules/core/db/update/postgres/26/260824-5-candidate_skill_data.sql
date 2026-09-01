@@ -300,5 +300,5 @@ INSERT INTO HUNTTECH_CANDIDATE_SKILL (id, version, candidate_id, skill_id, prior
 ('2dc29635-b97f-71dd-6462-dc11bc3526c8', 1, 'c32fac85-1bf6-0fe8-361e-ba402ebb46b1', 'd8e067c9-d081-4f1f-e2d7-440d97323b61', 10),
 ('110a3d65-6347-a21c-ec91-aee3f8293b4b', 1, 'c32fac85-1bf6-0fe8-361e-ba402ebb46b1', 'f12154ec-e3a3-c6b2-6739-c31f03a08fae', 10),
 ('b15bf582-740a-59aa-42c9-3261a26a34e3', 1, 'c32fac85-1bf6-0fe8-361e-ba402ebb46b1', '31735584-32eb-a97d-98ad-dccc8c4bb2e5', 10),
-('bd8dcd78-ab02-a6d3-170d-0933674a7201', 1, 'c32fac85-1bf6-0fe8-361e-ba402ebb46b1', 'c98f4741-cc2c-7587-a66e-56759f4a8b82', 10);
-ON CONFLICT (CANDIDATE_ID, SKILL_ID, (DELETE_TS IS NULL)) DO NOTHING;
+('bd8dcd78-ab02-a6d3-170d-0933674a7201', 1, 'c32fac85-1bf6-0fe8-361e-ba402ebb46b1', 'c98f4741-cc2c-7587-a66e-56759f4a8b82', 10)
+ON CONFLICT DO NOTHING;

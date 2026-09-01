@@ -921,5 +921,5 @@ INSERT INTO HUNTTECH_SKILL_TREE (id, version, open_position_id, skill_tree_id, s
 ('a8088f07-574a-8a90-03c8-e829c58f6b05', 1, NULL, 'c02bdfab-178f-7f80-56d6-fa1fc7363be3', 'ЦФТ', '', 1, 'c02bdfab-178f-7f80-56d6-fa1fc7363be3'),
 ('3ab67d9f-4fc4-60a4-7e39-96657e142f93', 2, NULL, 'f1c10dc9-442c-bfb0-a6e0-47ed23a84bf7', 'ЭДО', 'f', 1, 'f1c10dc9-442c-bfb0-a6e0-47ed23a84bf7'),
 ('70f2faf1-0d39-8f60-5edd-3a06ea9e4608', 3, NULL, NULL, 'Язык описания BA', 'f', 0, NULL),
-('1bc30b25-ba4a-ada6-45de-217c2c0d351a', 8, NULL, NULL, 'Языки программирования', 't', 0, NULL);
+('1bc30b25-ba4a-ada6-45de-217c2c0d351a', 8, NULL, NULL, 'Языки программирования', 't', 0, NULL)
 ON CONFLICT DO NOTHING;
