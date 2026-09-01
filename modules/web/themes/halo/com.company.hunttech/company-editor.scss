@@ -84,6 +84,21 @@
     // Визуальный блок sidebar: без карточки-рамки, аватар логотипа стоит на фоне
     // sidebar; блок центрирует круглый логотип 96×96 (PNG уже круглый после
     // обработки логотипа) и пару кнопок «Загрузить»/«Очистить».
+    // Нормализация вертикального потока слотов Vaadin в sidebar:
+    // отключает Vaadin-позиционирование (top/left absolute), предотвращая
+    // наложение кнопок и текста на аватар.
+    .edit-sidebar > .v-slot,
+    .edit-sidebar-visual > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
     .edit-sidebar-visual {
       box-sizing: border-box;
       width: 100% !important;
