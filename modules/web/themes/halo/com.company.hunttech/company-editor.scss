@@ -495,6 +495,8 @@
     
 
 
+    // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
+    .company-main-tab,
 // ═══════════════════════════════════════════════════════════════════════════
     // Единый шрифт, стиль и размер полей ввода (TextField, LookupField, LookupPickerField, DateField, TextArea)
     // ═══════════════════════════════════════════════════════════════════════════
@@ -838,6 +840,7 @@
       max-width: 100% !important;
     }
 
+    // (см. выше — тот же фикс scrollable и v-slot, не дублировать)
     // CDP-фикс: tabSheet панель должна обрезать содержимое, не выпуская v-scrollable
     // за свои границы. v-tabsheet-tabsheetpanel имеет box-sizing:content-box — это
     // сдвигает v-scrollable вправо на ширину border+padding.
@@ -849,8 +852,7 @@
 
     // CDP-фикс: hbox с парой чекбоксов (ourLegalEnityCheckBox + checkBoxOurClient) в
     // первой карточке — каждый чекбокс получает width:100% от Vaadin и вылезает
-    // вправо на 1020px (2 × 1020 = 2040). Превращаем hbox во flex-контейнер с
-    // равномерным распределением.
+    // вправо на 1020px. Объединяем оба селектора (новый :has(...) из HEAD и .company-main-tab-top-checks из PR).
     .edit-workspace-content .company-main-tab-top-checks {
       box-sizing: border-box !important;
       display: flex !important;

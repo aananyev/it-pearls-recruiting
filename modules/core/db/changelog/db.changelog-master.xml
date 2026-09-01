@@ -146,4 +146,8 @@
     <include file="260822-2-addCompanyWebSearchAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AI-сгенерированные данные навыков: кандидат + вакансия (подготовлено, НЕ запущено на проде). -->
+    <include file="260824-5-6-mergeCandidateAndVacancySkillsData.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

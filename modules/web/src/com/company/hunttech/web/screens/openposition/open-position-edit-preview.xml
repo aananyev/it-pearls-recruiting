@@ -218,19 +218,11 @@
           <vbox id="openPositionNewsTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionApprovalTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionCommentsTabNavigation" width="100%" visible="false"/>
-          <vbox id="openPositionInterviewPlanTabNavigation" width="100%" visible="false">
-            <button id="openPositionEditorNavInterviewPlan" visible="false"/>
-          </vbox>
-          <vbox id="openPositionSearchMapTabNavigation" width="100%" visible="false">
-            <button id="openPositionEditorNavSearchMap" visible="false"/>
-          </vbox>
           <!-- Контейнер label-навигации базового контроллера (контракт @Inject OpenPositionEdit);
                витрина использует собственный набор openPositionPreviewNavigation. -->
           <vbox id="openPositionEditorNavigation" width="100%" visible="false"/>
           <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
           <label id="infoPositionLabel" width="100%" visible="false"/>
-          <label id="infoCompanyLabel" width="100%" visible="false"/>
-          <label id="infoDepartmentLabel" width="100%" visible="false"/>
           <label id="infoProjectLabel" width="100%" visible="false"/>
           <label id="infoOwnerLabel" width="100%" visible="false"/>
           <label id="infoCityLabel" width="100%" visible="false"/>
@@ -244,9 +236,6 @@
           <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
           <!-- Скрытый label звёздного рейтинга sidebar (контракт @Inject из основного XML). -->
           <label id="openPositionRatingLabel" width="100%" visible="false"/>
-          <label id="openPositionSkillsLabels" width="100%" visible="false"/>
-          <label id="priorityBadgeLabel" width="100%" visible="false"/>
-          <button id="scanOpenPositionSkillsBtn" visible="false"/>
         </vbox>
         <!-- Ключевые параметры используют только уже загруженные свойства edit-view. -->
         <vbox id="openPositionPreviewSummary" width="100%" spacing="true" stylename="edit-sidebar-summary">
@@ -570,22 +559,6 @@
               <vbox id="memoVbox" width="100%" height="100%" spacing="true" expand="memoForInterviewRichTextArea">
                 <checkBox id="needMemoCheckBox" dataContainer="openPositionDc" property="needMemoForInterview" caption="msg://msgNeedMemoForInterview"/>
                 <richTextArea id="memoForInterviewRichTextArea" dataContainer="openPositionDc" property="memoForInterview" height="100%" width="100%"/>
-              </vbox>
-            </groupBox>
-          </tab>
-          <!-- 6.1. ПЛАН СОБЕСЕДОВАНИЯ -->
-          <tab id="tabInterviewPlan" caption="msg://msgInterviewPlan" margin="true" spacing="true" icon="font-icon:CALENDAR_CHECK_O">
-            <groupBox id="interviewPlanAccordion" caption="msg://msgInterviewPlan" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-tab-content open-position-preview-group-tab" width="100%" height="100%" expand="interviewPlanVBox">
-              <vbox id="interviewPlanVBox" width="100%" height="100%" spacing="true" expand="interviewPlanRichTextArea">
-                <richTextArea id="interviewPlanRichTextArea" dataContainer="openPositionDc" property="interviewPlan" height="100%" width="100%"/>
-              </vbox>
-            </groupBox>
-          </tab>
-          <!-- 6.2. КАРТА ПОИСКА -->
-          <tab id="tabSearchMap" caption="msg://msgSearchMap" margin="true" spacing="true" icon="font-icon:MAP_O">
-            <groupBox id="searchMapAccordion" caption="msg://msgSearchMap" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-tab-content open-position-preview-group-tab" width="100%" height="100%" expand="searchMapVBox">
-              <vbox id="searchMapVBox" width="100%" height="100%" spacing="true" expand="searchMapRichTextArea">
-                <richTextArea id="searchMapRichTextArea" dataContainer="openPositionDc" property="searchMap" height="100%" width="100%"/>
               </vbox>
             </groupBox>
           </tab>

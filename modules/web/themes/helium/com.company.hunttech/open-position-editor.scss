@@ -1695,11 +1695,9 @@
     #openPositionStandartDescriptionRichTextArea,
     #openPositionWhoIsThisGuyRichTextArea,
     .open-position-editor-richtext-variant5,
-    .open-position-editor-richtext-variant5.v-richtextarea,
-    .open-position-editor-richtext-section .v-richtextarea {
-      box-sizing: border-box !important;
+    .open-position-editor-richtext-variant5.v-richtextarea {
+      box-sizing: border-box;
       min-width: 0 !important;
-      width: 100% !important;
       max-width: 100% !important;
       margin: 0 !important;
       min-height: 120px;

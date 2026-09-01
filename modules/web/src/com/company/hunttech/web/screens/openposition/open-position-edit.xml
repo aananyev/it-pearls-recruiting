@@ -592,32 +592,6 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «План собеседования» (tabInterviewPlan): единый раздел — редактор
-                 плана собеседования; набор никогда не показывается (вкладка с одним блоком ввода),
-                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionInterviewPlanTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «План собеседования» — label-навигация контейнера interviewPlanVBox. -->
-                <button id="openPositionEditorNavInterviewPlan"
-                        caption="msg://msgInterviewPlan"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Карта поиска» (tabSearchMap): единый раздел — редактор
-                 карты поиска; набор никогда не показывается (вкладка с одним блоком ввода),
-                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionSearchMapTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Карта поиска» — label-навигация контейнера searchMapVBox. -->
-                <button id="openPositionEditorNavSearchMap"
-                        caption="msg://msgSearchMap"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
             <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел;
                  набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
                  структуры набора и Java-контракта (@Named/@Subscribe). -->
@@ -705,16 +679,6 @@
                   spacing="true">
                 <!-- Наименование должности (название вакансии). -->
                 <label id="infoPositionLabel"
-                       width="100%"
-                       htmlEnabled="true"
-                       stylename="open-position-editor-summary-value"/>
-                <!-- Компания позиции. -->
-                <label id="infoCompanyLabel"
-                       width="100%"
-                       htmlEnabled="true"
-                       stylename="open-position-editor-summary-value"/>
-                <!-- Департамент компании. -->
-                <label id="infoDepartmentLabel"
                        width="100%"
                        htmlEnabled="true"
                        stylename="open-position-editor-summary-value"/>
@@ -1010,13 +974,12 @@
                                         </actions>
                                     </lookupPickerField>
                                 </hbox>
-                                <!-- Строка 3: компания и департамент (скрыты из формы, отображаются в sidebar «Информация»). -->
+                                <!-- Строка 3: компания и департамент в одну линию (половина/половина). -->
                                 <hbox id="vacancyCompanyRow"
                                       spacing="true"
                                       width="100%"
-                                      visible="false"
                                       stylename="open-position-editor-field-row open-position-editor-row-half">
-                                    <!-- Компания позиции (невидимая, необязательная); при выборе обновляется список департаментов. -->
+<!-- Компания позиции (обязательная); при выборе обновляется список департаментов. -->
                                     <lookupPickerField id="companyNameField"
                                                        optionsContainer="companyNamesDc"
                                                        caption="msg://msgCompanyName"
@@ -1024,7 +987,7 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"
-                                                       required="false">
+                                                       required="true">
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup"/>
@@ -1032,7 +995,7 @@
                                                     type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
-                                    <!-- Департамент компании (невидимый, необязательный, options зависят от выбранной компании). -->
+<!-- Департамент компании (обязательный, options зависят от выбранной компании). -->
                                     <lookupPickerField id="companyDepartamentField"
                                                        optionsContainer="companyDepartamentsDc"
                                                        caption="msg://msgDepartment"
@@ -1040,7 +1003,7 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"
-                                                       required="false">
+                                                       required="true">
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup"/>
@@ -1772,52 +1735,6 @@
                     <richTextArea id="memoForInterviewRichTextArea"
                                   dataContainer="openPositionDc"
                                   property="memoForInterview"
-                                  height="100%"
-                                  width="100%"
-                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                </vbox>
-            </tab>
-            <!-- Вкладка «План собеседования»: редактор плана собеседования. -->
-            <tab id="tabInterviewPlan"
-                 caption="msg://msgInterviewPlan"
-                 margin="false"
-                 spacing="true"
-                 expand="interviewPlanVBox"
-                 icon="font-icon:CALENDAR_CHECK_O">
-                <!-- Контейнер вкладки плана собеседования. -->
-                <vbox id="interviewPlanVBox"
-                      height="100%"
-                      width="100%"
-                      spacing="true"
-                      expand="interviewPlanRichTextArea"
-                      stylename="open-position-editor-tab-content">
-                    <!-- Редактор плана собеседования (lazy). -->
-                    <richTextArea id="interviewPlanRichTextArea"
-                                  dataContainer="openPositionDc"
-                                  property="interviewPlan"
-                                  height="100%"
-                                  width="100%"
-                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                </vbox>
-            </tab>
-            <!-- Вкладка «Карта поиска»: редактор карты поиска кандидата. -->
-            <tab id="tabSearchMap"
-                 caption="msg://msgSearchMap"
-                 margin="false"
-                 spacing="true"
-                 expand="searchMapVBox"
-                 icon="font-icon:MAP_O">
-                <!-- Контейнер вкладки карты поиска. -->
-                <vbox id="searchMapVBox"
-                      height="100%"
-                      width="100%"
-                      spacing="true"
-                      expand="searchMapRichTextArea"
-                      stylename="open-position-editor-tab-content">
-                    <!-- Редактор карты поиска кандидата (lazy). -->
-                    <richTextArea id="searchMapRichTextArea"
-                                  dataContainer="openPositionDc"
-                                  property="searchMap"
                                   height="100%"
                                   width="100%"
                                   stylename="edit-form-control open-position-editor-richtext-variant5"/>
