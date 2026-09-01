@@ -592,6 +592,19 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
+            <!-- Набор вкладки «План собеседования» (tabInterviewPlan): единый раздел — редактор
+                 плана собеседования; набор никогда не показывается (вкладка с одним блоком ввода),
+                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
+            <vbox id="openPositionInterviewPlanTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «План собеседования» — label-навигация контейнера interviewPlanVBox. -->
+                <button id="openPositionEditorNavInterviewPlan"
+                        caption="msg://msgInterviewPlan"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
             <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел;
                  набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
                  структуры набора и Java-контракта (@Named/@Subscribe). -->
@@ -1722,6 +1735,29 @@
                     <richTextArea id="memoForInterviewRichTextArea"
                                   dataContainer="openPositionDc"
                                   property="memoForInterview"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
+            </tab>
+            <!-- Вкладка «План собеседования»: редактор плана собеседования. -->
+            <tab id="tabInterviewPlan"
+                 caption="msg://msgInterviewPlan"
+                 margin="false"
+                 spacing="true"
+                 expand="interviewPlanVBox"
+                 icon="font-icon:CALENDAR_CHECK_O">
+                <!-- Контейнер вкладки плана собеседования. -->
+                <vbox id="interviewPlanVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="interviewPlanRichTextArea"
+                      stylename="open-position-editor-tab-content">
+                    <!-- Редактор плана собеседования (lazy). -->
+                    <richTextArea id="interviewPlanRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="interviewPlan"
                                   height="100%"
                                   width="100%"
                                   stylename="edit-form-control open-position-editor-richtext-variant5"/>

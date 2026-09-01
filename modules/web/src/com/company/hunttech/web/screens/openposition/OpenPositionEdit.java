@@ -206,6 +206,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private RichTextArea exerciseRichTextArea;
     @Inject
+    private RichTextArea interviewPlanRichTextArea;
+    @Inject
     private LookupPickerField<Project> projectNameField;
     @Inject
     private TextField<String> vacansyNameField;
@@ -444,6 +446,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private VBoxLayout openPositionMemoTabNavigation;
     @Inject
+    private VBoxLayout openPositionInterviewPlanTabNavigation;
+    @Inject
     private VBoxLayout openPositionTemplateLetterTabNavigation;
     @Inject
     private VBoxLayout openPositionSkillsTabNavigation;
@@ -458,8 +462,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private VBoxLayout openPositionEditorNavigation;
     /* Пункты наборов навигации вкладок «Трудовой договор», «Описание должности», «Файлы»,
-       «Тестовое задание», «Памятка», «Шаблон письма», «Навыки», «Новости», «Согласование»,
-       «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
+       «Тестовое задание», «Памятка», «План собеседования», «Шаблон письма», «Навыки», «Новости»,
+       «Согласование», «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
        вкладок без полей ввода — только подсветка). */
     @Inject
     private Button openPositionEditorNavLaborAgreement;
@@ -477,6 +481,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button openPositionEditorNavExercise;
     @Inject
     private Button openPositionEditorNavMemo;
+    @Inject
+    private Button openPositionEditorNavInterviewPlan;
     @Inject
     private Button openPositionEditorNavTemplateLetter;
     @Inject
@@ -497,6 +503,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private boolean jobDescriptionLobsLoaded;
     private boolean exerciseLoaded;
     private boolean memoLoaded;
+    private boolean interviewPlanLoaded;
     private boolean templateLetterLoaded;
     private boolean skillsLoaded;
     private boolean filesLoaded;
@@ -584,6 +591,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 loadMemoForInterviewLob();
                 memoLoaded = true;
             }
+            if ("tabInterviewPlan".equals(tabName) && !interviewPlanLoaded) {
+                loadInterviewPlanLob();
+                interviewPlanLoaded = true;
+            }
             if ("tabTemplateLetter".equals(tabName) && !templateLetterLoaded) {
                 loadTemplateLetterLob();
                 templateLetterLoaded = true;
@@ -640,6 +651,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 openPositionFilesTabNavigation,
                 openPositionExerciseTabNavigation,
                 openPositionMemoTabNavigation,
+                openPositionInterviewPlanTabNavigation,
                 openPositionTemplateLetterTabNavigation,
                 openPositionSkillsTabNavigation,
                 openPositionNewsTabNavigation,
@@ -664,9 +676,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     /** Вкладки, в контенте которых два и более блока ввода: только для них в sidebar
      *  показывается label-навигация. Вкладки с единственным блоком ввода навигацию не имеют. */
     private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION = new HashSet<>(Arrays.asList(
-            "tabOpenPosition",     // 5 блоков: наименование, параметры, карточка вакансии, команда, зарплата
-            "laborAgreementTab",   // 2 блока: трудовые соглашения, детали оплаты
-            "tabJobDescription")); // 3 блока: опыт, аккордеон описаний, короткое описание
+        "tabOpenPosition",     // 5 блоков: наименование, параметры, карточка вакансии, команда, зарплата
+        "laborAgreementTab",   // 2 блока: трудовые соглашения, детали оплаты
+        "tabJobDescription")); // 3 блока: опыт, аккордеон описаний, короткое описание
 
     /** Показывает label-навигацию sidebar только для вкладок с двумя и более блоками ввода:
      *  контейнер openPositionEditorNavigation (заголовок + наборы пунктов) скрыт целиком на
@@ -681,11 +693,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         openPositionMainTabNavigation.setVisible("tabOpenPosition".equals(selectedTabName));
         openPositionLaborTabNavigation.setVisible("laborAgreementTab".equals(selectedTabName));
         openPositionJobDescriptionTabNavigation.setVisible("tabJobDescription".equals(selectedTabName));
-        // Наборы одноблочных вкладок («Файлы», «Тестовое задание», «Памятка», «Шаблон письма»,
-        // «Навыки», «Новости», «Согласование», «Комментарии») в sidebar не показываются никогда.
+        // Наборы одноблочных вкладок («Файлы», «Тестовое задание», «Памятка», «План собеседования»,
+        // «Шаблон письма», «Навыки», «Новости», «Согласование», «Комментарии») в sidebar не показываются никогда.
         openPositionFilesTabNavigation.setVisible(false);
         openPositionExerciseTabNavigation.setVisible(false);
         openPositionMemoTabNavigation.setVisible(false);
+        openPositionInterviewPlanTabNavigation.setVisible(false);
         openPositionTemplateLetterTabNavigation.setVisible(false);
         openPositionSkillsTabNavigation.setVisible(false);
         openPositionNewsTabNavigation.setVisible(false);
@@ -806,6 +819,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onOpenPositionEditorNavMemoClick(Button.ClickEvent event) {
         activateNavigationItem(openPositionMemoTabNavigation, openPositionEditorNavMemo);
         needMemoCheckBox.focus();
+    }
+
+    @Subscribe("openPositionEditorNavInterviewPlan")
+    /** label-навигация вкладки «План собеседования»: клик подсвечивает пункт и переводит фокус
+     *  в редактор плана собеседования. */
+    public void onOpenPositionEditorNavInterviewPlanClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionInterviewPlanTabNavigation, openPositionEditorNavInterviewPlan);
+        interviewPlanRichTextArea.focus();
     }
 
     @Subscribe("openPositionEditorNavTemplateLetter")
@@ -954,6 +975,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .add("memoForInterview")
                 .build());
         getEditedEntity().setMemoForInterview(reloaded.getMemoForInterview());
+    }
+
+    /** Lazy-загрузка плана собеседования при первом открытии вкладки. */
+    private void loadInterviewPlanLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("interviewPlan")
+                .build());
+        getEditedEntity().setInterviewPlan(reloaded.getInterviewPlan());
     }
 
     /** Lazy-загрузка шаблона сопроводительного письма при первом открытии вкладки. */
