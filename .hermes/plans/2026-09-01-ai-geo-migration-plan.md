@@ -148,12 +148,17 @@ pg_restore /tmp/.../local_schema_before.sql | psql -h 127.0.0.1 -U cuba -d huntt
   </update>
 </changeSet>
 ```
-2.2. Перед коммитом — **выгрузить эталонные `prompt_template`/`system_prompt`** для обеих функций с локали, чтобы в changelog подставить актуальный текст (а не «зашитый» из старых миграций). Команда:
+2.2. Перед коммитом — **выгрузить эталонные `prompt_template`/`system_prompt`** для **всех 11 строк** `hunttech_ai_function_configuration` (а не только 3): «длина в БД ≠ длина в seed-файле» означает ручную правку → нужен отдельный changelog. Команда:
 ```sql
-\copy (SELECT code, system_prompt, prompt_template, temperature, max_tokens FROM hunttech_ai_function_configuration WHERE code IN ('COMPANY_REQUISITES_PARSE_JSON','COMPANY_WEB_SEARCH_PARSE_JSON','CV_SMART_PARSE_JSON')) TO '/tmp/migplan/ai_prompts.csv' CSV HEADER
+\copy (SELECT code, length(system_prompt) sys_len, length(prompt_template) tpl_len, configuration_version, update_ts FROM hunttech_ai_function_configuration ORDER BY code) TO '/tmp/migplan/ai_prompts_lens.csv' CSV HEADER
 ```
+Затем сравнить с длинами из seed-файлов (`grep -c '…' modules/core/db/changelog/*.xml`). На 2026-09-01 на локали только `SKILLS_EXTRACT` имеет свежий `update_ts` (2026-08-18, после сида 260816-5) — все остальные совпадают с эталонами.
 
-2.3. **Решение по `hunttech_user_ai_profile`**: черновик `alan` на локали (1 строка) НЕ мигрировать — это личные настройки тестовой среды. Подтвердить с владельцем (`alan`).
+2.3. **Решение по `hunttech_user_ai_profile`** (GO/NO-GO от владельца `alan`): черновик 1 строки (28 полей) на локали — **100% ручной ввод**, в changelog его нет и быть не может. Варианты:
+- (a) **Не мигрировать** (по умолчанию) — личные настройки тестовой среды, на проде `alan` заново заполнит.
+- (b) **Мигрировать** как есть — тогда нужен отдельный `260824-3-mergeUserAiProfileFromLocal.xml` с `id='4cd4408b-9898-b689-8244-2000424c176c'`, `user_id=…`, всеми 28 колонками и `<preConditions><sqlCheck expectedResult="0">SELECT count(*) FROM hunttech_user_ai_profile</sqlCheck></preConditions>`.
+
+2.4. **Проверка ручных правок `hunttech_country` после `260823-3`**: сравнить на локали для 62 стран с `alpha3_code IS NOT NULL` — каждое поле (`country_eng_name`/`alpha3_code`/`currency_code`/`capital`/`phone_code`/`flag_url`/`flag_image`) — не правил ли пользователь что-то руками в UI уже после AI-сидинга. Если правки есть — добавить отдельный `260824-4-updateManualCountryOverrides.xml`.
 
 ### Фаза 3 — Репетиция на локальном клоне `hunttech_rehearsal` (0.5 дня)
 
