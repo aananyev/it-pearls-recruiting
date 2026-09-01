@@ -1573,7 +1573,8 @@
                                    height="100%">
                             <!-- Русскоязычное описание позиции (comment). -->
                             <tab id="openPositionRuTabAccordion"
-                                 caption="msg://msgRuComment">
+                                 caption="msg://msgRuComment"
+                                 icon="font-icon:LANGUAGE">
                                 <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
                                 <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
                                     <!-- Редактор русского описания (обязательный). -->
@@ -1589,7 +1590,8 @@
                             </tab>
                             <!-- Англоязычное описание позиции (commentEn). -->
                             <tab id="openPositionEnTabAccordion"
-                                 caption="msg://msgEnComment">
+                                 caption="msg://msgEnComment"
+                                 icon="font-icon:GLOBE">
                                 <!-- Контейнер редактора английского описания на всю высоту вкладки аккордеона. -->
                                 <vbox id="openPositionEnTabBox" width="100%" height="100%">
                                     <!-- Редактор английского описания. -->
@@ -1605,7 +1607,8 @@
                             </tab>
                             <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
                             <tab id="openPositionStandartDescriptionAccorden"
-                                 caption="msg://msgStandartDescription">
+                                 caption="msg://msgStandartDescription"
+                                 icon="font-icon:FILE_TEXT_O">
                                 <!-- Контейнер стандартного описания на всю высоту вкладки аккордеона. -->
                                 <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%">
                                     <!-- Просмотр стандартного описания (editable=false). -->
@@ -1619,7 +1622,8 @@
                             </tab>
                             <!-- Блок «Кто это» (генерируется, только чтение). -->
                             <tab id="openPositionWhoIsThisGuyAccorden"
-                                 caption="msg://msgWhoIsThisGuy">
+                                 caption="msg://msgWhoIsThisGuy"
+                                 icon="font-icon:USER_O">
                                 <!-- Контейнер описания «кто это» на всю высоту вкладки аккордеона. -->
                                 <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%">
                                     <!-- Просмотр сгенерированного описания «кто это». -->
@@ -1650,8 +1654,10 @@
                         <!-- Сканирование описания должности: извлечение короткого описания и навыков (addShortDescription). -->
                         <button id="scanJDButton"
                                 caption="msg://msgScanJD"
+                                icon="MAGIC"
                                 align="BOTTOM_RIGHT"
                                 description="msg://msgScanJDAndPut"
+                                stylename="secondary"
                                 invoke="addShortDescription"/>
                     </hbox>
                 </vbox>

@@ -494,25 +494,25 @@
                 </groupBox>
                 <groupBox id="descriptionTextsAccordion" caption="Тексты описания" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-richtext-section" width="100%" height="100%">
                   <accordion id="openPositionAccordion" width="100%" height="100%">
-                    <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment">
+                    <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment" icon="font-icon:LANGUAGE">
                       <!-- Растягивает редактор описания на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
                         <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="100%" required="true" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionEnTabAccordion" caption="msg://msgEnComment">
+                    <tab id="openPositionEnTabAccordion" caption="msg://msgEnComment" icon="font-icon:GLOBE">
                       <!-- Растягивает англ. редактор описания на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
                         <richTextArea id="openPositionEnRichTextArea" dataContainer="openPositionDc" property="commentEn" width="100%" height="100%" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionStandartDescriptionAccorden" caption="msg://msgStandartDescription">
+                    <tab id="openPositionStandartDescriptionAccorden" caption="msg://msgStandartDescription" icon="font-icon:FILE_TEXT_O">
                       <!-- Растягивает стандартное описание на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
                         <richTextArea id="openPositionStandartDescriptionRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionWhoIsThisGuyAccorden" caption="msg://msgWhoIsThisGuy">
+                    <tab id="openPositionWhoIsThisGuyAccorden" caption="msg://msgWhoIsThisGuy" icon="font-icon:USER_O">
                       <!-- Растягивает описание «Кто этот человек» на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
                         <richTextArea id="openPositionWhoIsThisGuyRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
@@ -523,7 +523,7 @@
                 <groupBox id="shortDescriptionAccordion" caption="msg://msgShortCaption" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-description-short" width="100%">
                   <hbox width="100%" spacing="true" expand="shortDescriptionTextArea">
                     <textField id="shortDescriptionTextArea" dataContainer="openPositionDc" property="shortDescription" maxLength="250" width="100%"/>
-                    <button id="scanJDButton" caption="msg://msgScanJD" align="BOTTOM_RIGHT" description="msg://msgScanJDAndPut" invoke="addShortDescription"/>
+                    <button id="scanJDButton" caption="msg://msgScanJD" icon="MAGIC" align="BOTTOM_RIGHT" description="msg://msgScanJDAndPut" stylename="secondary" invoke="addShortDescription"/>
                   </hbox>
                 </groupBox>
               </vbox>
