@@ -115,10 +115,10 @@ public class CompanyEdit extends StandardEditor<Company> {
                 put("tabCompanyDepartament", "companyEditorNavDepartments");
             }});
 
-    /** Вкладки с поддержкой sidebar-навигации: вкладки с 2+ блоками ввода (правило 3.6). */
+    /** Вкладки с поддержкой sidebar-навигации: все вкладки формы компании. */
     private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-                    "tabConpanyDetails", "companyRequisitesTab", "companyDescriptionTab")));
+                    "tabConpanyDetails", "companyRequisitesTab", "companyDescriptionTab", "tabCompanyDepartament")));
 
     @Subscribe("mainTab")
     public void onMainTabSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {

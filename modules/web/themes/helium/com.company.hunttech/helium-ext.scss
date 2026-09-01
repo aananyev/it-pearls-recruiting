@@ -1585,7 +1585,7 @@ rating_battery_yellow_3:before {
 
     img, .v-image-element {
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: inherit;
       width: 100% !important;
       height: 100% !important;
     }

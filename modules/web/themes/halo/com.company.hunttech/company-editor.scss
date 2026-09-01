@@ -84,7 +84,32 @@
     // Визуальный блок sidebar: без карточки-рамки, аватар логотипа стоит на фоне
     // sidebar; блок центрирует круглый логотип 96×96 (PNG уже круглый после
     // обработки логотипа) и пару кнопок «Загрузить»/«Очистить».
-    .edit-sidebar-visual {
+    // Статический блочный поток всех слотов Vaadin в sidebar:
+    // полностью отключает абсолютное GWT-позиционирование слотов,
+    // гарантируя строго последовательное вертикальное размещение
+    // (аватар -> кнопки загрузки -> умная обработка -> заголовок -> сводка -> разделы -> подсказка).
+    .edit-sidebar .v-slot,
+    .edit-sidebar-visual .v-slot,
+    .edit-sidebar-identity .v-slot,
+    .edit-sidebar > .v-slot,
+    .edit-sidebar-visual > .v-slot {
+      position: static !important;
+      float: none !important;
+      clear: both !important;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      top: auto !important;
+      left: auto !important;
+      bottom: auto !important;
+      right: auto !important;
+    }
+
+.edit-sidebar-visual {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
@@ -127,7 +152,7 @@
       max-width: 100% !important;
       max-height: 100% !important;
       border-radius: 50% !important;
-      object-fit: cover !important;
+      object-fit: inherit !important;
       object-position: center center !important;
       display: block !important;
     }
@@ -181,6 +206,60 @@
     .edit-sidebar-visual .c-fileupload-clear:hover {
       background: rgba(255, 255, 255, 0.12) !important;
       border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    // Кнопка умной обработки логотипа
+    #enhanceCompanyLogoBtn,
+    .enhance-company-logo-btn {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      margin-top: 8px !important;
+      padding: 0 10px !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.34) !important;
+      border-radius: 5px !important;
+      color: #f8fafc !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 34px !important;
+      box-shadow: none !important;
+      cursor: pointer !important;
+      transition: background 0.15s ease, border-color 0.15s ease !important;
+
+      .v-icon {
+        color: #ffb11b !important;
+        margin-right: 6px !important;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+      }
+    }
+
+    // Сводка ключевых реквизитов в сайдбаре
+    .edit-sidebar-summary {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      padding: 8px 10px !important;
+      margin: 6px 0 !important;
+      background: rgba(255, 255, 255, 0.035) !important;
+      border-radius: 6px !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+      .v-label {
+        font-size: 12px !important;
+        line-height: 18px !important;
+        color: rgba(248, 250, 252, 0.85) !important;
+      }
+
+      .bold,
+      .v-label.bold {
+        font-weight: 600 !important;
+        color: rgba(248, 250, 252, 0.55) !important;
+        min-width: 50px !important;
+      }
     }
 
     // Полоса-заголовок набора навигации «Разделы» и раздела «Коротко» (контракт
