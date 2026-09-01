@@ -450,11 +450,6 @@
                                             caption="Умная загрузка реквизитов"
                                             icon="MAGIC"
                                             stylename="primary candidate-btn candidate-smartload-btn"/>
-                                    <label value="Загрузка и парсинг из файла, текста или URL с автоматическим созданием директора в справочнике Люди"
-                                           stylename="edit-help"
-                                           width="100%"
-                                           box.expandRatio="1"
-                                           align="MIDDLE_LEFT"/>
                                 </hbox>
 
                                 <!-- Карточка 1: Основные юридические реквизиты -->
@@ -754,7 +749,6 @@
                                         <richTextArea id="companyDescritionRichTextArea"
                                                       dataContainer="companyDc"
                                                       property="companyDescription"
-                                                      caption="msg://msgCompanyDescription"
                                                       stylename="edit-form-control"
                                                       width="100%"
                                                       height="260px"/>
@@ -773,7 +767,6 @@
                                         <richTextArea id="companyWorkingConditionsRichTextArea"
                                                       dataContainer="companyDc"
                                                       property="workingConditions"
-                                                      caption="msg://msgCompanyWorkCondition"
                                                       stylename="edit-form-control"
                                                       width="100%"
                                                       height="260px"/>

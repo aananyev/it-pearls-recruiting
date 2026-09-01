@@ -1039,7 +1039,7 @@
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Стиль выпадающих меню (v-filterselect-suggestpopup, c-suggestionfield-popup):
-  // единый шрифт 15px, отступы и контрастное выделение активного пункта
+  // комфортный вертикальный интервал (34px), исключающий наезды пунктов друг на друга
   // ═══════════════════════════════════════════════════════════════════════════
   .v-filterselect-suggestpopup,
   .c-suggestionfield-popup,
@@ -1052,13 +1052,20 @@
     .gwt-MenuItem,
     .v-filterselect-suggestmenu .gwt-MenuItem,
     .c-suggestionfield-popup-content .gwt-MenuItem,
-    td.gwt-MenuItem {
+    td.gwt-MenuItem,
+    .v-filterselect-suggestmenu tr,
+    .v-filterselect-suggestmenu td {
       font-family: inherit !important;
       font-size: 15px !important;
       font-weight: 400 !important;
-      line-height: 1.45 !important;
-      padding: 6px 12px !important;
+      line-height: 32px !important;
+      height: 34px !important;
+      min-height: 34px !important;
+      padding: 2px 14px !important;
+      box-sizing: border-box !important;
       color: $v-font-color !important;
+      vertical-align: middle !important;
+      white-space: nowrap !important;
     }
 
     .gwt-MenuItem-selected,
