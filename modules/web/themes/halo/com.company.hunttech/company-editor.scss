@@ -492,12 +492,30 @@
     // edit-form-control) получает width:100% от Vaadin inline. Без фикса
     // каждый слот занимает 100% родителя, итого 2 × 100% = 200%, что
     // вылезает за workspace. Принудительно ограничиваем до 50%.
-    .edit-workspace-content .v-horizontallayout > .v-slot {
+        // Резиновая верстка (fluid responsive layout) всех горизонтальных строк:
+    .edit-workspace-content .v-horizontallayout,
+    .edit-card .v-horizontallayout {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .edit-workspace-content .v-horizontallayout > .v-expand,
+    .edit-card .v-horizontallayout > .v-expand {
       box-sizing: border-box !important;
       min-width: 0 !important;
-      max-width: 50% !important;
-      width: 50% !important;
-      flex: 0 0 50% !important;
+      max-width: 100% !important;
+    }
+
+    .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot,
+    .edit-workspace-content .v-horizontallayout > .v-slot,
+    .edit-card .v-horizontallayout > .v-expand > .v-slot,
+    .edit-card .v-horizontallayout > .v-slot {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
 
     .edit-workspace-content .v-gridlayout-slot .edit-form-control,

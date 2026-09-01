@@ -293,12 +293,14 @@
                                                        property="comanyName"
                                                        caption="msg://msgCompanyName"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="companyShortNameField"
                                                        dataContainer="companyDc"
                                                        property="companyShortName"
                                                        caption="mainMsg://msgCountryShortName"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
                                         <hbox spacing="true" width="100%">
@@ -308,6 +310,7 @@
                                                                optionsContainer="companyGroupDc"
                                                                caption="msg://msgCompanyGroup"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%"/>
                                             <lookupPickerField id="companyDirectorField"
                                                                dataContainer="companyDc"
@@ -315,6 +318,7 @@
                                                                property="companyDirector"
                                                                caption="msg://msgDirector"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%">
                                                 <actions>
                                                     <action id="lookup" type="picker_lookup"/>
@@ -341,6 +345,7 @@
                                                                property="countryOfCompany"
                                                                caption="msg://msgCountryOfCompany"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%"
                                                                required="true">
                                                 <actions>
@@ -353,6 +358,7 @@
                                                                property="regionOfCompany"
                                                                caption="msg://msgRegionOfCompany"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%"
                                                                required="true">
                                                 <actions>
@@ -365,6 +371,7 @@
                                                                property="cityOfCompany"
                                                                caption="msg://msgCityOfCompany"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%"
                                                                required="true">
                                                 <actions>
@@ -396,18 +403,21 @@
                                                        property="phone"
                                                        caption="Телефон"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="emailMainField"
                                                        dataContainer="companyDc"
                                                        property="email"
                                                        caption="Email"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="websiteMainField"
                                                        dataContainer="companyDc"
                                                        property="website"
                                                        caption="Веб-сайт"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
                                     </vbox>
@@ -463,6 +473,7 @@
                                                        property="legalEntityName"
                                                        caption="Юридическое лицо"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <lookupPickerField id="companyOwnershipRequisitesField"
                                                                optionsContainer="companyOwnershipsDc"
@@ -470,6 +481,7 @@
                                                                property="companyOwnership"
                                                                caption="Форма собственности"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%">
                                                 <actions>
                                                     <action id="lookup" type="picker_lookup"/>
@@ -484,18 +496,21 @@
                                                        property="inn"
                                                        caption="ИНН"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="kppField"
                                                        dataContainer="companyDc"
                                                        property="kpp"
                                                        caption="КПП"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="ogrnField"
                                                        dataContainer="companyDc"
                                                        property="ogrn"
                                                        caption="ОГРН / ОГРНИП"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
                                         <hbox spacing="true" width="100%">
@@ -504,18 +519,21 @@
                                                        property="okpo"
                                                        caption="ОКПО"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="oktmoField"
                                                        dataContainer="companyDc"
                                                        property="oktmo"
                                                        caption="ОКТМО"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="okvedField"
                                                        dataContainer="companyDc"
                                                        property="okved"
                                                        caption="Основной ОКВЭД"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
                                         <lookupPickerField id="companyDirectorRequisitesField"
@@ -550,6 +568,7 @@
                                                                property="countryOfCompany"
                                                                caption="Страна"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%">
                                                 <actions>
                                                     <action id="lookup" type="picker_lookup"/>
@@ -563,6 +582,7 @@
                                                                property="regionOfCompany"
                                                                caption="Регион"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%">
                                                 <actions>
                                                     <action id="lookup" type="picker_lookup"/>
@@ -576,6 +596,7 @@
                                                                property="cityOfCompany"
                                                                caption="Город"
                                                                stylename="edit-form-control"
+                                                               box.expandRatio="1"
                                                                width="100%">
                                                 <actions>
                                                     <action id="lookup" type="picker_lookup"/>
@@ -603,6 +624,7 @@
                                                       property="actualAddress"
                                                       caption="Фактический адрес"
                                                       stylename="edit-form-control"
+                                                      box.expandRatio="1"
                                                       width="100%"
                                                       rows="3"/>
                                             <textArea id="postalAddressField"
@@ -610,6 +632,7 @@
                                                       property="postalAddress"
                                                       caption="Почтовый адрес"
                                                       stylename="edit-form-control"
+                                                      box.expandRatio="1"
                                                       width="100%"
                                                       rows="3"/>
                                         </hbox>
@@ -631,12 +654,14 @@
                                                        property="bik"
                                                        caption="БИК Банка"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="bankNameField"
                                                        dataContainer="companyDc"
                                                        property="bankName"
                                                        caption="Наименование банка"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
                                         <hbox spacing="true" width="100%">
@@ -645,12 +670,14 @@
                                                        property="settlementAccount"
                                                        caption="Расчетный счет"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="correspondentAccountField"
                                                        dataContainer="companyDc"
                                                        property="correspondentAccount"
                                                        caption="Корреспондентский счет"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
                                     </vbox>
@@ -671,18 +698,21 @@
                                                        property="phone"
                                                        caption="Телефон"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="emailField"
                                                        dataContainer="companyDc"
                                                        property="email"
                                                        caption="Email"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="websiteField"
                                                        dataContainer="companyDc"
                                                        property="website"
                                                        caption="Веб-сайт"
                                                        stylename="edit-form-control"
+                                                       box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
                                     </vbox>
