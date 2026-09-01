@@ -1704,85 +1704,118 @@
                  caption="msg://msgExercise"
                  margin="false"
                  spacing="true"
-                 expand="exerciseVbox"
+                 expand="exerciseAccordion"
                  icon="ADJUST">
-                <!-- Контейнер вкладки тестового задания. -->
-                <vbox id="exerciseVbox"
-                      height="100%"
-                      width="100%"
-                      spacing="true"
-                      expand="exerciseRichTextArea"
-                      stylename="open-position-editor-tab-content">
-                    <!-- Признак «нужно тестовое задание» (needExercise). -->
-                    <checkBox id="needExerciseCheckBox"
-                              dataContainer="openPositionDc"
-                              property="needExercise"
-                              caption="msg://msgNeedExercice"/>
-                    <!-- Редактор тестового задания (lazy-загрузка при первом открытии вкладки). -->
-                    <richTextArea id="exerciseRichTextArea"
+                <!-- Карточка тестового задания (на всю высоту вкладки). -->
+                <groupBox id="exerciseAccordion"
+                          caption="msg://msgExercise"
+                          collapsable="true"
+                          collapsed="false"
+                          showAsPanel="true"
+                          stylename="edit-accordion-section open-position-editor-richtext-card"
+                          width="100%"
+                          height="100%"
+                          expand="exerciseVbox">
+                    <!-- Контейнер вкладки тестового задания. -->
+                    <vbox id="exerciseVbox"
+                          height="100%"
+                          width="100%"
+                          spacing="true"
+                          expand="exerciseRichTextArea"
+                          stylename="open-position-editor-tab-content">
+                        <!-- Признак «нужно тестовое задание» (needExercise). -->
+                        <checkBox id="needExerciseCheckBox"
                                   dataContainer="openPositionDc"
-                                  property="exercise"
-                                  height="100%"
-                                  width="100%"
-                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                </vbox>
+                                  property="needExercise"
+                                  caption="msg://msgNeedExercice"/>
+                        <!-- Редактор тестового задания (lazy-загрузка при первом открытии вкладки). -->
+                        <richTextArea id="exerciseRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="exercise"
+                                      height="100%"
+                                      width="100%"
+                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                    </vbox>
+                </groupBox>
             </tab>
             <!-- Вкладка «Памятка кандидату»: признак и редактор памятки. -->
             <tab id="tabMemoForInterview"
                  caption="msg://msgMemoForInterview"
                  margin="false"
                  spacing="true"
-                 expand="memoVbox"
+                 expand="memoAccordion"
                  icon="ADJUST">
-                <!-- Контейнер вкладки памятки. -->
-                <vbox id="memoVbox"
-                      height="100%"
-                      width="100%"
-                      spacing="true"
-                      expand="memoForInterviewRichTextArea"
-                      stylename="open-position-editor-tab-content">
-                    <!-- Признак «нужна памятка к собеседованию». -->
-                    <checkBox id="needMemoCheckBox"
-                              dataContainer="openPositionDc"
-                              property="needMemoForInterview"
-                              caption="msg://msgNeedMemoForInterview"/>
-                    <!-- Редактор памятки к собеседованию (lazy). -->
-                    <richTextArea id="memoForInterviewRichTextArea"
+                <!-- Карточка памятки кандидату (на всю высоту вкладки). -->
+                <groupBox id="memoAccordion"
+                          caption="msg://msgMemoForInterview"
+                          collapsable="true"
+                          collapsed="false"
+                          showAsPanel="true"
+                          stylename="edit-accordion-section open-position-editor-richtext-card"
+                          width="100%"
+                          height="100%"
+                          expand="memoVbox">
+                    <!-- Контейнер вкладки памятки. -->
+                    <vbox id="memoVbox"
+                          height="100%"
+                          width="100%"
+                          spacing="true"
+                          expand="memoForInterviewRichTextArea"
+                          stylename="open-position-editor-tab-content">
+                        <!-- Признак «нужна памятка к собеседованию». -->
+                        <checkBox id="needMemoCheckBox"
                                   dataContainer="openPositionDc"
-                                  property="memoForInterview"
-                                  height="100%"
-                                  width="100%"
-                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                </vbox>
+                                  property="needMemoForInterview"
+                                  caption="msg://msgNeedMemoForInterview"/>
+                        <!-- Редактор памятки к собеседованию (lazy). -->
+                        <richTextArea id="memoForInterviewRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="memoForInterview"
+                                      height="100%"
+                                      width="100%"
+                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                    </vbox>
+                </groupBox>
             </tab>
             <!-- Вкладка «Шаблон сопроводительного письма»: признак и редактор шаблона. -->
             <tab id="tabTemplateLetter"
                  caption="msg://msgTemplateLetter"
                  margin="false"
                  spacing="true"
-                 expand="templateLetterBox"
+                 expand="templateLetterAccordion"
                  icon="font-icon:MAIL_FORWARD">
-                <!-- Контейнер вкладки шаблона письма. -->
-                <vbox id="templateLetterBox"
-                      width="100%"
-                      height="100%"
-                      spacing="true"
-                      expand="templateLetterRichTextArea"
-                      stylename="open-position-editor-tab-content">
-                    <!-- Признак «нужно сопроводительное письмо» (needLetter). -->
-                    <checkBox id="needLetterCheckBox"
-                              dataContainer="openPositionDc"
-                              property="needLetter"
-                              caption="msg://msgNeedLetter"/>
-                    <!-- Редактор шаблона сопроводительного письма (lazy). -->
-                    <richTextArea id="templateLetterRichTextArea"
+                <!-- Карточка шаблона письма (на всю высоту вкладки). -->
+                <groupBox id="templateLetterAccordion"
+                          caption="msg://msgTemplateLetter"
+                          collapsable="true"
+                          collapsed="false"
+                          showAsPanel="true"
+                          stylename="edit-accordion-section open-position-editor-richtext-card"
+                          width="100%"
+                          height="100%"
+                          expand="templateLetterBox">
+                    <!-- Контейнер вкладки шаблона письма. -->
+                    <vbox id="templateLetterBox"
+                          width="100%"
+                          height="100%"
+                          spacing="true"
+                          expand="templateLetterRichTextArea"
+                          stylename="open-position-editor-tab-content">
+                        <!-- Признак «нужно сопроводительное письмо» (needLetter). -->
+                        <checkBox id="needLetterCheckBox"
                                   dataContainer="openPositionDc"
-                                  property="templateLetter"
-                                  width="100%"
-                                  height="100%"
-                                  required="false"
-                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                </vbox>
+                                  property="needLetter"
+                                  caption="msg://msgNeedLetter"/>
+                        <!-- Редактор шаблона сопроводительного письма (lazy). -->
+                        <richTextArea id="templateLetterRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="templateLetter"
+                                      width="100%"
+                                      height="100%"
+                                      required="false"
+                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                    </vbox>
+                </groupBox>
             </tab>
             <!-- Вкладка «Требуемые Навыки»: дерево навыков позиции и кнопка пересканирования описания. -->
             <tab id="tabSkills"
