@@ -248,6 +248,7 @@
                     <!-- Вкладка 1: Информация о компании -->
                     <tab id="tabConpanyDetails"
                          caption="mainMsg://msgCompanyDetail"
+                         margin="false"
                          spacing="true"
                          expand="companyDetailsScroll"
                          stylename="company-main-tab">
@@ -285,48 +286,40 @@
                                                       property="ourClient"
                                                       stylename="edit-form-control"/>
                                         </hbox>
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <textField id="comanyNameField"
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="comanyNameField"
+                                                       dataContainer="companyDc"
+                                                       property="comanyName"
+                                                       caption="msg://msgCompanyName"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="companyShortNameField"
+                                                       dataContainer="companyDc"
+                                                       property="companyShortName"
+                                                       caption="mainMsg://msgCountryShortName"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
+                                            <lookupPickerField id="companyGroupLookupPickerField"
                                                                dataContainer="companyDc"
-                                                               property="comanyName"
-                                                               caption="msg://msgCompanyName"
+                                                               property="companyGroup"
+                                                               optionsContainer="companyGroupDc"
+                                                               caption="msg://msgCompanyGroup"
                                                                stylename="edit-form-control"
                                                                width="100%"/>
-                                                    <textField id="companyShortNameField"
+                                            <lookupPickerField id="companyDirectorField"
                                                                dataContainer="companyDc"
-                                                               property="companyShortName"
-                                                               caption="mainMsg://msgCountryShortName"
+                                                               optionsContainer="companyDirectorsDc"
+                                                               property="companyDirector"
+                                                               caption="msg://msgDirector"
                                                                stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </row>
-                                                <row>
-                                                    <lookupPickerField id="companyGroupLookupPickerField"
-                                                                       dataContainer="companyDc"
-                                                                       property="companyGroup"
-                                                                       optionsContainer="companyGroupDc"
-                                                                       caption="msg://msgCompanyGroup"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%"/>
-                                                    <lookupPickerField id="companyDirectorField"
-                                                                       dataContainer="companyDc"
-                                                                       optionsContainer="companyDirectorsDc"
-                                                                       property="companyDirector"
-                                                                       caption="msg://msgDirector"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
                                 <!-- Карточка «Адрес компании» -->
@@ -340,53 +333,44 @@
                                     <vbox id="companyAddressFieldsBox"
                                           width="100%"
                                           spacing="true">
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <lookupPickerField id="countryOfCompanyField"
-                                                                       dataContainer="companyDc"
-                                                                       optionsContainer="countryOfCompaniesDc"
-                                                                       property="countryOfCompany"
-                                                                       caption="msg://msgCountryOfCompany"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%"
-                                                                       required="true">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                    <lookupPickerField id="regionOfCompanyField"
-                                                                       dataContainer="companyDc"
-                                                                       optionsContainer="regionOfCompaniesDc"
-                                                                       property="regionOfCompany"
-                                                                       caption="msg://msgRegionOfCompany"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%"
-                                                                       required="true">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                    <lookupPickerField id="cityOfCompanyField"
-                                                                       dataContainer="companyDc"
-                                                                       optionsContainer="cityOfCompaniesDc"
-                                                                       property="cityOfCompany"
-                                                                       caption="msg://msgCityOfCompany"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%"
-                                                                       required="true">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                        <hbox spacing="true" width="100%">
+                                            <lookupPickerField id="countryOfCompanyField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="countryOfCompaniesDc"
+                                                               property="countryOfCompany"
+                                                               caption="msg://msgCountryOfCompany"
+                                                               stylename="edit-form-control"
+                                                               width="100%"
+                                                               required="true">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <lookupPickerField id="regionOfCompanyField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="regionOfCompaniesDc"
+                                                               property="regionOfCompany"
+                                                               caption="msg://msgRegionOfCompany"
+                                                               stylename="edit-form-control"
+                                                               width="100%"
+                                                               required="true">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <lookupPickerField id="cityOfCompanyField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="cityOfCompaniesDc"
+                                                               property="cityOfCompany"
+                                                               caption="msg://msgCityOfCompany"
+                                                               stylename="edit-form-control"
+                                                               width="100%"
+                                                               required="true">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </hbox>
                                         <textArea id="addressOfCompanyField"
                                                   dataContainer="companyDc"
                                                   property="addressOfCompany"
@@ -405,35 +389,26 @@
                                           collapsed="false"
                                           width="100%">
                                     <vbox width="100%" spacing="true">
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <textField id="phoneMainField"
-                                                               dataContainer="companyDc"
-                                                               property="phone"
-                                                               caption="Телефон"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="emailMainField"
-                                                               dataContainer="companyDc"
-                                                               property="email"
-                                                               caption="Email"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="websiteMainField"
-                                                               dataContainer="companyDc"
-                                                               property="website"
-                                                               caption="Веб-сайт"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="phoneMainField"
+                                                       dataContainer="companyDc"
+                                                       property="phone"
+                                                       caption="Телефон"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="emailMainField"
+                                                       dataContainer="companyDc"
+                                                       property="email"
+                                                       caption="Email"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="websiteMainField"
+                                                       dataContainer="companyDc"
+                                                       property="website"
+                                                       caption="Веб-сайт"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
                             </vbox>
@@ -443,6 +418,7 @@
                     <!-- Вкладка 2: Официальные реквизиты -->
                     <tab id="companyRequisitesTab"
                          caption="Официальные реквизиты"
+                         margin="false"
                          spacing="true"
                          expand="companyRequisitesScroll"
                          stylename="company-requisites-tab">
@@ -480,84 +456,67 @@
                                           collapsed="false"
                                           width="100%">
                                     <vbox width="100%" spacing="true">
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <textField id="legalEntityNameField"
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="legalEntityNameField"
+                                                       dataContainer="companyDc"
+                                                       property="legalEntityName"
+                                                       caption="Юридическое лицо"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <lookupPickerField id="companyOwnershipRequisitesField"
+                                                               optionsContainer="companyOwnershipsDc"
                                                                dataContainer="companyDc"
-                                                               property="legalEntityName"
-                                                               caption="Юридическое лицо"
+                                                               property="companyOwnership"
+                                                               caption="Форма собственности"
                                                                stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <lookupPickerField id="companyOwnershipRequisitesField"
-                                                                       optionsContainer="companyOwnershipsDc"
-                                                                       dataContainer="companyDc"
-                                                                       property="companyOwnership"
-                                                                       caption="Форма собственности"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                            <action id="open" type="picker_open"/>
-                                                            <action id="clear" type="picker_clear"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                </row>
-                                            </rows>
-                                        </grid>
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <textField id="innField"
-                                                               dataContainer="companyDc"
-                                                               property="inn"
-                                                               caption="ИНН"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="kppField"
-                                                               dataContainer="companyDc"
-                                                               property="kpp"
-                                                               caption="КПП"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="ogrnField"
-                                                               dataContainer="companyDc"
-                                                               property="ogrn"
-                                                               caption="ОГРН / ОГРНИП"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </row>
-                                                <row>
-                                                    <textField id="okpoField"
-                                                               dataContainer="companyDc"
-                                                               property="okpo"
-                                                               caption="ОКПО"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="oktmoField"
-                                                               dataContainer="companyDc"
-                                                               property="oktmo"
-                                                               caption="ОКТМО"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="okvedField"
-                                                               dataContainer="companyDc"
-                                                               property="okved"
-                                                               caption="Основной ОКВЭД"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="innField"
+                                                       dataContainer="companyDc"
+                                                       property="inn"
+                                                       caption="ИНН"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="kppField"
+                                                       dataContainer="companyDc"
+                                                       property="kpp"
+                                                       caption="КПП"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="ogrnField"
+                                                       dataContainer="companyDc"
+                                                       property="ogrn"
+                                                       caption="ОГРН / ОГРНИП"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="okpoField"
+                                                       dataContainer="companyDc"
+                                                       property="okpo"
+                                                       caption="ОКПО"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="oktmoField"
+                                                       dataContainer="companyDc"
+                                                       property="oktmo"
+                                                       caption="ОКТМО"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="okvedField"
+                                                       dataContainer="companyDc"
+                                                       property="okved"
+                                                       caption="Основной ОКВЭД"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
                                         <lookupPickerField id="companyDirectorRequisitesField"
                                                            dataContainer="companyDc"
                                                            optionsContainer="companyDirectorsDc"
@@ -583,56 +542,47 @@
                                           collapsed="false"
                                           width="100%">
                                     <vbox width="100%" spacing="true">
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <lookupPickerField id="countryOfCompanyRequisitesField"
-                                                                       dataContainer="companyDc"
-                                                                       optionsContainer="countryOfCompaniesDc"
-                                                                       property="countryOfCompany"
-                                                                       caption="Страна"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                            <action id="open" type="picker_open"/>
-                                                            <action id="clear" type="picker_clear"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                    <lookupPickerField id="regionOfCompanyRequisitesField"
-                                                                       dataContainer="companyDc"
-                                                                       optionsContainer="regionOfCompaniesDc"
-                                                                       property="regionOfCompany"
-                                                                       caption="Регион"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                            <action id="open" type="picker_open"/>
-                                                            <action id="clear" type="picker_clear"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                    <lookupPickerField id="cityOfCompanyRequisitesField"
-                                                                       dataContainer="companyDc"
-                                                                       optionsContainer="cityOfCompaniesDc"
-                                                                       property="cityOfCompany"
-                                                                       caption="Город"
-                                                                       stylename="edit-form-control"
-                                                                       width="100%">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                            <action id="open" type="picker_open"/>
-                                                            <action id="clear" type="picker_clear"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                        <hbox spacing="true" width="100%">
+                                            <lookupPickerField id="countryOfCompanyRequisitesField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="countryOfCompaniesDc"
+                                                               property="countryOfCompany"
+                                                               caption="Страна"
+                                                               stylename="edit-form-control"
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <lookupPickerField id="regionOfCompanyRequisitesField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="regionOfCompaniesDc"
+                                                               property="regionOfCompany"
+                                                               caption="Регион"
+                                                               stylename="edit-form-control"
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <lookupPickerField id="cityOfCompanyRequisitesField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="cityOfCompaniesDc"
+                                                               property="cityOfCompany"
+                                                               caption="Город"
+                                                               stylename="edit-form-control"
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </hbox>
                                         <textField id="addressOfCompanyRequisitesField"
                                                    dataContainer="companyDc"
                                                    property="addressOfCompany"
@@ -646,30 +596,22 @@
                                                   stylename="edit-form-control"
                                                   width="100%"
                                                   rows="3"/>
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <textArea id="actualAddressField"
-                                                              dataContainer="companyDc"
-                                                              property="actualAddress"
-                                                              caption="Фактический адрес"
-                                                              stylename="edit-form-control"
-                                                              width="100%"
-                                                              rows="3"/>
-                                                    <textArea id="postalAddressField"
-                                                              dataContainer="companyDc"
-                                                              property="postalAddress"
-                                                              caption="Почтовый адрес"
-                                                              stylename="edit-form-control"
-                                                              width="100%"
-                                                              rows="3"/>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                        <hbox spacing="true" width="100%">
+                                            <textArea id="actualAddressField"
+                                                      dataContainer="companyDc"
+                                                      property="actualAddress"
+                                                      caption="Фактический адрес"
+                                                      stylename="edit-form-control"
+                                                      width="100%"
+                                                      rows="3"/>
+                                            <textArea id="postalAddressField"
+                                                      dataContainer="companyDc"
+                                                      property="postalAddress"
+                                                      caption="Почтовый адрес"
+                                                      stylename="edit-form-control"
+                                                      width="100%"
+                                                      rows="3"/>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
 
@@ -682,42 +624,34 @@
                                           collapsed="false"
                                           width="100%">
                                     <vbox width="100%" spacing="true">
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <textField id="bikField"
-                                                               dataContainer="companyDc"
-                                                               property="bik"
-                                                               caption="БИК Банка"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="bankNameField"
-                                                               dataContainer="companyDc"
-                                                               property="bankName"
-                                                               caption="Наименование банка"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </row>
-                                                <row>
-                                                    <textField id="settlementAccountField"
-                                                               dataContainer="companyDc"
-                                                               property="settlementAccount"
-                                                               caption="Расчетный счет"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="correspondentAccountField"
-                                                               dataContainer="companyDc"
-                                                               property="correspondentAccount"
-                                                               caption="Корреспондентский счет"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="bikField"
+                                                       dataContainer="companyDc"
+                                                       property="bik"
+                                                       caption="БИК Банка"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="bankNameField"
+                                                       dataContainer="companyDc"
+                                                       property="bankName"
+                                                       caption="Наименование банка"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="settlementAccountField"
+                                                       dataContainer="companyDc"
+                                                       property="settlementAccount"
+                                                       caption="Расчетный счет"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="correspondentAccountField"
+                                                       dataContainer="companyDc"
+                                                       property="correspondentAccount"
+                                                       caption="Корреспондентский счет"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
 
@@ -730,35 +664,26 @@
                                           collapsed="false"
                                           width="100%">
                                     <vbox width="100%" spacing="true">
-                                        <grid spacing="true" width="100%">
-                                            <columns>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                                <column flex="1"/>
-                                            </columns>
-                                            <rows>
-                                                <row>
-                                                    <textField id="phoneField"
-                                                               dataContainer="companyDc"
-                                                               property="phone"
-                                                               caption="Телефон"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="emailField"
-                                                               dataContainer="companyDc"
-                                                               property="email"
-                                                               caption="Email"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                    <textField id="websiteField"
-                                                               dataContainer="companyDc"
-                                                               property="website"
-                                                               caption="Веб-сайт"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </row>
-                                            </rows>
-                                        </grid>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="phoneField"
+                                                       dataContainer="companyDc"
+                                                       property="phone"
+                                                       caption="Телефон"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="emailField"
+                                                       dataContainer="companyDc"
+                                                       property="email"
+                                                       caption="Email"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="websiteField"
+                                                       dataContainer="companyDc"
+                                                       property="website"
+                                                       caption="Веб-сайт"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
                             </vbox>
@@ -768,6 +693,7 @@
                     <!-- Вкладка 3: Описание компании -->
                     <tab id="companyDescriptionTab"
                          caption="msg://msgCompanyDescription"
+                         margin="false"
                          spacing="true"
                          expand="companyDescriptionScroll"
                          stylename="company-description-tab">
@@ -822,6 +748,7 @@
                     <!-- Вкладка 4: Департаменты / Подразделения -->
                     <tab id="tabCompanyDepartament"
                          caption="mainMsg://msgCompanyDepartament"
+                         margin="false"
                          spacing="true"
                          expand="companyDepartmentsScroll"
                          stylename="company-departments-tab">
