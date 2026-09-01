@@ -109,7 +109,13 @@ public class CompanySearchWizardContractTest {
         assertTrue("Сервис должен быть зарегистрирован в web-spring.xml как remoteProxy",
                 webSpring.contains("hunttech_CompanySearchAiService"));
 
-        String sqlMigration = readProjectFile("modules/core/db/update/postgres/26/260822-2-addCompanyWebSearchAiFunction.sql");
+        String sqlMigration;
+        Path changelogXml = projectRoot().resolve("modules/core/db/changelog/260822-2-addCompanyWebSearchAiFunction.xml");
+        if (Files.exists(changelogXml)) {
+            sqlMigration = new String(Files.readAllBytes(changelogXml), StandardCharsets.UTF_8);
+        } else {
+            sqlMigration = readProjectFile("modules/core/db/update/postgres/26/260822-2-addCompanyWebSearchAiFunction.sql");
+        }
         assertTrue("Миграция должна сидировать AI-функцию COMPANY_WEB_SEARCH_PARSE_JSON",
                 sqlMigration.contains("COMPANY_WEB_SEARCH_PARSE_JSON"));
     }

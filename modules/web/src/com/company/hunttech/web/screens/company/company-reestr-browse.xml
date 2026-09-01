@@ -116,15 +116,14 @@
             <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
                 
                 <!-- Командный тулбар -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
-                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createBtn" caption="Создать компанию" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="companiesTable.create"/>
                         <button id="smartUploadBtn" caption="msg://msgSmartUpload" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
                         <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="companiesTable.edit"/>
                         <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="companiesTable.remove"/>
-                    </hbox>
-                    <hbox id="toolbarSpacer" width="100%"/>
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                    </cssLayout>
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
                         <popupButton id="filterPopupButton" caption="Все компании" icon="FILTER" stylename="secondary candidate-btn">
                             <actions>
                                 <action id="filterAll" caption="Все компании"/>
@@ -138,8 +137,8 @@
                                 <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
                             </actions>
                         </popupButton>
-                    </hbox>
-                </hbox>
+                    </cssLayout>
+                </cssLayout>
 
                 <!-- Generic Filter -->
                 <filter id="filter"
