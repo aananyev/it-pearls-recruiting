@@ -494,6 +494,7 @@
     // вылезает за workspace. Принудительно ограничиваем до 50%.
     
 
+
     // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
     .company-main-tab,
     .company-requisites-tab,
@@ -531,12 +532,15 @@
       max-width: 100% !important;
     }
 
+    // Двухколоночная верстка: каждая колонка строго 50% ширины
     .edit-workspace-content .v-horizontallayout > .v-expand,
     .edit-card .v-horizontallayout > .v-expand,
     .company-requisites-tab .v-horizontallayout > .v-expand {
       box-sizing: border-box !important;
       min-width: 0 !important;
-      max-width: 100% !important;
+      max-width: 50% !important;
+      width: 50% !important;
+      flex: 1 1 50% !important;
     }
 
     .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot,

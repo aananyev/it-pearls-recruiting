@@ -365,20 +365,19 @@
                                                     <action id="lookup" type="picker_lookup"/>
                                                 </actions>
                                             </lookupPickerField>
-                                            <lookupPickerField id="cityOfCompanyField"
-                                                               dataContainer="companyDc"
-                                                               optionsContainer="cityOfCompaniesDc"
-                                                               property="cityOfCompany"
-                                                               caption="msg://msgCityOfCompany"
-                                                               stylename="edit-form-control"
-                                                               box.expandRatio="1"
-                                                               width="100%"
-                                                               required="true">
-                                                <actions>
-                                                    <action id="lookup" type="picker_lookup"/>
-                                                </actions>
-                                            </lookupPickerField>
                                         </hbox>
+                                        <lookupPickerField id="cityOfCompanyField"
+                                                           dataContainer="companyDc"
+                                                           optionsContainer="cityOfCompaniesDc"
+                                                           property="cityOfCompany"
+                                                           caption="msg://msgCityOfCompany"
+                                                           stylename="edit-form-control"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
                                         <textArea id="addressOfCompanyField"
                                                   dataContainer="companyDc"
                                                   property="addressOfCompany"
@@ -412,14 +411,13 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
-                                            <textField id="websiteMainField"
-                                                       dataContainer="companyDc"
-                                                       property="website"
-                                                       caption="Веб-сайт"
-                                                       stylename="edit-form-control"
-                                                       box.expandRatio="1"
-                                                       width="100%"/>
                                         </hbox>
+                                        <textField id="websiteMainField"
+                                                   dataContainer="companyDc"
+                                                   property="website"
+                                                   caption="Веб-сайт"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
                                     </vbox>
                                 </groupBox>
                             </vbox>
@@ -507,6 +505,8 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
                                             <textField id="ogrnField"
                                                        dataContainer="companyDc"
                                                        property="ogrn"
@@ -514,8 +514,6 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
-                                        </hbox>
-                                        <hbox spacing="true" width="100%">
                                             <textField id="okpoField"
                                                        dataContainer="companyDc"
                                                        property="okpo"
@@ -523,6 +521,8 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
                                             <textField id="oktmoField"
                                                        dataContainer="companyDc"
                                                        property="oktmo"
@@ -592,6 +592,8 @@
                                                     <action id="clear" type="picker_clear"/>
                                                 </actions>
                                             </lookupPickerField>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
                                             <lookupPickerField id="cityOfCompanyRequisitesField"
                                                                dataContainer="companyDc"
                                                                optionsContainer="cityOfCompaniesDc"
@@ -606,13 +608,14 @@
                                                     <action id="clear" type="picker_clear"/>
                                                 </actions>
                                             </lookupPickerField>
+                                            <textField id="addressOfCompanyRequisitesField"
+                                                       dataContainer="companyDc"
+                                                       property="addressOfCompany"
+                                                       caption="Улица, дом, строение, офис (адресная строка)"
+                                                       stylename="edit-form-control"
+                                                       box.expandRatio="1"
+                                                       width="100%"/>
                                         </hbox>
-                                        <textField id="addressOfCompanyRequisitesField"
-                                                   dataContainer="companyDc"
-                                                   property="addressOfCompany"
-                                                   caption="Улица, дом, строение, офис (адресная строка)"
-                                                   stylename="edit-form-control"
-                                                   width="100%"/>
                                         <textArea id="legalAddressField"
                                                   dataContainer="companyDc"
                                                   property="legalAddress"
@@ -709,14 +712,13 @@
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
-                                            <textField id="websiteField"
-                                                       dataContainer="companyDc"
-                                                       property="website"
-                                                       caption="Веб-сайт"
-                                                       stylename="edit-form-control"
-                                                       box.expandRatio="1"
-                                                       width="100%"/>
                                         </hbox>
+                                        <textField id="websiteField"
+                                                   dataContainer="companyDc"
+                                                   property="website"
+                                                   caption="Веб-сайт"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
                                     </vbox>
                                 </groupBox>
                             </vbox>
