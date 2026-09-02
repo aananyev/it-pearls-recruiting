@@ -329,6 +329,27 @@ public class CompanyEditLayoutContractTest {
     }
 
     @Test
+    public void workspaceFieldRowsRemainResponsiveWithoutChangingSidebar() throws IOException {
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/company-editor.scss");
+
+        assertFalse("вкладка company-main-tab не должна наследовать высоту поля ввода",
+                canon.contains(".company-main-tab,"));
+        assertTrue("hbox-строка workspace не переведена в flex-flow",
+                canon.contains(".edit-workspace-content .v-horizontallayout > .v-expand")
+                        && canon.contains("display: flex !important")
+                        && canon.contains("flex-wrap: wrap !important"));
+        assertTrue("слоты hbox не возвращены в normal flow",
+                canon.contains(".edit-workspace-content .v-horizontallayout > .v-expand > .v-slot")
+                        && canon.contains("position: static !important")
+                        && canon.contains("left: auto !important")
+                        && canon.contains("flex: 1 1 240px !important"));
+        assertTrue("адаптивная правка не должна менять sidebar 270px",
+                canon.contains("width: 270px !important")
+                        && canon.contains("padding: 14px 16px 12px !important"));
+    }
+
+    @Test
     public void uploadButtonsFollowCanonicalDarkSidebarStyle() throws IOException {
         String canon = readProjectFile(
                 "modules/web/themes/hover/com.company.hunttech/company-editor.scss");

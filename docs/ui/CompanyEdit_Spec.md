@@ -107,6 +107,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
   - `tabConpanyDetails` — scrollBox `edit-workspace-scroll` → `edit-workspace-content` → карточки `edit-card`+`showAsPanel`: `companyMainCard` («Реквизиты компании») и `companyAddressCard` («Адрес компании»);
   - `companyDescriptionTab` — карточка `companyDescriptionCard` с двумя RichTextArea;
   - `tabCompanyDepartament` — карточка `companyDepartmentsCard` с dataGrid `departmentOfCompanyTable` + buttonsPanel.
+  - Строки парных полей внутри workspace сохраняют две колонки при достаточной ширине и переносятся в одну без горизонтального выхода при сужении окна. Sidebar остаётся фиксированной панелью 270px: его размер, состав и компоновка не участвуют в адаптивном правиле.
 - **Footer** `edit-footer-actions`: expand-спейсер + группа AUTO/MIDDLE_RIGHT (`spacing="true"`) → `company-editor-primary-action` / `company-editor-secondary-action` (40px/14px/600).
 
 Локальный SCSS: `company-editor.scss` в 7 темах (md5-идентичны), подключение `@import` + `@include company-editor-theme` в `styles.scss` каждой темы. Новые msg-ключи: `msgCompanySidebarHint`, `msgCompanyToolbarDescription`, `msgCompanyMainSection`, `msgCompanyAddressSection`, `msgCompanyDescriptionSection`, `msgCompanyDepartmentsSection`, `msgCompanyGroup` (в `screens/company/messages.properties` и `messages_ru.properties`); исправлена опечатка `msgCompanyDetail` (→ «Информация о компании») в главных messages.
@@ -117,6 +118,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-02 | Исправлена адаптивная компоновка правой части: `company-main-tab` больше не наследует высоту полей ввода; внутренние `.v-expand/.v-slot` строк hbox возвращаются в normal flow с переносом. Размер, компоновка и содержимое sidebar не изменялись. |
 | 2026-08-15 | Умная обработка логотипа компании (как у проекта): `WebProjectLogoFileUploadField` расширен на свойство `fileCompanyLogo` — PNG, ресайз 300px, удаление белого фона (rembg/AI/классика), вписывание в круг; конфиг общий `hunttech.projectLogo.*`; повторная загрузка без закрытия экрана обрабатывается заново (фикс кэша `processedDescriptor`) |
 | 2026-08-14 | Сверка с эталоном (контракт §3.1/§3.6/§4.1): пункты навигации по высоте контента (`height: auto`), удалено локальное wrap-правило с принудительной высотой, полоса-заголовок `height: auto`; реализовано правило 3.6 — `label-navigation` скрывается на одноблочных вкладках (`TABS_WITH_SIDEBAR_NAVIGATION`) |
 | 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit): sidebar 270px с логотипом `ovaFallbackImage` 176×176 и навигацией «Разделы» (вкладки), карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal; `WebOvaFallbackImage` вместо пары image, presentation-навигация в Java; `company-editor.scss` ×7 тем; новый `CompanyEditLayoutContractTest` (7/7) |
