@@ -150,4 +150,8 @@
     <include file="260824-5-6-mergeCandidateAndVacancySkillsData.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Добавление 144 недостающих технологических навыков из логов AI-анализа вакансий (Embedded, Web/Frontend, Backend, Blockchain, DevOps, Data/ML). -->
+    <include file="260902-1-add-missing-tech-skills.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

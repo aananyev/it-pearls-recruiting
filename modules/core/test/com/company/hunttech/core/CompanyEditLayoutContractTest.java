@@ -347,6 +347,10 @@ public class CompanyEditLayoutContractTest {
         assertTrue("адаптивная правка не должна менять sidebar 270px",
                 canon.contains("width: 270px !important")
                         && canon.contains("padding: 14px 16px 12px !important"));
+        assertFalse("адаптивная правка не должна расширять sidebar до 290px",
+                canon.contains("width: 290px !important"));
+        assertFalse("адаптивная правка не должна перестраивать sidebar сверху",
+                canon.contains("#companyEditorMainLayout {\n            flex-direction: column !important;"));
     }
 
     @Test

@@ -201,6 +201,8 @@
           <button id="openPositionEditorNavExercise" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavMemo" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavTemplateLetter" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavInterviewPlan" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavSearchMap" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavSkills" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavNews" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavApproval" width="100%" visible="false" stylename="borderless label-nav-item"/>
@@ -214,6 +216,8 @@
           <vbox id="openPositionExerciseTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionMemoTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionTemplateLetterTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionInterviewPlanTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionSearchMapTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionSkillsTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionNewsTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionApprovalTabNavigation" width="100%" visible="false"/>
@@ -223,6 +227,8 @@
           <vbox id="openPositionEditorNavigation" width="100%" visible="false"/>
           <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
           <label id="infoPositionLabel" width="100%" visible="false"/>
+          <label id="infoCompanyLabel" width="100%" visible="false"/>
+          <label id="infoDepartmentLabel" width="100%" visible="false"/>
           <label id="infoProjectLabel" width="100%" visible="false"/>
           <label id="infoOwnerLabel" width="100%" visible="false"/>
           <label id="infoCityLabel" width="100%" visible="false"/>
@@ -234,6 +240,8 @@
           <label id="statusOfVacansyLabel" width="100%" visible="false"/>
           <button id="openClosePositionButton" caption="Закрыть вакансию" width="100%" visible="false"/>
           <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
+          <label id="openPositionSkillsLabels" width="100%" visible="false"/>
+          <label id="priorityBadgeLabel" width="100%" visible="false"/>
           <!-- Скрытый label звёздного рейтинга sidebar (контракт @Inject из основного XML). -->
           <label id="openPositionRatingLabel" width="100%" visible="false"/>
         </vbox>
@@ -479,40 +487,41 @@
               <vbox width="100%" height="100%" spacing="true" margin="true" expand="descriptionTextsAccordion" stylename="open-position-preview-description-tab-content">
                 <groupBox id="workExperienceGroupBox" collapsable="true" collapsed="false" caption="msg://msgWorkExperience" stylename="light edit-card open-position-preview-description-experience" spacing="true" width="100%">
                   <radioButtonGroup id="workExperienceRadioButton" orientation="horizontal" required="true" description="msg://msgWorkExperience" dataContainer="openPositionDc" property="workExperience" caption="msg://msgWorkExperience"/>
+                  <button id="scanOpenPositionSkillsBtn" caption="msg://msgScanOpenPositionSkills" icon="MAGIC" stylename="primary" visible="false"/>
                   <radioButtonGroup id="commanExperienceRadioButton" orientation="horizontal" description="msg://msgCommandExperience" dataContainer="openPositionDc" visible="false" property="commandExperience" caption="msg://msgCommandExperience"/>
                 </groupBox>
                 <groupBox id="descriptionTextsAccordion" caption="Тексты описания" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-richtext-section" width="100%" height="100%">
-                  <accordion id="openPositionAccordion" width="100%" height="100%">
-                    <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment">
-                      <!-- Растягивает редактор описания на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                  <tabSheet id="openPositionAccordion" width="100%" height="100%">
+                    <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment" icon="font-icon:LANGUAGE" margin="false">
+                      <!-- Растягивает редактор описания на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionRichTextArea">
                         <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="100%" required="true" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionEnTabAccordion" caption="msg://msgEnComment">
-                      <!-- Растягивает англ. редактор описания на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                    <tab id="openPositionEnTabAccordion" caption="msg://msgEnComment" icon="font-icon:GLOBE" margin="false">
+                      <!-- Растягивает англ. редактор описания на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionEnRichTextArea">
                         <richTextArea id="openPositionEnRichTextArea" dataContainer="openPositionDc" property="commentEn" width="100%" height="100%" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionStandartDescriptionAccorden" caption="msg://msgStandartDescription">
-                      <!-- Растягивает стандартное описание на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                    <tab id="openPositionStandartDescriptionAccorden" caption="msg://msgStandartDescription" icon="font-icon:FILE_TEXT_O" margin="false">
+                      <!-- Растягивает стандартное описание на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionStandartDescriptionRichTextArea">
                         <richTextArea id="openPositionStandartDescriptionRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                    <tab id="openPositionWhoIsThisGuyAccorden" caption="msg://msgWhoIsThisGuy">
-                      <!-- Растягивает описание «Кто этот человек» на всю вкладку аккордеона. -->
-                      <vbox width="100%" height="100%">
+                    <tab id="openPositionWhoIsThisGuyAccorden" caption="msg://msgWhoIsThisGuy" icon="font-icon:USER_O" margin="false">
+                      <!-- Растягивает описание «Кто этот человек» на всю вкладку. -->
+                      <vbox width="100%" height="100%" expand="openPositionWhoIsThisGuyRichTextArea">
                         <richTextArea id="openPositionWhoIsThisGuyRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
-                  </accordion>
+                  </tabSheet>
                 </groupBox>
                 <groupBox id="shortDescriptionAccordion" caption="msg://msgShortCaption" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-description-short" width="100%">
                   <hbox width="100%" spacing="true" expand="shortDescriptionTextArea">
                     <textField id="shortDescriptionTextArea" dataContainer="openPositionDc" property="shortDescription" maxLength="250" width="100%"/>
-                    <button id="scanJDButton" caption="msg://msgScanJD" align="BOTTOM_RIGHT" description="msg://msgScanJDAndPut" invoke="addShortDescription"/>
+                    <button id="scanJDButton" caption="msg://msgScanJD" icon="MAGIC" align="BOTTOM_RIGHT" description="msg://msgScanJDAndPut" stylename="secondary" invoke="addShortDescription"/>
                   </hbox>
                 </groupBox>
               </vbox>
