@@ -565,8 +565,7 @@
                         stylename="borderless label-nav-item"/>
             </vbox>
             <!-- Набор вкладки «Тестовое задание» (tabExercise): единый раздел — признак и редактор
-                 задания; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
-                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
+                 задания; набор показывается для навигации. -->
             <vbox id="openPositionExerciseTabNavigation"
                   width="100%"
                   spacing="false"
@@ -579,8 +578,7 @@
                         stylename="borderless label-nav-item"/>
             </vbox>
             <!-- Набор вкладки «Памятка кандидату» (tabMemoForInterview): единый раздел — признак
-                 и редактор памятки; набор никогда не показывается (вкладка с одним блоком ввода),
-                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
+                 и редактор памятки; набор показывается для навигации. -->
             <vbox id="openPositionMemoTabNavigation"
                   width="100%"
                   spacing="false"
@@ -593,8 +591,7 @@
                         stylename="borderless label-nav-item"/>
             </vbox>
             <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел;
-                 набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
-                 структуры набора и Java-контракта (@Named/@Subscribe). -->
+                 набор показывается для навигации. -->
             <vbox id="openPositionTemplateLetterTabNavigation"
                   width="100%"
                   spacing="false"
@@ -606,9 +603,32 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
+            <!-- Набор вкладки «План собеседования» (tabInterviewPlan): единый раздел — редактор
+                 плана собеседования; набор показывается для навигации. -->
+            <vbox id="openPositionInterviewPlanTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «План собеседования» — label-навигация контейнера interviewPlanVBox. -->
+                <button id="openPositionEditorNavInterviewPlan"
+                        caption="msg://msgInterviewPlan"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Карта поиска» (tabSearchMap): единый раздел — редактор
+                 карты поиска; набор показывается для навигации. -->
+            <vbox id="openPositionSearchMapTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Карта поиска» — label-навигация контейнера searchMapVBox. -->
+                <button id="openPositionEditorNavSearchMap"
+                        caption="msg://msgSearchMap"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
             <!-- Набор вкладки «Требуемые Навыки» (tabSkills): единый раздел — дерево навыков
-                 позиции; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
-                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
+                 позиции; набор показывается для навигации. -->
             <vbox id="openPositionSkillsTabNavigation"
                   width="100%"
                   spacing="false"
@@ -622,8 +642,7 @@
                         stylename="borderless label-nav-item"/>
             </vbox>
             <!-- Набор вкладки «Новости» (tabOpenPositionNews): единый раздел — таблица новостей
-                 позиции; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
-                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
+                 позиции; набор показывается для навигации. -->
             <vbox id="openPositionNewsTabNavigation"
                   width="100%"
                   spacing="false"
@@ -636,8 +655,7 @@
                         stylename="borderless label-nav-item"/>
             </vbox>
             <!-- Набор вкладки «Согласование» (tabApproval): единый раздел — BPM-процесс согласования;
-                 набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
-                 структуры набора и Java-контракта (@Named/@Subscribe). -->
+                 набор показывается для навигации. -->
             <vbox id="openPositionApprovalTabNavigation"
                   width="100%"
                   spacing="false"
@@ -650,8 +668,7 @@
                         stylename="borderless label-nav-item"/>
             </vbox>
             <!-- Набор вкладки «Комментарии» (commentsTab): единый раздел — лента
-                 комментариев-рейтингов; набор никогда не показывается (вкладка с одним блоком
-                 ввода), сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
+                 комментариев-рейтингов; набор показывается для навигации. -->
             <vbox id="openPositionCommentsTabNavigation"
                   width="100%"
                   spacing="false"
@@ -1776,6 +1793,52 @@
                                       stylename="edit-form-control open-position-editor-richtext-variant5"/>
                     </vbox>
                 </groupBox>
+            </tab>
+            <!-- Вкладка «План собеседования»: редактор плана собеседования. -->
+            <tab id="tabInterviewPlan"
+                 caption="msg://msgInterviewPlan"
+                 margin="false"
+                 spacing="true"
+                 expand="interviewPlanVBox"
+                 icon="font-icon:CALENDAR_CHECK_O">
+                <!-- Контейнер вкладки плана собеседования. -->
+                <vbox id="interviewPlanVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="interviewPlanRichTextArea"
+                      stylename="open-position-editor-tab-content">
+                    <!-- Редактор плана собеседования (lazy). -->
+                    <richTextArea id="interviewPlanRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="interviewPlan"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
+            </tab>
+            <!-- Вкладка «Карта поиска»: редактор карты поиска кандидата. -->
+            <tab id="tabSearchMap"
+                 caption="msg://msgSearchMap"
+                 margin="false"
+                 spacing="true"
+                 expand="searchMapVBox"
+                 icon="font-icon:MAP_O">
+                <!-- Контейнер вкладки карты поиска. -->
+                <vbox id="searchMapVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="searchMapRichTextArea"
+                      stylename="open-position-editor-tab-content">
+                    <!-- Редактор карты поиска кандидата (lazy). -->
+                    <richTextArea id="searchMapRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="searchMap"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
             </tab>
             <!-- Вкладка «Шаблон сопроводительного письма»: признак и редактор шаблона. -->
             <tab id="tabTemplateLetter"

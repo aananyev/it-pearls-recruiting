@@ -201,6 +201,8 @@
           <button id="openPositionEditorNavExercise" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavMemo" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavTemplateLetter" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavInterviewPlan" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavSearchMap" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavSkills" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavNews" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavApproval" width="100%" visible="false" stylename="borderless label-nav-item"/>
@@ -214,6 +216,8 @@
           <vbox id="openPositionExerciseTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionMemoTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionTemplateLetterTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionInterviewPlanTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionSearchMapTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionSkillsTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionNewsTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionApprovalTabNavigation" width="100%" visible="false"/>

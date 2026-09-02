@@ -494,9 +494,6 @@
     // вылезает за workspace. Принудительно ограничиваем до 50%.
     
 
-
-    // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
-    .company-main-tab,
 // ═══════════════════════════════════════════════════════════════════════════
     // Единый шрифт, стиль и размер полей ввода (TextField, LookupField, LookupPickerField, DateField, TextArea)
     // ═══════════════════════════════════════════════════════════════════════════
@@ -1055,6 +1052,36 @@
           max-width: 100% !important;
           min-width: 0 !important;
         }
+      }
+
+      // Vaadin HorizontalLayout with expandRatio wraps all field slots into a
+      // single .v-expand wrapper. Keep those inner slots in normal flow so the
+      // second field wraps inside the card instead of keeping stale left offsets.
+      .v-horizontallayout > .v-expand {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        position: static !important;
+        flex: 1 1 100% !important;
+      }
+
+      .v-horizontallayout > .v-expand > .v-slot {
+        box-sizing: border-box !important;
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        flex: 1 1 240px !important;
+        width: auto !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
       }
     }
 

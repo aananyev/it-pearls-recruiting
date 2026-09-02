@@ -743,9 +743,10 @@
     .edit-workspace-content {
       box-sizing: border-box;
       width: 100% !important;
-      max-width: 1480px !important;
+      max-width: 100% !important;
       height: auto !important;
-      margin: 0 auto;
+      margin: 0;
+      padding: 0 16px;
     }
 
     /*
@@ -1287,6 +1288,7 @@
       min-width: 0 !important;
       max-width: 100% !important;
       height: 100% !important;
+      padding: 0 16px;
     }
 
     .open-position-editor-table-view .v-table,
@@ -1903,6 +1905,9 @@
         min-width: 0 !important;
         flex: 1 1 auto !important;
         min-height: 220px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
       }
     }
 
@@ -2343,6 +2348,276 @@
       .open-position-editor .edit-sidebar-warning.edit-sidebar-warning {
         padding: 2px 8px !important;
       }
+    }
+
+    /* ==========================================================================
+     * RESPONSIVE BREAKPOINTS — адаптивная верстка для всех разрешений экрана
+     * ========================================================================== */
+
+    /* Ultra-wide: ≥ 1920px — используем полную ширину с комфортными отступами */
+    @media (min-width: 1920px) {
+      .open-position-editor .edit-workspace-content {
+        max-width: 1600px !important;
+        margin: 0 auto !important;
+        padding: 0 24px !important;
+      }
+    }
+
+    /* Large desktop: 1440px–1919px — базовая верстка */
+    @media (min-width: 1440px) and (max-width: 1919px) {
+      .open-position-editor .edit-workspace-content {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 20px !important;
+      }
+    }
+
+    /* Standard desktop: 1366px–1439px (ноутбуки) */
+    @media (min-width: 1366px) and (max-width: 1439px) {
+      .open-position-editor .edit-workspace-content {
+        padding: 0 16px !important;
+      }
+      .open-position-editor .edit-sidebar {
+        width: 290px !important;
+        min-width: 290px !important;
+        max-width: 290px !important;
+        padding: 12px 14px 10px !important;
+      }
+      .open-position-editor .open-position-editor-field-row > .v-slot,
+      .open-position-editor .open-position-editor-field-row > .v-expand > .v-slot {
+        flex: 1 1 200px !important;
+      }
+    }
+
+    /* Tablet / small laptop: 1024px–1365px — сжимаем отступы, sidebar сужается */
+    @media (min-width: 1024px) and (max-width: 1365px) {
+      .open-position-editor .edit-workspace-content {
+        padding: 0 12px !important;
+      }
+      .open-position-editor .edit-sidebar {
+        width: 270px !important;
+        min-width: 270px !important;
+        max-width: 270px !important;
+        padding: 10px 12px 8px !important;
+      }
+      .open-position-editor .edit-toolbar {
+        padding: 8px 16px !important;
+        min-height: 52px !important;
+      }
+      .open-position-editor .open-position-editor-tabs .v-tabsheet-content {
+        padding: 10px 12px 14px !important;
+      }
+      .open-position-editor .open-position-editor-field-row > .v-slot,
+      .open-position-editor .open-position-editor-field-row > .v-expand > .v-slot {
+        flex: 1 1 180px !important;
+      }
+      .open-position-editor .edit-accordion-section .v-panel-content {
+        padding: 12px 14px 14px !important;
+      }
+    }
+
+    /* Mobile / very narrow: ≤ 1023px — вертикальная раскладка, sidebar сверху */
+    @media (max-width: 1023px) {
+      .open-position-editor .edit-screen-layout {
+        flex-direction: column !important;
+      }
+      .open-position-editor .edit-sidebar {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: 300px !important;
+        padding: 12px !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.78) !important;
+        box-shadow: 0 5px 20px rgba(15, 23, 42, 0.18) !important;
+      }
+      .open-position-editor .edit-workspace {
+        flex: 1 1 auto !important;
+        overflow-y: auto !important;
+      }
+      .open-position-editor .edit-workspace-content {
+        padding: 0 8px !important;
+      }
+      .open-position-editor .edit-toolbar {
+        padding: 8px 12px !important;
+        min-height: 48px !important;
+      }
+      .open-position-editor .open-position-editor-tabs .v-tabsheet-content {
+        padding: 8px 8px 12px !important;
+      }
+      .open-position-editor .open-position-editor-field-row > .v-slot,
+      .open-position-editor .open-position-editor-field-row > .v-expand > .v-slot {
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+      }
+      .open-position-editor .open-position-editor-cards-row > .v-slot,
+      .open-position-editor .open-position-editor-cards-row > .v-expand > .v-slot {
+        width: 100% !important;
+      }
+      .open-position-editor .edit-accordion-section .v-panel-content {
+        padding: 10px 12px 12px !important;
+      }
+      .open-position-editor .open-position-editor-vacancy-state-summary {
+        flex-direction: column !important;
+        gap: 8px !important;
+      }
+      .open-position-editor .open-position-editor-vacancy-state-summary > .v-slot {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .open-position-editor .open-position-editor-payments-columns {
+        flex-direction: column !important;
+      }
+      .open-position-editor .open-position-editor-payments-columns > .v-slot {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+      }
+      .open-position-editor .open-position-editor-footer {
+        position: static !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 10px 12px !important;
+        min-height: auto !important;
+      }
+      .open-position-editor .open-position-editor-owner-row {
+        margin-bottom: 8px !important;
+      }
+      .open-position-editor .open-position-editor-footer-actions {
+        justify-content: flex-end !important;
+        flex-wrap: wrap !important;
+      }
+      .open-position-editor .open-position-editor-commit-actions {
+        flex-wrap: wrap !important;
+        justify-content: flex-end !important;
+      }
+    }
+
+    /* ==========================================================================
+     * TAB-SPECIFIC FIXES: Preven right-edge overflow for specific tabs
+     * ========================================================================== */
+
+    /* Tab: Описание вакансии (tabJobDescription) — nested TabSheet with RichTextAreas */
+    #tabJobDescription,
+    .open-position-editor #tabJobDescription,
+    #jobDescriptionVBox,
+    .open-position-editor #jobDescriptionVBox,
+    #descriptionTextsAccordion,
+    .open-position-editor #descriptionTextsAccordion,
+    #descriptionsAccordionHBox,
+    .open-position-editor #descriptionsAccordionHBox,
+    .open-position-editor-richtext-section,
+    .open-position-editor #openPositionAccordion,
+    .open-position-editor .v-tabsheet-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Tab: Тестовое задание (tabExercise) — RichTextArea */
+    #tabExercise,
+    .open-position-editor #tabExercise,
+    #exerciseAccordion,
+    .open-position-editor #exerciseAccordion,
+    #exerciseVbox,
+    .open-position-editor #exerciseVbox,
+    #exerciseRichTextArea,
+    .open-position-editor #exerciseRichTextArea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Tab: Памятка кандидату (tabMemoForInterview) — RichTextArea */
+    #tabMemoForInterview,
+    .open-position-editor #tabMemoForInterview,
+    #memoAccordion,
+    .open-position-editor #memoAccordion,
+    #memoVbox,
+    .open-position-editor #memoVbox,
+    #memoForInterviewRichTextArea,
+    .open-position-editor #memoForInterviewRichTextArea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Tab: Шаблон сопроводительного письма (tabTemplateLetter) — RichTextArea */
+    #tabTemplateLetter,
+    .open-position-editor #tabTemplateLetter,
+    #templateLetterAccordion,
+    .open-position-editor #templateLetterAccordion,
+    #templateLetterBox,
+    .open-position-editor #templateLetterBox,
+    #templateLetterRichTextArea,
+    .open-position-editor #templateLetterRichTextArea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Ensure all RichTextArea variants respect container bounds */
+    .open-position-editor-richtext-variant5,
+    .open-position-editor-richtext-variant5.v-richtextarea,
+    .open-position-editor-richtext-section .v-richtextarea,
+    .open-position-editor #openPositionRichTextArea,
+    .open-position-editor #openPositionEnRichTextArea,
+    .open-position-editor #openPositionStandartDescriptionRichTextArea,
+    .open-position-editor #openPositionWhoIsThisGuyRichTextArea {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+
+    /* RichTextArea toolbar and content containment */
+    .open-position-editor .v-richtextarea-toolbar {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      flex-wrap: wrap !important;
+      overflow-x: hidden !important;
+    }
+
+    .open-position-editor .v-richtextarea-content,
+    .open-position-editor .v-richtextarea iframe {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+
+    /* TabSheet panel containment */
+    .open-position-editor .v-tabsheet-tabsheetpanel {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    /* General tab content containment */
+    .open-position-editor-tab-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Scrollable content containment */
+    .open-position-editor .edit-workspace-scroll,
+    .open-position-editor .v-tabsheet-content .v-verticallayout,
+    .open-position-editor .edit-workspace-scroll .v-verticallayout {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
     }
   }
 }
