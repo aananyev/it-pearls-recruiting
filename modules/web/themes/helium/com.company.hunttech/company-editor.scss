@@ -494,9 +494,6 @@
     // вылезает за workspace. Принудительно ограничиваем до 50%.
     
 
-
-    // Резиновая верстка (fluid responsive layout) всех вкладок и строк:
-    .company-main-tab,
 // ═══════════════════════════════════════════════════════════════════════════
     // Единый шрифт, стиль и размер полей ввода (TextField, LookupField, LookupPickerField, DateField, TextArea)
     // ═══════════════════════════════════════════════════════════════════════════
@@ -867,5 +864,245 @@
       min-width: 0 !important;
       max-width: 50% !important;
     }
+    /* Адаптивная верстка TabSheet и рабочей области без выхода за правую границу */
+    .edit-screen-layout,
+    #companyEditorMainLayout {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: row !important;
+
+      > .v-slot:first-child,
+      > .v-slot-edit-sidebar {
+        flex: 0 0 270px !important;
+        width: 270px !important;
+        min-width: 270px !important;
+        max-width: 270px !important;
+      }
+
+      > .v-expand,
+      > .v-slot:last-child,
+      > .v-slot-edit-workspace {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: calc(100% - 270px) !important;
+        width: auto !important;
+      }
+    }
+
+    .edit-workspace,
+    #companyEditorWorkspace {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+
+      > .v-slot,
+      > .v-expand {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+
+    .edit-toolbar,
+    #companyEditorToolbar {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 8px !important;
+
+      > .v-expand,
+      > .v-slot:first-child {
+        box-sizing: border-box !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      > .v-slot:last-child {
+        box-sizing: border-box !important;
+        flex: 0 0 auto !important;
+      }
+    }
+
+    #mainTab,
+    .edit-tabs,
+    .v-tabsheet {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+
+      .v-tabsheet-tabcontainer {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+      }
+
+      .v-tabsheet-tabsheetpanel {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+      }
+
+      .v-tabsheet-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+
+        > div {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          overflow-x: hidden !important;
+        }
+      }
+    }
+
+    .edit-workspace-scroll,
+    .edit-workspace-scroll > .v-scrollable,
+    .edit-workspace .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    .edit-workspace-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+      padding: 12px !important;
+
+      > .v-slot,
+      > .v-expand {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      .edit-card,
+      .v-groupbox {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+
+        .v-groupbox-content {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          overflow-x: hidden !important;
+          padding: 10px 14px !important;
+        }
+      }
+
+      .v-horizontallayout {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px 14px !important;
+
+        > .v-slot,
+        > .v-expand {
+          box-sizing: border-box !important;
+          flex: 1 1 240px !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          width: auto !important;
+        }
+
+        .edit-form-control,
+        .v-textfield,
+        .v-filterselect,
+        .c-pickerfield,
+        .c-suggestionfield,
+        .v-datefield,
+        .v-textarea,
+        .v-richtextarea {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+        }
+      }
+
+      // Vaadin HorizontalLayout with expandRatio wraps all field slots into a
+      // single .v-expand wrapper. Keep those inner slots in normal flow so the
+      // second field wraps inside the card instead of keeping stale left offsets.
+      .v-horizontallayout > .v-expand {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        position: static !important;
+        flex: 1 1 100% !important;
+      }
+
+      .v-horizontallayout > .v-expand > .v-slot {
+        box-sizing: border-box !important;
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        flex: 1 1 240px !important;
+        width: auto !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+      }
+    }
+
+    #editActions,
+    .edit-footer-actions {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 8px !important;
+      padding: 10px 16px !important;
+
+      #bottomActionsGroup {
+        box-sizing: border-box !important;
+        display: flex !important;
+        gap: 8px !important;
+      }
+    }
+
   }
 }
