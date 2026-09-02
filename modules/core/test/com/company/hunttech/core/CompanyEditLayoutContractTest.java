@@ -351,6 +351,10 @@ public class CompanyEditLayoutContractTest {
                 canon.contains("width: 290px !important"));
         assertFalse("адаптивная правка не должна перестраивать sidebar сверху",
                 canon.contains("#companyEditorMainLayout {\n            flex-direction: column !important;"));
+        assertTrue("первая вкладка не имеет изолированной адаптивной компоновки",
+                canon.contains(".company-main-tab {")
+                        && canon.contains("flex: 1 1 260px !important")
+                        && canon.contains("flex-basis: 220px !important"));
     }
 
     @Test

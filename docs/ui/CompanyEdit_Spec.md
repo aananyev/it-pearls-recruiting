@@ -108,6 +108,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
   - `companyDescriptionTab` — карточка `companyDescriptionCard` с двумя RichTextArea;
   - `tabCompanyDepartament` — карточка `companyDepartmentsCard` с dataGrid `departmentOfCompanyTable` + buttonsPanel.
   - Строки парных полей внутри workspace сохраняют две колонки при достаточной ширине и переносятся в одну без горизонтального выхода при сужении окна. Sidebar остаётся фиксированной панелью 270px: его размер, состав и компоновка не участвуют в адаптивном правиле.
+  - Вкладка `tabConpanyDetails` использует локальный поток `.company-main-tab`: технические Vaadin `v-expand/v-slot` образуют адаптивные пары полей (основа 260px) и переносятся без выхода за карточку. Это правило не применяется к sidebar и другим вкладкам.
 - **Footer** `edit-footer-actions`: expand-спейсер + группа AUTO/MIDDLE_RIGHT (`spacing="true"`) → `company-editor-primary-action` / `company-editor-secondary-action` (40px/14px/600).
 
 Локальный SCSS: `company-editor.scss` в 7 темах (md5-идентичны), подключение `@import` + `@include company-editor-theme` в `styles.scss` каждой темы. Новые msg-ключи: `msgCompanySidebarHint`, `msgCompanyToolbarDescription`, `msgCompanyMainSection`, `msgCompanyAddressSection`, `msgCompanyDescriptionSection`, `msgCompanyDepartmentsSection`, `msgCompanyGroup` (в `screens/company/messages.properties` и `messages_ru.properties`); исправлена опечатка `msgCompanyDetail` (→ «Информация о компании») в главных messages.
@@ -118,6 +119,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-02 | Пересобрана визуальная компоновка правой части первой вкладки: технические Vaadin-обёртки полей сведены в единый адаптивный поток только под `.company-main-tab`; карточки и пары полей не выходят за рабочую область. Sidebar, остальные вкладки, bindings и состав input-компонентов не изменялись. |
 | 2026-09-02 | Исправлена адаптивная компоновка правой части: `company-main-tab` больше не наследует высоту полей ввода; внутренние `.v-expand/.v-slot` строк hbox возвращаются в normal flow с переносом. Размер, компоновка и содержимое sidebar не изменялись. |
 | 2026-08-15 | Умная обработка логотипа компании (как у проекта): `WebProjectLogoFileUploadField` расширен на свойство `fileCompanyLogo` — PNG, ресайз 300px, удаление белого фона (rembg/AI/классика), вписывание в круг; конфиг общий `hunttech.projectLogo.*`; повторная загрузка без закрытия экрана обрабатывается заново (фикс кэша `processedDescriptor`) |
 | 2026-08-14 | Сверка с эталоном (контракт §3.1/§3.6/§4.1): пункты навигации по высоте контента (`height: auto`), удалено локальное wrap-правило с принудительной высотой, полоса-заголовок `height: auto`; реализовано правило 3.6 — `label-navigation` скрывается на одноблочных вкладках (`TABS_WITH_SIDEBAR_NAVIGATION`) |
