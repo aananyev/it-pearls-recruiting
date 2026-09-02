@@ -524,6 +524,19 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
+            <!-- Набор вкладки «Оплата» (tabPayments): детали оплаты ресерчера и рекрутера. -->
+            <vbox id="openPositionPaymentsTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Детали оплаты» — label-навигация секции groupBoxPaymentsDetail
+                     (тип комиссии, НДФЛ, проценты/суммы): клик подсвечивает пункт и переводит
+                     фокус в тип комиссии компании (начало секции). -->
+                <button id="openPositionEditorNavPaymentsDetail"
+                        caption="msg://openPositionEditorNavPaymentsDetail"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
             <!-- Набор пунктов вкладки «Описание должности» (tabJobDescription): опыт работы,
                  аккордеон описаний и короткое описание. -->
             <vbox id="openPositionJobDescriptionTabNavigation"

@@ -444,6 +444,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private VBoxLayout openPositionFilesTabNavigation;
     @Inject
+    private VBoxLayout openPositionPaymentsTabNavigation;
+    @Inject
     private VBoxLayout openPositionExerciseTabNavigation;
     @Inject
     private VBoxLayout openPositionMemoTabNavigation;
@@ -658,6 +660,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return Arrays.asList(
                 openPositionMainTabNavigation,
                 openPositionLaborTabNavigation,
+                openPositionPaymentsTabNavigation,
                 openPositionJobDescriptionTabNavigation,
                 openPositionFilesTabNavigation,
                 openPositionExerciseTabNavigation,
@@ -685,23 +688,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-    /** Вкладки, в контенте которых два и более блока ввода: только для них в sidebar
-     *  показывается label-навигация. Вкладки с единственным блоком ввода навигацию не имеют. */
+    /** Вкладки правой части экрана (все вкладки tabsheet, кроме основной «О вакансии»):
+     *  для них в sidebar показывается label-навигация. */
     private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION = new HashSet<>(Arrays.asList(
-            "tabOpenPosition",     // 5 блоков: наименование, параметры, карточка вакансии, команда, зарплата
-            "laborAgreementTab",   // 2 блока: трудовые соглашения, детали оплаты
-            "tabJobDescription",   // 3 блока: опыт, аккордеон описаний, короткое описание
-            "tabExercise",         // 1 блок: чекбокс + редактор (показываем навигацию)
-            "tabMemoForInterview", // 1 блок: чекбокс + редактор (показываем навигацию)
-            "tabTemplateLetter",   // 1 блок: чекбокс + редактор (показываем навигацию)
-            "tabInterviewPlan",    // 1 блок: редактор плана (показываем навигацию)
-            "tabSearchMap",        // 1 блок: редактор карты (показываем навигацию)
-            "tabSkills",           // 1 блок: дерево навыков (показываем навигацию)
-            "tabOpenPositionNews", // 1 блок: таблица новостей (показываем навигацию)
-            "tabApproval",         // 1 блок: BPM процесс (показываем навигацию)
-            "commentsTab"));       // 1 блок: комментарии (показываем навигацию)
+            "laborAgreementTab",   // Трудовые соглашения
+            "tabPayments",         // Оплата
+            "tabJobDescription",   // Описание должности
+            "tabFiles",            // Файлы
+            "tabExercise",         // Тестовое задание
+            "tabMemoForInterview", // Памятка кандидату
+            "tabTemplateLetter",   // Шаблон письма
+            "tabInterviewPlan",    // План собеседования
+            "tabSearchMap",        // Карта поиска
+            "tabSkills",           // Требуемые навыки
+            "tabOpenPositionNews", // Новости
+            "tabApproval",         // Согласование
+            "commentsTab"));       // Комментарии
 
-    /** Показывает label-навигацию sidebar для вкладок с блоками ввода:
+    /** Показывает label-навигацию sidebar для вкладок правой части экрана:
      *  контейнер openPositionEditorNavigation (заголовок + наборы пунктов) показывается для
      *  вкладок в TABS_WITH_SIDEBAR_NAVIGATION; на этих вкладках показывается набор активной
      *  вкладки и подсвечивается его первый пункт. */
@@ -711,9 +715,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         openPositionEditorNavigation.setVisible(TABS_WITH_SIDEBAR_NAVIGATION.contains(selectedTabName));
 
-        openPositionMainTabNavigation.setVisible("tabOpenPosition".equals(selectedTabName));
+        openPositionMainTabNavigation.setVisible(false);
         openPositionLaborTabNavigation.setVisible("laborAgreementTab".equals(selectedTabName));
+        openPositionPaymentsTabNavigation.setVisible("tabPayments".equals(selectedTabName));
         openPositionJobDescriptionTabNavigation.setVisible("tabJobDescription".equals(selectedTabName));
+        openPositionFilesTabNavigation.setVisible("tabFiles".equals(selectedTabName));
         openPositionExerciseTabNavigation.setVisible("tabExercise".equals(selectedTabName));
         openPositionMemoTabNavigation.setVisible("tabMemoForInterview".equals(selectedTabName));
         openPositionTemplateLetterTabNavigation.setVisible("tabTemplateLetter".equals(selectedTabName));
@@ -725,12 +731,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         openPositionCommentsTabNavigation.setVisible("commentsTab".equals(selectedTabName));
 
         resetNavigationActiveStyles();
-        if ("tabOpenPosition".equals(selectedTabName)) {
-            activateNavigationItem(openPositionMainTabNavigation, openPositionEditorNavName);
-        } else if ("laborAgreementTab".equals(selectedTabName)) {
+        if ("laborAgreementTab".equals(selectedTabName)) {
             activateNavigationItem(openPositionLaborTabNavigation, openPositionEditorNavLaborAgreement);
+        } else if ("tabPayments".equals(selectedTabName)) {
+            activateNavigationItem(openPositionPaymentsTabNavigation, openPositionEditorNavPaymentsDetail);
         } else if ("tabJobDescription".equals(selectedTabName)) {
             activateNavigationItem(openPositionJobDescriptionTabNavigation, openPositionEditorNavWorkExperience);
+        } else if ("tabFiles".equals(selectedTabName)) {
+            activateNavigationItem(openPositionFilesTabNavigation, openPositionEditorNavFiles);
         } else if ("tabExercise".equals(selectedTabName)) {
             activateNavigationItem(openPositionExerciseTabNavigation, openPositionEditorNavExercise);
         } else if ("tabMemoForInterview".equals(selectedTabName)) {
