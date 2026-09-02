@@ -650,27 +650,34 @@
       max-width: 34px !important;
     }
 
-        // Двухколоночная верстка: каждая колонка строго 50% ширины
-    .edit-workspace-content .v-horizontallayout > .v-expand,
-    .edit-card .v-horizontallayout > .v-expand,
-    .company-requisites-tab .v-horizontallayout > .v-expand {
+    // Vaadin сохраняет inline left/top у слотов hbox после изменения ширины
+    // окна. Внутри workspace возвращаем строки полей в нормальный flex-flow:
+    // на широкой области это две колонки, на узкой - перенос без overflow.
+    .edit-workspace-content .v-horizontallayout > .v-expand {
       box-sizing: border-box !important;
-      min-width: 0 !important;
-      max-width: 50% !important;
-      width: 50% !important;
-      flex: 1 1 50% !important;
-    }
-
-    .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot,
-    .edit-workspace-content .v-horizontallayout > .v-slot,
-    .edit-card .v-horizontallayout > .v-expand > .v-slot,
-    .edit-card .v-horizontallayout > .v-slot,
-    .company-requisites-tab .v-horizontallayout > .v-slot,
-    .company-requisites-tab .v-horizontallayout > .v-expand > .v-slot {
-      box-sizing: border-box !important;
+      display: flex !important;
+      flex: 1 1 100% !important;
+      flex-wrap: wrap !important;
+      gap: 10px 14px !important;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
+      height: auto !important;
+      position: static !important;
+    }
+
+    .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot {
+      box-sizing: border-box !important;
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      flex: 1 1 240px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
     }
 
     // Резиновая верстка тулбара реквизитов и перенос длинных подсказок
@@ -1086,353 +1093,23 @@
     }
 
     #editActions,
-        .edit-footer-actions {
-          box-sizing: border-box !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          min-width: 0 !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: flex-end !important;
-          gap: 8px !important;
-          padding: 10px 16px !important;
+    .edit-footer-actions {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 8px !important;
+      padding: 10px 16px !important;
 
-          #bottomActionsGroup {
-            box-sizing: border-box !important;
-            display: flex !important;
-            gap: 8px !important;
-          }
-        }
-
-        // =============================================================================
-        // RESPONSIVE BREAKPOINTS — адаптивная верстка CompanyEdit для всех экранов
-        // =============================================================================
-
-        // ≥ 1920px (Ultra-wide): центрированный контент с max-width 1600px, padding 24px
-        @media (min-width: 1920px) {
-          .edit-workspace-content {
-            max-width: 1600px !important;
-            margin: 0 auto !important;
-            padding: 0 24px !important;
-          }
-          .edit-workspace-scroll,
-          .edit-workspace {
-            max-width: 1600px !important;
-            margin: 0 auto !important;
-          }
-        }
-
-        // 1440–1919px (Large desktop): полная ширина с padding 20px
-        @media (max-width: 1919px) and (min-width: 1440px) {
-          .edit-workspace-content {
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 20px !important;
-          }
-          .edit-workspace-scroll,
-          .edit-workspace {
-            max-width: 100% !important;
-            margin: 0 !important;
-          }
-        }
-
-        // 1366–1439px (Standard laptop): sidebar 290px, padding 16px
-        @media (max-width: 1439px) and (min-width: 1366px) {
-          .edit-sidebar,
-          .v-slot-edit-sidebar {
-            width: 290px !important;
-            min-width: 290px !important;
-            max-width: 290px !important;
-          }
-          .edit-workspace-content {
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 16px !important;
-          }
-          .edit-workspace-scroll,
-          .edit-workspace {
-            max-width: calc(100% - 290px) !important;
-            margin: 0 !important;
-          }
-          .edit-screen-layout > .v-slot:first-child,
-          .edit-screen-layout > .v-slot-edit-sidebar {
-            flex: 0 0 290px !important;
-            width: 290px !important;
-            min-width: 290px !important;
-            max-width: 290px !important;
-          }
-          .edit-screen-layout > .v-expand,
-          .edit-screen-layout > .v-slot:last-child,
-          .edit-screen-layout > .v-slot-edit-workspace {
-            max-width: calc(100% - 290px) !important;
-          }
-        }
-
-        // 1024–1365px (Small laptop / tablet landscape): sidebar 270px, compact padding 12px
-        @media (max-width: 1365px) and (min-width: 1024px) {
-          .edit-sidebar,
-          .v-slot-edit-sidebar {
-            width: 270px !important;
-            min-width: 270px !important;
-            max-width: 270px !important;
-          }
-          .edit-workspace-content {
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 12px !important;
-          }
-          .edit-workspace-scroll,
-          .edit-workspace {
-            max-width: calc(100% - 270px) !important;
-            margin: 0 !important;
-          }
-          .edit-screen-layout > .v-slot:first-child,
-          .edit-screen-layout > .v-slot-edit-sidebar {
-            flex: 0 0 270px !important;
-            width: 270px !important;
-            min-width: 270px !important;
-            max-width: 270px !important;
-          }
-          .edit-screen-layout > .v-expand,
-          .edit-screen-layout > .v-slot:last-child,
-          .edit-screen-layout > .v-slot-edit-workspace {
-            max-width: calc(100% - 270px) !important;
-          }
-          // Уплотнение карточек
-          .edit-card .v-groupbox-content {
-            padding: 8px 12px !important;
-          }
-          .v-horizontallayout > .v-slot,
-          .v-horizontallayout > .v-expand {
-            flex: 1 1 200px !important;
-            gap: 8px 10px !important;
-          }
-        }
-
-        // ≤ 1023px (Mobile / narrow): sidebar сверху (horizontal), полная ширина вкладок
-        @media (max-width: 1023px) {
-          .edit-screen-layout,
-          #companyEditorMainLayout {
-            flex-direction: column !important;
-          }
-          .edit-sidebar,
-          .v-slot-edit-sidebar {
-            width: 100% !important;
-            max-width: 100% !important;
-            min-width: 0 !important;
-            height: auto !important;
-            min-height: 0 !important;
-            max-height: 320px !important;
-            flex: 0 0 auto !important;
-          }
-          .edit-screen-layout > .v-slot:first-child,
-          .edit-screen-layout > .v-slot-edit-sidebar {
-            flex: 0 0 auto !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            max-height: 320px !important;
-          }
-          .edit-screen-layout > .v-expand,
-          .edit-screen-layout > .v-slot:last-child,
-          .edit-screen-layout > .v-slot-edit-workspace {
-            flex: 1 1 auto !important;
-            max-width: 100% !important;
-            width: 100% !important;
-          }
-          .edit-workspace,
-          .edit-workspace-scroll,
-          #companyEditorWorkspace {
-            max-width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-          }
-          .edit-workspace-content {
-            padding: 0 12px !important;
-          }
-          // Sidebar: горизонтальный флекс для логотипа + навигации
-          .companySidebarScrollContent {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            gap: 12px !important;
-            align-items: flex-start !important;
-            padding-bottom: 8px !important;
-          }
-          .edit-sidebar-visual {
-            flex: 0 0 auto !important;
-            width: auto !important;
-            min-width: 80px !important;
-          }
-          .companyLogoPicBox {
-            width: 120px !important;
-            height: 120px !important;
-          }
-          .company-editor-logo-image,
-          .company-editor-logo-image img {
-            width: 120px !important;
-            height: 120px !important;
-          }
-          .edit-sidebar-identity {
-            flex: 1 1 200px !important;
-            min-width: 200px !important;
-            align-items: flex-start !important;
-          }
-          .edit-sidebar-summary {
-            flex: 1 1 250px !important;
-            min-width: 250px !important;
-          }
-          .label-navigation {
-            flex: 1 1 100% !important;
-            width: 100% !important;
-            order: 3 !important;
-          }
-          .label-nav-item {
-            display: inline-flex !important;
-            width: auto !important;
-            min-width: auto !important;
-            margin: 0 4px 0 0 !important;
-            border-left: none !important;
-            border-bottom: 3px solid transparent !important;
-            border-radius: 5px 5px 0 0 !important;
-            padding: 4px 10px !important;
-          }
-          .label-nav-item-active {
-            border-bottom-color: #ffb11b !important;
-            border-left-color: transparent !important;
-          }
-          .edit-sidebar-spacer {
-            display: none !important;
-          }
-          .edit-sidebar-hint {
-            order: 4 !important;
-            width: 100% !important;
-            text-align: center !important;
-          }
-          // Toolbar
-          .edit-toolbar {
-            flex-wrap: wrap !important;
-            gap: 6px !important;
-          }
-          .edit-toolbar-title {
-            font-size: 18px !important;
-          }
-          .edit-toolbar-description {
-            font-size: 11px !important;
-          }
-          // Карточки: поля в колонку
-          .v-horizontallayout {
-            flex-direction: column !important;
-          }
-          .v-horizontallayout > .v-slot,
-          .v-horizontallayout > .v-expand {
-            flex: 1 1 100% !important;
-            max-width: 100% !important;
-            width: 100% !important;
-          }
-          // Footer
-          .edit-footer-actions {
-            padding: 8px 12px !important;
-          }
-        }
-
-        // ≤ 800px height (low viewport): compact vertical spacing
-        @media (max-height: 800px) {
-          .edit-sidebar {
-            padding: 10px 12px 8px !important;
-          }
-          .edit-sidebar-title {
-            font-size: 16px !important;
-            line-height: 22px !important;
-            margin-bottom: 4px !important;
-          }
-          .edit-sidebar-visual {
-            min-height: 80px !important;
-          }
-          .companyLogoPicBox {
-            width: 112px !important;
-            height: 112px !important;
-          }
-          .company-editor-logo-image,
-          .company-editor-logo-image img {
-            width: 112px !important;
-            height: 112px !important;
-          }
-          .edit-sidebar-visual .c-fileupload .v-button,
-          .edit-sidebar-visual .c-fileupload-clear {
-            width: 88px !important;
-            min-width: 88px !important;
-            height: 32px !important;
-            min-height: 32px !important;
-            font-size: 13px !important;
-            line-height: 30px !important;
-          }
-          #enhanceCompanyLogoBtn,
-          .enhance-company-logo-btn {
-            min-height: 32px !important;
-            font-size: 12px !important;
-            line-height: 30px !important;
-          }
-          .edit-sidebar-summary {
-            padding: 6px 8px !important;
-            margin: 4px 0 !important;
-          }
-          .label-nav-title {
-            min-height: 32px !important;
-            padding: 5px 8px !important;
-            font-size: 14px !important;
-            line-height: 20px !important;
-          }
-          .label-nav-item {
-            min-height: 24px !important;
-            padding: 2px 8px !important;
-            font-size: 12px !important;
-            line-height: 18px !important;
-          }
-          .edit-toolbar {
-            padding: 6px 8px !important;
-          }
-          .edit-toolbar-title {
-            font-size: 18px !important;
-          }
-          .edit-toolbar-description {
-            font-size: 11px !important;
-          }
-          .edit-workspace-content {
-            padding: 0 10px !important;
-          }
-          .edit-card .v-groupbox-content {
-            padding: 8px 10px !important;
-          }
-          .v-horizontallayout {
-            gap: 6px 8px !important;
-          }
-          .edit-form-control,
-          .v-textfield,
-          .v-filterselect,
-          .c-pickerfield {
-            height: 34px !important;
-            min-height: 34px !important;
-            font-size: 14px !important;
-            line-height: 32px !important;
-          }
-          .v-textarea {
-            padding: 6px 8px !important;
-          }
-          .edit-footer-actions {
-            min-height: 54px !important;
-            padding: 8px 10px !important;
-          }
-          .edit-footer-actions .v-button {
-            min-height: 36px !important;
-            font-size: 13px !important;
-          }
-          // RichTextArea
-          .v-richtextarea,
-          .v-richtextarea-content,
-          .v-richtextarea iframe {
-            font-size: 14px !important;
-            line-height: 1.4 !important;
-          }
-        }
+      #bottomActionsGroup {
+        box-sizing: border-box !important;
+        display: flex !important;
+        gap: 8px !important;
       }
     }
+
+  }
 }

@@ -650,27 +650,34 @@
       max-width: 34px !important;
     }
 
-        // Двухколоночная верстка: каждая колонка строго 50% ширины
-    .edit-workspace-content .v-horizontallayout > .v-expand,
-    .edit-card .v-horizontallayout > .v-expand,
-    .company-requisites-tab .v-horizontallayout > .v-expand {
+    // Vaadin сохраняет inline left/top у слотов hbox после изменения ширины
+    // окна. Внутри workspace возвращаем строки полей в нормальный flex-flow:
+    // на широкой области это две колонки, на узкой - перенос без overflow.
+    .edit-workspace-content .v-horizontallayout > .v-expand {
       box-sizing: border-box !important;
-      min-width: 0 !important;
-      max-width: 50% !important;
-      width: 50% !important;
-      flex: 1 1 50% !important;
-    }
-
-    .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot,
-    .edit-workspace-content .v-horizontallayout > .v-slot,
-    .edit-card .v-horizontallayout > .v-expand > .v-slot,
-    .edit-card .v-horizontallayout > .v-slot,
-    .company-requisites-tab .v-horizontallayout > .v-slot,
-    .company-requisites-tab .v-horizontallayout > .v-expand > .v-slot {
-      box-sizing: border-box !important;
+      display: flex !important;
+      flex: 1 1 100% !important;
+      flex-wrap: wrap !important;
+      gap: 10px 14px !important;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
+      height: auto !important;
+      position: static !important;
+    }
+
+    .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot {
+      box-sizing: border-box !important;
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      flex: 1 1 240px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
     }
 
     // Резиновая верстка тулбара реквизитов и перенос длинных подсказок
