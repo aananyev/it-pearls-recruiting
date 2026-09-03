@@ -379,6 +379,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CollectionLoader<SomeFilesOpenPosition> someFilesesDl;
     @Inject
+    private Table<SomeFilesOpenPosition> someFilesTable;
+    @Inject
+    private CheckBox needLetterCheckBox;
+    @Inject
     private ProcActionsFragment procActionsFragment;
     @Inject
     private LookupPickerField<Grade> gradeLookupPickerField;
