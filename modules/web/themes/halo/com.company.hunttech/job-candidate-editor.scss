@@ -1140,6 +1140,20 @@
     text-align: center !important;
   }
 
+  /* Чип приоритета навыка в шапке сайдбара (SkillTreeReestrBrowse):
+     компактная пилюля в акцентном цвете темы. */
+  .skill-tree-reestr-priority-chip,
+  .job-candidate-sidebar .skill-tree-reestr-priority-chip {
+    display: inline-block !important;
+    width: auto !important;
+    padding: 3px 10px !important;
+    border-radius: 12px !important;
+    background: rgba($v-selection-color, 0.12) !important;
+    color: $v-selection-color !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
+
   /* =========================================================================
    * Реестр кандидатов (JobCandidateReestr): блок фильтров сверху экрана
    * ========================================================================= */

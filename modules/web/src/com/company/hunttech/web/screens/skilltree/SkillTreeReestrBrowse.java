@@ -89,7 +89,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
     }
 
     private void setupTableColumns() {
-        // Превью логотипа навыка в колонке «Логотип» (по эталону CityReestrBrowse).
+        // Превью логотипа навыка в колонке «Лого» (по эталону CityReestrBrowse).
         skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", skill -> {
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
             box.setWidthFull();
@@ -112,6 +112,9 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
             box.add(image);
             return box;
         });
+        // Центрирование сгенерированной колонки (align="CENTER" из XML не применяется к generated column).
+        skillTreesTreeTable.getColumn("skillLogoColumn")
+                .setAlignment(Table.ColumnAlignment.CENTER);
     }
 
     private void setupTableSelection() {

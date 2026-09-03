@@ -1034,6 +1034,18 @@
       min-height: 38px !important;
       height: auto !important;
     }
+
+    /* Групповые строки CUBA GroupTable: заголовок группы (навык-родитель) —
+       полужирный 13px, как заголовки таблиц реестров; expander групповой ячейки
+       (c-grouptable-group-cell-expander, CubaGroupTableWidget) с отступом. */
+    .v-table-caption-container {
+      font-weight: 600 !important;
+      font-size: 13px !important;
+    }
+
+    .c-grouptable-group-cell-expander {
+      padding-right: 6px !important;
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
