@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Реестр компетенций (SkillTreeReestrBrowse) — двухпанельный экран по контракту HRM реестров.
+     Левая панель (312px): TreeTable для иерархии SkillTree (parent-child).
+     Правая панель: детали узла (sidebar по эталону CandidateCVReestrBrowse — аватар 120px, 4 уровня типографики,
+     быстрые действия, реквизиты, чипы навыков).
+     Командный тулбар: Создать, Редактировать, Удалить, Фильтр (collapsable).
+     Адаптивность под 7 тем (hunttech-modern, hunttech-modern-dark, hunttech-modern-light, halo, havana, helium, hover). -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://skillTreeReestrCaption"
+        focusComponent="skillTreesTreeTable"
+        messagesPack="com.company.hunttech.web.screens.skilltree"
+        icon="CODE_FORK">
+    <data readOnly="true">
+        <!-- Коллекция навыков для дерева (иерархия через skillTree parent) -->
+        <collection id="skillTreesDc"
+                    class="com.company.hunttech.entity.SkillTree"
+                    view="skillTree-reestr-browse-view">
+            <loader id="skillTreesDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_SkillTree e
+                    order by e.skillTree.skillName nulls first, e.skillName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="750" width="1200"/>
+
+    <!-- Корневой layout: двухпанельная композиция (Split View) -->
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%"
+            stylename="skill-tree-reestr-edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true"
+              expand="workspaceBox" stylename="skill-tree-reestr-main-layout edit-screen-layout">
+
+            <!-- ЛЕВЫЙ САЙДБАР (312px) — TreeTable/Tree для иерархии SkillTree -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true"
+                  stylename="skill-tree-reestr-sidebar edit-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+
+                        <!-- Шапка профиля узла (аналог candidate-cv-reestr-browse: ovaFallbackImage 120px, 4 уровня типографики) -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER"
+                              stylename="skill-tree-reestr-profile-header edit-sidebar-visual">
+                            <!-- Круглый аватар/логотип навыка 120x120 -->
+                            <ovaFallbackImage id="skillLogoPic" width="120px" height="120px"
+                                              ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="skill-tree-reestr-avatar job-candidate-avatar"
+                                              fallbackThemePath="icons/no-programmer.jpeg"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <!-- Уровень 1: Название навыка (h2) -->
+                                <label id="detailSkillName" value="Выберите компетенцию"
+                                       width="100%" stylename="edit-sidebar-title h2 skill-tree-reestr-sidebar-fullname"
+                                       align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <!-- Уровень 2: Специализация (h4) -->
+                                <label id="detailSpecialisation" value="—"
+                                       width="100%" stylename="edit-sidebar-subtitle h4 skill-tree-reestr-sidebar-position"
+                                       align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <!-- Уровень 3: Родительский навык (help) -->
+                                <label id="detailParentSkill" value="—"
+                                       width="100%" stylename="edit-help skill-tree-reestr-sidebar-city"
+                                       align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <!-- Уровень 4: Приоритет (badge/чип) -->
+                                <label id="detailPriority" value="—"
+                                       width="100%" stylename="skill-tree-reestr-priority-chip"
+                                       align="MIDDLE_CENTER" htmlEnabled="true"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки быстрых действий сайдбара -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true"
+                              stylename="edit-sidebar-summary skill-tree-reestr-sidebar-actions">
+                            <button id="openEditCardBtn" caption="Открыть карточку" icon="EDIT_ACTION"
+                                    stylename="primary skill-tree-reestr-sidebar-btn" enabled="false" width="100%"/>
+                            <button id="createChildBtn" caption="Создать дочерний навык" icon="PLUS"
+                                    stylename="secondary skill-tree-reestr-sidebar-btn" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция: Реквизиты навыка (grid 2 колонки, по эталону city-reestr-browse) -->
+                        <vbox id="requisitesCard" width="100%" spacing="true"
+                              stylename="job-candidate-navigation label-navigation skill-tree-reestr-nav-section">
+                            <label value="РЕКВИЗИТЫ НАВЫКА" width="100%"
+                                   stylename="label-nav-title job-candidate-section-title skill-tree-reestr-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="requisitesGrid" spacing="true" width="100%"
+                                  stylename="edit-sidebar-summary skill-tree-reestr-grid">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Название:" stylename="bold"/><label id="detailSkillNameVal" value="—"/></row>
+                                    <row><label value="Специализация:" stylename="bold"/><label id="detailSpecialisationVal" value="—"/></row>
+                                    <row><label value="Родительский навык:" stylename="bold"/><label id="detailParentSkillVal" value="—"/></row>
+                                    <row><label value="Приоритет:" stylename="bold"/><label id="detailPriorityVal" value="—"/></row>
+                                    <row><label value="Wiki страница:" stylename="bold"/><label id="detailWikiPageVal" value="—" htmlEnabled="true"/></row>
+                                    <row><label value="CSS стиль:" stylename="bold"/><label id="detailStyleHighlightingVal" value="—"/></row>
+                                    <row><label value="Исключить из парсинга:" stylename="bold"/><label id="detailNotParsingVal" value="—"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Описание навыка (comment) -->
+                        <vbox id="descriptionCard" width="100%" spacing="true"
+                              stylename="job-candidate-navigation label-navigation skill-tree-reestr-nav-section">
+                            <label value="ОПИСАНИЕ НАВЫКА" width="100%"
+                                   stylename="label-nav-title job-candidate-section-title skill-tree-reestr-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <label id="detailComment" htmlEnabled="true" width="100%"
+                                   stylename="edit-help skill-tree-reestr-description"/>
+                        </vbox>
+
+                        <!-- Секция: Чипы навыков (дети текущего узла) -->
+                        <vbox id="childrenSkillsCard" width="100%" spacing="true"
+                              stylename="job-candidate-navigation label-navigation skill-tree-reestr-nav-section">
+                            <label value="ДОЧЕРНИЕ НАВЫКИ" width="100%"
+                                   stylename="label-nav-title job-candidate-section-title skill-tree-reestr-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <flowBox id="childrenSkillsChips" width="100%" spacing="true"
+                                     stylename="skill-tree-reestr-chips-container"/>
+                        </vbox>
+
+                        <!-- Секция: Логотип навыка (крупный) -->
+                        <vbox id="logoCard" width="100%" spacing="true"
+                              stylename="job-candidate-navigation label-navigation skill-tree-reestr-nav-section">
+                            <label value="ЛОГОТИП НАВЫКА" width="100%"
+                                   stylename="label-nav-title job-candidate-section-title skill-tree-reestr-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <vbox id="logoContainer" width="100%" spacing="true" align="MIDDLE_CENTER">
+                                <ovaFallbackImage id="detailLogoImage" width="140px" height="140px"
+                                                  ovalWidth="140px" ovalHeight="140px"
+                                                  align="MIDDLE_CENTER"
+                                                  stylename="skill-tree-reestr-logo-image dictionary-logo-image"
+                                                  fallbackThemePath="icons/no-programmer.jpeg"
+                                                  scaleMode="SCALE_DOWN"/>
+                            </vbox>
+                        </vbox>
+
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ — TreeTable иерархии -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true"
+                  stylename="edit-workspace skill-tree-reestr-workspace" expand="tableCard"
+                  margin="true,true,true,false">
+
+                <!-- Командный тулбар (адаптивный, по эталону OpenPositionReestrBrowse/ProjectReestrBrowse) -->
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card skill-tree-reestr-filter-bar">
+                    <!-- Левая группа: основные действия -->
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
+                        <button id="createBtn" caption="Создать" icon="CREATE_ACTION"
+                                stylename="primary candidate-btn candidate-create-btn"
+                                action="skillTreesTreeTable.create"/>
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION"
+                                stylename="secondary candidate-btn candidate-edit-btn"
+                                action="skillTreesTreeTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION"
+                                stylename="secondary candidate-btn candidate-remove-btn"
+                                action="skillTreesTreeTable.remove"/>
+                    </cssLayout>
+
+                    <!-- Правая группа: действия -->
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" showActionIcons="true"
+                                     stylename="primary candidate-btn">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
+                                <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                                <action id="expandAllAction" caption="Развернуть всё" icon="font-icon:EXPAND"/>
+                                <action id="collapseAllAction" caption="Свернуть всё" icon="font-icon:COMPRESS"/>
+                            </actions>
+                        </popupButton>
+                    </cssLayout>
+                </cssLayout>
+
+                <!-- Generic Filter (collapsable, collapsed по умолчанию) -->
+                <filter id="filter"
+                        applyTo="skillTreesTreeTable"
+                        dataLoader="skillTreesDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="skill-tree-reestr-generic-filter candidate-generic-filter">
+                    <properties include=".*"
+                                excludeProperties="openPosition,candidates,candidateCV,fileImageLogo,styleHighlighting,notParsing,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка TreeTable с rowsCount -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false"
+                      stylename="edit-card skill-tree-reestr-table-card" expand="skillTreesTreeTable">
+                    <!-- TreeTable для иерархии (hierarchyProperty = skillTree) -->
+                    <treeDataGrid id="skillTreesTreeTable"
+                                  width="100%"
+                                  height="100%"
+                                  dataContainer="skillTreesDc"
+                                  hierarchyProperty="skillTree"
+                                  stylename="borderless grid skill-tree-reestr-grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excel"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <!-- Превью логотипа навыка (генерируется контроллером) -->
+                            <column id="skillLogoColumn" caption="Логотип" width="60px" sortable="false"/>
+                            <!-- Иерархическая колонка с названием навыка -->
+                            <column id="skillName" property="skillName"
+                                    caption="msg://msgSkill" expandRatio="3" minWidth="250px"/>
+                            <!-- Специализация -->
+                            <column id="specialisation" property="specialisation.specRuName"
+                                    caption="msg://msgSpecialisation" width="200px"/>
+                            <!-- Родительский навык (отображается только для дочерних) -->
+                            <column id="skillTree" property="skillTree.skillName"
+                                    caption="msg://msgSkillTree" width="200px"/>
+                            <!-- Wiki страница -->
+                            <column id="wikiPage" property="wikiPage"
+                                    caption="msg://msgWikiPage" width="180px"/>
+                            <!-- Приоритет навыка -->
+                            <column id="prioritySkill" property="prioritySkill"
+                                    caption="msg://msgPrioritySkill" width="100px" align="CENTER"/>
+                            <!-- Флаг исключения из парсинга -->
+                            <column id="notParsing" property="notParsing"
+                                    caption="msg://msgNotParsing" width="120px" align="CENTER"/>
+                        </columns>
+                        <rowsCount/>
+                    </treeDataGrid>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

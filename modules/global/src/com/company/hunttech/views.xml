@@ -588,6 +588,19 @@
         <property name="wikiPage"/>
         <property name="prioritySkill"/>
     </view>
+    <!-- Реестр компетенций (SkillTreeReestrBrowse): дерево + сайдбар деталей узла.
+         Все геттеры, используемые контроллером, декларированы здесь (Data View Integrity). -->
+    <view entity="hunttech_SkillTree" name="skillTree-reestr-browse-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="wikiPage"/>
+        <property name="prioritySkill"/>
+        <property name="notParsing"/>
+        <property name="styleHighlighting"/>
+        <property name="comment"/>
+        <property name="fileImageLogo" view="_minimal"/>
+    </view>
     <view entity="hunttech_SkillTree" name="skillTree-edit-view" extends="_minimal">
         <property name="skillName"/>
         <property name="wikiPage"/>
