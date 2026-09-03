@@ -17,6 +17,8 @@ public final class UserAiContextBuilder {
     private static final int DEFAULT_FIELD_LIMIT = 4000;
     private static final int SHORT_FIELD_LIMIT = 255;
     private static final int TOTAL_CONTEXT_LIMIT = 16000;
+    /** Документированная нижняя граница бюджета hunttech.ai.userContextLimit (план §6.2). */
+    private static final int MIN_TOTAL_CONTEXT_LIMIT = 4000;
 
     private UserAiContextBuilder() {
     }
@@ -140,14 +142,11 @@ public final class UserAiContextBuilder {
     }
 
     /**
-     * Клампит запрошенный бюджет в допустимый диапазон: не выше жёсткого
-     * {@link #TOTAL_CONTEXT_LIMIT}, не ниже нижней границы свойства (4000).
+     * Клампит запрошенный бюджет: жёсткий верхний предел {@link #TOTAL_CONTEXT_LIMIT},
+     * нижняя граница — {@link #MIN_TOTAL_CONTEXT_LIMIT} (документированный диапазон 4000–6000).
      */
     private static int resolveEffectiveLimit(int requestedLimit) {
-        if (requestedLimit <= 0) {
-            return DEFAULT_FIELD_LIMIT;
-        }
-        return Math.min(requestedLimit, TOTAL_CONTEXT_LIMIT);
+        return Math.max(MIN_TOTAL_CONTEXT_LIMIT, Math.min(requestedLimit, TOTAL_CONTEXT_LIMIT));
     }
 
     // Очищает пользовательский текст от управляющих символов и нормализует пробелы.

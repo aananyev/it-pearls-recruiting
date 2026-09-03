@@ -158,9 +158,10 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         }
 
         try {
-            // Тот же лимит, что и при фактическом исполнении (UserAiContextServiceBean.
-            // resolveConfiguredLimit) — консистентность «факт = preview» (план §6.2).
-            int limit = configuration.getConfig(HunttechAiPersonalizationConfig.class).getUserContextLimit();
+            // Тот же единый резолв лимита, что и при фактическом исполнении
+            // (HunttechAiPersonalizationConfig.getUserContextLimitOrDefault) —
+            // консистентность «факт = preview» (план §6.2).
+            int limit = configuration.getConfig(HunttechAiPersonalizationConfig.class).getUserContextLimitOrDefault();
             aiContextPreviewArea.setValue(UserAiContextBuilder.buildPreview(profile, limit));
             previewGroup.setExpanded(true);
             updateUserAiProfileNavigationStyles(userAiProfilePreviewNav);

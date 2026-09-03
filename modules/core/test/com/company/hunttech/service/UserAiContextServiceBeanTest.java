@@ -139,15 +139,16 @@ public class UserAiContextServiceBeanTest {
     public void limitedContext_truncatesByRequestedBudget() {
         UserAiContextServiceBean service = new UserAiContextServiceBean();
         UserAiProfile profile = activeProfile();
-        profile.setAboutMe(repeat("слово ", 1000));
+        profile.setAboutMe(repeat("слово ", 2000));
 
+        // Ниже документированной нижней границы (4000) бюджет клампится к 4000.
         AiUserContext context = UserAiContextBuilder.buildContext(profile, 100);
 
-        // Общий бюджет соблюдён: суммарный размер данных ≤ 100 code points.
         int total = context.getProfileData().values().stream()
                 .mapToInt(v -> v.codePointCount(0, v.length()))
                 .sum();
-        assertTrue(total <= 100);
+        assertTrue(total <= 4000);
+        assertTrue(total > 0);
     }
 
     @Test
@@ -159,8 +160,8 @@ public class UserAiContextServiceBeanTest {
         profile.setCurrentPosition("Руководитель");
         profile.setAboutMe(repeat("слово ", 100));
 
-        AiUserContext context = UserAiContextBuilder.buildContext(profile, 200);
-        String preview = UserAiContextBuilder.buildPreview(profile, 200);
+        AiUserContext context = UserAiContextBuilder.buildContext(profile, 6000);
+        String preview = UserAiContextBuilder.buildPreview(profile, 6000);
 
         for (Map.Entry<String, String> entry : context.getProfileData().entrySet()) {
             assertTrue(preview.contains("- " + entry.getKey() + ": " + entry.getValue()));

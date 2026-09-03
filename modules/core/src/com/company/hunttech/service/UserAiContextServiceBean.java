@@ -40,20 +40,23 @@ public class UserAiContextServiceBean implements UserAiContextService {
 
     @Override
     public String buildContextPreview(UserAiProfile profile) {
-        return UserAiContextBuilder.buildPreview(profile);
+        // Тот же бюджет, что и фактическое исполнение: «факт = preview» (план §6.2).
+        return UserAiContextBuilder.buildPreview(profile, resolveConfiguredLimit());
     }
 
     /**
      * Резолвит {@code hunttech.ai.userContextLimit} через CUBA Config
-     * ({@link HunttechAiPersonalizationConfig}); некорректное (≤ 0) значение даёт дефолт 4000.
-     * Весь блок ограничен сверху жёстким лимитом builder'а (16000), поэтому
-     * чрезмерно большое значение безопасно клампится. Единая точка резолва:
-     * и фактическое исполнение, и UI-предпросмотр обязаны использовать этот метод,
-     * чтобы «факт = preview» (план персонализации §6.2).
+     * ({@link HunttechAiPersonalizationConfig#getUserContextLimitOrDefault()}):
+     * единая точка резолва — и фактическое исполнение, и UI-предпросмотр обязаны
+     * использовать этот метод, чтобы «факт = preview» (план персонализации §6.2).
+     * Весь блок дополнительно ограничен сверху жёстким лимитом builder'а (16000).
      */
     public int resolveConfiguredLimit() {
-        int configured = configuration.getConfig(HunttechAiPersonalizationConfig.class).getUserContextLimit();
-        return configured > 0 ? configured : 4000;
+        if (configuration == null) {
+            // Юнит-тесты создают бин без контейнера: CUBA Config недоступен — дефолт 4000.
+            return 4000;
+        }
+        return configuration.getConfig(HunttechAiPersonalizationConfig.class).getUserContextLimitOrDefault();
     }
 
     /*

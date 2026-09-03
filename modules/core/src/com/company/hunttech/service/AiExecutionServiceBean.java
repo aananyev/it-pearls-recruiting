@@ -406,6 +406,10 @@ public class AiExecutionServiceBean implements AiExecutionService {
         if (function.getIncludeUserContext() != null) {
             return function.getIncludeUserContext();
         }
+        if (function.getCapability() == null) {
+            // Fail-closed: неизвестная capability не получает персонализацию.
+            return false;
+        }
         return function.getCapability() != AiCapability.IMAGE_GENERATION;
     }
 
