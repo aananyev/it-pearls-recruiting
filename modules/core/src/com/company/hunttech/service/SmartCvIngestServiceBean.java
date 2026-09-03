@@ -840,7 +840,7 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
     private Iteraction resolveNewCandidateInteractionType() {
         try {
             List<Iteraction> list = dataManager.load(Iteraction.class)
-                    .query("select e from hunttech_Iteraction e where lower(e.iteractionTree.iteractionRuName) like :name")
+                    .query("select e from hunttech_Iteraction e where lower(e.iteractionTree.iterationName) like :name")
                     .parameter("name", "%новый кандидат%")
                     .view("iteraction-view")
                     .list();

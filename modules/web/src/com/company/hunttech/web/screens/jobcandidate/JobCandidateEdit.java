@@ -2604,7 +2604,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
         try {
             List<IteractionList> list = dataManager.load(IteractionList.class)
-                    .query("select e from hunttech_IteractionList e where e.iteractionType.iteractionTree.iteractionRuName like :name and e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
+                    .query("select e from hunttech_IteractionList e where e.iteractionType.iteractionTree.iterationName like :name and e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
                     .parameter("name", "%Зарплатные ожидания%")
                     .parameter("cand", candidate)
                     .view("iteractionList-view")
