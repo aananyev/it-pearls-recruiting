@@ -113,31 +113,33 @@
             <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
             <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
                 
-                <!-- Командный тулбар -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
-                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                <!-- Командный тулбар (адаптивный, по эталону OpenPositionReestrBrowse) -->
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
+                    <!-- Левая группа: основные действия -->
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createBtn" caption="Создать проект" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="projectsTable.create"/>
-                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="projectsTable.edit"/>
-                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="projectsTable.remove"/>
-                    </hbox>
-                    <hbox id="toolbarSpacer" width="100%"/>
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
-                        <popupButton id="filterPopupButton" caption="С открытыми вакансиями" icon="FILTER" stylename="secondary candidate-btn">
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" action="projectsTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" action="projectsTable.remove"/>
+                    </cssLayout>
+
+                    <!-- Правая группа: фильтры и действия -->
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
+                        <popupButton id="filterPopupButton" caption="С открытыми вакансиями" icon="FILTER" showActionIcons="true" stylename="secondary candidate-btn candidate-filter-scope-btn">
                             <actions>
-                                <action id="filterWithOpenPositions" caption="С открытыми вакансиями"/>
-                                <action id="filterOnlyOpen" caption="Только открытые проекты"/>
-                                <action id="filterAll" caption="Все проекты"/>
+                                <action id="filterWithOpenPositions" caption="С открытыми вакансиями" icon="FILTER"/>
+                                <action id="filterOnlyOpen" caption="Только открытые проекты" icon="ARCHIVE"/>
+                                <action id="filterAll" caption="Все проекты" icon="COMPASS"/>
                             </actions>
                         </popupButton>
-                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" showActionIcons="true" stylename="primary candidate-btn">
                             <actions>
                                 <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
                                 <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
                                 <action id="generateShortDescriptionAction" caption="ИТ-генерация краткого описания" icon="font-icon:MAGIC"/>
                             </actions>
                         </popupButton>
-                    </hbox>
-                </hbox>
+                    </cssLayout>
+                </cssLayout>
 
                 <!-- Generic Filter -->
                 <filter id="filter"
