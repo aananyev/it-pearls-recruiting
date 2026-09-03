@@ -37,7 +37,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
     @Inject
     private Metadata metadata;
     @Inject
-    private TreeDataGrid<SkillTree> skillTreesTreeTable;
+    private GroupTable<SkillTree> skillTreesTreeTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -90,8 +90,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
 
     private void setupTableColumns() {
         // Превью логотипа навыка в колонке «Логотип» (по эталону CityReestrBrowse).
-        skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", event -> {
-            SkillTree skill = event.getItem();
+        skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", skill -> {
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
             box.setWidthFull();
             box.setHeightFull();
@@ -177,6 +176,8 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
 
     @Subscribe(id = "skillTreesDl", target = Target.DATA_LOADER)
     private void onSkillTreesDlPostLoad(CollectionLoader.PostLoadEvent<SkillTree> event) {
+        // Раскрыть все группы родительских навыков по умолчанию (видимая иерархия).
+        skillTreesTreeTable.expandAll();
         SkillTree current = skillTreesTreeTable.getSingleSelected();
         if (current != null) {
             updateSidebarDetails(current);

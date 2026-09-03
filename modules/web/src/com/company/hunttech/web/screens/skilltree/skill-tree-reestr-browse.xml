@@ -178,12 +178,11 @@
                 <vbox id="tableCard" width="100%" height="100%" spacing="false"
                       stylename="edit-card candidate-table-card skill-tree-reestr-table-card" expand="skillTreesTreeTable">
                     <!-- TreeTable для иерархии (hierarchyProperty = skillTree) -->
-                    <treeDataGrid id="skillTreesTreeTable"
-                                  width="100%"
-                                  height="100%"
-                                  dataContainer="skillTreesDc"
-                                  hierarchyProperty="skillTree"
-                                  stylename="borderless grid skill-tree-reestr-grid candidate-browse-grid">
+                    <groupTable id="skillTreesTreeTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="skillTreesDc"
+                                stylename="borderless grid skill-tree-reestr-grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -192,17 +191,19 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
+                            <!-- Иерархическая группа: родительский навык (раскрывающиеся группы, как в legacy SkillTreeBrowse) -->
+                            <group>
+                                <column id="skillTree" property="skillTree.skillName"
+                                        caption="msg://msgSkillTree" minWidth="250px" expandRatio="2"/>
+                            </group>
                             <!-- Превью логотипа навыка (генерируется контроллером) -->
                             <column id="skillLogoColumn" caption="Логотип" width="60px" sortable="false"/>
-                            <!-- Иерархическая колонка с названием навыка -->
+                            <!-- Название навыка -->
                             <column id="skillName" property="skillName"
                                     caption="msg://msgSkill" expandRatio="3" minWidth="250px"/>
                             <!-- Специализация -->
                             <column id="specialisation" property="specialisation.specRuName"
                                     caption="msg://msgSpecialisation" width="200px"/>
-                            <!-- Родительский навык (отображается только для дочерних) -->
-                            <column id="skillTree" property="skillTree.skillName"
-                                    caption="msg://msgSkillTree" width="200px"/>
                             <!-- Wiki страница -->
                             <column id="wikiPage" property="wikiPage"
                                     caption="msg://msgWikiPage" width="180px"/>
@@ -214,7 +215,7 @@
                                     caption="msg://msgNotParsing" width="120px" align="CENTER"/>
                         </columns>
                         <rowsCount/>
-                    </treeDataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>
