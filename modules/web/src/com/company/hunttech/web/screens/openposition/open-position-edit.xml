@@ -450,246 +450,76 @@
                    height="AUTO"
                    stylename="open-position-editor-sidebar-value"/>
         </vbox>
-        <!-- Label-навигация разделов активной вкладки: контейнер целиком скрывается на вкладках
-             с единственным блоком ввода (см. Java syncSidebarNavigation, TABS_WITH_SIDEBAR_NAVIGATION);
-             на вкладках с двумя и более блоками показывается набор пунктов активной вкладки.
-             Кнопки без invoke (Java READ_ONLY) — только presentation, по §3.5 общего контракта. -->
+        <!-- Единая label-навигация по вкладкам tabSheetOpenPosition: пункты повторяют заголовки вкладок
+             в том же порядке. При клике переключается на соответствующую вкладку и фокусируется
+             первый элемент ввода вкладки (для вкладок без полей ввода — только подсветка).
+             Скрытая вкладка tabPayments исключена из навигации. -->
         <vbox id="openPositionEditorNavigation"
               width="100%"
               spacing="false"
               stylename="label-navigation">
-            <!-- Заголовок навигационного набора «РАЗДЕЛЫ АКТИВНОЙ ВКЛАДКИ»: стиль карточки
-                 «Информация» (полоса с фоном и разделителем снизу), статический. -->
-            <label id="openPositionEditorNavActiveSectionsLabel"
-                   value="mainMsg://openPositionEditorNavActiveSections"
+            <!-- Заголовок навигации «ВКЛАДКИ ФОРМЫ»: стиль карточки «Информация». -->
+            <label id="openPositionEditorNavTabsLabel"
+                   value="mainMsg://openPositionEditorNavTabs"
                    width="100%"
                    stylename="label-nav-title open-position-editor-section-title"/>
-            <!-- Набор пунктов вкладки «Вакансия» (tabOpenPosition): пять разделов основной
-                 вкладки; виден по умолчанию, показывается при переключении на вкладку. -->
-            <vbox id="openPositionMainTabNavigation"
+            <!-- Единый список пунктов навигации 1:1 с видимыми вкладками tabSheetOpenPosition. -->
+            <vbox id="openPositionTabNavigation"
                   width="100%"
                   spacing="false">
-                <!-- Пункт «Наименование» — label-навигация блока «Наименование» (ID, грейд, название, «Генерировать»):
-                     клик подсвечивает пункт и переводит фокус в ID (начало блока). -->
-                <button id="openPositionEditorNavName"
-                        caption="mainMsg://msgName"
+                <!-- Вкладка «Вакансия» (tabOpenPosition). -->
+                <button id="navTabOpenPosition"
+                        caption="msg://msgVacansy"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-                <!-- Пункт «Параметры вакансии» — label-навигация блока openPositionParamsGroupBox
-                     (приоритет, удалёнка, дата закрытия, комментарий): клик подсвечивает пункт
-                     и переводит фокус в поле приоритета (начало блока). -->
-                <button id="openPositionEditorNavParams"
-                        caption="msg://msgVacancyParams"
+                <!-- Вкладка «Трудовой договор» (laborAgreementTab). -->
+                <button id="navTabLaborAgreement"
+                        caption="msg://msgLaborAgreementTab"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-                <!-- Пункт «Вакансия» — label-навигация карточки «Вакансия» (приоритет, должность, проект,
-                     компания, департамент, город): клик подсвечивает пункт и переводит фокус
-                     в поле должности (начало карточки). -->
-                <button id="openPositionEditorNavVacancy"
-                        caption="mainMsg://openPositionEditorNavVacancy"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Команда» — label-навигация блока «Команда / Вакансия» (commandOrVacancyGroupBox):
-                     клик подсвечивает пункт и переводит фокус в radio «Команда/Вакансия». -->
-                <button id="openPositionEditorNavTeam"
-                        caption="msg://msgCommand"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Зарплатное предложение» — label-навигация блока salaryGroupBox
-                     (клик подсвечивает пункт и переводит фокус в поле минимальной зарплаты). -->
-                <button id="openPositionEditorNavSalary"
-                        caption="msg://msgSalaryProposal"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор пунктов вкладки «Трудовой договор» (laborAgreementTab): секция соглашений
-                 и детали оплаты; секции «Оплата ресерчерам/рекрутерам» содержат только label
-                 (без полей ввода) и в навигацию не включены. -->
-            <vbox id="openPositionLaborTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Трудовой договор» — label-навигация секции laborAgreementGroupBox
-                     (тип регистрации, стоимость аутстафа, таблица соглашений): клик подсвечивает
-                     пункт и переводит фокус в тип регистрации (начало секции). -->
-                <button id="openPositionEditorNavLaborAgreement"
-                        caption="msg://msgLaborAgreement"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Детали оплаты» — label-навигация секции groupBoxPaymentsDetail
-                     (тип комиссии, НДФЛ, проценты/суммы): клик подсвечивает пункт и переводит
-                     фокус в тип комиссии компании (начало секции). -->
-                <button id="openPositionEditorNavPaymentsDetail"
-                        caption="msg://openPositionEditorNavPaymentsDetail"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Оплата» (tabPayments): детали оплаты ресерчера и рекрутера. -->
-            <vbox id="openPositionPaymentsTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Детали оплаты» — label-навигация секции groupBoxPaymentsDetail
-                     (тип комиссии, НДФЛ, проценты/суммы): клик подсвечивает пункт и переводит
-                     фокус в тип комиссии компании (начало секции). -->
-                <button id="openPositionEditorNavPaymentsDetail"
-                        caption="msg://openPositionEditorNavPaymentsDetail"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор пунктов вкладки «Описание должности» (tabJobDescription): опыт работы,
-                 аккордеон описаний и короткое описание. -->
-            <vbox id="openPositionJobDescriptionTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Опыт работы» — label-навигация секции workExperienceGroupBox: клик
-                     подсвечивает пункт и переводит фокус в радио выбора опыта (начало секции). -->
-                <button id="openPositionEditorNavWorkExperience"
-                        caption="msg://openPositionEditorNavWorkExperience"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Описание должности» — label-навигация аккордеона описаний
-                     (descriptionsAccordionHBox): клик подсвечивает пункт и переводит фокус
-                     в русский редактор описания (первый элемент блока). -->
-                <button id="openPositionEditorNavDescription"
+                <!-- Вкладка «Описание вакансии» (tabJobDescription). -->
+                <button id="navTabJobDescription"
                         caption="mainMsg://msgJobDescription"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-                <!-- Пункт «Краткое описание» — label-навигация ряда shortDescriptionHBox: клик
-                     подсвечивает пункт и переводит фокус в поле короткого описания. -->
-                <button id="openPositionEditorNavShortDescription"
-                        caption="msg://openPositionEditorNavShortDescription"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Файлы» (tabFiles): единственный раздел — таблица файлов позиции;
-                 набор никогда не показывается (вкладка с одним блоком ввода — навигация скрыта),
-                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionFilesTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Файлы» — label-навигация таблицы someFilesTable: клик подсвечивает
-                     пункт и переводит фокус на таблицу файлов. -->
-                <button id="openPositionEditorNavFiles"
+                <!-- Вкладка «Файлы» (tabFiles). -->
+                <button id="navTabFiles"
                         caption="mainMsg://msgFiles"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Тестовое задание» (tabExercise): единый раздел — признак и редактор
-                 задания; набор показывается для навигации. -->
-            <vbox id="openPositionExerciseTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Тестовое задание» — label-навигация контейнера exerciseVbox: клик
-                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
-                <button id="openPositionEditorNavExercise"
+                <!-- Вкладка «Тестовое задание» (tabExercise). -->
+                <button id="navTabExercise"
                         caption="msg://msgExercise"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Памятка кандидату» (tabMemoForInterview): единый раздел — признак
-                 и редактор памятки; набор показывается для навигации. -->
-            <vbox id="openPositionMemoTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Памятка кандидату» — label-навигация контейнера memoVbox: клик
-                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
-                <button id="openPositionEditorNavMemo"
+                <!-- Вкладка «Памятка кандидату» (tabMemoForInterview). -->
+                <button id="navTabMemoForInterview"
                         caption="msg://msgMemoForInterview"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел;
-                 набор показывается для навигации. -->
-            <vbox id="openPositionTemplateLetterTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Шаблон письма» — label-навигация контейнера templateLetterBox: клик
-                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
-                <button id="openPositionEditorNavTemplateLetter"
-                        caption="msg://openPositionEditorNavTemplateLetter"
+                <!-- Вкладка «Шаблон сопроводительного письма» (tabTemplateLetter). -->
+                <button id="navTabTemplateLetter"
+                        caption="msg://msgTemplateLetter"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «План собеседования» (tabInterviewPlan): единый раздел — редактор
-                 плана собеседования; набор показывается для навигации. -->
-            <vbox id="openPositionInterviewPlanTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «План собеседования» — label-навигация контейнера interviewPlanVBox. -->
-                <button id="openPositionEditorNavInterviewPlan"
-                        caption="msg://msgInterviewPlan"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Карта поиска» (tabSearchMap): единый раздел — редактор
-                 карты поиска; набор показывается для навигации. -->
-            <vbox id="openPositionSearchMapTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Карта поиска» — label-навигация контейнера searchMapVBox. -->
-                <button id="openPositionEditorNavSearchMap"
-                        caption="msg://msgSearchMap"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Требуемые Навыки» (tabSkills): единый раздел — дерево навыков
-                 позиции; набор показывается для навигации. -->
-            <vbox id="openPositionSkillsTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Требуемые Навыки» — label-навигация дерева openPositionSkillsListTable:
-                     клик подсвечивает пункт и переводит фокус на дерево навыков (основной элемент;
-                     кнопка пересканирования не элемент ввода). -->
-                <button id="openPositionEditorNavSkills"
+                <!-- Вкладка «Требуемые Навыки» (tabSkills). -->
+                <button id="navTabSkills"
                         caption="msg://msgSkilsPosition"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Новости» (tabOpenPositionNews): единый раздел — таблица новостей
-                 позиции; набор показывается для навигации. -->
-            <vbox id="openPositionNewsTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Новости» — label-навигация таблицы openPostionNewsDataGrid: клик
-                     подсвечивает пункт и переводит фокус на таблицу новостей. -->
-                <button id="openPositionEditorNavNews"
+                <!-- Вкладка «Новости» (tabOpenPositionNews). -->
+                <button id="navTabOpenPositionNews"
                         caption="msg://msgOpenPositionNews"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Согласование» (tabApproval): единый раздел — BPM-процесс согласования;
-                 набор показывается для навигации. -->
-            <vbox id="openPositionApprovalTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Согласование» — label-навигация BPM-блока procActionsBox: блок не содержит
-                     полей ввода (фрагмент процесса), клик только подсвечивает пункт. -->
-                <button id="openPositionEditorNavApproval"
+                <!-- Вкладка «Согласование» (tabApproval). -->
+                <button id="navTabApproval"
                         caption="msg://msgOpenPositionApprovall"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Комментарии» (commentsTab): единый раздел — лента
-                 комментариев-рейтингов; набор показывается для навигации. -->
-            <vbox id="openPositionCommentsTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Комментарии» — label-навигация ленты commentsScrollBox: лента строится
-                     Java из label-элементов, полей ввода нет, клик только подсвечивает пункт. -->
-                <button id="openPositionEditorNavComments"
-                        caption="msg://openPositionEditorNavComments"
+                <!-- Вкладка «Комментарии» (commentsTab). -->
+                <button id="navTabComments"
+                        caption="msg://msgComments"
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
@@ -709,16 +539,6 @@
                   spacing="true">
                 <!-- Наименование должности (название вакансии). -->
                 <label id="infoPositionLabel"
-                       width="100%"
-                       htmlEnabled="true"
-                       stylename="open-position-editor-summary-value"/>
-                <!-- Компания позиции. -->
-                <label id="infoCompanyLabel"
-                       width="100%"
-                       htmlEnabled="true"
-                       stylename="open-position-editor-summary-value"/>
-                <!-- Департамент позиции. -->
-                <label id="infoDepartmentLabel"
                        width="100%"
                        htmlEnabled="true"
                        stylename="open-position-editor-summary-value"/>
@@ -1527,7 +1347,7 @@
                       width="100%"
                       height="100%"
                       spacing="true"
-                      expand="descriptionTextsAccordion"
+                      expand="descriptionsAccordionHBox"
                       stylename="edit-workspace-scroll open-position-editor-tab-content">
                     <!-- Группа «Опыт работы»: опыт коммерческой разработки и командный опыт (свёрнута). -->
                     <groupBox id="workExperienceGroupBox"
@@ -1564,128 +1384,99 @@
                                           property="commandExperience"
                                           caption="msg://msgCommandExperience"/>
                     </groupBox>
-                    <!-- Карточка «Тексты описания» со вкладками TabSheet (RU, EN, стандартное, кто это) -->
-                    <groupBox id="descriptionTextsAccordion"
-                              caption="msg://msgDescription"
-                              collapsable="true"
-                              collapsed="false"
-                              showAsPanel="true"
-                              stylename="edit-accordion-section open-position-editor-richtext-card"
-                              width="100%"
-                              height="100%"
-                              expand="descriptionsAccordionHBox">
-                        <hbox id="descriptionsAccordionHBox"
-                              spacing="false"
-                              width="100%"
-                              height="100%"
-                              expand="openPositionAccordion"
-                              stylename="open-position-editor-richtext-section">
-                            <!-- Вкладки описаний позиции TabSheet (четыре редактора RichTextArea). -->
-                            <tabSheet id="openPositionAccordion"
-                                      width="100%"
-                                      height="100%">
-                                <!-- Русскоязычное описание позиции (comment). -->
-                                <tab id="openPositionRuTabAccordion"
-                                     caption="msg://msgRuComment"
-                                     margin="false"
-                                     expand="openPositionRuTabBox"
-                                     icon="font-icon:LANGUAGE">
-                                    <!-- Контейнер редактора русского описания на всю высоту вкладки. -->
-                                    <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="false" expand="openPositionRichTextArea">
-                                        <!-- Редактор русского описания (обязательный). -->
-                                        <richTextArea id="openPositionRichTextArea"
-                                                      dataContainer="openPositionDc"
-                                                      property="comment"
-                                                      width="100%"
-                                                      height="100%"
-                                                      required="true"
-                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                    </vbox>
-                                </tab>
-                                <!-- Англоязычное описание позиции (commentEn). -->
-                                <tab id="openPositionEnTabAccordion"
-                                     caption="msg://msgEnComment"
-                                     margin="false"
-                                     expand="openPositionEnTabBox"
-                                     icon="font-icon:GLOBE">
-                                    <!-- Контейнер редактора английского описания на всю высоту вкладки. -->
-                                    <vbox id="openPositionEnTabBox" width="100%" height="100%" spacing="false" expand="openPositionEnRichTextArea">
-                                        <!-- Редактор английского описания. -->
-                                        <richTextArea id="openPositionEnRichTextArea"
-                                                      dataContainer="openPositionDc"
-                                                      property="commentEn"
-                                                      width="100%"
-                                                      height="100%"
-                                                      required="false"
-                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                    </vbox>
-                                </tab>
-                                <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
-                                <tab id="openPositionStandartDescriptionAccorden"
-                                     caption="msg://msgStandartDescription"
-                                     margin="false"
-                                     expand="openPositionStandartDescriptionTabBox"
-                                     icon="font-icon:FILE_TEXT_O">
-                                    <!-- Контейнер стандартного описания на всю высоту вкладки. -->
-                                    <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%" spacing="false" expand="openPositionStandartDescriptionRichTextArea">
-                                        <!-- Просмотр стандартного описания (editable=false). -->
-                                        <richTextArea id="openPositionStandartDescriptionRichTextArea"
-                                                      width="100%"
-                                                      height="100%"
-                                                      editable="false"
-                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                    </vbox>
-                                </tab>
-                                <!-- Блок «Кто это» (генерируется, только чтение). -->
-                                <tab id="openPositionWhoIsThisGuyAccorden"
-                                     caption="msg://msgWhoIsThisGuy"
-                                     margin="false"
-                                     expand="openPositionWhoIsThisGuyTabBox"
-                                     icon="font-icon:USER_O">
-                                    <!-- Контейнер описания «кто это» на всю высоту вкладки. -->
-                                    <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%" spacing="false" expand="openPositionWhoIsThisGuyRichTextArea">
-                                        <!-- Просмотр сгенерированного описания «кто это». -->
-                                        <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
-                                                      width="100%"
-                                                      height="100%"
-                                                      editable="false"
-                                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                                    </vbox>
-                                </tab>
-                            </tabSheet>
-                        </hbox>
-                    </groupBox>
-                    <!-- Карточка короткого описания позиции и сканирование JD. -->
-                    <groupBox id="shortDescriptionAccordion"
-                              caption="msg://msgShortCaption"
-                              collapsable="true"
-                              collapsed="false"
-                              showAsPanel="true"
-                              stylename="edit-accordion-section open-position-editor-description-short"
-                              width="100%">
-                        <hbox id="shortDescriptionHBox"
-                              width="100%"
-                              spacing="true"
-                              expand="shortDescriptionTextArea"
-                              stylename="open-position-editor-field-row open-position-editor-row-wide">
-                            <!-- Короткое описание позиции (до 250 символов). -->
-                            <textField id="shortDescriptionTextArea"
-                                       dataContainer="openPositionDc"
-                                       caption="msg://msgShortCaption"
-                                       property="shortDescription"
-                                       maxLength="250"
-                                       stylename="edit-form-control"
-                                       width="100%"/>
-                            <!-- Сканирование описания должности: извлечение короткого описания и навыков (addShortDescription). -->
-                            <button id="scanJDButton"
-                                    caption="msg://msgScanJD"
-                                    icon="MAGIC"
-                                    align="BOTTOM_RIGHT"
-                                    description="msg://msgScanJDAndPut"
-                                    stylename="secondary"
-                                    invoke="addShortDescription"/>
-                        </hbox>
-                    </groupBox>
+                    <!-- Секция аккордеона описаний позиции: русское, английское, стандартное и «кто это». -->
+                    <hbox id="descriptionsAccordionHBox"
+                          spacing="true"
+                          width="100%"
+                          height="100%"
+                          stylename="open-position-editor-richtext-section">
+                        <!-- Аккордеон описаний позиции (четыре редактора RichTextArea). -->
+                        <accordion id="openPositionAccordion"
+                                   width="100%"
+                                   height="100%">
+                            <!-- Русскоязычное описание позиции (comment). -->
+                            <tab id="openPositionRuTabAccordion"
+                                 caption="msg://msgRuComment">
+                                <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
+                                <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
+                                    <!-- Редактор русского описания (обязательный). -->
+                                    <richTextArea id="openPositionRichTextArea"
+                                                  dataContainer="openPositionDc"
+                                                  property="comment"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="100%"
+                                                  required="true"
+                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                </vbox>
+                            </tab>
+                            <!-- Англоязычное описание позиции (commentEn). -->
+                            <tab id="openPositionEnTabAccordion"
+                                 caption="msg://msgEnComment">
+                                <!-- Контейнер редактора английского описания на всю высоту вкладки аккордеона. -->
+                                <vbox id="openPositionEnTabBox" width="100%" height="100%">
+                                    <!-- Редактор английского описания. -->
+                                    <richTextArea id="openPositionEnRichTextArea"
+                                                  dataContainer="openPositionDc"
+                                                  property="commentEn"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="100%"
+                                                  required="false"
+                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                </vbox>
+                            </tab>
+                            <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
+                            <tab id="openPositionStandartDescriptionAccorden"
+                                 caption="msg://msgStandartDescription">
+                                <!-- Контейнер стандартного описания на всю высоту вкладки аккордеона. -->
+                                <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%">
+                                    <!-- Просмотр стандартного описания (editable=false). -->
+                                    <richTextArea id="openPositionStandartDescriptionRichTextArea"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="100%"
+                                                  editable="false"
+                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                </vbox>
+                            </tab>
+                            <!-- Блок «Кто это» (генерируется, только чтение). -->
+                            <tab id="openPositionWhoIsThisGuyAccorden"
+                                 caption="msg://msgWhoIsThisGuy">
+                                <!-- Контейнер описания «кто это» на всю высоту вкладки аккордеона. -->
+                                <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%">
+                                    <!-- Просмотр сгенерированного описания «кто это». -->
+                                    <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="100%"
+                                                  editable="false"
+                                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                                </vbox>
+                            </tab>
+                        </accordion>
+                    </hbox>
+                    <!-- Ряд короткого описания: краткое описание позиции и сканирование JD. -->
+                    <hbox id="shortDescriptionHBox"
+                          width="100%"
+                          spacing="true"
+                          expand="shortDescriptionTextArea"
+                          stylename="open-position-editor-field-row open-position-editor-row-wide">
+                        <!-- Короткое описание позиции (до 250 символов). -->
+                        <textField id="shortDescriptionTextArea"
+                                   dataContainer="openPositionDc"
+                                   caption="msg://msgShortCaption"
+                                   property="shortDescription"
+                                   maxLength="250"
+                                   stylename="edit-form-control"
+                                   width="100%"/>
+                        <!-- Сканирование описания должности: извлечение короткого описания и навыков (addShortDescription). -->
+                        <button id="scanJDButton"
+                                caption="msg://msgScanJD"
+                                align="BOTTOM_RIGHT"
+                                description="msg://msgScanJDAndPut"
+                                invoke="addShortDescription"/>
+                    </hbox>
                 </vbox>
             </tab>
             <!-- Вкладка «Файлы»: таблица файлов позиции. -->
@@ -1734,120 +1525,52 @@
                  caption="msg://msgExercise"
                  margin="false"
                  spacing="true"
-                 expand="exerciseAccordion"
+                 expand="exerciseVbox"
                  icon="ADJUST">
-                <!-- Карточка тестового задания (на всю высоту вкладки). -->
-                <groupBox id="exerciseAccordion"
-                          caption="msg://msgExercise"
-                          collapsable="true"
-                          collapsed="false"
-                          showAsPanel="true"
-                          stylename="edit-accordion-section open-position-editor-richtext-card"
-                          width="100%"
-                          height="100%"
-                          expand="exerciseVbox">
-                    <!-- Контейнер вкладки тестового задания. -->
-                    <vbox id="exerciseVbox"
-                          height="100%"
-                          width="100%"
-                          spacing="true"
-                          expand="exerciseRichTextArea"
-                          stylename="open-position-editor-tab-content">
-                        <!-- Признак «нужно тестовое задание» (needExercise). -->
-                        <checkBox id="needExerciseCheckBox"
+                <!-- Контейнер вкладки тестового задания. -->
+                <vbox id="exerciseVbox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="exerciseRichTextArea"
+                      stylename="open-position-editor-tab-content">
+                    <!-- Признак «нужно тестовое задание» (needExercise). -->
+                    <checkBox id="needExerciseCheckBox"
+                              dataContainer="openPositionDc"
+                              property="needExercise"
+                              caption="msg://msgNeedExercice"/>
+                    <!-- Редактор тестового задания (lazy-загрузка при первом открытии вкладки). -->
+                    <richTextArea id="exerciseRichTextArea"
                                   dataContainer="openPositionDc"
-                                  property="needExercise"
-                                  caption="msg://msgNeedExercice"/>
-                        <!-- Редактор тестового задания (lazy-загрузка при первом открытии вкладки). -->
-                        <richTextArea id="exerciseRichTextArea"
-                                      dataContainer="openPositionDc"
-                                      property="exercise"
-                                      height="100%"
-                                      width="100%"
-                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                    </vbox>
-                </groupBox>
+                                  property="exercise"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
             </tab>
             <!-- Вкладка «Памятка кандидату»: признак и редактор памятки. -->
             <tab id="tabMemoForInterview"
                  caption="msg://msgMemoForInterview"
                  margin="false"
                  spacing="true"
-                 expand="memoAccordion"
+                 expand="memoVbox"
                  icon="ADJUST">
-                <!-- Карточка памятки кандидату (на всю высоту вкладки). -->
-                <groupBox id="memoAccordion"
-                          caption="msg://msgMemoForInterview"
-                          collapsable="true"
-                          collapsed="false"
-                          showAsPanel="true"
-                          stylename="edit-accordion-section open-position-editor-richtext-card"
-                          width="100%"
-                          height="100%"
-                          expand="memoVbox">
-                    <!-- Контейнер вкладки памятки. -->
-                    <vbox id="memoVbox"
-                          height="100%"
-                          width="100%"
-                          spacing="true"
-                          expand="memoForInterviewRichTextArea"
-                          stylename="open-position-editor-tab-content">
-                        <!-- Признак «нужна памятка к собеседованию». -->
-                        <checkBox id="needMemoCheckBox"
-                                  dataContainer="openPositionDc"
-                                  property="needMemoForInterview"
-                                  caption="msg://msgNeedMemoForInterview"/>
-                        <!-- Редактор памятки к собеседованию (lazy). -->
-                        <richTextArea id="memoForInterviewRichTextArea"
-                                      dataContainer="openPositionDc"
-                                      property="memoForInterview"
-                                      height="100%"
-                                      width="100%"
-                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                    </vbox>
-                </groupBox>
-            </tab>
-            <!-- Вкладка «План собеседования»: редактор плана собеседования. -->
-            <tab id="tabInterviewPlan"
-                 caption="msg://msgInterviewPlan"
-                 margin="false"
-                 spacing="true"
-                 expand="interviewPlanVBox"
-                 icon="font-icon:CALENDAR_CHECK_O">
-                <!-- Контейнер вкладки плана собеседования. -->
-                <vbox id="interviewPlanVBox"
+                <!-- Контейнер вкладки памятки. -->
+                <vbox id="memoVbox"
                       height="100%"
                       width="100%"
                       spacing="true"
-                      expand="interviewPlanRichTextArea"
+                      expand="memoForInterviewRichTextArea"
                       stylename="open-position-editor-tab-content">
-                    <!-- Редактор плана собеседования (lazy). -->
-                    <richTextArea id="interviewPlanRichTextArea"
+                    <!-- Признак «нужна памятка к собеседованию». -->
+                    <checkBox id="needMemoCheckBox"
+                              dataContainer="openPositionDc"
+                              property="needMemoForInterview"
+                              caption="msg://msgNeedMemoForInterview"/>
+                    <!-- Редактор памятки к собеседованию (lazy). -->
+                    <richTextArea id="memoForInterviewRichTextArea"
                                   dataContainer="openPositionDc"
-                                  property="interviewPlan"
-                                  height="100%"
-                                  width="100%"
-                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                </vbox>
-            </tab>
-            <!-- Вкладка «Карта поиска»: редактор карты поиска кандидата. -->
-            <tab id="tabSearchMap"
-                 caption="msg://msgSearchMap"
-                 margin="false"
-                 spacing="true"
-                 expand="searchMapVBox"
-                 icon="font-icon:MAP_O">
-                <!-- Контейнер вкладки карты поиска. -->
-                <vbox id="searchMapVBox"
-                      height="100%"
-                      width="100%"
-                      spacing="true"
-                      expand="searchMapRichTextArea"
-                      stylename="open-position-editor-tab-content">
-                    <!-- Редактор карты поиска кандидата (lazy). -->
-                    <richTextArea id="searchMapRichTextArea"
-                                  dataContainer="openPositionDc"
-                                  property="searchMap"
+                                  property="memoForInterview"
                                   height="100%"
                                   width="100%"
                                   stylename="edit-form-control open-position-editor-richtext-variant5"/>
@@ -1858,40 +1581,29 @@
                  caption="msg://msgTemplateLetter"
                  margin="false"
                  spacing="true"
-                 expand="templateLetterAccordion"
+                 expand="templateLetterBox"
                  icon="font-icon:MAIL_FORWARD">
-                <!-- Карточка шаблона письма (на всю высоту вкладки). -->
-                <groupBox id="templateLetterAccordion"
-                          caption="msg://msgTemplateLetter"
-                          collapsable="true"
-                          collapsed="false"
-                          showAsPanel="true"
-                          stylename="edit-accordion-section open-position-editor-richtext-card"
-                          width="100%"
-                          height="100%"
-                          expand="templateLetterBox">
-                    <!-- Контейнер вкладки шаблона письма. -->
-                    <vbox id="templateLetterBox"
-                          width="100%"
-                          height="100%"
-                          spacing="true"
-                          expand="templateLetterRichTextArea"
-                          stylename="open-position-editor-tab-content">
-                        <!-- Признак «нужно сопроводительное письмо» (needLetter). -->
-                        <checkBox id="needLetterCheckBox"
+                <!-- Контейнер вкладки шаблона письма. Добавлен stylename template-letter-tab-content для padding richTextArea от краев вкладки. -->
+                <vbox id="templateLetterBox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      expand="templateLetterRichTextArea"
+                      stylename="open-position-editor-tab-content template-letter-tab-content">
+                    <!-- Признак «нужно сопроводительное письмо» (needLetter). -->
+                    <checkBox id="needLetterCheckBox"
+                              dataContainer="openPositionDc"
+                              property="needLetter"
+                              caption="msg://msgNeedLetter"/>
+                    <!-- Редактор шаблона сопроводительного письма (lazy). -->
+                    <richTextArea id="templateLetterRichTextArea"
                                   dataContainer="openPositionDc"
-                                  property="needLetter"
-                                  caption="msg://msgNeedLetter"/>
-                        <!-- Редактор шаблона сопроводительного письма (lazy). -->
-                        <richTextArea id="templateLetterRichTextArea"
-                                      dataContainer="openPositionDc"
-                                      property="templateLetter"
-                                      width="100%"
-                                      height="100%"
-                                      required="false"
-                                      stylename="edit-form-control open-position-editor-richtext-variant5"/>
-                    </vbox>
-                </groupBox>
+                                  property="templateLetter"
+                                  width="100%"
+                                  height="100%"
+                                  required="false"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
             </tab>
             <!-- Вкладка «Требуемые Навыки»: дерево навыков позиции и кнопка пересканирования описания. -->
             <tab id="tabSkills"

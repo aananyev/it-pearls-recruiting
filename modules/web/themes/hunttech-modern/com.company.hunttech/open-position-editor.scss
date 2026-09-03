@@ -1291,6 +1291,13 @@
       padding: 0 16px;
     }
 
+    /* Вкладка «Шаблон сопроводительного письма»: отступы для richTextArea от краев вкладки.
+     * Vaadin spacing="true" даёт отступы только МЕЖДУ компонентами, не от краев контейнера.
+     * padding: 12px даёт стандартный отступ экрана редактирования (как у groupBox/edit-card). */
+    .template-letter-tab-content {
+      padding: 12px;
+    }
+
     .open-position-editor-table-view .v-table,
     .open-position-editor-table-view .v-grid,
     .open-position-editor-table-view .c-treegrid,
