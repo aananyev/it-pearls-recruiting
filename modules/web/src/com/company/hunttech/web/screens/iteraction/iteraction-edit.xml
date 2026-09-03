@@ -93,8 +93,7 @@ order by e.number]]>
                           spacing="true"
                           align="MIDDLE_CENTER"
                           stylename="iteraction-identity-images edit-sidebar-visual">
-                        <!-- Круглая иллюстрация типа взаимодействия 176×176 (эталон JobCandidateEdit);
-                             реальная пиктограмма живёт в карточке «Пиктограмма» на вкладке формы. -->
+                        <!-- Круглая иллюстрация типа взаимодействия 176×176 (реальная пиктограмма в карточке «Пиктограмма»). -->
                         <ovalImage id="iteractionLogoImage"
                                    width="176px"
                                    height="176px"
@@ -104,6 +103,7 @@ order by e.number]]>
                                    align="MIDDLE_CENTER"
                                    scaleMode="SCALE_DOWN"
                                    stylename="dictionary-logo-image">
+                            <!-- Тематическая иконка справочника взаимодействия. -->
                             <theme path="icons/dictionaries/iteraction.png"/>
                         </ovalImage>
                     </hbox>

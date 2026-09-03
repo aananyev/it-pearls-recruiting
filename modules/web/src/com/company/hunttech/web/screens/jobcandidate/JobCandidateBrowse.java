@@ -405,6 +405,34 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     screen.show();
                 }));
 
+        actionsWithCandidateButton.addAction(new BaseAction("showCandidateCVListAction")
+                .withIcon(CubaIcon.FILE_TEXT_O.source())
+                .withCaption(messageBundle.getMessage("msgShowCandidateCVList"))
+                .withHandler(actionPerformedAction -> {
+                    JobCandidate candidate = jobCandidatesTable.getSingleSelected();
+                    if (candidate != null) {
+                        jobCandidatesTable.scrollTo(candidate);
+                        CandidateCVSimpleBrowse screen = screens.create(CandidateCVSimpleBrowse.class);
+                        screen.setSelectedCandidate(candidate);
+                        screen.setJobCandidate(candidate);
+                        screens.show(screen);
+                    }
+                }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("showIteractionListAction")
+                .withIcon(CubaIcon.HANDSHAKE_O.source())
+                .withCaption(messageBundle.getMessage("msgShowIteractionList"))
+                .withHandler(actionPerformedAction -> {
+                    JobCandidate candidate = jobCandidatesTable.getSingleSelected();
+                    if (candidate != null) {
+                        jobCandidatesTable.scrollTo(candidate);
+                        IteractionListSimpleBrowse screen = screens.create(IteractionListSimpleBrowse.class);
+                        screen.setSelectedCandidate(candidate);
+                        screen.setJobCandidate(candidate);
+                        screens.show(screen);
+                    }
+                }));
+
         actionsWithCandidateButton.addAction(new BaseAction("separator2Action")
                 .withCaption(separator));
 

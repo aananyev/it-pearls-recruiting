@@ -42,13 +42,16 @@ public class CompanyEditLayoutContractTest {
         assertTrue("sidebar не 270px (контракт §4.2)",
                 xml.contains("width=\"270px\""));
         assertTrue(xml.contains("stylename=\"edit-screen-layout\""));
-        assertTrue(xml.contains("stylename=\"edit-workspace\""));
+        // workspace может иметь дополнительные классы (company-editor-workspace)
+        assertTrue("нет edit-workspace в stylename",
+                xml.contains("stylename=\"edit-workspace") || xml.contains("stylename=\"edit-workspace "));
         assertTrue(xml.contains("stylename=\"label-navigation\""));
         assertTrue(xml.contains("label-nav-title"));
         assertTrue("нет активного пункта по умолчанию",
                 xml.contains("label-nav-item label-nav-item-active"));
         assertTrue(xml.contains("stylename=\"edit-footer-actions\""));
-        assertTrue(xml.contains("stylename=\"edit-toolbar\""));
+        assertTrue("нет edit-toolbar в stylename",
+                xml.contains("stylename=\"edit-toolbar") || xml.contains("stylename=\"edit-toolbar "));
         assertTrue("вкладки без контрактного edit-tabs",
                 xml.contains("stylename=\"edit-tabs\""));
         assertFalse("tabSheet остался framed (ломает контрактный вид вкладок)",
@@ -99,7 +102,7 @@ public class CompanyEditLayoutContractTest {
         // Каждый типовой input несёт общий stylename контракта (атрибуты XML
         // многострочные — проверяем id и stylename по отдельности, в пределах
         // 600 символов от открывающего тега поля).
-        String[] controls = {"companyOwnershipField", "comanyNameField",
+        String[] controls = {"companyOwnershipRequisitesField", "comanyNameField",
                 "companyShortNameField", "companyGroupLookupPickerField",
                 "companyDirectorField", "cityOfCompanyField",
                 "regionOfCompanyField", "countryOfCompanyField",
@@ -113,8 +116,8 @@ public class CompanyEditLayoutContractTest {
                     stylenameIdx > idx && stylenameIdx - idx < 600);
         }
 
-        // Captions полей сохранены (1:1 со старым дескриптором).
-        assertTrue(xml.contains("caption=\"mainMsg://msgOwnership\""));
+        // Captions полей сохранены
+        assertTrue(xml.contains("caption=\"Форма собственности\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyName\""));
         assertTrue(xml.contains("caption=\"mainMsg://msgCountryShortName\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyGroup\""));
@@ -211,19 +214,18 @@ public class CompanyEditLayoutContractTest {
         assertTrue(xml.contains("caption=\"mainMsg://msgCompanyDetail\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyDescription\""));
         assertTrue(xml.contains("caption=\"mainMsg://msgCompanyDepartament\""));
-        assertTrue(xml.contains("focusComponent=\"companyOwnershipField\""));
+        assertTrue(xml.contains("focusComponent=\"comanyNameField\""));
 
         // Java: клик по пункту навигации переключает вкладку TabSheet,
         // активный пункт синхронизируется по SelectedTabChange.
         String java = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/company/CompanyEdit.java");
         assertTrue(java.contains("mainTab.setSelectedTab(\"tabConpanyDetails\")"));
+        assertTrue(java.contains("mainTab.setSelectedTab(\"companyRequisitesTab\")"));
         assertTrue(java.contains("mainTab.setSelectedTab(\"companyDescriptionTab\")"));
         assertTrue(java.contains("mainTab.setSelectedTab(\"tabCompanyDepartament\")"));
         assertTrue(java.contains("TAB_TO_NAV_BUTTON"));
-        // Правило 3.6: label-навигация видима только на вкладках с 2+ блоками
-        // (tabConpanyDetails — 2 карточки; описание и департамент — одноблочные,
-        // контейнер скрывается целиком).
+        // label-навигация видима на всех вкладках формы компании.
         assertTrue("Нет константы TABS_WITH_SIDEBAR_NAVIGATION",
                 java.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
         assertTrue("Контейнер навигации не инжектится",
@@ -233,6 +235,12 @@ public class CompanyEditLayoutContractTest {
                         && java.contains("TABS_WITH_SIDEBAR_NAVIGATION.contains"));
         assertTrue("tabConpanyDetails не в списке вкладок с навигацией",
                 java.contains("\"tabConpanyDetails\""));
+        assertTrue("companyRequisitesTab не в списке вкладок с навигацией",
+                java.contains("\"companyRequisitesTab\""));
+        assertTrue("companyDescriptionTab не в списке вкладок с навигацией",
+                java.contains("\"companyDescriptionTab\""));
+        assertTrue("tabCompanyDepartament не в списке вкладок с навигацией",
+                java.contains("\"tabCompanyDepartament\""));
         assertTrue("Нет контейнера companyEditorSidebarNavigation в XML",
                 xml.contains("id=\"companyEditorSidebarNavigation\""));
         assertTrue("логотип должен инжектиться как WebOvaFallbackImage (авто-fallback)",
@@ -321,6 +329,31 @@ public class CompanyEditLayoutContractTest {
                     "modules/web/themes/" + theme + "/com.company.hunttech/company-editor.scss");
             assertTrue("company-editor.scss не идентичен в теме " + theme, canon.equals(local));
         }
+    }
+
+    @Test
+    public void workspaceFieldRowsRemainResponsiveWithoutChangingSidebar() throws IOException {
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/company-editor.scss");
+
+        assertFalse("вкладка company-main-tab не должна наследовать высоту поля ввода",
+                canon.contains(".company-main-tab,"));
+        assertTrue("hbox-строка workspace не переведена в flex-flow",
+                canon.contains(".edit-workspace-content .v-horizontallayout > .v-expand")
+                        && canon.contains("display: flex !important")
+                        && canon.contains("flex-wrap: wrap !important"));
+        assertTrue("слоты hbox не возвращены в normal flow",
+                canon.contains(".edit-workspace-content .v-horizontallayout > .v-expand > .v-slot")
+                        && canon.contains("position: static !important")
+                        && canon.contains("left: auto !important")
+                        && canon.contains("flex: 1 1 240px !important"));
+        assertTrue("адаптивная правка не должна менять sidebar 270px",
+                canon.contains("width: 270px !important")
+                        && canon.contains("padding: 14px 16px 12px !important"));
+        assertFalse("адаптивная правка не должна расширять sidebar до 290px",
+                canon.contains("width: 290px !important"));
+        assertFalse("адаптивная правка не должна перестраивать sidebar сверху",
+                canon.contains("#companyEditorMainLayout {\n            flex-direction: column !important;"));
     }
 
     @Test

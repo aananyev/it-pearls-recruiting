@@ -74,6 +74,7 @@ select e from hunttech_JobCandidate e order by e.secondName, e.firstName
 | `rating` | `iteractionList.rating` (через `interactionService`) |
 | `lastIteraction` | `iteractionList` (date, vacancy, comment, recrutier) |
 | `resume` | отдельный запрос `CandidateCV` по candidate |
+| `fullName` (реестр `JobCandidateReestr`) | `fullName`, `telegramName`, `email` + отдельный load `JobCandidateSignIcon` (view `jobCandidateSignIcon-view`) |
 | `personPosition` | `personPosition`, `positionList` |
 | `detailsGenerator` | полная карточка через фрагмент + доп. loaders |
 
@@ -201,10 +202,74 @@ layout (expand=jobCandidatesTable)
 
 ---
 
+## 7. Модернизированный интерфейс Split-View (`JobCandidateTestBrowse` & `JobCandidateReestr`)
+
+Экранные формы реестра кандидатов с Split-View разметкой (`job-candidate-test-browse.xml` / `job-candidate-reestr.xml`) реализуют современную эргономику рабочего места рекрутера:
+
+### 7.1 Левый профильный сайдбар (`job-candidate-sidebar`)
+- **Шапка кандидата**:
+  - Крупное фото 150×150px с круглой маской (`candidate-avatar-large`).
+  - ФИО кандидата: контрастный яркий белый `#f8fafc` с тенью `text-shadow: 0 1px 3px rgba(0,0,0,0.5)` (`candidate-sidebar-fullname`).
+  - Бейдж должности: синий акцент `#93c5fd` на полупрозрачном синем фоне `rgba(59, 130, 246, 0.25)` (`candidate-sidebar-position`).
+  - Город проживания: мягкий светлый тон `#cbd5e1` (`candidate-sidebar-city`).
+- **Секция «Контакты и реквизиты»**: телефон, Email, Telegram, компания, зарплатные ожидания без рамок на фоне сайдбара.
+- **Секция «Последняя активность» (`candidate-activity-sidebar`)**:
+  - Бесшовная интеграция на тёмном фоне `#172638` без светлых плашек и рамок.
+  - Светофорный статус (`🟢 Свободен` / `🔴 В работе`), роли команды процесса (Автор, Ресерчер, Рекрутер, Координатор) с указанием конкретных действий и даты.
+- **Секция «Основные навыки»**: разноцветные чип-бейджи навыков, распознанных AI.
+
+### 7.2 Панель быстрых фильтров (`tableFilterBar` / `candidate-filter-bar`)
+- Сегментированные кнопки-пилюли (`filter-pill-btn`, `filterAllBtn`, `filterMyCandidatesBtn`, `filterMyParticipationBtn`) с активной синей градиентной подсветкой.
+- Выравнивание от левого края без дублирующего заголовка таблицы.
+
+### 7.3 Фирменные кнопки действий (`candidate-btn`)
+- **«Создать кандидата» (`candidate-create-btn` / `primary`)**: насыщенный синий цвет, скругление 6px, тень `0 2px 5px rgba(37, 99, 235, 0.25)`.
+- **«Быстрая загрузка» (`quickLoadCV` / `secondary`)**: выпадающее меню загрузки PDF (`OnlyTextPersonPositionLoadPdf`), Word и вставки из буфера обмена (`OnlyTextPersonPosition`) с автопарсингом ФИО, контактов и созданием резюме.
+- **«Редактировать» (`editCandidateToolbarBtn` / `secondary`)**: быстрое открытие выбранного кандидата в редакторе карточки.
+- **«Фильтр по меткам» (`signFilterButton` / `secondary`)**: выпадающий фильтр кандидатов по персональным значкам текущего пользователя, сброс фильтра и открытие `SignIconsBrowse`.
+- **«Метки» (`signIconsButton` / `secondary`)**: контекстное назначение и снятие меток выбранного кандидата.
+- **Выпадающее меню «Действия» (`actionsWithCandidateButton`)**:
+  - `refreshAction`: перезагрузка данных реестра.
+  - `findSuitableAction`: подбор подходящих вакансий (`FindSuitable`).
+  - `scanSkillsAction`: AI-сканирование навыков резюме в фоне (`SkillAnalysisService`).
+  - `editCandidateAction`: открытие редактора карточки.
+  - `createInteractionAction`: регистрация нового взаимодействия.
+  - `showCandidateCVListAction`: быстрый переход к списку резюме кандидата.
+  - `showIteractionListAction`: просмотр истории взаимодействий.
+  - `sendEmailAction`: отправка email.
+  - `addPersonalReserveAction`: добавление в кадровый резерв.
+
+### 7.4 Изоляция счетчика строк таблицы (`rowsCount`)
+- Карточка таблицы (`candidate-table-card`) с отдельным подвалом `c-table-bottom-bar` (высота 42px, фон `#f8fafc`, верхняя граница `#e2e8f0`).
+- Полная изоляция от области строк и горизонтального скроллбара, исключающая перекрытие данных.
+
+### 7.5 Колонка «Кандидат» реестра (`JobCandidateReestr`) и Пакетная оптимизация (Zero N+1)
+- ФИО + контакт (telegram/email) выводятся слева ячейки (`text-align: left`); справа в ячейке — метки `SignIcons` (связь `JobCandidateSignIcon`): `Label.setIcon(iconName)` + `pic-center-large-<iconColor>`, tooltip `titleDescription`/`titleRu`; до 4 иконок + «+N».
+- **Batch PostLoad**: Метки `JobCandidateSignIcon` и навыки `CandidateSkill` загружаются единым batch-запросом в `onJobCandidatesDlPostLoad` по списку видимых кандидатов `where e.jobCandidate in :candidates`, полностью устраняя N+1 запросы при рендере и прокрутке таблицы.
+
+### 7.6 Сравнительный анализ функционала: JobCandidateBrowse vs JobCandidateReestr
+
+| Функциональный блок | `JobCandidateBrowse` (Классический) | `JobCandidateReestr` (Split-View) |
+|---|---|---|
+| **Архитектура представления** | Полноэкранный `DataGrid` (10 колонок) + раскрывающиеся строки `DetailsGenerator` (`hunttech_JobCanidateDetailScreenFragment`) | Двухпанельный `Split-View`: постоянный сайдбар профиля (312px) слева + `GroupTable` (7 колонок) справа |
+| **Просмотр данных кандидата** | Требуется клик/раскрытие строки `DetailsGenerator` или открытие полной формы редактирования | Мгновенный просмотр аватара 120×120, ФИО, должности, города, контактов, истории и навыков при выборе строки в таблице |
+| **Быстрые фильтры** | Чекбоксы: «Только мои», «С моим участием», «В работе», «Только с резюме», выпадающий фильтр по рейтингу `ratingFieldNotLower` | Сегментированные кнопки-пилюли («Все», «Мои», «С участием») + выпадающий фильтр по меткам `signFilterButton` |
+| **Метки и значки (SignIcons)** | Фильтр по значкам `signFilterButton` (диалог выбора) + вывод значка в колонку `status` | Выпадающий фильтр `signFilterButton` + выпадающая кнопка назначения `signIconsButton` + вывод до 4 цветных меток + «+N» в ячейке ФИО |
+| **Импорт резюме (Quick Load)** | Меню `quickLoadCV`: парсинг PDF (извлечение лиц), DOC/DOCX, парсинг текста из буфера обмена | Меню `quickLoadCV`: быстрая загрузка PDF (`OnlyTextPersonPositionLoadPdf`), Word и буфера обмена (`OnlyTextPersonPosition`) |
+| **AI-функции анализа** | Поиск подходящих вакансий (`findSuitable`) | AI-сканирование навыков (`scanSkillsAction` через `SkillAnalysisService`) + подбор вакансий (`findSuitableAction`) + цветные чипы навыков |
+| **Производительность** | Пакетный `PostLoad` (счётчики CV, последние взаимодействия, сущности `Employee`) | Пакетный `PostLoad` меток `JobCandidateSignIcon` и навыков `CandidateSkill` (Zero N+1) + ленивая подгрузка сайдбара по клику |
+
+---
+
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-20 | Реализован выпадающий фильтр по значкам `signFilterButton`, меню быстрой загрузки `quickLoadCV` (PDF, Word, буфер обмена), кнопка «Редактировать» в тулбаре, действие `findSuitableAction`, а также пакетная оптимизация загрузки меток и навыков (Zero N+1) |
+| 2026-08-19 | Реестр `JobCandidateReestr`: колонка «Кандидат» — ФИО/контакт слева ячейки (`text-align: left`), метки `SignIcons` справа (правка выравнивания, было вправо) |
+| 2026-08-18 | Реестр `JobCandidateReestr`: колонка «Кандидат» — ФИО/контакт + метки `SignIcons` справа (до 4 + «+N», `order by createTs`, per-row cacheable); добавлен §7.5 |
+| 2026-08-16 | Обновлен дизайн JobCandidateTestBrowse: удален избыточный заголовок реестра, стилизованы кнопки тулбара, изолирован rowsCount, настроены светлые цвета шапки сайдбара и бесшовный блок активности |
+| 2026-08-16 | В кнопку «Действия» добавлены действия показа списка резюме и списка взаимодействий |
 | 2026-07-21 | Исправлено открытие раздела «Кандидаты»: пакетный кеш сотрудников явно загружает `workStatus.inStaff`, а генератор статуса безопасно обрабатывает null и detached-сущности |
 | 2026-06-27 | Hover-preview фото: `descriptionProvider` + `FileDescriptorImageHelper.buildCandidateFacePreviewHtml`, CSS `candidate-face-thumb` / `candidate-face-preview-tooltip` (30px thumb, 300px circular tooltip) |
 | 2026-06-27 | Откат hover-preview фото: простая колонка 20px `circle-20px`, клик → `JobCandidateImageFace`; удалены `candidate-photo-wrapper` и CSS-hover |

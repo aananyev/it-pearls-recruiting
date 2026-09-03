@@ -4,7 +4,7 @@
 <!-- Корневой элемент: тестовый экран просмотра кандидатов Split-View -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
-        caption="Тест: Кандидаты (Split-View Halo)"
+        caption="Реестр кандидатов"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="USER">
     <!-- Секция данных экрана: декларативные контейнеры и лоадеры -->
@@ -15,8 +15,27 @@
                     view="jobCandidate-view">
             <!-- Загрузчик коллекции кандидатов ограничивает выборку 200 записями -->
             <loader id="jobCandidatesDl" maxResults="200">
-                <!-- JPQL-запрос выбирает кандидатов, сортируя по дате создания по убыванию -->
-                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
+                <!-- JPQL-запрос выбирает кандидатов, сортируя по фамилии-имени-отчеству -->
+                <query><![CDATA[select e from hunttech_JobCandidate e order by e.secondName asc, e.firstName asc, e.middleName asc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.createdBy like :createdBy</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select k.candidate from hunttech_IteractionList k where k.recrutier = :recrutier or k.createdBy = :recrutierName)</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <!-- Коллекция справочника меток и значков (метки текущего пользователя) -->
+        <collection id="signIconsDc"
+                    class="com.company.hunttech.entity.SignIcons"
+                    view="_local">
+            <loader id="signIconsDl" cacheable="true">
+                <query><![CDATA[select e from hunttech_SignIcons e where e.user = :user order by e.titleRu asc]]></query>
             </loader>
         </collection>
     </data>
@@ -25,34 +44,41 @@
     <dialogMode height="700" width="1100"/>
 
     <!-- Корневой контейнер разметки экрана с вертикальным размещением тулбара и рабочей области -->
-    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+    <layout expand="splitMainLayout" spacing="true" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
         <!-- Верхний тулбар управления в фирменном дизайне Edit-форм (edit-toolbar) -->
-        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_CENTER" stylename="edit-toolbar" expand="toolbarTitleBox">
-            <!-- Левый заголовочный блок с названием концепта и описанием -->
-            <vbox id="toolbarTitleBox" width="100%" spacing="false" align="MIDDLE_LEFT">
-                <label value="Кандидаты (Split-View Halo)" stylename="edit-toolbar-title"/>
-                <label value="Реестр кандидатов в теме Halo с профильной карточкой деталей" stylename="edit-toolbar-description"/>
+        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar" expand="filter">
+            <!-- Левый заголовочный блок с названием концепта и описанием (ровно по ширине сайдбара 312px) -->
+            <vbox id="toolbarTitleBox" width="312px" spacing="false" align="MIDDLE_LEFT">
+                <label value="Реестр кандидатов" stylename="edit-toolbar-title"/>
+                <label value="Реестр кандидатов с профильным сайдбаром" stylename="edit-toolbar-description"/>
             </vbox>
 
-            <!-- Правая панель кнопок действий и поиска (edit-toolbar-actions) -->
-            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
-                <textField id="searchField" inputPrompt="Поиск по ФИО..." width="240px" stylename="edit-form-control"/>
-                <button id="searchButton" caption="Поиск" icon="SEARCH" stylename="primary"/>
-                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
-                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary"/>
-            </hbox>
+            <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
+            <filter id="filter"
+                    applyTo="candidatesTable"
+                    dataLoader="jobCandidatesDl"
+                    defaultMode="generic"
+                    width="100%"
+                    stylename="candidate-generic-filter">
+                <properties include=".*"
+                            exclude="id"
+                            excludeRecursively="true"
+                            excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
+            </filter>
         </hbox>
 
-        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Таблица справа -->
-        <hbox id="splitMainLayout" width="100%" height="100%" spacing="false" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
+        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Просторная рабочая область справа -->
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
             
             <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Выдержана в фирменном стиле Edit-форм (job-candidate-sidebar edit-sidebar) -->
             <vbox id="candidateDetailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
-                <!-- Скроллер для детального просмотра данных -->
+                <!-- Скроллер для детального просмотра всех карточек данных -->
                 <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
+                    <!-- Вертикальная стопка блоков карточки детализации с комфортными отступами -->
                     <vbox width="100%" spacing="true">
-                        <!-- Шапка профиля с фото, центрированным ФИО и городом -->
+                        <!-- Шапка профиля: гармоничный аватар 120x120px, ФИО и должность -->
                         <vbox id="candidateProfileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <!-- Кастомное круглое фото с фолбеком на случай отсутствия изображения -->
                             <ovaFallbackImage id="detailPic"
                                               width="120px" height="120px"
                                               ovalWidth="120px" ovalHeight="120px"
@@ -60,22 +86,29 @@
                                               stylename="job-candidate-avatar"
                                               fallbackThemePath="icons/no-programmer.jpeg"
                                               scaleMode="SCALE_DOWN"/>
+                            <!-- Текстовый блок заголовка профиля с автопереносом строк и центрированием -->
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
-                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2" align="MIDDLE_CENTER"/>
-                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4" align="MIDDLE_CENTER"/>
-                                <label id="detailCity" value="" stylename="edit-help" align="MIDDLE_CENTER"/>
+                                <!-- Подпись с ФИО выбранного кандидата (+30% шрифт, центрировано) -->
+                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <!-- Подпись с текущей должностью кандидата -->
+                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <!-- Подпись с городом проживания кандидата (+30% шрифт, центрировано) -->
+                                <label id="detailCity" value="" stylename="edit-help" align="MIDDLE_CENTER" htmlEnabled="true"/>
                             </vbox>
                         </vbox>
 
-                        <!-- Кнопки действий -->
+                        <!-- Панель быстрых действий над выбранным кандидатом -->
                         <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <!-- Кнопка перехода к полному редактированию карточки -->
                             <button id="editCandidateBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                            <!-- Кнопка быстрой регистрации нового взаимодействия -->
                             <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false" width="100%"/>
                         </vbox>
 
-                        <!-- Таблица ключевых контактов и реквизитов (стиль Edit-форм с линиями над и под заголовком) -->
+                        <!-- Блок ключевой контактной информации кандидата (стиль Edit-форм с линиями) -->
                         <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="КОНТАКТЫ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <!-- Сетка контактов для упорядоченного вывода пар "ключ-значение" -->
                             <grid id="detailsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -103,10 +136,11 @@
                             </grid>
                         </vbox>
 
-                        <!-- Лента активности/взаимодействий (стиль Edit-форм с линиями над и под заголовком) -->
+                        <!-- Блок истории взаимодействий кандидата (стиль Edit-форм с линиями) -->
                         <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="ПОСЛЕДНЯЯ АКТИВНОСТЬ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
-                            <label id="detailInteractionsInfo" value="Выберите кандидата в таблице для просмотра истории." width="100%" stylename="edit-help"/>
+                            <!-- Текстовое описание последних действий рекрутера -->
+                            <label id="detailInteractionsInfo" value="Выберите кандидата в таблице справа для просмотра истории." width="100%" stylename="edit-help"/>
                         </vbox>
 
                         <!-- Блок основных навыков кандидата (стиль Edit-форм с цветными бейджами) -->
@@ -116,6 +150,86 @@
                         </vbox>
                     </vbox>
                 </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace) -->
+            <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
+                
+                <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
+                    <!-- Кнопка создания и быстрые фильтры по кандидатам -->
+                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
+                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
+                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
+                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
+                    </hbox>
+
+                    <!-- Выпадающая кнопка присвоения меток кандидату -->
+                    <popupButton id="signIconsButton"
+                                 caption="Метки"
+                                 icon="TAGS"
+                                 showActionIcons="true"
+                                 enabled="false"
+                                 stylename="secondary"
+                                 align="MIDDLE_RIGHT"/>
+
+                    <!-- Выпадающая кнопка действий над кандидатом с пунктом Обновить -->
+                    <popupButton id="actionsWithCandidateButton"
+                                 caption="Действия"
+                                 icon="BARS"
+                                 showActionIcons="true"
+                                 enabled="true"
+                                 stylename="primary"
+                                 align="MIDDLE_RIGHT">
+                        <actions>
+                            <action id="refreshAction" caption="Обновить" icon="REFRESH"/>
+                            <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
+                            <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
+                            <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
+                            <action id="showCandidateCVListAction" caption="Показать список резюме" icon="FILE_TEXT_O"/>
+                            <action id="showIteractionListAction" caption="Показать список взаимодействий" icon="HANDSHAKE_O"/>
+                            <action id="sendEmailAction" caption="Отправить Email" icon="ENVELOPE"/>
+                            <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
+                        </actions>
+                    </popupButton>
+                </hbox>
+
+                <!-- Карточка-обёртка для таблицы кандидатов -->
+                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="candidatesTable">
+                    <!-- Таблица кандидатов отображает расширенные колонки реестра -->
+                    <groupTable id="candidatesTable"
+                                 width="100%"
+                                 height="100%"
+                                 dataContainer="jobCandidatesDc"
+                                 stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="edit" type="edit"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <!-- Колонки таблицы с привязкой к свойствам сущности для стандартной сортировки -->
+                        <columns>
+                            <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
+                            <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <!-- Генерируемая колонка метки / значка кандидата -->
+                            <column id="signIcon" caption="Метка" width="55px" sortable="false"/>
+                            <!-- Колонка ФИО: растягивается на всё свободное место (expandRatio), сортировка по fullName -->
+                            <column id="fullName" caption="Кандидат" expandRatio="1"/>
+                            <!-- Колонка желаемой должности с сортировкой по personPosition -->
+                            <column id="personPosition" caption="Должность" width="170px"/>
+                            <!-- Колонка города проживания с сортировкой по cityOfResidence -->
+                            <column id="cityOfResidence" caption="Город" width="120px"/>
+                            <!-- Колонка текущей компании с сортировкой по currentCompany -->
+                            <column id="currentCompany" caption="Компания" width="180px"/>
+                            <!-- Генерируемая колонка ключевых навыков кандидата с чипами и всплывающим окном всех навыков -->
+                            <column id="mainSkills" caption="Ключевые навыки" width="220px" sortable="false"/>
+                            <!-- Компактная генерируемая колонка даты последнего взаимодействия со светофорным статусом -->
+                            <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px" sortable="false"/>
+                        </columns>
+                        <!-- Компонент отображения общего количества строк в таблице -->
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
             </vbox>
         </hbox>
     </layout>

@@ -71,9 +71,8 @@ public class UserSettingsAiApiPreferenceTest {
         String screenXml = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
 
-        assertTrue(screenXml.contains("id=\"aiSettingsMainBox\""));
-        assertTrue(screenXml.contains("stylename=\"ai-settings-editor\""));
-        assertTrue(screenXml.contains("id=\"aiSettingsSidebar\""));
+        assertTrue(screenXml.contains("id=\"aiSettingsContent\""));
+        assertTrue(screenXml.contains("id=\"aiSettingsNavigation\""));
         assertTrue(screenXml.contains("width=\"270px\""));
         assertTrue(screenXml.contains("id=\"aiConfigsButtonsPanel\""));
         assertTrue(screenXml.contains("invoke=\"onAiConfigsCreateBtnClick\""));
@@ -95,14 +94,11 @@ public class UserSettingsAiApiPreferenceTest {
         String screenXml = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
 
-        assertTrue(screenXml.contains("stylename=\"ext-settings-window\""));
+        assertTrue(screenXml.contains("stylename=\"ext-settings-window edit-screen-layout\""));
         assertTrue(screenXml.contains("stylename=\"framed ext-settings-tabs\""));
-        assertTrue(screenXml.contains("id=\"interfaceSettingsMainBox\""));
-        assertTrue(screenXml.contains("stylename=\"interface-settings-editor\""));
-        assertTrue(screenXml.contains("id=\"interfaceSettingsSidebar\""));
-        assertTrue(screenXml.contains("id=\"emailSettingsMainBox\""));
-        assertTrue(screenXml.contains("stylename=\"email-settings-editor\""));
-        assertTrue(screenXml.contains("id=\"emailSettingsSidebar\""));
+        assertTrue(screenXml.contains("id=\"settingsMainLayout\""));
+        assertTrue(screenXml.contains("id=\"settingsWorkspaceBox\""));
+        assertTrue(screenXml.contains("id=\"userAiProfileSidebar\""));
 
         List<String> preservedComponentIds = Arrays.asList(
                 "grid", "mainWindowLabel", "modeOptions", "visualThemeLabel", "appThemeField",

@@ -78,6 +78,15 @@
                 </query>
             </loader>
         </collection>
+        <collection id="jobHistoriesDc"
+                    class="com.company.hunttech.entity.JobHistory">
+            <view extends="jobHistory-view"/>
+            <loader id="jobHistoriesDl">
+                <query>
+                    <![CDATA[select e from hunttech_JobHistory e where e.candidate = :candidate order by e.startDate desc, e.createTs desc]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="800"
                 modal="true"
@@ -227,17 +236,24 @@
                           width="100%"
                           spacing="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvMainDataNav" caption="msg://candidateCvNavMainData" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCandidateMainData"/>
-                        <button id="candidateCvOriginalCvNav" caption="msg://candidateCvNavOriginalCv" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateOriginalCv"/>
-                        <button id="candidateCvHuntTechCvNav" caption="msg://candidateCvNavHuntTechCv" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateHuntTechCv"/>
+                        <button id="candidateCvMainDataNav" caption="msg://candidateCvNavMainData" icon="font-icon:USER" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCandidateMainData"/>
+                        <button id="candidateCvOriginalCvNav" caption="msg://candidateCvNavOriginalCv" icon="font-icon:FILE_TEXT_O" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateOriginalCv"/>
+                        <button id="candidateCvHuntTechCvNav" caption="msg://candidateCvNavHuntTechCv" icon="font-icon:FILE_WORD_O" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateHuntTechCv"/>
                     </vbox>
                     <vbox id="candidateCvCvNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvTextNav" caption="msg://candidateCvNavCvText" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCvText"/>
-                        <button id="candidateCvRecommendationNav" caption="msg://candidateCvNavCvRecommendations" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCvRecommendations"/>
+                        <button id="candidateCvTextNav" caption="msg://candidateCvNavCvText" icon="font-icon:ALIGN_LEFT" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCvText"/>
+                        <button id="candidateCvRecommendationNav" caption="msg://candidateCvNavCvRecommendations" width="100%" visible="false" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCvRecommendations"/>
+                    </vbox>
+                    <vbox id="candidateCvJobHistoryNavigation"
+                          width="100%"
+                          spacing="false"
+                          visible="false"
+                          stylename="candidate-cv-tab-navigation">
+                        <button id="candidateCvJobHistoryTableNav" caption="msg://candidateCvNavJobHistoryTable" icon="font-icon:HISTORY" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateJobHistoryTable"/>
                     </vbox>
                     <vbox id="candidateCvLetterNavigation"
                           width="100%"
@@ -254,15 +270,15 @@
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvSkillActionsNav" caption="msg://candidateCvNavSkillActions" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateSkillActions"/>
-                        <button id="candidateCvSkillTreeNav" caption="msg://candidateCvNavSkillTree" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateSkillTree"/>
+                        <button id="candidateCvSkillActionsNav" caption="msg://candidateCvNavSkillActions" icon="font-icon:MAGIC" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateSkillActions"/>
+                        <button id="candidateCvSkillTreeNav" caption="msg://candidateCvNavSkillTree" icon="font-icon:SITEMAP" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateSkillTree"/>
                     </vbox>
                     <vbox id="candidateCvFilesNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvFilesTableNav" caption="msg://candidateCvNavFiles" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateFilesTable"/>
+                        <button id="candidateCvFilesTableNav" caption="msg://candidateCvNavFiles" icon="font-icon:FOLDER_O" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateFilesTable"/>
                     </vbox>
                 </vbox>
 
@@ -546,7 +562,6 @@
                               spacing="true"
                               width="100%"
                               height="100%"
-                              box.expandRatio="4"
                               expand="candidateCVRichTextArea"
                               stylename="candidate-cv-card candidate-cv-editor-card">
                             <richTextArea id="candidateCVRichTextArea"
@@ -557,13 +572,69 @@
                                           required="true"
                                           stylename="candidate-cv-rich-editor"/>
                         </vbox>
-                        <richTextArea id="cvResomandation"
-                                      width="100%"
-                                      height="100%"
-                                      editable="false"
-                                      box.expandRatio="1"
-                                      stylename="borderless candidate-cv-recommendation"/>
                     </hbox>
+                </vbox>
+            </tab>
+
+            <tab id="tabJobHistory"
+                 caption="msg://msgTabJobHistory"
+                 icon="font-icon:HISTORY"
+                 margin="false"
+                 expand="jobHistoryVbox"
+                 spacing="false">
+                <vbox id="jobHistoryVbox"
+                      spacing="true"
+                      width="100%"
+                      height="100%"
+                      expand="jobHistoriesTable"
+                      stylename="candidate-cv-tab-content">
+                    <hbox id="jobHistoryToolbar"
+                          spacing="true"
+                          width="100%"
+                          stylename="candidate-cv-toolbar">
+                        <button id="smartParseWorkExperienceBtn"
+                                caption="msg://msgSmartParseWorkExperience"
+                                icon="font-icon:MAGIC"
+                                invoke="smartExtractWorkExperience"
+                                stylename="primary candidate-cv-editor-primary-action"/>
+                        <button id="createJobHistoryBtn"
+                                action="jobHistoriesTable.create"
+                                caption="msg://msgAddWorkExperience"
+                                icon="font-icon:PLUS"
+                                stylename="candidate-cv-editor-action"/>
+                        <button id="editJobHistoryBtn"
+                                action="jobHistoriesTable.edit"
+                                caption="msg://msgEditWorkExperience"
+                                icon="font-icon:PENCIL"
+                                stylename="candidate-cv-editor-action"/>
+                        <button id="removeJobHistoryBtn"
+                                action="jobHistoriesTable.remove"
+                                caption="msg://msgRemoveWorkExperience"
+                                icon="font-icon:TRASH"
+                                stylename="candidate-cv-editor-action"/>
+                        <button id="refreshJobHistoryBtn"
+                                action="jobHistoriesTable.refresh"
+                                icon="font-icon:REFRESH"
+                                stylename="candidate-cv-editor-action"/>
+                    </hbox>
+                    <table id="jobHistoriesTable"
+                           width="100%"
+                           dataContainer="jobHistoriesDc"
+                           stylename="candidate-cv-job-history-table">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="period" caption="msg://msgJobPeriod"/>
+                            <column id="companyName" caption="msg://msgJobCompany"/>
+                            <column id="positionName" caption="msg://msgJobPosition"/>
+                            <column id="duties" caption="msg://msgJobDuties" maxTextLength="150"/>
+                        </columns>
+                        <rowsCount/>
+                    </table>
                 </vbox>
             </tab>
 

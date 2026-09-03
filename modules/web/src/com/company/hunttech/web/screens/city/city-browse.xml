@@ -3,6 +3,7 @@
         caption="msg://browseCaption"
         focusComponent="citiesTable"
         messagesPack="com.company.hunttech.web.screens.city" icon="BANK">
+    <!-- Данные: справочник городов (кэшируемый loader, browse-view) -->
     <data readOnly="true">
         <collection id="citiesDc"
                     class="com.company.hunttech.entity.City"
@@ -15,37 +16,64 @@ order by e.cityRuName]]>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="citiesTable"
-            spacing="true">
+    <dialogMode height="700"
+                width="1000"/>
+    <layout expand="tableCard"
+            spacing="true"
+            width="100%"
+            height="100%"
+            stylename="edit-screen-layout">
+
+        <!-- Фильтр (сворачиваемый, стиль реестров) -->
         <filter id="filter"
                 applyTo="citiesTable"
-                dataLoader="citiesDl">
+                dataLoader="citiesDl"
+                defaultMode="generic"
+                width="100%"
+                collapsable="true"
+                collapsed="true"
+                stylename="candidate-generic-filter">
             <properties include=".*"
                         excludeProperties="openPosition,cityRegion.regionOfCity,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="citiesTable"
-                    width="100%"
-                    dataContainer="citiesDc">
-            <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
-                <action id="remove" type="remove"/>
-            </actions>
-            <columns>
-                <column id="cityRuName"/>
-                <column id="cityPhoneCode"/>
-                <column id="cityRegion"/>
-            </columns>
-            <rowsCount/>
-            <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
-                <button id="createBtn" action="citiesTable.create"/>
-                <button id="editBtn" action="citiesTable.edit"/>
-                <button id="removeBtn" action="citiesTable.remove"/>
-            </buttonsPanel>
-        </groupTable>
+
+        <!-- Карточка таблицы с rowsCount -->
+        <vbox id="tableCard"
+              width="100%"
+              height="100%"
+              spacing="false"
+              stylename="edit-card candidate-table-card"
+              expand="citiesTable">
+            <groupTable id="citiesTable"
+                        width="100%"
+                        height="100%"
+                        dataContainer="citiesDc"
+                        stylename="borderless grid candidate-browse-grid">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                    <action id="excel" type="excel"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <columns>
+                    <column id="cityRuName" caption="mainMsg://msgCityRuName" width="220px"/>
+                    <column id="cityEngName" caption="mainMsg://msgCityEngName" width="200px"/>
+                    <column id="cityRegion" caption="mainMsg://msgCityRegion" width="220px"/>
+                    <column id="cityPhoneCode" caption="mainMsg://msgCityPhoneCode" width="120px" align="CENTER"/>
+                    <column id="postalCode" caption="mainMsg://msgPostalCode" width="110px" align="CENTER"/>
+                    <column id="population" caption="mainMsg://msgPopulation" width="120px" align="CENTER"/>
+                    <column id="timeZone" caption="mainMsg://msgTimeZone" width="130px"/>
+                </columns>
+                <rowsCount/>
+                <buttonsPanel id="buttonsPanel"
+                              alwaysVisible="true">
+                    <button id="createBtn" caption="Создать" icon="CREATE_ACTION" action="citiesTable.create" stylename="primary candidate-btn candidate-create-btn"/>
+                    <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" action="citiesTable.edit" stylename="secondary candidate-btn"/>
+                    <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" action="citiesTable.remove" stylename="secondary candidate-btn"/>
+                </buttonsPanel>
+            </groupTable>
+        </vbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

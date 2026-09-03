@@ -276,11 +276,16 @@
                visible="false"/>
     <!-- Двухпанельная композиция формы: постоянная левая панель контекста и правая рабочая область. -->
     <vbox id="openPositionSidebar"
-          width="270px"
+          width="312px"
           height="100%"
-          spacing="true"
-          expand="openPositionSidebarSpacer"
+          spacing="false"
           stylename="edit-sidebar">
+        <!-- Скроллер для комфортного просмотра всех карточек и навигации в сайдбаре -->
+        <scrollBox id="openPositionSidebarScroll"
+                   width="100%"
+                   height="100%"
+                   orientation="vertical">
+            <vbox width="100%" spacing="true">
         <!-- Визуальный образ позиции: логотип проекта и аватар владельца одинакового размера рядом. -->
         <vbox id="openPositionSidebarVisual"
               width="100%"
@@ -445,216 +450,76 @@
                    height="AUTO"
                    stylename="open-position-editor-sidebar-value"/>
         </vbox>
-        <!-- Label-навигация разделов активной вкладки: контейнер целиком скрывается на вкладках
-             с единственным блоком ввода (см. Java syncSidebarNavigation, TABS_WITH_SIDEBAR_NAVIGATION);
-             на вкладках с двумя и более блоками показывается набор пунктов активной вкладки.
-             Кнопки без invoke (Java READ_ONLY) — только presentation, по §3.5 общего контракта. -->
+        <!-- Единая label-навигация по вкладкам tabSheetOpenPosition: пункты повторяют заголовки вкладок
+             в том же порядке. При клике переключается на соответствующую вкладку и фокусируется
+             первый элемент ввода вкладки (для вкладок без полей ввода — только подсветка).
+             Скрытая вкладка tabPayments исключена из навигации. -->
         <vbox id="openPositionEditorNavigation"
               width="100%"
               spacing="false"
               stylename="label-navigation">
-            <!-- Заголовок навигационного набора «РАЗДЕЛЫ АКТИВНОЙ ВКЛАДКИ»: стиль карточки
-                 «Информация» (полоса с фоном и разделителем снизу), статический. -->
-            <label id="openPositionEditorNavActiveSectionsLabel"
-                   value="mainMsg://openPositionEditorNavActiveSections"
+            <!-- Заголовок навигации «ВКЛАДКИ ФОРМЫ»: стиль карточки «Информация». -->
+            <label id="openPositionEditorNavTabsLabel"
+                   value="mainMsg://openPositionEditorNavTabs"
                    width="100%"
                    stylename="label-nav-title open-position-editor-section-title"/>
-            <!-- Набор пунктов вкладки «Вакансия» (tabOpenPosition): пять разделов основной
-                 вкладки; виден по умолчанию, показывается при переключении на вкладку. -->
-            <vbox id="openPositionMainTabNavigation"
+            <!-- Единый список пунктов навигации 1:1 с видимыми вкладками tabSheetOpenPosition. -->
+            <vbox id="openPositionTabNavigation"
                   width="100%"
                   spacing="false">
-                <!-- Пункт «Наименование» — label-навигация блока «Наименование» (ID, грейд, название, «Генерировать»):
-                     клик подсвечивает пункт и переводит фокус в ID (начало блока). -->
-                <button id="openPositionEditorNavName"
-                        caption="mainMsg://msgName"
+                <!-- Вкладка «Вакансия» (tabOpenPosition). -->
+                <button id="navTabOpenPosition"
+                        caption="msg://msgVacansy"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-                <!-- Пункт «Параметры вакансии» — label-навигация блока openPositionParamsGroupBox
-                     (приоритет, удалёнка, дата закрытия, комментарий): клик подсвечивает пункт
-                     и переводит фокус в поле приоритета (начало блока). -->
-                <button id="openPositionEditorNavParams"
-                        caption="msg://msgVacancyParams"
+                <!-- Вкладка «Трудовой договор» (laborAgreementTab). -->
+                <button id="navTabLaborAgreement"
+                        caption="msg://msgLaborAgreementTab"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-                <!-- Пункт «Вакансия» — label-навигация карточки «Вакансия» (приоритет, должность, проект,
-                     компания, департамент, город): клик подсвечивает пункт и переводит фокус
-                     в поле должности (начало карточки). -->
-                <button id="openPositionEditorNavVacancy"
-                        caption="mainMsg://openPositionEditorNavVacancy"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Команда» — label-навигация блока «Команда / Вакансия» (commandOrVacancyGroupBox):
-                     клик подсвечивает пункт и переводит фокус в radio «Команда/Вакансия». -->
-                <button id="openPositionEditorNavTeam"
-                        caption="msg://msgCommand"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Зарплатное предложение» — label-навигация блока salaryGroupBox
-                     (клик подсвечивает пункт и переводит фокус в поле минимальной зарплаты). -->
-                <button id="openPositionEditorNavSalary"
-                        caption="msg://msgSalaryProposal"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор пунктов вкладки «Трудовой договор» (laborAgreementTab): секция соглашений
-                 и детали оплаты; секции «Оплата ресерчерам/рекрутерам» содержат только label
-                 (без полей ввода) и в навигацию не включены. -->
-            <vbox id="openPositionLaborTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Трудовой договор» — label-навигация секции laborAgreementGroupBox
-                     (тип регистрации, стоимость аутстафа, таблица соглашений): клик подсвечивает
-                     пункт и переводит фокус в тип регистрации (начало секции). -->
-                <button id="openPositionEditorNavLaborAgreement"
-                        caption="msg://msgLaborAgreement"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Детали оплаты» — label-навигация секции groupBoxPaymentsDetail
-                     (тип комиссии, НДФЛ, проценты/суммы): клик подсвечивает пункт и переводит
-                     фокус в тип комиссии компании (начало секции). -->
-                <button id="openPositionEditorNavPaymentsDetail"
-                        caption="msg://openPositionEditorNavPaymentsDetail"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор пунктов вкладки «Описание должности» (tabJobDescription): опыт работы,
-                 аккордеон описаний и короткое описание. -->
-            <vbox id="openPositionJobDescriptionTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Опыт работы» — label-навигация секции workExperienceGroupBox: клик
-                     подсвечивает пункт и переводит фокус в радио выбора опыта (начало секции). -->
-                <button id="openPositionEditorNavWorkExperience"
-                        caption="msg://openPositionEditorNavWorkExperience"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-                <!-- Пункт «Описание должности» — label-навигация аккордеона описаний
-                     (descriptionsAccordionHBox): клик подсвечивает пункт и переводит фокус
-                     в русский редактор описания (первый элемент блока). -->
-                <button id="openPositionEditorNavDescription"
+                <!-- Вкладка «Описание вакансии» (tabJobDescription). -->
+                <button id="navTabJobDescription"
                         caption="mainMsg://msgJobDescription"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-                <!-- Пункт «Краткое описание» — label-навигация ряда shortDescriptionHBox: клик
-                     подсвечивает пункт и переводит фокус в поле короткого описания. -->
-                <button id="openPositionEditorNavShortDescription"
-                        caption="msg://openPositionEditorNavShortDescription"
-                        width="100%"
-                        stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Файлы» (tabFiles): единственный раздел — таблица файлов позиции;
-                 набор никогда не показывается (вкладка с одним блоком ввода — навигация скрыта),
-                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionFilesTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Файлы» — label-навигация таблицы someFilesTable: клик подсвечивает
-                     пункт и переводит фокус на таблицу файлов. -->
-                <button id="openPositionEditorNavFiles"
+                <!-- Вкладка «Файлы» (tabFiles). -->
+                <button id="navTabFiles"
                         caption="mainMsg://msgFiles"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Тестовое задание» (tabExercise): единый раздел — признак и редактор
-                 задания; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
-                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionExerciseTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Тестовое задание» — label-навигация контейнера exerciseVbox: клик
-                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
-                <button id="openPositionEditorNavExercise"
+                <!-- Вкладка «Тестовое задание» (tabExercise). -->
+                <button id="navTabExercise"
                         caption="msg://msgExercise"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Памятка кандидату» (tabMemoForInterview): единый раздел — признак
-                 и редактор памятки; набор никогда не показывается (вкладка с одним блоком ввода),
-                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionMemoTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Памятка кандидату» — label-навигация контейнера memoVbox: клик
-                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
-                <button id="openPositionEditorNavMemo"
+                <!-- Вкладка «Памятка кандидату» (tabMemoForInterview). -->
+                <button id="navTabMemoForInterview"
                         caption="msg://msgMemoForInterview"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел;
-                 набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
-                 структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionTemplateLetterTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Шаблон письма» — label-навигация контейнера templateLetterBox: клик
-                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
-                <button id="openPositionEditorNavTemplateLetter"
-                        caption="msg://openPositionEditorNavTemplateLetter"
+                <!-- Вкладка «Шаблон сопроводительного письма» (tabTemplateLetter). -->
+                <button id="navTabTemplateLetter"
+                        caption="msg://msgTemplateLetter"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Требуемые Навыки» (tabSkills): единый раздел — дерево навыков
-                 позиции; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
-                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionSkillsTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Требуемые Навыки» — label-навигация дерева openPositionSkillsListTable:
-                     клик подсвечивает пункт и переводит фокус на дерево навыков (основной элемент;
-                     кнопка пересканирования не элемент ввода). -->
-                <button id="openPositionEditorNavSkills"
+                <!-- Вкладка «Требуемые Навыки» (tabSkills). -->
+                <button id="navTabSkills"
                         caption="msg://msgSkilsPosition"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Новости» (tabOpenPositionNews): единый раздел — таблица новостей
-                 позиции; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
-                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionNewsTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Новости» — label-навигация таблицы openPostionNewsDataGrid: клик
-                     подсвечивает пункт и переводит фокус на таблицу новостей. -->
-                <button id="openPositionEditorNavNews"
+                <!-- Вкладка «Новости» (tabOpenPositionNews). -->
+                <button id="navTabOpenPositionNews"
                         caption="msg://msgOpenPositionNews"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Согласование» (tabApproval): единый раздел — BPM-процесс согласования;
-                 набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
-                 структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionApprovalTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Согласование» — label-навигация BPM-блока procActionsBox: блок не содержит
-                     полей ввода (фрагмент процесса), клик только подсвечивает пункт. -->
-                <button id="openPositionEditorNavApproval"
+                <!-- Вкладка «Согласование» (tabApproval). -->
+                <button id="navTabApproval"
                         caption="msg://msgOpenPositionApprovall"
                         width="100%"
                         stylename="borderless label-nav-item"/>
-            </vbox>
-            <!-- Набор вкладки «Комментарии» (commentsTab): единый раздел — лента
-                 комментариев-рейтингов; набор никогда не показывается (вкладка с одним блоком
-                 ввода), сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
-            <vbox id="openPositionCommentsTabNavigation"
-                  width="100%"
-                  spacing="false"
-                  visible="false">
-                <!-- Пункт «Комментарии» — label-навигация ленты commentsScrollBox: лента строится
-                     Java из label-элементов, полей ввода нет, клик только подсвечивает пункт. -->
-                <button id="openPositionEditorNavComments"
-                        caption="msg://openPositionEditorNavComments"
+                <!-- Вкладка «Комментарии» (commentsTab). -->
+                <button id="navTabComments"
+                        caption="msg://msgComments"
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
@@ -721,9 +586,21 @@
                    stylename="candidate-skills-chips"/>
             <!-- Скрытые элементы обратной совместимости -->
             <label id="citiesLabel" visible="false"/>
-            <label id="contextGradeLabel" visible="false"/>
-            <label id="contextRegistrationLabel" visible="false"/>
-            <label id="contextStatusLabel" visible="false"/>
+            <label id="contextGradeLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"
+                   visible="false"/>
+            <label id="contextRegistrationLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"
+                   visible="false"/>
+            <label id="contextStatusLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"
+                   visible="false"/>
             <label id="labelTopComissionRecrutier" visible="false"/>
             <label id="labelTopComissionResearcher" visible="false"/>
         </vbox>
@@ -732,11 +609,13 @@
                width="100%"
                icon="WARNING"
                stylename="edit-sidebar-warning"/>
-        <!-- Служебный expand-компонент: отделяет сводку от нижней границы sidebar и уводит переполнение в scroll. -->
+        <!-- Служебный spacer: обеспечивает нижний отступ 16px в конце скролла sidebar. -->
         <vbox id="openPositionSidebarSpacer"
               width="100%"
-              height="100%"
+              height="16px"
               stylename="edit-sidebar-spacer"/>
+            </vbox>
+        </scrollBox>
     </vbox>
     <!-- Рабочая область: toolbar → вкладки → прокручиваемый контент → постоянный footer. -->
     <vbox id="openPositionWorkspace"
@@ -774,7 +653,7 @@
                  количество персонала и заработная плата. -->
             <tab id="tabOpenPosition"
                  caption="msg://msgVacansy"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  icon="USERS">
                 <!-- Прокрутка содержимого вкладки «Вакансия». -->
@@ -852,7 +731,7 @@
                               spacing="true"
                               width="100%"
                               stylename="open-position-editor-field-row open-position-editor-row-half">
-<!-- Приоритет позиции (обязательный): влияет на сортировку и срочные списки. -->
+<!-- Приоритет позиции (обязательный) с визуальным цветовым бейджем-значком. -->
                             <lookupField id="priorityField"
                                          dataContainer="openPositionDc"
                                          property="priority"
@@ -862,6 +741,13 @@
                                          align="BOTTOM_LEFT"
                                          stylename="edit-form-control open-position-editor-priority-field"
                                          width="AUTO"/>
+                            <label id="priorityBadgeLabel"
+                                   htmlEnabled="true"
+                                   descriptionAsHtml="true"
+                                   align="BOTTOM_LEFT"
+                                   stylename="open-position-editor-priority-badge-label"
+                                   width="30px"
+                                   height="32px"/>
 <!-- Формат удалённой работы (remoteWork, обязательный). -->
                             <lookupField id="remoteWorkField"
                                          dataContainer="openPositionDc"
@@ -1234,7 +1120,7 @@
             <!-- Вкладка «Трудовой договор»: параметры оформления, таблица соглашений и платёжные секции. -->
             <tab id="laborAgreementTab"
                  caption="msg://msgLaborAgreementTab"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  icon="CUBES">
                 <!-- Прокрутка содержимого вкладки трудовых соглашений. -->
@@ -1248,7 +1134,7 @@
                     <vbox id="openPositionLaborTabContent"
                           width="100%"
                           spacing="true"
-                          margin="true"
+                          margin="false"
                           stylename="open-position-editor-labor-tab-content edit-workspace-content">
                         <!-- Секция трудовых соглашений: параметры оформления и редактируемая таблица. -->
                         <groupBox id="laborAgreementGroupBox"
@@ -1441,14 +1327,14 @@
                  Видимость управляется Java; контент перенесён во вкладку «Трудовой договор». -->
             <tab id="tabPayments"
                  caption="msg://msgPayments"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  visible="false"
                  icon="BULK_EDIT_ACTION"/>
             <!-- Вкладка «Описание должности»: опыт, аккордеон описаний (RU/EN/стандартное/«кто это») и короткое описание. -->
             <tab id="tabJobDescription"
                  caption="mainMsg://msgJobDescription"
-                 margin="true,true,true,true"
+                 margin="false"
                  expand="jobDescriptionVBox"
                  spacing="true"
                  icon="DRIVERS_LICENSE">
@@ -1597,7 +1483,7 @@
             <tab id="tabFiles"
                  icon="FILE_O"
                  caption="mainMsg://msgFiles"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="someFilesVbox">
                 <!-- Контейнер таблицы файлов позиции. -->
@@ -1637,7 +1523,7 @@
             <!-- Вкладка «Тестовое задание»: признак необходимости и редактор задания. -->
             <tab id="tabExercise"
                  caption="msg://msgExercise"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="exerciseVbox"
                  icon="ADJUST">
@@ -1665,7 +1551,7 @@
             <!-- Вкладка «Памятка кандидату»: признак и редактор памятки. -->
             <tab id="tabMemoForInterview"
                  caption="msg://msgMemoForInterview"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="memoVbox"
                  icon="ADJUST">
@@ -1693,17 +1579,17 @@
             <!-- Вкладка «Шаблон сопроводительного письма»: признак и редактор шаблона. -->
             <tab id="tabTemplateLetter"
                  caption="msg://msgTemplateLetter"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="templateLetterBox"
                  icon="font-icon:MAIL_FORWARD">
-                <!-- Контейнер вкладки шаблона письма. -->
+                <!-- Контейнер вкладки шаблона письма. Добавлен stylename template-letter-tab-content для padding richTextArea от краев вкладки. -->
                 <vbox id="templateLetterBox"
                       width="100%"
                       height="100%"
                       spacing="true"
                       expand="templateLetterRichTextArea"
-                      stylename="open-position-editor-tab-content">
+                      stylename="open-position-editor-tab-content template-letter-tab-content">
                     <!-- Признак «нужно сопроводительное письмо» (needLetter). -->
                     <checkBox id="needLetterCheckBox"
                               dataContainer="openPositionDc"
@@ -1722,7 +1608,7 @@
             <!-- Вкладка «Требуемые Навыки»: дерево навыков позиции и кнопка пересканирования описания. -->
             <tab id="tabSkills"
                  caption="msg://msgSkilsPosition"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="skillsBox"
                  icon="FILTER">
@@ -1787,7 +1673,7 @@
             <!-- Вкладка «Новости»: лента новостей позиции. -->
             <tab id="tabOpenPositionNews"
                  caption="msg://msgOpenPositionNews"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="openPostitonNewsBrowseBox"
                  icon="NEWSPAPER_O">
@@ -1833,7 +1719,7 @@
             <!-- Вкладка «Согласование»: BPM-процесс согласования позиции. -->
             <tab id="tabApproval"
                  caption="msg://msgOpenPositionApprovall"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="procActionsBox"
                  icon="NEWSPAPER_O">
@@ -1853,7 +1739,7 @@
             <!-- Вкладка «Комментарии»: лента комментариев-рейтингов позиции. -->
             <tab id="commentsTab"
                  caption="msg://msgComments"
-                 margin="true,true,true,true"
+                 margin="false"
                  spacing="true"
                  expand="commentsScrollBox"
                  icon="STAR_O">

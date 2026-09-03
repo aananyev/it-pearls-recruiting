@@ -277,316 +277,295 @@
             <vbox id="jobCandidateSidebar"
                   width="312px"
                   height="100%"
-                  spacing="true"
-                  expand="candidateSidebarSpacer"
+                  spacing="false"
                   stylename="job-candidate-sidebar edit-sidebar">
+                <!-- Скроллер для детального просмотра всех карточек данных в сайдбаре -->
+                <scrollBox id="candidateSidebarScroll" width="100%" height="100%" orientation="vertical">
+                    <!-- Вертикальная стопка блоков карточки детализации с комфортными отступами -->
+                    <vbox width="100%" spacing="true">
 
-                <!-- Profile Header: photo + name + position -->
-                <!-- Шапка профиля: фотография с зоной загрузки, ФИО и должность кандидата. -->
-                <vbox id="candidateProfileHeader"
-                      width="100%"
-                      spacing="true"
-                      align="TOP_CENTER"
-                      stylename="job-candidate-profile-header edit-sidebar-visual">
-                    <!-- Контейнер фотографии и зоны drag&drop загрузки нового фото. -->
-                    <vbox id="dropZone"
-                          spacing="true"
-                          align="TOP_CENTER">
-                        <!-- Обёртка изображения-аватара. -->
-                        <vbox id="picVBox"
+                        <!-- Profile Header: photo + name + position + city -->
+                        <!-- Шапка профиля: фотография с зоной загрузки, ФИО, должность и город кандидата. -->
+                        <vbox id="candidateProfileHeader"
+                              width="100%"
+                              spacing="true"
                               align="TOP_CENTER"
-                              spacing="true">
-                            <!--
-                              One data-bound component renders both the stored photo and the fallback.
-                              Keeping the fallback in the same component prevents layout shifts and
-                              removes the need to synchronize visibility of two parallel Image instances.
-                            -->
-                            <!-- Фотография кандидата: кастомный компонент с fallback-картинкой,
-                                 176×176, овальная обрезка, масштабирование по контейнеру. -->
-                            <ovaFallbackImage id="candidatePic"
-                                              dataContainer="jobCandidateDc"
-                                              property="fileImageFace"
-                                              width="176px" height="176px"
-                                              ovalWidth="176px" ovalHeight="176px"
-                                              align="TOP_CENTER"
-                                              stylename="job-candidate-avatar"
-                                              scaleMode="SCALE_DOWN"
-                                              fallbackThemePath="icons/no-programmer.jpeg"/>
-                            <!--
-                            Legacy two-component fallback retained temporarily for comparison only.
-                            It must stay commented while candidatePic is an ovaFallbackImage.
-                            <image id="candidateDefaultPic"
-                                   width="176px" height="176px"
-                                   align="TOP_CENTER"
-                                   stylename="job-candidate-avatar"
-                                   scaleMode="SCALE_DOWN">
-                                <theme path="icons/no-programmer.jpeg"/>
-                            </image>
-                            -->
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <!-- Контейнер фотографии и зоны drag&drop загрузки нового фото. -->
+                            <vbox id="dropZone"
+                                  spacing="true"
+                                  align="TOP_CENTER">
+                                <!-- Обёртка изображения-аватара. -->
+                                <vbox id="picVBox"
+                                      align="TOP_CENTER"
+                                      spacing="true">
+                                    <!-- Фотография кандидата: кастомный компонент с fallback-картинкой,
+                                         120×120, овальная обрезка, масштабирование по контейнеру. -->
+                                    <ovaFallbackImage id="candidatePic"
+                                                      dataContainer="jobCandidateDc"
+                                                      property="fileImageFace"
+                                                      width="120px" height="120px"
+                                                      ovalWidth="120px" ovalHeight="120px"
+                                                      align="TOP_CENTER"
+                                                      stylename="job-candidate-avatar"
+                                                      scaleMode="SCALE_DOWN"
+                                                      fallbackThemePath="icons/no-programmer.jpeg"/>
+                                </vbox>
+                                <!-- Загрузчик фотографии: мгновенная запись в fileStorage, привязка
+                                     к свойству fileImageFace, кнопка очистки и зона dropZone. -->
+                                <upload id="fileImageFaceUpload"
+                                        fileStoragePutMode="IMMEDIATE"
+                                        dataContainer="jobCandidateDc"
+                                        align="TOP_CENTER"
+                                        showFileName="false"
+                                        dropZone="dropZone"
+                                        showClearButton="true"
+                                        property="fileImageFace"/>
+                            </vbox>
+                            <!-- Блок идентичности: ФИО, должность и город (обновляются контроллером). -->
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <!-- ФИО кандидата (заполняется из fullName при загрузке и изменении). -->
+                                <label id="fullNameField"
+                                       width="100%"
+                                       stylename="job-candidate-profile-name edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       align="MIDDLE_CENTER"/>
+                                <!-- Должность кандидата под ФИО. -->
+                                <label id="personPositionLabel"
+                                       width="100%"
+                                       stylename="job-candidate-profile-position edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       align="MIDDLE_CENTER"/>
+                                <!-- Город проживания кандидата под должностью. -->
+                                <label id="cityOfCandidateHeader"
+                                       width="100%"
+                                       dataContainer="jobCandidateDc"
+                                       property="cityOfResidence"
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       align="MIDDLE_CENTER"/>
+                            </vbox>
                         </vbox>
-                        <!-- Загрузчик фотографии: мгновенная запись в fileStorage, привязка
-                             к свойству fileImageFace, кнопка очистки и зона dropZone. -->
-                        <upload id="fileImageFaceUpload"
-                                fileStoragePutMode="IMMEDIATE"
-                                dataContainer="jobCandidateDc"
-                                align="TOP_CENTER"
-                                showFileName="false"
-                                dropZone="dropZone"
-                                showClearButton="true"
-                                property="fileImageFace"/>
-                    </vbox>
-                    <!-- Блок идентичности: ФИО и должность (обновляются контроллером). -->
-                    <vbox width="100%" spacing="false" stylename="edit-sidebar-identity">
-                        <!-- ФИО кандидата (заполняется из fullName при загрузке и изменении). -->
-                        <label id="fullNameField"
-                               width="100%"
-                               stylename="job-candidate-profile-name edit-sidebar-title"
-                               align="MIDDLE_CENTER"/>
-                        <!-- Должность кандидата под ФИО. -->
-                        <label id="personPositionLabel"
-                               width="100%"
-                               stylename="job-candidate-profile-position edit-sidebar-subtitle"
-                               align="MIDDLE_CENTER"/>
-                    </vbox>
-                </vbox>
 
-                <!-- Быстрые действия вверху sidebar: Создать резюме и Создать взаимодействие. -->
-                <vbox id="candidateSidebarQuickActions"
-                      width="100%"
-                      spacing="true"
-                      stylename="edit-sidebar-summary">
-                    <!-- Создание резюме кандидата (открывает редактор CV). -->
-                    <button id="createCandidateCvButton"
-                            caption="msg://msgCreateCV"
-                            invoke="createCandidateCv"
-                            icon="CREATE_ACTION"
-                            stylename="primary"
-                            width="100%"/>
-                    <!-- Создание взаимодействия по кандидату. -->
-                    <button id="createCandidateIteractionButton"
-                            caption="msg://msgCreateIteraction"
-                            invoke="createCandidateIteraction"
-                            icon="PLUS"
-                            width="100%"/>
-                </vbox>
+                        <!-- Быстрые действия вверху sidebar: Создать резюме и Создать взаимодействие. -->
+                        <vbox id="candidateSidebarQuickActions"
+                              width="100%"
+                              spacing="true"
+                              stylename="edit-sidebar-summary">
+                            <!-- Создание резюме кандидата (открывает редактор CV). -->
+                            <button id="createCandidateCvButton"
+                                    caption="msg://msgCreateCV"
+                                    invoke="createCandidateCv"
+                                    icon="CREATE_ACTION"
+                                    stylename="primary"
+                                    width="100%"/>
+                            <!-- Создание взаимодействия по кандидату. -->
+                            <button id="createCandidateIteractionButton"
+                                    caption="msg://msgCreateIteraction"
+                                    invoke="createCandidateIteraction"
+                                    icon="PLUS"
+                                    width="100%"/>
+                        </vbox>
 
-                <!-- Summary: статус + рейтинг + карточка + ключевая информация. По Edit-контракту
-                     сводка идёт сразу после identity (ФИО + должность), до label-навигации. -->
-                <!-- Сводная карточка: рейтинг, процент заполнения, город, компания, резюме. -->
-                <vbox id="candidateProfileSummary"
-                      width="100%"
-                      spacing="true"
-                      stylename="job-candidate-profile-summary job-candidate-sidebar-card edit-sidebar-summary">
-                    <!-- Блок «Рейтинг» и «Карточка» со значениями, заполняемыми контроллером. -->
-                    <vbox id="statusRatingRow"
-                          width="100%"
-                          spacing="false"
-                          stylename="job-candidate-status">
-                        <!-- Строка «Рейтинг»: подпись и звёздный рейтинг кандидата. -->
-                        <hbox width="100%" spacing="false">
-                            <label value="msg://msgRating"
-                                   box.expandRatio="1"
-                                   stylename="h3"/>
-                            <!-- Значение рейтинга (заполняется контроллером). -->
-                            <label id="candidateRatingLabel"
-                                   box.expandRatio="2"
-                                   stylename="h3"/>
-                        </hbox>
-                        <!-- Строка «Карточка»: процент заполнения профиля. -->
-                        <hbox width="100%" spacing="false">
-                            <label value="msg://msgCard"
-                                   box.expandRatio="1"
-                                   stylename="h3"/>
-                            <!-- Процент заполнения карточки (заполняется контроллером). -->
-                            <label id="labelQualityPercent"
-                                   stylename="h3"/>
-                        </hbox>
-                    </vbox>
-                    <!-- Сетка ключевой информации: город, компания, резюме. -->
-                    <grid id="profileInfoGrid" spacing="true" width="100%">
-                        <columns count="2"/>
-                        <rows>
-                            <row>
-                                <!-- Строка «Город»: подпись и значение города проживания. -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="mainMsg://msgCity"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Значение города проживания (свойство cityOfResidence). -->
-                                    <label id="cityOfCandidate"
+                        <!-- Summary: статус + рейтинг + карточка + ключевая информация. -->
+                        <vbox id="candidateProfileSummary"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-profile-summary job-candidate-sidebar-card edit-sidebar-summary">
+                            <!-- Блок «Рейтинг» и «Карточка» со значениями, заполняемыми контроллером. -->
+                            <vbox id="statusRatingRow"
+                                  width="100%"
+                                  spacing="false"
+                                  stylename="job-candidate-status">
+                                <!-- Строка «Рейтинг»: подпись и звёздный рейтинг кандидата. -->
+                                <hbox width="100%" spacing="false">
+                                    <label value="msg://msgRating"
+                                           box.expandRatio="1"
+                                           stylename="h3"/>
+                                    <!-- Значение рейтинга (заполняется контроллером). -->
+                                    <label id="candidateRatingLabel"
                                            box.expandRatio="2"
-                                           stylename="small"
-                                           dataContainer="jobCandidateDc"
-                                           property="cityOfResidence"/>
+                                           stylename="h3"/>
                                 </hbox>
-                            </row>
-                            <row>
-                                <!-- Строка «Компания»: текущая компания кандидата. -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="msg://msgCompany"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Текущая компания кандидата (свойство currentCompany). -->
-                                    <label id="currentCompanyLabel"
-                                           box.expandRatio="2"
-                                           stylename="small"
-                                           dataContainer="jobCandidateDc"
-                                           property="currentCompany"/>
+                                <!-- Строка «Карточка»: процент заполнения профиля. -->
+                                <hbox width="100%" spacing="false">
+                                    <label value="msg://msgCard"
+                                           box.expandRatio="1"
+                                           stylename="h3"/>
+                                    <!-- Процент заполнения карточки (заполняется контроллером). -->
+                                    <label id="labelQualityPercent"
+                                           stylename="h3"/>
                                 </hbox>
-                            </row>
-                            <row>
-                                <!-- Строка «Резюме»: количество/ссылка на резюме (заполняется контроллером). -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="msg://msgResume"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Ссылка на резюме (заполняется контроллером). -->
-                                    <label id="labelCV"
-                                           align="MIDDLE_LEFT"
-                                           stylename="small"
-                                           box.expandRatio="2"/>
-                                </hbox>
-                            </row>
-                        </rows>
-                    </grid>
-                </vbox>
+                            </vbox>
+                            <!-- Сетка ключевой информации: город, компания, резюме. -->
+                            <grid id="profileInfoGrid" spacing="true" width="100%">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <!-- Строка «Город»: подпись и значение города проживания. -->
+                                        <hbox spacing="false"
+                                              width="100%">
+                                            <label value="mainMsg://msgCity"
+                                                   stylename="small"
+                                                   box.expandRatio="1"/>
+                                            <!-- Значение города проживания (свойство cityOfResidence). -->
+                                            <label id="cityOfCandidate"
+                                                   box.expandRatio="2"
+                                                   stylename="small"
+                                                   dataContainer="jobCandidateDc"
+                                                   property="cityOfResidence"/>
+                                        </hbox>
+                                    </row>
+                                    <row>
+                                        <!-- Строка «Компания»: текущая компания кандидата. -->
+                                        <hbox spacing="false"
+                                              width="100%">
+                                            <label value="msg://msgCompany"
+                                                   stylename="small"
+                                                   box.expandRatio="1"/>
+                                            <!-- Текущая компания кандидата (свойство currentCompany). -->
+                                            <label id="currentCompanyLabel"
+                                                   box.expandRatio="2"
+                                                   stylename="small"
+                                                   dataContainer="jobCandidateDc"
+                                                   property="currentCompany"/>
+                                        </hbox>
+                                    </row>
+                                    <row>
+                                        <!-- Строка «Резюме»: количество/ссылка на резюме (заполняется контроллером). -->
+                                        <hbox spacing="false"
+                                              width="100%">
+                                            <label value="msg://msgResume"
+                                                   stylename="small"
+                                                   box.expandRatio="1"/>
+                                            <!-- Ссылка на резюме (заполняется контроллером). -->
+                                            <label id="labelCV"
+                                                   align="MIDDLE_LEFT"
+                                                   stylename="small"
+                                                   box.expandRatio="2"/>
+                                        </hbox>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
 
-                <!-- Sidebar navigation: кнопки переключения вкладок по Edit-контракту идут после сводки (рейтинг/карточка). -->
-                <!-- Вертикальная label-навигация по разделам формы (переключение вкладок tabsheet). -->
-                <vbox id="candidateNavigation"
-                      width="100%"
-                      spacing="false"
-                      stylename="job-candidate-navigation label-navigation">
-                    <!-- Заголовок «Разделы формы» навигации: полоса-заголовок с двумя
-                         горизонтальными inset-линиями (контракт §4.1), класс job-candidate-section-title. -->
-                    <label value="msg://msgFormSections"
-                           width="100%"
-                           stylename="label-nav-title job-candidate-section-title"/>
-                    <!-- Переход на вкладку «Основное» (активна по умолчанию). -->
-                    <button id="candidateNavMain" invoke="candidateNavMain"
-                            caption="msg://msgTabMain"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
-                    <!-- Переход на вкладку «Позиции и вакансии». -->
-                    <button id="candidateNavPositions" invoke="candidateNavPositions"
-                            caption="msg://msgTabPositions"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <!-- Переход на вкладку «Взаимодействия». -->
-                    <button id="candidateNavIteraction" invoke="candidateNavIteraction"
-                            caption="msg://msgCandidateIteraction"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <!-- Переход на вкладку «Резюме и файлы». -->
-                    <button id="candidateNavResume" invoke="candidateNavResume"
-                            caption="msg://msgTabResume"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <!-- Переход на вкладку «Контакты». -->
-                    <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
-                            caption="msg://msgCandidateContacts"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <!-- Переход на вкладку «Комментарии». -->
-                    <button id="candidateNavComments" invoke="candidateNavComments"
-                            caption="msg://msgComments"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <!-- Переход на вкладку «История». -->
-                    <button id="candidateNavHistory" invoke="candidateNavHistory"
-                            caption="msg://msgTabHistory"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                </vbox>
+                        <!-- Sidebar navigation: кнопки переключения вкладок по Edit-контракту идут после сводки. -->
+                        <!-- Вертикальная label-навигация по разделам формы (переключение вкладок tabsheet). -->
+                        <vbox id="candidateNavigation"
+                              width="100%"
+                              spacing="false"
+                              stylename="job-candidate-navigation label-navigation">
+                            <!-- Заголовок «Разделы формы» навигации: полоса-заголовок с двумя
+                                 горизонтальными inset-линиями (контракт §4.1), класс job-candidate-section-title. -->
+                            <label value="msg://msgFormSections"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"/>
+                            <!-- Переход на вкладку «Основное» (активна по умолчанию). -->
+                            <button id="candidateNavMain" invoke="candidateNavMain"
+                                    caption="msg://msgTabMain"
+                                    width="100%"
+                                    stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
+                            <!-- Переход на вкладку «Позиции и вакансии». -->
+                            <button id="candidateNavPositions" invoke="candidateNavPositions"
+                                    caption="msg://msgTabPositions"
+                                    width="100%"
+                                    stylename="borderless job-candidate-nav-item label-nav-item"/>
+                            <!-- Переход на вкладку «Взаимодействия». -->
+                            <button id="candidateNavIteraction" invoke="candidateNavIteraction"
+                                    caption="msg://msgCandidateIteraction"
+                                    width="100%"
+                                    stylename="borderless job-candidate-nav-item label-nav-item"/>
+                            <!-- Переход на вкладку «Резюме и файлы». -->
+                            <button id="candidateNavResume" invoke="candidateNavResume"
+                                    caption="msg://msgTabResume"
+                                    width="100%"
+                                    stylename="borderless job-candidate-nav-item label-nav-item"/>
+                            <!-- Переход на вкладку «Контакты». -->
+                            <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
+                                    caption="msg://msgCandidateContacts"
+                                    width="100%"
+                                    stylename="borderless job-candidate-nav-item label-nav-item"/>
+                            <!-- Переход на вкладку «Комментарии». -->
+                            <button id="candidateNavComments" invoke="candidateNavComments"
+                                    caption="msg://msgComments"
+                                    width="100%"
+                                    stylename="borderless job-candidate-nav-item label-nav-item"/>
+                            <!-- Переход на вкладку «История». -->
+                            <button id="candidateNavHistory" invoke="candidateNavHistory"
+                                    caption="msg://msgTabHistory"
+                                    width="100%"
+                                    stylename="borderless job-candidate-nav-item label-nav-item"/>
+                        </vbox>
 
-                <!-- Contacts -->
-                <!-- Карточка контактов в sidebar: Email, Телефон, Telegram (ссылки заполняются контроллером). -->
-                <vbox id="candidateProfileContacts"
-                      width="100%"
-                      spacing="true"
-                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary">
-                    <!-- Элемент grid. -->
-                    <grid spacing="true" width="100%">
-                        <columns count="2"/>
-                        <rows>
-                            <row>
-                                <!-- Строка Email: подпись и кликабельная ссылка mailto. -->
-                                <hbox spacing="false" width="100%">
-                                    <label value="msg://msgEmail"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Ссылка mailto на email кандидата (заполняется контроллером). -->
-                                    <linkButton id="emailLinkButton"
-                                                box.expandRatio="2"
-                                                align="MIDDLE_LEFT"
-                                                stylename="small"/>
-                                </hbox>
-                            </row>
-                            <row>
-                                <!-- Строка «Телефон»: номер из jobCandidateDc. -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="msg://msgPhone"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Телефон кандидата (свойство phone). -->
-                                    <label id="phoneLabel"
-                                           box.expandRatio="2"
-                                           stylename="small"
-                                           dataContainer="jobCandidateDc"
-                                           property="phone"/>
-                                </hbox>
-                            </row>
-                            <row>
-                                <!-- Строка Telegram: кликабельная ссылка на профиль. -->
-                                <hbox spacing="false" width="100%">
-                                    <label value="msg://msgTelegramAccount" stylename="small" box.expandRatio="1"/>
-                                    <linkButton id="telegrammLinkButton"
-                                                box.expandRatio="2"
-                                                align="MIDDLE_LEFT"
-                                                stylename="small"/>
-                                </hbox>
-                            </row>
-                        </rows>
-                    </grid>
-                </vbox>
+                        <!-- Contacts and Requisites -->
+                        <!-- Блок ключевой контактной информации кандидата -->
+                        <vbox id="candidateProfileContacts"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="КОНТАКТЫ И РЕКВИЗИТЫ"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"/>
+                            <!-- Сетка контактов для упорядоченного вывода пар "ключ-значение" -->
+                            <grid id="detailsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Телефон:" stylename="bold"/>
+                                        <label id="detailPhone" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Email:" stylename="bold"/>
+                                        <linkButton id="emailLinkButton" align="MIDDLE_LEFT" stylename="link small"/>
+                                    </row>
+                                    <row>
+                                        <label value="Telegram:" stylename="bold"/>
+                                        <linkButton id="telegrammLinkButton" align="MIDDLE_LEFT" stylename="link small"/>
+                                    </row>
+                                    <row>
+                                        <label value="Компания:" stylename="bold"/>
+                                        <label id="detailCompany" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label id="detailSalaryCaption" value="Ожидания:" stylename="bold" visible="false"/>
+                                        <label id="detailSalary" value="-" visible="false"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
 
-                <!-- Основные навыки кандидата, определенные нейросетью -->
-                <vbox id="candidateProfileSkills"
-                      width="100%"
-                      spacing="true"
-                      stylename="job-candidate-navigation label-navigation">
-                    <label value="msg://msgMainSkillsTitle"
-                           width="100%"
-                           stylename="label-nav-title job-candidate-section-title"/>
-                    <label id="candidateSkillsLabels"
-                           width="100%"
-                           htmlEnabled="true"
-                           stylename="candidate-skills-chips"/>
-                </vbox>
+                        <!-- Основные навыки кандидата, определенные нейросетью -->
+                        <vbox id="candidateProfileSkills"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://msgMainSkillsTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"/>
+                            <label id="candidateSkillsLabels"
+                                   width="100%"
+                                   htmlEnabled="true"
+                                   stylename="candidate-skills-chips"/>
+                        </vbox>
 
-                <!-- Свободное пространство прижимает HR-Мастер к нижней границе sidebar. -->
-                <vbox id="candidateSidebarSpacer"
-                      width="100%"
-                      height="100%"
-                      stylename="job-candidate-sidebar-spacer edit-sidebar-spacer"/>
+                        <!-- Свободное пространство перед футером sidebar. -->
+                        <vbox id="candidateSidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="job-candidate-sidebar-spacer edit-sidebar-spacer"/>
 
-                <!-- Quick Actions -->
-                <!-- Быстрые действия внизу sidebar: HR-Мастер. -->
-                <vbox id="candidateProfileFooter"
-                      width="100%"
-                      spacing="true"
-                      stylename="job-candidate-profile-footer edit-sidebar-summary">
-                    <!-- Запуск «HR-Мастера» — подбора вакансий. -->
-                    <button id="openPositionMasterBrowseButton"
-                            caption="msg://msgOpenPositionMasterBrowse"
-                            invoke="openPositionMasterBrowseStart"
-                            width="100%"
-                            stylename="small"/>
-                </vbox>
+                        <!-- Quick Actions -->
+                        <!-- Быстрые действия внизу sidebar: HR-Мастер. -->
+                        <vbox id="candidateProfileFooter"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-profile-footer edit-sidebar-summary">
+                            <!-- Запуск «HR-Мастера» — подбора вакансий. -->
+                            <button id="openPositionMasterBrowseButton"
+                                    caption="msg://msgOpenPositionMasterBrowse"
+                                    invoke="openPositionMasterBrowseStart"
+                                    width="100%"
+                                    stylename="small"/>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
 
                 <!-- Hidden fields for Java -->
                 <!-- Скрытое поле fullName: используется контроллером для синхронизации ФИО. -->
@@ -600,6 +579,7 @@
                           property="blockCandidate"
                           visible="false"/>
                 <!-- Скрытые поля-помощники для контроллера (телефон/email/skype/telegram и заголовки). -->
+                <label id="phoneLabel" visible="false"/>
                 <label id="mobilePhoneLabel" visible="false"/>
                 <label id="emailLabel" visible="false"/>
                 <label id="skypuLabel" visible="false"/>
@@ -717,12 +697,21 @@
                     <tab id="tabMain"
                          caption="msg://msgTabMain"
                          spacing="true"
-                         margin="false">
-                        <!-- Аккордеон-секция вкладки «Основное» (заголовок + контент). -->
-                        <vbox id="jobCandidateMainSection"
-                              width="100%"
-                              spacing="true"
-                              stylename="job-candidate-accordion-section job-candidate-accordion-open edit-accordion-section">
+                         margin="false"
+                         expand="mainTabScrollBox">
+                        <!-- Прокручиваемый контейнер вкладки: обеспечивает доступ ко всем карточкам данных (персональные и профессиональные). -->
+                        <scrollBox id="mainTabScrollBox"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   width="100%"
+                                   height="100%"
+                                   spacing="false"
+                                   stylename="edit-workspace-scroll">
+                            <!-- Аккордеон-секция вкладки «Основное» (заголовок + контент). -->
+                            <vbox id="jobCandidateMainSection"
+                                  width="100%"
+                                  spacing="true"
+                                  stylename="job-candidate-accordion-section job-candidate-accordion-open edit-accordion-section">
 
                             <!-- Заголовок аккордеона с названием раздела. -->
                             <hbox id="jobCandidateMainSectionHeader"
@@ -983,6 +972,7 @@
                                 </vbox>
                             </vbox>
                         </vbox>
+                        </scrollBox>
                     </tab>
 
                     <!-- TAB: Контакты -->

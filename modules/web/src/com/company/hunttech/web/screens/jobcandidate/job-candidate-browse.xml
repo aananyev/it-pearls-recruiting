@@ -226,6 +226,8 @@
                     <actions>
                         <action id="addPersonalReserve" icon="SUPERSCRIPT"/>
                         <action id="sendEmail" icon="ENVELOPE"/>
+                        <action id="showCandidateCVList" icon="FILE_TEXT_O"/>
+                        <action id="showIteractionList" icon="HANDSHAKE_O"/>
                     </actions>
                 </popupButton>
                 <button id="sendEmailButton"

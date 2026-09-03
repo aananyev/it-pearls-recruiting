@@ -757,6 +757,16 @@
       font-weight: 600;
     }
 
+    .candidate-cv-job-history-table {
+      width: 100% !important;
+      height: 100% !important;
+
+      .v-table-cell-wrapper {
+        padding: 6px 10px;
+        line-height: 20px;
+      }
+    }
+
     @media (max-width: 1180px) {
       .candidate-cv-tabs > .v-tabsheet-content {
         padding: 12px;

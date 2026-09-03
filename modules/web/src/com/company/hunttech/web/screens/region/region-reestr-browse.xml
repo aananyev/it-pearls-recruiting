@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://regionReestrCaption"
+        focusComponent="regionsTable"
+        messagesPack="com.company.hunttech.web.screens.region"
+        icon="MAP_O">
+    <data readOnly="true">
+        <collection id="regionsDc"
+                    class="com.company.hunttech.entity.Region"
+                    view="region-browse-view">
+            <loader id="regionsDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_Region e
+order by e.regionRuName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px) -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+                        <!-- Шапка профиля региона -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/dictionaries/region.png" scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailTitle" value="Выберите регион" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
+                                <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция: Реквизиты региона -->
+                        <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="РЕКВИЗИТЫ РЕГИОНА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Страна:" stylename="bold"/><label id="detailCountry" value="-"/></row>
+                                    <row><label value="Код региона:" stylename="bold"/><label id="detailRegionCode" value="-"/></row>
+                                    <row><label value="ISO код:" stylename="bold"/><label id="detailIsoCode" value="-"/></row>
+                                    <row><label value="Тип региона:" stylename="bold"/><label id="detailRegionType" value="-"/></row>
+                                    <row><label value="Адм. центр:" stylename="bold"/><label id="detailCapital" value="-"/></row>
+                                    <row><label value="FIAS ID:" stylename="bold"/><label id="detailFiasId" value="-"/></row>
+                                    <row><label value="Часовой пояс:" stylename="bold"/><label id="detailTimeZone" value="-"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Герб -->
+                        <vbox id="emblemCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ГЕРБ РЕГИОНА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <vbox id="emblemContainer" width="100%" spacing="true" align="MIDDLE_CENTER">
+                                <ovaFallbackImage id="detailEmblemImage" width="140px" height="140px" ovalWidth="140px" ovalHeight="140px"
+                                                  align="MIDDLE_CENTER" stylename="dictionary-logo-image" fallbackThemePath="icons/dictionaries/region.png" scaleMode="SCALE_DOWN"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Секция: Статистика -->
+                        <vbox id="statsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="СТАТИСТИКА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="statsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Кол-во городов:" stylename="bold"/><label id="detailCitiesCount" value="0" stylename="bold"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
+
+                <!-- Командный тулбар -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createBtn" caption="Создать регион" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="regionsTable.create"/>
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="regionsTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="regionsTable.remove"/>
+                        <button id="loadRegionsRussiaBtn" caption="Загрузить регионы РФ" icon="CLOUD_DOWNLOAD" stylename="primary candidate-btn candidate-smartload-btn"/>
+                    </hbox>
+                    <hbox id="toolbarSpacer" width="100%"/>
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
+                                <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="regionsTable"
+                        dataLoader="regionsDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                excludeProperties="regionOfCity,regionCountry.countryOfRegion,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="regionsTable">
+                    <groupTable id="regionsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="regionsDc"
+                                stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excel"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="regionEmblemColumn" caption="Герб" width="50px" sortable="false"/>
+                            <column id="regionRuName" caption="Название" expandRatio="2"/>
+                            <column id="regionCountry" caption="Страна" width="180px"/>
+                            <column id="regionType" caption="Тип" width="130px"/>
+                            <column id="capital" caption="Адм. центр" width="150px"/>
+                            <column id="regionCode" caption="Код" width="100px" align="CENTER"/>
+                            <column id="isoCode" caption="ISO" width="100px" align="CENTER"/>
+                            <column id="timeZone" caption="Часовой пояс" width="130px"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

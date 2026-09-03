@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://positionReestrCaption"
+        focusComponent="positionsTable"
+        messagesPack="com.company.hunttech.web.screens.position"
+        icon="ID_BADGE">
+    <data readOnly="true">
+        <collection id="positionsDc"
+                    class="com.company.hunttech.entity.Position"
+                    view="position-browse-view">
+            <loader id="positionsDl">
+                <query><![CDATA[select e from hunttech_Position e order by e.positionRuName]]></query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px) -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+                        <!-- Шапка профиля должности -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/dictionaries/position.png" scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailTitle" value="msg://msgSelectPosition" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
+                                <label id="detailLocation" value="msg://msgPositionHandbook" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn" caption="msg://msgOpenCard" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция: Параметры наименования -->
+                        <vbox id="paramsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://msgSectionName" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="paramsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="msg://msgRuLabel" stylename="bold"/><label id="detailRuName" value="-"/></row>
+                                    <row><label value="msg://msgEnLabel" stylename="bold"/><label id="detailEnName" value="-"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Стандартное описание -->
+                        <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://msgSectionDescription" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <vbox spacing="false" width="100%" stylename="edit-sidebar-summary">
+                                <label id="detailDescription" value="-" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Секция: Кто это такой -->
+                        <vbox id="whoIsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://msgSectionProfile" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <vbox spacing="false" width="100%" stylename="edit-sidebar-summary">
+                                <label id="detailWhoIsThisGuy" value="-" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            </vbox>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
+                
+                <!-- Верхняя командная панель действий -->
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
+                        <button id="createPositionBtn" caption="msg://msgCreatePosition" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
+                        <button id="editPositionToolbarBtn" caption="msg://msgEditPosition" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
+                        <button id="removePositionToolbarBtn" caption="msg://msgRemovePosition" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
+                        <button id="refreshBtn" caption="msg://msgRefresh" icon="REFRESH" stylename="secondary candidate-btn"/>
+                    </cssLayout>
+                </cssLayout>
+
+                <!-- Стандартный фильтр поиска CUBA Platform -->
+                <filter id="filter"
+                        applyTo="positionsTable"
+                        dataLoader="positionsDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                exclude="id"
+                                excludeRecursively="true"
+                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка таблицы должностей -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="positionsTable">
+                    <groupTable id="positionsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="positionsDc"
+                                stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create" openMode="NEW_TAB"/>
+                            <action id="edit" type="edit" openMode="NEW_TAB"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="positionPicColumn" caption="Иконка" width="60px" sortable="false"/>
+                            <column id="positionRuName" caption="msg://msgPositionRuName" expandRatio="1"/>
+                            <column id="positionEnName" caption="msg://msgPositionEnName" width="240px"/>
+                            <column id="hasDescription" caption="msg://msgStandartDescription" width="160px" sortable="false"/>
+                            <column id="hasWhoIs" caption="msg://msgWhoThisGuy" width="120px" sortable="false"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

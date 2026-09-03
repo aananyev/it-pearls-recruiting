@@ -68,6 +68,36 @@
     overflow-wrap: anywhere;
   }
 
+    /* Grid labels в edit-sidebar-summary и edit-sidebar-grid — перенос по словам */
+  .edit-sidebar-summary .v-grid-row .v-label,
+  .edit-sidebar-grid .v-grid-row .v-label {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .edit-sidebar-title,
+  .edit-sidebar-title.v-label,
+  .candidate-sidebar-fullname,
+  .job-candidate-sidebar .candidate-sidebar-fullname,
+  .job-candidate-sidebar .edit-sidebar-title {
+    color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+    font-weight: 700 !important;
+  }
+
+  .edit-sidebar-subtitle,
+  .edit-sidebar-subtitle.v-label,
+  .candidate-sidebar-position,
+  .job-candidate-sidebar .candidate-sidebar-position {
+    color: $v-selection-color !important;
+    font-weight: 600 !important;
+  }
+
+  .candidate-sidebar-city,
+  .job-candidate-sidebar .candidate-sidebar-city {
+    color: rgba($v-font-color, 0.85) !important;
+  }
+
   .label-navigation,
   .v-slot-label-navigation {
     box-sizing: border-box;
@@ -171,6 +201,59 @@
     width: 100% !important;
     height: 100% !important;
     overflow-x: hidden !important;
+  }
+
+  // CDP-фикс (общий для всех Edit-форм HRM HuntTech): Vaadin .v-scrollable
+  // внутри .edit-workspace-scroll позиционируется абсолютно относительно
+  // v-generated-body (offsetParent = root Vaadin), из-за чего его ширина
+  // вычисляется от body (1600px) вместо scrollbox (1060px). Это приводит к
+  // каскадному overflow у gridlayout-slot, textfield, pickerfield, textarea
+  // на 32-100+ px вправо. Ограничиваем v-scrollable шириной родителя.
+  .edit-workspace-scroll > .v-scrollable,
+  .edit-workspace .v-scrollable {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  // CDP-фикс: .v-slot — обёртка Vaadin над layout. Без box-sizing:border-box
+  // и явной width:100% слоты растягиваются по содержимому (1030-3090px),
+  // ломая сетку gridlayout на 2/3 колонки. Запрещаем выход за границы.
+  .edit-workspace .v-slot,
+  .edit-workspace-content .v-slot {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  // CDP-фикс: tabSheet панель должна обрезать содержимое, не выпуская
+  // v-scrollable за свои границы (box-sizing:content-box сдвигает
+  // v-scrollable вправо на ширину border+padding).
+  .edit-workspace .v-tabsheet-tabsheetpanel {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  // CDP-фикс #2 (общий для всех Edit-форм): Vaadin рассчитывает inline 'left'
+  // для v-gridlayout-slot при инициализации. При resize left остаётся прежним,
+  // слоты уезжают за границы. Сбрасываем left:0 и переводим в normal flow.
+  .edit-workspace-content .v-gridlayout-slot {
+    left: 0 !important;
+    top: auto !important;
+    position: relative !important;
+  }
+
+  // CDP-фикс #3 (общий): v-slot в hbox-контейнере с парой edit-form-control
+  // получает width:100% от Vaadin inline. Ограничиваем до 50%.
+  .edit-workspace-content .v-horizontallayout > .v-slot {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 50% !important;
+    width: 50% !important;
+    flex: 0 0 50% !important;
   }
 
   .edit-workspace-content {
@@ -388,19 +471,103 @@
   }
 
   .edit-form-control .c-pickerfield-layout {
-    table-layout: fixed;
+    table-layout: fixed !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .edit-form-control .c-pickerfield-layout-cell {
     box-sizing: border-box;
     min-width: 0 !important;
-    max-width: 100% !important;
   }
 
-  .edit-form-control .v-filterselect-input,
+  .edit-form-control .c-pickerfield-layout-cell:first-child {
+    width: 100% !important;
+  }
+
+  .edit-form-control .c-pickerfield .c-pickerfield-button {
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Единый шрифт полей ввода: font-size: 15px / line-height: 38px / font-weight: 400
+  // (эталон — поле «Страна» в CompanyEdit: lookupPickerField / lookupField / textField).
+  // Применяется ко всем элементам ввода (v-textfield, v-filterselect-input, v-datefield-textfield,
+  // c-suggestionfield, c-pickerfield, v-textarea) как прямым (.v-textfield.edit-form-control),
+  // так и вложенным (.edit-form-control .v-textfield), а также внутри .edit-workspace / .edit-card / .edit-tabs.
+  // ═══════════════════════════════════════════════════════════════════════════
+  .v-textfield,
+  .v-textfield.edit-form-control,
+  .edit-form-control.v-textfield,
   .edit-form-control .v-textfield,
+  .v-filterselect-input,
+  .edit-form-control .v-filterselect-input,
+  .v-datefield-textfield,
   .edit-form-control .v-datefield-textfield,
-  .edit-form-control .c-suggestionfield {
+  .c-suggestionfield,
+  .edit-form-control .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-filterselect-input,
+  .edit-form-control .c-pickerfield .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-textfield,
+  .edit-form-control .c-pickerfield .v-datefield-textfield,
+  .edit-form-control .c-pickerfield input,
+  .edit-workspace .v-textfield,
+  .edit-workspace .v-filterselect-input,
+  .edit-workspace-content .v-textfield,
+  .edit-workspace-content .v-filterselect-input,
+  .edit-card .v-textfield,
+  .edit-card .v-filterselect-input,
+  .edit-tabs .v-textfield,
+  .edit-tabs .v-filterselect-input,
+  .edit-form-control .v-textarea,
+  .edit-workspace .v-textarea,
+  .edit-workspace-content .v-textarea,
+  .edit-card .v-textarea,
+  .edit-tabs .v-textarea,
+  .edit-form-control .v-richtextarea,
+  .edit-form-control .v-richtextarea .v-richtextarea-content,
+  .edit-form-control .v-richtextarea iframe,
+  .edit-form-control .v-checkbox,
+  .edit-form-control .v-checkbox .v-checkbox-caption,
+  .edit-form-control .v-caption,
+  .edit-form-control > .v-caption,
+  .edit-form-control .v-has-caption > .v-caption,
+  .edit-form-control .v-has-caption .v-caption {
+    box-sizing: border-box;
+    font-family: inherit !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+  }
+
+  // line-height: 38px и высота 38px строго для однострочных полей ввода (textField, lookupField, dateField, suggestionField)
+  .v-textfield,
+  .v-textfield.edit-form-control,
+  .edit-form-control.v-textfield,
+  .edit-form-control .v-textfield,
+  .v-filterselect-input,
+  .edit-form-control .v-filterselect-input,
+  .v-datefield-textfield,
+  .edit-form-control .v-datefield-textfield,
+  .c-suggestionfield,
+  .edit-form-control .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-filterselect-input,
+  .edit-form-control .c-pickerfield .c-suggestionfield,
+  .edit-form-control .c-pickerfield .v-textfield,
+  .edit-form-control .c-pickerfield .v-datefield-textfield,
+  .edit-form-control .c-pickerfield input,
+  .edit-workspace .v-textfield,
+  .edit-workspace .v-filterselect-input,
+  .edit-workspace-content .v-textfield,
+  .edit-workspace-content .v-filterselect-input,
+  .edit-card .v-textfield,
+  .edit-card .v-filterselect-input,
+  .edit-tabs .v-textfield,
+  .edit-tabs .v-filterselect-input {
     height: 38px !important;
     min-height: 38px !important;
     padding: 0 10px !important;
@@ -508,4 +675,405 @@
       max-width: 250px !important;
     }
   }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * PopupButton, Context Menu & Action Dropdowns (Theme-aware Modern UI)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+
+  .v-popupbutton-popup,
+  .c-popupbutton-popup,
+  .c-cm-container,
+  .v-popupview-popup,
+  .v-contextmenu,
+  .v-menubar-popup {
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.14) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.12) !important;
+    padding: 6px 4px !important;
+    min-width: 180px;
+    box-sizing: border-box !important;
+
+    .c-popupbutton-layout,
+    .v-scrollable {
+      padding: 0 !important;
+      overflow-x: hidden !important;
+    }
+  }
+
+  .c-cm-button,
+  .v-button.c-cm-button,
+  .v-popupbutton-popup .v-button,
+  .c-popupbutton-popup .v-button,
+  .v-contextmenu .gwt-MenuItem,
+  .v-menubar-popup .v-menubar-menuitem {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    padding: 2px 12px !important;
+    margin: 1px 0 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: mix($v-font-color, $v-panel-background-color, 85%) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.15px !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    transition: background 0.12s ease-in-out, color 0.12s ease-in-out, transform 0.08s ease !important;
+
+    &:after {
+      display: none !important;
+    }
+
+    .v-button-caption,
+    .c-cm-button-caption {
+      color: inherit !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 1.3 !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      flex: 1 1 auto !important;
+    }
+
+    .v-icon,
+    .c-cm-button-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 18px !important;
+      min-width: 18px !important;
+      font-size: 13.5px !important;
+      margin-right: 10px !important;
+      color: rgba($v-font-color, 0.60) !important;
+      transition: color 0.12s ease-in-out, transform 0.12s ease !important;
+    }
+
+    &:hover:not(.v-disabled),
+    &.c-cm-button-selected:not(.v-disabled),
+    &.v-button-focus:not(.v-disabled),
+    &.gwt-MenuItem-selected:not(.v-disabled),
+    &.v-menubar-menuitem-selected:not(.v-disabled) {
+      background: rgba($v-selection-color, 0.10) !important;
+      color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+
+      .v-icon,
+      .c-cm-button-icon {
+        color: $v-selection-color !important;
+        transform: scale(1.08);
+      }
+    }
+
+    &:active:not(.v-disabled) {
+      background: rgba($v-selection-color, 0.16) !important;
+      transform: scale(0.99);
+    }
+
+    &.v-disabled,
+    &[disabled] {
+      opacity: 0.45 !important;
+      cursor: not-allowed !important;
+      background: transparent !important;
+      color: rgba($v-font-color, 0.35) !important;
+
+      .v-icon,
+      .c-cm-button-icon {
+        color: rgba($v-font-color, 0.35) !important;
+      }
+    }
+  }
+
+  .c-cm-separator,
+  .v-menubar-separator {
+    height: 1px !important;
+    background: rgba($v-font-color, 0.12) !important;
+    margin: 4px 6px !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  /* Счетчик строк и пагинация над/под таблицами (rowsCount в DataGrid / TreeDataGrid / Table) */
+  .c-simplepagination,
+  .c-rows-count,
+  .v-slot-c-rows-count,
+  .c-paging,
+  .v-table-footer-container .c-rows-count,
+  .v-grid-footer-container .c-rows-count {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 4px !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+
+    /* Текст статуса строк (например, 1 - 100 из ...) */
+    .c-simplepagination-status,
+    .c-rows-count-label,
+    .v-label {
+      font-size: 12px !important;
+      line-height: 28px !important;
+      color: rgba($v-font-color, 0.72) !important;
+      padding: 0 6px !important;
+      white-space: nowrap !important;
+      vertical-align: middle !important;
+      margin: 0 !important;
+      height: 28px !important;
+    }
+
+    /* Кнопка ссылки подсчета общего количества (из 350) */
+    .c-simplepagination-count,
+    .c-rows-count-count,
+    .v-button-link {
+      height: 24px !important;
+      min-height: 24px !important;
+      line-height: 24px !important;
+      font-size: 12px !important;
+      padding: 0 4px !important;
+      margin: 0 !important;
+      vertical-align: middle !important;
+      color: $v-selection-color !important;
+    }
+
+    /* Стрелки пагинации влево / вправо / в начало / в конец */
+    .v-button,
+    .c-simplepagination-first,
+    .c-simplepagination-prev,
+    .c-simplepagination-next,
+    .c-simplepagination-last,
+    .c-rows-count-first,
+    .c-rows-count-prev,
+    .c-rows-count-next,
+    .c-rows-count-last {
+      height: 24px !important;
+      min-height: 24px !important;
+      max-height: 24px !important;
+      width: 24px !important;
+      min-width: 24px !important;
+      max-width: 24px !important;
+      padding: 0 !important;
+      margin: 0 2px !important;
+      border: 1px solid rgba($v-font-color, 0.14) !important;
+      border-radius: 4px !important;
+      background: rgba($v-font-color, 0.04) !important;
+      color: $v-font-color !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+      box-shadow: none !important;
+
+      .v-icon {
+        font-size: 11px !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: $v-font-color !important;
+      }
+
+      .v-button-wrap {
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      &:hover:not(.v-disabled) {
+        background: rgba($v-font-color, 0.09) !important;
+        border-color: rgba($v-font-color, 0.24) !important;
+      }
+
+      &.v-disabled {
+        opacity: 0.3 !important;
+        cursor: default !important;
+        background: transparent !important;
+        border-color: transparent !important;
+      }
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * Главное меню приложения (App Menubar, Main Menu, SideMenu)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  .c-app-menubar,
+  .cuba-app-menubar,
+  .c-main-menu,
+  .v-menubar.c-app-menubar {
+    height: 42px !important;
+    min-height: 42px !important;
+    line-height: 42px !important;
+    border: none !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+
+    > .v-menubar-menuitem {
+      height: 34px !important;
+      min-height: 34px !important;
+      line-height: 34px !important;
+      padding: 0 12px !important;
+      margin: 0 2px !important;
+      border-radius: 6px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.15px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+      transition: background 0.15s ease, color 0.15s ease !important;
+
+      .v-icon {
+        font-size: 14px !important;
+        line-height: 1 !important;
+        margin-right: 8px !important;
+        color: rgba($v-font-color, 0.72) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: color 0.15s ease, transform 0.15s ease !important;
+      }
+
+      .v-menubar-menuitem-caption {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        vertical-align: middle !important;
+        display: inline-block !important;
+      }
+
+      .v-menubar-submenu-indicator {
+        margin-left: 6px !important;
+        opacity: 0.65 !important;
+        font-size: 11px !important;
+      }
+
+      &:hover:not(.v-menubar-menuitem-disabled),
+      &.v-menubar-menuitem-selected,
+      &.v-menubar-menuitem-highlight {
+        background: rgba($v-selection-color, 0.12) !important;
+        color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+          transform: scale(1.08);
+        }
+      }
+    }
+  }
+
+  /* Боковое меню приложения SideMenu */
+  .c-sidemenu {
+    .v-side-menu-item {
+      border-radius: 6px !important;
+      margin: 2px 6px !important;
+      padding: 6px 12px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      transition: background 0.15s ease, color 0.15s ease !important;
+
+      .v-icon {
+        font-size: 14px !important;
+        margin-right: 10px !important;
+        color: rgba($v-font-color, 0.7) !important;
+      }
+
+      &:hover {
+        background: rgba($v-selection-color, 0.08) !important;
+        color: mix($v-font-color, $v-panel-background-color, 95%) !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+        }
+      }
+
+      &.v-side-menu-item-selected {
+        background: rgba($v-selection-color, 0.16) !important;
+        color: mix($v-font-color, $v-panel-background-color, 100%) !important;
+        font-weight: 600 !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+        }
+      }
+    }
+  }
+
+  /* Таблицы реестров (поддержка переноса текста + динамическая высота строк) */
+  .candidate-browse-grid {
+    .v-table-cell-content {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      min-height: 38px !important;
+      height: auto !important;
+      vertical-align: middle !important;
+    }
+
+    .v-table-cell-wrapper {
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+      height: auto !important;
+    }
+
+    .v-table-row,
+    .v-table-row-odd {
+      min-height: 38px !important;
+      height: auto !important;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Стиль выпадающих меню (v-filterselect-suggestpopup, c-suggestionfield-popup):
+  // комфортный вертикальный интервал (34px), исключающий наезды пунктов друг на друга
+  // ═══════════════════════════════════════════════════════════════════════════
+  .v-filterselect-suggestpopup,
+  .c-suggestionfield-popup,
+  .v-filterselect-suggestmenu {
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.15) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
+
+    .gwt-MenuItem,
+    .v-filterselect-suggestmenu .gwt-MenuItem,
+    .c-suggestionfield-popup-content .gwt-MenuItem,
+    td.gwt-MenuItem,
+    .v-filterselect-suggestmenu tr,
+    .v-filterselect-suggestmenu td {
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 32px !important;
+      height: 34px !important;
+      min-height: 34px !important;
+      padding: 2px 14px !important;
+      box-sizing: border-box !important;
+      color: $v-font-color !important;
+      vertical-align: middle !important;
+      white-space: nowrap !important;
+    }
+
+    .gwt-MenuItem-selected,
+    .v-filterselect-suggestmenu .gwt-MenuItem-selected,
+    .c-suggestionfield-popup-content .gwt-MenuItem-selected,
+    td.gwt-MenuItem-selected {
+      background: mix($v-selection-color, $v-panel-background-color, 25%) !important;
+      color: $v-font-color !important;
+    }
+  }
+
 }

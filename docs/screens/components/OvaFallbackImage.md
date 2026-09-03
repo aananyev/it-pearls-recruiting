@@ -184,6 +184,7 @@ Helper сначала сбрасывает прежний `ValueSource`, про�
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-28 | Исправлен `scaleMode` с `SCALE_TO_FIT` на `SCALE_DOWN` (валидное значение enum Image.ScaleMode в CUBA 7.3) в реестрах `IteractionListReestrBrowse` / `CandidateCVReestrBrowse` |
 | 2026-08-14 | `OvaFallbackImageLoader` читает XML-атрибут `ovalBackground` (фон-подложка под прозрачные изображения), вызов `setOvalBackground(...)`; в `ProjectEdit` логотипу проекта задан тёмно-серый фон `#3a3e44` |
 | 2026-08-14 | Унаследован атрибут `ovalBackground` от `OvalImage` (фон-подложка под прозрачные изображения); `WebOvaFallbackImage` реализует его через общий `OvalImageBackgroundSupport` |
 | 2026-08-13 | Статичный fallback без `dataContainer`/`property` применяется сразу в `setFallbackThemePath()` (`updateComponent` у компонента без valueSource не вызывается); guard `host.getSource() == null` — не затирает ручной `setSource(...)` контроллера; в `FallbackImageHost` добавлен `getSource()` |

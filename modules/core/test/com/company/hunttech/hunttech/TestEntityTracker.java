@@ -3,6 +3,8 @@ package com.company.hunttech;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 
+import com.haulmont.cuba.security.entity.User;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +23,12 @@ public class TestEntityTracker {
     }
 
     public <T extends Entity<UUID>> T track(T entity) {
+        if (entity instanceof User) {
+            String login = ((User) entity).getLoginLowerCase();
+            if ("anonymous".equalsIgnoreCase(login) || "admin".equalsIgnoreCase(login)) {
+                return entity; // Защита системных пользователей от трекинга на удаление
+            }
+        }
         entries.add(new CleanupEntry(entity.getClass(), entity.getId()));
         return entity;
     }
@@ -29,6 +37,21 @@ public class TestEntityTracker {
         for (int i = entries.size() - 1; i >= 0; i--) {
             CleanupEntry entry = entries.get(i);
             try {
+                if (User.class.isAssignableFrom(entry.entityClass)) {
+                    User user = (User) dataManager.load(entry.entityClass)
+                            .id(entry.id)
+                            .view("_minimal")
+                            .optional()
+                            .orElse(null);
+                    if (user != null) {
+                        String login = user.getLoginLowerCase();
+                        if ("anonymous".equalsIgnoreCase(login) || "admin".equalsIgnoreCase(login)) {
+                            continue; // Защита: никогда не удалять anonymous и admin
+                        }
+                        dataManager.remove(user);
+                    }
+                    continue;
+                }
                 Entity<UUID> entity = dataManager.load(entry.entityClass)
                         .id(entry.id)
                         .view("_minimal")

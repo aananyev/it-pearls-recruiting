@@ -4,6 +4,7 @@ import com.company.hunttech.app.ImageProcessingService;
 import com.company.hunttech.config.HunttechImageConfig;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.service.GeoDataEnrichmentService;
 import com.company.hunttech.service.HrmAiService;
 import com.company.hunttech.service.UserAiContextService;
 import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
@@ -671,6 +672,41 @@ public class ExtSettingsWindow extends SettingsWindow {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    public void onTestGeoApiBtnClick() {
+        UserSettings userSettings = userSettingsDs.getItem();
+        if (userSettings == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(getMessage("msgSettingsNotLoaded"))
+                    .show();
+            return;
+        }
+        String apiKey = userSettings.getGeoApiKey();
+        String secretKey = userSettings.getGeoApiSecret();
+        String apiUrl = userSettings.getGeoApiUrl();
+
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(getMessage("msgGeoApiKeyRequired"))
+                    .withDescription(getMessage("msgGeoApiKeyRequiredDesc"))
+                    .show();
+            return;
+        }
+
+        GeoDataEnrichmentService geoService = AppBeans.get(GeoDataEnrichmentService.class);
+        boolean success = geoService.testGeoApiConnection(apiKey, secretKey, apiUrl);
+        if (success) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(getMessage("msgGeoConnectionSuccess"))
+                    .withDescription(getMessage("msgGeoConnectionSuccessDesc"))
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(getMessage("msgGeoConnectionFailed"))
+                    .withDescription(getMessage("msgGeoConnectionFailedDesc"))
+                    .show();
+        }
     }
 
     @Override protected void initDefaultScreenField() { super.initDefaultScreenField(); }

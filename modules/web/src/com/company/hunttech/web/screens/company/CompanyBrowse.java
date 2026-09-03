@@ -1,8 +1,14 @@
 package com.company.hunttech.web.screens.company;
 
 import com.company.hunttech.entity.Company;
+import com.company.hunttech.service.CompanyRequisitesIngestService;
+import com.company.hunttech.service.CompanyRequisitesParsedData;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -10,6 +16,8 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -25,6 +33,8 @@ import java.util.stream.Collectors;
 @LookupComponent("companiesTable")
 @LoadDataBeforeShow
 public class CompanyBrowse extends StandardLookup<Company> {
+    private static final Logger log = LoggerFactory.getLogger(CompanyBrowse.class);
+
     private static final String QUERY_COMPANY_DESCRIPTIONS_BY_IDS =
             "select e.id, e.companyDescription from hunttech_Company e where e.id in :ids";
 
@@ -63,6 +73,19 @@ public class CompanyBrowse extends StandardLookup<Company> {
     }
 
     @Inject
+    private TreeDataGrid<Company> companiesTable;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private Messages messages;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private CompanyRequisitesIngestService companyRequisitesIngestService;
+
+    @Inject
     private CheckBox checkBoxOnlyOurClient;
     @Inject
     private CollectionLoader<Company> companiesDl;
@@ -72,6 +95,79 @@ public class CompanyBrowse extends StandardLookup<Company> {
     private DataManager dataManager;
 
     private Map<UUID, String> companyDescriptionCache = Collections.emptyMap();
+
+    @Subscribe("smartUploadBtn")
+    public void onSmartUploadBtnClick(Button.ClickEvent event) {
+        openSmartCompanyUploadDialog();
+    }
+
+    public void openSmartCompanyUploadDialog() {
+        SmartCompanyRequisitesUploadScreen screen = screenBuilders.screen(this)
+                .withScreenClass(SmartCompanyRequisitesUploadScreen.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        screen.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                CompanyRequisitesParsedData data = screen.getParsedData();
+                if (data != null) {
+                    Company company = null;
+                    if (data.getInn() != null && !data.getInn().trim().isEmpty()) {
+                        company = dataManager.load(Company.class)
+                                .query("select c from hunttech_Company c where c.inn = :inn")
+                                .parameter("inn", data.getInn().trim())
+                                .view("company-edit-view")
+                                .optional()
+                                .orElse(null);
+                    }
+                    if (company == null) {
+                        String nameToFind = null;
+                        if (data.getLegalEntityName() != null && !data.getLegalEntityName().trim().isEmpty()) {
+                            nameToFind = data.getLegalEntityName().trim();
+                        } else if (data.getCompanyShortName() != null && !data.getCompanyShortName().trim().isEmpty()) {
+                            nameToFind = data.getCompanyShortName().trim();
+                        }
+                        if (nameToFind != null) {
+                            List<Company> matches = dataManager.load(Company.class)
+                                    .query("select c from hunttech_Company c where lower(c.comanyName) = lower(:name) or lower(c.companyShortName) = lower(:name)")
+                                    .parameter("name", nameToFind)
+                                    .view("company-edit-view")
+                                    .list();
+                            if (!matches.isEmpty()) {
+                                company = matches.get(0);
+                            }
+                        }
+                    }
+                    boolean isNew = false;
+                    if (company == null) {
+                        company = metadata.create(Company.class);
+                        isNew = true;
+                    }
+                    company = companyRequisitesIngestService.applyRequisitesToCompany(company, data);
+                    if (company.getComanyName() == null || company.getComanyName().trim().isEmpty()) {
+                        if (data.getLegalEntityName() != null && !data.getLegalEntityName().trim().isEmpty()) {
+                            company.setComanyName(data.getLegalEntityName().trim());
+                        } else if (data.getCompanyShortName() != null && !data.getCompanyShortName().trim().isEmpty()) {
+                            company.setComanyName(data.getCompanyShortName().trim());
+                        } else {
+                            company.setComanyName("Новая компания");
+                        }
+                    }
+                    Company committedCompany = dataManager.commit(company);
+                    companiesDl.load();
+                    try {
+                        companiesTable.setSelected(committedCompany);
+                    } catch (Exception e) {
+                        log.warn("Failed to select company after smart upload", e);
+                    }
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messages.getMessage(CompanyBrowse.class, isNew ? "msgCompanyCreatedSuccess" : "msgCompanyUpdatedSuccess"))
+                            .withDescription(committedCompany.getComanyName() != null ? committedCompany.getComanyName() : "")
+                            .show();
+                }
+            }
+        });
+        screen.show();
+    }
 
     @Subscribe(id = "companiesDl", target = Target.DATA_LOADER)
     private void onCompaniesDlPostLoad(CollectionLoader.PostLoadEvent<Company> event) {

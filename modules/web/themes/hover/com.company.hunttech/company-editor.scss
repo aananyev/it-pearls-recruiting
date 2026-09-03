@@ -84,7 +84,32 @@
     // Визуальный блок sidebar: без карточки-рамки, аватар логотипа стоит на фоне
     // sidebar; блок центрирует круглый логотип 96×96 (PNG уже круглый после
     // обработки логотипа) и пару кнопок «Загрузить»/«Очистить».
-    .edit-sidebar-visual {
+    // Статический блочный поток всех слотов Vaadin в sidebar:
+    // полностью отключает абсолютное GWT-позиционирование слотов,
+    // гарантируя строго последовательное вертикальное размещение
+    // (аватар -> кнопки загрузки -> умная обработка -> заголовок -> сводка -> разделы -> подсказка).
+    .edit-sidebar .v-slot,
+    .edit-sidebar-visual .v-slot,
+    .edit-sidebar-identity .v-slot,
+    .edit-sidebar > .v-slot,
+    .edit-sidebar-visual > .v-slot {
+      position: static !important;
+      float: none !important;
+      clear: both !important;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      top: auto !important;
+      left: auto !important;
+      bottom: auto !important;
+      right: auto !important;
+    }
+
+.edit-sidebar-visual {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
@@ -94,13 +119,48 @@
       justify-content: center !important;
     }
 
-    // Круглый логотип проекта: border-radius 50% при object-fit FILL (PNG с
-    // прозрачностью), без рамки и тени.
+    // Круглый логотип компании 176×176: правильный круг без обрезки по бокам,
+    // точное вписывание изображения-заглушки и загруженных логотипов.
     .company-editor-logo-image,
-    .company-editor-logo-image.v-embedded {
-      box-sizing: border-box;
+    .company-editor-logo-image.v-embedded,
+    .company-editor-logo-image.v-image,
+    .company-editor-logo-image img,
+    .company-editor-logo-image .v-image-element,
+    .company-editor-logo-image .v-embedded-image {
+      box-sizing: border-box !important;
+      width: 176px !important;
+      height: 176px !important;
+      min-width: 176px !important;
+      min-height: 176px !important;
+      max-width: 176px !important;
+      max-height: 176px !important;
       border-radius: 50% !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      display: block !important;
+    }
+
+    // Fallback image (no-company.png) внутри ovaFallbackImage: масштабирование как у самого элемента
+    .company-editor-logo-image .ht-oval-fallback-image,
+    .company-editor-logo-image .ht-oval-fallback-image img,
+    .company-editor-logo-image .ht-oval-fallback-image .v-image-element {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 100% !important;
+      min-height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      border-radius: 50% !important;
+      object-fit: inherit !important;
+      object-position: center center !important;
+      display: block !important;
+    }
+
+    .company-editor-logo-image {
+      margin: 0 auto !important;
       overflow: hidden !important;
+      border-radius: 50% !important;
     }
 
     // Пара кнопок загрузчика логотипа 96×36 — канон контракта §4.1: полупрозрачный
@@ -146,6 +206,60 @@
     .edit-sidebar-visual .c-fileupload-clear:hover {
       background: rgba(255, 255, 255, 0.12) !important;
       border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    // Кнопка умной обработки логотипа
+    #enhanceCompanyLogoBtn,
+    .enhance-company-logo-btn {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      margin-top: 8px !important;
+      padding: 0 10px !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.34) !important;
+      border-radius: 5px !important;
+      color: #f8fafc !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 34px !important;
+      box-shadow: none !important;
+      cursor: pointer !important;
+      transition: background 0.15s ease, border-color 0.15s ease !important;
+
+      .v-icon {
+        color: #ffb11b !important;
+        margin-right: 6px !important;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+      }
+    }
+
+    // Сводка ключевых реквизитов в сайдбаре
+    .edit-sidebar-summary {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      padding: 8px 10px !important;
+      margin: 6px 0 !important;
+      background: rgba(255, 255, 255, 0.035) !important;
+      border-radius: 6px !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+      .v-label {
+        font-size: 12px !important;
+        line-height: 18px !important;
+        color: rgba(248, 250, 252, 0.85) !important;
+      }
+
+      .bold,
+      .v-label.bold {
+        font-weight: 600 !important;
+        color: rgba(248, 250, 252, 0.55) !important;
+        min-width: 50px !important;
+      }
     }
 
     // Полоса-заголовок набора навигации «Разделы» и раздела «Коротко» (контракт
@@ -292,14 +406,781 @@
     .v-richtextarea iframe {
       box-sizing: border-box;
       max-width: 100%;
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
     }
 
-    // Таблица вакансий (dataGrid): Grid внутри flex-карточки без min-width: 0
-    // выталкивает ширину за границы вкладки (приём open-position-editor-table-variant5).
+    .v-richtextarea {
+      font-family: inherit !important;
+    }
+
+    // Ограничение ширины таблиц DataGrid внутри вкладок
     .v-grid {
       box-sizing: border-box;
       min-width: 0 !important;
       max-width: 100% !important;
     }
+
+    // Гарантированный вертикальный скроллинг содержимого вкладок
+    .edit-workspace-scroll,
+    .edit-workspace-scroll > .v-scrollable,
+    .v-scrollbox.edit-workspace-scroll,
+    .v-scrollbox.edit-workspace-scroll > .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .edit-workspace-content,
+    .v-verticallayout.edit-workspace-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: min-content !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // GridLayout внутри вкладок: ограничение ширины слотов (fix overflow за границы экрана)
+    .edit-workspace-content .v-gridlayout,
+    .edit-workspace-content .v-gridlayout > div,
+    .edit-workspace-content .v-gridlayout table {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      table-layout: fixed !important;
+    }
+
+    .edit-workspace-content .v-gridlayout-slot {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding-top: 5px !important;
+      padding-bottom: 5px !important;
+    }
+
+    .edit-workspace-content .v-gridlayout-slot > .v-widget,
+    .edit-workspace-content .v-gridlayout-slot > .v-csslayout,
+    .edit-workspace-content .v-gridlayout-slot > .v-horizontallayout,
+    .edit-workspace-content .v-gridlayout-slot > .v-verticallayout {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+
+    // CDP-фикс #2: Vaadin рассчитывает inline 'left' для v-gridlayout-slot
+    // при инициализации по ширине gridlayout. При resize gridlayout сжимается,
+    // но inline 'left' остаётся прежним — слоты уезжают за границы.
+    // Принудительно сбрасываем left:0 и top:auto, чтобы слоты заняли
+    // свои 50% в normal flow (display:relative).
+    .edit-workspace-content .v-gridlayout-slot {
+      left: 0 !important;
+      top: auto !important;
+      position: relative !important;
+    }
+
+    // CDP-фикс #3: v-slot в hbox-контейнере с парой чекбоксов (или других
+    // edit-form-control) получает width:100% от Vaadin inline. Без фикса
+    // каждый слот занимает 100% родителя, итого 2 × 100% = 200%, что
+    // вылезает за workspace. Принудительно ограничиваем до 50%.
+    
+
+// ═══════════════════════════════════════════════════════════════════════════
+    // Единый шрифт, стиль и размер полей ввода (TextField, LookupField, LookupPickerField, DateField, TextArea)
+    // ═══════════════════════════════════════════════════════════════════════════
+    .v-textfield,
+    .v-textfield.edit-form-control,
+    .edit-form-control.v-textfield,
+    .edit-form-control .v-textfield,
+    .v-filterselect-input,
+    .edit-form-control .v-filterselect-input,
+    .v-datefield-textfield,
+    .edit-form-control .v-datefield-textfield,
+    .c-suggestionfield,
+    .edit-form-control .c-suggestionfield,
+    .c-pickerfield .v-filterselect-input,
+    .c-pickerfield .c-suggestionfield,
+    .c-pickerfield .v-textfield,
+    .c-pickerfield .v-datefield-textfield,
+    .c-pickerfield input,
+    input.v-textfield,
+    input.v-filterselect-input {
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 38px !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      padding: 0 10px !important;
+      color: $v-font-color !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    .v-textarea,
+    .v-textarea.edit-form-control,
+    .edit-form-control .v-textarea,
+    textarea.v-textarea {
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
+      padding: 8px 10px !important;
+      color: $v-font-color !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Выравнивание всех элементов ввода по правому краю без выхода за границы
+    // ═══════════════════════════════════════════════════════════════════════════
+    .company-details-tab,
+    .company-requisites-tab,
+    .company-description-tab,
+    .company-departments-tab,
+    .edit-workspace,
+    .edit-workspace-scroll,
+    .edit-workspace-content,
+    .edit-tabs,
+    .edit-card,
+    .edit-card .v-panel-content,
+    .edit-card .v-panel-deco,
+    .edit-form-control,
+    .v-verticallayout,
+    .v-horizontallayout,
+    .v-slot,
+    .v-slot-edit-form-control,
+    .v-textfield,
+    .v-filterselect,
+    .v-filterselect-input,
+    .c-pickerfield,
+    .c-pickerfield-layout,
+    .c-pickerfield-layout-cell,
+    .v-datefield,
+    .v-datefield-textfield,
+    .c-suggestionfield,
+    .v-textarea,
+    .v-richtextarea,
+    .v-richtextarea-content,
+    .v-richtextarea iframe,
+    .v-grid,
+    .v-grid-tablewrapper {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // Ограничение ширины вертикальных контейнеров и слотов по правому краю карточки
+    .edit-workspace-content,
+    .edit-workspace-content > .v-verticallayout,
+    .edit-card .v-verticallayout,
+    .edit-card .v-verticallayout > .v-slot,
+    .company-details-tab .v-verticallayout,
+    .company-details-tab .v-verticallayout > .v-slot,
+    .company-requisites-tab .v-verticallayout,
+    .company-requisites-tab .v-verticallayout > .v-slot,
+    .company-description-tab .v-verticallayout,
+    .company-description-tab .v-verticallayout > .v-slot,
+    .company-departments-tab .v-verticallayout,
+    .company-departments-tab .v-verticallayout > .v-slot {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    // Все однострочные и многострочные элементы ввода (textField, lookupPickerField, textArea, richTextArea, dataGrid):
+    .edit-workspace-content .v-textfield,
+    .edit-workspace-content .v-filterselect,
+    .edit-workspace-content .c-pickerfield,
+    .edit-workspace-content .v-textarea,
+    .edit-workspace-content .v-richtextarea,
+    .edit-workspace-content .v-grid,
+    .edit-card .v-textfield,
+    .edit-card .v-filterselect,
+    .edit-card .c-pickerfield,
+    .edit-card .v-textarea,
+    .edit-card .v-richtextarea,
+    .edit-card .v-grid {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // LookupPickerField (c-pickerfield): кнопки действий никогда не выталкивают поле вправо
+    .c-pickerfield,
+    .c-pickerfield-layout {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      table-layout: fixed !important;
+    }
+
+    .c-pickerfield-layout-cell {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+    }
+
+    .c-pickerfield .c-pickerfield-layout-cell:first-child {
+      width: 100% !important;
+    }
+
+    .c-pickerfield .c-pickerfield-button {
+      box-sizing: border-box !important;
+      flex-shrink: 0 !important;
+      width: 34px !important;
+      min-width: 34px !important;
+      max-width: 34px !important;
+    }
+
+    // Vaadin сохраняет inline left/top у слотов hbox после изменения ширины
+    // окна. Внутри workspace возвращаем строки полей в нормальный flex-flow:
+    // на широкой области это две колонки, на узкой - перенос без overflow.
+    .edit-workspace-content .v-horizontallayout > .v-expand {
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex: 1 1 100% !important;
+      flex-wrap: wrap !important;
+      gap: 10px 14px !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      position: static !important;
+    }
+
+    .edit-workspace-content .v-horizontallayout > .v-expand > .v-slot {
+      box-sizing: border-box !important;
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      flex: 1 1 240px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    // Резиновая верстка тулбара реквизитов и перенос длинных подсказок
+    .company-requisites-tab #requisitesToolbar,
+    .company-requisites-tab .candidate-filter-bar {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .company-requisites-tab #requisitesToolbar .v-label,
+    .company-requisites-tab .edit-help {
+      box-sizing: border-box !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // Резиновая адаптивность карточек реквизитов
+    .company-requisites-tab .edit-card,
+    .company-requisites-tab .v-panel,
+    .company-requisites-tab .v-panel-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    .company-requisites-tab .edit-form-control,
+    .company-requisites-tab .v-textfield,
+    .company-requisites-tab .v-filterselect,
+    .company-requisites-tab .c-pickerfield,
+    .company-requisites-tab .v-textarea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+// Резиновая адаптивность DataGrid и таблиц департаментов:
+    .company-departments-tab,
+    .company-departments-tab .edit-card,
+    .company-departments-tab .v-panel,
+    .company-departments-tab .v-panel-content,
+    .company-departments-tab .v-grid,
+    .company-departments-tab .v-grid-tablewrapper {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .company-departments-tab .v-grid-header,
+    .company-departments-tab .v-grid-body,
+    .company-departments-tab .v-grid-row,
+    .company-departments-tab .v-grid-cell {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+    }
+
+    .company-departments-tab .v-buttons-panel {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 6px 8px !important;
+      margin-bottom: 8px !important;
+    }
+
+    // Резиновая адаптивность RichTextArea описания и условий:
+    .company-description-tab,
+    .company-description-tab .edit-card,
+    .company-description-tab .v-panel,
+    .company-description-tab .v-panel-content,
+    .company-description-tab .edit-form-control,
+    .company-description-tab .v-richtextarea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    .company-description-tab .v-richtextarea-toolbar {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 4px 6px !important;
+      background: rgba(248, 250, 252, 0.9) !important;
+      padding: 6px 8px !important;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+    }
+
+    .company-description-tab .v-richtextarea-toolbar table,
+    .company-description-tab .v-richtextarea-toolbar tbody,
+    .company-description-tab .v-richtextarea-toolbar tr {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 4px 6px !important;
+      width: 100% !important;
+    }
+
+    .company-description-tab .v-richtextarea-toolbar td {
+      display: inline-flex !important;
+      align-items: center !important;
+      padding: 0 !important;
+    }
+
+    .company-description-tab .v-richtextarea-content,
+    .company-description-tab .v-richtextarea iframe {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: block !important;
+    }
+
+    .edit-workspace-content .v-gridlayout-slot .edit-form-control,
+    .edit-workspace-content .v-gridlayout-slot .v-textfield,
+    .edit-workspace-content .v-gridlayout-slot .v-filterselect,
+    .edit-workspace-content .v-gridlayout-slot .v-filterselect-input,
+    .edit-workspace-content .v-gridlayout-slot .c-pickerfield,
+    .edit-workspace-content .v-gridlayout-slot .c-suggestionfield,
+    .edit-workspace-content .v-gridlayout-slot .v-datefield,
+    .edit-workspace-content .v-gridlayout-slot .v-datefield-textfield,
+    .edit-workspace-content .v-gridlayout-slot .v-textarea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // CDP-фикс: Vaadin scrollbox (.v-scrollable) внутри .edit-workspace-scroll
+    // позиционируется абсолютно относительно v-generated-body (offsetParent=root),
+    // из-за чего его ширина вычисляется от body (1600px), а не от scrollbox (1060px).
+    // Это приводит к каскадному overflow у всех дочерних gridlayout-slot, textfield,
+    // pickerfield, textarea на 32-100+ px вправо. Ограничиваем .v-scrollable
+    // шириной родителя, фиксируем box-sizing и запрещаем горизонтальный скролл.
+    .edit-workspace-scroll > .v-scrollable,
+    .edit-workspace .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    // CDP-фикс: .v-slot — обёртка Vaadin над layout. Без box-sizing:border-box и
+    // явной width:100% слоты растягиваются по содержимому (1030-3090px), ломая
+    // сетку gridlayout на 2/3 колонки. Запрещаем выход за границы родителя.
+    .edit-workspace .v-slot,
+    .edit-workspace-content .v-slot {
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    // CDP-фикс: tabSheet панель должна обрезать содержимое, не выпуская v-scrollable
+    // за свои границы. v-tabsheet-tabsheetpanel имеет box-sizing:content-box — это
+    // сдвигает v-scrollable вправо на ширину border+padding.
+    .edit-workspace .v-tabsheet-tabsheetpanel {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+
+    // CDP-фикс: hbox с парой чекбоксов (ourLegalEnityCheckBox + checkBoxOurClient) в
+    // первой карточке — каждый чекбокс получает width:100% от Vaadin и вылезает
+    // вправо на 1020px (2 × 1020 = 2040). Превращаем hbox во flex-контейнер с
+    // равномерным распределением.
+    .edit-workspace-content .company-main-tab-top-checks {
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      max-width: 100% !important;
+    }
+    .edit-workspace-content .v-horizontallayout > .v-slot > .v-checkbox,
+    .company-main-tab-top-checks > .v-checkbox {
+      box-sizing: border-box !important;
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      max-width: 50% !important;
+    }
+    /* Адаптивная верстка TabSheet и рабочей области без выхода за правую границу */
+    .edit-screen-layout,
+    #companyEditorMainLayout {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: row !important;
+
+      > .v-slot:first-child,
+      > .v-slot-edit-sidebar {
+        flex: 0 0 270px !important;
+        width: 270px !important;
+        min-width: 270px !important;
+        max-width: 270px !important;
+      }
+
+      > .v-expand,
+      > .v-slot:last-child,
+      > .v-slot-edit-workspace {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: calc(100% - 270px) !important;
+        width: auto !important;
+      }
+    }
+
+    .edit-workspace,
+    #companyEditorWorkspace {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+
+      > .v-slot,
+      > .v-expand {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+
+    .edit-toolbar,
+    #companyEditorToolbar {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 8px !important;
+
+      > .v-expand,
+      > .v-slot:first-child {
+        box-sizing: border-box !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      > .v-slot:last-child {
+        box-sizing: border-box !important;
+        flex: 0 0 auto !important;
+      }
+    }
+
+    #mainTab,
+    .edit-tabs,
+    .v-tabsheet {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+
+      .v-tabsheet-tabcontainer {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+      }
+
+      .v-tabsheet-tabsheetpanel {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+      }
+
+      .v-tabsheet-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+
+        > div {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          overflow-x: hidden !important;
+        }
+      }
+    }
+
+    .edit-workspace-scroll,
+    .edit-workspace-scroll > .v-scrollable,
+    .edit-workspace .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    .edit-workspace-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
+      padding: 12px !important;
+
+      > .v-slot,
+      > .v-expand {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      .edit-card,
+      .v-groupbox {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+
+        .v-groupbox-content {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          overflow-x: hidden !important;
+          padding: 10px 14px !important;
+        }
+      }
+
+      .v-horizontallayout {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px 14px !important;
+
+        > .v-slot,
+        > .v-expand {
+          box-sizing: border-box !important;
+          flex: 1 1 240px !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          width: auto !important;
+        }
+
+        .edit-form-control,
+        .v-textfield,
+        .v-filterselect,
+        .c-pickerfield,
+        .c-suggestionfield,
+        .v-datefield,
+        .v-textarea,
+        .v-richtextarea {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+        }
+      }
+
+      // Vaadin HorizontalLayout with expandRatio wraps all field slots into a
+      // single .v-expand wrapper. Keep those inner slots in normal flow so the
+      // second field wraps inside the card instead of keeping stale left offsets.
+      .v-horizontallayout > .v-expand {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        position: static !important;
+        flex: 1 1 100% !important;
+      }
+
+      .v-horizontallayout > .v-expand > .v-slot {
+        box-sizing: border-box !important;
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        flex: 1 1 240px !important;
+        width: auto !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+      }
+    }
+
+    // Первая вкладка CompanyEdit: CUBA оставляет технические v-slot/v-expand
+    // для bindings и expandRatio. Визуально собираем их в один поток только
+    // внутри этой вкладки, не затрагивая sidebar и остальные tabSheet-вкладки.
+    .company-main-tab {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+
+      .edit-workspace-content {
+        padding: 12px !important;
+      }
+
+      .edit-card {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        margin: 0 0 12px !important;
+
+        .v-panel-content {
+          box-sizing: border-box !important;
+          min-width: 0 !important;
+          overflow-x: hidden !important;
+        }
+      }
+
+      .v-horizontallayout {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 12px 16px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        > .v-expand {
+          box-sizing: border-box !important;
+          display: flex !important;
+          flex: 1 1 100% !important;
+          flex-wrap: wrap !important;
+          gap: 12px 16px !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          height: auto !important;
+          position: static !important;
+        }
+
+        > .v-expand > .v-slot,
+        > .v-slot {
+          box-sizing: border-box !important;
+          flex: 1 1 260px !important;
+          width: auto !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          height: auto !important;
+          position: static !important;
+          left: auto !important;
+          top: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+        }
+      }
+
+      .company-main-tab-top-checks > .v-slot,
+      .company-main-tab-top-checks > .v-expand > .v-slot {
+        flex-basis: 220px !important;
+      }
+    }
+
+    #editActions,
+    .edit-footer-actions {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 8px !important;
+      padding: 10px 16px !important;
+
+      #bottomActionsGroup {
+        box-sizing: border-box !important;
+        display: flex !important;
+        gap: 8px !important;
+      }
+    }
+
   }
 }

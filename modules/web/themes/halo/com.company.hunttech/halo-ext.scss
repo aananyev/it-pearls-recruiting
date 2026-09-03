@@ -1785,17 +1785,42 @@ rating_battery_yellow_3:before {
 
     /* Custom Oval Image Widget Styles */
     .v-image.ht-oval-image,
-    .ht-oval-image {
+    .ht-oval-image,
+    .ht-oval-fallback-image {
       border-radius: 50% !important;
       overflow: hidden !important;
       display: inline-block;
 
       img, .v-image-element {
         border-radius: 50% !important;
-        object-fit: cover !important;
+        object-fit: inherit;
         width: 100% !important;
         height: 100% !important;
       }
     }
+
+    /* ── Hide amCharts watermark across all graphical widgets ── */
+    .amcharts-chart-div > a[href*="amcharts.com"],
+    .amcharts-chart-div a[href*="amcharts.com"],
+    .amcharts-main-div > a[href*="amcharts.com"],
+    .amcharts-main-div a[href*="amcharts.com"],
+    .c-chart-container a[href*="amcharts.com"],
+    .c-chart-canvas a[href*="amcharts.com"],
+    .v-amcharts-chart a[href*="amcharts.com"],
+    .c-amcharts-chart a[href*="amcharts.com"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      position: absolute !important;
+      clip: rect(0, 0, 0, 0) !important;
+      width: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+    }
 }
+
 

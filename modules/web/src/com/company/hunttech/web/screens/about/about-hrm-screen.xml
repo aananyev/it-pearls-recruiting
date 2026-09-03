@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://aboutHrmScreen.caption"
+        messagesPack="com.company.hunttech.web.screens.about">
+    <dialogMode height="420"
+                width="560"
+                forceDialog="true"
+                resizable="false"
+                closeable="true"/>
+    <layout>
+        <vbox id="rootBox"
+              spacing="true"
+              margin="true,20,20,20"
+              width="100%"
+              height="100%">
+            <!-- Логотип -->
+            <hbox id="logoBox"
+                  alignment="MIDDLE_CENTER"
+                  height="AUTO"
+                  width="100%">
+                <image id="logoImage"
+                       scaleMode="CONTAIN"
+                       width="180px"
+                       height="180px"/>
+            </hbox>
+
+            <!-- Название и версия -->
+            <vbox id="infoBox"
+                  spacing="8"
+                  alignment="TOP_CENTER"
+                  width="100%">
+                <label id="versionLabel"
+                       stylename="h2 bold"
+                       align="MIDDLE_CENTER"
+                       width="100%"/>
+                <label id="buildDateLabel"
+                       stylename="small"
+                       align="MIDDLE_CENTER"
+                       width="100%"/>
+            </vbox>
+
+            <!-- Разделитель -->
+            <separator id="separator1" width="100%"/>
+
+            <!-- Описание HRM -->
+            <vbox id="descBox"
+                  spacing="6"
+                  width="100%">
+                <label value="msg://aboutHrmScreen.descriptionTitle"
+                       stylename="bold"/>
+                <label id="descriptionLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="small"/>
+            </vbox>
+
+            <!-- Разделитель -->
+            <separator id="separator2" width="100%"/>
+
+            <!-- Автор / технологии -->
+            <vbox id="authorBox"
+                  spacing="6"
+                  width="100%">
+                <label value="msg://aboutHrmScreen.authorTitle"
+                       stylename="bold"/>
+                <label id="authorLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="small"/>
+            </vbox>
+
+            <!-- Кнопка закрытия -->
+            <hbox id="buttonBox"
+                  alignment="MIDDLE_CENTER"
+                  height="AUTO"
+                  margin="15,0,0,0"
+                  spacing="10"
+                  width="100%">
+                <button id="closeBtn"
+                        caption="msg://aboutHrmScreen.closeBtn"
+                        icon="TIMES"
+                        primary="true"
+                        width="AUTO"/>
+            </hbox>
+        </vbox>
+    </layout>
+</window>

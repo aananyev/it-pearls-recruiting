@@ -87,6 +87,7 @@ order by e.comanyName]]>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
                 <button id="createBtn" action="companiesTable.create"/>
+                <button id="smartUploadBtn" caption="msg://msgSmartUpload" icon="font-icon:MAGIC"/>
                 <button id="editBtn" action="companiesTable.edit"/>
                 <button id="removeBtn" action="companiesTable.remove"/>
             </buttonsPanel>

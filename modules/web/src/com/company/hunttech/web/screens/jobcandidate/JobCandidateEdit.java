@@ -297,6 +297,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Label<String> phoneLabel;
     @Inject
+    private Label<String> detailPhone;
+    @Inject
+    private Label<String> detailCompany;
+    @Inject
+    private Label<String> detailSalaryCaption;
+    @Inject
+    private Label<String> detailSalary;
+    @Inject
     private Label<String> mobilePhoneLabel;
     @Inject
     private Label<String> skypuLabel;
@@ -744,6 +752,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLinkButtonTelegrem();
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
+        setContactsAndRequisites();
 
         setCandidatePicImage();
         checkTelegramName();
@@ -1271,6 +1280,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             setFullNameCandidate();
         }
         updateCandidateProfileLabels(event.getItem());
+        setContactsAndRequisites();
     }
 
     /**
@@ -1291,6 +1301,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             updateCandidateProfileLabels(event.getItem());
         } else if ("personPosition".equals(event.getProperty())) {
             updateCandidateProfileLabels(event.getItem());
+        } else if ("phone".equals(event.getProperty())
+                || "mobilePhone".equals(event.getProperty())
+                || "email".equals(event.getProperty())
+                || "telegramName".equals(event.getProperty())
+                || "currentCompany".equals(event.getProperty())) {
+            setContactsAndRequisites();
         }
     }
 
@@ -2528,6 +2544,78 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    public void setContactsAndRequisites() {
+        JobCandidate candidate = getEditedEntity();
+        if (candidate == null) {
+            return;
+        }
+
+        if (detailPhone != null) {
+            String phone = candidate.getPhone() != null && !candidate.getPhone().trim().isEmpty() ? candidate.getPhone() :
+                    (candidate.getMobilePhone() != null && !candidate.getMobilePhone().trim().isEmpty() ? candidate.getMobilePhone() : "-");
+            detailPhone.setValue(phone);
+        }
+
+        if (emailLinkButton != null) {
+            String email = candidate.getEmail();
+            if (email != null && !email.trim().isEmpty()) {
+                emailLinkButton.setCaption(email);
+                emailLinkButton.setVisible(true);
+            } else {
+                emailLinkButton.setCaption("-");
+            }
+        }
+
+        if (telegrammLinkButton != null) {
+            String tg = candidate.getTelegramName();
+            if (tg != null && !tg.trim().isEmpty()) {
+                telegrammLinkButton.setCaption(tg.startsWith("@") ? tg : "@" + tg);
+                telegrammLinkButton.setVisible(true);
+            } else {
+                telegrammLinkButton.setCaption("-");
+            }
+        }
+
+        if (detailCompany != null) {
+            String company = "-";
+            if (candidate.getCurrentCompany() != null) {
+                company = candidate.getCurrentCompany().getComanyName() != null ?
+                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+            }
+            detailCompany.setValue(company != null && !company.trim().isEmpty() ? company : "-");
+        }
+
+        if (detailSalary != null && detailSalaryCaption != null) {
+            String salary = resolveCandidateSalary(candidate);
+            if (salary != null && !salary.trim().isEmpty()) {
+                detailSalaryCaption.setVisible(true);
+                detailSalary.setValue(salary);
+                detailSalary.setVisible(true);
+            } else {
+                detailSalaryCaption.setVisible(false);
+                detailSalary.setVisible(false);
+            }
+        }
+    }
+
+    private String resolveCandidateSalary(JobCandidate candidate) {
+        if (candidate == null) {
+            return null;
+        }
+        try {
+            List<IteractionList> list = dataManager.load(IteractionList.class)
+                    .query("select e from hunttech_IteractionList e where e.iteractionType.iteractionTree.iterationName like :name and e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
+                    .parameter("name", "%Зарплатные ожидания%")
+                    .parameter("cand", candidate)
+                    .view("iteractionList-view")
+                    .list();
+            if (!list.isEmpty() && list.get(0).getAddString() != null && !list.get(0).getAddString().trim().isEmpty()) {
+                return list.get(0).getAddString().trim();
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
     public void addPositionList() {
         SelectPersonPositions selectPersonPositions = screens
                 .create(SelectPersonPositions.class);
@@ -3632,7 +3720,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
      * class is restored first and the state-specific h2/h2-red class is added separately.
      */
     void updateFullNameStyle(boolean blocked) {
-        fullNameField.setStyleName("job-candidate-profile-name edit-sidebar-title");
+        fullNameField.removeStyleName("h2-red");
+        fullNameField.removeStyleName("h2");
         fullNameField.addStyleName(blocked ? "h2-red" : "h2");
     }
 

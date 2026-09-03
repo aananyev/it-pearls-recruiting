@@ -3,6 +3,7 @@
         caption="msg://browseCaption"
         focusComponent="regionsTable"
         messagesPack="com.company.hunttech.web.screens.region" icon="TENCENT_WEIBO">
+    <!-- Данные: справочник регионов (кэшируемый loader, browse-view) -->
     <data readOnly="true">
         <collection id="regionsDc"
                     class="com.company.hunttech.entity.Region"
@@ -15,37 +16,66 @@ order by e.regionRuName]]>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="regionsTable"
-            spacing="true">
+    <dialogMode height="700"
+                width="1000"/>
+    <layout expand="tableCard"
+            spacing="true"
+            width="100%"
+            height="100%"
+            stylename="edit-screen-layout">
+
+        <!-- Фильтр (сворачиваемый, стиль реестров) -->
         <filter id="filter"
                 applyTo="regionsTable"
-                dataLoader="regionsDl">
+                dataLoader="regionsDl"
+                defaultMode="generic"
+                width="100%"
+                collapsable="true"
+                collapsed="true"
+                stylename="candidate-generic-filter">
             <properties include=".*"
                         excludeProperties="regionOfCity,regionCountry.countryOfRegion,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="regionsTable"
-                    width="100%"
-                    dataContainer="regionsDc">
-            <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
-                <action id="remove" type="remove"/>
-            </actions>
-            <columns>
-                <column id="regionRuName"/>
-                <column id="regionCountry"/>
-                <column id="regionCode"/>
-            </columns>
-            <rowsCount/>
-            <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
-                <button id="createBtn" action="regionsTable.create"/>
-                <button id="editBtn" action="regionsTable.edit"/>
-                <button id="removeBtn" action="regionsTable.remove"/>
-            </buttonsPanel>
-        </groupTable>
+
+        <!-- Карточка таблицы с rowsCount -->
+        <vbox id="tableCard"
+              width="100%"
+              height="100%"
+              spacing="false"
+              stylename="edit-card candidate-table-card"
+              expand="regionsTable">
+            <groupTable id="regionsTable"
+                        width="100%"
+                        height="100%"
+                        dataContainer="regionsDc"
+                        stylename="borderless grid candidate-browse-grid">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                    <action id="excel" type="excel"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <columns>
+                    <column id="regionRuName" caption="mainMsg://msgRegionRuName" width="220px"/>
+                    <column id="regionEngName" caption="mainMsg://msgRegionEngName" width="200px"/>
+                    <column id="regionCountry" caption="mainMsg://msgCountry" width="180px"/>
+                    <column id="regionType" caption="mainMsg://msgRegionType" width="130px"/>
+                    <column id="capital" caption="mainMsg://msgAdministrativeCenter" width="180px"/>
+                    <column id="regionCode" caption="mainMsg://msgRegionCode" width="100px" align="CENTER"/>
+                    <column id="isoCode" caption="mainMsg://msgIsoCode" width="100px" align="CENTER"/>
+                    <column id="timeZone" caption="mainMsg://msgTimeZone" width="130px"/>
+                </columns>
+                <rowsCount/>
+                <buttonsPanel id="buttonsPanel"
+                              alwaysVisible="true">
+                    <button id="createBtn" caption="Создать" icon="CREATE_ACTION" action="regionsTable.create" stylename="primary candidate-btn candidate-create-btn"/>
+                    <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" action="regionsTable.edit" stylename="secondary candidate-btn"/>
+                    <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" action="regionsTable.remove" stylename="secondary candidate-btn"/>
+                    <button id="loadRegionsRussiaBtn" caption="msg://msgLoadRegionsRussia" icon="CLOUD_DOWNLOAD" stylename="secondary candidate-btn"/>
+                </buttonsPanel>
+            </groupTable>
+        </vbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

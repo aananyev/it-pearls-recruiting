@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Реестр открытых вакансий: Split-View (Master-Detail) Browse в теме CUBA Halo / HuntTech Modern -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="Реестр открытых вакансий"
+        focusComponent="openPositionsTable"
+        messagesPack="com.company.hunttech.web.screens.openposition"
+        icon="TH_LIST">
+
+    <!-- Секция данных экрана: декларативная коллекция позиций и загрузчик -->
+    <data readOnly="true">
+        <collection id="openPositionsDc"
+                    class="com.company.hunttech.entity.OpenPosition">
+            <view extends="openPosition-browse-view">
+                <property name="projectName" fetch="BATCH">
+                    <property name="projectLogo" view="_minimal"/>
+                    <property name="projectDepartment" view="companyDepartament-picker-view">
+                        <property name="companyName" view="company-picker-view"/>
+                    </property>
+                    <property name="projectOwner" view="person-owner-view"/>
+                    <property name="shortDescription"/>
+                    <property name="projectDescription"/>
+                </property>
+                <property name="positionType" fetch="BATCH" view="position-picker-view"/>
+                <property name="owner" fetch="BATCH" view="extUser-picker-view"/>
+                <property name="openPositionComments" fetch="BATCH" view="_minimal"/>
+                <property name="someFiles" fetch="BATCH" view="_minimal"/>
+                <property name="cities" fetch="BATCH" view="city-picker-view"/>
+                <property name="skillsList" fetch="BATCH" view="_minimal">
+                    <property name="skillName"/>
+                </property>
+            </view>
+            <loader id="openPositionsDl" maxResults="100">
+                <query>
+                    <![CDATA[select e from hunttech_OpenPosition e order by e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.priority = :priority</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>@between(e.lastOpenDate, now - :newOpenPosition, now + 1, day)</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select k.openPosition from hunttech_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>(e.openClose = :openClosePos or (:openClosePos = false and (e.openClose is null or e.openClose = false)))</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.signDraft = :signDraft</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <!-- Настройка диалогового режима -->
+    <dialogMode height="700" width="1100"/>
+
+    <!-- Корневой контейнер разметки экрана с базовыми стилями Edit-форм -->
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+
+        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар (312px) от самого верха до низа + Просторная рабочая область справа -->
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="positionsTableBox" stylename="job-candidate-main-layout edit-screen-layout">
+
+            <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Выдержана в фирменном стиле Edit-форм (job-candidate-sidebar edit-sidebar) -->
+            <vbox id="openPositionDetailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+
+                        <!-- Шапка профиля: логотип проекта / компании 120x120px, название вакансии и проект -->
+                        <vbox id="openPositionProfileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="projectLogoPic"
+                                              width="120px" height="120px"
+                                              ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              fallbackThemePath="icons/briefcase.png"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailVacancyName"
+                                       value="Выберите вакансию"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
+                                <label id="detailProjectName"
+                                       value="-"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
+                                <label id="detailCompanyName"
+                                       value="-"
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
+                                <label id="detailLocationAndFormat"
+                                       value="-"
+                                       stylename="edit-help candidate-sidebar-city"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"
+                                       htmlEnabled="true"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Панель быстрых действий по вакансии -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn"
+                                    caption="Открыть карточку"
+                                    icon="EDIT_ACTION"
+                                    stylename="primary"
+                                    enabled="false"
+                                    width="100%"/>
+                            <button id="suggestCandidatesBtn"
+                                    caption="Подобрать кандидатов"
+                                    icon="font-icon:MAGIC"
+                                    enabled="false"
+                                    width="100%"/>
+                            <button id="subscribeBtn"
+                                    caption="Подписаться"
+                                    icon="font-icon:BELL"
+                                    enabled="false"
+                                    width="100%"/>
+                        </vbox>
+
+                        <!-- Секция 3: Индикаторы готовности и рейтинг (перемещена под кнопку Подписаться) -->
+                        <vbox id="readinessCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ГОТОВНОСТЬ И РЕЙТИНГ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailIndicators" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailRating" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailSentCandidates" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                        </vbox>
+
+                        <!-- Секция 1: Условия и реквизиты -->
+                        <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="УСЛОВИЯ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Вилка по ТК:" stylename="bold"/>
+                                        <label id="detailSalaryTk" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Ставка по ИП:" stylename="bold"/>
+                                        <label id="detailSalaryIe" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Опыт работы:" stylename="bold"/>
+                                        <label id="detailExperience" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Грейд:" stylename="bold"/>
+                                        <label id="detailGrade" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Формат работы:" stylename="bold"/>
+                                        <label id="detailRemoteWork" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Статус:" stylename="bold"/>
+                                        <label id="detailOpenClose" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Позиций:" stylename="bold"/>
+                                        <label id="detailNumberPosition" value="-" htmlEnabled="true"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция 2: Проект и кураторы -->
+                        <vbox id="projectDetailsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ПРОЕКТ И КУРАТОРЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="projectGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Куратор проекта:" stylename="bold"/>
+                                        <label id="detailProjectOwner" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Владелец:" stylename="bold"/>
+                                        <label id="detailOwner" value="-" htmlEnabled="true"/>
+                                    </row>
+                                    <row>
+                                        <label value="Создатель:" stylename="bold"/>
+                                        <label id="detailCreatedBy" value="-" htmlEnabled="true"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция 4: Требуемые навыки -->
+                        <vbox id="skillsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ТРЕБУЕМЫЕ НАВЫКИ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailSkills" htmlEnabled="true" width="100%" stylename="candidate-skills-chips"/>
+                        </vbox>
+
+                        <!-- Секция 5: Краткое описание проекта / Описание проекта (перемещена в конец сайдбара, по алгоритму ProjectReestrBrowse) -->
+                        <vbox id="projectDescriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label id="projectDescriptionCardTitle" value="КРАТКОЕ ОПИСАНИЕ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailProjectShortDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                            <label id="detailProjectDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                        </vbox>
+
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace candidate-reestr-workspace) -->
+            <vbox id="positionsTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="positionsTableCard" margin="true,true,true,false">
+
+                <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card">
+
+                    <!-- Левая группа основных действий: Создать вакансию, Умная загрузка, Редактировать, Удалить -->
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
+                        <button id="createPositionBtn" caption="Создать вакансию" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
+                        <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
+                        <button id="editPositionToolbarBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
+                        <button id="removePositionToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
+                    </cssLayout>
+
+                    <!-- Правая группа фильтров и сервисных действий -->
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
+                        <popupButton id="vacanciesFilterPopupButton"
+                                     caption="Все вакансии"
+                                     icon="COMPASS"
+                                     showActionIcons="true"
+                                     stylename="secondary candidate-btn candidate-filter-scope-btn">
+                            <actions>
+                                <action id="filterAll" caption="Все открытые вакансии" icon="COMPASS"/>
+                                <action id="filterMySubscriptions" caption="Мои подписки" icon="USER"/>
+                                <action id="filterNew" caption="Новые (3 дня)" icon="CLOCK_O"/>
+                                <action id="filterAllWithArchive" caption="Все, включая закрытые" icon="ARCHIVE"/>
+                            </actions>
+                        </popupButton>
+
+                        <popupButton id="priorityFilterPopupButton"
+                                     caption="Приоритет"
+                                     icon="FILTER"
+                                     showActionIcons="true"
+                                     stylename="secondary">
+                            <actions>
+                                <action id="priorityAll" caption="Все приоритеты" icon="LIST"/>
+                                <action id="priorityHigh" caption="Высокий приоритет" icon="CIRCLE" stylename="priority-high-action"/>
+                                <action id="priorityNormal" caption="Обычный приоритет" icon="CIRCLE-O"/>
+                                <action id="priorityPaused" caption="Приостановленные" icon="PAUSE"/>
+                            </actions>
+                        </popupButton>
+
+                        <popupButton id="actionsWithPositionButton"
+                                     caption="Действия"
+                                     icon="BARS"
+                                     showActionIcons="true"
+                                     enabled="true"
+                                     stylename="primary"
+                                     align="MIDDLE_RIGHT">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить" icon="REFRESH"/>
+                                <action id="openPositionAction" caption="Открыть карточку" icon="EDIT_ACTION"/>
+                                <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
+                                <action id="suggestCandidatesAction" caption="Подобрать кандидатов" icon="font-icon:MAGIC"/>
+                                <action id="subscribeAction" caption="Подписаться" icon="font-icon:BELL"/>
+                                <action id="unsubscribeAction" caption="Отписаться" icon="font-icon:BELL_SLASH"/>
+                                <action id="groupSubscribeAction" caption="Групповая подписка" icon="USERS"/>
+                                <action id="showCandidatesAction" caption="Кандидаты вакансии" icon="USER"/>
+                                <action id="showCommentsAction" caption="Отзывы и рейтинг" icon="STAR"/>
+                                <action id="printCandidateMemoAction" caption="Памятка для кандидата" icon="PRINT"/>
+                            </actions>
+                        </popupButton>
+                    </cssLayout>
+                </cssLayout>
+
+                <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы позиций -->
+                <filter id="filter"
+                        applyTo="openPositionsTable"
+                        dataLoader="openPositionsDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                exclude="id"
+                                excludeRecursively="true"
+                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка-обёртка для таблицы вакансий -->
+                <vbox id="positionsTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="openPositionsTable">
+                    <groupTable id="openPositionsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="openPositionsDc"
+                                stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
+                            <action id="list" type="listPrintForm"/>
+                        </actions>
+                        <columns>
+                            <column id="priority" caption="Приоритет" width="55px" align="CENTER" sortable="true"/>
+                            <column id="vacansyID" caption="№ вакансии" width="90px" align="CENTER" sortable="true"/>
+                            <column id="logo" caption="Лого" width="55px" align="CENTER" sortable="false"/>
+                            <column id="vacansyName" caption="Вакансия" expandRatio="1"/>
+                            <column id="positionType" caption="Специализация" width="150px"/>
+                            <column id="salary" caption="Зарплата" width="150px"/>
+                            <column id="mainSkills" caption="Требуемые навыки" width="220px" sortable="false"/>
+                            <column id="statusBadge" caption="Статус" width="110px" sortable="false"/>
+                            <column id="sentCandidates" caption="Отправлено" width="95px" align="CENTER" sortable="false"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

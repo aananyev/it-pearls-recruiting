@@ -1,52 +1,69 @@
 package com.company.hunttech.web.screens.jobcandidate;
 
 import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.CandidateSkill;
+import com.company.hunttech.entity.CandidateSkillPriority;
+import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.JobCandidateSignIcon;
+import com.company.hunttech.entity.SignIcons;
+import com.company.hunttech.entity.SkillTree;
+import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.service.SkillAnalysisResult;
+import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.web.screens.signicons.SignIconsBrowse;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.PopupButton;
 import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.TextField;
-import com.haulmont.cuba.gui.components.ThemeResource;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.OpenMode;
+import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import com.hunttech.hrm.web.components.WebOvaFallbackImage;
-
-import com.company.hunttech.entity.Iteraction;
 import com.haulmont.cuba.security.global.UserSession;
+import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import com.vaadin.server.Page;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Контроллер базового тестового экрана просмотра кандидатов «Split-View Halo».
- * <p>
- * Реализует просмотр кандидатов с левым сайдбаром в теме CUBA Halo:
- * <ul>
- *   <li>Центрированные ФИО (+30% шрифт), плашка должности и город проживания.</li>
- *   <li>Динамический поиск и отображение зарплатных ожиданий кандидата из связанных сущностей IteractionList.</li>
- *   <li>Стилизованные разделы сайдбара с линиями над и под заголовком (по аналогии с Edit-формами).</li>
- * </ul>
- *
- * @see JobCandidate
- * @see IteractionList
  */
 @UiController("hunttech_JobCandidateTest.browse")
 @UiDescriptor("job-candidate-test-browse.xml")
@@ -54,49 +71,106 @@ import java.util.List;
 @LoadDataBeforeShow
 public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
-    /* ==================================================================     * Инъекции компонентов UI и сервисов
+    private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
+            "select e from hunttech_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";
+
+    /* =========================================================================
+     * Инъекции компонентов UI и сервисов
      * ========================================================================= */
 
-    /** Таблица реестра кандидатов */
     @Inject
     private GroupTable<JobCandidate> candidatesTable;
 
-    /** Загрузчик данных реестра */
     @Inject
     private CollectionLoader<JobCandidate> jobCandidatesDl;
 
-    /** Построитель диалоговых экранов */
+    @Inject
+    private CollectionContainer<SignIcons> signIconsDc;
+
+    @Inject
+    private CollectionLoader<SignIcons> signIconsDl;
+
     @Inject
     private ScreenBuilders screenBuilders;
 
-    /** Фабрика UI-компонентов */
     @Inject
     private UiComponents uiComponents;
     @Inject
     private FileLoader fileLoader;
 
-    /** Менеджер данных CUBA Platform для прямого поиска взаимодействий */
+    @Inject
+    private Metadata metadata;
+
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
 
-    /** Текущая пользовательская сессия */
+    @Inject
+    private Notifications notifications;
+
     @Inject
     private UserSession userSession;
 
-    /** Форматтер даты */
+    @Inject
+    private SkillAnalysisService skillAnalysisService;
+
+    @Inject
+    private BackgroundWorker backgroundWorker;
+
+    @Inject
+    private WebOvaFallbackImage detailPic;
+    @Inject
+    private Label<String> detailFullName;
+    @Inject
+    private Label<String> detailPosition;
+    @Inject
+    private Label<String> detailCity;
+    @Inject
+    private Label<String> detailPhone;
+    @Inject
+    private Label<String> detailEmail;
+    @Inject
+    private Label<String> detailTelegram;
+    @Inject
+    private Label<String> detailCompany;
+    @Inject
+    private Label<String> detailSalaryCaption;
+    @Inject
+    private Label<String> detailSalary;
+    @Inject
+    private Label<String> detailInteractionsInfo;
+    @Inject
+    private Label<String> detailSkillsLabels;
+    @Inject
+    private Button editCandidateBtn;
+    @Inject
+    private Button createInteractionBtn;
+
+    @Inject
+    private Button filterAllBtn;
+    @Inject
+    private Button filterMyCandidatesBtn;
+    @Inject
+    private Button filterMyParticipationBtn;
+    @Inject
+    private PopupButton actionsWithCandidateButton;
+    @Inject
+    private PopupButton signIconsButton;
+
     private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
 
     public enum InteractionStatus {
-        FREE("🟢 Свободен (> 1 мес)", "#27ae60"),
-        MY_CANDIDATE("🟡 В вашей работе (< 1 мес)", "#f39c12"),
-        OTHER_RECRUITER("🔴 В работе у другого рекрутера", "#e74c3c");
+        FREE("🟢 Свободен", "#27ae60", "rgba(39, 174, 96, 0.15)"),
+        MY_CANDIDATE("🟡 В вашей работе", "#f39c12", "rgba(243, 156, 18, 0.15)"),
+        OTHER_RECRUITER("🔴 В работе у другого", "#e74c3c", "rgba(231, 76, 60, 0.15)");
 
         private final String label;
         private final String color;
+        private final String bgColor;
 
-        InteractionStatus(String label, String color) {
+        InteractionStatus(String label, String color, String bgColor) {
             this.label = label;
             this.color = color;
+            this.bgColor = bgColor;
         }
 
         public String getLabel() {
@@ -105,6 +179,10 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
         public String getColor() {
             return color;
+        }
+
+        public String getBgColor() {
+            return bgColor;
         }
     }
 
@@ -144,197 +222,30 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
-    private final java.util.Map<String, String> userFullNameCache = new java.util.concurrent.ConcurrentHashMap<>();
-
-    private String resolveUserFullName(String login) {
-        if (login == null || login.trim().isEmpty()) {
-            return "—";
-        }
-        return userFullNameCache.computeIfAbsent(login, l -> {
-            try {
-                com.haulmont.cuba.security.entity.User u = dataManager.load(com.haulmont.cuba.security.entity.User.class)
-                        .query("select u from sec$User u where u.login = :login")
-                        .parameter("login", l)
-                        .view(com.haulmont.cuba.core.global.View.MINIMAL)
-                        .optional()
-                        .orElse(null);
-                if (u != null && u.getName() != null && !u.getName().trim().isEmpty()) {
-                    return u.getName().trim();
-                }
-            } catch (Exception ignored) {
-            }
-            return l;
-        });
-    }
-
-    public static class CandidateRoleTeam {
-        public String authorName;
-        public String researcherName;
-        public String recruiterName;
-        public String coordinatorName;
-        public boolean isFree;
-        public Date lastInteractionDate;
-        public int totalInteractions;
-        public InteractionStatus status;
-    }
-
-    private CandidateRoleTeam calculateCandidateTeam(JobCandidate candidate) {
-        CandidateRoleTeam team = new CandidateRoleTeam();
+    private FileDescriptor resolveCandidateFace(JobCandidate candidate) {
         if (candidate == null) {
-            team.isFree = true;
-            team.status = InteractionStatus.FREE;
-            return team;
+            return null;
         }
-        team.authorName = resolveUserFullName(candidate.getCreatedBy());
-        List<IteractionList> list = candidate.getIteractionList();
-        if (list == null || list.isEmpty()) {
-            team.isFree = true;
-            team.totalInteractions = 0;
-            team.status = InteractionStatus.FREE;
-            return team;
+        if (candidate.getFileImageFace() != null) {
+            return candidate.getFileImageFace();
         }
-        team.totalInteractions = list.size();
-        List<IteractionList> sortedList = new ArrayList<>(list);
-        sortedList.sort(Comparator.comparing(IteractionList::getDateIteraction, Comparator.nullsLast(Comparator.naturalOrder())));
-        IteractionList last = sortedList.get(sortedList.size() - 1);
-        team.lastInteractionDate = last.getDateIteraction();
-        team.status = calculateInteractionStatus(candidate);
-        team.isFree = (team.status == InteractionStatus.FREE);
-
-        for (IteractionList il : sortedList) {
-            Iteraction type = il.getIteractionType();
-            String personName = null;
-            if (il.getRecrutier() != null && il.getRecrutier().getName() != null && !il.getRecrutier().getName().trim().isEmpty()) {
-                personName = il.getRecrutier().getName().trim();
-            } else if (il.getCreatedBy() != null) {
-                personName = resolveUserFullName(il.getCreatedBy());
-            }
-            if (personName == null) continue;
-            if (type != null) {
-                if (Boolean.TRUE.equals(type.getSignSendToClient())
-                        || Boolean.TRUE.equals(type.getSignClientInterview())
-                        || Boolean.TRUE.equals(type.getSignStartProject())) {
-                    team.coordinatorName = personName;
-                }
-                if (Boolean.TRUE.equals(type.getSignOurInterview())
-                        || Boolean.TRUE.equals(type.getSignFeedback())
-                        || il.getRating() != null) {
-                    team.recruiterName = personName;
-                }
-                if (Boolean.TRUE.equals(type.getSignOurInterviewAssigned())
-                        || Boolean.TRUE.equals(type.getSignStartCase())) {
-                    if (team.researcherName == null) {
-                        team.researcherName = personName;
-                    }
-                }
-            }
+        if (candidate.getCandidateCv() != null && !candidate.getCandidateCv().isEmpty()) {
+            return candidate.getCandidateCv().stream()
+                    .filter(cv -> cv.getFileImageFace() != null)
+                    .max(Comparator.comparing(CandidateCV::getCreateTs, Comparator.nullsLast(Comparator.naturalOrder())))
+                    .map(CandidateCV::getFileImageFace)
+                    .orElse(null);
         }
-        if (team.researcherName == null && !sortedList.isEmpty()) {
-            IteractionList first = sortedList.get(0);
-            if (first.getRecrutier() != null && first.getRecrutier().getName() != null) {
-                team.researcherName = first.getRecrutier().getName().trim();
-            } else if (first.getCreatedBy() != null) {
-                team.researcherName = resolveUserFullName(first.getCreatedBy());
-            }
-        }
-        if (team.researcherName == null) {
-            team.researcherName = team.authorName;
-        }
-        return team;
+        return null;
     }
 
-    /* ==================================================================     * Поля левого профильного сайдбара
-     * ========================================================================= */
-
-    /** Овальный фото-аватар кандидата */
-    @Inject
-    private WebOvaFallbackImage detailPic;
-
-    /** Заголовок с ФИО выбранного кандидата */
-    @Inject
-    private Label<String> detailFullName;
-
-    /** Подзаголовок с наименованием должности */
-    @Inject
-    private Label<String> detailPosition;
-
-    /** Метка города проживания */
-    @Inject
-    private Label<String> detailCity;
-
-    /** Номер телефона */
-    @Inject
-    private Label<String> detailPhone;
-
-    /** Адрес электронной почты */
-    @Inject
-    private Label<String> detailEmail;
-
-    /** Имя в Telegram */
-    @Inject
-    private Label<String> detailTelegram;
-
-    /** Наименование текущей компании */
-    @Inject
-    private Label<String> detailCompany;
-
-    /** Заголовок поля зарплатных ожиданий */
-    @Inject
-    private Label<String> detailSalaryCaption;
-
-    /** Значение зарплатных ожиданий кандидата */
-    @Inject
-    private Label<String> detailSalary;
-
-    /** Сводка по истории взаимодействий */
-    @Inject
-    private Label<String> detailInteractionsInfo;
-
-    /** Метка цветных бейджей навыков кандидата */
-    @Inject
-    private Label<String> detailSkillsLabels;
-
-    /** Кнопка открытия формы редактирования */
-    @Inject
-    private Button editCandidateBtn;
-
-    /** Кнопка быстрого создания взаимодействия */
-    @Inject
-    private Button createInteractionBtn;
-
-    /** Поле быстрого поиска кандидатов */
-    @Inject
-    private TextField<String> searchField;
-
-    /* ==================================================================     * Бизнес-логика извлечения зарплатных ожиданий
-     * ========================================================================= */
-
-    /**
-     * Извлекает зарплатные ожидания кандидата из сущности IteractionList.
-     *
-     * @param candidate кандидат
-     * @return строка с суммой ожиданий либо null
-     */
-    private String getSalaryExpectations(JobCandidate candidate) {
-        if (candidate == null) return null;
-        
-        // 1. Поиск во встроенной коллекции
-        if (candidate.getIteractionList() != null) {
-            for (com.company.hunttech.entity.IteractionList it : candidate.getIteractionList()) {
-                if (it.getIteractionType() != null &&
-                    it.getIteractionType().getIterationName() != null &&
-                    it.getIteractionType().getIterationName().toLowerCase().contains("зарплатные ожидания")) {
-                    if (it.getAddString() != null && !it.getAddString().trim().isEmpty()) {
-                        return it.getAddString().trim();
-                    }
-                }
-            }
+    private String resolveCandidateSalary(JobCandidate candidate) {
+        if (candidate == null) {
+            return null;
         }
-        
-        // 2. Резервный запрос в БД через DataManager
         try {
-            java.util.List<com.company.hunttech.entity.IteractionList> list = dataManager.load(com.company.hunttech.entity.IteractionList.class)
-                    .query("select e from hunttech_IteractionList e where e.iteractionType.iterationName like :name and e.candidate = :cand order by e.createTs desc")
+            List<IteractionList> list = dataManager.load(IteractionList.class)
+                    .query("select e from hunttech_IteractionList e where e.iteractionType.iteractionTree.iterationName like :name and e.candidate = :cand order by e.dateIteraction desc, e.createTs desc")
                     .parameter("name", "%Зарплатные ожидания%")
                     .parameter("cand", candidate)
                     .view("iteractionList-view")
@@ -346,14 +257,14 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         return null;
     }
 
-    /* ==================================================================     * Инициализация и обработчики событий
-     * ========================================================================= */
-
-    /**
-     * Инициализация экрана: генератор аватара в первой колонке.
-     */
     @Subscribe
     public void onInit(Screen.InitEvent event) {
+        // Выравнивание заголовков профиля (под OvalFallbackImage) по центру
+        detailFullName.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailPosition.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        detailCity.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        // Колонка 1: Миниатюра фото кандидата (36px oval)
         candidatesTable.addGeneratedColumn("avatar", candidate -> {
             WebOvaFallbackImage avatarImg = uiComponents.create(WebOvaFallbackImage.class);
             avatarImg.setWidth("36px");
@@ -362,15 +273,295 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             avatarImg.setOvalHeight("36px");
             avatarImg.setFallbackThemePath("icons/no-programmer.jpeg");
             avatarImg.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            // Фото берётся из карточки кандидата, а при его отсутствии — из последнего резюме (CandidateCV)
             FileDescriptorImageHelper.setCandidateFace(avatarImg, fileLoader, resolveCandidateFace(candidate));
             return avatarImg;
         });
+
+        // Колонка 2: Метка / Значок кандидата
+        candidatesTable.addGeneratedColumn("signIcon", candidate -> {
+            Label<String> retLabel = uiComponents.create(Label.NAME);
+            retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                    .parameter("jobCandidate", candidate)
+                    .view("jobCandidateSignIcon-view")
+                    .cacheable(true)
+                    .list();
+            if (!list.isEmpty() && list.get(0).getSignIcon() != null) {
+                SignIcons sign = list.get(0).getSignIcon();
+                retLabel.setIcon(resolveSignIconIcon(sign.getIconName()));
+                if (sign.getTitleDescription() != null && !sign.getTitleDescription().isEmpty()) {
+                    retLabel.setDescription(sign.getTitleDescription());
+                } else if (sign.getTitleRu() != null) {
+                    retLabel.setDescription(sign.getTitleRu());
+                }
+                if (sign.getIconColor() != null && !sign.getIconColor().trim().isEmpty()) {
+                    injectSignColorCss(sign.getIconColor());
+                    retLabel.setStyleName("sign-icon-" + sign.getIconColor().replace("#", ""));
+                }
+            }
+            return retLabel;
+        });
+
+        // Колонка 3: Кандидат (ФИО + контакт)
+        candidatesTable.addGeneratedColumn("fullName", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
+            String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
+                    (candidate.getEmail() != null ? candidate.getEmail() : "");
+            lbl.setValue("<div><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
+            return lbl;
+        });
+
+        // Колонка 4: Должность
+        candidatesTable.addGeneratedColumn("personPosition", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            return lbl;
+        });
+
+        // Колонка 5: Город
+        candidatesTable.addGeneratedColumn("cityOfResidence", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>📍 " + city + "</span>");
+            return lbl;
+        });
+
+        // Колонка 6: Компания
+        candidatesTable.addGeneratedColumn("currentCompany", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String company = "-";
+            if (candidate.getCurrentCompany() != null) {
+                company = candidate.getCurrentCompany().getComanyName() != null ?
+                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+            }
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>" + (company != null ? company : "-") + "</span>");
+            return lbl;
+        });
+
+        // Колонка 7: Ключевые навыки (чипы)
+        candidatesTable.addGeneratedColumn("mainSkills", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            try {
+                List<CandidateSkill> skills = dataManager.load(CandidateSkill.class)
+                        .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
+                        .parameter("candidate", candidate)
+                        .view("candidateSkill-view")
+                        .list();
+
+                if (skills == null || skills.isEmpty()) {
+                    lbl.setValue("<span style='color: #a0aec0; font-size: 11px;'>—</span>");
+                    return lbl;
+                }
+
+                StringBuilder sb = new StringBuilder("<div style='display: flex; gap: 4px; flex-wrap: wrap;'>");
+                String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
+                int count = 0;
+                for (CandidateSkill cs : skills) {
+                    if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                        if (count >= 3) {
+                            sb.append("<span style='font-size: 10px; color: #7f8c8d; align-self: center;'>+").append(skills.size() - 3).append("</span>");
+                            break;
+                        }
+                        String sName = cs.getSkill().getSkillName();
+                        String color = palette[Math.abs(sName.hashCode()) % palette.length];
+                        sb.append(String.format("<span style='background: %s18; color: %s; border: 1px solid %s44; padding: 1px 6px; border-radius: 10px; font-size: 10.5px; font-weight: 600; white-space: nowrap;'>%s</span>",
+                                color, color, color, sName));
+                        count++;
+                    }
+                }
+                sb.append("</div>");
+                lbl.setValue(sb.toString());
+            } catch (Exception ex) {
+                lbl.setValue("<span style='color: #a0aec0; font-size: 11px;'>—</span>");
+            }
+            return lbl;
+        });
+
+        // Колонка 8: Статус взаимодействия
+        candidatesTable.addGeneratedColumn("lastInteractionStatus", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            InteractionStatus status = calculateInteractionStatus(candidate);
+            lbl.setValue(String.format(
+                    "<span style='background: %s; color: %s; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: nowrap; display: inline-block;'>%s</span>",
+                    status.getBgColor(), status.getColor(), status.getLabel()
+            ));
+            return lbl;
+        });
+
+        updateActionsState(candidatesTable.getSingleSelected());
+        updateSignIconsState(candidatesTable.getSingleSelected());
+    }
+
+    private void injectSignColorCss(String color) {
+        if (color == null || color.trim().isEmpty()) return;
+        String clean = color.replace("#", "").trim();
+        Page page = Page.getCurrent();
+        if (page != null && page.getStyles() != null) {
+            page.getStyles().add(String.format(".v-table .sign-icon-%s .v-icon, .sign-icon-%s .v-icon { color: #%s !important; font-size: 16px; }", clean, clean, clean));
+        }
+    }
+
+    @Subscribe
+    public void onBeforeShow(Screen.BeforeShowEvent event) {
+        initSignIconsDataContainer();
+        initSignIconsButton();
+        updateSignIconsState(candidatesTable.getSingleSelected());
+    }
+
+    private void initSignIconsDataContainer() {
+        signIconsDl.setParameter("user", (ExtUser) userSession.getUser());
+        signIconsDl.load();
+    }
+
+    @Subscribe(id = "signIconsDc", target = Target.DATA_CONTAINER)
+    public void onSignIconsDcCollectionChange(CollectionContainer.CollectionChangeEvent<SignIcons> event) {
+        initSignIconsButton();
     }
 
     /**
-     * Обработчик выбора строки в таблице: заполняет сайдбар.
+     * Имя значка в БД хранится как «font-icon:<CONSTANT>» (имя константы CubaIcon, например
+     * font-icon:REMOVE_ACTION). Передавать его в withIcon/setIcon напрямую нельзя:
+     * FontAwesomeIconProvider ищет поле в enum FontAwesome (REMOVE_ACTION там нет) и бросает
+     * InvalidCacheLoadException. Маппим через CubaIcon.valueOf(...).source(), неизвестное
+     * имя — null (значок не выводится, но экран не падает).
      */
+    private String resolveSignIconIcon(String iconName) {
+        if (iconName == null || !iconName.startsWith("font-icon:")) {
+            return iconName;
+        }
+        try {
+            return CubaIcon.valueOf(iconName.substring("font-icon:".length())).source();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private void initSignIconsButton() {
+        if (signIconsButton == null) return;
+        signIconsButton.removeAllActions();
+
+        for (SignIcons icon : signIconsDc.getItems()) {
+            String actId = "sign_" + (icon.getId() != null ? icon.getId().toString().replace("-", "_") : icon.getTitleRu());
+            signIconsButton.addAction(new BaseAction(actId)
+                    .withIcon(resolveSignIconIcon(icon.getIconName()))
+                    .withCaption(icon.getTitleRu() != null ? icon.getTitleRu() : "Метка")
+                    .withDescription(icon.getTitleDescription())
+                    .withHandler(e -> {
+                        JobCandidate selected = candidatesTable.getSingleSelected();
+                        if (selected != null) {
+                            setSignIcons(icon, selected);
+                        }
+                    }));
+        }
+
+        signIconsButton.addAction(new BaseAction("removeSignAction")
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption("Снять метку")
+                .withDescription("Снять присвоенную метку с выбранного кандидата")
+                .withHandler(e -> {
+                    JobCandidate selected = candidatesTable.getSingleSelected();
+                    if (selected != null) {
+                        removeSignAction(selected);
+                    }
+                }));
+
+        signIconsButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption("Редактирование значков")
+                .withDescription("Настройка справочника значков и меток")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(e -> {
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.addAfterCloseListener(closeEvent -> {
+                        signIconsDl.load();
+                        initSignIconsButton();
+                        candidatesTable.repaint();
+                    });
+                    screen.show();
+                }));
+    }
+
+    private void updateSignIconsState(JobCandidate selected) {
+        if (signIconsButton == null) return;
+        boolean hasSelected = selected != null;
+        signIconsButton.setEnabled(hasSelected);
+        if (hasSelected && signIconsButton.getAction("removeSignAction") != null) {
+            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                    .parameter("jobCandidate", selected)
+                    .view("jobCandidateSignIcon-view")
+                    .cacheable(true)
+                    .list();
+            signIconsButton.getAction("removeSignAction").setEnabled(!list.isEmpty());
+        }
+    }
+
+    private void setSignIcons(SignIcons icon, JobCandidate jobCandidate) {
+        if (jobCandidate == null || icon == null) return;
+        List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .cacheable(true)
+                .list();
+
+        if (list.isEmpty()) {
+            JobCandidateSignIcon jcsi = metadata.create(JobCandidateSignIcon.class);
+            jcsi.setJobCandidate(jobCandidate);
+            jcsi.setSignIcon(icon);
+            if (userSession.getUser() instanceof ExtUser) {
+                jcsi.setUser((ExtUser) userSession.getUser());
+            }
+            dataManager.commit(jcsi);
+        } else {
+            JobCandidateSignIcon jcsi = list.get(0);
+            jcsi.setSignIcon(icon);
+            dataManager.commit(jcsi);
+        }
+
+        candidatesTable.repaint();
+        candidatesTable.setSelected(jobCandidate);
+        updateSignIconsState(jobCandidate);
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Метка присвоена")
+                .withDescription(icon.getTitleRu() != null ? icon.getTitleRu() : "")
+                .show();
+    }
+
+    private void removeSignAction(JobCandidate jobCandidate) {
+        if (jobCandidate == null) return;
+        List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .cacheable(true)
+                .list();
+
+        if (!list.isEmpty()) {
+            for (JobCandidateSignIcon jcsi : list) {
+                dataManager.remove(jcsi);
+            }
+        }
+
+        candidatesTable.repaint();
+        candidatesTable.setSelected(jobCandidate);
+        updateSignIconsState(jobCandidate);
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Метка снята")
+                .show();
+    }
+
     @Subscribe("candidatesTable")
     public void onCandidatesTableSelection(Table.SelectionEvent<JobCandidate> event) {
         JobCandidate selected = candidatesTable.getSingleSelected();
@@ -379,33 +570,42 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         } else {
             populateDetailPane(selected);
         }
+        updateActionsState(selected);
+        updateSignIconsState(selected);
     }
 
-    /**
-     * Возвращает фото кандидата: сначала из карточки (JobCandidate.fileImageFace),
-     * при отсутствии — из последнего резюме с фото (CandidateCV.fileImageFace).
-     */
-    private FileDescriptor resolveCandidateFace(JobCandidate candidate) {
-        if (candidate.getFileImageFace() != null) {
-            return candidate.getFileImageFace();
+    private void updateActionsState(JobCandidate selected) {
+        if (actionsWithCandidateButton == null) return;
+        actionsWithCandidateButton.setEnabled(true);
+        boolean hasSelected = selected != null;
+        if (actionsWithCandidateButton.getAction("editCandidateAction") != null) {
+            actionsWithCandidateButton.getAction("editCandidateAction").setEnabled(hasSelected);
         }
-        if (candidate.getCandidateCv() != null) {
-            return candidate.getCandidateCv().stream()
-                    .filter(cv -> cv.getFileImageFace() != null)
-                    .max(Comparator.comparing(CandidateCV::getCreateTs,
-                            Comparator.nullsLast(Comparator.naturalOrder())))
-                    .map(CandidateCV::getFileImageFace)
-                    .orElse(null);
+        if (actionsWithCandidateButton.getAction("createInteractionAction") != null) {
+            actionsWithCandidateButton.getAction("createInteractionAction").setEnabled(hasSelected);
         }
-        return null;
+        if (actionsWithCandidateButton.getAction("scanSkillsAction") != null) {
+            actionsWithCandidateButton.getAction("scanSkillsAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("showCandidateCVListAction") != null) {
+            actionsWithCandidateButton.getAction("showCandidateCVListAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("showIteractionListAction") != null) {
+            actionsWithCandidateButton.getAction("showIteractionListAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("sendEmailAction") != null) {
+            actionsWithCandidateButton.getAction("sendEmailAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("addPersonalReserveAction") != null) {
+            actionsWithCandidateButton.getAction("addPersonalReserveAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("refreshAction") != null) {
+            actionsWithCandidateButton.getAction("refreshAction").setEnabled(true);
+        }
     }
 
-    /**
-     * Сброс сайдбара в пустое состояние.
-     */
     private void clearDetailPane() {
-        detailFullName.setHtmlEnabled(true);
-        detailFullName.setValue("<div style='text-align: center; font-size: 21px; font-weight: 700; color: #7f8c8d;'>Выберите кандидата</div>");
+        detailFullName.setValue("Выберите кандидата");
         detailPosition.setValue("");
         detailCity.setValue("");
         detailPhone.setValue("-");
@@ -416,109 +616,43 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         detailSalary.setVisible(false);
         detailInteractionsInfo.setValue("Выберите кандидата в таблице для просмотра истории.");
         if (detailSkillsLabels != null) {
-            detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Выберите кандидата для просмотра навыков</span>");
+            detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
         }
-        detailPic.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
     }
 
-    /**
-     * Заполнение сайдбара данными выбранного кандидата:
-     * центрированная шапка (+30% шрифт), контакты, зарплата и счетчик взаимодействий.
-     *
-     * @param candidate выбранный кандидат
-     */
     private void populateDetailPane(JobCandidate candidate) {
-        String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
-        detailFullName.setHtmlEnabled(true);
-        detailFullName.setValue("<div style='text-align: center; font-size: 22px; font-weight: 700; color: #2c3e50; line-height: 1.3;'>" + name + "</div>");
-
-        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
-        detailPosition.setHtmlEnabled(true);
-        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 3px 10px; border-radius: 4px; font-weight: 600; font-size: 14px; display: inline-block;'>" + pos + "</span></div>");
-
-        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
-        detailCity.setHtmlEnabled(true);
-        detailCity.setValue("<div style='text-align: center; font-size: 15px; font-weight: 500; color: #7f8c8d; margin-top: 2px;'>📍 " + city + "</div>");
-
-        detailPhone.setValue(candidate.getPhone() != null ? candidate.getPhone() : "-");
+        FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
+        detailFullName.setValue(candidate.getFullName() != null ? candidate.getFullName() : "Без имени");
+        detailPosition.setValue(candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Должность не указана");
+        detailCity.setValue(candidate.getCityOfResidence() != null ? "📍 " + candidate.getCityOfResidence().getCityRuName() : "");
+        detailPhone.setValue(candidate.getPhone() != null ? candidate.getPhone() : (candidate.getMobilePhone() != null ? candidate.getMobilePhone() : "-"));
         detailEmail.setValue(candidate.getEmail() != null ? candidate.getEmail() : "-");
-        detailTelegram.setValue(candidate.getTelegramName() != null ? candidate.getTelegramName() : "-");
-
-        String company = "-";
+        detailTelegram.setValue(candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() : "-");
         if (candidate.getCurrentCompany() != null) {
-            company = candidate.getCurrentCompany().getComanyName() != null ?
+            String company = candidate.getCurrentCompany().getComanyName() != null ?
                     candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+            detailCompany.setValue(company != null ? company : "-");
+        } else {
+            detailCompany.setValue("-");
         }
-        detailCompany.setValue(company != null ? company : "-");
 
-        String salary = getSalaryExpectations(candidate);
+        String salary = resolveCandidateSalary(candidate);
         if (salary != null && !salary.isEmpty()) {
             detailSalaryCaption.setVisible(true);
+            detailSalary.setValue(salary);
             detailSalary.setVisible(true);
-            detailSalary.setHtmlEnabled(true);
-            detailSalary.setValue("<span style='color: #27ae60; font-weight: 600;'>" + salary + "</span>");
         } else {
             detailSalaryCaption.setVisible(false);
             detailSalary.setVisible(false);
         }
 
-        // Фото: из карточки кандидата, при отсутствии — из последнего резюме (CandidateCV);
-        // если файла нет в хранилище — автоматический fallback без битой картинки
-        FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
-
-        // Светофорная карточка статуса взаимодействия и участников процесса
-        CandidateRoleTeam team = calculateCandidateTeam(candidate);
-        StringBuilder sb = new StringBuilder();
-        sb.append("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid ")
-                .append(team.status.getColor()).append("; margin-top: 6px; font-size: 12px; line-height: 1.6;'>");
-
-        sb.append("<div><b>Статус:</b> <span style='color: ").append(team.status.getColor())
-                .append("; font-weight: bold;'>").append(team.status.getLabel()).append("</span></div>");
-
-        if (team.isFree) {
-            sb.append("<div style='margin-top: 5px;'>👤 <b>Автор карточки:</b> ")
-                    .append(team.authorName != null ? team.authorName : "—").append("</div>");
-            if (team.lastInteractionDate != null) {
-                sb.append("<div style='color: #7f8c8d; font-size: 11px;'>Посл. активность: ")
-                        .append(interactionDateFormat.format(team.lastInteractionDate)).append("</div>");
-            }
-        } else {
-            sb.append("<div style='margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; flex-direction: column; gap: 3px;'>");
-            if (team.researcherName != null) {
-                sb.append("<div>🔍 <b>Ресерчер:</b> ").append(team.researcherName).append("</div>");
-            }
-            if (team.recruiterName != null) {
-                sb.append("<div>👔 <b>Рекрутер:</b> ").append(team.recruiterName).append("</div>");
-            }
-            if (team.coordinatorName != null) {
-                sb.append("<div>🎯 <b>Координатор:</b> ").append(team.coordinatorName).append("</div>");
-            }
-            if (team.lastInteractionDate != null) {
-                sb.append("<div style='color: #7f8c8d; font-size: 11px; margin-top: 2px;'>Посл. активность: ")
-                        .append(interactionDateFormat.format(team.lastInteractionDate)).append("</div>");
-            }
-            sb.append("</div>");
-        }
-
-        sb.append("<div style='color: #94a3b8; font-size: 10.5px; margin-top: 4px;'>Всего взаимодействий: ")
-                .append(team.totalInteractions).append("</div>");
-        sb.append("</div>");
-
-        detailInteractionsInfo.setHtmlEnabled(true);
-        detailInteractionsInfo.setValue(sb.toString());
-
-        // Заполнение блока основных навыков кандидата
         updateCandidateSkillsSidebar(candidate);
-
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);
     }
 
-    /**
-     * Заполняет сайдбар цветными бейджами основных навыков кандидата, распознанными AI.
-     */
     private void updateCandidateSkillsSidebar(JobCandidate candidate) {
         if (detailSkillsLabels == null) {
             return;
@@ -527,9 +661,8 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
             return;
         }
-
         try {
-            List<com.company.hunttech.entity.CandidateSkill> skills = dataManager.load(com.company.hunttech.entity.CandidateSkill.class)
+            List<CandidateSkill> skills = dataManager.load(CandidateSkill.class)
                     .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
                     .parameter("candidate", candidate)
                     .view("candidateSkill-view")
@@ -541,10 +674,8 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             }
 
             StringBuilder sb = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
-            String[] palette = new String[]{
-                    "#2b82c9", "#27ae60", "#8e44ad", "#d35400", "#16a085", "#2c3e50", "#e67e22", "#2980b9"
-            };
-            for (com.company.hunttech.entity.CandidateSkill cs : skills) {
+            String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
+            for (CandidateSkill cs : skills) {
                 if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
                     String skillName = cs.getSkill().getSkillName();
                     String color = palette[Math.abs(skillName.hashCode()) % palette.length];
@@ -564,6 +695,55 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
+    @Subscribe("filterAllBtn")
+    public void onFilterAllBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterAllBtn);
+        jobCandidatesDl.removeParameter("createdBy");
+        jobCandidatesDl.removeParameter("recrutier");
+        jobCandidatesDl.removeParameter("recrutierName");
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterMyCandidatesBtn")
+    public void onFilterMyCandidatesBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyCandidatesBtn);
+        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+        jobCandidatesDl.setParameter("createdBy", currentLogin);
+        jobCandidatesDl.removeParameter("recrutier");
+        jobCandidatesDl.removeParameter("recrutierName");
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterMyParticipationBtn")
+    public void onFilterMyParticipationBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyParticipationBtn);
+        jobCandidatesDl.removeParameter("createdBy");
+        jobCandidatesDl.setParameter("recrutier", userSession.getUser());
+        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+        jobCandidatesDl.setParameter("recrutierName", currentLogin);
+        jobCandidatesDl.load();
+    }
+
+    private void updateFilterButtons(Button activeBtn) {
+        filterAllBtn.setStyleName("secondary filter-pill-btn");
+        filterMyCandidatesBtn.setStyleName("secondary filter-pill-btn");
+        filterMyParticipationBtn.setStyleName("secondary filter-pill-btn");
+        activeBtn.setStyleName("primary filter-pill-btn active");
+    }
+
+    @Subscribe("createCandidateBtn")
+    public void onCreateCandidateBtnClick(Button.ClickEvent event) {
+        screenBuilders.editor(candidatesTable)
+                .newEntity()
+                .withOpenMode(OpenMode.DIALOG)
+                .show();
+    }
+
+    @Subscribe("actionsWithCandidateButton.refreshAction")
+    public void onActionsWithCandidateButtonRefreshAction(Action.ActionPerformedEvent event) {
+        jobCandidatesDl.load();
+    }
+
     @Subscribe("editCandidateBtn")
     public void onEditCandidateBtnClick(Button.ClickEvent event) {
         JobCandidate selected = candidatesTable.getSingleSelected();
@@ -575,28 +755,232 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
-    @Subscribe("createCandidateBtn")
-    public void onCreateCandidateBtnClick(Button.ClickEvent event) {
-        screenBuilders.editor(candidatesTable)
-                .newEntity()
-                .withOpenMode(OpenMode.DIALOG)
-                .show();
+    @Subscribe("actionsWithCandidateButton.scanSkillsAction")
+    public void onScanSkillsAction(Action.ActionPerformedEvent event) {
+        scanCandidateSkills();
     }
 
-    @Subscribe("refreshBtn")
-    public void onRefreshBtnClick(Button.ClickEvent event) {
-        jobCandidatesDl.load();
-    }
-
-    @Subscribe("searchButton")
-    public void onSearchButtonClick(Button.ClickEvent event) {
-        String queryText = searchField.getValue();
-        if (queryText == null || queryText.trim().isEmpty()) {
-            jobCandidatesDl.setQuery("select e from hunttech_JobCandidate e order by e.createTs desc");
-        } else {
-            jobCandidatesDl.setQuery("select e from hunttech_JobCandidate e where lower(e.fullName) like :queryText order by e.createTs desc");
-            jobCandidatesDl.setParameter("queryText", "%" + queryText.trim().toLowerCase() + "%");
+    /**
+     * AI-анализ навыков выбранного кандидата: берёт текст последнего резюме из БД,
+     * вызывает SkillAnalysisService (основные/второстепенные/третьестепенные навыки),
+     * сохраняет новые CandidateSkill и обновляет сайдбар навыков и колонку «Ключевые навыки».
+     */
+    private void scanCandidateSkills() {
+        JobCandidate candidate = candidatesTable.getSingleSelected();
+        if (candidate == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Кандидат не выбран. Для анализа навыков выберите кандидата.")
+                    .show();
+            return;
         }
-        jobCandidatesDl.load();
+
+        String rawText = loadLastCvText(candidate.getId());
+        if (rawText == null || rawText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Текст резюме пуст. Для анализа навыков необходимо заполнить текст резюме.")
+                    .show();
+            return;
+        }
+
+        String inputText = Jsoup.parse(rawText).text();
+        if (inputText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Текст резюме после очистки HTML-разметки пуст.")
+                    .show();
+            return;
+        }
+
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт операции — исчезающая TRAY-нотификация
+        AiOperationNotifier.showStarted(notifications, "Запущен AI-анализ навыков резюме…", null);
+
+        final JobCandidate candidateForScan = candidate;
+        final String textForScan = inputText;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ навыков резюме…");
+
+        BackgroundTask<Integer, SkillScanOutcome> task =
+                new BackgroundTask<Integer, SkillScanOutcome>(240, this) {
+                    @Override
+                    public SkillScanOutcome run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        List<CandidateSkill> existingSkills = dataManager.load(CandidateSkill.class)
+                                .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
+                                .parameter("candidate", candidateForScan)
+                                .view("candidateSkill-view")
+                                .list();
+
+                        Set<UUID> existingSkillIds = new HashSet<>();
+                        for (CandidateSkill cs : existingSkills) {
+                            if (cs.getSkill() != null) {
+                                existingSkillIds.add(cs.getSkill().getId());
+                            }
+                        }
+
+                        SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(textForScan);
+                        SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(textForScan);
+                        SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(textForScan);
+
+                        List<SkillTree> mainSkills = mainResult.getSkills();
+                        List<SkillTree> secondarySkills = secondaryResult.getSkills();
+                        List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
+                        SkillAnalysisResult allResult = null;
+
+                        if (mainSkills == null) mainSkills = Collections.emptyList();
+                        if (secondarySkills == null) secondarySkills = Collections.emptyList();
+                        if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
+
+                        if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
+                            allResult = skillAnalysisService.analyzeAll(textForScan);
+                            mainSkills = allResult.getSkills();
+                            if (mainSkills == null) mainSkills = Collections.emptyList();
+                        }
+
+                        SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
+                        AiExecutionResult aiExecution = aiSourceResult == null ? null : aiSourceResult.getAiExecution();
+
+                        List<CandidateSkill> toSave = new ArrayList<>();
+                        Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
+
+                        for (SkillTree st : mainSkills) {
+                            if (st != null && processedSkillIds.add(st.getId())) {
+                                CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                cs.setCandidate(candidateForScan);
+                                cs.setSkill(st);
+                                cs.setPriority(CandidateSkillPriority.MAIN);
+                                toSave.add(cs);
+                            }
+                        }
+
+                        for (SkillTree st : secondarySkills) {
+                            if (st != null && processedSkillIds.add(st.getId())) {
+                                CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                cs.setCandidate(candidateForScan);
+                                cs.setSkill(st);
+                                cs.setPriority(CandidateSkillPriority.SECONDARY);
+                                toSave.add(cs);
+                            }
+                        }
+
+                        for (SkillTree st : tertiarySkills) {
+                            if (st != null && processedSkillIds.add(st.getId())) {
+                                CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                cs.setCandidate(candidateForScan);
+                                cs.setSkill(st);
+                                cs.setPriority(CandidateSkillPriority.TERTIARY);
+                                toSave.add(cs);
+                            }
+                        }
+
+                        int mainDetected = mainSkills.size();
+                        int secondaryDetected = secondarySkills.size();
+                        int tertiaryDetected = tertiarySkills.size();
+                        int totalDetected = mainDetected + secondaryDetected + tertiaryDetected;
+                        int savedCount = toSave.size();
+                        int existingOrDuplicate = totalDetected - savedCount;
+
+                        if (!toSave.isEmpty()) {
+                            CommitContext commitContext = new CommitContext(toSave);
+                            dataManager.commit(commitContext);
+                        }
+
+                        String statsDescription = String.format(
+                                "Всего обнаружено навыков: <b>%d</b><br/>" +
+                                "• Основных: <b>%d</b><br/>" +
+                                "• Второстепенных: <b>%d</b><br/>" +
+                                "• Третьестепенных: <b>%d</b><br/>" +
+                                "──────────────────────<br/>" +
+                                "✅ Сохранено новых: <b>%d</b>%s",
+                                totalDetected,
+                                mainDetected,
+                                secondaryDetected,
+                                tertiaryDetected,
+                                savedCount,
+                                (existingOrDuplicate > 0 ? "<br/>ℹ️ Уже присутствуют у кандидата: <b>" + existingOrDuplicate + "</b>" : "")
+                        );
+
+                        return new SkillScanOutcome(statsDescription, aiExecution);
+                    }
+
+                    @Override
+                    public void done(SkillScanOutcome outcome) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+
+                        String statsDescription = outcome.statsDescription;
+                        AiExecutionResult aiExecution = outcome.aiExecution;
+                        if (aiExecution != null) {
+                            statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
+                        }
+
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Статистика анализа навыков")
+                                .withDescription(statsDescription)
+                                .withContentMode(ContentMode.HTML)
+                                .withHideDelayMs(5000)
+                                .show();
+
+                        JobCandidate selected = candidatesTable.getSingleSelected();
+                        if (selected != null && candidateForScan.getId() != null
+                                && candidateForScan.getId().equals(selected.getId())) {
+                            updateCandidateSkillsSidebar(selected);
+                        }
+                        candidatesTable.repaint();
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа навыков")
+                                .withDescription("Не удалось выполнить анализ навыков: " + ex.getMessage())
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа навыков")
+                                .withDescription("Анализ навыков превысил допустимое время выполнения.")
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
+    }
+
+    private String loadLastCvText(UUID candidateId) {
+        if (candidateId == null) {
+            return null;
+        }
+        return dataManager.loadValue(
+                "select e.textCV from hunttech_CandidateCV e " +
+                "where e.candidate.id = :candidateId " +
+                "order by e.datePost desc",
+                String.class)
+                .parameter("candidateId", candidateId)
+                .maxResults(1)
+                .optional()
+                .orElse(null);
+    }
+
+    private static class SkillScanOutcome {
+        final String statsDescription;
+        final AiExecutionResult aiExecution;
+
+        SkillScanOutcome(String statsDescription, AiExecutionResult aiExecution) {
+            this.statsDescription = statsDescription;
+            this.aiExecution = aiExecution;
+        }
+    }
+
+    @SafeVarargs
+    private static <T> T firstNonNull(T... values) {
+        if (values == null) return null;
+        for (T v : values) {
+            if (v != null) return v;
+        }
+        return null;
     }
 }

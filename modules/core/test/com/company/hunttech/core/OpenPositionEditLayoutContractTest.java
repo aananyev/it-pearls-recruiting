@@ -240,54 +240,64 @@ public class OpenPositionEditLayoutContractTest {
     }
 
     @Test
-    public void sidebarNavigationListsNameParamsVacancyTeamSalaryInOrder() throws IOException {
+    public void sidebarNavigationListsTabsInOrder() throws IOException {
         String descriptor = readProjectFile(EDIT_XML);
 
-        // Набор навигации вкладки «Вакансия» (openPositionMainTabNavigation) содержит ровно
-        // 5 пунктов в порядке следования секций формы: «Наименование», «Параметры вакансии»,
-        // «Вакансия», «Команда», «Зарплатное предложение».
-        int navStart = descriptor.indexOf("id=\"openPositionMainTabNavigation\"");
-        assertTrue("Набор навигации вкладки «Вакансия» не найден", navStart >= 0);
+        // Единый набор навигации вкладки «Вакансия» (openPositionTabNavigation) содержит
+        // 11 пунктов в порядке вкладок tabSheetOpenPosition:
+        // Вакансия, Трудовой договор, Описание вакансии, Файлы, Тестовое задание,
+        // Памятка кандидату, Шаблон письма, Навыки, Новости, Согласование, Комментарии.
+        int navStart = descriptor.indexOf("id=\"openPositionTabNavigation\"");
+        assertTrue("Единый набор навигации вкладок не найден", navStart >= 0);
         int navEnd = descriptor.indexOf("</vbox>", navStart);
         String nav = descriptor.substring(navStart, navEnd);
 
         String[] navIds = {
-                "openPositionEditorNavName",
-                "openPositionEditorNavParams",
-                "openPositionEditorNavVacancy",
-                "openPositionEditorNavTeam",
-                "openPositionEditorNavSalary"
+                "navTabOpenPosition",
+                "navTabLaborAgreement",
+                "navTabJobDescription",
+                "navTabFiles",
+                "navTabExercise",
+                "navTabMemoForInterview",
+                "navTabTemplateLetter",
+                "navTabSkills",
+                "navTabOpenPositionNews",
+                "navTabApproval",
+                "navTabComments"
         };
         int prev = -1;
         for (String navId : navIds) {
             int pos = nav.indexOf("id=\"" + navId + "\"");
             assertTrue("Пункт навигации " + navId + " не найден", pos >= 0);
-            assertTrue("Пункт навигации " + navId + " не в порядке секций", pos > prev);
+            assertTrue("Пункт навигации " + navId + " не в порядке вкладок", pos > prev);
             prev = pos;
         }
 
-        // Подписи пунктов соответствуют блокам вкладки (в пределах открывающего тега кнопки).
-        assertTrue("«Наименование» должен использовать mainMsg://msgName",
-                section(nav, "id=\"openPositionEditorNavName\"", "/>")
-                        .contains("caption=\"mainMsg://msgName\""));
-        assertTrue("«Параметры вакансии» должен использовать msg://msgVacancyParams",
-                section(nav, "id=\"openPositionEditorNavParams\"", "/>")
-                        .contains("caption=\"msg://msgVacancyParams\""));
-        assertTrue("«Вакансия» должен использовать mainMsg://openPositionEditorNavVacancy",
-                section(nav, "id=\"openPositionEditorNavVacancy\"", "/>")
-                        .contains("caption=\"mainMsg://openPositionEditorNavVacancy\""));
-        assertTrue("«Команда» должен использовать msg://msgCommand",
-                section(nav, "id=\"openPositionEditorNavTeam\"", "/>")
-                        .contains("caption=\"msg://msgCommand\""));
-        assertTrue("«Зарплатное предложение» должен использовать msg://msgSalaryProposal",
-                section(nav, "id=\"openPositionEditorNavSalary\"", "/>")
-                        .contains("caption=\"msg://msgSalaryProposal\""));
+        // Подписи пунктов соответствуют caption вкладок.
+        String[] captions = {
+                "caption=\"msg://msgVacansy\"",
+                "caption=\"msg://msgLaborAgreementTab\"",
+                "caption=\"mainMsg://msgJobDescription\"",
+                "caption=\"mainMsg://msgFiles\"",
+                "caption=\"msg://msgExercise\"",
+                "caption=\"msg://msgMemoForInterview\"",
+                "caption=\"msg://msgTemplateLetter\"",
+                "caption=\"msg://msgSkilsPosition\"",
+                "caption=\"msg://msgOpenPositionNews\"",
+                "caption=\"msg://msgOpenPositionApprovall\"",
+                "caption=\"msg://msgComments\""
+        };
+        for (int i = 0; i < navIds.length; i++) {
+            String buttonBlock = section(nav, "id=\"" + navIds[i] + "\"", "/>");
+            assertTrue("Пункт " + navIds[i] + " должен иметь caption " + captions[i],
+                    buttonBlock.contains(captions[i]));
+        }
 
-        // Устаревшие пункты «Параметры вакансии» (старый id) и «Количество персонала» удалены.
-        assertTrue("Пункт «Параметры вакансии» не должен использовать старый id openPositionEditorNavProject",
-                !descriptor.contains("openPositionEditorNavProject"));
-        assertTrue("Пункт «Количество персонала» должен быть удалён",
-                !descriptor.contains("openPositionEditorNavPersonnel"));
+        // Старые наборы/кнопки навигации удалены.
+        assertTrue("Старый набор openPositionMainTabNavigation должен быть удалён",
+                !descriptor.contains("openPositionMainTabNavigation"));
+        assertTrue("Старая кнопка openPositionEditorNavName должна быть удалена",
+                !descriptor.contains("openPositionEditorNavName"));
     }
 
     @Test
@@ -518,9 +528,9 @@ public class OpenPositionEditLayoutContractTest {
 
         // Оба заголовка секций sidebar несут класс open-position-editor-section-title
         // поверх базового label-nav-title.
-        String navSectionsLabel = startTag(descriptor, "openPositionEditorNavActiveSectionsLabel");
+        String navSectionsLabel = startTag(descriptor, "openPositionEditorNavTabsLabel");
         String contextLabel = startTag(descriptor, "openPositionEditorContextLabel");
-        assertTrue("«Разделы активной вкладки» не получил класс open-position-editor-section-title",
+        assertTrue("«ВКЛАДКИ ФОРМЫ» не получил класс open-position-editor-section-title",
                 navSectionsLabel.contains("label-nav-title open-position-editor-section-title"));
         assertTrue("«Контекст вакансии» не получил класс open-position-editor-section-title",
                 contextLabel.contains("label-nav-title open-position-editor-section-title"));
@@ -926,20 +936,55 @@ public class OpenPositionEditLayoutContractTest {
 
     @Test
     public void sidebarNavigationSetsFollowTabs() throws IOException {
-        // Label-навигация sidebar — наборы по вкладкам tabSheetOpenPosition: контейнер
-        // openPositionEditorNavigation содержит заголовок и 11 вложенных vbox-наборов
-        // openPosition*TabNavigation; все кроме вкладки по умолчанию скрыты; каждая кнопка
-        // набора — borderless label-nav-item. Java: syncSidebarNavigation показывает набор
-        // только для вкладок с двумя и более блоками ввода (TABS_WITH_SIDEBAR_NAVIGATION),
-        // одноблочные наборы всегда setVisible(false), контейнер скрывается целиком.
+        // Единая label-навигация по вкладкам tabSheetOpenPosition: контейнер
+        // openPositionEditorNavigation содержит заголовок и единый vbox openPositionTabNavigation
+        // с 11 кнопками navTab* (1:1 с видимыми вкладками); каждая кнопка — borderless label-nav-item.
+        // Java: syncSidebarNavigation показывает контейнер для всех вкладок (кроме tabPayments),
+        // подсвечивает активную кнопку, клики переключают вкладку и фокусируют первый элемент ввода.
         String descriptor = readProjectFile(EDIT_XML);
         String controller = readProjectFile(EDIT_CONTROLLER);
 
-        List<String> multiBlockSets = Arrays.asList(
+        // Контейнер навигации: существует в XML, Java управляет его видимостью.
+        assertTrue("XML: контейнер openPositionEditorNavigation отсутствует",
+                descriptor.contains("id=\"openPositionEditorNavigation\""));
+        assertTrue("Java: syncSidebarNavigation не переключает контейнер openPositionEditorNavigation",
+                controller.contains("openPositionEditorNavigation.setVisible("));
+
+        // Единый набор навигации openPositionTabNavigation с 11 кнопками 1:1 с вкладками.
+        assertTrue("XML: набор навигации openPositionTabNavigation отсутствует",
+                descriptor.contains("id=\"openPositionTabNavigation\""));
+
+        // 11 кнопок навигации, соответствующих видимым вкладкам (кроме скрытой tabPayments).
+        String[] navButtons = {
+                "navTabOpenPosition",
+                "navTabLaborAgreement",
+                "navTabJobDescription",
+                "navTabFiles",
+                "navTabExercise",
+                "navTabMemoForInterview",
+                "navTabTemplateLetter",
+                "navTabSkills",
+                "navTabOpenPositionNews",
+                "navTabApproval",
+                "navTabComments"
+        };
+        for (String buttonId : navButtons) {
+            assertTrue("XML: кнопка навигации " + buttonId + " отсутствует",
+                    descriptor.contains("id=\"" + buttonId + "\""));
+            String buttonBlock = section(descriptor, "<button id=\"" + buttonId + "\"", "/>");
+            assertTrue("XML: кнопка " + buttonId + " должна быть borderless label-nav-item",
+                    buttonBlock.contains("borderless label-nav-item"));
+            assertTrue("Java: кнопка " + buttonId + " не задекларирована как поле",
+                    controller.contains("private Button " + buttonId + ";"));
+            assertTrue("Java: клик-обработчик " + buttonId + " не найден",
+                    controller.contains("on" + capitalize(buttonId) + "Click"));
+        }
+
+        // Старые наборы навигации (openPositionMainTabNavigation и др.) удалены.
+        String[] oldSets = {
                 "openPositionMainTabNavigation",
                 "openPositionLaborTabNavigation",
-                "openPositionJobDescriptionTabNavigation");
-        List<String> singleBlockSets = Arrays.asList(
+                "openPositionJobDescriptionTabNavigation",
                 "openPositionFilesTabNavigation",
                 "openPositionExerciseTabNavigation",
                 "openPositionMemoTabNavigation",
@@ -947,51 +992,40 @@ public class OpenPositionEditLayoutContractTest {
                 "openPositionSkillsTabNavigation",
                 "openPositionNewsTabNavigation",
                 "openPositionApprovalTabNavigation",
-                "openPositionCommentsTabNavigation");
-
-        // Контейнер навигации: существует в XML, Java управляет его видимостью целиком.
-        assertTrue("XML: контейнер openPositionEditorNavigation отсутствует",
-                descriptor.contains("id=\"openPositionEditorNavigation\""));
-        assertTrue("Java: syncSidebarNavigation не переключает контейнер openPositionEditorNavigation",
-                controller.contains("openPositionEditorNavigation.setVisible("));
-        assertTrue("Java: не задекларирован TABS_WITH_SIDEBAR_NAVIGATION (вкладки с 2+ блоками)",
-                controller.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
-
-        for (String setId : multiBlockSets) {
-            assertTrue("XML: набор навигации " + setId + " отсутствует", descriptor.contains("id=\"" + setId + "\""));
-            assertTrue("Java: syncSidebarNavigation не переключает набор " + setId,
-                    controller.contains(setId + ".setVisible("));
-            if (!"openPositionMainTabNavigation".equals(setId)) {
-                String block = section(descriptor, "<vbox id=\"" + setId + "\"", "</vbox>");
-                assertTrue("XML: набор " + setId + " должен быть скрыт по умолчанию (visible=\"false\")",
-                        block.contains("visible=\"false\""));
-            }
-        }
-        for (String setId : singleBlockSets) {
-            assertTrue("XML: набор навигации " + setId + " отсутствует", descriptor.contains("id=\"" + setId + "\""));
-            // Одноблочные вкладки: набор никогда не показывается (контейнер скрыт целиком).
-            assertTrue("Java: набор " + setId + " должен быть всегда setVisible(false)",
-                    controller.contains(setId + ".setVisible(false)"));
-            String block = section(descriptor, "<vbox id=\"" + setId + "\"", "</vbox>");
-            assertTrue("XML: набор " + setId + " должен быть скрыт по умолчанию (visible=\"false\")",
-                    block.contains("visible=\"false\""));
+                "openPositionCommentsTabNavigation"
+        };
+        for (String oldSet : oldSets) {
+            assertTrue("XML: старый набор " + oldSet + " должен быть удалён",
+                    !descriptor.contains("id=\"" + oldSet + "\""));
         }
 
-        // Все навигационные кнопки (18) — borderless label-nav-item и имеют Java-поле.
-        for (String buttonId : new String[]{
+        // Старые кнопки навигации (openPositionEditorNav*) удалены.
+        String[] oldButtons = {
                 "openPositionEditorNavName", "openPositionEditorNavParams", "openPositionEditorNavVacancy",
                 "openPositionEditorNavTeam", "openPositionEditorNavSalary", "openPositionEditorNavLaborAgreement",
                 "openPositionEditorNavPaymentsDetail", "openPositionEditorNavWorkExperience",
                 "openPositionEditorNavDescription", "openPositionEditorNavShortDescription",
                 "openPositionEditorNavFiles", "openPositionEditorNavExercise", "openPositionEditorNavMemo",
                 "openPositionEditorNavTemplateLetter", "openPositionEditorNavSkills", "openPositionEditorNavNews",
-                "openPositionEditorNavApproval", "openPositionEditorNavComments"}) {
-            String buttonBlock = section(descriptor, "<button id=\"" + buttonId + "\"", "/>");
-            assertTrue("XML: кнопка " + buttonId + " должна быть borderless label-nav-item",
-                    buttonBlock.contains("borderless label-nav-item"));
-            assertTrue("Java: кнопка " + buttonId + " не задекларирована как поле",
-                    controller.contains("private Button " + buttonId + ";"));
+                "openPositionEditorNavApproval", "openPositionEditorNavComments"
+        };
+        for (String oldButton : oldButtons) {
+            assertTrue("XML: старая кнопка " + oldButton + " должна быть удалена",
+                    !descriptor.contains("id=\"" + oldButton + "\""));
         }
+
+        // TABS_WITH_SIDEBAR_NAVIGATION больше не используется (навигация единая для всех вкладок).
+        assertTrue("Java: TABS_WITH_SIDEBAR_NAVIGATION должен быть удалён",
+                !controller.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
+
+        // syncSidebarNavigation использует tabToNavButton() map для подсветки.
+        assertTrue("Java: tabToNavButton map не найден",
+                controller.contains("tabToNavButton"));
+    }
+
+    private String capitalize(String s) {
+        if (s == null || s.length() == 0) return s;
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
     private String themeScssPath(String theme) {

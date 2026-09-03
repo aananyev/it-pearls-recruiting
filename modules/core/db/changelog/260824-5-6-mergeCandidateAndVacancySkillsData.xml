@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+      Миграция данных: сгенерированные AI-скиллы (кандидат + вакансия).
+      Данные выгружены с локали 127.0.0.1:5432 (hunttech) через:
+      \copy (SELECT ...) TO '/tmp/migplan/hunttech_...csv' CSV HEADER
+      Выполняется ТОЛЬКО через Hermes-1 в окно деплоя; на этом этапе
+      НИЧЕГО НА ПРОД НЕ ПРИМЕНЯЕТСЯ. Это черновик changelog-файла.
+      Автор: агент (2026-09-01)
+    -->
+
+    <!-- Фаза A: hunttech_candidate_skill (306 строк, данные AI SKILLS_EXTRACT) -->
+    <changeSet id="260824-5-mergeCandidateSkillsData" author="HRM HuntTech" contextFilter="dev">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_CANDIDATE_SKILL"/>
+            <sqlCheck expectedResult="306">
+                SELECT count(*) FROM hunttech_candidate_skill WHERE delete_ts IS NULL
+            </sqlCheck>
+        </preConditions>
+        <comment>Данные сгенерированы AI-анализом навыков кандидатов (SKILLS_EXTRACT, 260815-2). Применяется идемпотентно: если на проде уже 306 строк с активными записями — пропускается.</comment>
+        <sqlFile path="update/postgres/26/260824-5-candidate_skill_data.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!-- Фаза B: hunttech_skill_tree (944 строки, навыки вакансий, сгенерированные AI) -->
+    <changeSet id="260824-6-mergeSkillTreeData" author="HRM HuntTech" contextFilter="dev">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_SKILL_TREE"/>
+            <sqlCheck expectedResult="944">
+                SELECT count(*) FROM hunttech_skill_tree WHERE delete_ts IS NULL
+            </sqlCheck>
+        </preConditions>
+        <comment>Навыки открытых вакансий (skillsList), сгенерированные через CV_SMART_PARSE_JSON / SKILLS_EXTRACT. Применяется идемпотентно.</comment>
+        <sqlFile path="update/postgres/26/260824-6-skill_tree_data.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+</databaseChangeLog>
