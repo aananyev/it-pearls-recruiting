@@ -33,6 +33,7 @@
         <property name="fallbackPolicy"/>
         <property name="allowModelOverride"/>
         <property name="active"/>
+        <property name="includeUserContext"/>
         <property name="configurationVersion"/>
     </view>
     <!-- Edit-view догружает prompt LOB только при открытии редактора функции. -->

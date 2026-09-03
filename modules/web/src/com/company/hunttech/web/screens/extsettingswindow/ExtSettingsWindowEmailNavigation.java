@@ -1,8 +1,10 @@
 package com.company.hunttech.web.screens.extsettingswindow;
 
+import com.company.hunttech.config.HunttechAiPersonalizationConfig;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.UserAiProfile;
 import com.company.hunttech.service.UserAiContextBuilder;
+import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Button;
@@ -47,6 +49,8 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private UiComponents uiComponents;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Configuration configuration;
 
     @Inject
     private VBoxLayout emailSettingsNavigation;
@@ -213,7 +217,11 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         }
 
         try {
-            aiContextPreviewArea.setValue(UserAiContextBuilder.buildPreview(profile));
+            // Тот же единый резолв лимита, что и при фактическом исполнении
+            // (HunttechAiPersonalizationConfig.getUserContextLimitOrDefault) —
+            // консистентность «факт = preview» (план §6.2).
+            int limit = configuration.getConfig(HunttechAiPersonalizationConfig.class).getUserContextLimitOrDefault();
+            aiContextPreviewArea.setValue(UserAiContextBuilder.buildPreview(profile, limit));
             previewGroup.setExpanded(true);
             updateUserAiProfileNavigationStyles(userAiProfilePreviewNav);
             // Фокус прокручивает длинную форму к раскрытому результату и делает действие видимым пользователю.

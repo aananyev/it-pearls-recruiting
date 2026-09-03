@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Персонализация AI-ответов данными «Обо мне» (UserAiProfile), этап B:
+        UPDATE-дефолты флага INCLUDE_USER_CONTEXT по матрице уместности персонализации.
+        Явные FALSE — детерминированные/объективные функции и корпоративные артефакты;
+        TRUE — генеративные vacancy-артефакты (legacy VACANCY_*); остальным текстовым
+        NULL-записям — TRUE; IMAGE и прочим — FALSE. INSERT-only-паттерн проекта:
+        существующие ручные настройки (не-NULL) не перезаписываются.
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION"/>
+        <columnExists tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION" columnName="INCLUDE_USER_CONTEXT"/>
+    </preConditions>
+
+    <changeSet id="260817-2-setIncludeUserContextDefaults" author="hunttech">
+        <sql splitStatements="true" stripComments="true">
+            -- Явно выключенные функции (матрица уместности, план 2026-08-17 §4.2):
+            UPDATE HUNTTECH_AI_FUNCTION_CONFIGURATION SET INCLUDE_USER_CONTEXT = FALSE
+             WHERE INCLUDE_USER_CONTEXT IS NULL
+               AND CODE IN ('STANDARDIZE_VACANCY','SKILLS_EXTRACT','TEXT_SMART_FORMAT_HTML',
+                            'TEXT_SMART_FORMAT_PLAIN','PROJECT_DESCRIPTION_GENERATE',
+                            'PROJECT_SHORT_DESCRIPTION_GENERATE','PROJECT_LOGO_IMAGE_GENERATE',
+                            'TEST_CONNECTION');
+
+            -- Остальные текстовые функции (включая legacy vacancy-артефакты VACANCY_*) — TRUE:
+            UPDATE HUNTTECH_AI_FUNCTION_CONFIGURATION SET INCLUDE_USER_CONTEXT = TRUE
+             WHERE INCLUDE_USER_CONTEXT IS NULL
+               AND CAPABILITY IN ('TEXT_GENERATION','TEXT_ANALYSIS','TEXT_TRANSFORMATION','DOCUMENT_ANALYSIS');
+
+            -- Все прочие (IMAGE и т.п.) — FALSE:
+            UPDATE HUNTTECH_AI_FUNCTION_CONFIGURATION SET INCLUDE_USER_CONTEXT = FALSE
+             WHERE INCLUDE_USER_CONTEXT IS NULL;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

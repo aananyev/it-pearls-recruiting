@@ -104,6 +104,9 @@
                             <lookupField id="capabilityField" dataContainer="aiFunctionDc" property="capability" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionCapability.caption"/>
                             <!-- Флаг централизованного включения функции. -->
                             <checkBox id="activeField" dataContainer="aiFunctionDc" property="active" caption="msg://aiFunctionActive.caption"/>
+                            <!-- Флаг передачи пользовательского контекста («Обо мне», UserAiProfile)
+                                 в system prompt при текстовых вызовах (персонализация, этап B). -->
+                            <checkBox id="includeUserContextField" dataContainer="aiFunctionDc" property="includeUserContext" caption="msg://aiFunctionIncludeUserContext.caption"/>
                         </groupBox>
                         <!-- Карточка «Маршрутизация»: политика выполнения и выбор корпоративного подключения. -->
                         <groupBox id="routingSection" caption="Маршрутизация" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">

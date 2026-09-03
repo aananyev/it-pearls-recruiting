@@ -1,7 +1,9 @@
 package com.company.hunttech.service;
 
+import com.company.hunttech.config.HunttechAiPersonalizationConfig;
 import com.company.hunttech.entity.UserAiProfile;
 import com.company.hunttech.service.dto.AiUserContext;
+import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,12 @@ public class UserAiContextServiceBean implements UserAiContextService {
     private DataManager dataManager;
     @Inject
     private UserSessionSource userSessionSource;
+    @Inject
+    private Configuration configuration;
 
     @Override
     public AiUserContext buildCurrentUserContext() {
-        return UserAiContextBuilder.buildContext(loadCurrentUserProfile());
+        return UserAiContextBuilder.buildContext(loadCurrentUserProfile(), resolveConfiguredLimit());
     }
 
     @Override
@@ -36,7 +40,23 @@ public class UserAiContextServiceBean implements UserAiContextService {
 
     @Override
     public String buildContextPreview(UserAiProfile profile) {
-        return UserAiContextBuilder.buildPreview(profile);
+        // Тот же бюджет, что и фактическое исполнение: «факт = preview» (план §6.2).
+        return UserAiContextBuilder.buildPreview(profile, resolveConfiguredLimit());
+    }
+
+    /**
+     * Резолвит {@code hunttech.ai.userContextLimit} через CUBA Config
+     * ({@link HunttechAiPersonalizationConfig#getUserContextLimitOrDefault()}):
+     * единая точка резолва — и фактическое исполнение, и UI-предпросмотр обязаны
+     * использовать этот метод, чтобы «факт = preview» (план персонализации §6.2).
+     * Весь блок дополнительно ограничен сверху жёстким лимитом builder'а (16000).
+     */
+    public int resolveConfiguredLimit() {
+        if (configuration == null) {
+            // Юнит-тесты создают бин без контейнера: CUBA Config недоступен — дефолт 4000.
+            return 4000;
+        }
+        return configuration.getConfig(HunttechAiPersonalizationConfig.class).getUserContextLimitOrDefault();
     }
 
     /*
@@ -52,3 +72,5 @@ public class UserAiContextServiceBean implements UserAiContextService {
                 .orElse(null);
     }
 }
+
+

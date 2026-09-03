@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Персонализация AI-ответов данными «Обо мне» (UserAiProfile), этап B:
+        колонка-флаг INCLUDE_USER_CONTEXT таблицы HUNTTECH_AI_FUNCTION_CONFIGURATION.
+        Флаг управляет передачей контекста пользователя в system prompt при executeText.
+        NULL трактуется execution layer'ом по capability (текстовые — true, IMAGE — false).
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION"/>
+    </preConditions>
+
+    <changeSet id="260817-1-addIncludeUserContextFlag" author="hunttech">
+        <sql splitStatements="true" stripComments="true">
+            ALTER TABLE HUNTTECH_AI_FUNCTION_CONFIGURATION
+                ADD COLUMN IF NOT EXISTS INCLUDE_USER_CONTEXT boolean;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

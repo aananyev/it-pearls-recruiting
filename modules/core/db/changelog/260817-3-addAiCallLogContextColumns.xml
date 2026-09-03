@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Персонализация AI-ответов данными «Обо мне» (UserAiProfile), этап E:
+        колонки аудита INCLUDE_USER_CONTEXT-передачи в HUNTTECH_AI_CALL_LOG.
+        contextIncluded — флаг фактического добавления блока в system prompt;
+        contextCodePoints — размер добавленного блока (для диагностики стоимости).
+        Контент блока в лог не пишется (приватность).
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_AI_CALL_LOG"/>
+    </preConditions>
+
+    <changeSet id="260817-3-addAiCallLogContextColumns" author="hunttech">
+        <sql splitStatements="true" stripComments="true">
+            ALTER TABLE HUNTTECH_AI_CALL_LOG
+                ADD COLUMN IF NOT EXISTS CONTEXT_INCLUDED boolean;
+            ALTER TABLE HUNTTECH_AI_CALL_LOG
+                ADD COLUMN IF NOT EXISTS CONTEXT_CODE_POINTS integer;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -1,10 +1,14 @@
 package com.company.hunttech.service;
 
+import com.company.hunttech.entity.AiCommunicationStyle;
 import com.company.hunttech.entity.AiFunctionalRole;
 import com.company.hunttech.entity.AiPreferredLanguage;
+import com.company.hunttech.entity.AiResponseDetailLevel;
 import com.company.hunttech.entity.UserAiProfile;
 import com.company.hunttech.service.dto.AiUserContext;
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -101,6 +105,103 @@ public class UserAiContextServiceBeanTest {
         profile.setAboutMe(" \t ");
         AiUserContext context = service.buildContext(profile);
         assertNull(context.getProfileData().get("aboutMe"));
+    }
+
+    @Test
+    public void stylePreferencesAndInstructions_keepBudgetBeforeLargeLobFields() {
+        // При ограниченном бюджете стилевые предпочтения и пользовательские
+        // инструкции добавляются первыми и не вытесняются объёмными LOB-полями.
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setPreferredLanguage(AiPreferredLanguage.RUSSIAN);
+        profile.setCommunicationStyle(AiCommunicationStyle.DIRECT);
+        profile.setResponseDetailLevel(AiResponseDetailLevel.BRIEF);
+        profile.setCustomAiInstructions("Стиль — кратко и по делу");
+        // Объёмные LOB-поля: суммарно заметно больше общего лимита контекста.
+        profile.setCurrentResponsibilities(repeat("обязанности ", 700));
+        profile.setEducation(repeat("образование ", 700));
+        profile.setCertifications(repeat("сертификаты ", 700));
+        profile.setDomainExpertise(repeat("экспертиза ", 700));
+
+        AiUserContext context = service.buildContext(profile);
+
+        assertEquals("RUSSIAN", context.getProfileData().get("preferredLanguage"));
+        assertEquals("DIRECT", context.getProfileData().get("communicationStyle"));
+        assertEquals("BRIEF", context.getProfileData().get("responseDetailLevel"));
+        assertEquals(1, context.getCustomInstructions().size());
+        assertEquals("Стиль — кратко и по делу", context.getCustomInstructions().get(0));
+        // Объёмные поля могли усечься/выпасть — это ожидаемо при лимите,
+        // но ядро персонализации обязано выжить.
+        assertTrue(context.getProfileData().containsKey("currentResponsibilities"));
+    }
+
+    @Test
+    public void limitedContext_truncatesByRequestedBudget() {
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setAboutMe(repeat("слово ", 2000));
+
+        // Ниже документированной нижней границы (4000) бюджет клампится к 4000.
+        AiUserContext context = UserAiContextBuilder.buildContext(profile, 100);
+
+        int total = context.getProfileData().values().stream()
+                .mapToInt(v -> v.codePointCount(0, v.length()))
+                .sum();
+        assertTrue(total <= 4000);
+        assertTrue(total > 0);
+    }
+
+    @Test
+    public void previewWithLimit_matchesContextWithSameLimit() {
+        // Консистентность «факт = preview» (план §6.2): одинаковый бюджет —
+        // одинаковое содержимое данных.
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setCurrentPosition("Руководитель");
+        profile.setAboutMe(repeat("слово ", 100));
+
+        AiUserContext context = UserAiContextBuilder.buildContext(profile, 6000);
+        String preview = UserAiContextBuilder.buildPreview(profile, 6000);
+
+        for (Map.Entry<String, String> entry : context.getProfileData().entrySet()) {
+            assertTrue(preview.contains("- " + entry.getKey() + ": " + entry.getValue()));
+        }
+    }
+
+    @Test
+    public void limitAboveHardCap_isClamped() {
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setAboutMe(repeat("слово ", 5000));
+
+        AiUserContext context = UserAiContextBuilder.buildContext(profile, 999999);
+
+        int total = context.getProfileData().values().stream()
+                .mapToInt(v -> v.codePointCount(0, v.length()))
+                .sum();
+        // Жёсткий верхний предел builder'а (16000) не превышается.
+        assertTrue(total <= 16000);
+    }
+
+    @Test
+    public void defaultOverload_usesHardLimitOf16000() {
+        UserAiProfile profile = activeProfile();
+        profile.setAboutMe(repeat("слово ", 5000));
+
+        // Однопараметрические методы builder'а сохраняют исторический дефолт 16000
+        // (совместимость с существующими потребителями).
+        profile.setCurrentResponsibilities(repeat("обязанности ", 400));
+        profile.setDecisionPriorities(repeat("приоритеты ", 400));
+        AiUserContext context = UserAiContextBuilder.buildContext(profile);
+        int total = context.getProfileData().values().stream()
+                .mapToInt(v -> v.codePointCount(0, v.length()))
+                .sum();
+        assertTrue(total <= 16000);
+        assertTrue(total > 4000);
+    }
+
+    private static String repeat(String value, int times) {
+        return String.join("", java.util.Collections.nCopies(times, value));
     }
 
     private UserAiProfile activeProfile() {

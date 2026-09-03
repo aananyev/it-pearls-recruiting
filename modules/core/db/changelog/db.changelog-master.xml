@@ -92,6 +92,19 @@
     <include file="260816-4-updateTextProcessingHtmlPrompt.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AiFunctionConfiguration: колонка-флаг INCLUDE_USER_CONTEXT (персонализация
+         «Обо мне» / UserAiProfile, этап B). -->
+    <include file="260817-1-addIncludeUserContextFlag.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Дефолты INCLUDE_USER_CONTEXT по матрице уместности персонализации (этап B). -->
+    <include file="260817-2-setIncludeUserContextDefaults.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- AiCallLog: колонки аудита CONTEXT_INCLUDED / CONTEXT_CODE_POINTS (этап E). -->
+    <include file="260817-3-addAiCallLogContextColumns.xml"
+             relativeToChangelogFile="true"/>
+
     <!-- Консолидированная миграция административных AI-промптов (2026-08-18):
          создаёт таблицы AI Control Plane, если они отсутствуют (прод-снапшот
          get_base.sh 2026-08-18 их не содержит), и загружает ВСЕ канонические

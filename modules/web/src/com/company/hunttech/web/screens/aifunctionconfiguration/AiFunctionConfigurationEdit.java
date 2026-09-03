@@ -49,6 +49,9 @@ public class AiFunctionConfigurationEdit extends StandardEditor<AiFunctionConfig
         entity.setTemperature(0.7);
         entity.setAllowModelOverride(false);
         entity.setActive(true);
+        // Ассистентский дефолт персонализации: новые функции по умолчанию передают
+        // пользовательский контекст «Обо мне» (матрица уместности, план §4.2).
+        entity.setIncludeUserContext(true);
         entity.setConfigurationVersion(1);
     }
 
