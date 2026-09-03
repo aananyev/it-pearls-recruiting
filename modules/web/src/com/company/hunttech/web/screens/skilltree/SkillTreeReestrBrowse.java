@@ -46,8 +46,6 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
     @Inject
     private OvaFallbackImage skillLogoPic;
     @Inject
-    private OvaFallbackImage detailLogoImage;
-    @Inject
     private Label<String> detailSkillName;
     @Inject
     private Label<String> detailSpecialisation;
@@ -193,13 +191,11 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
         openEditCardBtn.setEnabled(true);
         createChildBtn.setEnabled(true);
 
-        // Логотип в шапке профиля и в секции «ЛОГОТИП НАВЫКА»
+        // Логотип навыка — в шапке профиля (аватар 120px)
         if (skill.getFileImageLogo() != null) {
             skillLogoPic.setSource(FileDescriptorResource.class).setFileDescriptor(skill.getFileImageLogo());
-            detailLogoImage.setSource(FileDescriptorResource.class).setFileDescriptor(skill.getFileImageLogo());
         } else {
             skillLogoPic.applyFallback();
-            detailLogoImage.applyFallback();
         }
 
         String skillName = nvl(skill.getSkillName(), "Без названия");
@@ -273,7 +269,6 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
         openEditCardBtn.setEnabled(false);
         createChildBtn.setEnabled(false);
         skillLogoPic.applyFallback();
-        detailLogoImage.applyFallback();
         detailSkillName.setValue("Выберите компетенцию");
         detailSpecialisation.setValue("—");
         detailParentSkill.setValue("—");

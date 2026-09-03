@@ -47,9 +47,20 @@
 │ • РЕКВИЗИТЫ НАВЫКА (grid 2к)  │ │ rowsCount                          │ │
 │ • ОПИСАНИЕ НАВЫКА (comment)   │ └────────────────────────────────────┘ │
 │ • ДОЧЕРНИЕ НАВЫКИ (чипы)      │                                        │
-│ • ЛОГОТИП НАВЫКА (140px)      │                                        │
 └───────────────────────────────┴────────────────────────────────────────┘
 ```
+
+### Namespace и общие классы (2026-09-04)
+
+Корневой layout несёт `job-candidate-editor` — под этим namespace в общих SCSS
+(`job-candidate-editor.scss`, `edit-screen-shared-styles.scss`) живут правила
+реестров: фон сайдбара, ширина 312px (`.job-candidate-sidebar`), аватар
+(`.job-candidate-avatar`), типографика identity (`.candidate-sidebar-fullname/`
+`position/city`), workspace (`.candidate-reestr-workspace`), карточка таблицы
+(`.candidate-table-card`), сетка строк 38px (`.candidate-browse-grid`).
+Кастомные `skill-tree-reestr-*` — точечные маркеры поверх эталонных классов.
+Нижняя секция «ЛОГОТИП НАВЫКА» удалена 2026-09-04 как дубль: логотип навыка
+(`fileImageLogo`) показывается один раз — в аватаре 120px шапки профиля.
 
 ### Данные и View Integrity
 
