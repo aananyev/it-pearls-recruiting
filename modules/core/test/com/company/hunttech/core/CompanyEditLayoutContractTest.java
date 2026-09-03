@@ -90,6 +90,13 @@ public class CompanyEditLayoutContractTest {
         assertTrue(xml.contains("id=\"companyAddressCard\""));
         assertTrue(xml.contains("id=\"companyDescriptionCard\""));
         assertTrue(xml.contains("id=\"companyDepartmentsCard\""));
+        assertFalse("контакты не должны образовывать третью карточку первой вкладки",
+                xml.contains("id=\"companyMainContactsCard\""));
+        assertTrue("контактные поля должны остаться в основной карточке",
+                xml.indexOf("id=\"phoneMainField\"") > xml.indexOf("id=\"companyMainCard\"")
+                        && xml.indexOf("id=\"phoneMainField\"") < xml.indexOf("id=\"companyAddressCard\"")
+                        && xml.indexOf("id=\"emailMainField\"") < xml.indexOf("id=\"companyAddressCard\"")
+                        && xml.indexOf("id=\"websiteMainField\"") < xml.indexOf("id=\"companyAddressCard\""));
     }
 
     @Test
