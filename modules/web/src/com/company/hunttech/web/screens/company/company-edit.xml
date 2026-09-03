@@ -332,6 +332,31 @@
                                                 </actions>
                                             </lookupPickerField>
                                         </hbox>
+                                        <!-- Контактные поля остаются в основной карточке, чтобы не создавать
+                                             третью визуальную панель первой вкладки и не менять их bindings. -->
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="phoneMainField"
+                                                       dataContainer="companyDc"
+                                                       property="phone"
+                                                       caption="Телефон"
+                                                       stylename="edit-form-control"
+                                                       box.expandRatio="1"
+                                                       width="100%"/>
+                                            <textField id="emailMainField"
+                                                       dataContainer="companyDc"
+                                                       property="email"
+                                                       caption="Email"
+                                                       stylename="edit-form-control"
+                                                       box.expandRatio="1"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <!-- Сайт занимает всю строку: одиночное поле не требует отдельной карточки. -->
+                                        <textField id="websiteMainField"
+                                                   dataContainer="companyDc"
+                                                   property="website"
+                                                   caption="Веб-сайт"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
                                     </vbox>
                                 </groupBox>
                                 <!-- Карточка «Адрес компании» -->
@@ -392,39 +417,6 @@
                                                   stylename="edit-form-control"
                                                   width="100%"
                                                   rows="3"/>
-                                    </vbox>
-                                </groupBox>
-                                <!-- Карточка «Контакты компании» -->
-                                <groupBox id="companyMainContactsCard"
-                                          caption="Контакты"
-                                          stylename="edit-card"
-                                          showAsPanel="true"
-                                          collapsable="true"
-                                          collapsed="false"
-                                          width="100%">
-                                    <vbox width="100%" spacing="true">
-                                        <hbox spacing="true" width="100%">
-                                            <textField id="phoneMainField"
-                                                       dataContainer="companyDc"
-                                                       property="phone"
-                                                       caption="Телефон"
-                                                       stylename="edit-form-control"
-                                                       box.expandRatio="1"
-                                                       width="100%"/>
-                                            <textField id="emailMainField"
-                                                       dataContainer="companyDc"
-                                                       property="email"
-                                                       caption="Email"
-                                                       stylename="edit-form-control"
-                                                       box.expandRatio="1"
-                                                       width="100%"/>
-                                        </hbox>
-                                        <textField id="websiteMainField"
-                                                   dataContainer="companyDc"
-                                                   property="website"
-                                                   caption="Веб-сайт"
-                                                   stylename="edit-form-control"
-                                                   width="100%"/>
                                     </vbox>
                                 </groupBox>
                             </vbox>
