@@ -1092,6 +1092,77 @@
       }
     }
 
+    // Первая вкладка CompanyEdit: CUBA оставляет технические v-slot/v-expand
+    // для bindings и expandRatio. Визуально собираем их в один поток только
+    // внутри этой вкладки, не затрагивая sidebar и остальные tabSheet-вкладки.
+    .company-main-tab {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+
+      .edit-workspace-content {
+        padding: 12px !important;
+      }
+
+      .edit-card {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        margin: 0 0 12px !important;
+
+        .v-panel-content {
+          box-sizing: border-box !important;
+          min-width: 0 !important;
+          overflow-x: hidden !important;
+        }
+      }
+
+      .v-horizontallayout {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 12px 16px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        > .v-expand {
+          box-sizing: border-box !important;
+          display: flex !important;
+          flex: 1 1 100% !important;
+          flex-wrap: wrap !important;
+          gap: 12px 16px !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          height: auto !important;
+          position: static !important;
+        }
+
+        > .v-expand > .v-slot,
+        > .v-slot {
+          box-sizing: border-box !important;
+          flex: 1 1 260px !important;
+          width: auto !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          height: auto !important;
+          position: static !important;
+          left: auto !important;
+          top: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+        }
+      }
+
+      .company-main-tab-top-checks > .v-slot,
+      .company-main-tab-top-checks > .v-expand > .v-slot {
+        flex-basis: 220px !important;
+      }
+    }
+
     #editActions,
     .edit-footer-actions {
       box-sizing: border-box !important;
