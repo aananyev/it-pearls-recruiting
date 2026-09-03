@@ -8,6 +8,8 @@ import com.company.hunttech.entity.UserAiProfile;
 import com.company.hunttech.service.dto.AiUserContext;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -131,6 +133,70 @@ public class UserAiContextServiceBeanTest {
         // Объёмные поля могли усечься/выпасть — это ожидаемо при лимите,
         // но ядро персонализации обязано выжить.
         assertTrue(context.getProfileData().containsKey("currentResponsibilities"));
+    }
+
+    @Test
+    public void limitedContext_truncatesByRequestedBudget() {
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setAboutMe(repeat("слово ", 1000));
+
+        AiUserContext context = UserAiContextBuilder.buildContext(profile, 100);
+
+        // Общий бюджет соблюдён: суммарный размер данных ≤ 100 code points.
+        int total = context.getProfileData().values().stream()
+                .mapToInt(v -> v.codePointCount(0, v.length()))
+                .sum();
+        assertTrue(total <= 100);
+    }
+
+    @Test
+    public void previewWithLimit_matchesContextWithSameLimit() {
+        // Консистентность «факт = preview» (план §6.2): одинаковый бюджет —
+        // одинаковое содержимое данных.
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setCurrentPosition("Руководитель");
+        profile.setAboutMe(repeat("слово ", 100));
+
+        AiUserContext context = UserAiContextBuilder.buildContext(profile, 200);
+        String preview = UserAiContextBuilder.buildPreview(profile, 200);
+
+        for (Map.Entry<String, String> entry : context.getProfileData().entrySet()) {
+            assertTrue(preview.contains("- " + entry.getKey() + ": " + entry.getValue()));
+        }
+    }
+
+    @Test
+    public void limitAboveHardCap_isClamped() {
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setAboutMe(repeat("слово ", 5000));
+
+        AiUserContext context = UserAiContextBuilder.buildContext(profile, 999999);
+
+        int total = context.getProfileData().values().stream()
+                .mapToInt(v -> v.codePointCount(0, v.length()))
+                .sum();
+        // Жёсткий верхний предел builder'а (16000) не превышается.
+        assertTrue(total <= 16000);
+    }
+
+    @Test
+    public void defaultOverload_usesHardLimitOf16000() {
+        UserAiProfile profile = activeProfile();
+        profile.setAboutMe(repeat("слово ", 5000));
+
+        // Однопараметрические методы builder'а сохраняют исторический дефолт 16000
+        // (совместимость с существующими потребителями).
+        profile.setCurrentResponsibilities(repeat("обязанности ", 400));
+        profile.setDecisionPriorities(repeat("приоритеты ", 400));
+        AiUserContext context = UserAiContextBuilder.buildContext(profile);
+        int total = context.getProfileData().values().stream()
+                .mapToInt(v -> v.codePointCount(0, v.length()))
+                .sum();
+        assertTrue(total <= 16000);
+        assertTrue(total > 4000);
     }
 
     private static String repeat(String value, int times) {

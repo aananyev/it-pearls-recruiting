@@ -22,6 +22,16 @@ public final class UserAiContextBuilder {
     }
 
     public static AiUserContext buildContext(UserAiProfile profile) {
+        return buildContext(profile, TOTAL_CONTEXT_LIMIT);
+    }
+
+    /**
+     * Строит контекст с явным бюджетом code points. Жёсткий верхний предел —
+     * {@link #TOTAL_CONTEXT_LIMIT}; фактический лимит задаётся свойством
+     * {@code hunttech.ai.userContextLimit} и обязан совпадать в исполнении и предпросмотре
+     * (консистентность «факт = preview», план персонализации §6.2).
+     */
+    public static AiUserContext buildContext(UserAiProfile profile, int totalLimitCodePoints) {
         AiUserContext context = new AiUserContext();
         if (profile == null
                 || !Boolean.TRUE.equals(profile.getProfileEnabled())
@@ -30,7 +40,8 @@ public final class UserAiContextBuilder {
         }
 
         context.setActive(true);
-        int[] remaining = new int[]{TOTAL_CONTEXT_LIMIT};
+        int effectiveLimit = resolveEffectiveLimit(totalLimitCodePoints);
+        int[] remaining = new int[]{effectiveLimit};
 
         // 1. Стилевые предпочтения — ядро персонализации (язык, стиль, детализация,
         //    терминология, структура, ограничения общения). Добавляются первыми, чтобы
@@ -83,7 +94,15 @@ public final class UserAiContextBuilder {
     }
 
     public static String buildPreview(UserAiProfile profile) {
-        return buildPreview(buildContext(profile), profile);
+        return buildPreview(profile, TOTAL_CONTEXT_LIMIT);
+    }
+
+    /**
+     * Предпросмотр с тем же бюджетом, что и фактический контекст: UI обязан вызывать
+     * перегрузку с лимитом из свойства {@code hunttech.ai.userContextLimit}.
+     */
+    public static String buildPreview(UserAiProfile profile, int totalLimitCodePoints) {
+        return buildPreview(buildContext(profile, totalLimitCodePoints), profile);
     }
 
     static String buildPreview(AiUserContext context, UserAiProfile profile) {
@@ -118,6 +137,17 @@ public final class UserAiContextBuilder {
 
         preview.append("\nСекреты, почтовые пароли и API-ключи в контекст не включаются.\n");
         return preview.toString();
+    }
+
+    /**
+     * Клампит запрошенный бюджет в допустимый диапазон: не выше жёсткого
+     * {@link #TOTAL_CONTEXT_LIMIT}, не ниже нижней границы свойства (4000).
+     */
+    private static int resolveEffectiveLimit(int requestedLimit) {
+        if (requestedLimit <= 0) {
+            return DEFAULT_FIELD_LIMIT;
+        }
+        return Math.min(requestedLimit, TOTAL_CONTEXT_LIMIT);
     }
 
     // Очищает пользовательский текст от управляющих символов и нормализует пробелы.

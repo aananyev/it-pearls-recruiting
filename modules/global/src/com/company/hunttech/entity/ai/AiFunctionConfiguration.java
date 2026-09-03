@@ -78,6 +78,14 @@ public class AiFunctionConfiguration extends StandardEntity {
     @Column(name = "IS_ACTIVE")
     private Boolean active = true;
 
+    /**
+     * Флаг передачи пользовательского контекста («Обо мне», UserAiProfile) в system prompt
+     * этой функции при текстовых вызовах. NULL трактуется execution layer'ом по capability:
+     * текстовые — true, IMAGE — false. IMAGE-путь в v1 контекст не получает независимо от флага.
+     */
+    @Column(name = "INCLUDE_USER_CONTEXT")
+    private Boolean includeUserContext;
+
     @Column(name = "CONFIGURATION_VERSION")
     private Integer configurationVersion = 1;
 
@@ -191,6 +199,14 @@ public class AiFunctionConfiguration extends StandardEntity {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Boolean getIncludeUserContext() {
+        return includeUserContext;
+    }
+
+    public void setIncludeUserContext(Boolean includeUserContext) {
+        this.includeUserContext = includeUserContext;
     }
 
     public Integer getConfigurationVersion() {

@@ -102,6 +102,17 @@ public class AiCallLog extends StandardEntity {
     @Column(name = "ERROR_MESSAGE")
     private String errorMessage;
 
+    /**
+     * Аудит персонализации: контекст «Обо мне» (UserAiProfile) был фактически добавлен
+     * в system prompt этого вызова. Контент блока в лог не пишется (приватность).
+     */
+    @Column(name = "CONTEXT_INCLUDED")
+    private Boolean contextIncluded;
+
+    /** Размер добавленного блока в code points (диагностика стоимости вызова). */
+    @Column(name = "CONTEXT_CODE_POINTS")
+    private Integer contextCodePoints;
+
     public User getUser() {
         return user;
     }
@@ -268,5 +279,21 @@ public class AiCallLog extends StandardEntity {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public Boolean getContextIncluded() {
+        return contextIncluded;
+    }
+
+    public void setContextIncluded(Boolean contextIncluded) {
+        this.contextIncluded = contextIncluded;
+    }
+
+    public Integer getContextCodePoints() {
+        return contextCodePoints;
+    }
+
+    public void setContextCodePoints(Integer contextCodePoints) {
+        this.contextCodePoints = contextCodePoints;
     }
 }

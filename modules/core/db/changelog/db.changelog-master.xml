@@ -92,4 +92,17 @@
     <include file="260816-4-updateTextProcessingHtmlPrompt.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AiFunctionConfiguration: колонка-флаг INCLUDE_USER_CONTEXT (персонализация
+         «Обо мне» / UserAiProfile, этап B). -->
+    <include file="260817-1-addIncludeUserContextFlag.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Дефолты INCLUDE_USER_CONTEXT по матрице уместности персонализации (этап B). -->
+    <include file="260817-2-setIncludeUserContextDefaults.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- AiCallLog: колонки аудита CONTEXT_INCLUDED / CONTEXT_CODE_POINTS (этап E). -->
+    <include file="260817-3-addAiCallLogContextColumns.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

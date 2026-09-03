@@ -561,3 +561,4 @@ private boolean resolveIncludeUserContext(AiFunctionConfiguration function) {
 | Дата | Изменение |
 |---|---|
 | 2026-08-17 | Создан план: интеграция `UserAiContext` в `AiExecutionServiceBean.executeText`, флаг `INCLUDE_USER_CONTEXT`, матрица уместности персонализации, конфигурируемый лимит `hunttech.ai.userContextLimit`, аудит в `AiCallLog`, тесты и документация |
+| 2026-09-03 | Реализованы этапы A–F в ветке `agent/text-processing-remove-empty-lines`: флаг `includeUserContext` (260817-1/2), аудит `CONTEXT_INCLUDED`/`CONTEXT_CODE_POINTS` (260817-3), builder-перегрузки с лимитом + свойство `hunttech.ai.userContextLimit=4000` (единый резолв в `UserAiContextServiceBean.resolveConfiguredLimit()` для исполнения и preview), интеграция в `AiExecutionServiceBean.executeText` (маркированный блок, гейты, degrade без поломки вызова), IMAGE-путь без контекста; тесты `AiExecutionServiceBeanTest` (сценарии 1–10) + кейсы лимитов в `UserAiContextServiceBeanTest` |
