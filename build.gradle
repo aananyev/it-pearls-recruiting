@@ -41,7 +41,7 @@ configurations.all {
 cuba {
     artifact {
         group = 'com.company.hunttech'
-        version = '0.412'
+        version = '0.423'
         isSnapshot = true
     }
     tomcat {
@@ -424,4 +424,3 @@ buildscript {
         classpath "com.haulmont.gradle:cuba-plugin:$cubaVersion"
     }
 }
-

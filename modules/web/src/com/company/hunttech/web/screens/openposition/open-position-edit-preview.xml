@@ -213,6 +213,7 @@
           <vbox id="openPositionLaborTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionJobDescriptionTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionFilesTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionPaymentsTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionExerciseTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionMemoTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionTemplateLetterTabNavigation" width="100%" visible="false"/>

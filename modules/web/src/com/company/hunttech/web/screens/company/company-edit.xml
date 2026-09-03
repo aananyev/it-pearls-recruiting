@@ -211,14 +211,14 @@
             </vbox>
             <!-- Workspace: toolbar с заголовком, вкладки компании и footer-действия ОК/Отмена. -->
             <vbox id="companyEditorWorkspace"
-                  stylename="edit-workspace"
+                  stylename="edit-workspace company-editor-workspace"
                   width="100%"
                   height="100%"
                   spacing="false"
-                  expand="mainTab">
+                  expand="companyEditorContentScrollBox">
                 <!-- Toolbar: заголовок «Компании», описание и кнопка умного заполнения формы -->
                 <hbox id="companyEditorToolbar"
-                      stylename="edit-toolbar"
+                      stylename="edit-toolbar company-editor-toolbar"
                       width="100%"
                       spacing="true"
                       align="MIDDLE_LEFT"
@@ -240,11 +240,18 @@
                             description="msg://msgSmartCompanyFillHint"
                             align="MIDDLE_RIGHT"/>
                 </hbox>
-                <!-- Вкладки компании: 4 вкладки с выверенной сеткой полей -->
-                <tabSheet id="mainTab"
-                          stylename="edit-tabs"
-                          width="100%"
-                          height="100%">
+                <!-- НОВЫЙ: общий scrollBox для вкладок (эталон IteractionListEdit) -->
+                <scrollBox id="companyEditorContentScrollBox"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical"
+                           scrollBars="vertical"
+                           stylename="edit-workspace edit-workspace-scroll company-editor-content-scroll">
+                    <!-- Вкладки компании: 4 вкладки с выверенной сеткой полей -->
+                    <tabSheet id="mainTab"
+                              stylename="edit-tabs"
+                              width="100%"
+                              height="100%">
                     <!-- Вкладка 1: Информация о компании -->
                     <tab id="tabConpanyDetails"
                          caption="mainMsg://msgCompanyDetail"
@@ -824,10 +831,12 @@
                         </scrollBox>
                     </tab>
                 </tabSheet>
-                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю. -->
+                </scrollBox>
+                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю. ВНЕ scrollBox, НО В workspace. -->
                 <hbox id="editActions"
                       stylename="edit-footer-actions"
                       width="100%"
+                      height="AUTO"
                       expand="bottomActionsSpacer"
                       align="MIDDLE_RIGHT"
                       spacing="false">
