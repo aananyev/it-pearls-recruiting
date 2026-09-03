@@ -27,41 +27,44 @@
 
     <dialogMode height="750" width="1200"/>
 
-    <!-- Корневой layout: двухпанельная композиция (Split View) -->
+    <!-- Корневой layout: двухпанельная композиция (Split View).
+         Namespace job-candidate-editor обязателен: общие правила SCSS реестров
+         (фон сайдбара, ширина 312px, типографика identity, аватар) вложены в него. -->
     <layout expand="splitMainLayout" spacing="false" width="100%" height="100%"
-            stylename="skill-tree-reestr-edit-screen-layout">
+            stylename="job-candidate-editor edit-screen-layout">
         <hbox id="splitMainLayout" width="100%" height="100%" spacing="true"
-              expand="workspaceBox" stylename="skill-tree-reestr-main-layout edit-screen-layout">
+              expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
 
             <!-- ЛЕВЫЙ САЙДБАР (312px) — TreeTable/Tree для иерархии SkillTree -->
             <vbox id="detailPane" width="312px" height="100%" spacing="true"
-                  stylename="skill-tree-reestr-sidebar edit-sidebar">
+                  stylename="job-candidate-sidebar edit-sidebar skill-tree-reestr-sidebar">
                 <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
                     <vbox width="100%" spacing="true">
 
-                        <!-- Шапка профиля узла (аналог candidate-cv-reestr-browse: ovaFallbackImage 120px, 4 уровня типографики) -->
+                        <!-- Шапка профиля узла (эталон city/cv-reestr: аватар 120px = логотип навыка,
+                             4 уровня типографики identity). -->
                         <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER"
-                              stylename="skill-tree-reestr-profile-header edit-sidebar-visual">
-                            <!-- Круглый аватар/логотип навыка 120x120 -->
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <!-- Круглый аватар 120x120 — логотип навыка (fileImageLogo) -->
                             <ovaFallbackImage id="skillLogoPic" width="120px" height="120px"
                                               ovalWidth="120px" ovalHeight="120px"
                                               align="TOP_CENTER"
-                                              stylename="skill-tree-reestr-avatar job-candidate-avatar"
+                                              stylename="job-candidate-avatar skill-tree-reestr-avatar"
                                               fallbackThemePath="icons/no-programmer.jpeg"
                                               scaleMode="SCALE_DOWN"/>
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER"
                                   stylename="edit-sidebar-identity">
                                 <!-- Уровень 1: Название навыка (h2) -->
                                 <label id="detailSkillName" value="Выберите компетенцию"
-                                       width="100%" stylename="edit-sidebar-title h2 skill-tree-reestr-sidebar-fullname"
+                                       width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname"
                                        align="MIDDLE_CENTER" htmlEnabled="true"/>
                                 <!-- Уровень 2: Специализация (h4) -->
                                 <label id="detailSpecialisation" value="—"
-                                       width="100%" stylename="edit-sidebar-subtitle h4 skill-tree-reestr-sidebar-position"
+                                       width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position"
                                        align="MIDDLE_CENTER" htmlEnabled="true"/>
                                 <!-- Уровень 3: Родительский навык (help) -->
                                 <label id="detailParentSkill" value="—"
-                                       width="100%" stylename="edit-help skill-tree-reestr-sidebar-city"
+                                       width="100%" stylename="edit-help candidate-sidebar-city"
                                        align="MIDDLE_CENTER" htmlEnabled="true"/>
                                 <!-- Уровень 4: Приоритет (badge/чип) -->
                                 <label id="detailPriority" value="—"
@@ -120,29 +123,13 @@
                                      stylename="skill-tree-reestr-chips-container"/>
                         </vbox>
 
-                        <!-- Секция: Логотип навыка (крупный) -->
-                        <vbox id="logoCard" width="100%" spacing="true"
-                              stylename="job-candidate-navigation label-navigation skill-tree-reestr-nav-section">
-                            <label value="ЛОГОТИП НАВЫКА" width="100%"
-                                   stylename="label-nav-title job-candidate-section-title skill-tree-reestr-section-title"
-                                   align="MIDDLE_CENTER"/>
-                            <vbox id="logoContainer" width="100%" spacing="true" align="MIDDLE_CENTER">
-                                <ovaFallbackImage id="detailLogoImage" width="140px" height="140px"
-                                                  ovalWidth="140px" ovalHeight="140px"
-                                                  align="MIDDLE_CENTER"
-                                                  stylename="skill-tree-reestr-logo-image dictionary-logo-image"
-                                                  fallbackThemePath="icons/no-programmer.jpeg"
-                                                  scaleMode="SCALE_DOWN"/>
-                            </vbox>
-                        </vbox>
-
                     </vbox>
                 </scrollBox>
             </vbox>
 
             <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ — TreeTable иерархии -->
             <vbox id="workspaceBox" width="100%" height="100%" spacing="true"
-                  stylename="edit-workspace skill-tree-reestr-workspace" expand="tableCard"
+                  stylename="edit-workspace candidate-reestr-workspace skill-tree-reestr-workspace" expand="tableCard"
                   margin="true,true,true,false">
 
                 <!-- Командный тулбар (адаптивный, по эталону OpenPositionReestrBrowse/ProjectReestrBrowse) -->
@@ -189,7 +176,7 @@
 
                 <!-- Карточка TreeTable с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false"
-                      stylename="edit-card skill-tree-reestr-table-card" expand="skillTreesTreeTable">
+                      stylename="edit-card candidate-table-card skill-tree-reestr-table-card" expand="skillTreesTreeTable">
                     <!-- TreeTable для иерархии (hierarchyProperty = skillTree) -->
                     <treeDataGrid id="skillTreesTreeTable"
                                   width="100%"
