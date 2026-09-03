@@ -606,6 +606,7 @@
     .edit-tabs > .v-tabsheet-tabcontainer {
       overflow-x: auto !important;
       overflow-y: hidden !important;
+      width: 100% !important;
     }
 
     .edit-tabs .v-tabsheet-tabitem,
@@ -637,15 +638,22 @@
      * горизонтально (overflow-x на tabcontainer); контент вкладки растягивается
      * на остаток высоты вместо жёсткого calc(100% - 49px). */
     .open-position-editor-tabs {
+      box-sizing: border-box !important;
       display: flex !important;
       flex-direction: column !important;
+      width: 100% !important;
       max-width: 100% !important;
+      min-width: 0 !important;
+      overflow-x: hidden !important;
     }
 
     .open-position-editor-tabs .v-tabsheet-tabcontainer {
+      box-sizing: border-box !important;
       overflow-x: auto !important;
       overflow-y: hidden !important;
+      width: 100% !important;
       max-width: 100% !important;
+      min-width: 0 !important;
       flex: 0 0 auto;
     }
 
@@ -659,9 +667,14 @@
     }
 
     .open-position-editor-tabs .v-tabsheet-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
       height: auto !important;
       min-height: 0 !important;
       flex: 1 1 auto !important;
+      overflow-x: hidden !important;
     }
 
     /* Контент вкладки сжимается вместе с окном (flex min-width: auto растягивает
@@ -711,11 +724,15 @@
     }
 
     .open-position-editor-tabs .v-tabsheet-content {
+      box-sizing: border-box !important;
       width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
       height: auto !important;
       padding: 14px 16px 18px;
       background: mix($v-app-background-color, $v-panel-background-color, 86%) !important;
-      overflow: auto;
+      overflow-x: hidden !important;
+      overflow-y: auto;
     }
 
     .open-position-editor-tabs .v-tabsheet-tabsheetpanel {
@@ -1774,7 +1791,8 @@
       background: $v-panel-background-color;
       overflow: hidden;
 
-      .v-richtextarea-toolbar {
+      .v-richtextarea-toolbar,
+      .gwt-RichTextToolbar {
         box-sizing: border-box !important;
         display: flex !important;
         flex-wrap: wrap !important;
@@ -1799,7 +1817,9 @@
           border-radius: 4px !important;
         }
 
-        .v-button {
+        .v-button,
+        div.gwt-PushButton,
+        div.gwt-ToggleButton {
           box-sizing: border-box !important;
           min-width: 30px !important;
           height: 30px !important;
@@ -1968,7 +1988,8 @@
       background: $v-panel-background-color !important;
       overflow: hidden !important;
 
-      .v-richtextarea-toolbar {
+      .v-richtextarea-toolbar,
+      .gwt-RichTextToolbar {
         box-sizing: border-box !important;
         display: flex !important;
         flex-wrap: wrap !important;
@@ -1991,7 +2012,9 @@
           border-radius: 4px !important;
         }
 
-        .v-button {
+        .v-button,
+        div.gwt-PushButton,
+        div.gwt-ToggleButton {
           box-sizing: border-box !important;
           min-width: 30px !important;
           height: 30px !important;
@@ -2600,7 +2623,8 @@
     }
 
     /* RichTextArea toolbar and content containment */
-    .open-position-editor .v-richtextarea-toolbar {
+    .open-position-editor .v-richtextarea-toolbar,
+    .open-position-editor .gwt-RichTextToolbar {
       box-sizing: border-box !important;
       max-width: 100% !important;
       width: 100% !important;

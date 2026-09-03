@@ -935,6 +935,39 @@ public class OpenPositionEditLayoutContractTest {
     }
 
     @Test
+    public void rightTabsAndRichTextEditorsStayWithinWorkspace() throws IOException {
+        for (String theme : THEMES) {
+            String scss = readProjectFile(themeScssPath(theme));
+
+            assertTrue("В теме " + theme + " TabSheet должен считать padding внутри ширины",
+                    scss.contains(".open-position-editor-tabs {\n"
+                            + "      box-sizing: border-box !important;"));
+            assertTrue("В теме " + theme + " tabcontainer не должен расширять workspace padding-ом",
+                    scss.contains(".open-position-editor-tabs .v-tabsheet-tabcontainer {\n"
+                            + "      box-sizing: border-box !important;"));
+            assertTrue("В теме " + theme + " content вкладок должен ограничивать ширину справа",
+                    scss.contains(".open-position-editor-tabs .v-tabsheet-content {\n"
+                            + "      box-sizing: border-box !important;\n"
+                            + "      width: 100% !important;\n"
+                            + "      max-width: 100% !important;\n"
+                            + "      min-width: 0 !important;"));
+            assertTrue("В теме " + theme + " content вкладок должен сохранять стандартный отступ 16px",
+                    scss.contains("padding: 14px 16px 18px;"));
+            assertTrue("В теме " + theme + " горизонтальный overflow правой части должен быть запрещён",
+                    scss.contains("overflow-x: hidden !important;\n"
+                            + "      overflow-y: auto;"));
+            assertTrue("В теме " + theme + " шаблон письма должен иметь containment для RichTextArea",
+                    scss.contains("#templateLetterRichTextArea,\n"
+                            + "    .open-position-editor #templateLetterRichTextArea"));
+            assertTrue("В теме " + theme + " нужно покрывать реальный GWT toolbar RichTextArea",
+                    scss.contains(".gwt-RichTextToolbar"));
+            assertTrue("В теме " + theme + " toolbar-кнопки RichTextArea должны оставаться внутри панели",
+                    scss.contains("div.gwt-PushButton,\n"
+                            + "        div.gwt-ToggleButton"));
+        }
+    }
+
+    @Test
     public void sidebarNavigationSetsFollowTabs() throws IOException {
         // Единая label-навигация по вкладкам tabSheetOpenPosition: контейнер
         // openPositionEditorNavigation содержит заголовок и единый vbox openPositionTabNavigation
