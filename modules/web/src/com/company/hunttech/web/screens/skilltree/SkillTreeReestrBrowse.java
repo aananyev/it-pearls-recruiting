@@ -143,8 +143,11 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
             if (parent != null) {
                 SkillTree child = metadata.create(SkillTree.class);
                 child.setSkillTree(parent);
+                // withContainer(skillTreesDc): коммит редактора сам добавит узел в коллекцию
+                // и обновит дерево + сайдбар (стандартный механизм CUBA ScreenBuilders).
                 screenBuilders.editor(SkillTree.class, this)
                         .newEntity(child)
+                        .withContainer(skillTreesDc)
                         .withOpenMode(OpenMode.DIALOG)
                         .show();
             }
@@ -216,8 +219,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
         detailSpecialisationVal.setValue(escapeHtml(specName));
         detailParentSkillVal.setValue(escapeHtml(parentName));
         detailPriorityVal.setValue(priority);
-        detailWikiPageVal.setValue(skill.getWikiPage() != null && !skill.getWikiPage().trim().isEmpty()
-                ? "<a href=\"" + escapeHtml(skill.getWikiPage().trim()) + "\" target=\"_blank\">📖 Открыть Wiki</a>" : "—");
+        detailWikiPageVal.setValue(safeWikiLinkHtml(skill.getWikiPage()));
         detailStyleHighlightingVal.setValue(nvl(skill.getStyleHighlighting(), "—"));
         detailNotParsingVal.setValue(Boolean.TRUE.equals(skill.getNotParsing()) ? "Да" : "Нет");
 
@@ -251,6 +253,20 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
             chip.setHtmlEnabled(true);
             childrenSkillsChips.add(chip);
         }
+    }
+
+    /** Ссылка на Wiki только по http/https (защита от javascript:-XSS), target=_blank + rel=noopener. */
+    private String safeWikiLinkHtml(String wikiPage) {
+        if (wikiPage == null || wikiPage.trim().isEmpty()) {
+            return "—";
+        }
+        String url = wikiPage.trim();
+        String lower = url.toLowerCase();
+        if (!(lower.startsWith("http://") || lower.startsWith("https://"))) {
+            return "<span style='color: #94a3b8; font-size: 11px;'>"
+                    + escapeHtml(url) + "</span>";
+        }
+        return "<a href=\"" + escapeHtml(url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">📖 Открыть Wiki</a>";
     }
 
     private void clearSidebarDetails() {
