@@ -1,0 +1,53 @@
+# LlmChatService (`hunttech_LlmChatService`)
+
+Middleware-фасад плавающего LLM-чата HRM HuntTech. Сервис владеет границами диалога, квотой, идемпотентностью и безопасным transport-контрактом web ↔ core; выбор провайдера и ключа остаётся в `AiExecutionService`.
+
+## Бизнес-контекст (What & Why)
+
+Пользователь общается с настроенной им LLM. Если личное подключение недоступно, административное подключение может быть использовано только после отдельного `adminFallbackConsent`. Профиль пользователя добавляется централизованным `UserAiContextService`; номера телефонов, пароли, AI-секреты и кандидатские/CV-данные в чатовый контекст не извлекаются.
+
+## UI Context & Navigation
+
+- `ExtMainScreen` открывает modeless `LlmChatScreen` через постоянный launcher.
+- `LlmChatScreen` создаёт один диалог пользователя, показывает бессрочную историю и получает live-ответ через polling timer 500 мс.
+- Удаление истории пользователю не предоставляется.
+
+## Архитектура и размещение
+
+- API: `modules/global/src/com/company/hunttech/service/LlmChatService.java`.
+- DTO потокового состояния: `modules/global/src/com/company/hunttech/service/LlmChatStreamState.java`.
+- Реализация: `modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java`.
+- Web proxy: `modules/web/src/com/company/hunttech/web-spring.xml`.
+- Экран: `modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java`.
+
+## API и алгоритм
+
+1. `startConversation()` создаёт `LlmChatConversation`, связанную с текущим пользователем.
+2. `startStreaming(conversationId, message, requestId)` проверяет владельца, валидирует сообщение, резервирует месячную квоту и сохраняет USER-сообщение.
+3. Запрос планируется штатным daemon `scheduler` с переносом CUBA `SecurityContext`; provider streaming дельты накапливаются в owner-scoped snapshot.
+4. `pollStreaming()` повторно проверяет пользователя и conversationId и возвращает cumulative text. Snapshot удаляется через 10 минут после завершения.
+5. После подтверждённого результата quota reservation закрывается, ASSISTANT-сообщение сохраняется один раз. При неизвестном результате резерв переводится в `UNKNOWN_PENDING`; второй provider call не запускается.
+6. `cancelMessage()` ставит `CANCEL_REQUESTED` и передаёт requestId в `AIProviderRegistry`. OpenAI-compatible адаптеры прерывают активное HTTP-соединение; sync-only адаптеры завершаются кооперативно.
+
+Синхронные `sendMessage(...)` сохранены для совместимости и идемпотентных интеграций. Для provider без streaming execution layer отдаёт полный ответ одной дельтой.
+
+## Security и доступ к истории
+
+- `loadHistory()` — только владелец диалога.
+- `loadHistoryAsAdmin()` — только при `hunttech.ai.viewChatHistoryAdmin`.
+- Административная сверка неизвестного usage — только при `hunttech.ai.reconcileChatQuota`.
+- В transport snapshot не передаются ключи, prompt payload провайдера или чужие диалоги.
+
+## Тестирование
+
+- `LlmChatFoundationContractTest` проверяет API, owner-scoped polling, timer, streaming routing, quota и privacy-контракты.
+- `ScreenViewIntegrityTest` обязателен после изменения XML экрана.
+- Проверка сборки: `:app-core:test`, `:app-core:compileJava`, `:app-web:compileJava`.
+
+## Деплой и миграция
+
+Этот срез streaming facade не требует новых таблиц или changeSet. Production-порядок, seed-промпты, квота, permissions и rollback описаны в `docs/ai/LLM_CHAT_IMPLEMENTATION.md` и отдельном production migration plan проекта. Перед rollout требуется smoke старых AI-функций и тестовая группа чата.
+
+## Ограничения и следующие шаги
+
+Настоящий Vaadin push/WebSocket не вводился: polling выбран как совместимый промежуточный transport. Автоматическое reconciliation по provider request ID, drag/position persistence и mobile sheet остаются следующими срезами.

@@ -81,8 +81,9 @@ public class LlmChatFoundationContractTest {
         String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
 
         assertTrue(descriptor.contains("dialogMode width=\"420\" height=\"640\""));
-        assertTrue(controller.contains("llmChatService.sendMessage"));
-        assertTrue(controller.contains("BackgroundTask"));
+        assertTrue(controller.contains("llmChatService.startStreaming"));
+        assertTrue(controller.contains("pollStreaming"));
+        assertTrue(descriptor.contains("streamPollTimer"));
         assertFalse("Пользователю нельзя удалять бессрочную историю", controller.contains("delete"));
         assertTrue(menu.contains("screen=\"hunttech_LlmChatScreen\""));
     }
@@ -223,6 +224,30 @@ public class LlmChatFoundationContractTest {
         assertTrue(chat.contains("aiProviderRegistry.cancelRequest"));
         assertTrue(chat.contains("reservation.setProviderRequestId"));
         assertTrue(message.contains("setProviderRequestId"));
+    }
+
+    @Test
+    public void chatStreamingUsesOwnerScopedPollingFacade() throws IOException {
+        String api = source("modules/global/src/com/company/hunttech/service/LlmChatService.java");
+        String state = source("modules/global/src/com/company/hunttech/service/LlmChatStreamState.java");
+        String service = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String executionApi = source("modules/global/src/com/company/hunttech/service/AiExecutionService.java");
+        String execution = source("modules/core/src/com/company/hunttech/service/AiExecutionServiceBean.java");
+        String screen = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/llmchat/llm-chat-screen.xml");
+
+        assertTrue(api.contains("startStreaming(UUID conversationId, String message, String requestId)"));
+        assertTrue(api.contains("pollStreaming(UUID conversationId, String requestId)"));
+        assertTrue(state.contains("isCompleted()"));
+        assertTrue(state.contains("getText()"));
+        assertTrue(service.contains("TaskScheduler"));
+        assertTrue(service.contains("SecurityContextAwareRunnable"));
+        assertTrue(service.contains("resolveConversation(conversationId, user)"));
+        assertTrue(executionApi.contains("executeTextStreaming"));
+        assertTrue(execution.contains("supportsStreaming"));
+        assertTrue(screen.contains("streamPollTimer"));
+        assertTrue(screen.contains("pollStreaming"));
+        assertTrue(descriptor.contains("id=\"streamPollTimer\""));
     }
 
     private String source(String relativePath) throws IOException {

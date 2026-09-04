@@ -15,7 +15,9 @@
 - `reconcileUnknown(requestId, actualTokens, providerCharged)` — административная операция закрытия `UNKNOWN_PENDING` без повторного вызова провайдера; требует отдельного specific permission `hunttech.ai.reconcileChatQuota`.
 - `loadHistory()` доступен владельцу; `loadHistoryAsAdmin()` защищён specific permission `hunttech.ai.viewChatHistoryAdmin`.
 - `LlmChatQuotaReconciliationBrowse` — permission-gated административный экран для ручной сверки; до проверки права не загружает ни одной строки.
-- OpenAI-compatible provider adapters поддерживают provider request ID, SSE streaming и прерывание активного HTTP-вызова по HRM `requestId`; текущий `LlmChatService` пока использует синхронный путь.
+- `startStreaming()` запускает запрос через middleware scheduler, а `pollStreaming()` возвращает owner-scoped накопленный snapshot; floating screen обновляет ответ timer-интервалом 500 мс.
+- OpenAI-compatible provider adapters поддерживают provider request ID, SSE streaming и прерывание активного HTTP-вызова по HRM `requestId`; legacy adapters автоматически отдают полный ответ одной дельтой.
+- Streaming-задача переносит CUBA security context, не сохраняет partial assistant message и пишет итог в историю только после подтверждённого завершения.
 
 ## Квота
 
@@ -38,4 +40,4 @@ Liquibase и CUBA `updateDb` SQL находятся в `modules/core/db/`. Вс�
 
 ## Ограничения
 
-OpenAI-compatible provider adapters уже возвращают provider request ID, умеют SSE streaming и прерывание активного HTTP-вызова; нативные протоколы Anthropic/Gemini/YandexGPT/GigaChat пока явно не объявляют streaming. Автоматическая сверка по API провайдера ещё не реализована. До неё администратор сверяет `UNKNOWN_PENDING` через permission-gated экран: подтверждённое списание переводит резерв в `SETTLED`, отсутствие списания — в `RELEASED`.
+OpenAI-compatible provider adapters уже возвращают provider request ID, умеют SSE streaming и прерывание активного HTTP-вызова; нативные протоколы Anthropic/Gemini/YandexGPT/GigaChat используют безопасный sync fallback. В UI подключён polling facade, а не отдельный WebSocket/Vaadin push: это совместимый промежуточный transport без изменения схемы данных. In-memory snapshot удаляется через 10 минут после завершения; после перезапуска core незавершённый запрос восстанавливается как reservation/status и не запускается повторно. Автоматическая сверка по API провайдера ещё не реализована. До неё администратор сверяет `UNKNOWN_PENDING` через permission-gated экран: подтверждённое списание переводит резерв в `SETTLED`, отсутствие списания — в `RELEASED`.

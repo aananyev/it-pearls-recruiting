@@ -3,7 +3,7 @@ package com.company.hunttech.service;
 import java.io.Serializable;
 import java.util.UUID;
 
-/** Safe synchronous facade response; streaming deltas are not exposed by the current UI facade. */
+/** Safe completed-response DTO retained for synchronous integrations and retries. */
 public class LlmChatResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 

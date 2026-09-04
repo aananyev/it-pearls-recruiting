@@ -8,6 +8,7 @@ import com.company.hunttech.entity.ai.LlmChatQuotaPeriod;
 import com.company.hunttech.entity.ai.LlmChatQuotaReservation;
 import com.company.hunttech.entity.ai.LlmUserQuotaOverride;
 import com.company.hunttech.core.ai.AIProviderRegistry;
+import com.haulmont.cuba.core.sys.SecurityContextAwareRunnable;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
@@ -16,7 +17,9 @@ import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.security.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.TaskScheduler;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Date;
@@ -25,11 +28,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Calendar;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * Synchronous MVP facade for the floating chat. Provider routing, profile
- * context and admin fallback policy remain centralized in AiExecutionService;
- * provider-level cancellation is routed by the core adapter registry.
+ * Middleware facade for the floating chat. It keeps synchronous compatibility
+ * while exposing an owner-scoped polling snapshot for streaming. Provider
+ * routing, profile context and admin fallback policy remain centralized in
+ * AiExecutionService; provider-level cancellation is routed by the core adapter registry.
  */
 @Service(LlmChatService.NAME)
 public class LlmChatServiceBean implements LlmChatService {
@@ -64,6 +70,9 @@ public class LlmChatServiceBean implements LlmChatService {
                     + "where e.user.id = :userId and e.effectiveFrom <= :today "
                     + "and (e.effectiveTo is null or e.effectiveTo >= :today) and e.deleteTs is null "
                     + "order by e.effectiveFrom desc";
+    private static final long STREAM_SESSION_TTL_MS = 10 * 60 * 1000L;
+
+    private final ConcurrentMap<String, StreamingSession> streamingSessions = new ConcurrentHashMap<>();
 
     @Inject
     private DataManager dataManager;
@@ -77,6 +86,8 @@ public class LlmChatServiceBean implements LlmChatService {
     private AIProviderRegistry aiProviderRegistry;
     @Inject
     private Security security;
+    @Resource(name = "scheduler")
+    private TaskScheduler scheduler;
 
     @Override
     public UUID startConversation() {
@@ -180,6 +191,201 @@ public class LlmChatServiceBean implements LlmChatService {
 
         return new LlmChatResponse(conversation.getId(), result.getText(), result.getProviderCode(),
                 result.getModelName(), result.getCredentialOwner());
+    }
+
+    @Override
+    public LlmChatStreamState startStreaming(UUID conversationId, String message, String requestId) {
+        validateMessage(message);
+        validateRequestId(requestId);
+        String normalizedRequestId = requestId.trim();
+        ExtUser user = currentUser();
+        LlmChatConversation conversation = resolveConversation(conversationId, user);
+        cleanupStreamingSessions();
+
+        StreamingSession active = streamingSessions.get(normalizedRequestId);
+        if (active != null) {
+            active.assertOwner(user.getId(), conversation.getId());
+            return active.snapshot();
+        }
+
+        LlmChatStreamState existingState = resolveExistingStreamingState(conversation, user, normalizedRequestId);
+        if (existingState != null) {
+            return existingState;
+        }
+
+        Date now = new Date();
+        int nextSequence = nextSequence(conversation.getId(), user.getId());
+        QuotaReservationContext quota = reserveQuota(user, conversation, message.trim(), normalizedRequestId);
+        LlmChatMessage userMessage = metadata.create(LlmChatMessage.class);
+        userMessage.setConversation(conversation);
+        userMessage.setRole("USER");
+        userMessage.setContent(message.trim());
+        userMessage.setSequenceNo(nextSequence);
+        userMessage.setRequestId(normalizedRequestId);
+        userMessage.setStatus("COMPLETED");
+        conversation.setLastMessageAt(now);
+        dataManager.commit(new CommitContext(conversation, userMessage));
+
+        StreamingSession session = new StreamingSession(user.getId(), conversation.getId(), normalizedRequestId,
+                quota, userMessage, nextSequence);
+        streamingSessions.put(normalizedRequestId, session);
+        if (isCancellationRequested(quota)) {
+            settleCancelledBeforeProvider(quota, userMessage);
+            session.complete("CANCELLED", "Запрос отменён до обращения к AI.");
+            return session.snapshot();
+        }
+
+        scheduler.schedule(new SecurityContextAwareRunnable(() -> executeStreaming(session)), new Date());
+        return session.snapshot();
+    }
+
+    @Override
+    public LlmChatStreamState pollStreaming(UUID conversationId, String requestId) {
+        validateRequestId(requestId);
+        String normalizedRequestId = requestId.trim();
+        ExtUser user = currentUser();
+        LlmChatConversation conversation = resolveConversation(conversationId, user);
+        cleanupStreamingSessions();
+
+        StreamingSession session = streamingSessions.get(normalizedRequestId);
+        if (session != null) {
+            session.assertOwner(user.getId(), conversation.getId());
+            return session.snapshot();
+        }
+
+        LlmChatMessage assistant = dataManager.load(LlmChatMessage.class)
+                .query(QUERY_ASSISTANT_BY_REQUEST)
+                .parameter("conversationId", conversation.getId())
+                .parameter("requestId", normalizedRequestId)
+                .view("llm-chat-message-view")
+                .optional().orElse(null);
+        if (assistant != null) {
+            return new LlmChatStreamState(conversation.getId(), normalizedRequestId, assistant.getContent(),
+                    "COMPLETED", null, true);
+        }
+        LlmChatQuotaReservation reservation = dataManager.load(LlmChatQuotaReservation.class)
+                .query(QUERY_RESERVATION_BY_REQUEST)
+                .parameter("requestId", normalizedRequestId)
+                .parameter("conversationId", conversation.getId())
+                .parameter("userId", user.getId())
+                .view("llm-chat-quota-reservation-view")
+                .optional().orElseThrow(() -> new DevelopmentException("Потоковый запрос не найден."));
+        String status = reservation.getStatus();
+        if ("UNKNOWN_PENDING".equals(status)) {
+            return new LlmChatStreamState(conversation.getId(), normalizedRequestId, "", status,
+                    "Результат запроса не подтверждён; резерв квоты помечен как уточняющий.", true);
+        }
+        boolean completed = "CANCELLED".equals(status) || "RELEASED".equals(status);
+        return new LlmChatStreamState(conversation.getId(), normalizedRequestId, "", status,
+                completed ? "Запрос завершён без ответа." : null, completed);
+    }
+
+    private void executeStreaming(StreamingSession session) {
+        Map<String, Object> context = new HashMap<>();
+        context.put("message", session.userMessage.getContent());
+        context.put("callerSource", "LlmChatService.streaming");
+        context.put("requestId", session.requestId);
+        boolean quotaSettled = false;
+        try {
+            AiExecutionResult result = aiExecutionService.executeTextStreaming(FUNCTION_CODE, context, session::append);
+            if (result == null || result.getText() == null || result.getText().trim().isEmpty()) {
+                markQuotaPending(session.quota);
+                session.complete("ERROR", "AI-провайдер вернул пустой ответ.");
+                return;
+            }
+            if (settleQuota(session.quota, result)) {
+                quotaSettled = true;
+                session.userMessage.setStatus("CANCELLED");
+                dataManager.commit(session.userMessage);
+                session.complete("CANCELLED", "Запрос отменён. Фактическое usage учтено; ответ не добавлен в историю.");
+                return;
+            }
+            quotaSettled = true;
+
+            LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+            assistantMessage.setConversation(dataManager.load(LlmChatConversation.class)
+                    .id(session.conversationId).view("llm-chat-conversation-view").one());
+            assistantMessage.setRole("ASSISTANT");
+            assistantMessage.setContent(result.getText());
+            assistantMessage.setSequenceNo(session.nextSequence + 1);
+            assistantMessage.setRequestId(session.requestId);
+            assistantMessage.setStatus("COMPLETED");
+            assistantMessage.setProviderCode(result.getProviderCode());
+            assistantMessage.setModelName(result.getModelName());
+            assistantMessage.setProviderRequestId(result.getProviderRequestId());
+            assistantMessage.setCredentialOwner(result.getCredentialOwner() == null
+                    ? null : result.getCredentialOwner().name());
+            dataManager.commit(assistantMessage);
+            session.complete("COMPLETED", null);
+        } catch (RuntimeException failure) {
+            if (!quotaSettled) {
+                try {
+                    markQuotaPending(session.quota);
+                } catch (RuntimeException reconciliationFailure) {
+                    // Preserve the original user-facing failure; the reservation is
+                    // still visible to the administrator for manual reconciliation.
+                }
+            }
+            String message = failure.getMessage() == null ? "Ошибка выполнения запроса к AI." : failure.getMessage();
+            session.complete(isCancellationMessage(message) ? "CANCELLED" : "ERROR", message);
+        }
+    }
+
+    private void validateMessage(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            throw new DevelopmentException("Введите сообщение.");
+        }
+        if (message.length() > 32000) {
+            throw new DevelopmentException("Сообщение слишком длинное: максимум 32000 символов.");
+        }
+    }
+
+    private void validateRequestId(String requestId) {
+        if (requestId == null || requestId.trim().isEmpty() || requestId.length() > 64) {
+            throw new DevelopmentException("Некорректный идентификатор запроса.");
+        }
+    }
+
+    private boolean isCancellationMessage(String message) {
+        return message != null && (message.contains("Запрос отменён") || message.contains("AI-запрос отменён"));
+    }
+
+    private void cleanupStreamingSessions() {
+        long threshold = System.currentTimeMillis() - STREAM_SESSION_TTL_MS;
+        streamingSessions.entrySet().removeIf(entry -> entry.getValue().isFinishedBefore(threshold));
+    }
+
+    private LlmChatStreamState resolveExistingStreamingState(LlmChatConversation conversation,
+                                                              ExtUser user, String requestId) {
+        LlmChatQuotaReservation reservation = dataManager.load(LlmChatQuotaReservation.class)
+                .query(QUERY_RESERVATION_BY_REQUEST)
+                .parameter("requestId", requestId)
+                .parameter("conversationId", conversation.getId())
+                .parameter("userId", user.getId())
+                .view("llm-chat-quota-reservation-view")
+                .optional().orElse(null);
+        if (reservation == null) {
+            return null;
+        }
+        String status = reservation.getStatus();
+        if ("RESERVED".equals(status) || "CANCEL_REQUESTED".equals(status)) {
+            return new LlmChatStreamState(conversation.getId(), requestId, "", status, null, false);
+        }
+        if ("UNKNOWN_PENDING".equals(status)) {
+            return new LlmChatStreamState(conversation.getId(), requestId, "", status,
+                    "Результат запроса не подтверждён; резерв квоты помечен как уточняющий.", true);
+        }
+        LlmChatMessage assistant = dataManager.load(LlmChatMessage.class)
+                .query(QUERY_ASSISTANT_BY_REQUEST)
+                .parameter("conversationId", conversation.getId())
+                .parameter("requestId", requestId)
+                .view("llm-chat-message-view")
+                .optional().orElse(null);
+        if (assistant == null) {
+            throw new DevelopmentException("Результат потокового запроса сохранён, но ещё не восстановлен в истории.");
+        }
+        return new LlmChatStreamState(conversation.getId(), requestId, assistant.getContent(),
+                "COMPLETED", null, true);
     }
 
     @Override
@@ -492,6 +698,60 @@ public class LlmChatServiceBean implements LlmChatService {
         calendar.setTime(value);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         return truncateToDate(calendar.getTime());
+    }
+
+    private static final class StreamingSession {
+        private final UUID userId;
+        private final UUID conversationId;
+        private final String requestId;
+        private final QuotaReservationContext quota;
+        private final LlmChatMessage userMessage;
+        private final int nextSequence;
+        private final StringBuilder text = new StringBuilder();
+        private volatile String status = "STREAMING";
+        private volatile String errorMessage;
+        private volatile long finishedAt;
+
+        private StreamingSession(UUID userId, UUID conversationId, String requestId,
+                                 QuotaReservationContext quota, LlmChatMessage userMessage, int nextSequence) {
+            this.userId = userId;
+            this.conversationId = conversationId;
+            this.requestId = requestId;
+            this.quota = quota;
+            this.userMessage = userMessage;
+            this.nextSequence = nextSequence;
+        }
+
+        private synchronized void append(String delta) {
+            if (delta != null && !delta.isEmpty() && !isCompleted()) {
+                text.append(delta);
+            }
+        }
+
+        private synchronized void complete(String status, String errorMessage) {
+            this.status = status;
+            this.errorMessage = errorMessage;
+            this.finishedAt = System.currentTimeMillis();
+        }
+
+        private synchronized LlmChatStreamState snapshot() {
+            return new LlmChatStreamState(conversationId, requestId, text.toString(), status,
+                    errorMessage, isCompleted());
+        }
+
+        private boolean isCompleted() {
+            return "COMPLETED".equals(status) || "ERROR".equals(status) || "CANCELLED".equals(status);
+        }
+
+        private boolean isFinishedBefore(long threshold) {
+            return isCompleted() && finishedAt > 0 && finishedAt < threshold;
+        }
+
+        private void assertOwner(UUID expectedUserId, UUID expectedConversationId) {
+            if (!userId.equals(expectedUserId) || !conversationId.equals(expectedConversationId)) {
+                throw new DevelopmentException("Потоковый запрос недоступен.");
+            }
+        }
     }
 
     private static final class QuotaReservationContext {

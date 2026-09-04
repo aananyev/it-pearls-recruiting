@@ -17,6 +17,12 @@ public interface LlmChatService {
 
     LlmChatResponse sendMessage(UUID conversationId, String message, String requestId);
 
+    /** Starts a non-blocking streaming request; the web tier polls its snapshot. */
+    LlmChatStreamState startStreaming(UUID conversationId, String message, String requestId);
+
+    /** Returns the cumulative owner-scoped snapshot of a streaming request. */
+    LlmChatStreamState pollStreaming(UUID conversationId, String requestId);
+
     /**
      * Requests cancellation of an in-flight request. Providers with an
      * interruptible adapter close their active HTTP connection; legacy

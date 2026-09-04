@@ -2,13 +2,11 @@ package com.company.hunttech.web.screens.llmchat;
 
 import com.company.hunttech.entity.ai.LlmChatMessage;
 import com.company.hunttech.service.LlmChatService;
-import com.company.hunttech.service.LlmChatResponse;
+import com.company.hunttech.service.LlmChatStreamState;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.TextArea;
-import com.haulmont.cuba.gui.executors.BackgroundTask;
-import com.haulmont.cuba.gui.executors.BackgroundWorker;
-import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -18,14 +16,12 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.UUID;
 
-/** Compact floating chat shell for the synchronous MVP. */
+/** Compact floating chat shell with incremental provider output. */
 @UiController("hunttech_LlmChatScreen")
 @UiDescriptor("llm-chat-screen.xml")
 public class LlmChatScreen extends Screen {
     @Inject
     private LlmChatService llmChatService;
-    @Inject
-    private BackgroundWorker backgroundWorker;
     @Inject
     private Notifications notifications;
     @Inject
@@ -36,6 +32,8 @@ public class LlmChatScreen extends Screen {
     private Button sendBtn;
     @Inject
     private Button cancelBtn;
+    @Inject
+    private Timer streamPollTimer;
 
     private UUID conversationId;
     private String activeRequestId;
@@ -70,50 +68,29 @@ public class LlmChatScreen extends Screen {
             activeRequestText = request;
         }
         final String requestId = activeRequestId;
-        BackgroundTask<Integer, LlmChatResponse> task =
-                new BackgroundTask<Integer, LlmChatResponse>(60, this) {
-                    @Override
-                    public LlmChatResponse run(TaskLifeCycle<Integer> taskLifeCycle) {
-                        return llmChatService.sendMessage(conversationId, request, requestId);
-                    }
+        try {
+            LlmChatStreamState state = llmChatService.startStreaming(conversationId, request, requestId);
+            streamPollTimer.start();
+            applyStreamState(state);
+        } catch (RuntimeException ex) {
+            resetControls(false);
+            showError(ex);
+        }
+    }
 
-                    @Override
-                    public void done(LlmChatResponse response) {
-                        inputArea.setValue("");
-                        inputArea.setEnabled(true);
-                        sendBtn.setEnabled(true);
-                        cancelBtn.setEnabled(false);
-                        activeRequestId = null;
-                        activeRequestText = null;
-                        renderHistory(llmChatService.loadHistory(conversationId));
-                    }
-
-                    @Override
-                    public boolean handleException(Exception ex) {
-                        inputArea.setEnabled(true);
-                        sendBtn.setEnabled(true);
-                        cancelBtn.setEnabled(false);
-                        if (isCancellationMessage(ex)) {
-                            activeRequestId = null;
-                            activeRequestText = null;
-                        }
-                        showError(ex);
-                        return true;
-                    }
-
-                    @Override
-                    public boolean handleTimeoutException() {
-                        inputArea.setEnabled(true);
-                        sendBtn.setEnabled(true);
-                        cancelBtn.setEnabled(false);
-                        notifications.create(Notifications.NotificationType.ERROR)
-                                .withCaption("Чат не ответил вовремя")
-                                .withDescription("Результат запроса не подтверждён; резерв квоты помечен как уточняющий.")
-                                .show();
-                        return true;
-                    }
-                };
-        backgroundWorker.handle(task).execute();
+    @Subscribe("streamPollTimer")
+    public void onStreamPoll(Timer.TimerActionEvent event) {
+        if (conversationId == null || activeRequestId == null) {
+            streamPollTimer.stop();
+            return;
+        }
+        try {
+            applyStreamState(llmChatService.pollStreaming(conversationId, activeRequestId));
+        } catch (RuntimeException ex) {
+            streamPollTimer.stop();
+            resetControls(false);
+            showError(ex);
+        }
     }
 
     @Subscribe("cancelBtn")
@@ -134,12 +111,50 @@ public class LlmChatScreen extends Screen {
     }
 
     private void renderHistory(List<LlmChatMessage> messages) {
+        renderHistory(messages, null);
+    }
+
+    private void renderHistory(List<LlmChatMessage> messages, String liveText) {
         StringBuilder rendered = new StringBuilder();
         for (LlmChatMessage message : messages) {
             rendered.append("USER".equals(message.getRole()) ? "Вы" : "ИИ")
                     .append(":\n").append(message.getContent()).append("\n\n");
         }
+        if (liveText != null && !liveText.isEmpty()) {
+            rendered.append("ИИ:\n").append(liveText).append("\n");
+        }
         historyArea.setValue(rendered.toString());
+    }
+
+    private void applyStreamState(LlmChatStreamState state) {
+        if (state == null) {
+            return;
+        }
+        if (!state.isCompleted()) {
+            renderHistory(llmChatService.loadHistory(conversationId), state.getText());
+            return;
+        }
+        streamPollTimer.stop();
+        boolean success = "COMPLETED".equals(state.getStatus());
+        resetControls(success);
+        activeRequestId = null;
+        activeRequestText = null;
+        renderHistory(llmChatService.loadHistory(conversationId));
+        if (!success && state.getErrorMessage() != null) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Запрос к ИИ завершён без ответа")
+                    .withDescription(state.getErrorMessage())
+                    .show();
+        }
+    }
+
+    private void resetControls(boolean clearInput) {
+        if (clearInput) {
+            inputArea.setValue("");
+        }
+        inputArea.setEnabled(true);
+        sendBtn.setEnabled(true);
+        cancelBtn.setEnabled(false);
     }
 
     private void showError(Exception ex) {
@@ -149,9 +164,4 @@ public class LlmChatScreen extends Screen {
                 .show();
     }
 
-    private boolean isCancellationMessage(Exception ex) {
-        return ex != null && ex.getMessage() != null
-                && (ex.getMessage().contains("Запрос отменён")
-                || ex.getMessage().contains("AI-запрос отменён"));
-    }
 }

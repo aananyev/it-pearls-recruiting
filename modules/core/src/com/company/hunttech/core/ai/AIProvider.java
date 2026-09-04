@@ -1,5 +1,7 @@
 package com.company.hunttech.core.ai;
 
+import com.company.hunttech.service.AiStreamListener;
+
 import java.util.Map;
 
 /**

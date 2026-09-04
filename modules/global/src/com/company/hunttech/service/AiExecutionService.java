@@ -30,6 +30,16 @@ public interface AiExecutionService {
      */
     AiExecutionResult executeText(String functionCode, Map<String, Object> context);
 
+    /** Executes text generation and emits provider deltas when available. */
+    default AiExecutionResult executeTextStreaming(String functionCode, Map<String, Object> context,
+                                                   AiStreamListener listener) {
+        AiExecutionResult result = executeText(functionCode, context);
+        if (listener != null && result != null && result.getText() != null) {
+            listener.onDelta(result.getText());
+        }
+        return result;
+    }
+
     /**
      * Выполняет AI-функцию с capability IMAGE_GENERATION над переданным изображением.
      *
