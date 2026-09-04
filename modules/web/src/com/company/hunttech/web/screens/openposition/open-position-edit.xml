@@ -497,6 +497,21 @@
                         caption="msg://msgMemoForInterview"
                         width="100%"
                         stylename="borderless label-nav-item"/>
+                <!-- Вкладка «План собеседования» (tabInterviewPlan). -->
+                <button id="navTabInterviewPlan"
+                        caption="msg://msgInterviewPlan"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Вкладка «Карта поиска» (tabSearchMap). -->
+                <button id="navTabSearchMap"
+                        caption="msg://msgSearchMap"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Вкладка «Чекл-лист» (tabInterviewChecklist). -->
+                <button id="navTabInterviewChecklist"
+                        caption="msg://msgInterviewChecklist"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
                 <!-- Вкладка «Шаблон сопроводительного письма» (tabTemplateLetter). -->
                 <button id="navTabTemplateLetter"
                         caption="msg://msgTemplateLetter"
@@ -1390,14 +1405,19 @@
                           width="100%"
                           height="100%"
                           stylename="open-position-editor-richtext-section">
-                        <!-- Аккордеон описаний позиции (четыре редактора RichTextArea). -->
-                        <accordion id="openPositionAccordion"
-                                   width="100%"
-                                   height="100%">
+                        <!-- Вложенный tabSheet описаний позиции (бывший аккордеон, 2026-09-04):
+                             те же четыре раздела с RichTextArea, компоновка как во вкладке «Описание вакансии». -->
+                        <tabSheet id="openPositionDescriptionsTabSheet"
+                                  stylename="framed edit-tabs open-position-editor-tabs"
+                                  width="100%"
+                                  height="100%">
                             <!-- Русскоязычное описание позиции (comment). -->
                             <tab id="openPositionRuTabAccordion"
-                                 caption="msg://msgRuComment">
-                                <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
+                                 caption="msg://msgRuComment"
+                                 margin="false"
+                                 spacing="true"
+                                 expand="openPositionRuTabBox">
+                                <!-- Контейнер редактора русского описания на всю высоту вкладки. -->
                                 <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
                                     <!-- Редактор русского описания (обязательный). -->
                                     <richTextArea id="openPositionRichTextArea"
@@ -1412,8 +1432,11 @@
                             </tab>
                             <!-- Англоязычное описание позиции (commentEn). -->
                             <tab id="openPositionEnTabAccordion"
-                                 caption="msg://msgEnComment">
-                                <!-- Контейнер редактора английского описания на всю высоту вкладки аккордеона. -->
+                                 caption="msg://msgEnComment"
+                                 margin="false"
+                                 spacing="true"
+                                 expand="openPositionEnTabBox">
+                                <!-- Контейнер редактора английского описания на всю высоту вкладки. -->
                                 <vbox id="openPositionEnTabBox" width="100%" height="100%">
                                     <!-- Редактор английского описания. -->
                                     <richTextArea id="openPositionEnRichTextArea"
@@ -1428,8 +1451,11 @@
                             </tab>
                             <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
                             <tab id="openPositionStandartDescriptionAccorden"
-                                 caption="msg://msgStandartDescription">
-                                <!-- Контейнер стандартного описания на всю высоту вкладки аккордеона. -->
+                                 caption="msg://msgStandartDescription"
+                                 margin="false"
+                                 spacing="true"
+                                 expand="openPositionStandartDescriptionTabBox">
+                                <!-- Контейнер стандартного описания на всю высоту вкладки. -->
                                 <vbox id="openPositionStandartDescriptionTabBox" width="100%" height="100%">
                                     <!-- Просмотр стандартного описания (editable=false). -->
                                     <richTextArea id="openPositionStandartDescriptionRichTextArea"
@@ -1442,8 +1468,11 @@
                             </tab>
                             <!-- Блок «Кто это» (генерируется, только чтение). -->
                             <tab id="openPositionWhoIsThisGuyAccorden"
-                                 caption="msg://msgWhoIsThisGuy">
-                                <!-- Контейнер описания «кто это» на всю высоту вкладки аккордеона. -->
+                                 caption="msg://msgWhoIsThisGuy"
+                                 margin="false"
+                                 spacing="true"
+                                 expand="openPositionWhoIsThisGuyTabBox">
+                                <!-- Контейнер описания «кто это» на всю высоту вкладки. -->
                                 <vbox id="openPositionWhoIsThisGuyTabBox" width="100%" height="100%">
                                     <!-- Просмотр сгенерированного описания «кто это». -->
                                     <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
@@ -1454,7 +1483,7 @@
                                                   stylename="edit-form-control open-position-editor-richtext-variant5"/>
                                 </vbox>
                             </tab>
-                        </accordion>
+                        </tabSheet>
                     </hbox>
                     <!-- Ряд короткого описания: краткое описание позиции и сканирование JD. -->
                     <hbox id="shortDescriptionHBox"
@@ -1571,6 +1600,70 @@
                     <richTextArea id="memoForInterviewRichTextArea"
                                   dataContainer="openPositionDc"
                                   property="memoForInterview"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
+            </tab>
+            <!-- Вкладка «План собеседования»: редактор плана (interviewPlan, lazy LOB).
+                 Компоновка аналогична вкладке «Описание вакансии» (2026-09-04). -->
+            <tab id="tabInterviewPlan"
+                 caption="msg://msgInterviewPlan"
+                 margin="false"
+                 spacing="true"
+                 expand="interviewPlanVBox"
+                 icon="font-icon:CALENDAR_CHECK_O">
+                <vbox id="interviewPlanVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="interviewPlanRichTextArea"
+                      stylename="edit-workspace-scroll open-position-editor-tab-content">
+                    <richTextArea id="interviewPlanRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="interviewPlan"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
+            </tab>
+            <!-- Вкладка «Карта поиска»: редактор карты поиска (searchMap, lazy LOB). -->
+            <tab id="tabSearchMap"
+                 caption="msg://msgSearchMap"
+                 margin="false"
+                 spacing="true"
+                 expand="searchMapVBox"
+                 icon="font-icon:MAP_O">
+                <vbox id="searchMapVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="searchMapRichTextArea"
+                      stylename="edit-workspace-scroll open-position-editor-tab-content">
+                    <richTextArea id="searchMapRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="searchMap"
+                                  height="100%"
+                                  width="100%"
+                                  stylename="edit-form-control open-position-editor-richtext-variant5"/>
+                </vbox>
+            </tab>
+            <!-- Вкладка «Чекл-лист»: редактор чек-листа собеседования (interviewChecklist, lazy LOB). -->
+            <tab id="tabInterviewChecklist"
+                 caption="msg://msgInterviewChecklist"
+                 margin="false"
+                 spacing="true"
+                 expand="interviewChecklistVBox"
+                 icon="font-icon:CHECK_SQUARE_O">
+                <vbox id="interviewChecklistVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="interviewChecklistRichTextArea"
+                      stylename="edit-workspace-scroll open-position-editor-tab-content">
+                    <richTextArea id="interviewChecklistRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="interviewChecklist"
                                   height="100%"
                                   width="100%"
                                   stylename="edit-form-control open-position-editor-richtext-variant5"/>

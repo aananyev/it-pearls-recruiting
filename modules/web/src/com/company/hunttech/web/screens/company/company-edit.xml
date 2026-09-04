@@ -257,14 +257,13 @@
                          caption="mainMsg://msgCompanyDetail"
                          margin="false"
                          spacing="true"
-                         expand="companyDetailsScroll"
                          stylename="company-main-tab">
                         <scrollBox id="companyDetailsScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="edit-workspace edit-workspace-scroll">
+                                   stylename="company-tab-scroll">
                             <vbox id="companyDetailsContent"
                                   width="100%"
                                   spacing="true"
@@ -332,6 +331,31 @@
                                                 </actions>
                                             </lookupPickerField>
                                         </hbox>
+                                        <!-- Контактные поля остаются в основной карточке, чтобы не создавать
+                                             третью визуальную панель первой вкладки и не менять их bindings. -->
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="phoneMainField"
+                                                       dataContainer="companyDc"
+                                                       property="phone"
+                                                       caption="Телефон"
+                                                       stylename="edit-form-control"
+                                                       box.expandRatio="1"
+                                                       width="100%"/>
+                                            <textField id="emailMainField"
+                                                       dataContainer="companyDc"
+                                                       property="email"
+                                                       caption="Email"
+                                                       stylename="edit-form-control"
+                                                       box.expandRatio="1"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <!-- Сайт занимает всю строку: одиночное поле не требует отдельной карточки. -->
+                                        <textField id="websiteMainField"
+                                                   dataContainer="companyDc"
+                                                   property="website"
+                                                   caption="Веб-сайт"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
                                     </vbox>
                                 </groupBox>
                                 <!-- Карточка «Адрес компании» -->
@@ -394,39 +418,6 @@
                                                   rows="3"/>
                                     </vbox>
                                 </groupBox>
-                                <!-- Карточка «Контакты компании» -->
-                                <groupBox id="companyMainContactsCard"
-                                          caption="Контакты"
-                                          stylename="edit-card"
-                                          showAsPanel="true"
-                                          collapsable="true"
-                                          collapsed="false"
-                                          width="100%">
-                                    <vbox width="100%" spacing="true">
-                                        <hbox spacing="true" width="100%">
-                                            <textField id="phoneMainField"
-                                                       dataContainer="companyDc"
-                                                       property="phone"
-                                                       caption="Телефон"
-                                                       stylename="edit-form-control"
-                                                       box.expandRatio="1"
-                                                       width="100%"/>
-                                            <textField id="emailMainField"
-                                                       dataContainer="companyDc"
-                                                       property="email"
-                                                       caption="Email"
-                                                       stylename="edit-form-control"
-                                                       box.expandRatio="1"
-                                                       width="100%"/>
-                                        </hbox>
-                                        <textField id="websiteMainField"
-                                                   dataContainer="companyDc"
-                                                   property="website"
-                                                   caption="Веб-сайт"
-                                                   stylename="edit-form-control"
-                                                   width="100%"/>
-                                    </vbox>
-                                </groupBox>
                             </vbox>
                         </scrollBox>
                     </tab>
@@ -436,14 +427,13 @@
                          caption="Официальные реквизиты"
                          margin="false"
                          spacing="true"
-                         expand="companyRequisitesScroll"
                          stylename="company-requisites-tab">
                         <scrollBox id="companyRequisitesScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="edit-workspace edit-workspace-scroll">
+                                   stylename="company-tab-scroll">
                             <vbox id="companyRequisitesContent"
                                   width="100%"
                                   spacing="true"
@@ -732,14 +722,13 @@
                          caption="msg://msgCompanyDescription"
                          margin="false"
                          spacing="true"
-                         expand="companyDescriptionScroll"
                          stylename="company-description-tab">
                         <scrollBox id="companyDescriptionScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="edit-workspace edit-workspace-scroll">
+                                   stylename="company-tab-scroll">
                             <vbox id="companyDescriptionContent"
                                   width="100%"
                                   spacing="true"
@@ -789,14 +778,13 @@
                          caption="mainMsg://msgCompanyDepartament"
                          margin="false"
                          spacing="true"
-                         expand="companyDepartmentsScroll"
                          stylename="company-departments-tab">
                         <scrollBox id="companyDepartmentsScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="edit-workspace edit-workspace-scroll">
+                                   stylename="company-tab-scroll">
                             <vbox id="companyDepartmentsContent"
                                   width="100%"
                                   height="100%"

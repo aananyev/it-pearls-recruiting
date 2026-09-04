@@ -144,9 +144,9 @@ public class SkillTreeEditLayoutContractTest {
         assertTrue(xml.contains("view=\"specialisation-picker-view\""));
         assertTrue(xml.contains("id=\"specialisationDl\" cacheable=\"true\""));
 
-        // JPQL-запросы не изменились.
+        // JPQL-запросы (skillTreesLc с 2026-09-04 грузит ВСЕ навыки — родитель на любой глубине
+        // должен быть доступен в lookup "Элемент верхнего уровня"; было: where e.skillTree is null).
         assertTrue(xml.contains("select e from hunttech_SkillTree e"));
-        assertTrue(xml.contains("where e.skillTree is null"));
         assertTrue(xml.contains("order by e.skillName"));
         assertTrue(xml.contains("select e from hunttech_Specialisation e order by e.specRuName"));
 

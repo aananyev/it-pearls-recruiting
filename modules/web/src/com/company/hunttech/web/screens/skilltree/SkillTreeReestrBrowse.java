@@ -46,8 +46,6 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
     @Inject
     private OvaFallbackImage skillLogoPic;
     @Inject
-    private OvaFallbackImage detailLogoImage;
-    @Inject
     private Label<String> detailSkillName;
     @Inject
     private Label<String> detailSpecialisation;
@@ -91,7 +89,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
     }
 
     private void setupTableColumns() {
-        // Превью логотипа навыка в колонке «Логотип» (по эталону CityReestrBrowse).
+        // Превью логотипа навыка в колонке «Лого» (по эталону CityReestrBrowse).
         skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", event -> {
             SkillTree skill = event.getItem();
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
@@ -179,6 +177,8 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
 
     @Subscribe(id = "skillTreesDl", target = Target.DATA_LOADER)
     private void onSkillTreesDlPostLoad(CollectionLoader.PostLoadEvent<SkillTree> event) {
+        // Раскрыть все узлы дерева по умолчанию (видимая иерархия навыков).
+        skillTreesTreeTable.expandAll();
         SkillTree current = skillTreesTreeTable.getSingleSelected();
         if (current != null) {
             updateSidebarDetails(current);
@@ -193,13 +193,11 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
         openEditCardBtn.setEnabled(true);
         createChildBtn.setEnabled(true);
 
-        // Логотип в шапке профиля и в секции «ЛОГОТИП НАВЫКА»
+        // Логотип навыка — в шапке профиля (аватар 120px)
         if (skill.getFileImageLogo() != null) {
             skillLogoPic.setSource(FileDescriptorResource.class).setFileDescriptor(skill.getFileImageLogo());
-            detailLogoImage.setSource(FileDescriptorResource.class).setFileDescriptor(skill.getFileImageLogo());
         } else {
             skillLogoPic.applyFallback();
-            detailLogoImage.applyFallback();
         }
 
         String skillName = nvl(skill.getSkillName(), "Без названия");
@@ -273,7 +271,6 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
         openEditCardBtn.setEnabled(false);
         createChildBtn.setEnabled(false);
         skillLogoPic.applyFallback();
-        detailLogoImage.applyFallback();
         detailSkillName.setValue("Выберите компетенцию");
         detailSpecialisation.setValue("—");
         detailParentSkill.setValue("—");

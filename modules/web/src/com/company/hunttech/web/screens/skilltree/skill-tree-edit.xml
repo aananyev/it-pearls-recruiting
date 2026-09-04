@@ -23,7 +23,6 @@
                 <!-- Только корневые элементы, по алфавиту. -->
                 <query>
                     <![CDATA[select e from hunttech_SkillTree e
-                    where e.skillTree is null
                     order by e.skillName]]>
                 </query>
             </loader>

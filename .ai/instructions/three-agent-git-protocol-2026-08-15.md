@@ -15,6 +15,53 @@
 Роли меняются только пользователем. Если какой-то агент не работает —
 его роль переходит к другому по согласованию.
 
+## Защита CompanyEdit (обязательно для Hermes-1)
+
+Hermes-1 выполняет для `CompanyEdit` только проверку PR, merge и CI/CD.
+При конфликте или дефекте он не заменяет XML, SCSS либо тесты файлами из
+старой ветки, коммита или worktree и не удаляет контрактные тесты формы.
+Если merge меняет любой из файлов ниже вне явно одобренного PR, Hermes-1
+останавливает merge/deploy, сохраняет рабочее дерево и запрашивает UI-review:
+
+- `modules/web/src/com/company/hunttech/web/screens/company/company-edit.xml`;
+- `modules/web/themes/*/com.company.hunttech/company-editor.scss`;
+- `modules/core/test/com/company/hunttech/core/CompanyEdit*LayoutContractTest.java`.
+
+Перед deploy Hermes-1 обязан проверить итоговый diff относительно свежего
+`origin/master` и выполнить профильные контрактные тесты CompanyEdit.
+Для вкладочных scrollBox недопустимо возвращать сочетание
+`tab expand="<scrollBox>"` с `height="100%"` и стилем
+`edit-workspace edit-workspace-scroll`: это регрессия «видна одна строка».
+
+## Защита ExtSettingsWindow (обязательно для Hermes-1)
+
+Hermes-1 выполняет для `ExtSettingsWindow` только проверку PR, merge и CI/CD.
+Аналогичные ограничения: не заменять файлы из старых веток, не удалять
+контрактные тесты. Если merge меняет файлы ниже вне одобренного PR —
+остановить merge/deploy, сохранить рабочее дерево, запросить UI-review:
+
+- `modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml`;
+- `modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-main-background.xml`;
+- `modules/web/themes/*/com.company.hunttech/settings-window-sections.scss`;
+- `modules/web/themes/*/com.company.hunttech/edit-screen-shared-styles.scss`;
+- `modules/core/test/com/company/hunttech/core/ExtSettingsWindow*ContractTest.java`.
+
+**Владение формами**: `CompanyEdit` и `ExtSettingsWindow` — **эксклюзивно Antigravity**.
+Без особого распоряжения пользователя ни Hermes-2, ни другие агенты не имеют права
+создавать PR, вносящие изменения в эти файлы. Hermes-1 отклоняет такие PR на входе.
+
+## Обязательный OCR Code Review (для всех PR)
+
+Перед созданием PR **всегда** запускать OCR CLI review:
+```bash
+ocr review --audience agent
+```
+Результат review (PASS/FAIL + найденные проблемы) прикладывать к PR в описании.
+PR без OCR review не принимается Hermes-1.
+
+OCR CLI использует скилл `open-code-review` (Alibaba). Не основной моделью и не
+субагентами — ТОЛЬКО через `ocr review --audience agent`.
+
 ## Изоляция (обязательно)
 
 1. Каждый агент = своя ветка + свой worktree:

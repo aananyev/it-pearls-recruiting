@@ -37,8 +37,10 @@ public class ExtSettingsWindowLayoutContractTest {
         // 3. Правая рабочая область содержит tabSheet
         assertTrue("Правая рабочая область должна содержать settingsWorkspaceBox",
                 descriptor.contains("<vbox id=\"settingsWorkspaceBox\""));
+        // 2026-09-04: height="100%" убран — высоту tabSheet отдаёт expand родителя
+        // (фикс D1 "поехавшей" компоновки, отчёт UI/UX-дизайнера ExtSettingsWindow).
         assertTrue("settingsWorkspaceBox должен содержать tabSheet id=\"settingsTabSheet\"",
-                descriptor.contains("<tabSheet id=\"settingsTabSheet\" width=\"100%\" height=\"100%\""));
+                descriptor.contains("<tabSheet id=\"settingsTabSheet\" width=\"100%\""));
 
         // 4. Все 5 вкладок присутствуют в TabSheet
         assertTrue("Вкладка Мой профиль и ИИ", descriptor.contains("<tab id=\"msgMyInfo\""));

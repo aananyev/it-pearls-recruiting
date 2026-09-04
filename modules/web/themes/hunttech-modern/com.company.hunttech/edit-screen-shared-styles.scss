@@ -234,7 +234,7 @@
   .edit-workspace .v-tabsheet-tabsheetpanel {
     box-sizing: border-box !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
   }
 
   // CDP-фикс #2 (общий для всех Edit-форм): Vaadin рассчитывает inline 'left'
@@ -420,7 +420,9 @@
      карточки наезжает на предыдущую карточку и на toolbar. Сброс возвращает шапку
      внутрь панели (эталон — open-position-editor). */
   .edit-card > .v-panel-captionwrap,
-  .edit-card > .c-groupbox-captionwrap {
+  .edit-card > .c-groupbox-captionwrap,
+  .edit-accordion-section > .v-panel-captionwrap,
+  .edit-accordion-section > .c-groupbox-captionwrap {
     margin-top: 0 !important;
   }
 
@@ -1033,6 +1035,18 @@
     .v-table-row-odd {
       min-height: 38px !important;
       height: auto !important;
+    }
+
+    /* Групповые строки CUBA GroupTable: заголовок группы (навык-родитель) —
+       полужирный 13px, как заголовки таблиц реестров; expander групповой ячейки
+       (c-grouptable-group-cell-expander, CubaGroupTableWidget) с отступом. */
+    .v-table-caption-container {
+      font-weight: 600 !important;
+      font-size: 13px !important;
+    }
+
+    .c-grouptable-group-cell-expander {
+      padding-right: 6px !important;
     }
   }
 

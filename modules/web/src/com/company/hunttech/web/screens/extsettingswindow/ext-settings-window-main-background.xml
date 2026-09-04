@@ -4,9 +4,13 @@
         class="com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindowMainBackground"
         extends="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-email-navigation.xml">
     <layout>
-        <hbox id="settingsMainLayout" width="100%" height="100%" spacing="false" expand="settingsWorkspaceBox">
-            <vbox id="settingsWorkspaceBox" width="100%" height="100%" spacing="false" expand="settingsTabSheet">
-                <tabSheet id="settingsTabSheet" width="100%" height="100%">
+        <hbox id="settingsMainLayout" width="100%" height="100%" spacing="false" expand="settingsWorkspaceBox"
+              stylename="edit-screen-layout">
+            <vbox id="settingsWorkspaceBox" width="100%" height="100%" spacing="false" expand="settingsTabSheet"
+                  stylename="edit-workspace settings-workspace">
+                <!-- 2026-09-04: height="100%" убран (фикс D1 «поехавшей» компоновки) —
+                     высоту tabSheet отдаёт expand родителя; stylename продублирован явно (A-7). -->
+                <tabSheet id="settingsTabSheet" width="100%" stylename="framed ext-settings-tabs">
                     <tab id="msgInterface">
                         <scrollBox id="interfaceSettingsContentScrollBox">
                             <vbox id="interfaceSettingsContent">

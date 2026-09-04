@@ -93,6 +93,13 @@ public class CompanyEditLayoutContractTest {
         assertTrue(xml.contains("id=\"companyAddressCard\""));
         assertTrue(xml.contains("id=\"companyDescriptionCard\""));
         assertTrue(xml.contains("id=\"companyDepartmentsCard\""));
+        assertFalse("контакты не должны образовывать третью карточку первой вкладки",
+                xml.contains("id=\"companyMainContactsCard\""));
+        assertTrue("контактные поля должны остаться в основной карточке",
+                xml.indexOf("id=\"phoneMainField\"") > xml.indexOf("id=\"companyMainCard\"")
+                        && xml.indexOf("id=\"phoneMainField\"") < xml.indexOf("id=\"companyAddressCard\"")
+                        && xml.indexOf("id=\"emailMainField\"") < xml.indexOf("id=\"companyAddressCard\"")
+                        && xml.indexOf("id=\"websiteMainField\"") < xml.indexOf("id=\"companyAddressCard\""));
     }
 
     @Test
@@ -354,6 +361,10 @@ public class CompanyEditLayoutContractTest {
                 canon.contains("width: 290px !important"));
         assertFalse("адаптивная правка не должна перестраивать sidebar сверху",
                 canon.contains("#companyEditorMainLayout {\n            flex-direction: column !important;"));
+        assertTrue("первая вкладка не имеет изолированной адаптивной компоновки",
+                canon.contains(".company-main-tab {")
+                        && canon.contains("flex: 1 1 260px !important")
+                        && canon.contains("flex-basis: 220px !important"));
     }
 
     @Test
