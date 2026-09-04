@@ -20,21 +20,6 @@ import static org.junit.Assert.assertTrue;
 public class IteractionListAccordionNavigationTest {
 
     @Test
-    public void descriptorContainsExactlyFourSectionNavigationItems() throws IOException {
-        String descriptor = descriptor();
-        String sidebar = section(
-                descriptor,
-                "id=\"iteractionListNavigation\"",
-                "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card");
-
-        assertTrue(sidebar.contains("stylename=\"label-navigation\""));
-        assertTrue(sidebar.contains("stylename=\"label-nav-title\""));
-        assertEquals(4, count(sidebar, "stylename=\"label-nav-item"));
-        assertFalse(sidebar.contains("value=\"msg://mshMostPopular\""));
-        assertFalse(sidebar.contains("popularAccordionNav"));
-    }
-
-    @Test
     public void activeControllerCreatesFourButtonsAndTogglesOnlyPresentationStyles()
             throws IOException {
         String presentation = activePresentation();

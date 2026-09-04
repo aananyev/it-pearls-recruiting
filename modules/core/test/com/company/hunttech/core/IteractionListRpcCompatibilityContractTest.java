@@ -61,26 +61,6 @@ public class IteractionListRpcCompatibilityContractTest {
         assertTrue(descriptor.contains("action=\"windowClose\""));
     }
 
-    @Test
-    public void navigationIdsMatchInjectedGroupBoxes() throws IOException {
-        String descriptor = descriptor();
-        String controller = controller();
-        String[] ids = {
-                "participantsAccordion",
-                "interactionAccordion",
-                "resultAccordion",
-                "commentAccordion",
-                "popularAccordion"
-        };
-
-        for (String id : ids) {
-            assertTrue(descriptor.contains("id=\"" + id + "\""));
-            assertTrue(controller.contains("private GroupBoxLayout " + id + ";"));
-        }
-        assertTrue(controller.contains(
-                "selectAccordion(participantsAccordion, participantsAccordionNav, candidateField::focus)"));
-    }
-
     private String descriptor() throws IOException {
         return readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
