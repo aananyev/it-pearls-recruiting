@@ -327,11 +327,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TextField<String> shortDescriptionTextArea;
     @Inject
     private RichTextArea openPositionStandartDescriptionRichTextArea;
-    @Named("openPositionAccordion.openPositionStandartDescriptionAccorden")
+    @Named("openPositionDescriptionsTabSheet.openPositionStandartDescriptionAccorden")
     private VBoxLayout openPositionStandartDescriptionAccorden;
     @Inject
     private InstanceContainer<OpenPosition> openPositionDc;
-    @Named("openPositionAccordion.openPositionWhoIsThisGuyAccorden")
+    @Named("openPositionDescriptionsTabSheet.openPositionWhoIsThisGuyAccorden")
     private VBoxLayout openPositionWhoIsThisGuyAccorden;
     @Inject
     private RichTextArea openPositionWhoIsThisGuyRichTextArea;
