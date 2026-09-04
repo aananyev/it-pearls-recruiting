@@ -9,6 +9,7 @@ import java.util.UUID;
 public interface LlmChatService {
     String NAME = "hunttech_LlmChatService";
     String VIEW_CHAT_HISTORY_ADMIN_PERMISSION = "hunttech.ai.viewChatHistoryAdmin";
+    String RECONCILE_CHAT_QUOTA_PERMISSION = "hunttech.ai.reconcileChatQuota";
 
     UUID startConversation();
 
@@ -23,6 +24,12 @@ public interface LlmChatService {
      * usage when the provider returns.
      */
     void cancelMessage(UUID conversationId, String requestId);
+
+    /**
+     * Closes an UNKNOWN_PENDING reservation after an administrator verifies
+     * whether the provider charged the request and its actual token usage.
+     */
+    void reconcileUnknown(String requestId, Integer actualTokens, boolean providerCharged);
 
     List<LlmChatMessage> loadHistory(UUID conversationId);
 

@@ -12,6 +12,7 @@
 - `sendMessage(conversationId, message, requestId)` проверяет владельца, резервирует месячную квоту и сохраняет USER/ASSISTANT сообщения.
 - Повторный `requestId` не создаёт второй provider call или повторное списание.
 - `cancelMessage()` реализует кооперативную отмену: ответ не сохраняется, usage учитывается при известном результате.
+- `reconcileUnknown(requestId, actualTokens, providerCharged)` — административная операция закрытия `UNKNOWN_PENDING` без повторного вызова провайдера; требует отдельного specific permission `hunttech.ai.reconcileChatQuota`.
 - `loadHistory()` доступен владельцу; `loadHistoryAsAdmin()` защищён specific permission `hunttech.ai.viewChatHistoryAdmin`.
 
 ## Квота
@@ -29,9 +30,10 @@
 3. `260904-3-addLlmChatQuotaTables` — периоды, overrides и reservation ledger.
 4. `260904-4-addUserAiEncryptedKey` — ciphertext-колонка персонального ключа.
 5. `260904-5-addLlmChatRequestId` — request id и индекс сообщений.
+6. `260904-6-addLlmChatReconciliationAudit` — nullable provider request ID для сообщения и резерва, а также кто и когда выполнил административную сверку.
 
 Liquibase и CUBA `updateDb` SQL находятся в `modules/core/db/`. Все шаги additive/idempotent; production-порядок и обязательные seed-данные описываются в отдельном migration plan.
 
 ## Ограничения
 
-Текущие provider adapters синхронные. Streaming, provider request ID, жёсткая отмена HTTP-вызова и reconciliation `UNKNOWN_PENDING` требуют отдельного адаптера. До его появления UI честно показывает состояние ожидания и ограничение кооперативной отмены.
+Текущие provider adapters синхронные и пока не возвращают provider request ID. Жёсткая отмена HTTP-вызова и автоматическая сверка по API провайдера требуют отдельного адаптера. До его появления администратор сверяет `UNKNOWN_PENDING` вручную: подтверждённое списание переводит резерв в `SETTLED`, отсутствие списания — в `RELEASED`.

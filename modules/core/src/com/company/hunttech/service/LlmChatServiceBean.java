@@ -44,6 +44,9 @@ public class LlmChatServiceBean implements LlmChatService {
             "select e from hunttech_LlmChatQuotaReservation e "
                     + "where e.requestId = :requestId and e.conversation.id = :conversationId "
                     + "and e.period.user.id = :userId and e.deleteTs is null";
+    private static final String QUERY_RESERVATION_BY_REQUEST_ADMIN =
+            "select e from hunttech_LlmChatQuotaReservation e "
+                    + "where e.requestId = :requestId and e.deleteTs is null";
     private static final String QUERY_ASSISTANT_BY_REQUEST =
             "select e from hunttech_LlmChatMessage e "
                     + "where e.conversation.id = :conversationId and e.requestId = :requestId "
@@ -194,6 +197,43 @@ public class LlmChatServiceBean implements LlmChatService {
         }
     }
 
+    @Override
+    public void reconcileUnknown(String requestId, Integer actualTokens, boolean providerCharged) {
+        requireQuotaReconciliationPermission();
+        if (requestId == null || requestId.trim().isEmpty() || requestId.length() > 64) {
+            throw new DevelopmentException("Некорректный идентификатор запроса.");
+        }
+        if (actualTokens == null || actualTokens < 0
+                || (!providerCharged && actualTokens != 0)) {
+            throw new DevelopmentException("Укажите корректное фактическое usage и признак списания провайдером.");
+        }
+
+        LlmChatQuotaReservation reservation = dataManager.load(LlmChatQuotaReservation.class)
+                .query(QUERY_RESERVATION_BY_REQUEST_ADMIN)
+                .parameter("requestId", requestId.trim())
+                .view("llm-chat-quota-reservation-view")
+                .optional()
+                .orElseThrow(() -> new DevelopmentException("Резерв по requestId не найден."));
+        if (!"UNKNOWN_PENDING".equals(reservation.getStatus())) {
+            throw new DevelopmentException("Резерв уже сверяется или закрыт: " + reservation.getStatus());
+        }
+
+        LlmChatQuotaPeriod period = dataManager.load(LlmChatQuotaPeriod.class)
+                .id(reservation.getPeriod().getId())
+                .view("llm-chat-quota-period-view")
+                .one();
+        int reservedTokens = safeInt(reservation.getReservedTokens());
+        period.setPendingTokens(Math.max(0, safeInt(period.getPendingTokens()) - reservedTokens));
+        reservation.setSettledTokens(providerCharged ? actualTokens : 0);
+        reservation.setStatus(providerCharged ? "SETTLED" : "RELEASED");
+        reservation.setReconciledBy(currentLogin());
+        reservation.setReconciledAt(new Date());
+        if (providerCharged) {
+            period.setConsumedTokens(safeInt(period.getConsumedTokens()) + actualTokens);
+        }
+        dataManager.commit(new CommitContext(period, reservation));
+    }
+
     private LlmChatResponse resolveExistingRequest(LlmChatConversation conversation,
                                                    ExtUser user,
                                                    String requestId) {
@@ -283,6 +323,12 @@ public class LlmChatServiceBean implements LlmChatService {
     private void requireHistoryAdminPermission() {
         if (!security.isSpecificPermitted(LlmChatService.VIEW_CHAT_HISTORY_ADMIN_PERMISSION)) {
             throw new DevelopmentException("Нет права просмотра истории LLM-чата.");
+        }
+    }
+
+    private void requireQuotaReconciliationPermission() {
+        if (!security.isSpecificPermitted(LlmChatService.RECONCILE_CHAT_QUOTA_PERMISSION)) {
+            throw new DevelopmentException("Нет права сверки usage LLM-чата.");
         }
     }
 
@@ -458,5 +504,13 @@ public class LlmChatServiceBean implements LlmChatService {
                 .id(sessionUser.getId())
                 .view("_minimal")
                 .one();
+    }
+
+    private String currentLogin() {
+        User sessionUser = userSessionSource.getUserSession().getUser();
+        if (sessionUser == null || sessionUser.getLogin() == null) {
+            throw new DevelopmentException("Требуется авторизация администратора.");
+        }
+        return sessionUser.getLogin();
     }
 }

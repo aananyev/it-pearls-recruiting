@@ -152,6 +152,31 @@ public class LlmChatFoundationContractTest {
         assertTrue(service.contains("CANCEL_REQUESTED"));
     }
 
+    @Test
+    public void unknownUsageHasPermissionGatedAdminReconciliation() throws IOException {
+        String api = source("modules/global/src/com/company/hunttech/service/LlmChatService.java");
+        String service = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String reservation = source("modules/global/src/com/company/hunttech/entity/ai/LlmChatQuotaReservation.java");
+        String permissions = source("modules/web/src/com/company/hunttech/web-permissions.xml");
+        String views = source("modules/global/src/com/company/hunttech/ai-control-plane-views.xml");
+        String migration = source("modules/core/db/changelog/260904-6-addLlmChatReconciliationAudit.xml")
+                + source("modules/core/db/update/postgres/26/260904-6-addLlmChatReconciliationAudit.sql");
+
+        assertTrue(api.contains("reconcileUnknown(String requestId, Integer actualTokens, boolean providerCharged)"));
+        assertTrue(api.contains("RECONCILE_CHAT_QUOTA_PERMISSION"));
+        assertTrue(service.contains("UNKNOWN_PENDING"));
+        assertTrue(service.contains("RECONCILE_CHAT_QUOTA_PERMISSION"));
+        assertTrue(service.contains("setReconciledBy"));
+        assertTrue(service.contains("providerCharged"));
+        assertTrue(reservation.contains("PROVIDER_REQUEST_ID"));
+        assertTrue(reservation.contains("RECONCILED_AT"));
+        assertTrue(permissions.contains("hunttech.ai.reconcileChatQuota"));
+        assertTrue(views.contains("providerRequestId"));
+        assertTrue(migration.contains("PROVIDER_REQUEST_ID"));
+        assertTrue(migration.contains("RECONCILED_BY"));
+        assertTrue(migration.contains("RECONCILED_AT"));
+    }
+
     private String source(String relativePath) throws IOException {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) root = root.getParent();

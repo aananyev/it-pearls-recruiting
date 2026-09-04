@@ -188,4 +188,8 @@
     <include file="260904-5-addLlmChatRequestId.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Provider request ID preparation and auditable manual reconciliation of UNKNOWN_PENDING usage. -->
+    <include file="260904-6-addLlmChatReconciliationAudit.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

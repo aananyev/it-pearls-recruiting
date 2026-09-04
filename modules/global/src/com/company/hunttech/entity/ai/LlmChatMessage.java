@@ -37,6 +37,9 @@ public class LlmChatMessage extends StandardEntity {
     @Column(name = "REQUEST_ID", length = 64)
     private String requestId;
 
+    @Column(name = "PROVIDER_REQUEST_ID", length = 128)
+    private String providerRequestId;
+
     @NotNull
     @Column(name = "STATUS", nullable = false, length = 32)
     private String status = "COMPLETED";
@@ -63,6 +66,8 @@ public class LlmChatMessage extends StandardEntity {
     public void setSequenceNo(Integer sequenceNo) { this.sequenceNo = sequenceNo; }
     public String getRequestId() { return requestId; }
     public void setRequestId(String requestId) { this.requestId = requestId; }
+    public String getProviderRequestId() { return providerRequestId; }
+    public void setProviderRequestId(String providerRequestId) { this.providerRequestId = providerRequestId; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public String getProviderCode() { return providerCode; }

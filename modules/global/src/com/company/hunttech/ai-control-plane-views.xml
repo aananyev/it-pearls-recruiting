@@ -108,6 +108,7 @@
     <view entity="hunttech_LlmChatMessage" name="llm-chat-message-view" extends="_local">
         <property name="conversation" view="_minimal"/>
         <property name="requestId"/>
+        <property name="providerRequestId"/>
     </view>
     <view entity="hunttech_LlmChatQuotaPeriod" name="llm-chat-quota-period-view" extends="_local">
         <property name="user" view="_minimal"/>
@@ -118,5 +119,8 @@
     <view entity="hunttech_LlmChatQuotaReservation" name="llm-chat-quota-reservation-view" extends="_local">
         <property name="period" view="_minimal"/>
         <property name="conversation" view="_minimal"/>
+        <property name="providerRequestId"/>
+        <property name="reconciledBy"/>
+        <property name="reconciledAt"/>
     </view>
 </views>
