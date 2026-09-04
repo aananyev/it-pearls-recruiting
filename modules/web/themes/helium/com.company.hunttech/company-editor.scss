@@ -437,6 +437,19 @@
       scrollbar-width: thin;
     }
 
+    // Вкладочный scrollBox CompanyEdit (companyDetailsScroll и аналоги): высоту
+    // отдаёт tabsheetpanel (mainTab height=100%), сам высоту НЕ задаёт — иначе
+    // «видна одна строка» (регрессия сент. 2026, CompanyEditTabLayoutContractTest).
+    .company-tab-scroll,
+    .v-scrollbox.company-tab-scroll > .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
     .edit-workspace-content,
     .v-verticallayout.edit-workspace-content {
       box-sizing: border-box !important;
@@ -847,10 +860,10 @@
     // CDP-фикс: tabSheet панель должна обрезать содержимое, не выпуская v-scrollable
     // за свои границы. v-tabsheet-tabsheetpanel имеет box-sizing:content-box — это
     // сдвигает v-scrollable вправо на ширину border+padding.
-    .edit-workspace .v-tabsheet-tabsheetpanel {
+    .edit-screen-layout .v-tabsheet-tabsheetpanel {
       box-sizing: border-box !important;
       max-width: 100% !important;
-      overflow: hidden !important;
+      overflow-x: hidden !important;
     }
 
     // CDP-фикс: hbox с парой чекбоксов (ourLegalEnityCheckBox + checkBoxOurClient) в
@@ -948,7 +961,6 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
-      overflow: hidden !important;
 
       .v-tabsheet-tabcontainer {
         box-sizing: border-box !important;
@@ -964,7 +976,7 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-        overflow: hidden !important;
+        overflow-x: hidden !important;
       }
 
       .v-tabsheet-content {
