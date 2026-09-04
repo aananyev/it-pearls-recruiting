@@ -437,6 +437,16 @@
       scrollbar-width: thin;
     }
 
+    .company-tab-scroll,
+    .v-scrollbox.company-tab-scroll > .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
     .edit-workspace-content,
     .v-verticallayout.edit-workspace-content {
       box-sizing: border-box !important;
@@ -850,7 +860,6 @@
     .edit-workspace .v-tabsheet-tabsheetpanel {
       box-sizing: border-box !important;
       max-width: 100% !important;
-      overflow: hidden !important;
     }
 
     // CDP-фикс: hbox с парой чекбоксов (ourLegalEnityCheckBox + checkBoxOurClient) в
@@ -964,7 +973,7 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-        overflow: hidden !important;
+        overflow-x: hidden !important;
       }
 
       .v-tabsheet-content {
