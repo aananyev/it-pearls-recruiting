@@ -26,7 +26,7 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 2. `startStreaming(conversationId, message, requestId)` проверяет владельца, валидирует сообщение, резервирует месячную квоту и сохраняет USER-сообщение.
 3. Запрос планируется штатным daemon `scheduler` с переносом CUBA `SecurityContext`; provider streaming дельты накапливаются в owner-scoped snapshot.
 4. `pollStreaming()` повторно проверяет пользователя и conversationId и возвращает cumulative text. Snapshot удаляется через 10 минут после завершения.
-5. После подтверждённого результата quota reservation закрывается, ASSISTANT-сообщение сохраняется один раз. При неизвестном результате резерв переводится в `UNKNOWN_PENDING`; второй provider call не запускается.
+5. После подтверждённого результата quota reservation закрывается, ASSISTANT-сообщение сохраняется один раз. Если до обрыва пришёл фактический usage callback, резерв автоматически закрывается с audit actor `SYSTEM_PROVIDER_USAGE`; если пришёл только provider request ID, резерв переводится в `UNKNOWN_PENDING`, второй provider call не запускается.
 6. `cancelMessage()` ставит `CANCEL_REQUESTED` и передаёт requestId в `AIProviderRegistry`. OpenAI-compatible адаптеры прерывают активное HTTP-соединение; sync-only адаптеры завершаются кооперативно.
 
 Синхронные `sendMessage(...)` сохранены для совместимости и идемпотентных интеграций. Для provider без streaming execution layer отдаёт полный ответ одной дельтой.
@@ -50,4 +50,4 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 
 ## Ограничения и следующие шаги
 
-Настоящий Vaadin push/WebSocket не вводился: polling выбран как совместимый промежуточный transport. Автоматическое reconciliation по provider request ID, drag/position persistence и mobile sheet остаются следующими срезами.
+Настоящий Vaadin push/WebSocket не вводился: polling выбран как совместимый промежуточный transport. Lookup usage по одному provider request ID остаётся TODO до появления подтверждённых provider-specific API; drag/position persistence и mobile sheet остаются следующими срезами.

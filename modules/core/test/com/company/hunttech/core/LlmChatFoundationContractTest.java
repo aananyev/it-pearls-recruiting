@@ -250,6 +250,24 @@ public class LlmChatFoundationContractTest {
         assertTrue(descriptor.contains("id=\"streamPollTimer\""));
     }
 
+    @Test
+    public void streamingPersistsProviderIdAndSettlesObservedUsageFailClosed() throws IOException {
+        String listener = source("modules/global/src/com/company/hunttech/service/AiStreamListener.java");
+        String adapter = source("modules/core/src/com/company/hunttech/core/ai/AbstractOpenAiCompatibleProvider.java");
+        String service = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String session = service.substring(service.indexOf("private static final class StreamingSession"));
+
+        assertTrue(listener.contains("onProviderRequestId"));
+        assertTrue(listener.contains("onUsage"));
+        assertTrue(adapter.contains("listener.onProviderRequestId"));
+        assertTrue(adapter.contains("listener.onUsage"));
+        assertTrue(service.contains("settleObservedUsage"));
+        assertTrue(service.contains("setProviderRequestId"));
+        assertTrue(service.contains("settleFailedQuota(session)"));
+        assertTrue(session.contains("providerRequestId"));
+        assertTrue(session.contains("observedTotalTokens"));
+    }
+
     private String source(String relativePath) throws IOException {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) root = root.getParent();

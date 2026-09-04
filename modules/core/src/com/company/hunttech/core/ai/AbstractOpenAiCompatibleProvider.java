@@ -162,6 +162,7 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
                     JsonNode root = objectMapper.readTree(payload);
                     if (root.path("id").isTextual()) {
                         providerRequestId = root.path("id").asText();
+                        listener.onProviderRequestId(providerRequestId);
                     }
                     JsonNode delta = root.path("choices").path(0).path("delta").path("content");
                     if (delta.isTextual() && isConfigured(delta.asText())) {
@@ -172,6 +173,11 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
                     JsonNode usage = root.path("usage");
                     promptTokens = usage.path("prompt_tokens").asInt(promptTokens);
                     completionTokens = usage.path("completion_tokens").asInt(completionTokens);
+                    int reportedTotalTokens = usage.path("total_tokens").asInt(-1);
+                    if (reportedTotalTokens >= 0 || usage.has("prompt_tokens") || usage.has("completion_tokens")) {
+                        listener.onUsage(promptTokens, completionTokens,
+                                reportedTotalTokens >= 0 ? reportedTotalTokens : promptTokens + completionTokens);
+                    }
                 }
             }
             if (!isConfigured(text.toString())) {

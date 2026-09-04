@@ -8,6 +8,7 @@ import com.company.hunttech.entity.ai.LlmChatQuotaPeriod;
 import com.company.hunttech.entity.ai.LlmChatQuotaReservation;
 import com.company.hunttech.entity.ai.LlmUserQuotaOverride;
 import com.company.hunttech.core.ai.AIProviderRegistry;
+import com.company.hunttech.service.AiStreamListener;
 import com.haulmont.cuba.core.sys.SecurityContextAwareRunnable;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
@@ -287,9 +288,25 @@ public class LlmChatServiceBean implements LlmChatService {
         context.put("requestId", session.requestId);
         boolean quotaSettled = false;
         try {
-            AiExecutionResult result = aiExecutionService.executeTextStreaming(FUNCTION_CODE, context, session::append);
+            AiExecutionResult result = aiExecutionService.executeTextStreaming(FUNCTION_CODE, context,
+                    new AiStreamListener() {
+                        @Override
+                        public void onDelta(String text) {
+                            session.append(text);
+                        }
+
+                        @Override
+                        public void onProviderRequestId(String providerRequestId) {
+                            session.setProviderRequestId(providerRequestId);
+                        }
+
+                        @Override
+                        public void onUsage(Integer promptTokens, Integer completionTokens, Integer totalTokens) {
+                            session.setObservedTotalTokens(totalTokens);
+                        }
+                    });
             if (result == null || result.getText() == null || result.getText().trim().isEmpty()) {
-                markQuotaPending(session.quota);
+                settleFailedQuota(session);
                 session.complete("ERROR", "AI-провайдер вернул пустой ответ.");
                 return;
             }
@@ -320,7 +337,7 @@ public class LlmChatServiceBean implements LlmChatService {
         } catch (RuntimeException failure) {
             if (!quotaSettled) {
                 try {
-                    markQuotaPending(session.quota);
+                    settleFailedQuota(session);
                 } catch (RuntimeException reconciliationFailure) {
                     // Preserve the original user-facing failure; the reservation is
                     // still visible to the administrator for manual reconciliation.
@@ -353,6 +370,14 @@ public class LlmChatServiceBean implements LlmChatService {
     private void cleanupStreamingSessions() {
         long threshold = System.currentTimeMillis() - STREAM_SESSION_TTL_MS;
         streamingSessions.entrySet().removeIf(entry -> entry.getValue().isFinishedBefore(threshold));
+    }
+
+    private void settleFailedQuota(StreamingSession session) {
+        if (session.getObservedTotalTokens() != null) {
+            settleObservedUsage(session.quota, session.getObservedTotalTokens(), session.getProviderRequestId());
+        } else {
+            markQuotaPending(session.quota, session.getProviderRequestId());
+        }
     }
 
     private LlmChatStreamState resolveExistingStreamingState(LlmChatConversation conversation,
@@ -665,6 +690,10 @@ public class LlmChatServiceBean implements LlmChatService {
     }
 
     private void markQuotaPending(QuotaReservationContext context) {
+        markQuotaPending(context, null);
+    }
+
+    private void markQuotaPending(QuotaReservationContext context, String providerRequestId) {
         LlmChatQuotaPeriod period = dataManager.load(LlmChatQuotaPeriod.class)
                 .id(context.periodId).view("llm-chat-quota-period-view").one();
         LlmChatQuotaReservation reservation = dataManager.load(LlmChatQuotaReservation.class)
@@ -672,6 +701,24 @@ public class LlmChatServiceBean implements LlmChatService {
         period.setReservedTokens(Math.max(0, safeInt(period.getReservedTokens()) - context.reservedTokens));
         period.setPendingTokens(safeInt(period.getPendingTokens()) + context.reservedTokens);
         reservation.setStatus("UNKNOWN_PENDING");
+        reservation.setProviderRequestId(providerRequestId);
+        dataManager.commit(new CommitContext(period, reservation));
+    }
+
+    private void settleObservedUsage(QuotaReservationContext context, int actualTokens, String providerRequestId) {
+        int consumed = Math.max(0, actualTokens);
+        LlmChatQuotaPeriod period = dataManager.load(LlmChatQuotaPeriod.class)
+                .id(context.periodId).view("llm-chat-quota-period-view").one();
+        LlmChatQuotaReservation reservation = dataManager.load(LlmChatQuotaReservation.class)
+                .id(context.reservationId).view("llm-chat-quota-reservation-view").one();
+        period.setReservedTokens(Math.max(0, safeInt(period.getReservedTokens()) - context.reservedTokens));
+        period.setConsumedTokens(safeInt(period.getConsumedTokens()) + consumed);
+        reservation.setSettledTokens(consumed);
+        reservation.setProviderRequestId(providerRequestId);
+        reservation.setReconciledBy("SYSTEM_PROVIDER_USAGE");
+        reservation.setReconciledAt(new Date());
+        reservation.setStatus("CANCEL_REQUESTED".equals(reservation.getStatus())
+                ? "CANCELLED" : (consumed == 0 ? "RELEASED" : "SETTLED"));
         dataManager.commit(new CommitContext(period, reservation));
     }
 
@@ -708,6 +755,8 @@ public class LlmChatServiceBean implements LlmChatService {
         private final LlmChatMessage userMessage;
         private final int nextSequence;
         private final StringBuilder text = new StringBuilder();
+        private volatile String providerRequestId;
+        private volatile Integer observedTotalTokens;
         private volatile String status = "STREAMING";
         private volatile String errorMessage;
         private volatile long finishedAt;
@@ -732,6 +781,26 @@ public class LlmChatServiceBean implements LlmChatService {
             this.status = status;
             this.errorMessage = errorMessage;
             this.finishedAt = System.currentTimeMillis();
+        }
+
+        private void setProviderRequestId(String providerRequestId) {
+            if (providerRequestId != null && !providerRequestId.trim().isEmpty()) {
+                this.providerRequestId = providerRequestId.trim();
+            }
+        }
+
+        private String getProviderRequestId() {
+            return providerRequestId;
+        }
+
+        private void setObservedTotalTokens(Integer observedTotalTokens) {
+            if (observedTotalTokens != null && observedTotalTokens >= 0) {
+                this.observedTotalTokens = observedTotalTokens;
+            }
+        }
+
+        private Integer getObservedTotalTokens() {
+            return observedTotalTokens;
         }
 
         private synchronized LlmChatStreamState snapshot() {
