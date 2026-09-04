@@ -234,7 +234,7 @@
   .edit-workspace .v-tabsheet-tabsheetpanel {
     box-sizing: border-box !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
   }
 
   // CDP-фикс #2 (общий для всех Edit-форм): Vaadin рассчитывает inline 'left'
