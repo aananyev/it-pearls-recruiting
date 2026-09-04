@@ -89,7 +89,7 @@ public class ExtSettingsWindowCoreBeanLookupTest {
         assertTrue(descriptor.contains("id=\"previewAiContextBtn\""));
         assertTrue(descriptor.contains("invoke=\"previewAiContext\""));
         assertTrue(navigationController.contains("public void previewAiContext()"));
-        assertTrue(navigationController.contains("UserAiContextBuilder.buildPreview(profile)"));
+        assertTrue(navigationController.contains("UserAiContextBuilder.buildPreview(profile, limit)"));
         assertFalse(navigationController.contains("userAiContextService.buildContextPreview(profile)"));
         assertTrue(navigationController.contains("previewGroup.setExpanded(true);"));
         assertTrue(navigationController.contains("aiContextPreviewArea.focus();"));
