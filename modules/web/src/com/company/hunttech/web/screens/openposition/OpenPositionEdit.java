@@ -201,6 +201,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CheckBox needExerciseCheckBox;
     @Inject
     private RichTextArea exerciseRichTextArea;
+
+    @Inject
+    private RichTextArea interviewPlanRichTextArea;
+
+    @Inject
+    private RichTextArea searchMapRichTextArea;
+
+    @Inject
+    private RichTextArea interviewChecklistRichTextArea;
     @Inject
     private LookupPickerField<Project> projectNameField;
     @Inject
@@ -435,6 +444,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button navTabExercise;
     @Named("navTabMemoForInterview")
     private Button navTabMemoForInterview;
+
+    @Inject
+    private Button navTabInterviewPlan;
+
+    @Inject
+    private Button navTabSearchMap;
+
+    @Inject
+    private Button navTabInterviewChecklist;
     @Named("navTabTemplateLetter")
     private Button navTabTemplateLetter;
     @Named("navTabSkills")
@@ -454,6 +472,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
        openPositionRichTextArea, someFilesTable, needExerciseCheckBox, needMemoCheckBox,
        needLetterCheckBox, openPositionSkillsListTable, openPostionNewsDataGrid. */
 
+    private boolean interviewPlanLoaded;
+    private boolean searchMapLoaded;
+    private boolean interviewChecklistLoaded;
     private boolean jobDescriptionLobsLoaded;
     private boolean exerciseLoaded;
     private boolean memoLoaded;
@@ -544,6 +565,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 loadMemoForInterviewLob();
                 memoLoaded = true;
             }
+            if ("tabInterviewPlan".equals(tabName) && !interviewPlanLoaded) {
+                loadInterviewPlanLob();
+                interviewPlanLoaded = true;
+            }
+            if ("tabSearchMap".equals(tabName) && !searchMapLoaded) {
+                loadSearchMapLob();
+                searchMapLoaded = true;
+            }
+            if ("tabInterviewChecklist".equals(tabName) && !interviewChecklistLoaded) {
+                loadInterviewChecklistLob();
+                interviewChecklistLoaded = true;
+            }
             if ("tabTemplateLetter".equals(tabName) && !templateLetterLoaded) {
                 loadTemplateLetterLob();
                 templateLetterLoaded = true;
@@ -614,6 +647,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         map.put("tabFiles", navTabFiles);
         map.put("tabExercise", navTabExercise);
         map.put("tabMemoForInterview", navTabMemoForInterview);
+        map.put("tabInterviewPlan", navTabInterviewPlan);
+        map.put("tabSearchMap", navTabSearchMap);
+        map.put("tabInterviewChecklist", navTabInterviewChecklist);
         map.put("tabTemplateLetter", navTabTemplateLetter);
         map.put("tabSkills", navTabSkills);
         map.put("tabOpenPositionNews", navTabOpenPositionNews);
@@ -694,6 +730,33 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         navTabMemoForInterview.addStyleName("label-nav-item-active");
         tabSheetOpenPosition.setSelectedTab(tabSheetOpenPosition.getTab("tabMemoForInterview"));
         needMemoCheckBox.focus();
+    }
+
+    @Subscribe("navTabInterviewPlan")
+    /** Вкладка «План собеседования»: клик переключает на tabInterviewPlan и фокусирует редактор. */
+    public void onNavTabInterviewPlanClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        navTabInterviewPlan.addStyleName("label-nav-item-active");
+        tabSheetOpenPosition.setSelectedTab(tabSheetOpenPosition.getTab("tabInterviewPlan"));
+        interviewPlanRichTextArea.focus();
+    }
+
+    @Subscribe("navTabSearchMap")
+    /** Вкладка «Карта поиска»: клик переключает на tabSearchMap и фокусирует редактор. */
+    public void onNavTabSearchMapClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        navTabSearchMap.addStyleName("label-nav-item-active");
+        tabSheetOpenPosition.setSelectedTab(tabSheetOpenPosition.getTab("tabSearchMap"));
+        searchMapRichTextArea.focus();
+    }
+
+    @Subscribe("navTabInterviewChecklist")
+    /** Вкладка «Чекл-лист»: клик переключает на tabInterviewChecklist и фокусирует редактор. */
+    public void onNavTabInterviewChecklistClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        navTabInterviewChecklist.addStyleName("label-nav-item-active");
+        tabSheetOpenPosition.setSelectedTab(tabSheetOpenPosition.getTab("tabInterviewChecklist"));
+        interviewChecklistRichTextArea.focus();
     }
 
     @Subscribe("navTabTemplateLetter")
@@ -849,6 +912,30 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .add("memoForInterview")
                 .build());
         getEditedEntity().setMemoForInterview(reloaded.getMemoForInterview());
+    }
+
+    /** Lazy-загрузка плана собеседования при первом открытии вкладки. */
+    private void loadInterviewPlanLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("interviewPlan")
+                .build());
+        getEditedEntity().setInterviewPlan(reloaded.getInterviewPlan());
+    }
+
+    /** Lazy-загрузка карты поиска при первом открытии вкладки. */
+    private void loadSearchMapLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("searchMap")
+                .build());
+        getEditedEntity().setSearchMap(reloaded.getSearchMap());
+    }
+
+    /** Lazy-загрузка чек-листа собеседования при первом открытии вкладки. */
+    private void loadInterviewChecklistLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("interviewChecklist")
+                .build());
+        getEditedEntity().setInterviewChecklist(reloaded.getInterviewChecklist());
     }
 
     /** Lazy-загрузка шаблона сопроводительного письма при первом открытии вкладки. */
