@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Отдельное согласие на автоматический fallback чата к административному
+        AI API. FALSE сохраняет безопасное поведение для существующих пользователей
+        и не меняет externalProcessingAllowed.
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
+    </preConditions>
+
+    <changeSet id="260904-1-addAdminFallbackConsent" author="hunttech">
+        <sql splitStatements="true" stripComments="true">
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                ADD COLUMN IF NOT EXISTS ADMIN_FALLBACK_CONSENT boolean;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                ADD COLUMN IF NOT EXISTS ADMIN_FALLBACK_CONSENT_VERSION varchar(32);
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                ADD COLUMN IF NOT EXISTS ADMIN_FALLBACK_CONSENT_AT timestamp;
+            UPDATE HUNTTECH_USER_AI_PROFILE
+               SET ADMIN_FALLBACK_CONSENT = FALSE
+             WHERE ADMIN_FALLBACK_CONSENT IS NULL;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                ALTER COLUMN ADMIN_FALLBACK_CONSENT SET DEFAULT FALSE;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                ALTER COLUMN ADMIN_FALLBACK_CONSENT SET NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                DROP COLUMN IF EXISTS ADMIN_FALLBACK_CONSENT_AT;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                DROP COLUMN IF EXISTS ADMIN_FALLBACK_CONSENT_VERSION;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                DROP COLUMN IF EXISTS ADMIN_FALLBACK_CONSENT;
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

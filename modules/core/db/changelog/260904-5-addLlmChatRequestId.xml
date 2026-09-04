@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Idempotency key is nullable for pre-chat rows and required by new calls. -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_LLM_CHAT_MESSAGE"/>
+    </preConditions>
+
+    <changeSet id="260904-5-addLlmChatRequestId" author="hunttech">
+        <addColumn tableName="HUNTTECH_LLM_CHAT_MESSAGE">
+            <column name="REQUEST_ID" type="varchar(64)"/>
+        </addColumn>
+        <createIndex tableName="HUNTTECH_LLM_CHAT_MESSAGE" indexName="IDX_HUNTTECH_LLM_CHAT_MESSAGE_REQUEST">
+            <column name="REQUEST_ID"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="HUNTTECH_LLM_CHAT_MESSAGE" indexName="IDX_HUNTTECH_LLM_CHAT_MESSAGE_REQUEST"/>
+            <dropColumn tableName="HUNTTECH_LLM_CHAT_MESSAGE" columnName="REQUEST_ID"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

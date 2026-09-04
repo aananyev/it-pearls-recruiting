@@ -4,6 +4,7 @@
     <specific>
         <category id="hunttech.ai">
             <permission id="hunttech.ai.manageCorporateCredentials"/>
+            <permission id="hunttech.ai.viewChatHistoryAdmin"/>
         </category>
     </specific>
 </permission-config>

@@ -13,5 +13,11 @@ public interface AiCredentialService {
 
     String encryptAdminSecret(String plainText);
 
+    /**
+     * Encrypts a personal secret. The service never exposes a decrypt operation
+     * to the web client and does not persist the supplied plaintext.
+     */
+    String encryptUserSecret(String plainText);
+
     void testAdminConnection(UUID configurationId);
 }

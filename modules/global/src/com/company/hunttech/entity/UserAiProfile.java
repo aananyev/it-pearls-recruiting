@@ -44,6 +44,18 @@ public class UserAiProfile extends StandardEntity {
     @Column(name = "EXTERNAL_PROCESSING_ALLOWED", nullable = false)
     private Boolean externalProcessingAllowed = false;
 
+    /** Separate consent for routing chat requests to the administrative AI API. */
+    @NotNull
+    @Column(name = "ADMIN_FALLBACK_CONSENT", nullable = false)
+    private Boolean adminFallbackConsent = false;
+
+    @Column(name = "ADMIN_FALLBACK_CONSENT_VERSION", length = 32)
+    private String adminFallbackConsentVersion;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "ADMIN_FALLBACK_CONSENT_AT")
+    private Date adminFallbackConsentAt;
+
     @Column(name = "CONSENT_VERSION", length = 32)
     private String consentVersion;
 
@@ -162,6 +174,12 @@ public class UserAiProfile extends StandardEntity {
     public void setProfileEnabled(Boolean profileEnabled) { this.profileEnabled = profileEnabled; }
     public Boolean getExternalProcessingAllowed() { return externalProcessingAllowed; }
     public void setExternalProcessingAllowed(Boolean externalProcessingAllowed) { this.externalProcessingAllowed = externalProcessingAllowed; }
+    public Boolean getAdminFallbackConsent() { return adminFallbackConsent; }
+    public void setAdminFallbackConsent(Boolean adminFallbackConsent) { this.adminFallbackConsent = adminFallbackConsent; }
+    public String getAdminFallbackConsentVersion() { return adminFallbackConsentVersion; }
+    public void setAdminFallbackConsentVersion(String adminFallbackConsentVersion) { this.adminFallbackConsentVersion = adminFallbackConsentVersion; }
+    public Date getAdminFallbackConsentAt() { return adminFallbackConsentAt; }
+    public void setAdminFallbackConsentAt(Date adminFallbackConsentAt) { this.adminFallbackConsentAt = adminFallbackConsentAt; }
     public String getConsentVersion() { return consentVersion; }
     public void setConsentVersion(String consentVersion) { this.consentVersion = consentVersion; }
     public Date getConsentAcceptedAt() { return consentAcceptedAt; }

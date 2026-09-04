@@ -109,8 +109,6 @@
                         <groupBox id="securitySection" caption="Безопасность" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
                             <!-- API-ключ хранится только у пользователя и отображается как secret. -->
                             <passwordField id="apiKeyField"
-                                           dataContainer="userAiConfigurationDc"
-                                           property="apiKey"
                                            secret="true"
                                            width="100%"
                                            stylename="edit-form-control"

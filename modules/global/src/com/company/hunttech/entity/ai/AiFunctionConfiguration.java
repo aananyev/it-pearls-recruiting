@@ -57,6 +57,10 @@ public class AiFunctionConfiguration extends StandardEntity {
     @Column(name = "MAX_TOKENS")
     private Integer maxTokens;
 
+    /** Common calendar-month chat quota; user-specific override has priority. */
+    @Column(name = "DEFAULT_MONTHLY_TOKEN_QUOTA")
+    private Integer defaultMonthlyTokenQuota;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ADMIN_CONFIGURATION_ID")
     private AdminAiConfiguration adminConfiguration;
@@ -151,6 +155,14 @@ public class AiFunctionConfiguration extends StandardEntity {
 
     public void setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;
+    }
+
+    public Integer getDefaultMonthlyTokenQuota() {
+        return defaultMonthlyTokenQuota;
+    }
+
+    public void setDefaultMonthlyTokenQuota(Integer defaultMonthlyTokenQuota) {
+        this.defaultMonthlyTokenQuota = defaultMonthlyTokenQuota;
     }
 
     public AdminAiConfiguration getAdminConfiguration() {

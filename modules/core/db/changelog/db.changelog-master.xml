@@ -167,4 +167,25 @@
     <include file="260902-1-add-missing-tech-skills.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Отдельное согласие пользователя на автоматический fallback чата к admin AI API. -->
+    <include file="260904-1-addAdminFallbackConsent.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- MVP-фундамент плавающего LLM-чата: история, сервисная функция и безопасный prompt. -->
+    <include file="260904-2-addLlmChatFoundation.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Календарная месячная квота, индивидуальные override и token reservations. -->
+    <include file="260904-3-addLlmChatQuotaTables.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Personal AI credentials: additive ciphertext column; legacy plaintext is
+         converted by the application, never copied by SQL. -->
+    <include file="260904-4-addUserAiEncryptedKey.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Idempotency key for safe chat retries. -->
+    <include file="260904-5-addLlmChatRequestId.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

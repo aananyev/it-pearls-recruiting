@@ -92,3 +92,12 @@ footer a {
     color: #3c97bf;
     text-decoration: none;
 }
+
+.llm-chat-launcher-bar { position: fixed !important; right: 24px !important; bottom: 24px !important; width: auto !important; z-index: 1001 !important; pointer-events: none; }
+.llm-chat-launcher-bar .v-button { pointer-events: auto; }
+.llm-chat-launcher { border-radius: 999px !important; padding: 0 18px !important; min-height: 42px !important; font-weight: 700 !important; box-shadow: 0 6px 18px rgba(15, 23, 42, .24) !important; }
+@media (max-width: 640px) {
+    .llm-chat-launcher-bar { right: 14px !important; bottom: 14px !important; }
+    .llm-chat-launcher { min-width: 42px !important; width: 42px !important; padding: 0 !important; }
+    .llm-chat-launcher .v-button-caption { display: none; }
+}

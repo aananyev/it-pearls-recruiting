@@ -6,6 +6,7 @@ import com.company.hunttech.core.ai.AiCostCalculator;
 import com.company.hunttech.core.ai.AiProviderResponse;
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.entity.UserAiProfile;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.entity.ai.AiCallLog;
 import com.company.hunttech.entity.ai.AiCapability;
@@ -52,6 +53,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
     private static final String QUERY_OVERRIDE =
             "select e from hunttech_UserAiFunctionOverride e "
                     + "where e.user = :user and e.aiFunction = :function and e.enabled = true";
+    private static final String QUERY_USER_AI_PROFILE =
+            "select e from hunttech_UserAiProfile e where e.user = :user";
+    private static final String LLM_CHAT_FUNCTION_CODE = "LLM_CHAT";
 
     /**
      * Маркеры блока пользовательского контекста в system prompt (план персонализации §3.3).
@@ -107,7 +111,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         callerSource, startTime, userContext);
             } catch (RuntimeException userFailure) {
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
-                        && isUsableAdminConfiguration(function.getAdminConfiguration())) {
+                        && resolveAdminConfiguration(function) != null) {
+                    ensureAdminFallbackAllowed(function, currentUser);
                     log.warn("Персональное AI-подключение функции {} недоступно; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
                     return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
@@ -120,6 +125,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
             }
         }
+        ensureAdminFallbackAllowed(function, currentUser);
         return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext);
     }
 
@@ -177,7 +183,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             model = override.getModelName();
         }
         try {
-            byte[] image = executeProviderImage(configuration.getProviderCode(), configuration.getApiKey(), model,
+            byte[] image = executeProviderImage(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
                     function, prompt, sourceImage, sourceMimeType);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, "[IMAGE DATA " + (image != null ? image.length : 0) + " bytes]",
@@ -233,14 +239,15 @@ public class AiExecutionServiceBean implements AiExecutionService {
             model = override.getModelName();
         }
         try {
-            AiProviderResponse response = executeProvider(configuration.getProviderCode(), configuration.getApiKey(), model,
+            AiProviderResponse response = executeProvider(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
                     function, prompt, effectiveSystemPrompt);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                     response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                     userContext);
             return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText());
+                    model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText(),
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens());
         } catch (Exception e) {
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
@@ -269,7 +276,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                     userContext);
             return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText());
+                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens());
         } catch (Exception e) {
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
@@ -513,6 +521,29 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
     }
 
+    /**
+     * Chat is allowed to use the administrative credential only after the user
+     * explicitly accepted the separate fallback consent. Other AI functions
+     * retain their existing routing behavior.
+     */
+    private void ensureAdminFallbackAllowed(AiFunctionConfiguration function, User currentUser) {
+        if (function == null || !LLM_CHAT_FUNCTION_CODE.equals(function.getCode())) {
+            return;
+        }
+        boolean consentGranted = currentUser != null && dataManager.load(UserAiProfile.class)
+                .query(QUERY_USER_AI_PROFILE)
+                .parameter("user", currentUser)
+                .view("userAiProfile-view")
+                .optional()
+                .map(UserAiProfile::getAdminFallbackConsent)
+                .orElse(false);
+        if (!consentGranted) {
+            throw new DevelopmentException(
+                    "Персональное AI-подключение недоступно. Для автоматического fallback "
+                            + "к административному AI API сначала дайте отдельное согласие в настройках профиля.");
+        }
+    }
+
     private boolean isUsableUserOverride(UserAiFunctionOverride override, User currentUser) {
         if (override == null || !Boolean.TRUE.equals(override.getEnabled())) {
             return false;
@@ -523,7 +554,31 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 && configuration.getUser().getId().equals(currentUser.getId())
                 && Boolean.TRUE.equals(configuration.getIsActive())
                 && isConfigured(configuration.getProviderCode())
-                && isConfigured(configuration.getApiKey());
+                && hasUserCredential(configuration);
+    }
+
+    private String resolveUserApiKey(UserAiConfiguration configuration) {
+        if (configuration == null) {
+            throw new DevelopmentException("Персональное AI-подключение не найдено.");
+        }
+        if (isConfigured(configuration.getApiKeyEncrypted())) {
+            return aiSecretService.decrypt(configuration.getApiKeyEncrypted());
+        }
+        if (isConfigured(configuration.getApiKey())) {
+            // One-time compatibility conversion for records created before the
+            // encrypted column was introduced. The plaintext is removed from
+            // the entity before it is committed back to the database.
+            String plainText = configuration.getApiKey();
+            configuration.setApiKeyEncrypted(aiSecretService.encrypt(plainText));
+            configuration.setApiKey(null);
+            dataManager.commit(configuration);
+            return plainText;
+        }
+        throw new DevelopmentException("Персональный API-ключ не настроен.");
+    }
+
+    private boolean hasUserCredential(UserAiConfiguration configuration) {
+        return isConfigured(configuration.getApiKeyEncrypted()) || isConfigured(configuration.getApiKey());
     }
 
     private AdminAiConfiguration resolveAdminConfiguration(AiFunctionConfiguration function) {

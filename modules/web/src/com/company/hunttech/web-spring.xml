@@ -48,6 +48,8 @@
                        value="com.company.hunttech.app.ProjectLogoImageProcessingService"/>
                 <entry key="hunttech_UserAiContextService"
                        value="com.company.hunttech.service.UserAiContextService"/>
+                <entry key="hunttech_LlmChatService"
+                       value="com.company.hunttech.service.LlmChatService"/>
                 <entry key="hunttech_SkillAnalysisService"
                        value="com.company.hunttech.service.SkillAnalysisService"/>
                 <entry key="hunttech_TextProcessingService"

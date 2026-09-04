@@ -2,9 +2,11 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.core.ai.AIProvider;
 import com.company.hunttech.core.ai.AIProviderRegistry;
+import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AiCapability;
 import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.core.global.DataManager;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -25,6 +27,10 @@ public class HrmAiServiceBean implements HrmAiService {
     private AiExecutionService aiExecutionService;
     @Inject
     private AIProviderRegistry aiProviderRegistry;
+    @Inject
+    private AiSecretService aiSecretService;
+    @Inject
+    private DataManager dataManager;
 
     @Override
     public String standardizeVacancyDescription(String rawText) {
@@ -78,7 +84,8 @@ public class HrmAiServiceBean implements HrmAiService {
         if (!isConfigured(configuration.getProviderCode())) {
             throw new DevelopmentException("Не указан провайдер AI.");
         }
-        if (!isConfigured(configuration.getApiKey())) {
+        String apiKey = resolveApiKey(configuration);
+        if (!isConfigured(apiKey)) {
             throw new DevelopmentException("Не указан API-ключ для провайдера «"
                     + configuration.getProviderCode() + "».");
         }
@@ -94,7 +101,7 @@ public class HrmAiServiceBean implements HrmAiService {
         String response = provider.generateText(
                 "Ответь одним словом: ok",
                 "Тестирование подключения к API искусственного интеллекта.",
-                configuration.getApiKey(),
+                apiKey,
                 configuration.getDefaultModelName(),
                 Map.of("temperature", 0.0));
 
@@ -119,5 +126,19 @@ public class HrmAiServiceBean implements HrmAiService {
 
     private boolean isConfigured(String value) {
         return value != null && !value.trim().isEmpty();
+    }
+
+    private String resolveApiKey(UserAiConfiguration configuration) {
+        if (isConfigured(configuration.getApiKeyEncrypted())) {
+            return aiSecretService.decrypt(configuration.getApiKeyEncrypted());
+        }
+        if (isConfigured(configuration.getApiKey())) {
+            String plainText = configuration.getApiKey();
+            configuration.setApiKeyEncrypted(aiSecretService.encrypt(plainText));
+            configuration.setApiKey(null);
+            dataManager.commit(configuration);
+            return plainText;
+        }
+        return null;
     }
 }

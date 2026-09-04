@@ -44,6 +44,14 @@ public class AiCredentialServiceBean implements AiCredentialService {
     }
 
     @Override
+    public String encryptUserSecret(String plainText) {
+        if (!isConfigured(plainText)) {
+            throw new DevelopmentException("Новый персональный API-ключ не задан.");
+        }
+        return aiSecretService.encrypt(plainText);
+    }
+
+    @Override
     public void testAdminConnection(UUID configurationId) {
         requireAdminPermission();
         if (configurationId == null) {

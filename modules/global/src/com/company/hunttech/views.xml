@@ -1510,8 +1510,12 @@
         <property name="isActive"/>
         <property name="user" view="_minimal"/>
     </view>
-    <view entity="hunttech_UserAiConfiguration" name="userAiConfiguration-edit-view" extends="_local">
+    <view entity="hunttech_UserAiConfiguration" name="userAiConfiguration-edit-view" extends="_minimal">
         <property name="user" view="_minimal"/>
+        <property name="providerCode"/>
+        <property name="defaultModelName"/>
+        <property name="isActive"/>
+        <property name="apiKeyEncrypted"/>
     </view>
     <view entity="hunttech_VacancyPromptTemplate" name="vacancyPromptTemplate-view" extends="_local"/>
     <view entity="hunttech_VacancyPromptTemplate" name="vacancyPromptTemplate-browse-view">
