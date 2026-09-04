@@ -16,11 +16,12 @@
 - `loadHistory()` доступен владельцу; `loadHistoryAsAdmin()` защищён specific permission `hunttech.ai.viewChatHistoryAdmin`.
 - `LlmChatQuotaReconciliationBrowse` — permission-gated административный экран для ручной сверки; до проверки права не загружает ни одной строки.
 - При обрыве streaming после provider usage callback резерв закрывается автоматически с `SYSTEM_PROVIDER_USAGE`; если известен только provider request ID, резерв остаётся `UNKNOWN_PENDING`.
-- `startStreaming()` запускает запрос через middleware scheduler, а `pollStreaming()` возвращает owner-scoped накопленный snapshot; floating screen обновляет ответ timer-интервалом 500 мс.
+- `startStreaming()` запускает запрос через middleware scheduler, а `pollStreaming()` возвращает owner-scoped накопленный snapshot; floating screen получает push-событие и использует polling с интервалом 3 секунды как recovery.
 - OpenAI-compatible provider adapters поддерживают provider request ID, SSE streaming и прерывание активного HTTP-вызова по HRM `requestId`; legacy adapters автоматически отдают полный ответ одной дельтой.
 - Streaming-задача переносит CUBA security context, не сохраняет partial assistant message и пишет итог в историю только после подтверждённого завершения.
 - Floating UI сохраняет позицию и размер через штатные пользовательские screen settings CUBA; при ширине до 640 px диалог становится полноэкранным mobile sheet. Новых сущностей и changeSet для UI-настроек нет.
 - Для live-ответа включён Vaadin push: core публикует UI-событие только с идентификаторами пользователя, диалога и запроса, а web-клиент получает актуальный owner-scoped snapshot. Polling с интервалом 3 секунды оставлен для восстановления при временной недоступности push.
+- Lookup usage по одному `providerRequestId` отложен до подтверждения provider-specific API; решение и обязательные условия зафиксированы в `LLM_CHAT_PROVIDER_USAGE_LOOKUP_DECISION.md`.
 
 ## Квота
 

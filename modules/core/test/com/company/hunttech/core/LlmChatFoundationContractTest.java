@@ -125,6 +125,19 @@ public class LlmChatFoundationContractTest {
     }
 
     @Test
+    public void pushTransportCarriesNoAiTextAndRechecksOwnerScopedSnapshot() throws IOException {
+        String event = source("modules/global/src/com/company/hunttech/LlmChatStreamEvent.java");
+        String service = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String screen = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+
+        assertFalse("Push event must not broadcast partial AI text", event.contains("String text"));
+        assertFalse("Push event must not carry provider usage or prompt context", event.contains("usage") || event.contains("prompt"));
+        assertTrue("Web client must reload the snapshot through the service", screen.contains("pollStreaming(conversationId, activeRequestId)"));
+        assertTrue("Core snapshot access must remain owner-scoped", service.contains("session.userId"));
+        assertTrue("Provider ID without confirmed usage must fail closed", service.contains("markQuotaPending"));
+    }
+
+    @Test
     public void adminHistoryIsPermissionGatedAndUserHistoryRemainsScoped() throws IOException {
         String contract = source("modules/global/src/com/company/hunttech/service/LlmChatService.java")
                 + source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
