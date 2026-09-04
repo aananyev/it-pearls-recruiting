@@ -122,6 +122,8 @@
           insertAfter="administration">
         <item screen="hunttech_LlmChatScreen"
               caption="mainMsg://menu-config.hunttech_LlmChatScreen" icon="COMMENT_O" openType="DIALOG"/>
+        <item screen="hunttech_LlmChatQuotaReconciliation.browse"
+              caption="mainMsg://menu-config.hunttech_LlmChatQuotaReconciliation.browse" icon="CHECK"/>
         <item screen="hunttech_AdminAiDashboard"
               caption="mainMsg://menu_config.hunttech_AdminAiDashboard" icon="DASHBOARD"/>
         <item screen="hunttech_UserAiDashboard"

@@ -123,4 +123,15 @@
         <property name="reconciledBy"/>
         <property name="reconciledAt"/>
     </view>
+    <!-- Admin reconciliation view adds only the owner/period/title context required by the pending ledger screen. -->
+    <view entity="hunttech_LlmChatQuotaReservation" name="llm-chat-quota-reconciliation-view"
+          extends="llm-chat-quota-reservation-view">
+        <property name="period">
+            <property name="periodStart"/>
+            <property name="user" view="_minimal"/>
+        </property>
+        <property name="conversation">
+            <property name="title"/>
+        </property>
+    </view>
 </views>

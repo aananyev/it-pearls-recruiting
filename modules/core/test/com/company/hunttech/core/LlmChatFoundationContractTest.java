@@ -177,6 +177,26 @@ public class LlmChatFoundationContractTest {
         assertTrue(migration.contains("RECONCILED_AT"));
     }
 
+    @Test
+    public void adminReconciliationScreenExposesOnlyPendingReservations() throws IOException {
+        String controller = source("modules/web/src/com/company/hunttech/web/screens/llmchatquota/LlmChatQuotaReconciliationBrowse.java");
+        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/llmchatquota/llm-chat-quota-reconciliation-browse.xml");
+        String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
+
+        assertTrue(controller.contains("LlmChatService"));
+        assertTrue(controller.contains("reconcileUnknown"));
+        assertTrue(controller.contains("Dialogs"));
+        assertTrue(controller.contains("isSpecificPermitted"));
+        assertTrue(controller.contains("RECONCILE_CHAT_QUOTA_PERMISSION"));
+        assertTrue(descriptor.contains("UNKNOWN_PENDING"));
+        assertTrue(descriptor.contains("providerRequestId"));
+        assertTrue(descriptor.contains("settledBtn"));
+        assertTrue(descriptor.contains("releasedBtn"));
+        assertFalse("Экран сверки не должен удалять reservation или историю",
+                descriptor.contains("type=\"remove\"") || descriptor.contains("action=\"remove\""));
+        assertTrue(menu.contains("hunttech_LlmChatQuotaReconciliation.browse"));
+    }
+
     private String source(String relativePath) throws IOException {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) root = root.getParent();

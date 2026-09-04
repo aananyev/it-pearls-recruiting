@@ -14,6 +14,7 @@
 - `cancelMessage()` реализует кооперативную отмену: ответ не сохраняется, usage учитывается при известном результате.
 - `reconcileUnknown(requestId, actualTokens, providerCharged)` — административная операция закрытия `UNKNOWN_PENDING` без повторного вызова провайдера; требует отдельного specific permission `hunttech.ai.reconcileChatQuota`.
 - `loadHistory()` доступен владельцу; `loadHistoryAsAdmin()` защищён specific permission `hunttech.ai.viewChatHistoryAdmin`.
+- `LlmChatQuotaReconciliationBrowse` — permission-gated административный экран для ручной сверки; до проверки права не загружает ни одной строки.
 
 ## Квота
 
@@ -36,4 +37,4 @@ Liquibase и CUBA `updateDb` SQL находятся в `modules/core/db/`. Вс�
 
 ## Ограничения
 
-Текущие provider adapters синхронные и пока не возвращают provider request ID. Жёсткая отмена HTTP-вызова и автоматическая сверка по API провайдера требуют отдельного адаптера. До его появления администратор сверяет `UNKNOWN_PENDING` вручную: подтверждённое списание переводит резерв в `SETTLED`, отсутствие списания — в `RELEASED`.
+Текущие provider adapters синхронные и пока не возвращают provider request ID. Жёсткая отмена HTTP-вызова и автоматическая сверка по API провайдера требуют отдельного адаптера. До его появления администратор сверяет `UNKNOWN_PENDING` через permission-gated экран: подтверждённое списание переводит резерв в `SETTLED`, отсутствие списания — в `RELEASED`.
