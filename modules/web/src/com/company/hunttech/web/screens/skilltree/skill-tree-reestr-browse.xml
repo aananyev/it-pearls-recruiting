@@ -176,12 +176,15 @@
                 <!-- Карточка TreeTable с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false"
                       stylename="edit-card candidate-table-card" expand="skillTreesTreeTable">
-                    <!-- TreeTable для иерархии (hierarchyProperty = skillTree) -->
-                    <groupTable id="skillTreesTreeTable"
-                                width="100%"
-                                height="100%"
-                                dataContainer="skillTreesDc"
-                                stylename="borderless grid candidate-browse-grid">
+                    <!-- Дерево навыков (hierarchyProperty = skillTree): корни верхнего уровня,
+                         раскрытие узлов expander'ом — настоящее дерево, а не группировка по родителю.
+                         Высота гарантирована min-height в SCSS (.skill-tree-reestr-grid). -->
+                    <treeDataGrid id="skillTreesTreeTable"
+                                  width="100%"
+                                  height="100%"
+                                  dataContainer="skillTreesDc"
+                                  hierarchyProperty="skillTree"
+                                  stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -190,31 +193,20 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <!-- Иерархическая группа: родительский навык (раскрывающиеся группы, как в legacy SkillTreeBrowse) -->
-                            <group>
-                                <column id="skillTree" property="skillTree.skillName"
-                                        caption="msg://msgSkillTree" width="260px"/>
-                            </group>
                             <!-- Превью логотипа навыка (генерируется контроллером) -->
-                            <column id="skillLogoColumn" caption="Лого" width="60px" align="CENTER" sortable="false"/>
-                            <!-- Название навыка -->
+                            <column id="skillLogoColumn" caption="Лого" width="60px" sortable="false"/>
+                            <!-- Иерархическая колонка: название навыка (раскрытие узлов дерева) -->
                             <column id="skillName" property="skillName"
                                     caption="msg://msgSkill" expandRatio="1" minWidth="220px"/>
                             <!-- Специализация -->
                             <column id="specialisation" property="specialisation.specRuName"
                                     caption="msg://msgSpecialisation" width="200px"/>
-                            <!-- Wiki страница -->
-                            <column id="wikiPage" property="wikiPage"
-                                    caption="msg://msgWikiPage" width="180px"/>
                             <!-- Приоритет навыка -->
                             <column id="prioritySkill" property="prioritySkill"
-                                    caption="msg://msgPrioritySkill" width="100px" align="CENTER"/>
-                            <!-- Флаг исключения из парсинга -->
-                            <column id="notParsing" property="notParsing"
-                                    caption="msg://msgNotParsing" width="120px" align="CENTER"/>
+                                    caption="msg://msgPrioritySkill" width="110px" align="CENTER"/>
                         </columns>
                         <rowsCount/>
-                    </groupTable>
+                    </treeDataGrid>
                 </vbox>
             </vbox>
         </hbox>

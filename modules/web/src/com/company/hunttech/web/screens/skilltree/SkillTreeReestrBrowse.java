@@ -37,7 +37,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
     @Inject
     private Metadata metadata;
     @Inject
-    private GroupTable<SkillTree> skillTreesTreeTable;
+    private TreeDataGrid<SkillTree> skillTreesTreeTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -90,7 +90,8 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
 
     private void setupTableColumns() {
         // Превью логотипа навыка в колонке «Лого» (по эталону CityReestrBrowse).
-        skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", skill -> {
+        skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", event -> {
+            SkillTree skill = event.getItem();
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
             box.setWidthFull();
             box.setHeightFull();
@@ -112,9 +113,6 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
             box.add(image);
             return box;
         });
-        // Центрирование сгенерированной колонки (align="CENTER" из XML не применяется к generated column).
-        skillTreesTreeTable.getColumn("skillLogoColumn")
-                .setAlignment(Table.ColumnAlignment.CENTER);
     }
 
     private void setupTableSelection() {
@@ -179,7 +177,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
 
     @Subscribe(id = "skillTreesDl", target = Target.DATA_LOADER)
     private void onSkillTreesDlPostLoad(CollectionLoader.PostLoadEvent<SkillTree> event) {
-        // Раскрыть все группы родительских навыков по умолчанию (видимая иерархия).
+        // Раскрыть все узлы дерева по умолчанию (видимая иерархия навыков).
         skillTreesTreeTable.expandAll();
         SkillTree current = skillTreesTreeTable.getSingleSelected();
         if (current != null) {

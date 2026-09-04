@@ -1140,6 +1140,13 @@
     text-align: center !important;
   }
 
+  /* Дерево компетенций (SkillTreeReestrBrowse): TreeDataGrid не схлопывается —
+     высота слота и сетки гарантирована (прецедент job-candidate-table, 2026-08-03). */
+  .v-slot-candidate-table-card .v-treegrid,
+  .candidate-table-card .v-treegrid {
+    min-height: 320px !important;
+  }
+
   /* Чип приоритета навыка в шапке сайдбара (SkillTreeReestrBrowse):
      компактная пилюля в акцентном цвете темы. */
   .skill-tree-reestr-priority-chip,
