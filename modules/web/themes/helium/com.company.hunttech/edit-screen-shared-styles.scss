@@ -420,7 +420,9 @@
      карточки наезжает на предыдущую карточку и на toolbar. Сброс возвращает шапку
      внутрь панели (эталон — open-position-editor). */
   .edit-card > .v-panel-captionwrap,
-  .edit-card > .c-groupbox-captionwrap {
+  .edit-card > .c-groupbox-captionwrap,
+  .edit-accordion-section > .v-panel-captionwrap,
+  .edit-accordion-section > .c-groupbox-captionwrap {
     margin-top: 0 !important;
   }
 
