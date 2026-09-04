@@ -225,7 +225,25 @@
           <vbox id="openPositionCommentsTabNavigation" width="100%" visible="false"/>
           <!-- Контейнер label-навигации базового контроллера (контракт @Inject OpenPositionEdit);
                витрина использует собственный набор openPositionPreviewNavigation. -->
-          <vbox id="openPositionEditorNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionEditorNavigation" width="100%" visible="false">
+            <label id="openPositionEditorNavTabsLabel" value="mainMsg://openPositionEditorNavTabs" width="100%"/>
+            <vbox id="openPositionTabNavigation" width="100%" spacing="false">
+                <button id="navTabOpenPosition" caption="msg://msgVacansy" width="100%"/>
+                <button id="navTabLaborAgreement" caption="msg://msgLaborAgreementTab" width="100%"/>
+                <button id="navTabJobDescription" caption="mainMsg://msgJobDescription" width="100%"/>
+                <button id="navTabFiles" caption="mainMsg://msgFiles" width="100%"/>
+                <button id="navTabExercise" caption="msg://msgExercise" width="100%"/>
+                <button id="navTabMemoForInterview" caption="msg://msgMemoForInterview" width="100%"/>
+                <button id="navTabInterviewPlan" caption="msg://msgInterviewPlan" width="100%"/>
+                <button id="navTabSearchMap" caption="msg://msgSearchMap" width="100%"/>
+                <button id="navTabInterviewChecklist" caption="msg://msgInterviewChecklist" width="100%"/>
+                <button id="navTabTemplateLetter" caption="msg://msgTemplateLetter" width="100%"/>
+                <button id="navTabSkills" caption="msg://msgSkilsPosition" width="100%"/>
+                <button id="navTabOpenPositionNews" caption="msg://msgOpenPositionNews" width="100%"/>
+                <button id="navTabApproval" caption="msg://msgOpenPositionApprovall" width="100%"/>
+                <button id="navTabComments" caption="msg://msgComments" width="100%"/>
+            </vbox>
+        </vbox>
           <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
           <label id="infoPositionLabel" width="100%" visible="false"/>
           <label id="infoCompanyLabel" width="100%" visible="false"/>
@@ -571,6 +589,24 @@
                 <richTextArea id="memoForInterviewRichTextArea" dataContainer="openPositionDc" property="memoForInterview" height="100%" width="100%"/>
               </vbox>
             </groupBox>
+          </tab>
+          <!-- 6a. ПЛАН СОБЕСЕДОВАНИЯ (stub для inherited компонента) -->
+          <tab id="tabInterviewPlan" caption="msg://msgInterviewPlan" margin="true" spacing="true" icon="ADJUST">
+            <vbox id="interviewPlanVBox" width="100%" height="100%" spacing="true" expand="interviewPlanRichTextArea">
+              <richTextArea id="interviewPlanRichTextArea" dataContainer="openPositionDc" property="interviewPlan" height="100%" width="100%"/>
+            </vbox>
+          </tab>
+          <!-- 6b. КАРТА ПОИСКА (stub) -->
+          <tab id="tabSearchMap" caption="msg://msgSearchMap" margin="true" spacing="true" icon="ADJUST">
+            <vbox id="searchMapVBox" width="100%" height="100%" spacing="true" expand="searchMapRichTextArea">
+              <richTextArea id="searchMapRichTextArea" dataContainer="openPositionDc" property="searchMap" height="100%" width="100%"/>
+            </vbox>
+          </tab>
+          <!-- 6c. ЧЕКЛ-ЛИСТ (stub) -->
+          <tab id="tabInterviewChecklist" caption="msg://msgInterviewChecklist" margin="true" spacing="true" icon="ADJUST">
+            <vbox id="interviewChecklistVBox" width="100%" height="100%" spacing="true" expand="interviewChecklistRichTextArea">
+              <richTextArea id="interviewChecklistRichTextArea" dataContainer="openPositionDc" property="interviewChecklist" height="100%" width="100%"/>
+            </vbox>
           </tab>
           <!-- 7. ШАБЛОН ПИСЬМА -->
           <tab id="tabTemplateLetter" caption="msg://msgTemplateLetter" margin="true" spacing="true" icon="font-icon:MAIL_FORWARD">
