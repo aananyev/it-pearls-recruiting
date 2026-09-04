@@ -510,7 +510,7 @@
                   <radioButtonGroup id="commanExperienceRadioButton" orientation="horizontal" description="msg://msgCommandExperience" dataContainer="openPositionDc" visible="false" property="commandExperience" caption="msg://msgCommandExperience"/>
                 </groupBox>
                 <groupBox id="descriptionTextsAccordion" caption="Тексты описания" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-richtext-section" width="100%" height="100%">
-                  <tabSheet id="openPositionAccordion" width="100%" height="100%">
+                  <tabSheet id="openPositionDescriptionsTabSheet" stylename="framed edit-tabs open-position-editor-tabs" width="100%" height="100%">
                     <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment" icon="font-icon:LANGUAGE" margin="false">
                       <!-- Растягивает редактор описания на всю вкладку. -->
                       <vbox width="100%" height="100%" expand="openPositionRichTextArea">
