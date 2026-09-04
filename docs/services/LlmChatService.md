@@ -9,7 +9,7 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 ## UI Context & Navigation
 
 - `ExtMainScreen` открывает modeless `LlmChatScreen` через постоянный launcher.
-- `LlmChatScreen` создаёт один диалог пользователя, показывает бессрочную историю и получает live-ответ через polling timer 500 мс.
+- `LlmChatScreen` создаёт один диалог пользователя, показывает бессрочную историю и получает live-ответ через Vaadin push; polling timer 3 секунды остаётся резервом при временной недоступности push.
 - Геометрия плавающего окна (позиция и размер) сохраняется в штатных пользовательских screen settings CUBA; новая таблица для этого не нужна.
 - На экране до 640 px диалог превращается в полноэкранный mobile sheet, а сохранённые desktop-координаты не применяются.
 - Удаление истории пользователю не предоставляется.
@@ -27,7 +27,7 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 1. `startConversation()` создаёт `LlmChatConversation`, связанную с текущим пользователем.
 2. `startStreaming(conversationId, message, requestId)` проверяет владельца, валидирует сообщение, резервирует месячную квоту и сохраняет USER-сообщение.
 3. Запрос планируется штатным daemon `scheduler` с переносом CUBA `SecurityContext`; provider streaming дельты накапливаются в owner-scoped snapshot.
-4. `pollStreaming()` повторно проверяет пользователя и conversationId и возвращает cumulative text. Snapshot удаляется через 10 минут после завершения.
+4. `pollStreaming()` повторно проверяет пользователя и conversationId и возвращает cumulative text. Push-событие передаёт только идентификаторы, а web-клиент сам запрашивает snapshot. Snapshot удаляется через 10 минут после завершения.
 5. После подтверждённого результата quota reservation закрывается, ASSISTANT-сообщение сохраняется один раз. Если до обрыва пришёл фактический usage callback, резерв автоматически закрывается с audit actor `SYSTEM_PROVIDER_USAGE`; если пришёл только provider request ID, резерв переводится в `UNKNOWN_PENDING`, второй provider call не запускается.
 6. `cancelMessage()` ставит `CANCEL_REQUESTED` и передаёт requestId в `AIProviderRegistry`. OpenAI-compatible адаптеры прерывают активное HTTP-соединение; sync-only адаптеры завершаются кооперативно.
 
@@ -52,4 +52,4 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 
 ## Ограничения и следующие шаги
 
-Настоящий Vaadin push/WebSocket не вводился: polling выбран как совместимый промежуточный transport. Lookup usage по одному provider request ID остаётся TODO до появления подтверждённых provider-specific API. Геометрия desktop-диалога уже сохраняется через CUBA settings, mobile sheet реализован CSS-режимом без изменения схемы.
+Vaadin push включён как основной transport live-обновлений; polling 3 секунды сохранён как recovery-механизм. Событие push не содержит partial AI text и не отменяет owner-scoped проверку в `pollStreaming()`. Lookup usage по одному provider request ID остаётся TODO до появления подтверждённых provider-specific API. Геометрия desktop-диалога сохраняется через CUBA settings, mobile sheet реализован CSS-режимом без изменения схемы.

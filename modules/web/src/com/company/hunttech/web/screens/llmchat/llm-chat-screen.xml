@@ -16,6 +16,7 @@
             <button id="sendBtn" caption="msg://send" stylename="primary"/>
             <button id="cancelBtn" caption="msg://cancel" enabled="false"/>
         </hbox>
-        <timer id="streamPollTimer" delay="500" autostart="false" repeating="true"/>
+        <!-- Recovery polling if Vaadin push is temporarily unavailable. -->
+        <timer id="streamPollTimer" delay="3000" autostart="false" repeating="true"/>
     </layout>
 </window>

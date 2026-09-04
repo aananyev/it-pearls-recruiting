@@ -1,5 +1,6 @@
 package com.company.hunttech.web.screens.llmchat;
 
+import com.company.hunttech.LlmChatStreamEvent;
 import com.company.hunttech.entity.ai.LlmChatMessage;
 import com.company.hunttech.service.LlmChatService;
 import com.company.hunttech.service.LlmChatStreamState;
@@ -13,7 +14,11 @@ import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.shared.communication.PushMode;
+import com.vaadin.ui.UI;
 import org.dom4j.Element;
+import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -40,10 +45,13 @@ public class LlmChatScreen extends Screen {
     private Button cancelBtn;
     @Inject
     private Timer streamPollTimer;
+    @Inject
+    private UserSession userSession;
 
     private UUID conversationId;
     private String activeRequestId;
     private String activeRequestText;
+    private UI chatUi;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -62,7 +70,38 @@ public class LlmChatScreen extends Screen {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
+        chatUi = UI.getCurrent();
+        if (chatUi != null) {
+            chatUi.getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+        }
         restoreDialogGeometry(getSettings());
+    }
+
+    @EventListener
+    public void onLlmChatStreamEvent(LlmChatStreamEvent event) {
+        if (conversationId == null || activeRequestId == null
+                || !conversationId.equals(event.getConversationId())
+                || !activeRequestId.equals(event.getRequestId())
+                || userSession == null || userSession.getUser() == null
+                || !userSession.getUser().getId().equals(event.getUserId())) {
+            return;
+        }
+        UI ui = chatUi;
+        if (ui == null) {
+            return;
+        }
+        ui.access(() -> {
+            if (conversationId == null || activeRequestId == null) {
+                return;
+            }
+            try {
+                applyStreamState(llmChatService.pollStreaming(conversationId, activeRequestId));
+            } catch (RuntimeException ex) {
+                streamPollTimer.stop();
+                resetControls(false);
+                showError(ex);
+            }
+        });
     }
 
     @Override

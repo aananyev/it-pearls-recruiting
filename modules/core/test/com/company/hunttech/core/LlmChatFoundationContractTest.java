@@ -108,6 +108,23 @@ public class LlmChatFoundationContractTest {
     }
 
     @Test
+    public void streamingHasPushFirstUiTransportWithRecoveryPolling() throws IOException {
+        String event = source("modules/global/src/com/company/hunttech/LlmChatStreamEvent.java");
+        String service = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String screen = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/llmchat/llm-chat-screen.xml");
+
+        assertTrue(event.contains("implements GlobalUiEvent"));
+        assertTrue(event.contains("getUserId()"));
+        assertTrue(event.contains("getConversationId()"));
+        assertTrue(event.contains("getRequestId()"));
+        assertTrue(service.contains("events.publish(new LlmChatStreamEvent"));
+        assertTrue(screen.contains("PushMode.AUTOMATIC"));
+        assertTrue(screen.contains("ui.access"));
+        assertTrue(descriptor.contains("delay=\"3000\""));
+    }
+
+    @Test
     public void adminHistoryIsPermissionGatedAndUserHistoryRemainsScoped() throws IOException {
         String contract = source("modules/global/src/com/company/hunttech/service/LlmChatService.java")
                 + source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");

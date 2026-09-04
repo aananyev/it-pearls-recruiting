@@ -20,6 +20,7 @@
 - OpenAI-compatible provider adapters поддерживают provider request ID, SSE streaming и прерывание активного HTTP-вызова по HRM `requestId`; legacy adapters автоматически отдают полный ответ одной дельтой.
 - Streaming-задача переносит CUBA security context, не сохраняет partial assistant message и пишет итог в историю только после подтверждённого завершения.
 - Floating UI сохраняет позицию и размер через штатные пользовательские screen settings CUBA; при ширине до 640 px диалог становится полноэкранным mobile sheet. Новых сущностей и changeSet для UI-настроек нет.
+- Для live-ответа включён Vaadin push: core публикует UI-событие только с идентификаторами пользователя, диалога и запроса, а web-клиент получает актуальный owner-scoped snapshot. Polling с интервалом 3 секунды оставлен для восстановления при временной недоступности push.
 
 ## Квота
 
@@ -42,4 +43,4 @@ Liquibase и CUBA `updateDb` SQL находятся в `modules/core/db/`. Вс�
 
 ## Ограничения
 
-OpenAI-compatible provider adapters уже возвращают provider request ID, умеют SSE streaming и прерывание активного HTTP-вызова; нативные протоколы Anthropic/Gemini/YandexGPT/GigaChat используют безопасный sync fallback. В UI подключён polling facade, а не отдельный WebSocket/Vaadin push: это совместимый промежуточный transport без изменения схемы данных. In-memory snapshot удаляется через 10 минут после завершения; после перезапуска core незавершённый запрос восстанавливается как reservation/status и не запускается повторно. Автоматическая сверка выполняется только по фактическому usage callback, который прислал провайдер; один provider request ID без подтверждённого usage не даёт оснований для списания или освобождения и остаётся `UNKNOWN_PENDING` для ручной сверки.
+OpenAI-compatible provider adapters уже возвращают provider request ID, умеют SSE streaming и прерывание активного HTTP-вызова; нативные протоколы Anthropic/Gemini/YandexGPT/GigaChat используют безопасный sync fallback. В UI push включён как основной transport live-обновлений, а polling с интервалом 3 секунды оставлен recovery-механизмом без изменения схемы данных. In-memory snapshot удаляется через 10 минут после завершения; после перезапуска core незавершённый запрос восстанавливается как reservation/status и не запускается повторно. Автоматическая сверка выполняется только по фактическому usage callback, который прислал провайдер; один provider request ID без подтверждённого usage не даёт оснований для списания или освобождения и остаётся `UNKNOWN_PENDING` для ручной сверки.

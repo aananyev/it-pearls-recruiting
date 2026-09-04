@@ -1,5 +1,6 @@
 package com.company.hunttech.service;
 
+import com.company.hunttech.LlmChatStreamEvent;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
@@ -13,6 +14,7 @@ import com.haulmont.cuba.core.sys.SecurityContextAwareRunnable;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -85,6 +87,8 @@ public class LlmChatServiceBean implements LlmChatService {
     private AiExecutionService aiExecutionService;
     @Inject
     private AIProviderRegistry aiProviderRegistry;
+    @Inject
+    private Events events;
     @Inject
     private Security security;
     @Resource(name = "scheduler")
@@ -233,6 +237,7 @@ public class LlmChatServiceBean implements LlmChatService {
         if (isCancellationRequested(quota)) {
             settleCancelledBeforeProvider(quota, userMessage);
             session.complete("CANCELLED", "Запрос отменён до обращения к AI.");
+            publishStreamEvent(session, true);
             return session.snapshot();
         }
 
@@ -293,6 +298,7 @@ public class LlmChatServiceBean implements LlmChatService {
                         @Override
                         public void onDelta(String text) {
                             session.append(text);
+                            publishStreamEvent(session, false);
                         }
 
                         @Override
@@ -308,6 +314,7 @@ public class LlmChatServiceBean implements LlmChatService {
             if (result == null || result.getText() == null || result.getText().trim().isEmpty()) {
                 settleFailedQuota(session);
                 session.complete("ERROR", "AI-провайдер вернул пустой ответ.");
+                publishStreamEvent(session, true);
                 return;
             }
             if (settleQuota(session.quota, result)) {
@@ -315,6 +322,7 @@ public class LlmChatServiceBean implements LlmChatService {
                 session.userMessage.setStatus("CANCELLED");
                 dataManager.commit(session.userMessage);
                 session.complete("CANCELLED", "Запрос отменён. Фактическое usage учтено; ответ не добавлен в историю.");
+                publishStreamEvent(session, true);
                 return;
             }
             quotaSettled = true;
@@ -334,6 +342,7 @@ public class LlmChatServiceBean implements LlmChatService {
                     ? null : result.getCredentialOwner().name());
             dataManager.commit(assistantMessage);
             session.complete("COMPLETED", null);
+            publishStreamEvent(session, true);
         } catch (RuntimeException failure) {
             if (!quotaSettled) {
                 try {
@@ -345,6 +354,16 @@ public class LlmChatServiceBean implements LlmChatService {
             }
             String message = failure.getMessage() == null ? "Ошибка выполнения запроса к AI." : failure.getMessage();
             session.complete(isCancellationMessage(message) ? "CANCELLED" : "ERROR", message);
+            publishStreamEvent(session, true);
+        }
+    }
+
+    private void publishStreamEvent(StreamingSession session, boolean completed) {
+        try {
+            events.publish(new LlmChatStreamEvent(this, session.userId, session.conversationId,
+                    session.requestId, completed));
+        } catch (RuntimeException ignored) {
+            // Push is an optimization; polling remains the recovery transport.
         }
     }
 
