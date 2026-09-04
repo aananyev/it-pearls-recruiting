@@ -7,6 +7,7 @@ import com.company.hunttech.entity.ai.AiFunctionConfiguration;
 import com.company.hunttech.entity.ai.LlmChatQuotaPeriod;
 import com.company.hunttech.entity.ai.LlmChatQuotaReservation;
 import com.company.hunttech.entity.ai.LlmUserQuotaOverride;
+import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
@@ -27,7 +28,8 @@ import java.util.Calendar;
 
 /**
  * Synchronous MVP facade for the floating chat. Provider routing, profile
- * context and admin fallback policy remain centralized in AiExecutionService.
+ * context and admin fallback policy remain centralized in AiExecutionService;
+ * provider-level cancellation is routed by the core adapter registry.
  */
 @Service(LlmChatService.NAME)
 public class LlmChatServiceBean implements LlmChatService {
@@ -71,6 +73,8 @@ public class LlmChatServiceBean implements LlmChatService {
     private UserSessionSource userSessionSource;
     @Inject
     private AiExecutionService aiExecutionService;
+    @Inject
+    private AIProviderRegistry aiProviderRegistry;
     @Inject
     private Security security;
 
@@ -141,6 +145,7 @@ public class LlmChatServiceBean implements LlmChatService {
         // resolved or attached to this contract.
         context.put("message", message.trim());
         context.put("callerSource", "LlmChatService");
+        context.put("requestId", requestId.trim());
         AiExecutionResult result;
         try {
             result = aiExecutionService.executeText(FUNCTION_CODE, context);
@@ -167,6 +172,7 @@ public class LlmChatServiceBean implements LlmChatService {
         assistantMessage.setStatus("COMPLETED");
         assistantMessage.setProviderCode(result.getProviderCode());
         assistantMessage.setModelName(result.getModelName());
+        assistantMessage.setProviderRequestId(result.getProviderRequestId());
         assistantMessage.setCredentialOwner(result.getCredentialOwner() == null
                 ? null : result.getCredentialOwner().name());
         conversation.setLastMessageAt(new Date());
@@ -194,6 +200,10 @@ public class LlmChatServiceBean implements LlmChatService {
         if ("RESERVED".equals(reservation.getStatus())) {
             reservation.setStatus("CANCEL_REQUESTED");
             dataManager.commit(reservation);
+            // The registry interrupts the active adapter connection; if it has
+            // not been opened yet, the provider observes the cancelled marker
+            // when it registers the request.
+            aiProviderRegistry.cancelRequest(requestId.trim());
         }
     }
 
@@ -424,6 +434,7 @@ public class LlmChatServiceBean implements LlmChatService {
         period.setReservedTokens(Math.max(0, safeInt(period.getReservedTokens()) - context.reservedTokens));
         period.setConsumedTokens(safeInt(period.getConsumedTokens()) + consumed);
         reservation.setSettledTokens(consumed);
+        reservation.setProviderRequestId(result.getProviderRequestId());
         boolean cancelled = "CANCEL_REQUESTED".equals(reservation.getStatus());
         reservation.setStatus(cancelled ? "CANCELLED" : (result.getTotalTokens() == null ? "ESTIMATED" : "SETTLED"));
         dataManager.commit(new CommitContext(period, reservation));

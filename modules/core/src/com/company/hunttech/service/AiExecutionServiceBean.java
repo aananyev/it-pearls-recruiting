@@ -4,6 +4,7 @@ import com.company.hunttech.core.ai.AIProvider;
 import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.company.hunttech.core.ai.AiCostCalculator;
 import com.company.hunttech.core.ai.AiProviderResponse;
+import com.company.hunttech.core.ai.AiRequestCancelledException;
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.UserAiProfile;
@@ -86,6 +87,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         long startTime = System.currentTimeMillis();
         String callerSource = context != null && context.get("callerSource") != null
                 ? String.valueOf(context.get("callerSource")) : null;
+        String requestId = requestIdFromContext(context);
 
         AiFunctionConfiguration function = loadFunction(functionCode);
         validateTextCapability(function);
@@ -103,20 +105,23 @@ public class AiExecutionServiceBean implements AiExecutionService {
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
             validateUserOverride(userOverride, currentUser, functionCode);
             return executeWithUser(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
-                    callerSource, startTime, userContext);
+                    callerSource, startTime, userContext, requestId);
         }
         if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && isUsableUserOverride(userOverride, currentUser)) {
             try {
                 return executeWithUser(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
-                        callerSource, startTime, userContext);
+                        callerSource, startTime, userContext, requestId);
             } catch (RuntimeException userFailure) {
+                if (userFailure instanceof AiRequestCancelledException) {
+                    throw userFailure;
+                }
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
                         && resolveAdminConfiguration(function) != null) {
                     ensureAdminFallbackAllowed(function, currentUser);
                     log.warn("Персональное AI-подключение функции {} недоступно; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
                     return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
-                            callerSource, startTime, userContext);
+                            callerSource, startTime, userContext, requestId);
                 }
                 saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
                         null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
@@ -126,7 +131,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             }
         }
         ensureAdminFallbackAllowed(function, currentUser);
-        return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext);
+        return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
     }
 
     @Override
@@ -232,7 +237,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                               String prompt,
                                               String effectiveSystemPrompt,
                                               User currentUser, String callerSource, long startTime,
-                                              UserContextAttachment userContext) {
+                                              UserContextAttachment userContext, String requestId) {
         UserAiConfiguration configuration = override.getUserAiConfiguration();
         String model = configuration.getDefaultModelName();
         if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
@@ -240,14 +245,15 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
         try {
             AiProviderResponse response = executeProvider(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
-                    function, prompt, effectiveSystemPrompt);
+                    function, prompt, effectiveSystemPrompt, requestId);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                     response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                     userContext);
             return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
                     model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText(),
-                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens());
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                    response.getProviderRequestId());
         } catch (Exception e) {
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
@@ -259,7 +265,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
     private AiExecutionResult executeWithAdmin(AiFunctionConfiguration function, String prompt,
                                                String effectiveSystemPrompt,
                                                User currentUser, String callerSource, long startTime,
-                                               UserContextAttachment userContext) {
+                                               UserContextAttachment userContext, String requestId) {
         AdminAiConfiguration configuration = resolveAdminConfiguration(function);
         if (configuration == null) {
             throw new DevelopmentException(
@@ -270,14 +276,15 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
         try {
             AiProviderResponse response = executeProvider(configuration.getProviderCode(), apiKey, model, function,
-                    prompt, effectiveSystemPrompt);
+                    prompt, effectiveSystemPrompt, requestId);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                     prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                     response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                     userContext);
             return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
                     model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
-                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens());
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                    response.getProviderRequestId());
         } catch (Exception e) {
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
@@ -291,7 +298,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                String model,
                                                AiFunctionConfiguration function,
                                                String prompt,
-                                               String effectiveSystemPrompt) {
+                                               String effectiveSystemPrompt,
+                                               String requestId) {
         if (!isConfigured(providerCode) || !isConfigured(apiKey)) {
             throw new DevelopmentException("Эффективное AI-подключение настроено не полностью.");
         }
@@ -301,7 +309,13 @@ public class AiExecutionServiceBean implements AiExecutionService {
         } catch (IllegalArgumentException e) {
             throw new DevelopmentException("Провайдер AI «" + providerCode + "» не подключён в приложении.", e);
         }
-        return provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model, buildOptions(function));
+        aiProviderRegistry.registerRequest(requestId, provider);
+        try {
+            return provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model,
+                    buildOptions(function, requestId));
+        } finally {
+            aiProviderRegistry.unregisterRequest(requestId, provider);
+        }
     }
 
     private void saveAiCallLog(User user, AiFunctionConfiguration function, String providerCode,
@@ -493,12 +507,27 @@ public class AiExecutionServiceBean implements AiExecutionService {
     }
 
     private Map<String, Object> buildOptions(AiFunctionConfiguration function) {
+        return buildOptions(function, null);
+    }
+
+    private Map<String, Object> buildOptions(AiFunctionConfiguration function, String requestId) {
         Map<String, Object> options = new HashMap<>();
         options.put("temperature", function.getTemperature() == null ? 0.7 : function.getTemperature());
         if (function.getMaxTokens() != null) {
             options.put("maxTokens", function.getMaxTokens());
         }
+        if (requestId != null && !requestId.trim().isEmpty()) {
+            options.put("requestId", requestId.trim());
+        }
         return options;
+    }
+
+    private String requestIdFromContext(Map<String, Object> context) {
+        if (context == null || !(context.get("requestId") instanceof String)) {
+            return null;
+        }
+        String requestId = ((String) context.get("requestId")).trim();
+        return requestId.isEmpty() ? null : requestId;
     }
 
     private void validateTextCapability(AiFunctionConfiguration function) {

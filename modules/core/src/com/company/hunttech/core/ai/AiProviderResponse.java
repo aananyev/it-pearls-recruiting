@@ -17,10 +17,17 @@ public class AiProviderResponse implements Serializable {
     private final Integer totalTokens;
     private final BigDecimal cost;
     private final String currency;
+    private final String providerRequestId;
 
     public AiProviderResponse(String text, byte[] image, Integer promptTokens,
                               Integer completionTokens, Integer totalTokens,
                               BigDecimal cost, String currency) {
+        this(text, image, promptTokens, completionTokens, totalTokens, cost, currency, null);
+    }
+
+    public AiProviderResponse(String text, byte[] image, Integer promptTokens,
+                              Integer completionTokens, Integer totalTokens,
+                              BigDecimal cost, String currency, String providerRequestId) {
         this.text = text;
         this.image = image;
         this.promptTokens = promptTokens;
@@ -28,6 +35,7 @@ public class AiProviderResponse implements Serializable {
         this.totalTokens = totalTokens;
         this.cost = cost;
         this.currency = currency;
+        this.providerRequestId = providerRequestId;
     }
 
     public static AiProviderResponse ofText(String text, Integer promptTokens, Integer completionTokens, Integer totalTokens) {
@@ -37,6 +45,12 @@ public class AiProviderResponse implements Serializable {
     public static AiProviderResponse ofTextWithCost(String text, Integer promptTokens, Integer completionTokens,
                                                     Integer totalTokens, BigDecimal cost, String currency) {
         return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens, cost, currency);
+    }
+
+    public static AiProviderResponse ofText(String text, Integer promptTokens, Integer completionTokens,
+                                            Integer totalTokens, String providerRequestId) {
+        return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens,
+                null, null, providerRequestId);
     }
 
     public static AiProviderResponse ofImage(byte[] image, Integer promptTokens, Integer completionTokens, Integer totalTokens) {
@@ -69,5 +83,9 @@ public class AiProviderResponse implements Serializable {
 
     public String getCurrency() {
         return currency;
+    }
+
+    public String getProviderRequestId() {
+        return providerRequestId;
     }
 }

@@ -15,6 +15,7 @@
 - `reconcileUnknown(requestId, actualTokens, providerCharged)` — административная операция закрытия `UNKNOWN_PENDING` без повторного вызова провайдера; требует отдельного specific permission `hunttech.ai.reconcileChatQuota`.
 - `loadHistory()` доступен владельцу; `loadHistoryAsAdmin()` защищён specific permission `hunttech.ai.viewChatHistoryAdmin`.
 - `LlmChatQuotaReconciliationBrowse` — permission-gated административный экран для ручной сверки; до проверки права не загружает ни одной строки.
+- OpenAI-compatible provider adapters поддерживают provider request ID, SSE streaming и прерывание активного HTTP-вызова по HRM `requestId`; текущий `LlmChatService` пока использует синхронный путь.
 
 ## Квота
 
@@ -37,4 +38,4 @@ Liquibase и CUBA `updateDb` SQL находятся в `modules/core/db/`. Вс�
 
 ## Ограничения
 
-Текущие provider adapters синхронные и пока не возвращают provider request ID. Жёсткая отмена HTTP-вызова и автоматическая сверка по API провайдера требуют отдельного адаптера. До его появления администратор сверяет `UNKNOWN_PENDING` через permission-gated экран: подтверждённое списание переводит резерв в `SETTLED`, отсутствие списания — в `RELEASED`.
+OpenAI-compatible provider adapters уже возвращают provider request ID, умеют SSE streaming и прерывание активного HTTP-вызова; нативные протоколы Anthropic/Gemini/YandexGPT/GigaChat пока явно не объявляют streaming. Автоматическая сверка по API провайдера ещё не реализована. До неё администратор сверяет `UNKNOWN_PENDING` через permission-gated экран: подтверждённое списание переводит резерв в `SETTLED`, отсутствие списания — в `RELEASED`.

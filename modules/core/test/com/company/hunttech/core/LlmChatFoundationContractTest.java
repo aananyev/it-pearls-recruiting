@@ -197,6 +197,34 @@ public class LlmChatFoundationContractTest {
         assertTrue(menu.contains("hunttech_LlmChatQuotaReconciliation.browse"));
     }
 
+    @Test
+    public void providerAdapterSupportsRequestIdStreamingAndHardCancellation() throws IOException {
+        String provider = source("modules/core/src/com/company/hunttech/core/ai/AIProvider.java");
+        String registry = source("modules/core/src/com/company/hunttech/core/ai/AIProviderRegistry.java");
+        String adapter = source("modules/core/src/com/company/hunttech/core/ai/AbstractOpenAiCompatibleProvider.java");
+        String response = source("modules/core/src/com/company/hunttech/core/ai/AiProviderResponse.java");
+        String result = source("modules/global/src/com/company/hunttech/service/AiExecutionResult.java");
+        String execution = source("modules/core/src/com/company/hunttech/service/AiExecutionServiceBean.java");
+        String chat = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String message = source("modules/global/src/com/company/hunttech/entity/ai/LlmChatMessage.java");
+
+        assertTrue(provider.contains("supportsStreaming"));
+        assertTrue(provider.contains("cancelRequest(String requestId)"));
+        assertTrue(registry.contains("cancelRequest"));
+        assertTrue(registry.contains("registerRequest"));
+        assertTrue(registry.contains("unregisterRequest"));
+        assertTrue(adapter.contains("text/event-stream"));
+        assertTrue(adapter.contains("PROVIDER_REQUEST_ID") || adapter.contains("providerRequestId"));
+        assertTrue(adapter.contains("disconnect()"));
+        assertTrue(response.contains("getProviderRequestId"));
+        assertTrue(result.contains("getProviderRequestId"));
+        assertTrue(execution.contains("response.getProviderRequestId()"));
+        assertTrue(chat.contains("context.put(\"requestId\""));
+        assertTrue(chat.contains("aiProviderRegistry.cancelRequest"));
+        assertTrue(chat.contains("reservation.setProviderRequestId"));
+        assertTrue(message.contains("setProviderRequestId"));
+    }
+
     private String source(String relativePath) throws IOException {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) root = root.getParent();

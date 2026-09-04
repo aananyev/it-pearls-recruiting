@@ -3,7 +3,7 @@ package com.company.hunttech.service;
 import java.io.Serializable;
 import java.util.UUID;
 
-/** Safe synchronous MVP response; streaming/cancellation are intentionally not exposed yet. */
+/** Safe synchronous facade response; streaming deltas are not exposed by the current UI facade. */
 public class LlmChatResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 

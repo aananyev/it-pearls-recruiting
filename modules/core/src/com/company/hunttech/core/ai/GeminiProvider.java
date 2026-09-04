@@ -22,6 +22,7 @@ public class GeminiProvider extends AbstractOpenAiCompatibleProvider {
     @Override protected String getApiUrl() { return API_BASE_URL; }
     @Override protected String getDefaultModel() { return "gemini-3.5-flash"; }
     @Override protected String getProviderDisplayName() { return "Google Gemini"; }
+    @Override public boolean supportsStreaming() { return false; }
 
     @Override
     public String generateText(String prompt, String systemContext, String apiKey, String modelName,

@@ -150,6 +150,8 @@ public class LlmChatScreen extends Screen {
     }
 
     private boolean isCancellationMessage(Exception ex) {
-        return ex != null && ex.getMessage() != null && ex.getMessage().contains("Запрос отменён");
+        return ex != null && ex.getMessage() != null
+                && (ex.getMessage().contains("Запрос отменён")
+                || ex.getMessage().contains("AI-запрос отменён"));
     }
 }

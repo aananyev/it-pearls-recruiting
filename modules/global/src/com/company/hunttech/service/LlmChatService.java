@@ -18,10 +18,10 @@ public interface LlmChatService {
     LlmChatResponse sendMessage(UUID conversationId, String message, String requestId);
 
     /**
-     * Requests cooperative cancellation of an in-flight request. The existing
-     * synchronous provider contract cannot interrupt an already-open HTTP call;
-     * middleware therefore suppresses persistence of its result and settles
-     * usage when the provider returns.
+     * Requests cancellation of an in-flight request. Providers with an
+     * interruptible adapter close their active HTTP connection; legacy
+     * synchronous adapters still use cooperative cancellation and settle usage
+     * when the provider returns.
      */
     void cancelMessage(UUID conversationId, String requestId);
 
