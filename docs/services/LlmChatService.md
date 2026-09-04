@@ -10,6 +10,8 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 
 - `ExtMainScreen` открывает modeless `LlmChatScreen` через постоянный launcher.
 - `LlmChatScreen` создаёт один диалог пользователя, показывает бессрочную историю и получает live-ответ через polling timer 500 мс.
+- Геометрия плавающего окна (позиция и размер) сохраняется в штатных пользовательских screen settings CUBA; новая таблица для этого не нужна.
+- На экране до 640 px диалог превращается в полноэкранный mobile sheet, а сохранённые desktop-координаты не применяются.
 - Удаление истории пользователю не предоставляется.
 
 ## Архитектура и размещение
@@ -50,4 +52,4 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 
 ## Ограничения и следующие шаги
 
-Настоящий Vaadin push/WebSocket не вводился: polling выбран как совместимый промежуточный transport. Lookup usage по одному provider request ID остаётся TODO до появления подтверждённых provider-specific API; drag/position persistence и mobile sheet остаются следующими срезами.
+Настоящий Vaadin push/WebSocket не вводился: polling выбран как совместимый промежуточный transport. Lookup usage по одному provider request ID остаётся TODO до появления подтверждённых provider-specific API. Геометрия desktop-диалога уже сохраняется через CUBA settings, mobile sheet реализован CSS-режимом без изменения схемы.

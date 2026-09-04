@@ -19,6 +19,7 @@
 - `startStreaming()` запускает запрос через middleware scheduler, а `pollStreaming()` возвращает owner-scoped накопленный snapshot; floating screen обновляет ответ timer-интервалом 500 мс.
 - OpenAI-compatible provider adapters поддерживают provider request ID, SSE streaming и прерывание активного HTTP-вызова по HRM `requestId`; legacy adapters автоматически отдают полный ответ одной дельтой.
 - Streaming-задача переносит CUBA security context, не сохраняет partial assistant message и пишет итог в историю только после подтверждённого завершения.
+- Floating UI сохраняет позицию и размер через штатные пользовательские screen settings CUBA; при ширине до 640 px диалог становится полноэкранным mobile sheet. Новых сущностей и changeSet для UI-настроек нет.
 
 ## Квота
 

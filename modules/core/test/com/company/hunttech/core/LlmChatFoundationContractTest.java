@@ -89,6 +89,25 @@ public class LlmChatFoundationContractTest {
     }
 
     @Test
+    public void floatingChatPersistsDialogGeometryAndHasMobileMode() throws IOException {
+        String controller = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+        String styles = source("modules/web/themes/hunttech-modern-light/com.company.hunttech/chat-style.css");
+
+        assertTrue(controller.contains("DialogWindow"));
+        assertTrue(controller.contains("CHAT_DIALOG_STYLENAME"));
+        assertTrue(controller.contains("setDialogStylename(CHAT_DIALOG_STYLENAME)"));
+        assertTrue(controller.contains("saveSettings()"));
+        assertTrue(controller.contains("getPositionX()"));
+        assertTrue(controller.contains("getPositionY()"));
+        assertTrue(controller.contains("llmChatLayout"));
+        assertTrue(controller.contains("instanceof DialogWindow"));
+        assertTrue(styles.contains(".llm-chat-window"));
+        assertTrue(styles.contains("@media (max-width: 640px)"));
+        assertTrue(styles.contains("100vw"));
+        assertTrue(styles.contains("100vh"));
+    }
+
+    @Test
     public void adminHistoryIsPermissionGatedAndUserHistoryRemainsScoped() throws IOException {
         String contract = source("modules/global/src/com/company/hunttech/service/LlmChatService.java")
                 + source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");

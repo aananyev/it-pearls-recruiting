@@ -5,12 +5,15 @@ import com.company.hunttech.service.LlmChatService;
 import com.company.hunttech.service.LlmChatStreamState;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.DialogWindow;
 import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.Timer;
+import com.haulmont.cuba.gui.settings.Settings;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import org.dom4j.Element;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -20,6 +23,9 @@ import java.util.UUID;
 @UiController("hunttech_LlmChatScreen")
 @UiDescriptor("llm-chat-screen.xml")
 public class LlmChatScreen extends Screen {
+    private static final String CHAT_LAYOUT_SETTINGS = "llmChatLayout";
+    private static final String CHAT_DIALOG_STYLENAME = "llm-chat-window";
+
     @Inject
     private LlmChatService llmChatService;
     @Inject
@@ -41,6 +47,10 @@ public class LlmChatScreen extends Screen {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        DialogWindow dialog = getDialogWindow();
+        if (dialog != null) {
+            dialog.setDialogStylename(CHAT_DIALOG_STYLENAME);
+        }
         try {
             conversationId = llmChatService.startConversation();
             renderHistory(llmChatService.loadHistory(conversationId));
@@ -48,6 +58,71 @@ public class LlmChatScreen extends Screen {
             sendBtn.setEnabled(false);
             showError(ex);
         }
+    }
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        restoreDialogGeometry(getSettings());
+    }
+
+    @Override
+    protected void saveSettings() {
+        saveDialogGeometry(getSettings());
+        super.saveSettings();
+    }
+
+    private void restoreDialogGeometry(Settings settings) {
+        DialogWindow dialog = getDialogWindow();
+        if (settings == null || dialog == null) {
+            return;
+        }
+        Element layout = settings.get(CHAT_LAYOUT_SETTINGS);
+        setPositionIfPresent(layout, "positionX", dialog::setPositionX);
+        setPositionIfPresent(layout, "positionY", dialog::setPositionY);
+        setSizeIfPresent(layout, "width", dialog::setDialogWidth);
+        setSizeIfPresent(layout, "height", dialog::setDialogHeight);
+    }
+
+    private void saveDialogGeometry(Settings settings) {
+        DialogWindow dialog = getDialogWindow();
+        if (settings == null || dialog == null) {
+            return;
+        }
+        Element layout = settings.get(CHAT_LAYOUT_SETTINGS);
+        layout.addAttribute("positionX", String.valueOf(dialog.getPositionX()));
+        layout.addAttribute("positionY", String.valueOf(dialog.getPositionY()));
+        layout.addAttribute("width", sizeValue(dialog.getDialogWidth(), dialog.getDialogWidthUnit()));
+        layout.addAttribute("height", sizeValue(dialog.getDialogHeight(), dialog.getDialogHeightUnit()));
+        settings.setModified(true);
+    }
+
+    private void setPositionIfPresent(Element layout, String attribute, java.util.function.IntConsumer setter) {
+        String value = layout.attributeValue(attribute);
+        if (value != null && !value.isEmpty()) {
+            try {
+                setter.accept(Integer.parseInt(value));
+            } catch (NumberFormatException ignored) {
+                // Ignore corrupted legacy settings and keep the framework default.
+            }
+        }
+    }
+
+    private void setSizeIfPresent(Element layout, String attribute, java.util.function.Consumer<String> setter) {
+        String value = layout.attributeValue(attribute);
+        if (value != null && !value.isEmpty()) {
+            setter.accept(value);
+        }
+    }
+
+    private String sizeValue(float value, com.haulmont.cuba.gui.components.SizeUnit unit) {
+        if (value < 0) {
+            return "AUTO";
+        }
+        return Math.round(value) + (unit == null ? "px" : unit.getSymbol());
+    }
+
+    private DialogWindow getDialogWindow() {
+        return getWindow() instanceof DialogWindow ? (DialogWindow) getWindow() : null;
     }
 
     @Subscribe("sendBtn")
