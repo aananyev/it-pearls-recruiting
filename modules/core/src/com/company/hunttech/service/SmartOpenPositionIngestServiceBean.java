@@ -519,9 +519,9 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setProjectName(project);
             log.info("[SMART_VACANCY_OPENING] Проект позиции: {}", project != null ? (project.getProjectName() + " (ID=" + project.getId() + ")") : "НЕ НАЙДЕН");
 
-            // Поиск / привязка типа позиции
+            // Поиск / привязка типа позиции (запрещено создавать новые должности, выбирается наиболее подходящая)
             String posName = data.getPositionTypeName() != null ? data.getPositionTypeName() : openPosition.getVacansyName();
-            Position positionType = findOrCreatePositionType(posName);
+            Position positionType = findBestMatchingPositionType(posName);
             openPosition.setPositionType(positionType);
             log.info("[SMART_VACANCY_OPENING] Тип позиции: {}", positionType != null ? (positionType.getPositionRuName() + " (ID=" + positionType.getId() + ")") : "НЕ НАЙДЕН");
 
@@ -632,30 +632,106 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         return null;
     }
 
-    private Position findOrCreatePositionType(String positionName) {
+    private Position findBestMatchingPositionType(String positionName) {
         if (positionName == null || positionName.trim().isEmpty()) return null;
         String cleanName = cleanTitle(positionName);
         if (cleanName.isEmpty()) return null;
 
-        // Строгое ограничение: колонка HUNTTECH_POSITION.POSITION_RU_NAME имеет тип varchar(80)
         String safeName = truncate(cleanName, 80);
+        log.info("[SMART_VACANCY_OPENING] Подбор наиболее подходящей должности в справочнике hunttech_Position для '{}'", safeName);
 
-        log.info("[SMART_VACANCY_OPENING] Поиск / создание типа должности: '{}'", safeName);
-        List<Position> list = dataManager.load(Position.class)
-                .query("select e from hunttech_Position e where lower(e.positionRuName) = lower(:name) or lower(e.positionEnName) = lower(:name)")
+        // 1. Поиск по точному совпадению наименования (RU или EN)
+        List<Position> exactList = dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where (lower(e.positionRuName) = lower(:name) or lower(e.positionEnName) = lower(:name)) and (e.positionRuName not like '%(не использовать)%' and e.positionRuName not like '%дубль%')")
                 .parameter("name", safeName)
                 .view("position-picker-view")
                 .maxResults(1)
                 .list();
-        if (!list.isEmpty()) {
-            log.info("[SMART_VACANCY_OPENING] Найден тип должности: '{}' (ID={})", list.get(0).getPositionRuName(), list.get(0).getId());
-            return list.get(0);
+        if (!exactList.isEmpty()) {
+            log.info("[SMART_VACANCY_OPENING] ✓ Найдено точное совпадение должности: '{}' (ID={})", exactList.get(0).getPositionRuName(), exactList.get(0).getId());
+            return exactList.get(0);
         }
-        Position pos = metadata.create(Position.class);
-        pos.setPositionRuName(safeName);
-        dataManager.commit(pos);
-        log.info("[SMART_VACANCY_OPENING] Создан новый тип должности: '{}' (ID={})", pos.getPositionRuName(), pos.getId());
-        return pos;
+
+        // 2. Интеллектуальный поиск среди существующих активных должностей по схожести и токенам
+        List<Position> allPositions = dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where (e.positionRuName not like '%(не использовать)%' and e.positionRuName not like '%дубль%')")
+                .view("position-picker-view")
+                .list();
+
+        Position bestMatch = null;
+        int bestScore = 0;
+        String lowerTarget = safeName.toLowerCase();
+        Set<String> targetTokens = extractSignificantTokens(lowerTarget);
+
+        for (Position pos : allPositions) {
+            String ru = pos.getPositionRuName() != null ? pos.getPositionRuName().toLowerCase() : "";
+            String en = pos.getPositionEnName() != null ? pos.getPositionEnName().toLowerCase() : "";
+
+            int score = 0;
+            // Совпадение как подстроки (например, "Разработчик 1С" внутри "Разработчик 1С:WMS")
+            if (!ru.isEmpty() && lowerTarget.contains(ru)) {
+                score += 100 + ru.length();
+            }
+            if (!en.isEmpty() && lowerTarget.contains(en)) {
+                score += 100 + en.length();
+            }
+            // Обратное совпадение: строка из справочника содержит искомое слово
+            if (!ru.isEmpty() && ru.contains(lowerTarget)) {
+                score += 50;
+            }
+
+            // Токенное пересечение
+            Set<String> candidateTokens = extractSignificantTokens(ru + " " + en);
+            for (String token : targetTokens) {
+                if (candidateTokens.contains(token)) {
+                    score += 15;
+                }
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = pos;
+            }
+        }
+
+        if (bestMatch != null && bestScore > 0) {
+            log.info("[SMART_VACANCY_OPENING] ✓ Подобрана наиболее подходящая существующая должность: '{}' (ID={}, score={}) для входной '{}'",
+                    bestMatch.getPositionRuName(), bestMatch.getId(), bestScore, safeName);
+            return bestMatch;
+        }
+
+        // 3. Fallback: поиск общей должности по ключевым технологическим направлениям
+        log.warn("[SMART_VACANCY_OPENING] Должность '{}' не найдена напрямую, попытка подобрать базовую должность в справочнике", safeName);
+        List<Position> fallbackList = dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where (lower(e.positionRuName) like '%разработчик%' or lower(e.positionRuName) like '%инженер%' or lower(e.positionRuName) like '%аналитик%') and e.positionRuName not like '%(не использовать)%'")
+                .view("position-picker-view")
+                .maxResults(1)
+                .list();
+        if (!fallbackList.isEmpty()) {
+            log.info("[SMART_VACANCY_OPENING] Выбрана базовая должность: '{}'", fallbackList.get(0).getPositionRuName());
+            return fallbackList.get(0);
+        }
+
+        log.warn("[SMART_VACANCY_OPENING] Не удалось подобрать должность в справочнике hunttech_Position. Новая должность НЕ создается (согласно бизнес-правилу)");
+        return null;
+    }
+
+    private Set<String> extractSignificantTokens(String text) {
+        if (text == null) return Collections.emptySet();
+        Set<String> tokens = new HashSet<>();
+        for (String part : text.toLowerCase().split("[^a-zA-Zа-яА-Я0-9]+")) {
+            String trimmed = part.trim();
+            if (trimmed.length() >= 2 && !isStopWord(trimmed)) {
+                tokens.add(trimmed);
+            }
+        }
+        return tokens;
+    }
+
+    private boolean isStopWord(String word) {
+        return "от".equals(word) || "до".equals(word) || "для".equals(word) || "по".equals(word)
+                || "на".equals(word) || "в".equals(word) || "и".equals(word) || "или".equals(word)
+                || "с".equals(word) || "со".equals(word) || "за".equals(word) || "из".equals(word);
     }
 
     private Grade findGrade(String gradeName) {
