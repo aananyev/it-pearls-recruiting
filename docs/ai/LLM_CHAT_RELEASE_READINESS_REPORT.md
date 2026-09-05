@@ -8,12 +8,12 @@
 
 ## Текущий этап roadmap
 
-Этап 6 «Подготовка к выпуску»: release-readiness handoff. Перед началом этапа прочитаны roadmap, migration plan, push verification, integration test report и текущая реализация. В этом срезе подготовлены критерии передачи в staging, список блокеров и порядок дальнейших действий. Production не развёртывался.
+Этап 4 «Безопасность и данные»: локальный security-contract hardening. Перед началом этапа прочитаны roadmap, migration plan, push verification, integration test report, release handoff и текущая реализация. Добавлены автоматические проверки allowlist пользовательского контекста, отсутствия candidate/CV entity resolution, owner isolation, отдельных административных permission gates и privacy push-события. Production не развёртывался.
 
 ## Кто работал на текущем этапе
 
-- Основной агент: прочитал roadmap и сопутствующую документацию, сверил фактический статус PR, дополнил release-readiness отчёт, связал его с migration/rollback plan и зафиксировал следующий gate.
-- Субагенты: на текущем этапе не привлекались. Аналитик, UI/UX-дизайнер и автоматизированный тестировщик не запускались, поскольку срез ограничен release-документацией и подготовкой staging handoff; тестовые и эксплуатационные действия в staging ещё невозможны без отдельного контура.
+- Основной агент: прочитал roadmap и сопутствующую документацию, добавил security-contract тесты, выполнил локальную проверку и обновил release-readiness handoff.
+- Субагенты: на текущем этапе не привлекались. Проверка активных задач показала, что запущенных субагентов нет; закрывать нечего. Аналитик, UI/UX-дизайнер и автоматизированный тестировщик не запускались, потому что для текущего локального contract-среза отдельная делегация не требовалась.
 
 ## Что уже выполнено
 
@@ -49,6 +49,12 @@
 - Provider-specific lookup usage по одному request ID не подтверждён; до отдельного решения используется ручная reconciliation, автоматический повторный provider call запрещён.
 - PII-маскирование данных кандидатов оставлено TODO по распоряжению пользователя; текущий чат не извлекает candidate/CV entities.
 
+## Результат текущего security-среза
+
+Локальные security-contract тесты проверяют запрет телефонов, паролей и API-ключей в builder, отсутствие загрузки candidate/CV entities, owner boundary для истории и streaming, отсутствие текста в push-событии и раздельные административные permission gates. Динамическая проверка через staging остаётся обязательной.
+
+Проверка выполнена командой `./gradlew :app-core:test --tests com.company.hunttech.core.LlmChatSecurityContractTest --tests com.company.hunttech.core.LlmChatFoundationContractTest --tests com.company.hunttech.service.AiExecutionServiceBeanTest :app-core:compileJava :app-web:compileJava --no-daemon --console=plain`; результат: `BUILD SUCCESSFUL`.
+
 ## Что делать на следующем этапе
 
 Следующий этап — закрыть authenticated staging/load gate этапа 5:
@@ -61,7 +67,8 @@
 
 ## Краткий список оставшихся этапов roadmap
 
-- Этап 5 «Интеграция и тестирование» — частично выполнен; остаются authenticated staging, нагрузка, security acceptance и регрессия shell/layout.
+- Этап 4 «Безопасность и данные» — локальный contract-срез выполнен; остаются динамические security-проверки в staging и проверка remediation legacy plaintext keys.
+- Этап 5 «Интеграция и тестирование» — частично выполнен; остаются authenticated staging, нагрузка и регрессия shell/layout.
 - Этап 6 «Подготовка к выпуску» — документация подготовлена, но остаются rehearsal, утверждение seed-значений, release decision и затем отдельное production-распоряжение.
 - После MVP, не блокируя текущий PR: provider-specific usage lookup по request ID — только после подтверждения API; маскирование PII кандидатских данных — TODO по распоряжению пользователя; архивирование истории — отдельное решение при бессрочном хранении.
 
