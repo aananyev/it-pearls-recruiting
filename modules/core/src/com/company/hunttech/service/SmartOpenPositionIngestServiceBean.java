@@ -546,22 +546,46 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             // Добавление создаваемой вакансии в транзакцию сохранения
             commitContext.addInstanceToCommit(openPosition);
 
-            // Создание дерева навыков SkillTree для позиции
+            // Привязка навыков к вакансии через справочник SkillTree и каноническую сущность OpenPositionSkill
             if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
                 log.info("[SMART_VACANCY_OPENING] Привязка навыков к вакансии (всего: {})...", data.getRequiredSkills().size());
                 int count = 0;
+                Set<String> processedSkills = new HashSet<>();
+
                 for (String skillName : data.getRequiredSkills()) {
                     if (skillName == null || skillName.trim().isEmpty()) continue;
                     String cleanSkill = truncate(cleanTitle(skillName), 80);
-                    if (cleanSkill.isEmpty()) continue;
+                    if (cleanSkill.isEmpty() || processedSkills.contains(cleanSkill.toLowerCase())) continue;
+                    processedSkills.add(cleanSkill.toLowerCase());
 
-                    SkillTree skill = metadata.create(SkillTree.class);
-                    skill.setSkillName(cleanSkill);
-                    skill.setOpenPosition(openPosition);
-                    commitContext.addInstanceToCommit(skill);
+                    // Поиск существующего навыка в справочнике hunttech_SkillTree
+                    List<SkillTree> existingSkills = dataManager.load(SkillTree.class)
+                            .query("select s from hunttech_SkillTree s where lower(s.skillName) = lower(:name)")
+                            .parameter("name", cleanSkill)
+                            .view("_local")
+                            .maxResults(1)
+                            .list();
+
+                    SkillTree skill;
+                    if (!existingSkills.isEmpty()) {
+                        skill = existingSkills.get(0);
+                        log.info("[SMART_VACANCY_OPENING] Использован существующий навык из справочника: '{}' (ID={})", skill.getSkillName(), skill.getId());
+                    } else {
+                        skill = metadata.create(SkillTree.class);
+                        skill.setSkillName(cleanSkill);
+                        commitContext.addInstanceToCommit(skill);
+                        log.info("[SMART_VACANCY_OPENING] Создан новый навык в справочнике: '{}'", cleanSkill);
+                    }
+
+                    // Связывание навыка с вакансией через каноническую сущность OpenPositionSkill
+                    OpenPositionSkill ops = metadata.create(OpenPositionSkill.class);
+                    ops.setOpenPosition(openPosition);
+                    ops.setSkill(skill);
+                    ops.setPriority(CandidateSkillPriority.MAIN);
+                    commitContext.addInstanceToCommit(ops);
                     count++;
                 }
-                log.info("[SMART_VACANCY_OPENING] Создано {} сущностей SkillTree для вакансии", count);
+                log.info("[SMART_VACANCY_OPENING] Успешно привязано {} навыков к вакансии через OpenPositionSkill", count);
             }
 
             log.info("[SMART_VACANCY_OPENING] Отправка CommitContext в DataManager...");
