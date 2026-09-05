@@ -455,7 +455,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
                             (existingDuplicatePosition.getVacansyID() != null ? existingDuplicatePosition.getVacansyID() : "") +
                             ").\n\nВы действительно хотите создать новую вакансию-дубликат?")
                     .withActions(
-                            new DialogAction(DialogAction.Type.YES, Action.Status.WARNING).withHandler(e -> checkMissingFieldsAndProceed()),
+                            new DialogAction(DialogAction.Type.YES).withHandler(e -> checkMissingFieldsAndProceed()),
                             new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
                     )
                     .show();
