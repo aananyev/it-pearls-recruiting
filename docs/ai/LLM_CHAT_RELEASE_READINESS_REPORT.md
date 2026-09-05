@@ -50,6 +50,8 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 
 Результат: `BUILD SUCCESSFUL`. Локальный PASS не закрывает staging и runtime security gates.
 
+В изолированной локальной песочнице дополнительно проверен временный mock OpenAI-compatible provider без внешних API и production: sync JSON с usage, SSE streaming с usage и `[DONE]`, synthetic HTTP 503 и synthetic timeout — все сценарии `PASS`. Mock provider после проверки остановлен, секреты и тестовые payload в репозитории не сохранены. Эта проверка подтверждает только HTTP-контракт provider adapter и не заменяет authenticated UI, reverse proxy, session affinity или staging migration rehearsal.
+
 ## Обязательные шаги до release
 
 1. Развернуть approved commit из PR в отдельном staging с выключенным chat feature flag.

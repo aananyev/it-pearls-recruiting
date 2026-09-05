@@ -42,6 +42,7 @@
 - Независимый тестировщик по актуальному срезу не выдал verdict из-за исчерпания usage; его прежний отчет по старому commit исключён из приемки. Локальные тесты и компиляция текущего worktree прошли.
 - Добавлен fail-closed гейт: `LLM_CHAT` не выполняет provider dispatch без настроенной версии privacy policy; отрицательный тест проходит.
 - После замечаний выполнен полный локальный прогон security, foundation, schema, routing, context тестов и web-компиляции: `BUILD SUCCESSFUL`.
+- В изолированной локальной песочнице временный mock OpenAI-compatible provider проверен без внешних API и production: sync JSON + usage, SSE streaming + usage + `[DONE]`, synthetic `503` и synthetic timeout — `PASS`; provider после прогона остановлен, временный файл удалён.
 - Оба agent-сеанса после завершения проверки закрыты; активных субагентов нет.
 
 ## Следующий этап
