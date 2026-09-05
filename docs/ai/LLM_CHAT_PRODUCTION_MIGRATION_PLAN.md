@@ -10,6 +10,122 @@
 - Rollback отключает чат и не удаляет историю, аудит или подтверждённый usage.
 - Секреты не передаются в migration output, отчёты и логи.
 
+## Production baseline и границы окна
+
+- Этот документ — план и чек-лист, а не разрешение на production. Фактическое окно начинается только после отдельного распоряжения владельца.
+- Источник кода — approved commit PR #230; перед окном зафиксировать SHA, ветку и версию артефакта. Локальные настройки, локальная БД и локальные тестовые credentials в production не переносятся.
+- Рекомендуемая стартовая общая квота — `10 000` токенов на пользователя за календарный месяц. Финальное значение должно быть подтверждено в migration log перед seed; активный индивидуальный override имеет приоритет и обязан содержать `effectiveTo` и причину.
+- Privacy policy для `LLM_CHAT` — `llm-chat-privacy-v1`. Для существующих пользователей `ADMIN_FALLBACK_CONSENT` остаётся `FALSE`; отдельное согласие не проставляется массово и не заменяется `EXTERNAL_PROCESSING_ALLOWED`.
+- Provider/model/region берутся из уже разрешённых настроек AI Control Plane production. Секретный ключ не копируется из локальной среды; корпоративный ключ вводится или ротируется только через защищённый runtime/UI-процесс.
+- В текущем PR отдельный feature flag для floating launcher не реализован: launcher добавлен в main screen без DB-флага. До production rollout нужно либо добавить и принять feature flag, либо выполнить согласованный rollout через права/ограниченный охват. Нельзя считать миграцию завершённой при простом включении схемы.
+
+## Пошаговое production-окно
+
+### 0. Предусловия и stop/go
+
+1. Получить письменное распоряжение на production-окно, ответственных и канал аварийной остановки.
+2. Утвердить commit, версию, provider/model/region, system prompt checksum, prompt template, temperature, `MAX_TOKENS`, квоту и права.
+3. Иметь проверенный backup с идентификатором и подтверждённым restore point; запретить необратимые действия до проверки backup.
+4. Подтвердить окно, в котором допустим короткий restart core/web, и наличие rollback-артефакта предыдущей версии.
+5. Остановить rollout при любом расхождении схемы, seed-checksum, количества конфигураций или прав.
+
+### 1. Preflight без изменений
+
+Зафиксировать только безопасные метаданные:
+
+- database/schema, master changelog и текущую версию приложения;
+- наличие активной `LLM_CHAT` и её `privacyPolicyVersion` без вывода prompt и ключей;
+- counts таблиц `HUNTTECH_AI_FUNCTION_CONFIGURATION`, `HUNTTECH_ADMIN_AI_CONFIGURATION`, `HUNTTECH_USER_AI_CONFIGURATION`, `HUNTTECH_USER_AI_FUNCTION_OVERRIDE`, `HUNTTECH_USER_AI_PROFILE`;
+- count legacy `API_KEY` и count `API_KEY_ENCRYPTED`, без значений и без экспорта ciphertext;
+- наличие текущих admin AI-конфигураций и разрешённых provider/model/region;
+- наличие ролей/permissions `hunttech.ai.viewChatHistoryAdmin`, `hunttech.ai.reconcileChatQuota` и `hunttech.ai.manageCorporateCredentials`.
+
+Если preflight показывает plaintext key, сначала выполнить отдельный controlled legacy migration через core/runtime; SQL-backfill ключей запрещён.
+
+### 2. Backup и deploy с выключенным rollout
+
+1. Создать backup базы и проверить возможность восстановления на pre-production копии.
+2. Развернуть approved артефакты с floating launcher/чатом недоступными для production-пользователей согласно принятому rollout-механизму.
+3. Не запускать provider call и не создавать тестовые conversation до завершения DDL и seed-проверок.
+4. Проверить, что старые AI-функции, ExtSettingsWindow и AI Control Plane открываются штатно.
+
+### 3. Применение schema changeSet
+
+1. Применить штатный CUBA/Liquibase master changelog через core deployment; не выполнять SQL-файлы вручную в обход changelog.
+2. Сохранить в migration log порядок и результат семи changeSet: `260904-1` … `260904-6`, затем `260905-1`.
+3. Повторно запустить `updateDb` в pre-production rehearsal: ожидается отсутствие новых изменений, дублей и конфликтов.
+4. При DDL-ошибке остановить rollout, не удалять частично созданные chat-таблицы вручную, восстановить предыдущую версию приложения и перейти к rollback-разделу.
+
+### 4. Загрузка seed и reference data
+
+Загрузить или проверить следующие данные, строго не перезаписывая ручные production-настройки пустыми значениями:
+
+- `HUNTTECH_AI_FUNCTION_CONFIGURATION`: ровно одна активная функция `LLM_CHAT`; capability текстовой генерации; утверждённые system prompt и prompt template; `configurationVersion`; `includeUserContext=true`; `executionPolicy=USER_OVERRIDE_ALLOWED`; `fallbackPolicy=FALLBACK_TO_ADMIN`; утверждённые `temperature`, `maxTokens`, `defaultMonthlyTokenQuota=10 000` либо финальное значение из migration log; `privacyPolicyVersion=llm-chat-privacy-v1`.
+- `HUNTTECH_ADMIN_AI_CONFIGURATION`: разрешённое активное корпоративное подключение, provider/model/base URL из AI Control Plane и secret только в `API_KEY_ENCRYPTED`. Если запись уже есть, сверить metadata и не дублировать её.
+- `HUNTTECH_USER_AI_PROFILE`: существующим пользователям сохранить профиль и `EXTERNAL_PROCESSING_ALLOWED`; новые поля `ADMIN_FALLBACK_CONSENT`, версия и дата для существующих пользователей остаются `FALSE`/`NULL` до отдельного явного согласия.
+- `HUNTTECH_USER_AI_CONFIGURATION` и `HUNTTECH_USER_AI_FUNCTION_OVERRIDE`: не создавать production personal credentials из локальных тестовых данных. Пользовательский ключ появляется только после самостоятельного защищённого ввода владельцем; override создаётся только для соответствующей пользовательской конфигурации.
+- `HUNTTECH_LLM_CHAT_QUOTA_PERIOD`, `HUNTTECH_LLM_CHAT_QUOTA_RESERVATION`: не загружать фиктивные периоды, usage, request ID или reservations. Период создаётся сервисом при первом реальном запросе и относится к календарному месяцу.
+- permissions: выдать только согласованным ролям admin history/reconciliation/credential-management; обычным пользователям эти specific permissions не назначать.
+
+Контрольная сумма prompt считается от точного UTF-8 содержимого до загрузки; в migration log хранится checksum и версия, но не секреты и не персональные данные.
+
+### 5. Безопасное lifecycle credentials
+
+1. Проверить наличие server-side `hunttech.ai.encryptionKey` в секретном хранилище deployment без вывода значения.
+2. Выполнить admin-only `AiCredentialService.migrateLegacyUserSecrets()` для оставшихся legacy user keys; записать только counts до/после.
+3. При ротации задать новый current key и временный previous key через секретное хранилище, выполнить `AiCredentialService.rotateSecrets()`, проверить расшифровку и provider smoke, затем удалить previous key.
+4. Повторный запуск migration/rotation должен дать нулевые изменения при неизменном наборе ciphertext.
+5. Запретить копирование локального административного API-ключа, его ciphertext и тестовых personal configs в production.
+
+### 6. Verification и ограниченный rollout
+
+До включения для пользователей проверить:
+
+1. `LLM_CHAT` active, prompt/template/version/checksum/privacy version совпадают с migration log.
+2. Общая квота имеет утверждённое ненулевое значение; override с `effectiveTo`/причиной работает; duplicate period и duplicate request ID не создаются.
+3. У существующих профилей fallback-consent не включился автоматически.
+4. Ключи отсутствуют в UI, исключениях, audit и server log; новые `AiCallLog` не содержат prompt/response.
+5. История доступна только владельцу и разрешённому администратору; удаление пользователем запрещено.
+6. Личный API имеет приоритет; успешный personal call не уменьшает admin quota; fallback без отдельного consent запрещён.
+7. Через разрешённый proxy выполнены asset/WebSocket smoke, authenticated sync/streaming/recovery, cancel/error и короткий regression связанных AI-экранов.
+8. Включить чат сначала для согласованной тестовой группы; после smoke расширять охват поэтапно.
+
+Нагрузочную проверку 20–50 UI-сессий в рамках этого проекта не выполнять: она отменена пользователем. Это не отменяет минимальную authenticated проверку и proxy/reconnect smoke.
+
+## Verification queries для migration log
+
+Запросы выполняются read-only и выводят только metadata/counts:
+
+```sql
+select code, is_active, configuration_version, privacy_policy_version,
+       default_monthly_token_quota
+from hunttech_ai_function_configuration
+where code = 'LLM_CHAT';
+
+select count(*) as active_admin_configs
+from hunttech_admin_ai_configuration
+where delete_ts is null and is_active = true;
+
+select count(*) as legacy_user_keys
+from hunttech_user_ai_configuration
+where delete_ts is null and api_key is not null and trim(api_key) <> '';
+
+select count(*) as encrypted_user_keys
+from hunttech_user_ai_configuration
+where delete_ts is null and api_key_encrypted is not null
+  and trim(api_key_encrypted) <> '';
+
+select count(*) as enabled_fallback_consents
+from hunttech_user_ai_profile
+where delete_ts is null and admin_fallback_consent = true;
+
+select count(*) as chat_conversations
+from hunttech_llm_chat_conversation
+where delete_ts is null;
+```
+
+Значения prompt, API key, ciphertext, персональные профили, сообщения и response payload в migration log не копируются.
+
 ## ChangeSet и порядок
 
 1. `260904-1-addAdminFallbackConsent`: добавить `ADMIN_FALLBACK_CONSENT`, версию и дату согласия в `HUNTTECH_USER_AI_PROFILE`; существующим пользователям установить `FALSE`.
@@ -98,4 +214,4 @@
 
 ## Итоговый migration log
 
-После согласованного переноса зафиксировать окно, backup identifier, commit, changeSet, seed prompts и checksum, значения квот без секретов, counts, verification queries, smoke/regression evidence, охват rollout, отклонения, решение rollback и ответственных. До такого распоряжения этот раздел не заполняется production-данными.
+После согласованного переноса зафиксировать окно, backup identifier и результат restore check, commit/version, changeSet, seed prompts и checksum, значения квот без секретов, counts до/после, verification queries, credential lifecycle counts, smoke/regression evidence, охват rollout, отклонения, решение rollback и ответственных. До отдельного production-распоряжения этот раздел не заполняется production-данными.
