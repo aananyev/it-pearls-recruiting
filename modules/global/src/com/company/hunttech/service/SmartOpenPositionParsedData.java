@@ -13,19 +13,29 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     private String rawText;
     private String vacansyName;
+    private String rawVacansyName;
     private String projectName;
     private String companyName;
+    private String projectShortDescription;
+    private String projectFullDescription;
     private String positionTypeName;
     private String gradeName;
     private String cityName;
     private Integer remoteWork = 1; // 0=Офис, 1=Удаленно, 2=Гибрид
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
+    private BigDecimal salaryIE;
+    private String salaryComment;
     private Integer workExperience = 3;
     private Integer numberPosition = 1;
     private Integer priority = 2; // Обычный
     private String shortDescription;
     private String comment;
+    private String exercise;
+    private String memoForInterview;
+    private String interviewChecklist;
+    private String searchMap;
+    private String interviewPlan;
     private List<String> requiredSkills = new ArrayList<>();
     private List<String> checklist = new ArrayList<>();
     private List<String> missingFields = new ArrayList<>();
@@ -44,6 +54,14 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     public void setVacansyName(String vacansyName) {
         this.vacansyName = vacansyName;
+    }
+
+    public String getRawVacansyName() {
+        return rawVacansyName;
+    }
+
+    public void setRawVacansyName(String rawVacansyName) {
+        this.rawVacansyName = rawVacansyName;
     }
 
     public String getProjectName() {
@@ -172,5 +190,77 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     public void setMissingFields(List<String> missingFields) {
         this.missingFields = missingFields != null ? missingFields : new ArrayList<>();
+    }
+
+    public String getProjectShortDescription() {
+        return projectShortDescription;
+    }
+
+    public void setProjectShortDescription(String projectShortDescription) {
+        this.projectShortDescription = projectShortDescription;
+    }
+
+    public String getProjectFullDescription() {
+        return projectFullDescription;
+    }
+
+    public void setProjectFullDescription(String projectFullDescription) {
+        this.projectFullDescription = projectFullDescription;
+    }
+
+    public BigDecimal getSalaryIE() {
+        return salaryIE;
+    }
+
+    public void setSalaryIE(BigDecimal salaryIE) {
+        this.salaryIE = salaryIE;
+    }
+
+    public String getSalaryComment() {
+        return salaryComment;
+    }
+
+    public void setSalaryComment(String salaryComment) {
+        this.salaryComment = salaryComment;
+    }
+
+    public String getExercise() {
+        return exercise;
+    }
+
+    public void setExercise(String exercise) {
+        this.exercise = exercise;
+    }
+
+    public String getMemoForInterview() {
+        return memoForInterview;
+    }
+
+    public void setMemoForInterview(String memoForInterview) {
+        this.memoForInterview = memoForInterview;
+    }
+
+    public String getInterviewChecklist() {
+        return interviewChecklist;
+    }
+
+    public void setInterviewChecklist(String interviewChecklist) {
+        this.interviewChecklist = interviewChecklist;
+    }
+
+    public String getSearchMap() {
+        return searchMap;
+    }
+
+    public void setSearchMap(String searchMap) {
+        this.searchMap = searchMap;
+    }
+
+    public String getInterviewPlan() {
+        return interviewPlan;
+    }
+
+    public void setInterviewPlan(String interviewPlan) {
+        this.interviewPlan = interviewPlan;
     }
 }

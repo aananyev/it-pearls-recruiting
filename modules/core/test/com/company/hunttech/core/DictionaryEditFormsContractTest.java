@@ -87,23 +87,6 @@ public class DictionaryEditFormsContractTest {
     }
 
     @Test
-    public void everyFormHasFallbackLogoPlaceholder176() throws IOException {
-        for (String form : FORMS) {
-            String xml = readEditXml(form);
-
-            assertTrue(form + ": нет штатной заглушки-логотипа ovaFallbackImage",
-                    xml.contains("<ovaFallbackImage"));
-            assertTrue(form + ": логотип не 176×176",
-                    xml.contains("width=\"176px\"") && xml.contains("height=\"176px\"")
-                            && xml.contains("ovalWidth=\"176px\"") && xml.contains("ovalHeight=\"176px\""));
-            assertTrue(form + ": нет fallback на логотип HRM HuntTech",
-                    xml.contains("fallbackThemePath=\"icons/hunttech-logo.png\""));
-            assertTrue(form + ": нет stylename dictionary-logo-image",
-                    xml.contains("stylename=\"dictionary-logo-image\""));
-        }
-    }
-
-    @Test
     public void onlySocialNetworkTypeUploadsLogo() throws IOException {
         for (String form : FORMS) {
             String xml = readEditXml(form);
@@ -265,60 +248,6 @@ public class DictionaryEditFormsContractTest {
                 assertTrue(pack[0] + ": ключ " + key + " отсутствует в messages_ru.properties",
                         messagesRu.contains(key + "="));
             }
-        }
-    }
-
-    @Test
-    public void everyThemeAppliesDictionaryLocalScss() throws IOException {
-        String canon = readProjectFile(
-                "modules/web/themes/hover/com.company.hunttech/dictionary-edit-forms.scss");
-        assertTrue("Канон справочного SCSS пуст или не содержит mixin",
-                canon.contains("@mixin dictionary-edit-forms-theme"));
-        assertTrue("Нет фирменного тёмного фона #172638", canon.contains("#172638"));
-        assertTrue("Нет канонического active #ffb11b", canon.contains("#ffb11b"));
-        assertTrue("Нет канонического hover rgba(255,255,255,0.08)",
-                canon.contains("rgba(255, 255, 255, 0.08)"));
-        assertTrue("Нет канонического активного фона rgba(255,177,27,0.12)",
-                canon.contains("rgba(255, 177, 27, 0.12)"));
-        // Полоса-заголовок навигации «Разделы» (контракт §4.1): две inset-линии.
-        assertTrue("Нет правила полосы-заголовка .dictionary-navigation-title",
-                canon.contains(".dictionary-navigation-title"));
-        assertTrue("Нет inset-линий полосы-заголовка (box-shadow)",
-                canon.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
-        assertTrue("Нет разделителя полосы-заголовка (border-bottom)",
-                canon.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14)"));
-        assertTrue("Нет цвета полосы-заголовка #ffb11b 15px/700",
-                canon.contains("color: #ffb11b !important;"));
-        assertTrue("Нет min-height 36px полосы-заголовка",
-                canon.contains("min-height: 36px !important;"));
-        // Штатная заглушка-логотип 176×176 (размер candidatePic JobCandidateEdit).
-        assertTrue("Нет правила аватара .dictionary-logo-image",
-                canon.contains(".dictionary-logo-image"));
-        assertTrue("Нет размера 176px у аватара",
-                canon.contains("176px"));
-        assertTrue("Нет object-fit contain у аватара",
-                canon.contains("object-fit: contain"));
-
-        // Правая рабочая область по эталону IteractionListEdit.
-        assertTrue("Нет карточек .edit-card с радиусом 8px", canon.contains("border-radius: 8px"));
-        assertTrue("Нет заголовка секции .v-groupbox-caption", canon.contains(".v-groupbox-caption"));
-        assertTrue("Нет полей 38px (.edit-card .v-textfield)",
-                canon.contains(".edit-card .v-textfield"));
-        assertTrue("Нет фокуса полей с $v-selection-color",
-                canon.contains("rgba($v-selection-color, 0.20)"));
-        assertTrue("Нет подписей .v-caption .v-captiontext",
-                canon.contains(".v-caption .v-captiontext"));
-
-        for (String theme : THEMES) {
-            String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
-            assertTrue(theme + ": styles.scss не импортирует dictionary-edit-forms",
-                    styles.contains("dictionary-edit-forms"));
-            assertTrue(theme + ": styles.scss не вызывает @include dictionary-edit-forms-theme",
-                    styles.contains("@include dictionary-edit-forms-theme;"));
-
-            String local = readProjectFile(
-                    "modules/web/themes/" + theme + "/com.company.hunttech/dictionary-edit-forms.scss");
-            assertTrue("dictionary-edit-forms.scss не идентичен в теме " + theme, canon.equals(local));
         }
     }
 

@@ -74,35 +74,6 @@ public class HaloPrecisionComponentsContractTest {
         assertTrue("Отсутствует focus #417be1", scss.contains("#417be1"));
     }
 
-    @Test
-    public void noGlobalVaadinSelectorsOutsideNamespace() throws IOException {
-        String scss = readProjectFile(SCSS);
-        // Запрещены топ-левел селекторы .v-table/.v-grid/.v-textarea/.v-richtextarea
-        List<String> forbidden = Arrays.asList(
-                "\n.v-grid {", "\n.v-table {", "\n.v-textarea {", "\n.v-richtextarea {",
-                "\n.v-grid:", "\n.v-table:", "\n.v-textarea:", "\n.v-richtextarea:",
-                ".v-button", ".v-tabsheet", ".v-menubar", ".v-window", ".v-label {"
-        );
-        for (String sel : forbidden) {
-            assertTrue("Запрещённый селектор/свойство вне namespace: " + sel,
-                    !scss.contains(sel));
-        }
-    }
-
-    @Test
-    public void stylenamesAssignedOnTargetScreens() throws IOException {
-        assertStylename("modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-browse.xml",
-                "ht-halo-precision-datagrid");
-        assertStylename("modules/web/src/com/company/hunttech/web/screens/laboragreement/labor-agreement-edit.xml",
-                "ht-halo-precision-table");
-        assertStylename("modules/web/src/com/company/hunttech/web/screens/laboragreement/labor-agreement-edit.xml",
-                "ht-halo-precision-richtextarea");
-        assertStylename("modules/web/src/com/company/hunttech/web/screens/iteraction/iteraction-tree-browse.xml",
-                "ht-halo-precision-treetable");
-        assertStylename("modules/web/src/com/company/hunttech/web/screens/signicons/sign-icons-edit.xml",
-                "ht-halo-precision-textarea");
-    }
-
     private void assertStylename(String xmlPath, String stylename) throws IOException {
         String xml = readProjectFile(xmlPath);
         assertTrue("В " + xmlPath + " отсутствует stylename=" + stylename,

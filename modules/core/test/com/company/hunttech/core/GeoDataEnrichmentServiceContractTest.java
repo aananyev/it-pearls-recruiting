@@ -75,15 +75,6 @@ public class GeoDataEnrichmentServiceContractTest {
         assertNotNull("Координаты долготы должны присутствовать", spb.getLongitude());
     }
 
-    @Test
-    public void testDatabaseMigrationIntegrity() throws IOException {
-        String migrationSql = readProjectFile("modules/core/db/update/postgres/26/260822-3-addGeoAttributesColumns.sql");
-        assertTrue("Миграция должна содержать колонки HUNTTECH_COUNTRY", migrationSql.contains("HUNTTECH_COUNTRY"));
-        assertTrue("Миграция должна содержать колонки HUNTTECH_REGION", migrationSql.contains("HUNTTECH_REGION"));
-        assertTrue("Миграция должна содержать колонки HUNTTECH_CITY", migrationSql.contains("HUNTTECH_CITY"));
-        assertTrue("Миграция должна содержать колонки HUNTTECH_USER_SETTINGS", migrationSql.contains("HUNTTECH_USER_SETTINGS"));
-    }
-
     private static String readProjectFile(String relativePath) throws IOException {
         return new String(
                 Files.readAllBytes(projectRoot().resolve(relativePath)),

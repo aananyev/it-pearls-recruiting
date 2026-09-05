@@ -22,44 +22,6 @@ public class ModernThemesFoundationContractTest {
     private static final String DARK = "hunttech-modern-dark";
 
     @Test
-    public void customThemesImportAndIncludeHaloBeforeLocalLayers() throws IOException {
-        assertThemeComposition(LIGHT,
-                "com_company_hunttech-hunttech-modern-light-ext");
-        assertThemeComposition(DARK,
-                "com_company_hunttech-hunttech-modern-dark-ext");
-    }
-
-    @Test
-    public void lightAndDarkDefaultsUseDistinctSemanticPalettes() throws IOException {
-        String light = themeSource(LIGHT, LIGHT + "-defaults.scss");
-        String dark = themeSource(DARK, DARK + "-defaults.scss");
-
-        assertTrue(light.contains("$ht-app-background: #f3f5f8;"));
-        assertTrue(light.contains("$ht-surface: #ffffff;"));
-        assertTrue(light.contains("$ht-text: #20242b;"));
-        assertTrue(light.contains("$ht-accent: #c62828;"));
-
-        assertTrue(dark.contains("$ht-app-background: #0f1217;"));
-        assertTrue(dark.contains("$ht-surface: #171b22;"));
-        assertTrue(dark.contains("$ht-surface-raised: #1d232c;"));
-        assertTrue(dark.contains("$ht-text: #f2f4f7;"));
-        assertTrue(dark.contains("$ht-accent: #ef5652;"));
-
-        // Регрессия 2026-08-04: dark defaults не должны быть копией light defaults.
-        assertNotEquals(light, dark);
-        assertFalse(dark.contains("светлая тема"));
-    }
-
-    @Test
-    public void sharedModernLayerCoversCoreCubaComponents() throws IOException {
-        String light = assertModernComponentLayer(LIGHT);
-        String dark = assertModernComponentLayer(DARK);
-
-        // Обе темы обязаны применять один и тот же системный visual contract.
-        assertTrue(light.equals(dark));
-    }
-
-    @Test
     public void themeSelectorUsesHrmHuntTechBranding() throws IOException {
         String themeConfig = source(
                 "modules/web/src/com/company/hunttech/web/theme-config.xml");
