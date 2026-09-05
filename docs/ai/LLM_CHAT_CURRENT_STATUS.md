@@ -9,6 +9,7 @@
 - Репозиторий: `aananyev/it-pearls-recruiting`.
 - PR: [#230](https://github.com/aananyev/it-pearls-recruiting/pull/230), ветка `feat/llm-chat`.
 - Production не затрагивается; любые production-действия требуют отдельного распоряжения.
+- Именование субагентов в коммуникации и отчетах строго по должностям; технические nicknames платформы не используются как имена.
 - Кандидатские/CV-данные чат не извлекает; PII-маскирование пользовательских вставок — TODO по распоряжению пользователя.
 - Lookup usage по одному provider request ID не реализуется без подтверждённого API; используется `UNKNOWN_PENDING` и ручная reconciliation.
 
