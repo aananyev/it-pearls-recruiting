@@ -491,7 +491,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             OpenPosition openPosition = metadata.create(OpenPosition.class);
             openPosition.setVacansyName(safeVacName);
             openPosition.setOpenClose(false); // Открыта
-            openPosition.setSignDraft(false);
+            openPosition.setSignDraft(true);  // Вакансия создается как черновик (требование: скрыта до ручной проверки и снятия черновика)
             openPosition.setRemoteWork(data.getRemoteWork() != null ? data.getRemoteWork() : 1);
             openPosition.setWorkExperience(data.getWorkExperience() != null ? data.getWorkExperience() : 3);
             openPosition.setNumberPosition(data.getNumberPosition() != null ? data.getNumberPosition() : 1);
@@ -511,7 +511,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setOwner(recruiter);
             openPosition.setCommandCandidate(1);
 
-            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
+            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', signDraft=true (ЧЕРНОВИК), priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
                     openPosition.getVacansyName(), openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getWorkExperience());
 
             // Поиск / привязка проекта
@@ -543,30 +543,32 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 }
             }
 
-            commitContext.addInstanceToCommit(openPosition);
-
-            // Добавление ключевых навыков в позицию
+            // Создание дерева навыков SkillTree для позиции
             if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
-                log.info("[SMART_VACANCY_OPENING] Добавление {} навыков в SkillTree: {}", data.getRequiredSkills().size(), data.getRequiredSkills());
-                for (String rawSkill : data.getRequiredSkills()) {
-                    String cleanSkill = cleanTitle(rawSkill);
-                    if (!cleanSkill.isEmpty()) {
-                        SkillTree st = metadata.create(SkillTree.class);
-                        st.setSkillName(truncate(cleanSkill, 100));
-                        st.setOpenPosition(openPosition);
-                        commitContext.addInstanceToCommit(st);
-                    }
+                log.info("[SMART_VACANCY_OPENING] Привязка навыков к вакансии (всего: {})...", data.getRequiredSkills().size());
+                int count = 0;
+                for (String skillName : data.getRequiredSkills()) {
+                    if (skillName == null || skillName.trim().isEmpty()) continue;
+                    String cleanSkill = truncate(cleanTitle(skillName), 80);
+                    if (cleanSkill.isEmpty()) continue;
+
+                    SkillTree skill = metadata.create(SkillTree.class);
+                    skill.setSkillName(cleanSkill);
+                    skill.setOpenPosition(openPosition);
+                    commitContext.addInstanceToCommit(skill);
+                    count++;
                 }
+                log.info("[SMART_VACANCY_OPENING] Создано {} сущностей SkillTree для вакансии", count);
             }
 
             log.info("[SMART_VACANCY_OPENING] Отправка CommitContext в DataManager...");
             dataManager.commit(commitContext);
-            log.info("[SMART_VACANCY_OPENING] ✓ Вакансия успешно зафиксирована в БД! ID={}, vacansyID={}, name='{}', priority={}",
+            log.info("[SMART_VACANCY_OPENING] ✓ Вакансия успешно зафиксирована в БД! ID={}, vacansyID={}, name='{}', signDraft=true, priority={}",
                     openPosition.getId(), openPosition.getVacansyID(), openPosition.getVacansyName(), openPosition.getPriority());
 
             result.setSuccess(true);
             result.setOpenPosition(openPosition);
-            result.setMessage("Вакансия «" + openPosition.getVacansyName() + "» успешно открыта!");
+            result.setMessage("Черновик вакансии «" + openPosition.getVacansyName() + "» успешно создан!");
         } catch (Exception e) {
             log.error("[SMART_VACANCY_OPENING] ✘ КРИТИЧЕСКАЯ ОШИБКА при сохранении вакансии в БД", e);
             result.setSuccess(false);
@@ -580,27 +582,50 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         log.info("[SMART_VACANCY_OPENING] Поиск проекта: name='{}', company='{}'", cleanName, companyName);
         if (!cleanName.isEmpty()) {
             List<Project> list = dataManager.load(Project.class)
-                    .query("select e from hunttech_Project e where lower(e.projectName) like lower(:name)")
+                    .query("select e from hunttech_Project e where lower(e.projectName) like lower(:name) and (e.projectIsClosed is null or e.projectIsClosed = false)")
                     .parameter("name", "%" + cleanName + "%")
                     .view("project-picker-view")
                     .maxResults(1)
                     .list();
             if (!list.isEmpty()) {
-                log.info("[SMART_VACANCY_OPENING] Найден существующий проект: '{}' (ID={})", list.get(0).getProjectName(), list.get(0).getId());
+                log.info("[SMART_VACANCY_OPENING] Найден существующий открытый проект: '{}' (ID={})", list.get(0).getProjectName(), list.get(0).getId());
                 return list.get(0);
             }
         }
-        // Первый доступный проект в системе по умолчанию
+        if (companyName != null && !companyName.trim().isEmpty()) {
+            String cleanCompany = cleanTitle(companyName);
+            List<Project> companyProjects = dataManager.load(Project.class)
+                    .query("select e from hunttech_Project e where lower(e.projectName) like lower(:comp) and (e.projectIsClosed is null or e.projectIsClosed = false)")
+                    .parameter("comp", "%" + cleanCompany + "%")
+                    .view("project-picker-view")
+                    .maxResults(1)
+                    .list();
+            if (!companyProjects.isEmpty()) {
+                log.info("[SMART_VACANCY_OPENING] Найден открытый проект по компании '{}': '{}' (ID={})", cleanCompany, companyProjects.get(0).getProjectName(), companyProjects.get(0).getId());
+                return companyProjects.get(0);
+            }
+        }
+        // Поиск системного проекта по умолчанию
         List<Project> defaultList = dataManager.load(Project.class)
-                .query("select e from hunttech_Project e order by e.createTs desc")
+                .query("select e from hunttech_Project e where e.defaultProject = true and (e.projectIsClosed is null or e.projectIsClosed = false)")
                 .view("project-picker-view")
                 .maxResults(1)
                 .list();
         if (!defaultList.isEmpty()) {
-            log.info("[SMART_VACANCY_OPENING] Проект по умолчанию: '{}' (ID={})", defaultList.get(0).getProjectName(), defaultList.get(0).getId());
+            log.info("[SMART_VACANCY_OPENING] Использован системный проект по умолчанию: '{}' (ID={})", defaultList.get(0).getProjectName(), defaultList.get(0).getId());
             return defaultList.get(0);
         }
-        log.warn("[SMART_VACANCY_OPENING] В БД нет ни одного проекта hunttech_Project");
+        // Первый доступный открытый проект в системе
+        List<Project> fallbackList = dataManager.load(Project.class)
+                .query("select e from hunttech_Project e where (e.projectIsClosed is null or e.projectIsClosed = false) order by e.createTs desc")
+                .view("project-picker-view")
+                .maxResults(1)
+                .list();
+        if (!fallbackList.isEmpty()) {
+            log.warn("[SMART_VACANCY_OPENING] Проект не найден, использован открытый проект: '{}' (ID={})", fallbackList.get(0).getProjectName(), fallbackList.get(0).getId());
+            return fallbackList.get(0);
+        }
+        log.warn("[SMART_VACANCY_OPENING] В БД нет ни одного открытого проекта hunttech_Project");
         return null;
     }
 
