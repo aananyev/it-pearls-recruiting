@@ -45,9 +45,18 @@
 - В изолированной локальной песочнице временный mock OpenAI-compatible provider проверен без внешних API и production: sync JSON + usage, SSE streaming + usage + `[DONE]`, synthetic `503` и synthetic timeout — `PASS`; provider после прогона остановлен, временный файл удалён.
 - Оба agent-сеанса после завершения проверки закрыты; активных субагентов нет.
 
+## Локальная приёмка после запуска ветки
+
+- Локальные targeted tests, Java-компиляция и deploy `app-core`/`app-web`/`app-web-toolkit` завершились `BUILD SUCCESSFUL`.
+- В локальной PostgreSQL `hunttech` подтверждены AI-таблицы, активная административная конфигурация `DeepSeek (прод)` с моделью `deepseek-v4-flash`, privacy version `llm-chat-privacy-v1` и отсутствие записей чата до теста.
+- В локальной PostgreSQL применены семь additive/idempotent changeSet чата; это локальная rehearsal-проверка, не production-перенос. Общая месячная квота осталась `NULL` и без распоряжения не заполнялась.
+- Для локального пользователя без личного ключа подтверждено отсутствие `admin_fallback_consent`; реальный provider call не выполнялся, чтобы не обходить квоту и отдельное согласие.
+- Собственная копия Tomcat на 8081 запускалась только локально и остановлена. Оставить её параллельно нельзя безопасно без изоляции DB-owned Telegram-настройки: при `telegram_bot_start=true` она конфликтует с уже работающим ботом (`409`). Общий экземпляр 8080 не перенастраивался намеренно.
+- В доступном UI shell 8080 открывалась форма входа, но authenticated chat flow не подтвержден; проверка 20–50 UI-сессий пользователем отменена.
+
 ## Следующий этап
 
-Закрыть оставшийся security/data checklist этапа 4: доказать lifecycle ключей, отсутствие секретов в UI/log/error/audit, retention и consent/privacy version; затем перейти к authenticated staging/load этапа 5.
+Закрыть оставшийся security/data checklist этапа 4 runtime-evidence: доказать lifecycle ключей, отсутствие секретов в UI/log/error/audit, retention и consent/privacy version; затем перейти к authenticated staging этапа 5. Для локальной копии сначала нужна отдельная БД либо безопасный per-instance override Telegram-настройки.
 
 ## Оставшиеся этапы roadmap
 

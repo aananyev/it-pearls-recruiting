@@ -52,6 +52,14 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 
 В изолированной локальной песочнице дополнительно проверен временный mock OpenAI-compatible provider без внешних API и production: sync JSON с usage, SSE streaming с usage и `[DONE]`, synthetic HTTP 503 и synthetic timeout — все сценарии `PASS`. Mock provider после проверки остановлен, секреты и тестовые payload в репозитории не сохранены. Эта проверка подтверждает только HTTP-контракт provider adapter и не заменяет authenticated UI, reverse proxy, session affinity или staging migration rehearsal.
 
+## Результат локальной среды этапа 5
+
+- Локальная сборка, targeted tests, Java-компиляция и deploy артефактов завершены успешно; локальный `updateDb` применил семь additive/idempotent chat changeSet в базе `hunttech`.
+- AI Control Plane локальной базы содержит активную административную конфигурацию `DeepSeek (прод)`/`deepseek-v4-flash`; для `LLM_CHAT` установлена privacy version `llm-chat-privacy-v1`, но общая месячная квота не задана (`NULL`).
+- У локального тестового профиля нет личного API-ключа и отдельного согласия на admin fallback, поэтому реальный вызов настроенного провайдера без дополнительного решения не выполнялся.
+- Копия Tomcat на 8081 была запущена и остановлена в своей директории. Runtime-проверка выявила, что Telegram-флаг читается из общей DB-owned настройки; при включении вторая копия вызывает Telegram `409 Conflict`. Изменять эту настройку в общей БД нельзя, поэтому для полноценного 8081 нужен DB clone или согласованный per-instance switch.
+- UI shell 8080 доступен в браузере, но authenticated flow чата не подтвержден; массовая проверка 20–50 UI-сессий исключена по распоряжению пользователя. Общий 8080 не изменялся намеренно; production не затрагивался.
+
 ## Обязательные шаги до release
 
 1. Развернуть approved commit из PR в отдельном staging с выключенным chat feature flag.
@@ -79,6 +87,7 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 - Массовая очистка исторических `PROMPT_TEXT`/`RESPONSE_TEXT` не выполнялась и требует отдельного распоряжения, поскольку противоречит безопасному бессрочному хранению без согласованной процедуры.
 - Повторный запуск независимого тестировщика по текущему worktree завершился ошибкой лимита usage до отчёта; предыдущий отчет по старому commit не используется как приемка. Локальная приемка текущего worktree выполнена основным агентом.
 - Добавлен и локально проверен fail-closed privacy gate: `LLM_CHAT` не обращается к провайдеру без версии privacy policy.
+- Локальный параллельный runtime на 8081 не принят как staging: требуется изоляция DB-owned Telegram-настройки, а для реального provider call — утверждённая квота и подтверждённое отдельное fallback-согласие.
 
 ## Результат текущего security-среза
 
@@ -88,13 +97,13 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 
 ## Что делать на следующем этапе
 
-Сначала закрыть замечания аналитика по этапу 4, затем перейти к authenticated staging/load gate этапа 5:
+Сначала закрыть замечания аналитика по этапу 4, затем перейти к authenticated staging gate этапа 5:
 
 1. Выполнить в staging encryption/rotation lifecycle, secret leakage, retention, consent/privacy version и legacy plaintext remediation rehearsal; локальный implementation slice уже добавлен, но runtime подтверждение отсутствует.
 2. Получить staging URL, тестовую учётную запись, sandbox credentials и параметры reverse proxy/балансировщика.
 3. Развернуть approved commit только в staging с выключенным feature flag.
 4. Запустить transport smoke для asset/WebSocket, затем проверить authenticated push, recovery polling, quota, fallback, cancel, retry и owner isolation.
-5. Провести нагрузочную проверку 20–50 UI-сессий, reconnect, sticky-session и proxy timeouts.
+5. Нагрузочную проверку 20–50 UI-сессий не выполнять: она отменена пользователем. Оставить ограниченный reconnect/proxy smoke, если будет доступен отдельный staging proxy.
 6. Повторно прогнать migration/rollback rehearsal и обновить этот отчёт evidence и решением о готовности.
 
 ## Краткий список оставшихся этапов roadmap
