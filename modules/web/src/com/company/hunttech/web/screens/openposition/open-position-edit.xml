@@ -1195,7 +1195,7 @@
                                       width="100%"
                                       editorEnabled="true"
                                       dataContainer="laborAgreementDc"
-                                      stylename="open-position-editor-table-variant5">
+                                      stylename="borderless grid candidate-browse-grid">
                                 <actions>
                                     <action id="create" type="create"/>
                                     <action id="edit" type="edit"/>
@@ -1524,10 +1524,9 @@
                       stylename="open-position-editor-tab-content open-position-editor-table-view">
                     <!-- Таблица файлов позиции: описание, тип файла, размер, владелец. -->
                     <table id="someFilesTable"
-                           height="300px"
                            width="100%"
                            dataContainer="someFilesesDc"
-                           stylename="open-position-editor-table-variant5">
+                           stylename="borderless grid candidate-browse-grid">
                         <columns>
                             <column id="fileDescription"/>
                             <column id="fileType.nameFileType"/>
@@ -1724,7 +1723,7 @@
                                   hierarchyColumn="skillName"
                                   dataContainer="openPositionSkillsListsDc"
                                   hierarchyProperty="skillTree"
-                                  stylename="open-position-editor-table-variant5">
+                                  stylename="borderless grid candidate-browse-grid">
                         <columns>
                             <!-- Логотип навыка (кастомный рендер). -->
                             <column id="fileImageLogo"
@@ -1782,7 +1781,7 @@
                               dataContainer="openPositionNewsDc"
                               width="100%"
                               height="100%"
-                              stylename="open-position-editor-table-variant5">
+                              stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="remove" type="remove"/>
