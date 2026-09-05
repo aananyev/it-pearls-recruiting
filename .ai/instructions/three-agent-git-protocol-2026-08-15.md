@@ -46,9 +46,40 @@ Hermes-1 выполняет для `ExtSettingsWindow` только провер
 - `modules/web/themes/*/com.company.hunttech/edit-screen-shared-styles.scss`;
 - `modules/core/test/com/company/hunttech/core/ExtSettingsWindow*ContractTest.java`.
 
-**Владение формами**: `CompanyEdit` и `ExtSettingsWindow` — **эксклюзивно Antigravity**.
-Без особого распоряжения пользователя ни Hermes-2, ни другие агенты не имеют права
-создавать PR, вносящие изменения в эти файлы. Hermes-1 отклоняет такие PR на входе.
+## Защита ExtUserEdit (обязательно для Hermes-1)
+
+Добавлено 2026-09-05 (Hermes-1, по итогам диагностики deploy-гэпа PR #225–229).
+Аналогичные ограничения: не заменять файлы из старых веток, не удалять
+контрактные тесты. Если merge меняет файлы ниже вне одобренного PR —
+остановить merge/deploy, сохранить рабочее дерево, запросить UI-review:
+
+- `modules/web/src/com/company/hunttech/web/screens/extuser/ext-user-edit.xml`;
+- `modules/web/themes/*/com.company.hunttech/ext-user-editor.scss`;
+- `modules/core/test/com/company/hunttech/core/ExtUserEdit*ContractTest.java`;
+- `modules/core/test/com/company/hunttech/core/ExtUserChangePasswordContractTest.java`.
+
+**Владение формами**: `CompanyEdit`, `ExtSettingsWindow` и `ExtUserEdit` —
+**эксклюзивно Antigravity**. Без особого распоряжения пользователя ни Hermes-2,
+ни другие агенты не имеют права создавать PR, вносящие изменения в эти файлы.
+Hermes-1 отклоняет такие PR на входе.
+
+## Дисциплина деплоя (обязательно для Hermes-1; введено 2026-09-05)
+
+Инцидент 04.09.2026: PR #225–227 (фиксы компоновки CompanyEdit/ExtSettingsWindow)
+были смержены в 08:00–08:37, но последний задокументированный деплой master —
+0.424 от 01:00, ДО мержей; отчётов о деплое #225–229 нет. Пользователь видел
+«старую версию» при корректном коде в master. Правила:
+
+1. **Каждая пачка мержей в master завершается деплоем**: `scripts/start-app.sh`
+   (без флагов) → HTTP 200 → smoke затронутых экранов со скриншотами → отчёт
+   `.ai/reports/{date}-PR{n}-{n}-deploy.md`. PR без deploy-отчёта считается
+   НЕДОЗАВЕРШЁННЫМ.
+2. **BRANCH DEPLOY (запуск ветки агента на общий Tomcat) — только с немедленным
+   возвратом master** (`scripts/start-app.sh` без флагов) по завершении проверки
+   агента. Долго висящий Tomcat на ветке агента запрещён: пользователь видит не то,
+   что в master.
+3. Перед smoke-проверкой фиксов компоновки — жёсткая перезагрузка браузера
+   (Ctrl+Shift+R): Vaadin отдаёт styles.css по стабильному URL и агрессивно кэшируется.
 
 ## Обязательный OCR Code Review (для всех PR)
 
