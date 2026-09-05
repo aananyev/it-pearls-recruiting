@@ -43,6 +43,7 @@ cuba {
         group = 'com.company.hunttech'
         version = '0.441'
         isSnapshot = true
+        isSnapshot = true
     }
     tomcat {
         dir = "$project.rootDir/deploy/tomcat"
