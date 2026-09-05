@@ -4,6 +4,7 @@ import com.company.hunttech.app.ImageProcessingService;
 import com.company.hunttech.config.HunttechImageConfig;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.service.AiConsentPolicy;
 import com.company.hunttech.service.GeoDataEnrichmentService;
 import com.company.hunttech.service.HrmAiService;
 import com.company.hunttech.service.UserAiContextService;
@@ -40,7 +41,7 @@ public class ExtSettingsWindow extends SettingsWindow {
             "select e from hunttech_UserSettings e where e.user = :currentUser";
     private static final String QUERY_GET_USER_AI_PROFILE =
             "select e from hunttech_UserAiProfile e where e.user = :currentUser";
-    private static final String AI_PROFILE_CONSENT_VERSION = "2026-07-22-v1";
+    private static final String AI_PROFILE_CONSENT_VERSION = AiConsentPolicy.PROFILE_EXTERNAL_PROCESSING_VERSION;
 
     @Inject private UserSessionSource userSessionSource;
     @Inject private Metadata metadata;
@@ -95,6 +96,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Inject private LookupField<AiAnswerStructure> preferredAnswerStructureField;
     @Inject private CheckBox profileEnabledField;
     @Inject private CheckBox externalProcessingAllowedField;
+    @Inject private CheckBox adminFallbackConsentField;
 
     @Inject private CollectionDatasource<UserAiConfiguration, UUID> userAiConfigsDs;
     @Inject private Table<UserAiConfiguration> aiConfigsTable;
@@ -134,6 +136,7 @@ public class ExtSettingsWindow extends SettingsWindow {
         functionalRoleField.addValueChangeListener(event -> refreshProfileSummary());
         profileEnabledField.addValueChangeListener(event -> refreshProfileSummary());
         externalProcessingAllowedField.addValueChangeListener(event -> refreshProfileSummary());
+        adminFallbackConsentField.addValueChangeListener(event -> refreshProfileSummary());
     }
 
     private void loadExtUser() {
@@ -187,6 +190,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     private void applySafeProfileDefaults(UserAiProfile profile) {
         if (profile.getProfileEnabled() == null) profile.setProfileEnabled(false);
         if (profile.getExternalProcessingAllowed() == null) profile.setExternalProcessingAllowed(false);
+        if (profile.getAdminFallbackConsent() == null) profile.setAdminFallbackConsent(false);
         if (profile.getPreferredLanguage() == null) profile.setPreferredLanguage(AiPreferredLanguage.AUTO);
         if (profile.getResponseDetailLevel() == null) profile.setResponseDetailLevel(AiResponseDetailLevel.BALANCED);
         if (profile.getCommunicationStyle() == null) profile.setCommunicationStyle(AiCommunicationStyle.NEUTRAL);
@@ -561,8 +565,11 @@ public class ExtSettingsWindow extends SettingsWindow {
         if (profile == null) return;
         profile.setProfileEnabled(false);
         profile.setExternalProcessingAllowed(false);
+        profile.setAdminFallbackConsent(false);
         profile.setConsentVersion(null);
         profile.setConsentAcceptedAt(null);
+        profile.setAdminFallbackConsentVersion(null);
+        profile.setAdminFallbackConsentAt(null);
         profile.setProfileConfirmedAt(null);
         profile.setAboutMe(null);
         profile.setCurrentPosition(null);
@@ -660,6 +667,15 @@ public class ExtSettingsWindow extends SettingsWindow {
             profile.setProfileEnabled(false);
             profile.setConsentVersion(null);
             profile.setConsentAcceptedAt(null);
+        }
+        if (Boolean.TRUE.equals(profile.getAdminFallbackConsent())) {
+            if (profile.getAdminFallbackConsentAt() == null) {
+                profile.setAdminFallbackConsentAt(now);
+            }
+            profile.setAdminFallbackConsentVersion(AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+        } else {
+            profile.setAdminFallbackConsentVersion(null);
+            profile.setAdminFallbackConsentAt(null);
         }
         if (Boolean.TRUE.equals(profile.getProfileEnabled())) profile.setProfileConfirmedAt(now);
         refreshProfileSummary();

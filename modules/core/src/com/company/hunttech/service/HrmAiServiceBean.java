@@ -98,12 +98,20 @@ public class HrmAiServiceBean implements HrmAiService {
                     + configuration.getProviderCode() + "» не подключён в приложении.", e);
         }
 
-        String response = provider.generateText(
-                "Ответь одним словом: ok",
-                "Тестирование подключения к API искусственного интеллекта.",
-                apiKey,
-                configuration.getDefaultModelName(),
-                Map.of("temperature", 0.0));
+        String response;
+        try {
+            response = provider.generateText(
+                    "Ответь одним словом: ok",
+                    "Тестирование подключения к API искусственного интеллекта.",
+                    apiKey,
+                    configuration.getDefaultModelName(),
+                    Map.of("temperature", 0.0));
+        } catch (RuntimeException failure) {
+            String safeMessage = AiSecuritySanitizer.sanitizeError(failure);
+            throw new DevelopmentException(safeMessage == null
+                    ? "Ошибка проверки AI-подключения."
+                    : safeMessage);
+        }
 
         if (!isConfigured(response)) {
             throw new DevelopmentException("API провайдера «"

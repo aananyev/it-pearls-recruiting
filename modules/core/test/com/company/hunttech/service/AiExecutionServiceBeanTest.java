@@ -5,6 +5,7 @@ import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.UserAiProfile;
+import com.company.hunttech.service.AiConsentPolicy;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.entity.ai.AiCallLog;
 import com.company.hunttech.entity.ai.AiCapability;
@@ -354,6 +355,8 @@ public class AiExecutionServiceBeanTest {
 
         UserAiProfile profile = new UserAiProfile();
         profile.setAdminFallbackConsent(true);
+        profile.setAdminFallbackConsentVersion(AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+        profile.setAdminFallbackConsentAt(new java.util.Date());
         stubProfile(profile);
         AdminAiConfiguration admin = function.getAdminConfiguration();
         admin.setProviderCode("admin-provider");

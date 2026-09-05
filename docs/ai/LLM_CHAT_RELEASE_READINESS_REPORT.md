@@ -13,8 +13,8 @@
 ## Кто работал на текущем этапе
 
 - Основной агент: прочитал roadmap и сопутствующую документацию, устранил неполноту независимого test-run evidence, выполнил полный локальный прогон и обновил отчёт.
-- Аналитик `Goodall`: проверил соответствие этапу 4 и полноту security/release gates; verdict `REWORK`.
-- Автоматизированный тестировщик `Lorentz`: проверил PR, тесты, миграции и риски staging; verdict `REWORK`. Незавершённый сеанс после отчёта закрыт.
+- Аналитик: проверил соответствие этапу 4 и полноту security/release gates; verdict `REWORK`.
+- Автоматизированный тестировщик: проверил PR, тесты, миграции и риски staging; verdict `FAIL` для полного acceptance gate. Сеанс после отчёта закрыт.
 
 ## Что уже выполнено
 
@@ -26,11 +26,15 @@
 - Mock-интеграция personal/admin routing покрыта тестами.
 - Локальный read-only transport smoke: push asset HTTP 200, WebSocket HTTP 101, 8/8 параллельных handshake.
 - Migration plan с seed-данными, rehearsal, verification и rollback зафиксирован отдельно.
+- Versioned consent fallback: сервер проверяет флаг, версию и дату явного согласия; в ExtSettingsWindow добавлен отдельный checkbox, независимый от `externalProcessingAllowed`.
+- `AiCredentialService.migrateLegacyUserSecrets()` выполняет admin-only перенос legacy `API_KEY` в AES-GCM ciphertext и очищает plaintext; SQL-backfill не используется.
+- `AiCredentialService.rotateSecrets()` добавлен для controlled master-key rotation через текущий и временный предыдущий server-side key.
+- `AiSecuritySanitizer` применяется к ошибкам, AI-аудиту и сообщениям server log; локальный contract test проверяет редактирование Authorization/secret-like значений.
 
 ## Результат независимой приёмки
 
 - Аналитик потребовал не закрывать этап 4 до evidence по encryption/rotation, secret leakage, retention, privacy/consent и runtime security.
-- QA указал P1-блокеры: authenticated staging/load, sandbox credentials, legacy plaintext remediation и отсутствие provider-specific usage lookup.
+- Автоматизированный тестировщик подтвердил локальный PASS среза, но указал блокеры полного gate: authenticated staging/load, sandbox credentials, runtime secret leakage/retention checks и legacy migration evidence.
 - Полный локальный прогон после QA замечания завершён успешно:
 
 ```text
@@ -78,7 +82,7 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 
 Сначала закрыть замечания аналитика по этапу 4, затем перейти к authenticated staging/load gate этапа 5:
 
-1. Зафиксировать encryption/rotation lifecycle, secret leakage, retention, consent/privacy version и legacy plaintext remediation.
+1. Выполнить в staging encryption/rotation lifecycle, secret leakage, retention, consent/privacy version и legacy plaintext remediation rehearsal; локальный implementation slice уже добавлен, но runtime подтверждение отсутствует.
 2. Получить staging URL, тестовую учётную запись, sandbox credentials и параметры reverse proxy/балансировщика.
 3. Развернуть approved commit только в staging с выключенным feature flag.
 4. Запустить transport smoke для asset/WebSocket, затем проверить authenticated push, recovery polling, quota, fallback, cancel, retry и owner isolation.

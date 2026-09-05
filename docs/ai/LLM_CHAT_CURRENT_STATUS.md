@@ -26,6 +26,7 @@
 
 - Backend chat service, conversation/message, quota ledger, requestId/idempotency, cancel и `UNKNOWN_PENDING`.
 - Secure personal credentials с transitional legacy `API_KEY`.
+- Admin-only legacy migration и server-side master-key rotation с временным previous key.
 - Floating UI, geometry settings, mobile sheet, streaming, Vaadin push и polling recovery 3 секунды.
 - Permission-gated admin history и manual quota reconciliation.
 - Mock routing tests, security-contract tests, migration/rollback plan и read-only staging transport smoke.
@@ -33,8 +34,9 @@
 ## Приёмка текущего этапа
 
 - Текущий этап: этап 4 «Безопасность и данные», hardening-срез.
-- Аналитик `Goodall`: `REWORK`; требует evidence шифрования/ротации, secret leakage, retention, consent/privacy version и runtime security.
-- Тестировщик `Lorentz`: `REWORK`; staging/auth/load и legacy plaintext остаются P1, статические тесты не заменяют runtime acceptance.
+- Аналитик: `REWORK`; требует evidence шифрования/ротации, secret leakage, retention, consent/privacy version и runtime security.
+- Автоматизированный тестировщик: `FAIL` для полного acceptance gate; локальный кодовый срез прошёл, но staging/auth/load и runtime evidence отсутствуют.
+- В текущем срезе добавлены versioned fallback consent и checkbox ExtSettingsWindow, admin-only legacy secret migration/master-key rotation, общий sanitizer ошибок/аудита и security-contract tests.
 - После замечаний выполнен полный локальный прогон security, foundation, schema, routing, context тестов и web-компиляции: `BUILD SUCCESSFUL`.
 - Оба agent-сеанса после завершения проверки закрыты; активных субагентов нет.
 
@@ -52,7 +54,7 @@
 
 ## Канонические документы
 
-- `LLM_CHAT_IMPLEMENTATION_PLAN.md` — roadmap аналитика.
+- `LLM_CHAT_IMPLEMENTATION.md` — roadmap аналитика.
 - `LLM_CHAT_RELEASE_READINESS_REPORT.md` — блокеры и шаги до выпуска.
 - `LLM_CHAT_PRODUCTION_MIGRATION_PLAN.md` — changeSet, seed, rehearsal и rollback.
 - `LLM_CHAT_PUSH_STAGE_VERIFICATION.md` — transport evidence и staging gate.

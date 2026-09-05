@@ -504,7 +504,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             callLog.setResponseText(responseText);
             callLog.setCallerSource(callerSource);
             callLog.setStatus(status);
-            callLog.setErrorMessage(errorMessage);
+            callLog.setErrorMessage(AiSecuritySanitizer.sanitizeError(errorMessage));
             if (userContext != null) {
                 callLog.setContextIncluded(userContext.contextIncluded);
                 callLog.setContextCodePoints(userContext.contextCodePoints);
@@ -512,7 +512,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
             dataManager.commit(new CommitContext(callLog));
         } catch (Exception e) {
-            log.error("Не удалось сохранить запись журнала вызовов AI: {}", e.getMessage(), e);
+            log.error("Не удалось сохранить запись журнала вызовов AI: {}",
+                    AiSecuritySanitizer.sanitizeError(e));
         }
     }
 
@@ -711,13 +712,16 @@ public class AiExecutionServiceBean implements AiExecutionService {
         if (function == null || !LLM_CHAT_FUNCTION_CODE.equals(function.getCode())) {
             return;
         }
-        boolean consentGranted = currentUser != null && dataManager.load(UserAiProfile.class)
+        UserAiProfile profile = currentUser == null ? null : dataManager.load(UserAiProfile.class)
                 .query(QUERY_USER_AI_PROFILE)
                 .parameter("user", currentUser)
                 .view("userAiProfile-view")
                 .optional()
-                .map(UserAiProfile::getAdminFallbackConsent)
-                .orElse(false);
+                .orElse(null);
+        boolean consentGranted = profile != null
+                && Boolean.TRUE.equals(profile.getAdminFallbackConsent())
+                && AiConsentPolicy.ADMIN_FALLBACK_VERSION.equals(profile.getAdminFallbackConsentVersion())
+                && profile.getAdminFallbackConsentAt() != null;
         if (!consentGranted) {
             throw new DevelopmentException(
                     "Персональное AI-подключение недоступно. Для автоматического fallback "

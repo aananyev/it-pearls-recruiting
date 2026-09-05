@@ -19,6 +19,10 @@
 5. `260904-5-addLlmChatRequestId`: добавить nullable `REQUEST_ID` и индекс сообщений.
 6. `260904-6-addLlmChatReconciliationAudit`: добавить `PROVIDER_REQUEST_ID` и поля ручной сверки.
 
+После применения changeSet 260904-4 выполнить только в core/runtime с настроенным `hunttech.ai.encryptionKey` контролируемую операцию `AiCredentialService.migrateLegacyUserSecrets()` под правом `hunttech.ai.manageCorporateCredentials`. SQL не должен читать или шифровать plaintext API-ключи. Операция повторяема: уже очищенные `API_KEY` не выбираются, при ошибке незавершённые записи остаются для повторного запуска.
+
+Ротация master-key выполняется отдельным окном: новый ключ задаётся в `hunttech.ai.encryptionKey`, прежний временно — в `hunttech.ai.previousEncryptionKey`; затем admin-only `AiCredentialService.rotateSecrets()` пере-шифровывает все ciphertext, после verification предыдущий ключ удаляется и выполняется повторная проверка доступа к AI. Значения ключей не попадают в migration log.
+
 Позиция общей квоты — `AiFunctionConfiguration.defaultMonthlyTokenQuota` для `LLM_CHAT`. Квота считается за календарный месяц; активный индивидуальный override пользователя имеет приоритет.
 
 ## Обязательные данные для загрузки
@@ -43,10 +47,13 @@
 1. Проверить текущий master changelog, наличие AI-таблиц и фактические counts.
 2. Проверить backup и возможность восстановления.
 3. Сохранить экспорт AI-конфигураций без секретов.
-4. Прогнать все changeSet и seed повторно; counts и контрольные суммы не должны измениться.
-5. Проверить rollback rehearsal: выключение feature flag, восстановление конфигурации и сохранение ledger.
-6. Выполнить `scripts/verify-llm-chat-staging.sh` через реальный staging proxy.
-7. Выполнить authenticated UI, provider sandbox, quota, fallback, cancel, retry и privacy smoke.
+4. Выполнить dry-run инвентаризации legacy `API_KEY` без вывода значений; записать только count и идентификаторы конфигураций.
+5. Прогнать все changeSet и seed повторно; counts и контрольные суммы не должны измениться.
+6. Запустить admin-only legacy migration в staging, сохранить count до/после и checksum ciphertext без раскрытия ключей; повторный запуск должен дать `0` новых миграций.
+7. Провести rotation rehearsal: новый/предыдущий server-side key, `rotateSecrets()`, проверка provider call, повторный запуск без изменений и удаление previous key после сверки.
+8. Проверить rollback rehearsal: выключение feature flag, восстановление конфигурации и сохранение ledger.
+9. Выполнить `scripts/verify-llm-chat-staging.sh` через реальный staging proxy.
+10. Выполнить authenticated UI, provider sandbox, quota, fallback, cancel, retry и privacy smoke.
 
 ## Порядок rollout
 
@@ -65,6 +72,9 @@
 - Есть ровно одна квотная запись пользователя на календарный месяц.
 - System prompt непустой, версия и checksum совпадают с migration log.
 - Нет фиктивных quota periods, usage и provider request IDs.
+- После legacy migration нет активных непустых `API_KEY`; ciphertext имеет формат `v1:<iv>:<ciphertext>`.
+- После rotation rehearsal все активные credentials расшифровываются только текущим key; предыдущий key удалён из конфигурации после verification.
+- Старые ключи не появляются в UI, исключениях, `AiCallLog` и server log; secret-like значения в диагностических ошибках заменены `[REDACTED]`.
 - Повторный `requestId` не создаёт второй provider call или списание.
 - `UNKNOWN_PENDING` закрывается только ручной сверкой без повторного вызова провайдера.
 - История доступна только владельцу и разрешённому администратору.
@@ -76,6 +86,7 @@
 - Не удалять новые таблицы, историю, аудит и подтверждённый usage автоматически.
 - Восстановить предыдущие значения конфигурации из backup/versioned seed.
 - Pending reservation оставить для ручной сверки; повторный provider call запрещён.
+- При частичной legacy migration повторно запустить batch после устранения причины; не выполнять SQL-очистку plaintext без подтверждённого ciphertext.
 - Фактическое списание подтвердить через `reconcileUnknown()` с audit trail.
 - Удаление схемы допускается только отдельным утверждённым планом.
 

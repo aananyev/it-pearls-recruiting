@@ -39,6 +39,9 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 - `loadHistoryAsAdmin()` — только при `hunttech.ai.viewChatHistoryAdmin`.
 - Административная сверка неизвестного usage — только при `hunttech.ai.reconcileChatQuota`.
 - В transport snapshot не передаются ключи, prompt payload провайдера или чужие диалоги.
+- Fallback проверяет не только флаг, но и актуальные `adminFallbackConsentVersion` и дату явного согласия; изменение версии политики отзывает старое согласие.
+- Ошибки, попадающие в UI, `AiCallLog` и server log, проходят общий `AiSecuritySanitizer`; credentials, Authorization и token-like значения заменяются на `[REDACTED]`.
+- История не имеет пользовательской операции удаления; retention бессрочный, а доступ к содержимому ограничен владельцем и отдельным административным permission.
 
 ## Тестирование
 

@@ -10,6 +10,7 @@ import com.company.hunttech.entity.ai.LlmChatQuotaReservation;
 import com.company.hunttech.entity.ai.LlmUserQuotaOverride;
 import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.company.hunttech.service.AiStreamListener;
+import com.company.hunttech.service.AiSecuritySanitizer;
 import com.haulmont.cuba.core.sys.SecurityContextAwareRunnable;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
@@ -167,7 +168,10 @@ public class LlmChatServiceBean implements LlmChatService {
             result = aiExecutionService.executeText(FUNCTION_CODE, context);
         } catch (RuntimeException failure) {
             markQuotaPending(quota);
-            throw failure;
+            String safeMessage = AiSecuritySanitizer.sanitizeError(failure);
+            throw new DevelopmentException(safeMessage == null
+                    ? "Ошибка выполнения запроса к AI."
+                    : safeMessage);
         }
         if (result == null || result.getText() == null || result.getText().trim().isEmpty()) {
             markQuotaPending(quota);
@@ -352,8 +356,10 @@ public class LlmChatServiceBean implements LlmChatService {
                     // still visible to the administrator for manual reconciliation.
                 }
             }
-            String message = failure.getMessage() == null ? "Ошибка выполнения запроса к AI." : failure.getMessage();
-            session.complete(isCancellationMessage(message) ? "CANCELLED" : "ERROR", message);
+            String originalMessage = failure.getMessage();
+            String safeMessage = AiSecuritySanitizer.sanitizeError(failure);
+            session.complete(isCancellationMessage(originalMessage) ? "CANCELLED" : "ERROR",
+                    safeMessage == null ? "Ошибка выполнения запроса к AI." : safeMessage);
             publishStreamEvent(session, true);
         }
     }

@@ -3,6 +3,7 @@ package com.company.hunttech.service;
 import com.company.hunttech.core.ai.AIProvider;
 import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.company.hunttech.core.ai.AiSecretService;
+import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -49,6 +51,64 @@ public class AiCredentialServiceBean implements AiCredentialService {
             throw new DevelopmentException("Новый персональный API-ключ не задан.");
         }
         return aiSecretService.encrypt(plainText);
+    }
+
+    @Override
+    public int migrateLegacyUserSecrets() {
+        requireAdminPermission();
+        List<UserAiConfiguration> legacyConfigurations = dataManager.load(UserAiConfiguration.class)
+                .query("select e from hunttech_UserAiConfiguration e "
+                        + "where e.apiKey is not null and trim(e.apiKey) <> ''")
+                .view("user-ai-configuration-ai-execution-view")
+                .list();
+        int migrated = 0;
+        for (UserAiConfiguration configuration : legacyConfigurations) {
+            String legacySecret = configuration.getApiKey();
+            if (!isConfigured(legacySecret)) {
+                continue;
+            }
+            configuration.setApiKeyEncrypted(aiSecretService.encrypt(legacySecret));
+            configuration.setApiKey(null);
+            dataManager.commit(configuration);
+            migrated++;
+        }
+        return migrated;
+    }
+
+    @Override
+    public int rotateSecrets() {
+        requireAdminPermission();
+        int rotated = 0;
+        List<UserAiConfiguration> userConfigurations = dataManager.load(UserAiConfiguration.class)
+                .query("select e from hunttech_UserAiConfiguration e "
+                        + "where e.apiKeyEncrypted is not null and trim(e.apiKeyEncrypted) <> ''")
+                .view("user-ai-configuration-ai-execution-view")
+                .list();
+        for (UserAiConfiguration configuration : userConfigurations) {
+            String current = configuration.getApiKeyEncrypted();
+            String rotatedValue = aiSecretService.rotate(current);
+            if (!rotatedValue.equals(current)) {
+                configuration.setApiKeyEncrypted(rotatedValue);
+                dataManager.commit(configuration);
+                rotated++;
+            }
+        }
+
+        List<AdminAiConfiguration> adminConfigurations = dataManager.load(AdminAiConfiguration.class)
+                .query("select e from hunttech_AdminAiConfiguration e "
+                        + "where e.apiKeyEncrypted is not null and trim(e.apiKeyEncrypted) <> ''")
+                .view("admin-ai-configuration-secret-view")
+                .list();
+        for (AdminAiConfiguration configuration : adminConfigurations) {
+            String current = configuration.getApiKeyEncrypted();
+            String rotatedValue = aiSecretService.rotate(current);
+            if (!rotatedValue.equals(current)) {
+                configuration.setApiKeyEncrypted(rotatedValue);
+                dataManager.commit(configuration);
+                rotated++;
+            }
+        }
+        return rotated;
     }
 
     @Override

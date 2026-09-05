@@ -58,6 +58,26 @@ public class LlmChatSecurityContractTest {
         assertTrue(permissions.contains("hunttech.ai.reconcileChatQuota"));
     }
 
+    @Test
+    public void stageFourSecurityBoundariesAreWired() throws IOException {
+        String credentials = source("modules/core/src/com/company/hunttech/service/AiCredentialServiceBean.java");
+        String execution = source("modules/core/src/com/company/hunttech/service/AiExecutionServiceBean.java");
+        String chat = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String screen = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java");
+        String xml = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
+
+        assertTrue(credentials.contains("migrateLegacyUserSecrets"));
+        assertTrue(credentials.contains("rotateSecrets"));
+        assertTrue(credentials.contains("requireAdminPermission()"));
+        assertTrue(execution.contains("AiSecuritySanitizer.sanitizeError(errorMessage)"));
+        assertTrue(execution.contains("AiConsentPolicy.ADMIN_FALLBACK_VERSION"));
+        assertTrue(chat.contains("AiSecuritySanitizer.sanitizeError(failure)"));
+        assertTrue(screen.contains("adminFallbackConsentField"));
+        assertTrue(screen.contains("AiConsentPolicy.ADMIN_FALLBACK_VERSION"));
+        assertTrue(xml.contains("property=\"adminFallbackConsent\""));
+        assertFalse(chat.contains("dataManager.remove"));
+    }
+
     private String source(String relativePath) throws IOException {
         Path project = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (project != null && !Files.exists(project.resolve("build.gradle"))) {

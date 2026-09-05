@@ -251,6 +251,8 @@
                                         <checkBox id="profileEnabledField" datasource="userAiProfileDs" property="profileEnabled" caption="msg://profileEnabled"/>
                                         <checkBox id="externalProcessingAllowedField" datasource="userAiProfileDs" property="externalProcessingAllowed" caption="msg://externalProcessingAllowed"/>
                                         <label value="msg://externalProcessingConsentText" width="100%" stylename="user-ai-profile-help"/>
+                                        <checkBox id="adminFallbackConsentField" datasource="userAiProfileDs" property="adminFallbackConsent" caption="msg://adminFallbackConsent"/>
+                                        <label value="msg://adminFallbackConsentText" width="100%" stylename="user-ai-profile-help"/>
                                         <label id="consentAcceptedAtLabel" width="100%" stylename="h4"/>
                                     </vbox>
                                 </groupBox>

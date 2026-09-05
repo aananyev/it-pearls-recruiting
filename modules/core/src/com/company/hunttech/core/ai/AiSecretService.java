@@ -28,6 +28,27 @@ public class AiSecretService {
         return cipher.decrypt(encryptedText, requireEncryptionKey());
     }
 
+    /**
+     * Keeps ciphertext unchanged when it already uses the current key; otherwise
+     * decrypts it with the temporary previous key and encrypts it with the current key.
+     */
+    public String rotate(String encryptedText) {
+        String currentKey = requireEncryptionKey();
+        try {
+            cipher.decrypt(encryptedText, currentKey);
+            return encryptedText;
+        } catch (RuntimeException currentKeyFailure) {
+            String previousKey = configuration.getConfig(HunttechAiSecurityConfig.class)
+                    .getPreviousEncryptionKey();
+            if (previousKey == null || previousKey.trim().length() < 32) {
+                throw new DevelopmentException(
+                        "Не настроен предыдущий ключ шифрования для ротации AI credentials.");
+            }
+            String plainText = cipher.decrypt(encryptedText, previousKey);
+            return cipher.encrypt(plainText, currentKey);
+        }
+    }
+
     private String requireEncryptionKey() {
         String key = configuration.getConfig(HunttechAiSecurityConfig.class).getEncryptionKey();
         if (key == null || key.trim().length() < 32) {
