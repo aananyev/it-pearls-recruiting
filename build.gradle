@@ -41,7 +41,7 @@ configurations.all {
 cuba {
     artifact {
         group = 'com.company.hunttech'
-        version = '0.442'
+        version = '0.443'
         isSnapshot = true
         isSnapshot = true
         isSnapshot = true
