@@ -67,6 +67,9 @@ stylename="job-candidate-sidebar edit-sidebar"`, внутри — вертика
 - Аватар: компонент `ovaFallbackImage` **120×120px**, `ovalWidth/ovalHeight="120px"`,
   `stylename="job-candidate-avatar"`, `scaleMode="SCALE_DOWN"`, обязательный
   `fallbackThemePath` (`job-candidate-reestr.xml:64-70`, `open-position-reestr-browse.xml:81-87`).
+  Геометрия задаётся SCSS и переопределять её в экране нельзя: `border-radius: 50%`,
+  рамка `4px solid rgba(255,255,255,.96)`, тень `0 8px 24px rgba(0,0,0,.30)`,
+  `object-fit: cover` (`job-candidate-editor.scss:183-209`).
   Контракт fallback-изображения кандидата: `docs/ui/ReestrBrowseFallbackNoCandidate_Spec.md:21-22,40,49`
   (силуэт человека `icons/no-candidate.png`, контроллер не перетирает fallback чужим путём).
 - Иерархия подписей идентичности (три уровня типографики, все `align="MIDDLE_CENTER"`,
@@ -295,6 +298,10 @@ themes-tmp, поэтому каждая тема содержит реальну
 (job-candidate-editor.scss + edit-screen-shared-styles.scss). Правило: новая правка
 любого из этих классов обязана попасть во все 7 копий; PR, изменивший partial только
 в части тем, отклоняется QA.
+- **Механическая проверка синхронности**: на master `7c1c9b7a` все 7 копий каждого
+  partial'а sha256-идентичны (проверено: `shasum -a 256 */com.company.hunttech/{job-candidate-editor,edit-screen-shared-styles}.scss`
+  даёт один хеш на partial). После правки хеши обязаны остаться идентичными —
+  это пункт чеклиста QA (п.9.14).
 
 7.3. **Цвета**: правила привязаны к Vaadin-переменным темы (`$v-font-color`,
 `$v-selection-color`, `$v-panel-background-color`) — см. `edit-screen-shared-styles.scss:84,92,98,408-409,442`.
@@ -303,13 +310,16 @@ themes-tmp, поэтому каждая тема содержит реальну
 `job-candidate-editor.scss:1336`, градиент сайдбара `:68-69`, цвета identity-подписей
 `:1124-1141`) и он обязан быть продублирован во всех копиях (п.7.1).
 
-7.4. **Responsive** (готовые брейкпоинты partial'а, переопределять нельзя):
+7.4. **Responsive** (готовые брейкпоинты partial'ов, переопределять нельзя):
 - ≤1440px: уплотнение тулбара (`job-candidate-editor.scss:1438-1463`);
+- ≤1366px (реестровый partial): сайдбар 296px + уплотнение горизонтальных padding
+  (`job-candidate-editor.scss:1036-1048`);
 - ≤1240px: группы тулбара складываются в две строки, правая — с пунктирным разделителем
   (`job-candidate-editor.scss:1465-1487`);
 - ≤1100px: сайдбар 284px (`job-candidate-editor.scss:1538-1547`);
 - ≤900px: кнопки тулбара 11.5px/padding 6px (`job-candidate-editor.scss:1489-1505`);
-- ≤1366px (shared): базовый `edit-sidebar` 250px (`edit-screen-shared-styles.scss:672-678`).
+- ≤1366px (shared, для базовых edit-форм): `edit-sidebar` 250px
+  (`edit-screen-shared-styles.scss:672-678`).
 
 ---
 
