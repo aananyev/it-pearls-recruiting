@@ -1342,98 +1342,104 @@
     /*
      * Variant 5: плотные theme-aware таблицы. Селекторы ограничены namespace,
      * стили таблиц других экранов не затрагиваются.
+     * Обновлено для соответствия контракту ReestrBrowse_Design_Contract.md:
+     * - строка 38px + word-break
+     * - соответствует candidate-browse-grid
      */
-    .open-position-editor-table-variant5,
-    .open-position-editor-table-variant5.v-grid,
-    .open-position-editor-table-variant5.v-table {
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      min-width: 0 !important;
-      max-width: 100% !important;
-      min-height: 320px !important;
-      height: 100% !important;
-      border: 1px solid rgba($v-font-color, 0.16);
-      border-radius: 6px;
-      background: $v-panel-background-color;
-      overflow: hidden;
-    }
+        .open-position-editor-table-variant5,
+        .open-position-editor-table-variant5.v-grid,
+        .open-position-editor-table-variant5.v-table {
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          min-height: 320px !important;
+          height: 100% !important;
+          border: 1px solid rgba($v-font-color, 0.16);
+          border-radius: 6px;
+          background: $v-panel-background-color;
+          overflow: hidden;
+        }
 
-    .open-position-editor-table-variant5 > .v-grid,
-    .open-position-editor-table-variant5 > .v-table,
-    .open-position-editor-table-variant5 .v-grid {
-      box-sizing: border-box;
-      flex: 1 1 auto;
-      min-height: 260px !important;
-      height: auto !important;
-    }
+        .open-position-editor-table-variant5 > .v-grid,
+        .open-position-editor-table-variant5 > .v-table,
+        .open-position-editor-table-variant5 .v-grid {
+          box-sizing: border-box;
+          flex: 1 1 auto;
+          min-height: 260px !important;
+          height: auto !important;
+        }
 
-    .open-position-editor-table-variant5 .v-grid-header,
-    .open-position-editor-table-variant5 .v-table-header-wrap {
-      min-height: 42px;
-      background: mix($v-app-background-color, $v-panel-background-color, 58%);
-      border-bottom: 1px solid rgba($v-font-color, 0.14);
-    }
+        .open-position-editor-table-variant5 .v-grid-header,
+        .open-position-editor-table-variant5 .v-table-header-wrap {
+          min-height: 42px;
+          background: mix($v-app-background-color, $v-panel-background-color, 58%);
+          border-bottom: 1px solid rgba($v-font-color, 0.14);
+        }
 
-    .open-position-editor-table-variant5 .v-grid-header .v-grid-cell,
-    .open-position-editor-table-variant5 .v-table-header-cell {
-      box-sizing: border-box;
-      min-height: 42px;
-      padding: 0 12px;
-      color: mix($v-font-color, $v-panel-background-color, 82%);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 18px;
-    }
+        .open-position-editor-table-variant5 .v-grid-header .v-grid-cell,
+        .open-position-editor-table-variant5 .v-table-header-cell {
+          box-sizing: border-box;
+          min-height: 42px;
+          padding: 0 12px;
+          color: mix($v-font-color, $v-panel-background-color, 82%);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0;
+          line-height: 18px;
+        }
 
-    .open-position-editor-table-variant5 .v-grid-row,
-    .open-position-editor-table-variant5 .v-table-row {
-      min-height: 42px;
-      border-bottom: 1px solid rgba($v-font-color, 0.08);
-      transition: background-color 0.15s ease;
-    }
+        .open-position-editor-table-variant5 .v-grid-row,
+        .open-position-editor-table-variant5 .v-table-row {
+          min-height: 38px !important;
+          border-bottom: 1px solid rgba($v-font-color, 0.08);
+          transition: background-color 0.15s ease;
+        }
 
-    .open-position-editor-table-variant5 .v-grid-row:hover,
-    .open-position-editor-table-variant5 .v-table-row:hover {
-      background: rgba($v-selection-color, 0.07);
-    }
+        .open-position-editor-table-variant5 .v-grid-row:hover,
+        .open-position-editor-table-variant5 .v-table-row:hover {
+          background: rgba($v-selection-color, 0.07);
+        }
 
-    .open-position-editor-table-variant5 .v-grid-cell,
-    .open-position-editor-table-variant5 .v-table-cell-content {
-      box-sizing: border-box;
-      min-width: 0;
-      padding: 0 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+        .open-position-editor-table-variant5 .v-grid-cell,
+        .open-position-editor-table-variant5 .v-table-cell-content {
+          box-sizing: border-box;
+          min-width: 0;
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          overflow: hidden;
+          white-space: normal !important;
+          line-height: 1.35 !important;
+          word-break: break-word !important;
+          text-overflow: clip !important;
+        }
 
-    .open-position-editor-table-variant5 .v-grid-editor-cells,
-    .open-position-editor-table-variant5 .v-grid-editor-cell,
-    .open-position-editor-table-variant5 .v-textfield,
-    .open-position-editor-table-variant5 .v-filterselect {
-      box-sizing: border-box;
-      min-height: 34px;
-      max-width: 100% !important;
-      border-radius: 4px;
-    }
+        .open-position-editor-table-variant5 .v-grid-editor-cells,
+        .open-position-editor-table-variant5 .v-grid-editor-cell,
+        .open-position-editor-table-variant5 .v-textfield,
+        .open-position-editor-table-variant5 .v-filterselect {
+          box-sizing: border-box;
+          min-height: 34px;
+          max-width: 100% !important;
+          border-radius: 4px;
+        }
 
-    .open-position-editor-table-variant5 .v-buttons-panel,
-    .open-position-editor-table-variant5 .v-grid-footer {
-      box-sizing: border-box;
-      min-height: 48px;
-      padding: 6px 8px;
-      border-top: 1px solid rgba($v-font-color, 0.12);
-      background: mix($v-app-background-color, $v-panel-background-color, 42%);
-    }
+        .open-position-editor-table-variant5 .v-buttons-panel,
+        .open-position-editor-table-variant5 .v-grid-footer {
+          box-sizing: border-box;
+          min-height: 48px;
+          padding: 6px 8px;
+          border-top: 1px solid rgba($v-font-color, 0.12);
+          background: mix($v-app-background-color, $v-panel-background-color, 42%);
+        }
 
-    .open-position-editor-table-variant5 .v-buttons-panel .v-button {
-      min-width: 34px;
-      min-height: 34px;
-      margin: 0 3px 0 0;
-      border-radius: 4px;
-    }
+        .open-position-editor-table-variant5 .v-buttons-panel .v-button {
+          min-width: 34px;
+          min-height: 34px;
+          margin: 0 3px 0 0;
+          border-radius: 4px;
+        }
 
     /* Вкладка «Трудовой договор» (laborAgreementTab): адаптивная верстка параметров, таблиц и колонок оплаты */
     #openPositionLaborScrollBox,
