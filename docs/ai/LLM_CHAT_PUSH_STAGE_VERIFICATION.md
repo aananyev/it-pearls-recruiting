@@ -8,7 +8,7 @@
 
 ## Что проверено
 
-- Текущая ветка `feat/llm-chat`, commit `e3fc5ed`.
+- Текущая ветка `feat/llm-chat`, локальный кандидат для staging `542ddd4`; до staging нужен опубликованный и approved commit PR.
 - Widgetset текущей ветки собран Gradle-задачами `:app-web-toolkit:buildWidgetSet :app-web-toolkit:webArchive`.
 - Свежий артефакт `app-web-toolkit-0.442-SNAPSHOT-client.jar` содержит `AppWidgetSet.nocache.js`.
 - Локальный Vaadin push asset на `http://127.0.0.1:8080/hrm/VAADIN/vaadinPush.debug.js` возвращает HTTP 200.
@@ -32,7 +32,7 @@ scripts/verify-llm-chat-staging.sh https://staging.example/hrm 8
 
 ## Обязательная staging-проверка перед production
 
-1. Развернуть текущий approved commit `e892ad9` или более новый approved commit в отдельном staging.
+1. Развернуть опубликованный approved commit PR (на момент обновления локальный кандидат `542ddd4`) в отдельном staging.
 2. Проверить HTTP 200 widgetset/push asset и WebSocket `101` через фактический proxy/балансировщик.
 3. Выполнить authenticated сценарий: открыть чат, отправить тестовый запрос, убедиться в push-обновлении дельт, завершении и отсутствии повторного provider-вызова.
 4. Разорвать push-канал и убедиться, что recovery polling 3 секунды завершает отображение без дубля сообщения.

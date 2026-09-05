@@ -42,7 +42,7 @@
 - Независимый тестировщик по актуальному срезу не выдал verdict из-за исчерпания usage; его прежний отчет по старому commit исключён из приемки. Локальные тесты и компиляция текущего worktree прошли.
 - Добавлен fail-closed гейт: `LLM_CHAT` не выполняет provider dispatch без настроенной версии privacy policy; отрицательный тест проходит.
 - После замечаний выполнен полный локальный прогон security, foundation, schema, routing, context тестов и web-компиляции: `BUILD SUCCESSFUL`.
-- 2026-09-05 этот targeted-прогон повторён на текущем `HEAD 59e175c`: security/foundation/schema/routing/context-тесты и компиляция `app-core`/`app-web` снова завершились `BUILD SUCCESSFUL`. Проверка не заменяет staging runtime evidence.
+- 2026-09-05 этот targeted-прогон повторён на текущем `HEAD 542ddd4`: security/foundation/schema/routing/context-тесты и компиляция `app-core`/`app-web` снова завершились `BUILD SUCCESSFUL`. Проверка не заменяет staging runtime evidence.
 - 2026-09-05 выполнена read-only проверка `scripts/verify-llm-chat-staging.sh`: `bash -n` прошёл, вызов без URL корректно завершился кодом `2` с подсказкой; фактический staging endpoint не запускался.
 - В изолированной локальной песочнице временный mock OpenAI-compatible provider проверен без внешних API и production: sync JSON + usage, SSE streaming + usage + `[DONE]`, synthetic `503` и synthetic timeout — `PASS`; provider после прогона остановлен, временный файл удалён.
 - Оба agent-сеанса после завершения проверки закрыты; активных субагентов нет.

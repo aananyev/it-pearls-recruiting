@@ -50,7 +50,7 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 
 Результат: `BUILD SUCCESSFUL`. Локальный PASS не закрывает staging и runtime security gates.
 
-2026-09-05 этот targeted-прогон повторён на текущем `HEAD 59e175c`: security/foundation/schema/routing/context-тесты и компиляция `app-core`/`app-web` снова завершились `BUILD SUCCESSFUL`. Дополнительно `scripts/verify-llm-chat-staging.sh` прошёл синтаксическую проверку; вызов без URL корректно отклонён с кодом `2`. Фактический staging transport и authenticated UI по-прежнему не запускались.
+2026-09-05 этот targeted-прогон повторён на текущем `HEAD 542ddd4`: security/foundation/schema/routing/context-тесты и компиляция `app-core`/`app-web` снова завершились `BUILD SUCCESSFUL`. Дополнительно `scripts/verify-llm-chat-staging.sh` прошёл синтаксическую проверку; вызов без URL корректно отклонён с кодом `2`. Фактический staging transport и authenticated UI по-прежнему не запускались.
 
 В изолированной локальной песочнице дополнительно проверен временный mock OpenAI-compatible provider без внешних API и production: sync JSON с usage, SSE streaming с usage и `[DONE]`, synthetic HTTP 503 и synthetic timeout — все сценарии `PASS`. Mock provider после проверки остановлен, секреты и тестовые payload в репозитории не сохранены. Эта проверка подтверждает только HTTP-контракт provider adapter и не заменяет authenticated UI, reverse proxy, session affinity или staging migration rehearsal.
 
