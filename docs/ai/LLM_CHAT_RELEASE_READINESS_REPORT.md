@@ -50,6 +50,8 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 
 Результат: `BUILD SUCCESSFUL`. Локальный PASS не закрывает staging и runtime security gates.
 
+2026-09-05 этот targeted-прогон повторён на текущем `HEAD 59e175c`: security/foundation/schema/routing/context-тесты и компиляция `app-core`/`app-web` снова завершились `BUILD SUCCESSFUL`. Дополнительно `scripts/verify-llm-chat-staging.sh` прошёл синтаксическую проверку; вызов без URL корректно отклонён с кодом `2`. Фактический staging transport и authenticated UI по-прежнему не запускались.
+
 В изолированной локальной песочнице дополнительно проверен временный mock OpenAI-compatible provider без внешних API и production: sync JSON с usage, SSE streaming с usage и `[DONE]`, synthetic HTTP 503 и synthetic timeout — все сценарии `PASS`. Mock provider после проверки остановлен, секреты и тестовые payload в репозитории не сохранены. Эта проверка подтверждает только HTTP-контракт provider adapter и не заменяет authenticated UI, reverse proxy, session affinity или staging migration rehearsal.
 
 ## Результат локальной среды этапа 5
@@ -78,6 +80,7 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 ## Открытые блокеры
 
 - Нет staging URL, тестовой учётной записи и параметров reverse proxy/балансировщика.
+- Локальный targeted-прогон на текущем `HEAD` успешен, но не является evidence authenticated staging, proxy/WebSocket, recovery polling или provider sandbox.
 - Нет утверждённых sandbox credentials для provider-интеграционного теста.
 - Не зафиксированы финальные значения общей месячной квоты, system prompt/privacy policy version и provider/model/region для rollout.
 - Provider-specific lookup usage по одному request ID не подтверждён; до отдельного решения используется ручная reconciliation, автоматический повторный provider call запрещён.

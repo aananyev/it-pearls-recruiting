@@ -42,6 +42,8 @@
 - Независимый тестировщик по актуальному срезу не выдал verdict из-за исчерпания usage; его прежний отчет по старому commit исключён из приемки. Локальные тесты и компиляция текущего worktree прошли.
 - Добавлен fail-closed гейт: `LLM_CHAT` не выполняет provider dispatch без настроенной версии privacy policy; отрицательный тест проходит.
 - После замечаний выполнен полный локальный прогон security, foundation, schema, routing, context тестов и web-компиляции: `BUILD SUCCESSFUL`.
+- 2026-09-05 этот targeted-прогон повторён на текущем `HEAD 59e175c`: security/foundation/schema/routing/context-тесты и компиляция `app-core`/`app-web` снова завершились `BUILD SUCCESSFUL`. Проверка не заменяет staging runtime evidence.
+- 2026-09-05 выполнена read-only проверка `scripts/verify-llm-chat-staging.sh`: `bash -n` прошёл, вызов без URL корректно завершился кодом `2` с подсказкой; фактический staging endpoint не запускался.
 - В изолированной локальной песочнице временный mock OpenAI-compatible provider проверен без внешних API и production: sync JSON + usage, SSE streaming + usage + `[DONE]`, synthetic `503` и synthetic timeout — `PASS`; provider после прогона остановлен, временный файл удалён.
 - Оба agent-сеанса после завершения проверки закрыты; активных субагентов нет.
 
@@ -53,6 +55,7 @@
 - Для локального пользователя без личного ключа подтверждено отсутствие `admin_fallback_consent`; реальный provider call не выполнялся, чтобы не обходить квоту и отдельное согласие.
 - Собственная копия Tomcat на 8081 запускалась только локально и остановлена. Оставить её параллельно нельзя безопасно без изоляции DB-owned Telegram-настройки: при `telegram_bot_start=true` она конфликтует с уже работающим ботом (`409`). Общий экземпляр 8080 не перенастраивался намеренно.
 - В UI shell 8080 ранее открывалась форма входа, но финальная проверка после reload получила `ERR_CONNECTION_REFUSED`; authenticated chat flow не подтвержден. Проверка 20–50 UI-сессий пользователем отменена.
+- Локальный targeted-прогон на текущем `HEAD` успешен, но authenticated staging, WebSocket через proxy, recovery polling и provider sandbox по-прежнему не проверены из-за отсутствия staging-входных данных.
 
 ## Следующий этап
 
