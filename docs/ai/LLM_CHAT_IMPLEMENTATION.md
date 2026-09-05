@@ -28,6 +28,7 @@
 - Текущая release readiness и все оставшиеся шаги зафиксированы в `LLM_CHAT_RELEASE_READINESS_REPORT.md`; статус остаётся `NOT READY FOR PRODUCTION`.
 - Перед каждым новым этапом roadmap необходимо читать актуальный план и сопутствующие отчёты; текущий handoff и следующий staging gate описаны в release-readiness report.
 - Security-contract проверки текущего среза находятся в `LlmChatSecurityContractTest`; runtime security acceptance выполняется только в staging.
+- Компактный канонический статус, verdict аналитика/QA и актуальный порядок этапов находятся в `LLM_CHAT_CURRENT_STATUS.md`.
 
 ## Квота
 
