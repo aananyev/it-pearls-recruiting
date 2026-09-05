@@ -1,8 +1,9 @@
 package com.company.hunttech.service;
 
-import com.company.hunttech.entity.ExtUser;
-import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.*;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+
+import java.util.Collection;
 
 /**
  * Сервис умной загрузки, AI-распознавания и создания открытых вакансий (OpenPosition) из произвольного описания.
@@ -24,6 +25,12 @@ public interface SmartOpenPositionIngestService {
      * Поиск существующей похожей вакансии в базе данных.
      */
     OpenPosition findDuplicate(SmartOpenPositionParsedData data);
+
+    /**
+     * Канонический алгоритм генерации названия вакансии (в точности повторяет алгоритм кнопки «Генерировать» из OpenPositionEdit).
+     * Формат: [Grade] [PositionRu] / [PositionEn] ([Project], [City])
+     */
+    String generateCanonicalVacancyName(Grade grade, Position positionType, Project project, City city, Collection<City> additionalCities);
 
     /**
      * Создание и сохранение новой открытой вакансии, привязка проекта, грейда, навыков и города.

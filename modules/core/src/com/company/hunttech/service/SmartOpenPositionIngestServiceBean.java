@@ -247,6 +247,38 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     data.setChecklist(chk);
                 }
 
+                // 1.13 Ставка ИП и комментарий по зарплате
+                BigDecimal sIE = getJsonBigDecimal(json, "salaryIE", "rateIE", "ieSalary");
+                if (sIE != null) data.setSalaryIE(sIE);
+                String sCom = getJsonString(json, "salaryComment", "paymentConditions", "salaryConditions");
+                if (sCom != null) data.setSalaryComment(cleanHtmlToPlainText(sCom));
+
+                // 1.14 Описание проекта
+                String prjShort = getJsonString(json, "projectShortDescription", "shortProjectDescription");
+                if (prjShort != null) data.setProjectShortDescription(cleanHtmlToPlainText(prjShort));
+                String prjFull = getJsonString(json, "projectDescription", "projectFullDescription");
+                if (prjFull != null) data.setProjectFullDescription(cleanHtmlToPlainText(prjFull));
+
+                // 1.15 Тестовое задание и памятка для собеседования
+                String exercise = getJsonString(json, "exercise", "testExercise", "testTask");
+                if (exercise != null) data.setExercise(cleanHtmlToPlainText(exercise));
+                String memo = getJsonString(json, "memoForInterview", "memo", "interviewMemo");
+                if (memo != null) data.setMemoForInterview(cleanHtmlToPlainText(memo));
+
+                // 1.16 Разделы из AI-промптов: чек-лист, карта поиска, план собеседования
+                String chkText = getJsonString(json, "interviewChecklist", "checklistText");
+                if (chkText != null) data.setInterviewChecklist(cleanHtmlToPlainText(chkText));
+                String sMap = getJsonString(json, "searchMap", "sourcingMap");
+                if (sMap != null) data.setSearchMap(cleanHtmlToPlainText(sMap));
+                String iPlan = getJsonString(json, "interviewPlan", "interviewStructure");
+                if (iPlan != null) data.setInterviewPlan(cleanHtmlToPlainText(iPlan));
+
+                // 1.17 Стандартизированное описание вакансии
+                String fullCommentJson = getJsonString(json, "comment", "standardizedDescription");
+                if (fullCommentJson != null && fullCommentJson.length() > 50) {
+                    data.setComment(cleanHtmlToPlainText(fullCommentJson));
+                }
+
                 if (data.getVacansyName() != null && !data.getVacansyName().isEmpty()) {
                     parsedByAi = true;
                     log.info("[SMART_VACANCY_OPENING] ✓ AI-распознавание завершено успешно. Позиция: '{}', Проект: '{}', Компания: '{}', Зарплата: {} - {}, Навыки: {}",
@@ -270,7 +302,28 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     data.getVacansyName(), data.getRemoteWork(), data.getSalaryMin(), data.getSalaryMax(), data.getGradeName(), data.getRequiredSkills());
         }
 
-        data.setComment(textForAi);
+        if (data.getComment() == null || data.getComment().trim().isEmpty()) {
+            data.setComment(textForAi);
+        }
+
+        // 3. Формирование канонического наименования по алгоритму кнопки «Генерировать» из OpenPositionEdit
+        if (dataManager != null) {
+            Position posPreview = findBestMatchingPositionType(data.getPositionTypeName() != null ? data.getPositionTypeName() : data.getVacansyName());
+            Grade grPreview = findGrade(data.getGradeName());
+            Project prjPreview = findExistingOpenProject(data.getProjectName(), data.getCompanyName());
+            if (prjPreview == null && data.getProjectName() != null && !data.getProjectName().trim().isEmpty() && metadata != null) {
+                prjPreview = metadata.create(Project.class);
+                prjPreview.setProjectName(cleanTitle(data.getProjectName()));
+            }
+            City cityPreview = findCity(data.getCityName());
+            if (posPreview != null) {
+                String canonical = generateCanonicalVacancyName(grPreview, posPreview, prjPreview, cityPreview, null);
+                if (canonical != null && !canonical.trim().isEmpty()) {
+                    log.info("[SMART_VACANCY_OPENING] Установлено каноническое название вакансии для превью: '{}'", canonical);
+                    data.setVacansyName(canonical);
+                }
+            }
+        }
 
         // Проверка обязательных полей
         if (data.getVacansyName() == null || data.getVacansyName().isEmpty()) {
@@ -514,33 +567,73 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', signDraft=true (ЧЕРНОВИК), priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
                     openPosition.getVacansyName(), openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getWorkExperience());
 
-            // Поиск / привязка проекта
-            Project project = findOrCreateProject(data.getProjectName(), data.getCompanyName());
+            // Дополнительные реквизиты сущности OpenPosition
+            if (data.getSalaryIE() != null) {
+                openPosition.setSalaryIE(data.getSalaryIE());
+            }
+            if (data.getSalaryComment() != null) {
+                openPosition.setSalaryComment(data.getSalaryComment());
+            }
+            if (data.getRawText() != null) {
+                openPosition.setRawDescription(data.getRawText());
+            }
+            if (data.getInterviewChecklist() != null) {
+                openPosition.setInterviewChecklist(data.getInterviewChecklist());
+            }
+            if (data.getSearchMap() != null) {
+                openPosition.setSearchMap(data.getSearchMap());
+            }
+            if (data.getInterviewPlan() != null) {
+                openPosition.setInterviewPlan(data.getInterviewPlan());
+            }
+            if (data.getExercise() != null && !data.getExercise().trim().isEmpty()) {
+                openPosition.setExercise(data.getExercise());
+                openPosition.setNeedExercise(true);
+            }
+            if (data.getMemoForInterview() != null && !data.getMemoForInterview().trim().isEmpty()) {
+                openPosition.setMemoForInterview(data.getMemoForInterview());
+                openPosition.setNeedMemoForInterview(true);
+            }
+
+            // 1. Поиск / создание проекта (разрешено генерировать Project только если не найден существующий)
+            Project project = findOrCreateProject(data.getProjectName(), data.getCompanyName(),
+                    data.getProjectShortDescription(), data.getProjectFullDescription(), commitContext);
             openPosition.setProjectName(project);
             log.info("[SMART_VACANCY_OPENING] Проект позиции: {}", project != null ? (project.getProjectName() + " (ID=" + project.getId() + ")") : "НЕ НАЙДЕН");
 
-            // Поиск / привязка типа позиции (запрещено создавать новые должности, выбирается наиболее подходящая)
-            String posName = data.getPositionTypeName() != null ? data.getPositionTypeName() : openPosition.getVacansyName();
+            // 2. Поиск / привязка типа позиции (запрещено создавать новые должности, выбирается наиболее подходящая)
+            String posName = data.getPositionTypeName() != null ? data.getPositionTypeName() : data.getVacansyName();
             Position positionType = findBestMatchingPositionType(posName);
             openPosition.setPositionType(positionType);
             log.info("[SMART_VACANCY_OPENING] Тип позиции: {}", positionType != null ? (positionType.getPositionRuName() + " (ID=" + positionType.getId() + ")") : "НЕ НАЙДЕН");
 
-            // Поиск / привязка грейда
+            // 3. Поиск / привязка грейда
+            Grade grade = null;
             if (data.getGradeName() != null) {
-                Grade grade = findGrade(data.getGradeName());
+                grade = findGrade(data.getGradeName());
                 if (grade != null) {
                     openPosition.setGrade(grade);
                     log.info("[SMART_VACANCY_OPENING] Грейд позиции: {} (ID={})", grade.getGradeName(), grade.getId());
                 }
             }
 
-            // Поиск / привязка города
+            // 4. Поиск / привязка города (запрещено создавать новые гео-данные!)
+            City city = null;
             if (data.getCityName() != null) {
-                City city = findCity(data.getCityName());
+                city = findCity(data.getCityName());
                 if (city != null) {
                     openPosition.setCityPosition(city);
                     log.info("[SMART_VACANCY_OPENING] Город позиции: {} (ID={})", city.getCityRuName(), city.getId());
                 }
+            }
+
+            // 5. ВЫЗОВ АЛГОРИТМА ГЕНЕРАЦИИ НАЗВАНИЯ ВАКАНСИИ ИЗ OpenPositionEdit (кнопка «Генерировать»)
+            String canonicalName = generateCanonicalVacancyName(grade, positionType, project, city, openPosition.getCities());
+            if (canonicalName != null && !canonicalName.trim().isEmpty()) {
+                openPosition.setVacansyName(truncate(canonicalName, 250));
+                log.info("[SMART_VACANCY_OPENING] Сгенерировано каноническое наименование вакансии алгоритмом OpenPositionEdit: '{}'", openPosition.getVacansyName());
+            } else {
+                openPosition.setVacansyName(safeVacName);
             }
 
             // Добавление создаваемой вакансии в транзакцию сохранения
@@ -604,7 +697,75 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         return result;
     }
 
-    private Project findOrCreateProject(String projectName, String companyName) {
+    @Override
+    public String generateCanonicalVacancyName(Grade grade, Position positionType, Project project, City city, Collection<City> additionalCities) {
+        StringBuilder sb = new StringBuilder();
+
+        if (grade != null && grade.getGradeName() != null && !grade.getGradeName().trim().isEmpty()) {
+            sb.append(grade.getGradeName().trim()).append(" ");
+        }
+
+        if (positionType != null) {
+            String ru = positionType.getPositionRuName() != null ? positionType.getPositionRuName().trim() : "";
+            String en = positionType.getPositionEnName() != null ? positionType.getPositionEnName().trim() : "";
+            sb.append(ru);
+            if (!en.isEmpty() && !en.equalsIgnoreCase(ru)) {
+                sb.append(" / ").append(en);
+            }
+        } else {
+            return "";
+        }
+
+        if (project != null && project.getProjectName() != null && !project.getProjectName().trim().isEmpty()) {
+            sb.append(" (").append(project.getProjectName().trim());
+        } else {
+            return "";
+        }
+
+        if (city != null && city.getCityRuName() != null && !city.getCityRuName().trim().isEmpty()) {
+            sb.append(", ").append(city.getCityRuName().trim());
+        }
+
+        if (additionalCities != null && !additionalCities.isEmpty()) {
+            for (City c : additionalCities) {
+                if (c != null && c.getCityRuName() != null && !c.getCityRuName().trim().isEmpty()) {
+                    sb.append(", ").append(c.getCityRuName().trim());
+                }
+            }
+        }
+
+        sb.append(")");
+
+        return sb.toString();
+    }
+
+    private Project findExistingOpenProject(String projectName, String companyName) {
+        if (dataManager == null) return null;
+        String cleanName = projectName != null ? cleanTitle(projectName) : "";
+        if (!cleanName.isEmpty()) {
+            List<Project> list = dataManager.load(Project.class)
+                    .query("select e from hunttech_Project e where lower(e.projectName) like lower(:name) and (e.projectIsClosed is null or e.projectIsClosed = false)")
+                    .parameter("name", "%" + cleanName + "%")
+                    .view("project-picker-view")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        }
+        if (companyName != null && !companyName.trim().isEmpty()) {
+            String cleanCompany = cleanTitle(companyName);
+            List<Project> list = dataManager.load(Project.class)
+                    .query("select e from hunttech_Project e where lower(e.projectName) like lower(:comp) and (e.projectIsClosed is null or e.projectIsClosed = false)")
+                    .parameter("comp", "%" + cleanCompany + "%")
+                    .view("project-picker-view")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        }
+        return null;
+    }
+
+    private Project findOrCreateProject(String projectName, String companyName, String shortDesc, String fullDesc, CommitContext commitContext) {
+        if (dataManager == null || metadata == null) return null;
         String cleanName = projectName != null ? cleanTitle(projectName) : "";
         log.info("[SMART_VACANCY_OPENING] Поиск проекта: name='{}', company='{}'", cleanName, companyName);
         if (!cleanName.isEmpty()) {
@@ -632,31 +793,28 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 return companyProjects.get(0);
             }
         }
-        // Поиск системного проекта по умолчанию
-        List<Project> defaultList = dataManager.load(Project.class)
-                .query("select e from hunttech_Project e where e.defaultProject = true and (e.projectIsClosed is null or e.projectIsClosed = false)")
-                .view("project-picker-view")
-                .maxResults(1)
-                .list();
-        if (!defaultList.isEmpty()) {
-            log.info("[SMART_VACANCY_OPENING] Использован системный проект по умолчанию: '{}' (ID={})", defaultList.get(0).getProjectName(), defaultList.get(0).getId());
-            return defaultList.get(0);
+
+        // Проект не найден среди существующих открытых. Генерируем новую подчиненную сущность Project
+        String newProjName = !cleanName.isEmpty() ? cleanName : (!cleanTitle(companyName).isEmpty() ? cleanTitle(companyName) : "Новый проект");
+        newProjName = truncate(newProjName, 150);
+        log.info("[SMART_VACANCY_OPENING] Открытый проект не найден в БД. Создание новой подчиненной сущности Project: '{}'", newProjName);
+
+        Project newProj = metadata.create(Project.class);
+        newProj.setProjectName(newProjName);
+        newProj.setProjectIsClosed(false);
+        newProj.setStartProjectDate(new Date());
+        if (shortDesc != null && !shortDesc.trim().isEmpty()) {
+            newProj.setShortDescription(truncate(cleanHtmlToPlainText(shortDesc), 250));
         }
-        // Первый доступный открытый проект в системе
-        List<Project> fallbackList = dataManager.load(Project.class)
-                .query("select e from hunttech_Project e where (e.projectIsClosed is null or e.projectIsClosed = false) order by e.createTs desc")
-                .view("project-picker-view")
-                .maxResults(1)
-                .list();
-        if (!fallbackList.isEmpty()) {
-            log.warn("[SMART_VACANCY_OPENING] Проект не найден, использован открытый проект: '{}' (ID={})", fallbackList.get(0).getProjectName(), fallbackList.get(0).getId());
-            return fallbackList.get(0);
+        if (fullDesc != null && !fullDesc.trim().isEmpty()) {
+            newProj.setProjectDescription(cleanHtmlToPlainText(fullDesc));
         }
-        log.warn("[SMART_VACANCY_OPENING] В БД нет ни одного открытого проекта hunttech_Project");
-        return null;
+        commitContext.addInstanceToCommit(newProj);
+        return newProj;
     }
 
     private Position findBestMatchingPositionType(String positionName) {
+        if (dataManager == null) return null;
         if (positionName == null || positionName.trim().isEmpty()) return null;
         String cleanName = cleanTitle(positionName);
         if (cleanName.isEmpty()) return null;
@@ -759,6 +917,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
     }
 
     private Grade findGrade(String gradeName) {
+        if (dataManager == null) return null;
         if (gradeName == null) return null;
         String cleanGrade = cleanTitle(gradeName);
         if (cleanGrade.isEmpty()) return null;
@@ -774,6 +933,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
     }
 
     private City findCity(String cityName) {
+        if (dataManager == null) return null;
         if (cityName == null) return null;
         String cleanCity = cleanTitle(cityName);
         if (cleanCity.isEmpty()) return null;
