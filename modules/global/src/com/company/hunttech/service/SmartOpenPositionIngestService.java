@@ -27,8 +27,10 @@ public interface SmartOpenPositionIngestService {
     OpenPosition findDuplicate(SmartOpenPositionParsedData data);
 
     /**
-     * Канонический алгоритм генерации названия вакансии (в точности повторяет алгоритм кнопки «Генерировать» из OpenPositionEdit).
+     * Канонический алгоритм генерации названия вакансии (в соответствии с алгоритмом кнопки «Генерировать» из OpenPositionEdit).
      * Формат: [Grade] [PositionRu] / [PositionEn] ([Project], [City])
+     * Примечание: безопасная реализация сервиса обрабатывает случай отсутствия города (для удаленного формата работы по всей РФ)
+     * и отсутствие EN-наименования должности, исключая генерацию пустой строки или "null".
      */
     String generateCanonicalVacancyName(Grade grade, Position positionType, Project project, City city, Collection<City> additionalCities);
 

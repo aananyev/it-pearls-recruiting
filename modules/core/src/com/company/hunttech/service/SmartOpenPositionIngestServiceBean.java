@@ -307,8 +307,9 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         }
 
         // 3. Формирование канонического наименования по алгоритму кнопки «Генерировать» из OpenPositionEdit
+        data.setRawVacansyName(data.getVacansyName());
         if (dataManager != null) {
-            Position posPreview = findBestMatchingPositionType(data.getPositionTypeName() != null ? data.getPositionTypeName() : data.getVacansyName());
+            Position posPreview = findBestMatchingPositionType(data.getPositionTypeName() != null ? data.getPositionTypeName() : data.getRawVacansyName());
             Grade grPreview = findGrade(data.getGradeName());
             Project prjPreview = findExistingOpenProject(data.getProjectName(), data.getCompanyName());
             if (prjPreview == null && data.getProjectName() != null && !data.getProjectName().trim().isEmpty() && metadata != null) {
@@ -332,7 +333,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             log.warn("[SMART_VACANCY_OPENING] Название вакансии не удалось извлечь, установлено имя по умолчанию");
         }
         if (data.getProjectName() == null || data.getProjectName().isEmpty()) {
-            data.getMissingFields().add("Проект не указан в тексте (будет выбран основной)");
+            data.getMissingFields().add("Проект не указан в тексте (будет создан проект «Новый проект» или выбран существующий)");
             log.info("[SMART_VACANCY_OPENING] Проект не указан в описании вакансии");
         }
 
@@ -602,7 +603,8 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             log.info("[SMART_VACANCY_OPENING] Проект позиции: {}", project != null ? (project.getProjectName() + " (ID=" + project.getId() + ")") : "НЕ НАЙДЕН");
 
             // 2. Поиск / привязка типа позиции (запрещено создавать новые должности, выбирается наиболее подходящая)
-            String posName = data.getPositionTypeName() != null ? data.getPositionTypeName() : data.getVacansyName();
+            String posName = data.getPositionTypeName() != null ? data.getPositionTypeName()
+                    : (data.getRawVacansyName() != null ? data.getRawVacansyName() : data.getVacansyName());
             Position positionType = findBestMatchingPositionType(posName);
             openPosition.setPositionType(positionType);
             log.info("[SMART_VACANCY_OPENING] Тип позиции: {}", positionType != null ? (positionType.getPositionRuName() + " (ID=" + positionType.getId() + ")") : "НЕ НАЙДЕН");
@@ -766,37 +768,33 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
     private Project findOrCreateProject(String projectName, String companyName, String shortDesc, String fullDesc, CommitContext commitContext) {
         if (dataManager == null || metadata == null) return null;
-        String cleanName = projectName != null ? cleanTitle(projectName) : "";
-        log.info("[SMART_VACANCY_OPENING] Поиск проекта: name='{}', company='{}'", cleanName, companyName);
-        if (!cleanName.isEmpty()) {
-            List<Project> list = dataManager.load(Project.class)
-                    .query("select e from hunttech_Project e where lower(e.projectName) like lower(:name) and (e.projectIsClosed is null or e.projectIsClosed = false)")
-                    .parameter("name", "%" + cleanName + "%")
-                    .view("project-picker-view")
-                    .maxResults(1)
-                    .list();
-            if (!list.isEmpty()) {
-                log.info("[SMART_VACANCY_OPENING] Найден существующий открытый проект: '{}' (ID={})", list.get(0).getProjectName(), list.get(0).getId());
-                return list.get(0);
-            }
-        }
-        if (companyName != null && !companyName.trim().isEmpty()) {
-            String cleanCompany = cleanTitle(companyName);
-            List<Project> companyProjects = dataManager.load(Project.class)
-                    .query("select e from hunttech_Project e where lower(e.projectName) like lower(:comp) and (e.projectIsClosed is null or e.projectIsClosed = false)")
-                    .parameter("comp", "%" + cleanCompany + "%")
-                    .view("project-picker-view")
-                    .maxResults(1)
-                    .list();
-            if (!companyProjects.isEmpty()) {
-                log.info("[SMART_VACANCY_OPENING] Найден открытый проект по компании '{}': '{}' (ID={})", cleanCompany, companyProjects.get(0).getProjectName(), companyProjects.get(0).getId());
-                return companyProjects.get(0);
-            }
+        log.info("[SMART_VACANCY_OPENING] Поиск проекта: name='{}', company='{}'", projectName, companyName);
+
+        // 1. Поиск открытого проекта по наименованию или компании (дедуплицированный хелпер)
+        Project existing = findExistingOpenProject(projectName, companyName);
+        if (existing != null) {
+            log.info("[SMART_VACANCY_OPENING] Использован найденный открытый проект: '{}' (ID={})", existing.getProjectName(), existing.getId());
+            return existing;
         }
 
-        // Проект не найден среди существующих открытых. Генерируем новую подчиненную сущность Project
+        // 2. Определение наименования нового проекта
+        String cleanName = projectName != null ? cleanTitle(projectName) : "";
         String newProjName = !cleanName.isEmpty() ? cleanName : (!cleanTitle(companyName).isEmpty() ? cleanTitle(companyName) : "Новый проект");
         newProjName = truncate(newProjName, 150);
+
+        // 3. Проверка существования проекта-заглушки (например «Новый проект») во избежание дублирования
+        List<Project> stubs = dataManager.load(Project.class)
+                .query("select e from hunttech_Project e where lower(e.projectName) = lower(:n) and (e.projectIsClosed is null or e.projectIsClosed = false)")
+                .parameter("n", newProjName)
+                .view("project-picker-view")
+                .maxResults(1)
+                .list();
+        if (!stubs.isEmpty()) {
+            log.info("[SMART_VACANCY_OPENING] Использован существующий открытый проект: '{}' (ID={})", stubs.get(0).getProjectName(), stubs.get(0).getId());
+            return stubs.get(0);
+        }
+
+        // 4. Проект не найден среди существующих открытых. Генерируем новую подчиненную сущность Project
         log.info("[SMART_VACANCY_OPENING] Открытый проект не найден в БД. Создание новой подчиненной сущности Project: '{}'", newProjName);
 
         Project newProj = metadata.create(Project.class);

@@ -13,6 +13,7 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     private String rawText;
     private String vacansyName;
+    private String rawVacansyName;
     private String projectName;
     private String companyName;
     private String projectShortDescription;
@@ -53,6 +54,14 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     public void setVacansyName(String vacansyName) {
         this.vacansyName = vacansyName;
+    }
+
+    public String getRawVacansyName() {
+        return rawVacansyName;
+    }
+
+    public void setRawVacansyName(String rawVacansyName) {
+        this.rawVacansyName = rawVacansyName;
     }
 
     public String getProjectName() {
