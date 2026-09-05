@@ -15,6 +15,14 @@
 - Корректный WebSocket handshake на `/hrm/PUSH/` возвращает HTTP 101 и Vaadin push frame.
 - Concurrency probe: 8 параллельных handshake-запросов, результат `8/8 HTTP 101`.
 
+Для повторения read-only transport smoke используется `scripts/verify-llm-chat-staging.sh`:
+
+```bash
+scripts/verify-llm-chat-staging.sh https://staging.example/hrm 8
+```
+
+Скрипт проверяет только push asset и WebSocket handshake. Он не выполняет вход, не отправляет сообщения, не вызывает LLM и не меняет данные.
+
 ## Ограничения evidence
 
 - Локальный Tomcat запущен из `/Users/alekseyananyev/StudioProjects/hunttech_recruiting`, commit `2fc96ead`, версия `0.434`; это не текущий PR и он не использовался как доказательство поведения нового `LlmChatScreen`.
@@ -24,7 +32,7 @@
 
 ## Обязательная staging-проверка перед production
 
-1. Развернуть commit `e3fc5ed` или более новый approved commit в отдельном staging.
+1. Развернуть текущий approved commit `e892ad9` или более новый approved commit в отдельном staging.
 2. Проверить HTTP 200 widgetset/push asset и WebSocket `101` через фактический proxy/балансировщик.
 3. Выполнить authenticated сценарий: открыть чат, отправить тестовый запрос, убедиться в push-обновлении дельт, завершении и отсутствии повторного provider-вызова.
 4. Разорвать push-канал и убедиться, что recovery polling 3 секунды завершает отображение без дубля сообщения.
