@@ -78,6 +78,7 @@
 - После legacy migration нет активных непустых `API_KEY`; ciphertext имеет формат `v1:<iv>:<ciphertext>`.
 - У `LLM_CHAT` есть privacy policy version `llm-chat-privacy-v1`; новые audit-записи получают фактические snapshot-версии, старые явно помечены `LEGACY_NOT_CAPTURED`.
 - Новые `AiCallLog` не содержат `PROMPT_TEXT` и `RESPONSE_TEXT`; существующий исторический payload не изменяется этим changeSet.
+- До provider dispatch приложение проверяет наличие версии privacy policy; при пустой версии операция завершается fail-closed без внешнего вызова.
 - После rotation rehearsal все активные credentials расшифровываются только текущим key; предыдущий key удалён из конфигурации после verification.
 - Старые ключи не появляются в UI, исключениях, `AiCallLog` и server log; secret-like значения в диагностических ошибках заменены `[REDACTED]`.
 - Повторный `requestId` не создаёт второй provider call или списание.

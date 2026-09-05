@@ -339,6 +339,24 @@ public class AiExecutionServiceBeanTest {
     }
 
     @Test
+    public void llmChatWithoutPrivacyPolicyDoesNotCallProvider() {
+        function.setCode("LLM_CHAT");
+        function.setPrivacyPolicyVersion(null);
+        function.setPromptTemplate("${message}");
+
+        boolean rejected = false;
+        try {
+            service.executeText("LLM_CHAT", Collections.singletonMap("message", "Привет"));
+        } catch (DevelopmentException expected) {
+            rejected = true;
+            assertTrue(expected.getMessage().contains("privacy policy"));
+        }
+
+        assertTrue("LLM_CHAT must fail closed without privacy policy version", rejected);
+        verify(provider, never()).executeTextWithTokens(anyString(), anyString(), anyString(), anyString(), any());
+    }
+
+    @Test
     public void llmChat_fallsBackToAdminOnlyAfterPersonalFailureAndConsent() {
         function.setCode("LLM_CHAT");
         function.setPromptTemplate("${message}");

@@ -93,6 +93,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
         AiFunctionConfiguration function = loadFunction(functionCode);
         validateTextCapability(function);
+        validatePrivacyPolicy(function);
         String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
         User currentUser = userSessionSource.getUserSession().getUser();
         AiExecutionPolicy policy = function.getExecutionPolicy();
@@ -148,6 +149,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String requestId = requestIdFromContext(context);
         AiFunctionConfiguration function = loadFunction(functionCode);
         validateTextCapability(function);
+        validatePrivacyPolicy(function);
         String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
         User currentUser = userSessionSource.getUserSession().getUser();
         AiExecutionPolicy policy = function.getExecutionPolicy();
@@ -549,6 +551,14 @@ public class AiExecutionServiceBean implements AiExecutionService {
             throw new DevelopmentException(
                     "AI-функция «" + function.getCode() + "» требует capability «" + capability
                             + "», которая не поддержана image execution layer (ожидается IMAGE_GENERATION).");
+        }
+    }
+
+    private void validatePrivacyPolicy(AiFunctionConfiguration function) {
+        if (function != null && LLM_CHAT_FUNCTION_CODE.equals(function.getCode())
+                && !isConfigured(function.getPrivacyPolicyVersion())) {
+            throw new DevelopmentException(
+                    "Для AI-чата не задана версия privacy policy; внешний вызов заблокирован.");
         }
     }
 

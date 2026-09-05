@@ -40,6 +40,7 @@
 - Подготовлен `LLM_CHAT_STAGE4_RUNTIME_EVIDENCE_TEMPLATE.md` с synthetic staging fixture и матрицей security/data acceptance; реальные секреты и production не используются.
 - Выполнен кодовый rework аудита: новые `AiCallLog` не сохраняют prompt/response, добавлены privacy/consent snapshots и additive/idempotent changeSet `260905-1`; исторический payload не удаляется без отдельного распоряжения.
 - Независимый тестировщик по актуальному срезу не выдал verdict из-за исчерпания usage; его прежний отчет по старому commit исключён из приемки. Локальные тесты и компиляция текущего worktree прошли.
+- Добавлен fail-closed гейт: `LLM_CHAT` не выполняет provider dispatch без настроенной версии privacy policy; отрицательный тест проходит.
 - После замечаний выполнен полный локальный прогон security, foundation, schema, routing, context тестов и web-компиляции: `BUILD SUCCESSFUL`.
 - Оба agent-сеанса после завершения проверки закрыты; активных субагентов нет.
 
