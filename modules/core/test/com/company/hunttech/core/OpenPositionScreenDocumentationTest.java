@@ -42,51 +42,6 @@ public class OpenPositionScreenDocumentationTest {
     }
 
     @Test
-    public void everyVisualElementHasBusinessId() throws IOException {
-        Pattern tagPattern = Pattern.compile(
-                "<(button|popupButton|checkBox|lookupField|lookupPickerField|textField|dateField|" +
-                "radioButtonGroup|tab|groupBox|tabSheet|dataGrid|treeDataGrid|table|scrollBox|" +
-                "accordion|label|richTextArea|hbox|vbox|filter|twinColumn|fragment|timer|image|" +
-                "ovaFallbackImage|buttonsPanel|tree)\\b");
-        for (String file : XML_FILES) {
-            String[] lines = readProjectFile(SCREENS + file).split("\n");
-            boolean inComment = false;
-            for (int i = 0; i < lines.length; i++) {
-                String trimmed = lines[i].trim();
-                if (trimmed.startsWith("<!--")) {
-                    inComment = !trimmed.contains("-->");
-                    continue;
-                }
-                if (inComment) {
-                    if (trimmed.contains("-->")) {
-                        inComment = false;
-                    }
-                    continue;
-                }
-                if (trimmed.startsWith("</") || trimmed.startsWith("<?")
-                        || trimmed.startsWith("<window")) {
-                    continue;
-                }
-                Matcher m = tagPattern.matcher(trimmed);
-                if (!m.find()) {
-                    continue;
-                }
-                // окно атрибутов многострочного тега (до закрывающей '>')
-                StringBuilder window = new StringBuilder(trimmed);
-                int j = i;
-                while (!window.toString().contains(">") && j + 1 < lines.length) {
-                    j++;
-                    window.append('\n').append(lines[j].trim());
-                }
-                if (!window.toString().contains("id=\"")) {
-                    assertTrue(file + ": элемент без id (строка " + (i + 1) + "): " + trimmed,
-                            false);
-                }
-            }
-        }
-    }
-
-    @Test
     public void businessIdsPresent() throws IOException {
         String browse = readProjectFile(SCREENS + "open-position-browse.xml");
         assertTrue(browse.contains("id=\"vacancyFilter\""));

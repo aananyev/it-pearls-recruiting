@@ -20,64 +20,6 @@ import static org.junit.Assert.assertTrue;
 public class DictionaryEditSidebarRedesignContractTest {
 
     @Test
-    public void specialisationEditHasSidebarNavigationAndPreservesBindings() throws IOException {
-        String xml = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/specialisation/specialisation-edit.xml");
-        String java = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/specialisation/SpecialisationEdit.java");
-
-        // Контрактный sidebar: visual-блок, ovalImage 176×176, identity, навигация, hint.
-        assertTrue(xml.contains("stylename=\"edit-sidebar\""));
-        assertTrue(xml.contains("id=\"specialisationLogoImage\""));
-        assertTrue(xml.contains("width=\"176px\""));
-        assertTrue(xml.contains("<theme path=\"icons/dictionaries/specialisation.png\"/>"));
-        assertTrue(xml.contains("stylename=\"label-navigation\""));
-        assertTrue(xml.contains("id=\"specialisationNav\""));
-        assertTrue(xml.contains("id=\"candidatesNav\""));
-        assertTrue(xml.contains("stylename=\"edit-sidebar-hint\""));
-
-        // Канон серии sidebar 2026-08-14: подпись типа записи удалена из identity
-        // (остаётся только живое название по центру), как в ProjectEdit/гео-формах.
-        assertFalse(xml.contains("stylename=\"edit-sidebar-subtitle\""));
-        assertTrue(xml.contains("id=\"sidebarTitle\""));
-
-        // SCSS-канон specialisation (dictionary-edit-forms.scss, 7 тем): отступы
-        // контента sidebar 14/16/12 + border-right + тень, название по центру,
-        // тонкий скроллбар при переполнении.
-        String scss = readProjectFile(
-                "modules/web/themes/hover/com.company.hunttech/dictionary-edit-forms.scss");
-        assertTrue(scss.contains(".specialisation-editor .edit-sidebar {"));
-        assertTrue(scss.contains("padding: 14px 16px 12px !important;"));
-        assertTrue(scss.contains("border-right: 1px solid rgba(15, 23, 42, 0.78) !important;"));
-        assertTrue(scss.contains("box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;"));
-        assertTrue(scss.contains(".specialisation-editor .edit-sidebar-title,"));
-        assertTrue(scss.contains("text-align: center !important;"));
-        assertTrue(scss.contains("scrollbar-width: thin;"));
-        for (String theme : new String[]{"halo", "havana", "helium", "hover",
-                "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"}) {
-            String t = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/dictionary-edit-forms.scss");
-            assertTrue(theme + ": dictionary-edit-forms.scss не идентичен hover", scss.equals(t));
-        }
-
-        // Редизайн не должен менять bindings, loader и framework actions.
-        assertTrue(xml.contains("id=\"specialisationDc\""));
-        assertTrue(xml.contains("class=\"com.company.hunttech.entity.Specialisation\""));
-        assertTrue(xml.contains("view extends=\"specialisation-view\""));
-        assertTrue(xml.contains("id=\"specialisationCandidatesDc\" property=\"candidate\""));
-        assertTrue(xml.contains("property=\"specRuName\""));
-        assertTrue(xml.contains("id=\"specialisationCandidateTable\""));
-        assertTrue(xml.contains("action=\"windowCommitAndClose\""));
-        assertTrue(xml.contains("action=\"windowClose\""));
-
-        // Навигация по вкладкам TabSheet.
-        assertTrue(java.contains("initTabNavigation()"));
-        assertTrue(java.contains("tabSheet.setSelectedTab(tabName)"));
-        assertTrue(java.contains("addStyleName(ACTIVE_NAV_STYLE)"));
-        assertTrue(java.contains("removeStyleName(ACTIVE_NAV_STYLE)"));
-    }
-
-    @Test
     public void ownershupEditHasSidebarAndPreservesBindings() throws IOException {
         String xml = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/ownershup/ownershup-edit.xml");

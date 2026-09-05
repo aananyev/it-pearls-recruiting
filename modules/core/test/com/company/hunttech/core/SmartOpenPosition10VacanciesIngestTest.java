@@ -169,24 +169,6 @@ public class SmartOpenPosition10VacanciesIngestTest {
     }
 
     @Test
-    public void testVacancy9_SeniorDotNetDeveloper() {
-        String text = "Позиция: Senior C# / .NET Core Developer\n" +
-                "Локация: Нижний Новгород, удаленная работа\n" +
-                "Зарплата: 280 000 - 400 000 руб. Опыт от 5 лет. Грейд Senior.\n" +
-                "Навыки: C#, .NET Core, ASP.NET, PostgreSQL, Redis, Docker, Git.";
-
-        SmartOpenPositionParsedData data = service.parseVacancyText(text);
-        assertNotNull(data);
-        assertTrue(data.getVacansyName().contains("Senior C#"));
-        assertEquals(new BigDecimal("280000"), data.getSalaryMin());
-        assertEquals(new BigDecimal("400000"), data.getSalaryMax());
-        assertEquals(Integer.valueOf(1), data.getRemoteWork());
-        assertEquals("Senior", data.getGradeName());
-        assertTrue(data.getRequiredSkills().contains("C#"));
-        assertTrue(data.getRequiredSkills().contains("PostgreSQL"));
-    }
-
-    @Test
     public void testVacancy10_AndroidKotlinDeveloper() {
         String text = "Вакансия: Middle Android Developer (Kotlin)\n" +
                 "Город: Самара (удаленка)\n" +

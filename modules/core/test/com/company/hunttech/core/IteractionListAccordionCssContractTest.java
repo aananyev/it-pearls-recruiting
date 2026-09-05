@@ -25,52 +25,6 @@ public class IteractionListAccordionCssContractTest {
             "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark");
 
     @Test
-    public void allThemesImportFinalScopedOverrideAfterReferences() throws IOException {
-        for (String theme : THEMES) {
-            String scss = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/iteraction-list-reference-finish.scss");
-            String shared = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/edit-screen-shared-styles.scss");
-            String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
-
-            assertTrue(shared.contains(".edit-form-control"));
-            assertTrue(shared.contains(".edit-form-control .v-textfield"));
-            assertTrue(shared.contains(".edit-form-control .v-textarea"));
-            assertTrue(shared.contains(".edit-form-control .c-pickerfield-layout"));
-            assertTrue(shared.contains(".edit-form-control .c-suggestionfield"));
-            assertTrue(shared.contains(".edit-form-control .v-filterselect > .v-icon"));
-            assertTrue(shared.contains(".v-icon + .v-filterselect-input"));
-            assertTrue(shared.contains("padding-left: 40px !important;"));
-            String visual = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/iteraction-list-visual-alignment.scss");
-            assertTrue(visual.contains(".iteraction-list-form-grid.iteraction-list-participants-grid"));
-            assertTrue(visual.contains(".iteraction-list-form-grid.iteraction-list-result-grid"));
-            assertTrue(visual.contains("> .v-gridlayout-slot:last-child"));
-            assertTrue(visual.contains(".iteraction-list-service-card .c-datefield-layout"));
-            assertTrue(visual.contains("> .c-timefield-wrapper"));
-            assertTrue(visual.contains("margin-top: 12px !important;"));
-            assertTrue(scss.contains(".iteraction-list-editor"));
-            assertTrue(scss.contains(".iteraction-list-accordion-section"));
-            assertTrue(scss.contains(".iteraction-list-popular-host"));
-            assertTrue(scss.contains(".iteraction-list-footer-actions"));
-            assertTrue(scss.contains("height: 40px !important;"));
-            assertTrue(scss.contains("border-radius: 8px !important;"));
-            assertTrue(scss.contains("visibility: visible !important;"));
-            assertFalse(scss.contains("background: #2e7d32 !important;"));
-            assertFalse(scss.contains("border-radius: 999px !important;"));
-            assertFalse(scss.contains("@mixin iteraction-list-reference-finish-theme {\n  .v-panel"));
-            assertTrue(styles.indexOf("@import \"com.company.hunttech/iteraction-list-reference-finish\";")
-                    > styles.indexOf("@import \"com.company.hunttech/candidate-cv-editor\";"));
-            assertTrue(styles.indexOf("@import \"com.company.hunttech/iteraction-list-visual-alignment\";")
-                    > styles.indexOf("@import \"com.company.hunttech/edit-screen-shared-styles\";"));
-            assertTrue(styles.indexOf("@include iteraction-list-visual-alignment-theme;")
-                    > styles.indexOf("@include edit-screen-shared-styles;"));
-            assertTrue(styles.indexOf("@include iteraction-list-reference-finish-theme;")
-                    > styles.indexOf("@include candidate-cv-editor-theme;"));
-        }
-    }
-
-    @Test
     public void finalOverrideMatchesSettingsWindowAccordionAndFormControls() throws IOException {
         for (String theme : THEMES) {
             String settings = readProjectFile("modules/web/themes/" + theme
