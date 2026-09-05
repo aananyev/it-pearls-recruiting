@@ -23,6 +23,10 @@ public class DatabaseSchemaReconciliationChangelogTest {
             "modules/core/db/changelog/260727-1-reconcileProductionSchema.xml";
     private static final String PROFILE_COMPLETION_CHANGELOG =
             "modules/core/db/changelog/260727-2-completeUserAiProfileColumns.xml";
+    private static final String ADMIN_FALLBACK_CONSENT_CHANGELOG =
+            "modules/core/db/changelog/260904-1-addAdminFallbackConsent.xml";
+    private static final String SECURE_USER_AI_CREDENTIAL_CHANGELOG =
+            "modules/core/db/changelog/260904-4-addUserAiEncryptedKey.xml";
     private static final String ACCOUNTING_BOT_CHANGELOG =
             "modules/core/db/changelog/260729-1-addAccountingBotEntities.xml";
     private static final String OUTSTAFFING_RATES_SQL =
@@ -31,6 +35,10 @@ public class DatabaseSchemaReconciliationChangelogTest {
             "modules/core/db/changelog/db.changelog-master.xml";
     private static final String CUBA_UPDATE_SQL =
             "modules/core/db/update/postgres/26/260727-2-reconcileProductionSchema.sql";
+    private static final String ADMIN_FALLBACK_CONSENT_SQL =
+            "modules/core/db/update/postgres/26/260904-1-addAdminFallbackConsent.sql";
+    private static final String SECURE_USER_AI_CREDENTIAL_SQL =
+            "modules/core/db/update/postgres/26/260904-4-addUserAiEncryptedKey.sql";
     private static final String USER_SETTINGS =
             "modules/global/src/com/company/hunttech/entity/UserSettings.java";
     private static final String USER_AI_PROFILE =
@@ -70,12 +78,14 @@ public class DatabaseSchemaReconciliationChangelogTest {
     public void everyUserAiProfileEntityColumnIsCoveredByBothMigrationPaths() throws IOException {
         String entity = readProjectFile(USER_AI_PROFILE);
         String liquibase = readProjectFile(CHANGELOG)
-                + readProjectFile(PROFILE_COMPLETION_CHANGELOG);
-        String cubaSql = readProjectFile(CUBA_UPDATE_SQL);
+                + readProjectFile(PROFILE_COMPLETION_CHANGELOG)
+                + readProjectFile(ADMIN_FALLBACK_CONSENT_CHANGELOG);
+        String cubaSql = readProjectFile(CUBA_UPDATE_SQL)
+                + readProjectFile(ADMIN_FALLBACK_CONSENT_SQL);
         Set<String> entityColumns = extractEntityColumnNames(entity);
 
-        // Контракт фиксирует 33 @Column и один @JoinColumn текущей entity-модели.
-        assertEquals(34, entityColumns.size());
+        // Контракт фиксирует 36 @Column и один @JoinColumn текущей entity-модели.
+        assertEquals(37, entityColumns.size());
         for (String column : entityColumns) {
             assertTrue("Liquibase не содержит колонку UserAiProfile: " + column,
                     liquibase.contains(column));
@@ -86,6 +96,18 @@ public class DatabaseSchemaReconciliationChangelogTest {
         assertTrue(readProjectFile(PROFILE_COMPLETION_CHANGELOG)
                 .contains("ADD COLUMN IF NOT EXISTS COMMUNICATION_CONSTRAINTS"));
         assertTrue(cubaSql.contains("ADD COLUMN IF NOT EXISTS COMMUNICATION_CONSTRAINTS"));
+    }
+
+    @Test
+    public void personalCredentialMigrationIsAdditiveAndMasterRegistered() throws IOException {
+        String master = readProjectFile(CHANGELOG_MASTER);
+        String liquibase = readProjectFile(SECURE_USER_AI_CREDENTIAL_CHANGELOG);
+        String cubaSql = readProjectFile(SECURE_USER_AI_CREDENTIAL_SQL);
+        assertTrue(master.contains("260904-4-addUserAiEncryptedKey.xml"));
+        assertTrue(liquibase.contains("API_KEY_ENCRYPTED"));
+        assertTrue(cubaSql.contains("ADD COLUMN IF NOT EXISTS API_KEY_ENCRYPTED"));
+        assertFalse(liquibase.contains("API_KEY ="));
+        assertFalse(cubaSql.contains("API_KEY ="));
     }
 
     @Test

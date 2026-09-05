@@ -142,6 +142,8 @@
                             <textField id="temperatureField" dataContainer="aiFunctionDc" property="temperature" width="100%" stylename="edit-form-control" caption="msg://aiFunctionTemperature.caption"/>
                             <!-- Max tokens передаётся provider, если adapter поддерживает эту опцию. -->
                             <textField id="maxTokensField" dataContainer="aiFunctionDc" property="maxTokens" width="100%" stylename="edit-form-control" caption="msg://aiFunctionMaxTokens.caption"/>
+                            <!-- Общая квота LLM_CHAT за календарный месяц; индивидуальный override имеет приоритет. -->
+                            <textField id="defaultMonthlyTokenQuotaField" dataContainer="aiFunctionDc" property="defaultMonthlyTokenQuota" width="100%" stylename="edit-form-control" caption="msg://aiFunctionDefaultMonthlyTokenQuota.caption"/>
                             <!-- Версия конфигурации нужна для операционной воспроизводимости prompt/config; обязательна. -->
                             <textField id="configurationVersionField" dataContainer="aiFunctionDc" property="configurationVersion" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionConfigurationVersion.caption"/>
                         </groupBox>

@@ -67,6 +67,11 @@
         <class>com.company.hunttech.entity.ai.AiFunctionConfiguration</class>
         <class>com.company.hunttech.entity.ai.UserAiFunctionOverride</class>
         <class>com.company.hunttech.entity.ai.AiCallLog</class>
+        <class>com.company.hunttech.entity.ai.LlmChatConversation</class>
+        <class>com.company.hunttech.entity.ai.LlmChatMessage</class>
+        <class>com.company.hunttech.entity.ai.LlmChatQuotaPeriod</class>
+        <class>com.company.hunttech.entity.ai.LlmUserQuotaOverride</class>
+        <class>com.company.hunttech.entity.ai.LlmChatQuotaReservation</class>
         <class>com.company.hunttech.entity.AccountingExpenseCategory</class>
         <class>com.company.hunttech.entity.AccountingRecipient</class>
         <class>com.company.hunttech.entity.AccountingCompanyAlias</class>

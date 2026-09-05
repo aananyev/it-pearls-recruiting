@@ -5,6 +5,7 @@ import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.UserAiProfile;
+import com.company.hunttech.service.AiConsentPolicy;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.entity.ai.AiCallLog;
 import com.company.hunttech.entity.ai.AiCapability;
@@ -14,6 +15,7 @@ import com.company.hunttech.entity.ai.AiFunctionConfiguration;
 import com.company.hunttech.entity.ai.UserAiFunctionOverride;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.core.global.FluentLoader;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.Metadata;
@@ -296,5 +298,139 @@ public class AiExecutionServiceBeanTest {
         service.executeText(FUNCTION_CODE, Collections.singletonMap("vacancyName", "Java"));
 
         assertEquals(BASE_SYSTEM_PROMPT, executedSystemPrompt());
+    }
+
+    @Test
+    public void llmChat_prefersPersonalApiAndDoesNotCallAdminApi() {
+        function.setCode("LLM_CHAT");
+        function.setPromptTemplate("${message}");
+        function.setExecutionPolicy(AiExecutionPolicy.USER_OVERRIDE_ALLOWED);
+        function.setFallbackPolicy(AiFallbackPolicy.NO_FALLBACK);
+
+        UserAiConfiguration personal = new UserAiConfiguration();
+        personal.setUser(user);
+        personal.setProviderCode("personal-provider");
+        personal.setApiKeyEncrypted("personal-secret");
+        personal.setDefaultModelName("personal-model");
+        personal.setIsActive(true);
+        UserAiFunctionOverride override = new UserAiFunctionOverride();
+        override.setUser(user);
+        override.setAiFunction(function);
+        override.setUserAiConfiguration(personal);
+        override.setEnabled(true);
+
+        FluentLoader overrideLoader = (FluentLoader) dataManager.load(UserAiFunctionOverride.class);
+        when(overrideLoader.query(anyString()).parameter(anyString(), any()).parameter(anyString(), any())
+                .view(anyString()).optional())
+                .thenReturn(java.util.Optional.of(override));
+        when(providerRegistry.getProvider("personal-provider")).thenReturn(provider);
+        when(aiSecretService.decrypt("personal-secret")).thenReturn("personal-key");
+
+        AiExecutionResult result = service.executeText("LLM_CHAT", Collections.singletonMap("message", "Привет"));
+
+        assertEquals(AiCredentialOwner.USER, result.getCredentialOwner());
+        verify(provider).executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any());
+        verify(aiSecretService, never()).decrypt("secret");
+    }
+
+    @Test
+    public void llmChat_fallsBackToAdminOnlyAfterPersonalFailureAndConsent() {
+        function.setCode("LLM_CHAT");
+        function.setPromptTemplate("${message}");
+        function.setExecutionPolicy(AiExecutionPolicy.USER_OVERRIDE_ALLOWED);
+        function.setFallbackPolicy(AiFallbackPolicy.FALLBACK_TO_ADMIN);
+
+        UserAiConfiguration personal = new UserAiConfiguration();
+        personal.setUser(user);
+        personal.setProviderCode("personal-provider");
+        personal.setApiKeyEncrypted("personal-secret");
+        personal.setDefaultModelName("personal-model");
+        personal.setIsActive(true);
+        UserAiFunctionOverride override = new UserAiFunctionOverride();
+        override.setUser(user);
+        override.setAiFunction(function);
+        override.setUserAiConfiguration(personal);
+        override.setEnabled(true);
+        stubOverride(override);
+
+        UserAiProfile profile = new UserAiProfile();
+        profile.setAdminFallbackConsent(true);
+        profile.setAdminFallbackConsentVersion(AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+        profile.setAdminFallbackConsentAt(new java.util.Date());
+        stubProfile(profile);
+        AdminAiConfiguration admin = function.getAdminConfiguration();
+        admin.setProviderCode("admin-provider");
+        admin.setApiKeyEncrypted("admin-secret");
+        function.setAdminConfiguration(admin);
+
+        AIProvider adminProvider = mock(AIProvider.class);
+        when(providerRegistry.getProvider("personal-provider")).thenReturn(provider);
+        when(providerRegistry.getProvider("admin-provider")).thenReturn(adminProvider);
+        when(aiSecretService.decrypt("personal-secret")).thenReturn("personal-key");
+        when(aiSecretService.decrypt("admin-secret")).thenReturn("admin-key");
+        when(provider.executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any()))
+                .thenThrow(new RuntimeException("personal provider unavailable"));
+        when(adminProvider.executeTextWithTokens(anyString(), anyString(), eq("admin-key"), eq("gpt-test"), any()))
+                .thenReturn(com.company.hunttech.core.ai.AiProviderResponse.ofText("admin response", 10, 5, 15));
+
+        AiExecutionResult result = service.executeText("LLM_CHAT", Collections.singletonMap("message", "Привет"));
+
+        assertEquals(AiCredentialOwner.ADMIN, result.getCredentialOwner());
+        verify(provider).executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any());
+        verify(adminProvider).executeTextWithTokens(anyString(), anyString(), eq("admin-key"), eq("gpt-test"), any());
+    }
+
+    @Test
+    public void llmChat_doesNotFallbackWithoutSeparateConsent() {
+        function.setCode("LLM_CHAT");
+        function.setPromptTemplate("${message}");
+        function.setExecutionPolicy(AiExecutionPolicy.USER_OVERRIDE_ALLOWED);
+        function.setFallbackPolicy(AiFallbackPolicy.FALLBACK_TO_ADMIN);
+
+        UserAiConfiguration personal = new UserAiConfiguration();
+        personal.setUser(user);
+        personal.setProviderCode("personal-provider");
+        personal.setApiKeyEncrypted("personal-secret");
+        personal.setDefaultModelName("personal-model");
+        personal.setIsActive(true);
+        UserAiFunctionOverride override = new UserAiFunctionOverride();
+        override.setUser(user);
+        override.setAiFunction(function);
+        override.setUserAiConfiguration(personal);
+        override.setEnabled(true);
+        stubOverride(override);
+        UserAiProfile profile = new UserAiProfile();
+        profile.setAdminFallbackConsent(false);
+        stubProfile(profile);
+
+        when(providerRegistry.getProvider("personal-provider")).thenReturn(provider);
+        when(aiSecretService.decrypt("personal-secret")).thenReturn("personal-key");
+        when(provider.executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any()))
+                .thenThrow(new RuntimeException("personal provider unavailable"));
+
+        boolean rejected = false;
+        try {
+            service.executeText("LLM_CHAT", Collections.singletonMap("message", "Привет"));
+        } catch (DevelopmentException expected) {
+            rejected = true;
+            assertTrue(expected.getMessage().contains("отдельное согласие"));
+        }
+        assertTrue("Admin fallback must require separate consent", rejected);
+        verify(provider).executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any());
+        verify(providerRegistry, never()).getProvider("admin-provider");
+    }
+
+    private void stubOverride(UserAiFunctionOverride override) {
+        FluentLoader overrideLoader = (FluentLoader) dataManager.load(UserAiFunctionOverride.class);
+        when(overrideLoader.query(anyString()).parameter(anyString(), any()).parameter(anyString(), any())
+                .view(anyString()).optional())
+                .thenReturn(java.util.Optional.of(override));
+    }
+
+    private void stubProfile(UserAiProfile profile) {
+        FluentLoader profileLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(dataManager.load(UserAiProfile.class)).thenReturn(profileLoader);
+        when(profileLoader.query(anyString()).parameter(anyString(), any()).view(anyString()).optional())
+                .thenReturn(java.util.Optional.of(profile));
     }
 }

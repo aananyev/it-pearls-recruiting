@@ -28,10 +28,16 @@ public class AiExecutionResult implements Serializable {
     private final String modelName;
     private final String providerCode;
     private final AiCredentialOwner credentialOwner;
+    private final Integer promptTokens;
+    private final Integer completionTokens;
+    private final Integer totalTokens;
+    private final String providerRequestId;
 
     private AiExecutionResult(String functionCode, String functionName, AiCapability capability,
                               String modelName, String providerCode, AiCredentialOwner credentialOwner,
-                              String text, byte[] image) {
+                              String text, byte[] image, Integer promptTokens,
+                              Integer completionTokens, Integer totalTokens,
+                              String providerRequestId) {
         this.functionCode = functionCode;
         this.functionName = functionName;
         this.capability = capability;
@@ -40,6 +46,10 @@ public class AiExecutionResult implements Serializable {
         this.credentialOwner = credentialOwner;
         this.text = text;
         this.image = image;
+        this.promptTokens = promptTokens;
+        this.completionTokens = completionTokens;
+        this.totalTokens = totalTokens;
+        this.providerRequestId = providerRequestId;
     }
 
     /**
@@ -50,7 +60,30 @@ public class AiExecutionResult implements Serializable {
                                                String providerCode, AiCredentialOwner credentialOwner,
                                                String text) {
         return new AiExecutionResult(functionCode, functionName, capability,
-                modelName, providerCode, credentialOwner, text, null);
+                modelName, providerCode, credentialOwner, text, null, null, null, null, null);
+    }
+
+    /** Provider usage, when the adapter reported it, for quota settlement. */
+    public static AiExecutionResult textResult(String functionCode, String functionName,
+                                               AiCapability capability, String modelName,
+                                               String providerCode, AiCredentialOwner credentialOwner,
+                                               String text, Integer promptTokens,
+                                               Integer completionTokens, Integer totalTokens) {
+        return new AiExecutionResult(functionCode, functionName, capability,
+                modelName, providerCode, credentialOwner, text, null,
+                promptTokens, completionTokens, totalTokens, null);
+    }
+
+    /** Text result with provider-native request identifier when the adapter exposes one. */
+    public static AiExecutionResult textResult(String functionCode, String functionName,
+                                               AiCapability capability, String modelName,
+                                               String providerCode, AiCredentialOwner credentialOwner,
+                                               String text, Integer promptTokens,
+                                               Integer completionTokens, Integer totalTokens,
+                                               String providerRequestId) {
+        return new AiExecutionResult(functionCode, functionName, capability,
+                modelName, providerCode, credentialOwner, text, null,
+                promptTokens, completionTokens, totalTokens, providerRequestId);
     }
 
     /**
@@ -61,7 +94,7 @@ public class AiExecutionResult implements Serializable {
                                                 String providerCode, AiCredentialOwner credentialOwner,
                                                 byte[] image) {
         return new AiExecutionResult(functionCode, functionName, capability,
-                modelName, providerCode, credentialOwner, null, image);
+                modelName, providerCode, credentialOwner, null, image, null, null, null, null);
     }
 
     /** Стабильный код выполненной AI-функции (например {@code PROJECT_SHORT_DESCRIPTION_GENERATE}). */
@@ -102,5 +135,21 @@ public class AiExecutionResult implements Serializable {
     /** Собственник использованного API: корпоративное подключение или личное пользователя. */
     public AiCredentialOwner getCredentialOwner() {
         return credentialOwner;
+    }
+
+    public Integer getPromptTokens() {
+        return promptTokens;
+    }
+
+    public Integer getCompletionTokens() {
+        return completionTokens;
+    }
+
+    public Integer getTotalTokens() {
+        return totalTokens;
+    }
+
+    public String getProviderRequestId() {
+        return providerRequestId;
     }
 }

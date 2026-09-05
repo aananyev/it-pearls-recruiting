@@ -27,6 +27,7 @@
         <property name="capability"/>
         <property name="temperature"/>
         <property name="maxTokens"/>
+        <property name="defaultMonthlyTokenQuota"/>
         <property name="adminConfiguration" view="admin-ai-configuration-browse-view"/>
         <property name="adminModelName"/>
         <property name="executionPolicy"/>
@@ -53,9 +54,10 @@
         <property name="defaultModelName"/>
         <property name="isActive"/>
     </view>
-    <!-- Core-only view добавляет legacy API_KEY для фактического пользовательского вызова. -->
+    <!-- Core-only view добавляет ciphertext и transitional API_KEY для фактического вызова. -->
     <view entity="hunttech_UserAiConfiguration" name="user-ai-configuration-ai-execution-view" extends="user-ai-configuration-override-picker-view">
         <property name="apiKey"/>
+        <property name="apiKeyEncrypted"/>
     </view>
 
     <!-- Browse/edit override view содержит только безопасные сведения о выбранной функции и личном подключении. -->
@@ -97,5 +99,39 @@
         <property name="promptText"/>
         <property name="responseText"/>
         <property name="errorMessage"/>
+    </view>
+
+    <!-- Chat history is loaded by owner-scoped middleware queries only. -->
+    <view entity="hunttech_LlmChatConversation" name="llm-chat-conversation-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="hunttech_LlmChatMessage" name="llm-chat-message-view" extends="_local">
+        <property name="conversation" view="_minimal"/>
+        <property name="requestId"/>
+        <property name="providerRequestId"/>
+    </view>
+    <view entity="hunttech_LlmChatQuotaPeriod" name="llm-chat-quota-period-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="hunttech_LlmUserQuotaOverride" name="llm-user-quota-override-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="hunttech_LlmChatQuotaReservation" name="llm-chat-quota-reservation-view" extends="_local">
+        <property name="period" view="_minimal"/>
+        <property name="conversation" view="_minimal"/>
+        <property name="providerRequestId"/>
+        <property name="reconciledBy"/>
+        <property name="reconciledAt"/>
+    </view>
+    <!-- Admin reconciliation view adds only the owner/period/title context required by the pending ledger screen. -->
+    <view entity="hunttech_LlmChatQuotaReservation" name="llm-chat-quota-reconciliation-view"
+          extends="llm-chat-quota-reservation-view">
+        <property name="period">
+            <property name="periodStart"/>
+            <property name="user" view="_minimal"/>
+        </property>
+        <property name="conversation">
+            <property name="title"/>
+        </property>
     </view>
 </views>

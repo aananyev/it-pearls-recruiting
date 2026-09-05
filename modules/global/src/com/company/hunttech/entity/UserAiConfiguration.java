@@ -27,7 +27,13 @@ public class UserAiConfiguration extends StandardEntity {
     private String providerCode;
 
     @Column(name = "API_KEY", length = 512)
+    /**
+     * Transitional legacy field. New writes must use apiKeyEncrypted.
+     */
     private String apiKey;
+
+    @Column(name = "API_KEY_ENCRYPTED", length = 4096)
+    private String apiKeyEncrypted;
 
     @Column(name = "DEFAULT_MODEL_NAME", length = 128)
     private String defaultModelName;
@@ -57,6 +63,14 @@ public class UserAiConfiguration extends StandardEntity {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public String getApiKeyEncrypted() {
+        return apiKeyEncrypted;
+    }
+
+    public void setApiKeyEncrypted(String apiKeyEncrypted) {
+        this.apiKeyEncrypted = apiKeyEncrypted;
     }
 
     public String getDefaultModelName() {
