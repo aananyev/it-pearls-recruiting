@@ -24,6 +24,7 @@
 - Lookup usage по одному `providerRequestId` отложен до подтверждения provider-specific API; решение и обязательные условия зафиксированы в `LLM_CHAT_PROVIDER_USAGE_LOOKUP_DECISION.md`.
 - Интеграционная маршрутизация личного API и согласованного admin fallback покрыта mock-провайдерами; сценарии и ограничения зафиксированы в `LLM_CHAT_INTEGRATION_TEST_REPORT.md`.
 - Read-only transport smoke для staging вынесен в `scripts/verify-llm-chat-staging.sh`; authenticated сценарии и нагрузка выполняются только в выделенном staging.
+- План migration/rehearsal, seed-данных и rollback зафиксирован в `LLM_CHAT_PRODUCTION_MIGRATION_PLAN.md`; production-перенос без отдельного распоряжения запрещён.
 
 ## Квота
 
