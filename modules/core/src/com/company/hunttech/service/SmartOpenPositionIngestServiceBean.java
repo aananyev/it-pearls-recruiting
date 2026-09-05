@@ -543,6 +543,9 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 }
             }
 
+            // Добавление создаваемой вакансии в транзакцию сохранения
+            commitContext.addInstanceToCommit(openPosition);
+
             // Создание дерева навыков SkillTree для позиции
             if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
                 log.info("[SMART_VACANCY_OPENING] Привязка навыков к вакансии (всего: {})...", data.getRequiredSkills().size());
