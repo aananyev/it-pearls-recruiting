@@ -191,5 +191,7 @@
     <!-- Provider request ID preparation and auditable manual reconciliation of UNKNOWN_PENDING usage. -->
     <include file="260904-6-addLlmChatReconciliationAudit.xml"
              relativeToChangelogFile="true"/>
+    <include file="260905-1-addAiAuditSecuritySnapshots.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

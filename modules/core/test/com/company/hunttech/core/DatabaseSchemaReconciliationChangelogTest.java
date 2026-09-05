@@ -39,6 +39,10 @@ public class DatabaseSchemaReconciliationChangelogTest {
             "modules/core/db/update/postgres/26/260904-1-addAdminFallbackConsent.sql";
     private static final String SECURE_USER_AI_CREDENTIAL_SQL =
             "modules/core/db/update/postgres/26/260904-4-addUserAiEncryptedKey.sql";
+    private static final String AI_AUDIT_SECURITY_CHANGELOG =
+            "modules/core/db/changelog/260905-1-addAiAuditSecuritySnapshots.xml";
+    private static final String AI_AUDIT_SECURITY_SQL =
+            "modules/core/db/update/postgres/26/260905-1-addAiAuditSecuritySnapshots.sql";
     private static final String USER_SETTINGS =
             "modules/global/src/com/company/hunttech/entity/UserSettings.java";
     private static final String USER_AI_PROFILE =
@@ -108,6 +112,23 @@ public class DatabaseSchemaReconciliationChangelogTest {
         assertTrue(cubaSql.contains("ADD COLUMN IF NOT EXISTS API_KEY_ENCRYPTED"));
         assertFalse(liquibase.contains("API_KEY ="));
         assertFalse(cubaSql.contains("API_KEY ="));
+    }
+
+    @Test
+    public void aiAuditSecurityMigrationIsAdditiveAndDoesNotDeleteHistoricalPayload() throws IOException {
+        String master = readProjectFile(CHANGELOG_MASTER);
+        String changelog = readProjectFile(AI_AUDIT_SECURITY_CHANGELOG);
+        String sql = readProjectFile(AI_AUDIT_SECURITY_SQL);
+
+        assertTrue(master.contains("260905-1-addAiAuditSecuritySnapshots.xml"));
+        assertTrue(changelog.contains("PRIVACY_POLICY_VERSION"));
+        assertTrue(changelog.contains("PRIVACY_POLICY_VERSION_SNAPSHOT"));
+        assertTrue(changelog.contains("LEGACY_NOT_CAPTURED"));
+        assertTrue(sql.contains("ADD COLUMN IF NOT EXISTS PRIVACY_POLICY_VERSION"));
+        assertTrue(sql.contains("LEGACY_NOT_CAPTURED"));
+        assertFalse(sql.toLowerCase(Locale.ROOT).contains("prompt_text = null"));
+        assertFalse(sql.toLowerCase(Locale.ROOT).contains("response_text = null"));
+        assertFalse(changelog.toLowerCase(Locale.ROOT).contains("delete from"));
     }
 
     @Test

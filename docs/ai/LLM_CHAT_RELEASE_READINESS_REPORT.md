@@ -30,6 +30,7 @@
 - `AiCredentialService.migrateLegacyUserSecrets()` выполняет admin-only перенос legacy `API_KEY` в AES-GCM ciphertext и очищает plaintext; SQL-backfill не используется.
 - `AiCredentialService.rotateSecrets()` добавлен для controlled master-key rotation через текущий и временный предыдущий server-side key.
 - `AiSecuritySanitizer` применяется к ошибкам, AI-аудиту и сообщениям server log; локальный contract test проверяет редактирование Authorization/secret-like значений.
+- Для следующего runtime gate подготовлен `LLM_CHAT_STAGE4_RUNTIME_EVIDENCE_TEMPLATE.md`: синтетические пользователи/fixtures, migration и rotation rehearsal, secret leakage, consent/privacy, owner isolation, retention, quota и fallback checks.
 
 ## Результат независимой приёмки
 
@@ -71,6 +72,10 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 - Не зафиксированы финальные значения общей месячной квоты, system prompt/privacy policy version и provider/model/region для rollout.
 - Provider-specific lookup usage по одному request ID не подтверждён; до отдельного решения используется ручная reconciliation, автоматический повторный provider call запрещён.
 - PII-маскирование данных кандидатов оставлено TODO по распоряжению пользователя; текущий чат не извлекает candidate/CV entities.
+- Evidence-шаблон подготовлен, но не может быть заполнен до выдачи staging URL, тестовых учётных записей и sandbox credentials.
+- Выполнен additive rework аудита: новые `AiCallLog` не сохраняют prompt/response, добавлены snapshot-поля consent/privacy и changeSet `260905-1`; существующий исторический payload не очищается автоматически из-за необратимости.
+- Массовая очистка исторических `PROMPT_TEXT`/`RESPONSE_TEXT` не выполнялась и требует отдельного распоряжения, поскольку противоречит безопасному бессрочному хранению без согласованной процедуры.
+- Повторный запуск независимого тестировщика по текущему worktree завершился ошибкой лимита usage до отчёта; предыдущий отчет по старому commit не используется как приемка. Локальная приемка текущего worktree выполнена основным агентом.
 
 ## Результат текущего security-среза
 

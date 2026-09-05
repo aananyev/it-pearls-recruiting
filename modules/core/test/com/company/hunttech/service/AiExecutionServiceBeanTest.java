@@ -89,6 +89,7 @@ public class AiExecutionServiceBeanTest {
         function.setPromptTemplate("Опиши вакансию ${vacancyName}");
         function.setSystemPrompt(BASE_SYSTEM_PROMPT);
         function.setIncludeUserContext(true);
+        function.setPrivacyPolicyVersion(AiConsentPolicy.LLM_CHAT_PRIVACY_POLICY_VERSION);
 
         AdminAiConfiguration admin = new AdminAiConfiguration();
         admin.setProviderCode("openai");
@@ -275,6 +276,10 @@ public class AiExecutionServiceBeanTest {
         AiCallLog callLog = (AiCallLog) commitCaptor.getValue().getCommitInstances().iterator().next();
         assertEquals(Boolean.TRUE, callLog.getContextIncluded());
         assertTrue(callLog.getContextCodePoints() != null && callLog.getContextCodePoints() > 0);
+        assertNull(callLog.getPromptText());
+        assertNull(callLog.getResponseText());
+        assertEquals(AiConsentPolicy.LLM_CHAT_PRIVACY_POLICY_VERSION,
+                callLog.getPrivacyPolicyVersionSnapshot());
     }
 
     @Test

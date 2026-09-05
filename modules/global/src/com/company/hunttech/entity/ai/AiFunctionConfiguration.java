@@ -51,6 +51,10 @@ public class AiFunctionConfiguration extends StandardEntity {
     @Column(name = "PROMPT_TEMPLATE")
     private String promptTemplate;
 
+    /** Immutable policy identifier used for the technical audit snapshot. */
+    @Column(name = "PRIVACY_POLICY_VERSION", length = 64)
+    private String privacyPolicyVersion;
+
     @Column(name = "TEMPERATURE")
     private Double temperature = 0.7;
 
@@ -139,6 +143,14 @@ public class AiFunctionConfiguration extends StandardEntity {
 
     public void setPromptTemplate(String promptTemplate) {
         this.promptTemplate = promptTemplate;
+    }
+
+    public String getPrivacyPolicyVersion() {
+        return privacyPolicyVersion;
+    }
+
+    public void setPrivacyPolicyVersion(String privacyPolicyVersion) {
+        this.privacyPolicyVersion = privacyPolicyVersion;
     }
 
     public Double getTemperature() {

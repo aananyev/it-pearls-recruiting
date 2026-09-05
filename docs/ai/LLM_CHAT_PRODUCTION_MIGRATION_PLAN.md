@@ -18,10 +18,13 @@
 4. `260904-4-addUserAiEncryptedKey`: добавить nullable `API_KEY_ENCRYPTED`; plaintext SQL-backfill не выполнять.
 5. `260904-5-addLlmChatRequestId`: добавить nullable `REQUEST_ID` и индекс сообщений.
 6. `260904-6-addLlmChatReconciliationAudit`: добавить `PROVIDER_REQUEST_ID` и поля ручной сверки.
+7. `260905-1-addAiAuditSecuritySnapshots`: добавить nullable `PRIVACY_POLICY_VERSION` в AI-функцию и три nullable snapshot-поля в `HUNTTECH_AI_CALL_LOG`.
 
 После применения changeSet 260904-4 выполнить только в core/runtime с настроенным `hunttech.ai.encryptionKey` контролируемую операцию `AiCredentialService.migrateLegacyUserSecrets()` под правом `hunttech.ai.manageCorporateCredentials`. SQL не должен читать или шифровать plaintext API-ключи. Операция повторяема: уже очищенные `API_KEY` не выбираются, при ошибке незавершённые записи остаются для повторного запуска.
 
 Ротация master-key выполняется отдельным окном: новый ключ задаётся в `hunttech.ai.encryptionKey`, прежний временно — в `hunttech.ai.previousEncryptionKey`; затем admin-only `AiCredentialService.rotateSecrets()` пере-шифровывает все ciphertext, после verification предыдущий ключ удаляется и выполняется повторная проверка доступа к AI. Значения ключей не попадают в migration log.
+
+`260905-1-addAiAuditSecuritySnapshots` seed-ит для `LLM_CHAT` стабильную внутреннюю версию privacy policy `llm-chat-privacy-v1` только при пустом значении и заполняет новые audit snapshot-поля маркером `LEGACY_NOT_CAPTURED` для старых записей. Исторические `PROMPT_TEXT`/`RESPONSE_TEXT` не удаляются автоматически: их массовая очистка является необратимым изменением и требует отдельного явного распоряжения, backup и согласованного плана хранения.
 
 Позиция общей квоты — `AiFunctionConfiguration.defaultMonthlyTokenQuota` для `LLM_CHAT`. Квота считается за календарный месяц; активный индивидуальный override пользователя имеет приоритет.
 
@@ -73,6 +76,8 @@
 - System prompt непустой, версия и checksum совпадают с migration log.
 - Нет фиктивных quota periods, usage и provider request IDs.
 - После legacy migration нет активных непустых `API_KEY`; ciphertext имеет формат `v1:<iv>:<ciphertext>`.
+- У `LLM_CHAT` есть privacy policy version `llm-chat-privacy-v1`; новые audit-записи получают фактические snapshot-версии, старые явно помечены `LEGACY_NOT_CAPTURED`.
+- Новые `AiCallLog` не содержат `PROMPT_TEXT` и `RESPONSE_TEXT`; существующий исторический payload не изменяется этим changeSet.
 - После rotation rehearsal все активные credentials расшифровываются только текущим key; предыдущий key удалён из конфигурации после verification.
 - Старые ключи не появляются в UI, исключениях, `AiCallLog` и server log; secret-like значения в диагностических ошибках заменены `[REDACTED]`.
 - Повторный `requestId` не создаёт второй provider call или списание.

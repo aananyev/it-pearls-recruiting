@@ -37,6 +37,9 @@
 - Аналитик: `REWORK`; требует evidence шифрования/ротации, secret leakage, retention, consent/privacy version и runtime security.
 - Автоматизированный тестировщик: `FAIL` для полного acceptance gate; локальный кодовый срез прошёл, но staging/auth/load и runtime evidence отсутствуют.
 - В текущем срезе добавлены versioned fallback consent и checkbox ExtSettingsWindow, admin-only legacy secret migration/master-key rotation, общий sanitizer ошибок/аудита и security-contract tests.
+- Подготовлен `LLM_CHAT_STAGE4_RUNTIME_EVIDENCE_TEMPLATE.md` с synthetic staging fixture и матрицей security/data acceptance; реальные секреты и production не используются.
+- Выполнен кодовый rework аудита: новые `AiCallLog` не сохраняют prompt/response, добавлены privacy/consent snapshots и additive/idempotent changeSet `260905-1`; исторический payload не удаляется без отдельного распоряжения.
+- Независимый тестировщик по актуальному срезу не выдал verdict из-за исчерпания usage; его прежний отчет по старому commit исключён из приемки. Локальные тесты и компиляция текущего worktree прошли.
 - После замечаний выполнен полный локальный прогон security, foundation, schema, routing, context тестов и web-компиляции: `BUILD SUCCESSFUL`.
 - Оба agent-сеанса после завершения проверки закрыты; активных субагентов нет.
 

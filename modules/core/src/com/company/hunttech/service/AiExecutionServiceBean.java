@@ -39,7 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * Выбор credential выполняется строго по policy функции. Пользовательский ключ может
  * заместить корпоративный только через UserAiFunctionOverride для конкретной функции.
- * Все вызовы фиксируются в сущности AiCallLog с токенами, длительностью, промптом и статусом.
+ * Все вызовы фиксируются в сущности AiCallLog с токенами, длительностью и статусом;
+ * исходные prompt/response в технический аудит не сохраняются.
  *
  * Персонализация: перед вызовом провайдера в executeText контекст «Обо мне» текущего
  * пользователя (UserAiProfile через UserAiContextService) добавляется в system prompt
@@ -99,7 +100,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");
         }
 
-        UserContextAttachment userContext = resolveUserContext(function);
+        UserContextAttachment userContext = resolveUserContext(function, currentUser);
         String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
@@ -118,7 +119,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 }
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
                         && resolveAdminConfiguration(function) != null) {
-                    ensureAdminFallbackAllowed(function, currentUser);
+                    ensureAdminFallbackAllowed(function, currentUser, userContext);
                     log.warn("Персональное AI-подключение функции {} недоступно; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
                     return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
@@ -131,7 +132,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
             }
         }
-        ensureAdminFallbackAllowed(function, currentUser);
+        ensureAdminFallbackAllowed(function, currentUser, userContext);
         return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
     }
 
@@ -154,7 +155,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");
         }
 
-        UserContextAttachment userContext = resolveUserContext(function);
+        UserContextAttachment userContext = resolveUserContext(function, currentUser);
         String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         AtomicBoolean emitted = new AtomicBoolean(false);
@@ -180,7 +181,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 }
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
                         && resolveAdminConfiguration(function) != null) {
-                    ensureAdminFallbackAllowed(function, currentUser);
+                    ensureAdminFallbackAllowed(function, currentUser, userContext);
                     return executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
                             callerSource, startTime, userContext, requestId, guardedListener);
                 }
@@ -188,7 +189,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
             }
         }
-        ensureAdminFallbackAllowed(function, currentUser);
+        ensureAdminFallbackAllowed(function, currentUser, userContext);
         return executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
                 callerSource, startTime, userContext, requestId, guardedListener);
     }
@@ -500,11 +501,20 @@ public class AiExecutionServiceBean implements AiExecutionService {
             callLog.setEstimatedCost(costResult.getCost());
             callLog.setCurrency(costResult.getCurrency());
 
-            callLog.setPromptText(prompt);
-            callLog.setResponseText(responseText);
+            // AiCallLog is a technical audit, not a conversation store. Never persist
+            // user/provider payloads here: chat history has its own owner-scoped storage.
+            callLog.setPromptText(null);
+            callLog.setResponseText(null);
             callLog.setCallerSource(callerSource);
             callLog.setStatus(status);
             callLog.setErrorMessage(AiSecuritySanitizer.sanitizeError(errorMessage));
+            callLog.setPrivacyPolicyVersionSnapshot(function == null ? null : function.getPrivacyPolicyVersion());
+            if (userContext != null) {
+                callLog.setExternalProcessingConsentVersionSnapshot(
+                        userContext.externalProcessingConsentVersionSnapshot);
+                callLog.setAdminFallbackConsentVersionSnapshot(
+                        userContext.adminFallbackConsentVersionSnapshot);
+            }
             if (userContext != null) {
                 callLog.setContextIncluded(userContext.contextIncluded);
                 callLog.setContextCodePoints(userContext.contextCodePoints);
@@ -548,8 +558,12 @@ public class AiExecutionServiceBean implements AiExecutionService {
      * + непустота контекста. При любом «нет» — исходный system prompt без изменений
      * (план персонализации §3.2, §4.3).
      */
-    private UserContextAttachment resolveUserContext(AiFunctionConfiguration function) {
+    private UserContextAttachment resolveUserContext(AiFunctionConfiguration function, User currentUser) {
         UserContextAttachment detached = new UserContextAttachment(function.getSystemPrompt());
+        UserAiProfile profile = loadUserAiProfileForAudit(currentUser);
+        if (profile != null) {
+            detached.externalProcessingConsentVersionSnapshot = profile.getConsentVersion();
+        }
         if (!resolveIncludeUserContext(function)) {
             return detached;
         }
@@ -623,6 +637,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
         private String effectiveSystemPrompt;
         private boolean contextIncluded;
         private Integer contextCodePoints;
+        private String externalProcessingConsentVersionSnapshot;
+        private String adminFallbackConsentVersionSnapshot;
 
         private UserContextAttachment(String originalSystemPrompt) {
             this.effectiveSystemPrompt = originalSystemPrompt;
@@ -709,6 +725,11 @@ public class AiExecutionServiceBean implements AiExecutionService {
      * retain their existing routing behavior.
      */
     private void ensureAdminFallbackAllowed(AiFunctionConfiguration function, User currentUser) {
+        ensureAdminFallbackAllowed(function, currentUser, null);
+    }
+
+    private void ensureAdminFallbackAllowed(AiFunctionConfiguration function, User currentUser,
+                                             UserContextAttachment userContext) {
         if (function == null || !LLM_CHAT_FUNCTION_CODE.equals(function.getCode())) {
             return;
         }
@@ -726,6 +747,27 @@ public class AiExecutionServiceBean implements AiExecutionService {
             throw new DevelopmentException(
                     "Персональное AI-подключение недоступно. Для автоматического fallback "
                             + "к административному AI API сначала дайте отдельное согласие в настройках профиля.");
+        }
+        if (userContext != null) {
+            userContext.adminFallbackConsentVersionSnapshot = profile.getAdminFallbackConsentVersion();
+        }
+    }
+
+    private UserAiProfile loadUserAiProfileForAudit(User currentUser) {
+        if (currentUser == null || dataManager == null) {
+            return null;
+        }
+        try {
+            return dataManager.load(UserAiProfile.class)
+                    .query(QUERY_USER_AI_PROFILE)
+                    .parameter("user", currentUser)
+                    .view("userAiProfile-view")
+                    .optional()
+                    .orElse(null);
+        } catch (RuntimeException e) {
+            log.warn("Не удалось загрузить версии согласий для AI-аудита; snapshot не заполнен. Причина: {}",
+                    e.getClass().getSimpleName());
+            return null;
         }
     }
 

@@ -46,6 +46,7 @@
 4. `260904-4-addUserAiEncryptedKey` — ciphertext-колонка персонального ключа.
 5. `260904-5-addLlmChatRequestId` — request id и индекс сообщений.
 6. `260904-6-addLlmChatReconciliationAudit` — nullable provider request ID для сообщения и резерва, а также кто и когда выполнил административную сверку.
+7. `260905-1-addAiAuditSecuritySnapshots` — privacy/consent snapshot-поля, privacy policy seed и legacy audit marker без удаления исторического payload.
 
 Liquibase и CUBA `updateDb` SQL находятся в `modules/core/db/`. Все шаги additive/idempotent; production-порядок и обязательные seed-данные описываются в отдельном migration plan.
 

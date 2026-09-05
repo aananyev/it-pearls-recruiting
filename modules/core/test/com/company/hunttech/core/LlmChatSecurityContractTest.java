@@ -70,6 +70,9 @@ public class LlmChatSecurityContractTest {
         assertTrue(credentials.contains("rotateSecrets"));
         assertTrue(credentials.contains("requireAdminPermission()"));
         assertTrue(execution.contains("AiSecuritySanitizer.sanitizeError(errorMessage)"));
+        assertTrue(execution.contains("callLog.setPromptText(null)"));
+        assertTrue(execution.contains("callLog.setResponseText(null)"));
+        assertTrue(execution.contains("setPrivacyPolicyVersionSnapshot"));
         assertTrue(execution.contains("AiConsentPolicy.ADMIN_FALLBACK_VERSION"));
         assertTrue(chat.contains("AiSecuritySanitizer.sanitizeError(failure)"));
         assertTrue(screen.contains("adminFallbackConsentField"));

@@ -25,6 +25,7 @@
         <property name="name"/>
         <property name="description"/>
         <property name="capability"/>
+        <property name="privacyPolicyVersion"/>
         <property name="temperature"/>
         <property name="maxTokens"/>
         <property name="defaultMonthlyTokenQuota"/>
@@ -92,6 +93,9 @@
         <property name="totalTokens"/>
         <property name="estimatedCost"/>
         <property name="currency"/>
+        <property name="privacyPolicyVersionSnapshot"/>
+        <property name="externalProcessingConsentVersionSnapshot"/>
+        <property name="adminFallbackConsentVersionSnapshot"/>
         <property name="callerSource"/>
         <property name="status"/>
     </view>
