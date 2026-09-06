@@ -314,6 +314,11 @@ public class DictionaryEditFormsDetachedObjectTest {
     }
 
     private String shortCode3() {
-        return ("T" + Math.abs(UUID.randomUUID().hashCode() % 90 + 10)).substring(0, 3);
+        // Детерминированный 3-символьный код: T + 2 цифры из энтропии UUID
+        // (старая реализация давала StringIndexOutOfBounds при hashCode%90+10 < 10
+        // и коллизии из-за слабой энтропии Math.abs(hashCode()%90)).
+        String hex = UUID.randomUUID().toString().replace("-", "");
+        int v = (Character.digit(hex.charAt(0), 16) * 16 + Character.digit(hex.charAt(1), 16)) % 100;
+        return String.format("T%02d", v);
     }
 }

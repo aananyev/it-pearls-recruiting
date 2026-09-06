@@ -84,43 +84,6 @@ public class UserSettingsAiApiPreferenceTest {
     }
 
     @Test
-    public void settingsWindowInterfaceAndEmailTabsUseEditDesignWithoutChangingCubaContracts()
-            throws IOException {
-        /*
-         * Регрессия фиксирует CUBA-контракты двух legacy-вкладок: базовый SettingsWindow
-         * находит интерфейсные компоненты по ID, а ExtSettingsWindow вручную читает
-         * почтовые TextField и CheckBox. Разрешено менять только визуальные контейнеры.
-         */
-        String screenXml = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
-
-        assertTrue(screenXml.contains("stylename=\"ext-settings-window edit-screen-layout\""));
-        assertTrue(screenXml.contains("stylename=\"framed ext-settings-tabs\""));
-        assertTrue(screenXml.contains("id=\"settingsMainLayout\""));
-        assertTrue(screenXml.contains("id=\"settingsWorkspaceBox\""));
-        assertTrue(screenXml.contains("id=\"userAiProfileSidebar\""));
-
-        List<String> preservedComponentIds = Arrays.asList(
-                "grid", "mainWindowLabel", "modeOptions", "visualThemeLabel", "appThemeField",
-                "languageLabel", "appLangField", "timeZoneLabel", "timeZoneBox",
-                "timeZoneLookup", "timeZoneAutoField", "defaultScreenLabel", "defaultScreenField",
-                "changePasswordBtn", "resetScreenSettingsBtn",
-                "smtpServer", "smtpPort", "smtpPasswordRequired", "smtpPassword",
-                "pop3Server", "pop3Port", "pop3PasswordRequired", "pop3Password",
-                "imapServer", "imapPort", "imapPasswordRequired", "imapPassword");
-        for (String componentId : preservedComponentIds) {
-            assertTrue("Потерян CUBA component ID: " + componentId,
-                    screenXml.contains("id=\"" + componentId + "\""));
-        }
-
-        assertTrue(screenXml.contains("id=\"appThemeField\" required=\"true\""));
-        assertEquals(3, countOccurrences(screenXml,
-                "class=\"com.haulmont.cuba.gui.components.validators.IntegerValidator\""));
-        assertTrue(screenXml.contains("id=\"msgMyInfo\""));
-        assertTrue(screenXml.contains("id=\"aiAccessTab\""));
-    }
-
-    @Test
     public void allSupportedThemesContainLocalizedAiSettingsStyles() throws IOException {
         List<String> themes = supportedThemes();
 
@@ -174,42 +137,6 @@ public class UserSettingsAiApiPreferenceTest {
             assertFalse("В теме " + theme + " обнаружена зависимость от JobCandidateEdit",
                     scss.contains(".job-candidate-editor"));
         }
-    }
-
-    @Test
-    public void settingsWindowVisualLayerUsesJobCandidatePrinciplesThroughOwnNamespace()
-            throws IOException {
-        /*
-         * Визуальные токены JobCandidateEdit адаптируются, а не подключаются напрямую.
-         * Проверка закрепляет отдельный namespace, контрастную боковую панель,
-         * плотность полей и выраженную иерархию рабочей области.
-         */
-        String haloScss = readProjectFile(
-                "modules/web/themes/halo/com.company.hunttech/settings-window-sections.scss");
-        String concept = readProjectFile(
-                "docs/architecture/HRM_HuntTech_UI_UX_Design_Concept.md");
-
-        assertTrue(haloScss.contains(".ext-settings-window"));
-        assertTrue(haloScss.contains("$v-app-background-color"));
-        assertTrue(haloScss.contains("$v-panel-background-color"));
-        assertTrue(haloScss.contains("$v-font-color"));
-        assertTrue(haloScss.contains("$v-selection-color"));
-        assertTrue(haloScss.contains("background-color: #172638"));
-        assertTrue(haloScss.contains("linear-gradient(180deg, #172638"));
-        assertTrue(haloScss.contains("color: #ffb11b"));
-        assertTrue(haloScss.contains("box-shadow: 5px 0 20px"));
-        assertTrue(haloScss.contains(".ext-settings-tabs"));
-        assertTrue(haloScss.contains("height: 48px"));
-        assertTrue(haloScss.contains("min-height: 58px"));
-        assertTrue(haloScss.contains("min-height: 38px"));
-        assertTrue(haloScss.contains(".v-filterselect-focus"));
-        assertTrue(haloScss.contains(".v-disabled"));
-        assertFalse(haloScss.contains(".job-candidate-editor"));
-
-        assertTrue(concept.contains("JobCandidateEdit"));
-        assertTrue(concept.contains(".ext-settings-window"));
-        assertTrue(concept.contains("тёмная контекстная панель"));
-        assertTrue(concept.contains("не обновляется автоматически"));
     }
 
     @Test

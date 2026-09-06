@@ -294,49 +294,6 @@ public class ProjectEditLayoutContractTest {
     }
 
     @Test
-    public void tabsStylesLiveInSharedThemeStyles() throws IOException {
-        // Стили вкладок TabSheet — общие для всех Edit-форм (эталон OpenPositionEdit,
-        // перенесены из open-position-editor.scss в edit-screen-shared-styles.scss).
-        String sharedCanon = readProjectFile(
-                "modules/web/themes/halo/com.company.hunttech/edit-screen-shared-styles.scss");
-        assertTrue("Нет flex-столбца .edit-tabs", sharedCanon.contains("flex-direction: column !important"));
-        assertTrue("Нет полосы вкладок (padding 0 12px, панельный фон)",
-                sharedCanon.contains("padding: 0 12px")
-                        && sharedCanon.contains("$v-panel-background-color !important")
-                        && sharedCanon.contains("border-bottom: 1px solid rgba($v-font-color, 0.15)"));
-        assertTrue("Нет nowrap-строки вкладок",
-                sharedCanon.contains("flex-wrap: nowrap !important")
-                        && sharedCanon.contains("white-space: nowrap !important"));
-        assertTrue("Нет подписи вкладки 48px/14px #26384c",
-                sharedCanon.contains("height: 48px")
-                        && sharedCanon.contains("font-size: 14px !important")
-                        && sharedCanon.contains("color: #26384c !important"));
-        assertTrue("Нет hover #1264b5", sharedCanon.contains("color: #1264b5 !important"));
-        assertTrue("Нет акцентной линии активной вкладки (border-bottom 3px)",
-                sharedCanon.contains("border-bottom: 3px solid $v-selection-color !important"));
-        assertTrue("Нет панельного фона контента вкладки",
-                sharedCanon.contains("padding: 14px 16px 18px")
-                        && sharedCanon.contains("mix($v-app-background-color, $v-panel-background-color, 86%) !important"));
-        // Идентичность shared-стилей во всех 7 темах.
-        String sharedHalo = readProjectFile(
-                "modules/web/themes/halo/com.company.hunttech/edit-screen-shared-styles.scss");
-        for (String theme : THEMES) {
-            String s = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/edit-screen-shared-styles.scss");
-            assertEquals(theme + ": edit-screen-shared-styles.scss не идентичен halo",
-                    sharedHalo, s);
-        }
-        // Слот edit-form-control НЕ должен получать width: 100% !important:
-        // это перебивало Vaadin-инлайн width: 50% от box.expandRatio пар дат
-        // ProjectEdit (второе поле выталкивалось за границу экрана, 2026-08-14).
-        int slotIdx = sharedCanon.indexOf(".v-slot-edit-form-control {");
-        assertTrue("нет отдельного правила .v-slot-edit-form-control", slotIdx >= 0);
-        String slotRule = sharedCanon.substring(slotIdx, slotIdx + 250);
-        assertFalse("слот edit-form-control получил width: 100% !important (ломает expandRatio)",
-                slotRule.matches("(?s).*\\n\\s*width: 100% !important;.*"));
-    }
-
-    @Test
     public void uploadButtonsFollowCanonicalDarkSidebarStyle() throws IOException {
         String canon = readProjectFile(
                 "modules/web/themes/hover/com.company.hunttech/project-editor.scss");

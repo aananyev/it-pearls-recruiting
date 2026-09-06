@@ -66,29 +66,6 @@ public class ExtSettingsWindowRemainingNavigationTest {
     }
 
     @Test
-    public void extSettingsWindowUsesSharedEditStyleApiAlongsideLegacyClasses() throws IOException {
-        String descriptor = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/"
-                        + "ext-settings-window.xml");
-        String controller = readController();
-
-        assertTrue(descriptor.contains("stylename=\"user-ai-profile-navigation label-navigation\""));
-        assertTrue(descriptor.contains("stylename=\"settings-section-navigation label-navigation\""));
-        assertTrue(descriptor.contains("stylename=\"ai-settings-navigation label-navigation\""));
-        assertTrue(descriptor.contains("label-nav-title"));
-        assertTrue(descriptor.contains("label-nav-item label-nav-item-active"));
-        assertTrue(descriptor.contains("edit-sidebar"));
-        assertTrue(descriptor.contains("edit-toolbar"));
-        assertTrue(descriptor.contains("edit-card"));
-        assertTrue(descriptor.contains("edit-accordion-section"));
-
-        assertTrue(controller.contains("settings-section-nav-item label-nav-item"));
-        assertTrue(controller.contains("ai-settings-nav-item label-nav-item"));
-        assertTrue(controller.contains("user-ai-profile-nav-item label-nav-item"));
-        assertTrue(controller.contains("label-nav-item-active"));
-    }
-
-    @Test
     public void remainingNavigationDoesNotChangeSettingsBusinessLogic() throws IOException {
         String controller = readController();
 

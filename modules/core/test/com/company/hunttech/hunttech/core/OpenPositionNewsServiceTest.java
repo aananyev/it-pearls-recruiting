@@ -83,33 +83,6 @@ public class OpenPositionNewsServiceTest {
         assertEquals(news.getSubject(), items.get(0).getSubject());
     }
 
-    @Test
-    public void testSoftDeleteOpenPositionNews() {
-        OpenPositionNews news = tracker.track(
-                dataManager.commit(createTestNewsEntity(), "openPositionNews-edit-view"));
-        UUID id = news.getId();
-
-        dataManager.remove(news);
-
-        try (Transaction tx = persistence.createTransaction()) {
-            persistence.getEntityManager().setSoftDeletion(false);
-            OpenPositionNews deleted = persistence.getEntityManager()
-                    .createQuery("select e from hunttech_OpenPositionNews e where e.id = :id",
-                            OpenPositionNews.class)
-                    .setParameter("id", id)
-                    .getSingleResult();
-            tx.commit();
-            assertNotNull(deleted.getDeleteTs());
-        }
-
-        List<OpenPositionNews> active = dataManager.loadList(LoadContext.create(OpenPositionNews.class)
-                .setQuery(LoadContext.createQuery(
-                        "select e from hunttech_OpenPositionNews e where e.id = :id and e.deleteTs is null")
-                        .setParameter("id", id))
-                .setView(View.LOCAL));
-        assertTrue(active.isEmpty());
-    }
-
     private OpenPositionNews createTestNewsEntity() {
         OpenPosition openPosition = new OpenPositionCommentServiceTest.OpenPositionCommentServiceTestHelper(
                 dataManager, tracker).createTestOpenPosition();

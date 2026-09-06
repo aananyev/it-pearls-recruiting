@@ -41,6 +41,21 @@ public class HrmAiServiceBean implements HrmAiService {
     }
 
     @Override
+    public String generateChecklist(String vacancyText) {
+        return generateVacancyArtifact(vacancyText, FUNCTION_VACANCY_CHECKLIST);
+    }
+
+    @Override
+    public String generateSearchMap(String vacancyText) {
+        return generateVacancyArtifact(vacancyText, FUNCTION_VACANCY_SEARCH_MAP);
+    }
+
+    @Override
+    public String generateInterviewPlan(String vacancyText) {
+        return generateVacancyArtifact(vacancyText, FUNCTION_VACANCY_INTERVIEW_PLAN);
+    }
+
+    @Override
     public String generateVacancyArtifact(String standardizedDescription, String functionCode) {
         Map<String, Object> ctx = new java.util.HashMap<>();
         ctx.put("description", standardizedDescription);
