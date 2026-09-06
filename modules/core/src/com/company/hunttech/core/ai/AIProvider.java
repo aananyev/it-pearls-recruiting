@@ -1,5 +1,7 @@
 package com.company.hunttech.core.ai;
 
+import com.company.hunttech.service.AiStreamListener;
+
 import java.util.Map;
 
 /**
@@ -32,6 +34,24 @@ public interface AIProvider {
         return AiProviderResponse.ofText(text, promptTokens, completionTokens, promptTokens + completionTokens);
     }
 
+    /** Provider-level streaming capability. Legacy adapters remain synchronous by default. */
+    default boolean supportsStreaming() {
+        return false;
+    }
+
+    /** Streams text deltas when the provider supports it; otherwise fails explicitly. */
+    default AiProviderResponse executeTextStreaming(String prompt, String systemContext, String apiKey,
+                                                    String modelName, Map<String, Object> options,
+                                                    AiStreamListener listener) {
+        throw new UnsupportedOperationException(
+                "Провайдер «" + getProviderCode() + "» не поддерживает streaming.");
+    }
+
+    /** Interrupts an active request identified by the HRM requestId, if supported. */
+    default void cancelRequest(String requestId) {
+        // Synchronous/legacy adapters have no interruptible request registry.
+    }
+
     /**
      * Выполняет редактирование изображения (capability IMAGE_GENERATION).
      *
@@ -54,4 +74,3 @@ public interface AIProvider {
                 "Провайдер «" + getProviderCode() + "» не поддерживает IMAGE_GENERATION.");
     }
 }
-

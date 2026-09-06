@@ -22,6 +22,7 @@ public class GigaChatProvider extends AbstractOpenAiCompatibleProvider {
     @Override protected String getApiUrl() { return "https://api.giga.chat/v1/chat/completions"; }
     @Override protected String getDefaultModel() { return "GigaChat"; }
     @Override protected String getProviderDisplayName() { return "GigaChat"; }
+    @Override public boolean supportsStreaming() { return false; }
 
     @Override
     public String generateText(String prompt, String systemContext, String apiKey, String modelName,

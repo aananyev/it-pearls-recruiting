@@ -17,6 +17,7 @@ public class AnthropicProvider extends AbstractOpenAiCompatibleProvider {
     @Override protected String getApiUrl() { return "https://api.anthropic.com/v1/messages"; }
     @Override protected String getDefaultModel() { return "claude-sonnet-4-6"; }
     @Override protected String getProviderDisplayName() { return "Anthropic Claude"; }
+    @Override public boolean supportsStreaming() { return false; }
 
     @Override
     public String generateText(String prompt, String systemContext, String apiKey, String modelName,
@@ -56,7 +57,9 @@ public class AnthropicProvider extends AbstractOpenAiCompatibleProvider {
                 completionTokens = text.asText().length() / 4;
             }
 
-            return AiProviderResponse.ofText(text.asText(), promptTokens, completionTokens, promptTokens + completionTokens);
+            String providerRequestId = root.path("id").isTextual() ? root.path("id").asText() : null;
+            return AiProviderResponse.ofText(text.asText(), promptTokens, completionTokens,
+                    promptTokens + completionTokens, providerRequestId);
         } catch (IOException e) {
             throw new RuntimeException("Ошибка запроса к Anthropic Claude API: " + e.getMessage(), e);
         }

@@ -4,6 +4,8 @@
     <specific>
         <category id="hunttech.ai">
             <permission id="hunttech.ai.manageCorporateCredentials"/>
+            <permission id="hunttech.ai.viewChatHistoryAdmin"/>
+            <permission id="hunttech.ai.reconcileChatQuota"/>
         </category>
     </specific>
 </permission-config>

@@ -4,8 +4,10 @@ import com.company.hunttech.core.ai.AIProvider;
 import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.company.hunttech.core.ai.AiCostCalculator;
 import com.company.hunttech.core.ai.AiProviderResponse;
+import com.company.hunttech.core.ai.AiRequestCancelledException;
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.entity.UserAiProfile;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.entity.ai.AiCallLog;
 import com.company.hunttech.entity.ai.AiCapability;
@@ -30,13 +32,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Централизованный resolver и execution layer для AI-функций HRM HuntTech.
  *
  * Выбор credential выполняется строго по policy функции. Пользовательский ключ может
  * заместить корпоративный только через UserAiFunctionOverride для конкретной функции.
- * Все вызовы фиксируются в сущности AiCallLog с токенами, длительностью, промптом и статусом.
+ * Все вызовы фиксируются в сущности AiCallLog с токенами, длительностью и статусом;
+ * исходные prompt/response в технический аудит не сохраняются.
  *
  * Персонализация: перед вызовом провайдера в executeText контекст «Обо мне» текущего
  * пользователя (UserAiProfile через UserAiContextService) добавляется в system prompt
@@ -52,6 +56,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
     private static final String QUERY_OVERRIDE =
             "select e from hunttech_UserAiFunctionOverride e "
                     + "where e.user = :user and e.aiFunction = :function and e.enabled = true";
+    private static final String QUERY_USER_AI_PROFILE =
+            "select e from hunttech_UserAiProfile e where e.user = :user";
+    private static final String LLM_CHAT_FUNCTION_CODE = "LLM_CHAT";
 
     /**
      * Маркеры блока пользовательского контекста в system prompt (план персонализации §3.3).
@@ -82,9 +89,11 @@ public class AiExecutionServiceBean implements AiExecutionService {
         long startTime = System.currentTimeMillis();
         String callerSource = context != null && context.get("callerSource") != null
                 ? String.valueOf(context.get("callerSource")) : null;
+        String requestId = requestIdFromContext(context);
 
         AiFunctionConfiguration function = loadFunction(functionCode);
         validateTextCapability(function);
+        validatePrivacyPolicy(function);
         String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
         User currentUser = userSessionSource.getUserSession().getUser();
         AiExecutionPolicy policy = function.getExecutionPolicy();
@@ -92,26 +101,30 @@ public class AiExecutionServiceBean implements AiExecutionService {
             throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");
         }
 
-        UserContextAttachment userContext = resolveUserContext(function);
+        UserContextAttachment userContext = resolveUserContext(function, currentUser);
         String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
             validateUserOverride(userOverride, currentUser, functionCode);
             return executeWithUser(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
-                    callerSource, startTime, userContext);
+                    callerSource, startTime, userContext, requestId);
         }
         if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && isUsableUserOverride(userOverride, currentUser)) {
             try {
                 return executeWithUser(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
-                        callerSource, startTime, userContext);
+                        callerSource, startTime, userContext, requestId);
             } catch (RuntimeException userFailure) {
+                if (userFailure instanceof AiRequestCancelledException) {
+                    throw userFailure;
+                }
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
-                        && isUsableAdminConfiguration(function.getAdminConfiguration())) {
+                        && resolveAdminConfiguration(function) != null) {
+                    ensureAdminFallbackAllowed(function, currentUser, userContext);
                     log.warn("Персональное AI-подключение функции {} недоступно; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
                     return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
-                            callerSource, startTime, userContext);
+                            callerSource, startTime, userContext, requestId);
                 }
                 saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
                         null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
@@ -120,7 +133,67 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
             }
         }
-        return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext);
+        ensureAdminFallbackAllowed(function, currentUser, userContext);
+        return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
+    }
+
+    @Override
+    public AiExecutionResult executeTextStreaming(String functionCode, Map<String, Object> context,
+                                                  AiStreamListener listener) {
+        if (listener == null) {
+            throw new DevelopmentException("Streaming listener не задан.");
+        }
+        long startTime = System.currentTimeMillis();
+        String callerSource = context != null && context.get("callerSource") != null
+                ? String.valueOf(context.get("callerSource")) : null;
+        String requestId = requestIdFromContext(context);
+        AiFunctionConfiguration function = loadFunction(functionCode);
+        validateTextCapability(function);
+        validatePrivacyPolicy(function);
+        String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
+        User currentUser = userSessionSource.getUserSession().getUser();
+        AiExecutionPolicy policy = function.getExecutionPolicy();
+        if (policy == null) {
+            throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");
+        }
+
+        UserContextAttachment userContext = resolveUserContext(function, currentUser);
+        String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
+        UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
+        AtomicBoolean emitted = new AtomicBoolean(false);
+        AiStreamListener guardedListener = delta -> {
+            if (delta != null && !delta.isEmpty()) {
+                emitted.set(true);
+            }
+            listener.onDelta(delta);
+        };
+        if (AiExecutionPolicy.USER_REQUIRED == policy) {
+            validateUserOverride(userOverride, currentUser, functionCode);
+            return executeWithUserStreaming(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
+                    callerSource, startTime, userContext, requestId, guardedListener);
+        }
+        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && isUsableUserOverride(userOverride, currentUser)) {
+            try {
+                return executeWithUserStreaming(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
+                        callerSource, startTime, userContext, requestId, guardedListener);
+            } catch (RuntimeException userFailure) {
+                // Never append a second provider response after partial output.
+                if (emitted.get() || userFailure instanceof AiRequestCancelledException) {
+                    throw userFailure;
+                }
+                if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
+                        && resolveAdminConfiguration(function) != null) {
+                    ensureAdminFallbackAllowed(function, currentUser, userContext);
+                    return executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
+                            callerSource, startTime, userContext, requestId, guardedListener);
+                }
+                throw new DevelopmentException(
+                        "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
+            }
+        }
+        ensureAdminFallbackAllowed(function, currentUser, userContext);
+        return executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
+                callerSource, startTime, userContext, requestId, guardedListener);
     }
 
     @Override
@@ -177,7 +250,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             model = override.getModelName();
         }
         try {
-            byte[] image = executeProviderImage(configuration.getProviderCode(), configuration.getApiKey(), model,
+            byte[] image = executeProviderImage(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
                     function, prompt, sourceImage, sourceMimeType);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, "[IMAGE DATA " + (image != null ? image.length : 0) + " bytes]",
@@ -226,21 +299,23 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                               String prompt,
                                               String effectiveSystemPrompt,
                                               User currentUser, String callerSource, long startTime,
-                                              UserContextAttachment userContext) {
+                                              UserContextAttachment userContext, String requestId) {
         UserAiConfiguration configuration = override.getUserAiConfiguration();
         String model = configuration.getDefaultModelName();
         if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
             model = override.getModelName();
         }
         try {
-            AiProviderResponse response = executeProvider(configuration.getProviderCode(), configuration.getApiKey(), model,
-                    function, prompt, effectiveSystemPrompt);
+            AiProviderResponse response = executeProvider(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
+                    function, prompt, effectiveSystemPrompt, requestId);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                     response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                     userContext);
             return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText());
+                    model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText(),
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                    response.getProviderRequestId());
         } catch (Exception e) {
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
@@ -252,7 +327,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
     private AiExecutionResult executeWithAdmin(AiFunctionConfiguration function, String prompt,
                                                String effectiveSystemPrompt,
                                                User currentUser, String callerSource, long startTime,
-                                               UserContextAttachment userContext) {
+                                               UserContextAttachment userContext, String requestId) {
         AdminAiConfiguration configuration = resolveAdminConfiguration(function);
         if (configuration == null) {
             throw new DevelopmentException(
@@ -263,17 +338,82 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
         try {
             AiProviderResponse response = executeProvider(configuration.getProviderCode(), apiKey, model, function,
-                    prompt, effectiveSystemPrompt);
+                    prompt, effectiveSystemPrompt, requestId);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                     prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                     response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                     userContext);
             return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText());
+                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                    response.getProviderRequestId());
         } catch (Exception e) {
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
                     userContext);
+            throw e;
+        }
+    }
+
+    private AiExecutionResult executeWithUserStreaming(AiFunctionConfiguration function,
+                                                       UserAiFunctionOverride override,
+                                                       String prompt, String effectiveSystemPrompt,
+                                                       User currentUser, String callerSource, long startTime,
+                                                       UserContextAttachment userContext, String requestId,
+                                                       AiStreamListener listener) {
+        UserAiConfiguration configuration = override.getUserAiConfiguration();
+        String model = configuration.getDefaultModelName();
+        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
+            model = override.getModelName();
+        }
+        try {
+            AiProviderResponse response = executeProviderStreaming(configuration.getProviderCode(),
+                    resolveUserApiKey(configuration), model, function, prompt, effectiveSystemPrompt,
+                    requestId, listener);
+            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                    prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
+                    response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                    userContext);
+            return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                    model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText(),
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                    response.getProviderRequestId());
+        } catch (Exception e) {
+            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource,
+                    "ERROR", e.getMessage(), userContext);
+            throw e;
+        }
+    }
+
+    private AiExecutionResult executeWithAdminStreaming(AiFunctionConfiguration function, String prompt,
+                                                        String effectiveSystemPrompt, User currentUser,
+                                                        String callerSource, long startTime,
+                                                        UserContextAttachment userContext, String requestId,
+                                                        AiStreamListener listener) {
+        AdminAiConfiguration configuration = resolveAdminConfiguration(function);
+        if (configuration == null) {
+            throw new DevelopmentException(
+                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
+        }
+        String model = isConfigured(function.getAdminModelName())
+                ? function.getAdminModelName() : configuration.getDefaultModelName();
+        String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
+        try {
+            AiProviderResponse response = executeProviderStreaming(configuration.getProviderCode(), apiKey, model,
+                    function, prompt, effectiveSystemPrompt, requestId, listener);
+            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                    prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
+                    response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                    userContext);
+            return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
+                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                    response.getProviderRequestId());
+        } catch (Exception e) {
+            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource,
+                    "ERROR", e.getMessage(), userContext);
             throw e;
         }
     }
@@ -283,7 +423,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                String model,
                                                AiFunctionConfiguration function,
                                                String prompt,
-                                               String effectiveSystemPrompt) {
+                                               String effectiveSystemPrompt,
+                                               String requestId) {
         if (!isConfigured(providerCode) || !isConfigured(apiKey)) {
             throw new DevelopmentException("Эффективное AI-подключение настроено не полностью.");
         }
@@ -293,7 +434,43 @@ public class AiExecutionServiceBean implements AiExecutionService {
         } catch (IllegalArgumentException e) {
             throw new DevelopmentException("Провайдер AI «" + providerCode + "» не подключён в приложении.", e);
         }
-        return provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model, buildOptions(function));
+        aiProviderRegistry.registerRequest(requestId, provider);
+        try {
+            return provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model,
+                    buildOptions(function, requestId));
+        } finally {
+            aiProviderRegistry.unregisterRequest(requestId, provider);
+        }
+    }
+
+    private AiProviderResponse executeProviderStreaming(String providerCode, String apiKey, String model,
+                                                        AiFunctionConfiguration function, String prompt,
+                                                        String effectiveSystemPrompt, String requestId,
+                                                        AiStreamListener listener) {
+        if (!isConfigured(providerCode) || !isConfigured(apiKey)) {
+            throw new DevelopmentException("Эффективное AI-подключение настроено не полностью.");
+        }
+        AIProvider provider;
+        try {
+            provider = aiProviderRegistry.getProvider(providerCode);
+        } catch (IllegalArgumentException e) {
+            throw new DevelopmentException("Провайдер AI «" + providerCode + "» не подключён в приложении.", e);
+        }
+        aiProviderRegistry.registerRequest(requestId, provider);
+        try {
+            if (provider.supportsStreaming()) {
+                return provider.executeTextStreaming(prompt, effectiveSystemPrompt, apiKey, model,
+                        buildOptions(function, requestId), listener::onDelta);
+            }
+            AiProviderResponse response = provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model,
+                    buildOptions(function, requestId));
+            if (response != null && response.getText() != null) {
+                listener.onDelta(response.getText());
+            }
+            return response;
+        } finally {
+            aiProviderRegistry.unregisterRequest(requestId, provider);
+        }
     }
 
     private void saveAiCallLog(User user, AiFunctionConfiguration function, String providerCode,
@@ -326,11 +503,20 @@ public class AiExecutionServiceBean implements AiExecutionService {
             callLog.setEstimatedCost(costResult.getCost());
             callLog.setCurrency(costResult.getCurrency());
 
-            callLog.setPromptText(prompt);
-            callLog.setResponseText(responseText);
+            // AiCallLog is a technical audit, not a conversation store. Never persist
+            // user/provider payloads here: chat history has its own owner-scoped storage.
+            callLog.setPromptText(null);
+            callLog.setResponseText(null);
             callLog.setCallerSource(callerSource);
             callLog.setStatus(status);
-            callLog.setErrorMessage(errorMessage);
+            callLog.setErrorMessage(AiSecuritySanitizer.sanitizeError(errorMessage));
+            callLog.setPrivacyPolicyVersionSnapshot(function == null ? null : function.getPrivacyPolicyVersion());
+            if (userContext != null) {
+                callLog.setExternalProcessingConsentVersionSnapshot(
+                        userContext.externalProcessingConsentVersionSnapshot);
+                callLog.setAdminFallbackConsentVersionSnapshot(
+                        userContext.adminFallbackConsentVersionSnapshot);
+            }
             if (userContext != null) {
                 callLog.setContextIncluded(userContext.contextIncluded);
                 callLog.setContextCodePoints(userContext.contextCodePoints);
@@ -338,7 +524,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
             dataManager.commit(new CommitContext(callLog));
         } catch (Exception e) {
-            log.error("Не удалось сохранить запись журнала вызовов AI: {}", e.getMessage(), e);
+            log.error("Не удалось сохранить запись журнала вызовов AI: {}",
+                    AiSecuritySanitizer.sanitizeError(e));
         }
     }
 
@@ -367,14 +554,26 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
     }
 
+    private void validatePrivacyPolicy(AiFunctionConfiguration function) {
+        if (function != null && LLM_CHAT_FUNCTION_CODE.equals(function.getCode())
+                && !isConfigured(function.getPrivacyPolicyVersion())) {
+            throw new DevelopmentException(
+                    "Для AI-чата не задана версия privacy policy; внешний вызов заблокирован.");
+        }
+    }
+
     /**
      * Резолвит и, при уместности, собирает пользовательский контекст для executeText.
      * Гейты: флаг функции (NULL → дефолт по capability) + активность профиля + согласие
      * + непустота контекста. При любом «нет» — исходный system prompt без изменений
      * (план персонализации §3.2, §4.3).
      */
-    private UserContextAttachment resolveUserContext(AiFunctionConfiguration function) {
+    private UserContextAttachment resolveUserContext(AiFunctionConfiguration function, User currentUser) {
         UserContextAttachment detached = new UserContextAttachment(function.getSystemPrompt());
+        UserAiProfile profile = loadUserAiProfileForAudit(currentUser);
+        if (profile != null) {
+            detached.externalProcessingConsentVersionSnapshot = profile.getConsentVersion();
+        }
         if (!resolveIncludeUserContext(function)) {
             return detached;
         }
@@ -448,6 +647,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
         private String effectiveSystemPrompt;
         private boolean contextIncluded;
         private Integer contextCodePoints;
+        private String externalProcessingConsentVersionSnapshot;
+        private String adminFallbackConsentVersionSnapshot;
 
         private UserContextAttachment(String originalSystemPrompt) {
             this.effectiveSystemPrompt = originalSystemPrompt;
@@ -485,12 +686,27 @@ public class AiExecutionServiceBean implements AiExecutionService {
     }
 
     private Map<String, Object> buildOptions(AiFunctionConfiguration function) {
+        return buildOptions(function, null);
+    }
+
+    private Map<String, Object> buildOptions(AiFunctionConfiguration function, String requestId) {
         Map<String, Object> options = new HashMap<>();
         options.put("temperature", function.getTemperature() == null ? 0.7 : function.getTemperature());
         if (function.getMaxTokens() != null) {
             options.put("maxTokens", function.getMaxTokens());
         }
+        if (requestId != null && !requestId.trim().isEmpty()) {
+            options.put("requestId", requestId.trim());
+        }
         return options;
+    }
+
+    private String requestIdFromContext(Map<String, Object> context) {
+        if (context == null || !(context.get("requestId") instanceof String)) {
+            return null;
+        }
+        String requestId = ((String) context.get("requestId")).trim();
+        return requestId.isEmpty() ? null : requestId;
     }
 
     private void validateTextCapability(AiFunctionConfiguration function) {
@@ -513,6 +729,58 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
     }
 
+    /**
+     * Chat is allowed to use the administrative credential only after the user
+     * explicitly accepted the separate fallback consent. Other AI functions
+     * retain their existing routing behavior.
+     */
+    private void ensureAdminFallbackAllowed(AiFunctionConfiguration function, User currentUser) {
+        ensureAdminFallbackAllowed(function, currentUser, null);
+    }
+
+    private void ensureAdminFallbackAllowed(AiFunctionConfiguration function, User currentUser,
+                                             UserContextAttachment userContext) {
+        if (function == null || !LLM_CHAT_FUNCTION_CODE.equals(function.getCode())) {
+            return;
+        }
+        UserAiProfile profile = currentUser == null ? null : dataManager.load(UserAiProfile.class)
+                .query(QUERY_USER_AI_PROFILE)
+                .parameter("user", currentUser)
+                .view("userAiProfile-view")
+                .optional()
+                .orElse(null);
+        boolean consentGranted = profile != null
+                && Boolean.TRUE.equals(profile.getAdminFallbackConsent())
+                && AiConsentPolicy.ADMIN_FALLBACK_VERSION.equals(profile.getAdminFallbackConsentVersion())
+                && profile.getAdminFallbackConsentAt() != null;
+        if (!consentGranted) {
+            throw new DevelopmentException(
+                    "Персональное AI-подключение недоступно. Для автоматического fallback "
+                            + "к административному AI API сначала дайте отдельное согласие в настройках профиля.");
+        }
+        if (userContext != null) {
+            userContext.adminFallbackConsentVersionSnapshot = profile.getAdminFallbackConsentVersion();
+        }
+    }
+
+    private UserAiProfile loadUserAiProfileForAudit(User currentUser) {
+        if (currentUser == null || dataManager == null) {
+            return null;
+        }
+        try {
+            return dataManager.load(UserAiProfile.class)
+                    .query(QUERY_USER_AI_PROFILE)
+                    .parameter("user", currentUser)
+                    .view("userAiProfile-view")
+                    .optional()
+                    .orElse(null);
+        } catch (RuntimeException e) {
+            log.warn("Не удалось загрузить версии согласий для AI-аудита; snapshot не заполнен. Причина: {}",
+                    e.getClass().getSimpleName());
+            return null;
+        }
+    }
+
     private boolean isUsableUserOverride(UserAiFunctionOverride override, User currentUser) {
         if (override == null || !Boolean.TRUE.equals(override.getEnabled())) {
             return false;
@@ -523,7 +791,31 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 && configuration.getUser().getId().equals(currentUser.getId())
                 && Boolean.TRUE.equals(configuration.getIsActive())
                 && isConfigured(configuration.getProviderCode())
-                && isConfigured(configuration.getApiKey());
+                && hasUserCredential(configuration);
+    }
+
+    private String resolveUserApiKey(UserAiConfiguration configuration) {
+        if (configuration == null) {
+            throw new DevelopmentException("Персональное AI-подключение не найдено.");
+        }
+        if (isConfigured(configuration.getApiKeyEncrypted())) {
+            return aiSecretService.decrypt(configuration.getApiKeyEncrypted());
+        }
+        if (isConfigured(configuration.getApiKey())) {
+            // One-time compatibility conversion for records created before the
+            // encrypted column was introduced. The plaintext is removed from
+            // the entity before it is committed back to the database.
+            String plainText = configuration.getApiKey();
+            configuration.setApiKeyEncrypted(aiSecretService.encrypt(plainText));
+            configuration.setApiKey(null);
+            dataManager.commit(configuration);
+            return plainText;
+        }
+        throw new DevelopmentException("Персональный API-ключ не настроен.");
+    }
+
+    private boolean hasUserCredential(UserAiConfiguration configuration) {
+        return isConfigured(configuration.getApiKeyEncrypted()) || isConfigured(configuration.getApiKey());
     }
 
     private AdminAiConfiguration resolveAdminConfiguration(AiFunctionConfiguration function) {
