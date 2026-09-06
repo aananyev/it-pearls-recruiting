@@ -138,7 +138,14 @@ OCR CLI использует скилл `open-code-review` (Alibaba). Не ос�
    после kill -9 владельца снимается shlock автоматически.
 6. Первый прогон в новом worktree долгий (10–15 мин, медленный
    repo.cuba-platform.com) — это норма, не убивать.
-6. Дубли jar в `deploy/tomcat/shared/lib` (напр. groovy 2.5.2 + 2.5.23 →
+7. **Быстрый деплой (Fast Deployment) во время разработки**:
+   Вместо 4.5-минутного полного `scripts/start-app.sh` агенты разработки
+   (Antigravity, Hermes-2) при запущенном Tomcat используют `scripts/fast-deploy.sh`:
+   - `bash scripts/fast-deploy.sh --conf` — 1–3 секунды (XML-экраны, локализация messages*.properties без перезапуска Tomcat);
+   - `bash scripts/fast-deploy.sh --web` — 15–20 секунд (Java-контроллеры веб-модуля без перекомпиляции тем и GWT-виджетов);
+   - `bash scripts/fast-deploy.sh --themes` — 20–30 секунд (SCSS-стили).
+   Полный холодный деплой `scripts/start-app.sh` (с `clean`, `updateDb`, сборкой SCSS и WidgetSet) обязателен только для Hermes-1 при релизе master и наличии новых Liquibase-миграций.
+8. Дубли jar в `deploy/tomcat/shared/lib` (напр. groovy 2.5.2 + 2.5.23 →
    «Conflicting module versions», Context startup failed) — удалять старые дубли.
 
 ## Конфликты shared-файлов
