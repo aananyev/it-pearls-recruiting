@@ -241,6 +241,7 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
             Company selected = companiesTable.getSingleSelected();
             if (selected != null) {
                 screenBuilders.editor(companiesTable)
+                        .withScreenClass(CompanyReestrEdit.class)
                         .editEntity(selected)
                         .withOpenMode(OpenMode.DIALOG)
                         .show();

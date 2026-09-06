@@ -161,8 +161,8 @@
                                 dataContainer="companiesDc"
                                 stylename="borderless grid candidate-browse-grid">
                         <actions>
-                            <action id="create" type="create"/>
-                            <action id="edit" type="edit"/>
+                            <action id="create" type="create" screenClass="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
+                            <action id="edit" type="edit" screenClass="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
                             <action id="remove" type="remove"/>
                             <action id="excel" type="excel"/>
                             <action id="refresh" type="refresh"/>
