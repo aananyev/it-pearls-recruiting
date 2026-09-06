@@ -129,6 +129,9 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
             ((CreateAction<Company>) createAction).setScreenClass(CompanyReestrEdit.class);
             ((CreateAction<Company>) createAction).setOpenMode(OpenMode.DIALOG);
         }
+        if (editAction != null) {
+            companiesTable.setItemClickAction(editAction);
+        }
     }
 
     private void setupTableColumns() {
