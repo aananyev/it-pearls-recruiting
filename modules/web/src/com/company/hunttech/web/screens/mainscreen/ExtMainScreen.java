@@ -8,6 +8,7 @@ import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.PersonelReserve;
 import com.company.hunttech.web.extension.ChangeFaviconExtension;
+import com.company.hunttech.web.screens.llmchat.LlmChatScreen;
 import com.haulmont.cuba.core.app.ConfigStorageService;
 import com.haulmont.cuba.core.config.AppPropertiesLocator;
 import com.haulmont.cuba.core.config.AppPropertyEntity;
@@ -16,6 +17,7 @@ import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -90,6 +92,13 @@ public class ExtMainScreen extends MainScreen {
     private Image logoImage;
     @Inject
     private ConfigStorageService configStorageService;
+    @Inject
+    private Screens screens;
+
+    /** Opens the modeless chat panel from the persistent main-screen launcher. */
+    public void openLlmChat() {
+        screens.create(LlmChatScreen.class).show();
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

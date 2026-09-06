@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Additive credential hardening. Existing API_KEY is retained temporarily
+        for compatibility and is migrated to ciphertext by the application on
+        save or first successful use; this migration never copies plaintext in SQL.
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+    </preConditions>
+
+    <changeSet id="260904-4-addUserAiEncryptedKey" author="hunttech">
+        <addColumn tableName="HUNTTECH_USER_AI_CONFIGURATION">
+            <column name="API_KEY_ENCRYPTED" type="varchar(4096)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="API_KEY_ENCRYPTED"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

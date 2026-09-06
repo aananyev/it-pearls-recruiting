@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_LLM_CHAT_MESSAGE"/>
+        <tableExists tableName="HUNTTECH_LLM_CHAT_QUOTA_RESERVATION"/>
+    </preConditions>
+
+    <changeSet id="260904-6-addLlmChatReconciliationAudit" author="hunttech">
+        <addColumn tableName="HUNTTECH_LLM_CHAT_MESSAGE">
+            <column name="PROVIDER_REQUEST_ID" type="varchar(128)"/>
+        </addColumn>
+        <addColumn tableName="HUNTTECH_LLM_CHAT_QUOTA_RESERVATION">
+            <column name="PROVIDER_REQUEST_ID" type="varchar(128)"/>
+            <column name="RECONCILED_BY" type="varchar(50)"/>
+            <column name="RECONCILED_AT" type="timestamp"/>
+        </addColumn>
+        <createIndex tableName="HUNTTECH_LLM_CHAT_QUOTA_RESERVATION"
+                     indexName="IDX_HUNTTECH_LLM_CHAT_QUOTA_PROVIDER_REQUEST">
+            <column name="PROVIDER_REQUEST_ID"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="HUNTTECH_LLM_CHAT_QUOTA_RESERVATION"
+                       indexName="IDX_HUNTTECH_LLM_CHAT_QUOTA_PROVIDER_REQUEST"/>
+            <dropColumn tableName="HUNTTECH_LLM_CHAT_QUOTA_RESERVATION" columnName="RECONCILED_AT"/>
+            <dropColumn tableName="HUNTTECH_LLM_CHAT_QUOTA_RESERVATION" columnName="RECONCILED_BY"/>
+            <dropColumn tableName="HUNTTECH_LLM_CHAT_QUOTA_RESERVATION" columnName="PROVIDER_REQUEST_ID"/>
+            <dropColumn tableName="HUNTTECH_LLM_CHAT_MESSAGE" columnName="PROVIDER_REQUEST_ID"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

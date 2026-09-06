@@ -1,0 +1,281 @@
+package com.company.hunttech.web.screens.llmchat;
+
+import com.company.hunttech.LlmChatStreamEvent;
+import com.company.hunttech.entity.ai.LlmChatMessage;
+import com.company.hunttech.service.LlmChatService;
+import com.company.hunttech.service.LlmChatStreamState;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.DialogWindow;
+import com.haulmont.cuba.gui.components.TextArea;
+import com.haulmont.cuba.gui.components.Timer;
+import com.haulmont.cuba.gui.settings.Settings;
+import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.shared.communication.PushMode;
+import com.vaadin.ui.UI;
+import org.dom4j.Element;
+import org.springframework.context.event.EventListener;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.UUID;
+
+/** Compact floating chat shell with incremental provider output. */
+@UiController("hunttech_LlmChatScreen")
+@UiDescriptor("llm-chat-screen.xml")
+public class LlmChatScreen extends Screen {
+    private static final String CHAT_LAYOUT_SETTINGS = "llmChatLayout";
+    private static final String CHAT_DIALOG_STYLENAME = "llm-chat-window";
+
+    @Inject
+    private LlmChatService llmChatService;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private TextArea<String> historyArea;
+    @Inject
+    private TextArea<String> inputArea;
+    @Inject
+    private Button sendBtn;
+    @Inject
+    private Button cancelBtn;
+    @Inject
+    private Timer streamPollTimer;
+    @Inject
+    private UserSession userSession;
+
+    private UUID conversationId;
+    private String activeRequestId;
+    private String activeRequestText;
+    private UI chatUi;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        DialogWindow dialog = getDialogWindow();
+        if (dialog != null) {
+            dialog.setDialogStylename(CHAT_DIALOG_STYLENAME);
+        }
+        try {
+            conversationId = llmChatService.startConversation();
+            renderHistory(llmChatService.loadHistory(conversationId));
+        } catch (RuntimeException ex) {
+            sendBtn.setEnabled(false);
+            showError(ex);
+        }
+    }
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        chatUi = UI.getCurrent();
+        if (chatUi != null) {
+            chatUi.getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+        }
+        restoreDialogGeometry(getSettings());
+    }
+
+    @EventListener
+    public void onLlmChatStreamEvent(LlmChatStreamEvent event) {
+        if (conversationId == null || activeRequestId == null
+                || !conversationId.equals(event.getConversationId())
+                || !activeRequestId.equals(event.getRequestId())
+                || userSession == null || userSession.getUser() == null
+                || !userSession.getUser().getId().equals(event.getUserId())) {
+            return;
+        }
+        UI ui = chatUi;
+        if (ui == null) {
+            return;
+        }
+        ui.access(() -> {
+            if (conversationId == null || activeRequestId == null) {
+                return;
+            }
+            try {
+                applyStreamState(llmChatService.pollStreaming(conversationId, activeRequestId));
+            } catch (RuntimeException ex) {
+                streamPollTimer.stop();
+                resetControls(false);
+                showError(ex);
+            }
+        });
+    }
+
+    @Override
+    protected void saveSettings() {
+        saveDialogGeometry(getSettings());
+        super.saveSettings();
+    }
+
+    private void restoreDialogGeometry(Settings settings) {
+        DialogWindow dialog = getDialogWindow();
+        if (settings == null || dialog == null) {
+            return;
+        }
+        Element layout = settings.get(CHAT_LAYOUT_SETTINGS);
+        setPositionIfPresent(layout, "positionX", dialog::setPositionX);
+        setPositionIfPresent(layout, "positionY", dialog::setPositionY);
+        setSizeIfPresent(layout, "width", dialog::setDialogWidth);
+        setSizeIfPresent(layout, "height", dialog::setDialogHeight);
+    }
+
+    private void saveDialogGeometry(Settings settings) {
+        DialogWindow dialog = getDialogWindow();
+        if (settings == null || dialog == null) {
+            return;
+        }
+        Element layout = settings.get(CHAT_LAYOUT_SETTINGS);
+        layout.addAttribute("positionX", String.valueOf(dialog.getPositionX()));
+        layout.addAttribute("positionY", String.valueOf(dialog.getPositionY()));
+        layout.addAttribute("width", sizeValue(dialog.getDialogWidth(), dialog.getDialogWidthUnit()));
+        layout.addAttribute("height", sizeValue(dialog.getDialogHeight(), dialog.getDialogHeightUnit()));
+        settings.setModified(true);
+    }
+
+    private void setPositionIfPresent(Element layout, String attribute, java.util.function.IntConsumer setter) {
+        String value = layout.attributeValue(attribute);
+        if (value != null && !value.isEmpty()) {
+            try {
+                setter.accept(Integer.parseInt(value));
+            } catch (NumberFormatException ignored) {
+                // Ignore corrupted legacy settings and keep the framework default.
+            }
+        }
+    }
+
+    private void setSizeIfPresent(Element layout, String attribute, java.util.function.Consumer<String> setter) {
+        String value = layout.attributeValue(attribute);
+        if (value != null && !value.isEmpty()) {
+            setter.accept(value);
+        }
+    }
+
+    private String sizeValue(float value, com.haulmont.cuba.gui.components.SizeUnit unit) {
+        if (value < 0) {
+            return "AUTO";
+        }
+        return Math.round(value) + (unit == null ? "px" : unit.getSymbol());
+    }
+
+    private DialogWindow getDialogWindow() {
+        return getWindow() instanceof DialogWindow ? (DialogWindow) getWindow() : null;
+    }
+
+    @Subscribe("sendBtn")
+    public void onSend(Button.ClickEvent event) {
+        String message = inputArea.getValue();
+        if (message == null || message.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Введите сообщение")
+                    .show();
+            return;
+        }
+        final String request = message.trim();
+        inputArea.setEnabled(false);
+        sendBtn.setEnabled(false);
+        cancelBtn.setEnabled(true);
+        if (activeRequestId == null || !request.equals(activeRequestText)) {
+            activeRequestId = UUID.randomUUID().toString();
+            activeRequestText = request;
+        }
+        final String requestId = activeRequestId;
+        try {
+            LlmChatStreamState state = llmChatService.startStreaming(conversationId, request, requestId);
+            streamPollTimer.start();
+            applyStreamState(state);
+        } catch (RuntimeException ex) {
+            resetControls(false);
+            showError(ex);
+        }
+    }
+
+    @Subscribe("streamPollTimer")
+    public void onStreamPoll(Timer.TimerActionEvent event) {
+        if (conversationId == null || activeRequestId == null) {
+            streamPollTimer.stop();
+            return;
+        }
+        try {
+            applyStreamState(llmChatService.pollStreaming(conversationId, activeRequestId));
+        } catch (RuntimeException ex) {
+            streamPollTimer.stop();
+            resetControls(false);
+            showError(ex);
+        }
+    }
+
+    @Subscribe("cancelBtn")
+    public void onCancel(Button.ClickEvent event) {
+        if (conversationId == null || activeRequestId == null) {
+            return;
+        }
+        try {
+            llmChatService.cancelMessage(conversationId, activeRequestId);
+            cancelBtn.setEnabled(false);
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Отмена запрошена")
+                    .withDescription("Ответ не будет сохранён; провайдер может успеть учесть фактическое usage.")
+                    .show();
+        } catch (RuntimeException ex) {
+            showError(ex);
+        }
+    }
+
+    private void renderHistory(List<LlmChatMessage> messages) {
+        renderHistory(messages, null);
+    }
+
+    private void renderHistory(List<LlmChatMessage> messages, String liveText) {
+        StringBuilder rendered = new StringBuilder();
+        for (LlmChatMessage message : messages) {
+            rendered.append("USER".equals(message.getRole()) ? "Вы" : "ИИ")
+                    .append(":\n").append(message.getContent()).append("\n\n");
+        }
+        if (liveText != null && !liveText.isEmpty()) {
+            rendered.append("ИИ:\n").append(liveText).append("\n");
+        }
+        historyArea.setValue(rendered.toString());
+    }
+
+    private void applyStreamState(LlmChatStreamState state) {
+        if (state == null) {
+            return;
+        }
+        if (!state.isCompleted()) {
+            renderHistory(llmChatService.loadHistory(conversationId), state.getText());
+            return;
+        }
+        streamPollTimer.stop();
+        boolean success = "COMPLETED".equals(state.getStatus());
+        resetControls(success);
+        activeRequestId = null;
+        activeRequestText = null;
+        renderHistory(llmChatService.loadHistory(conversationId));
+        if (!success && state.getErrorMessage() != null) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Запрос к ИИ завершён без ответа")
+                    .withDescription(state.getErrorMessage())
+                    .show();
+        }
+    }
+
+    private void resetControls(boolean clearInput) {
+        if (clearInput) {
+            inputArea.setValue("");
+        }
+        inputArea.setEnabled(true);
+        sendBtn.setEnabled(true);
+        cancelBtn.setEnabled(false);
+    }
+
+    private void showError(Exception ex) {
+        notifications.create(Notifications.NotificationType.ERROR)
+                .withCaption("Не удалось выполнить запрос к ИИ")
+                .withDescription(ex.getMessage() == null ? "Проверьте настройки AI и согласие на fallback." : ex.getMessage())
+                .show();
+    }
+
+}

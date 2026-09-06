@@ -50,4 +50,34 @@ public class SmartOpenPositionIngestServiceContractTest {
         assertNotNull(data.getVacansyName());
         assertTrue(data.getVacansyName().equals("Senior Java Developer"));
     }
+
+    @Test
+    public void testCreateOpenPositionSetsDraftFlagAndUnderReviewPriority() throws Exception {
+        File beanFile = new File("src/com/company/hunttech/service/SmartOpenPositionIngestServiceBean.java");
+        if (!beanFile.exists()) {
+            beanFile = new File("modules/core/src/com/company/hunttech/service/SmartOpenPositionIngestServiceBean.java");
+        }
+        assertTrue("SmartOpenPositionIngestServiceBean.java должен существовать", beanFile.exists());
+
+        String content = Files.readString(beanFile.toPath());
+        assertTrue("createOpenPosition должен устанавливать signDraft(true)",
+                content.contains("openPosition.setSignDraft(true)"));
+        assertTrue("createOpenPosition должен устанавливать priority UNDER_REVIEW (-2)",
+                content.contains("openPosition.setPriority(OpenPositionPriority.UNDER_REVIEW.getId())"));
+    }
+
+    @Test
+    public void testScreenHandlesDuplicateAndMissingFields() throws Exception {
+        File screenJava = new File("../web/src/com/company/hunttech/web/screens/openposition/SmartOpenPositionUploadScreen.java");
+        if (!screenJava.exists()) {
+            screenJava = new File("modules/web/src/com/company/hunttech/web/screens/openposition/SmartOpenPositionUploadScreen.java");
+        }
+        assertTrue("SmartOpenPositionUploadScreen.java должен существовать", screenJava.exists());
+
+        String content = Files.readString(screenJava.toPath());
+        assertTrue("Экран должен запрашивать подтверждение при обнаружении дубликата",
+                content.contains("Обнаружен дубликат"));
+        assertTrue("Экран должен запрашивать подтверждение при неполных данных",
+                content.contains("Неполные данные вакансии"));
+    }
 }

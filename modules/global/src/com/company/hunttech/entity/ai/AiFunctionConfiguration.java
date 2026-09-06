@@ -51,11 +51,19 @@ public class AiFunctionConfiguration extends StandardEntity {
     @Column(name = "PROMPT_TEMPLATE")
     private String promptTemplate;
 
+    /** Immutable policy identifier used for the technical audit snapshot. */
+    @Column(name = "PRIVACY_POLICY_VERSION", length = 64)
+    private String privacyPolicyVersion;
+
     @Column(name = "TEMPERATURE")
     private Double temperature = 0.7;
 
     @Column(name = "MAX_TOKENS")
     private Integer maxTokens;
+
+    /** Common calendar-month chat quota; user-specific override has priority. */
+    @Column(name = "DEFAULT_MONTHLY_TOKEN_QUOTA")
+    private Integer defaultMonthlyTokenQuota;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ADMIN_CONFIGURATION_ID")
@@ -137,6 +145,14 @@ public class AiFunctionConfiguration extends StandardEntity {
         this.promptTemplate = promptTemplate;
     }
 
+    public String getPrivacyPolicyVersion() {
+        return privacyPolicyVersion;
+    }
+
+    public void setPrivacyPolicyVersion(String privacyPolicyVersion) {
+        this.privacyPolicyVersion = privacyPolicyVersion;
+    }
+
     public Double getTemperature() {
         return temperature;
     }
@@ -151,6 +167,14 @@ public class AiFunctionConfiguration extends StandardEntity {
 
     public void setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;
+    }
+
+    public Integer getDefaultMonthlyTokenQuota() {
+        return defaultMonthlyTokenQuota;
+    }
+
+    public void setDefaultMonthlyTokenQuota(Integer defaultMonthlyTokenQuota) {
+        this.defaultMonthlyTokenQuota = defaultMonthlyTokenQuota;
     }
 
     public AdminAiConfiguration getAdminConfiguration() {

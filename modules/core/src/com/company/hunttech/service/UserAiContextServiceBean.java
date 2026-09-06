@@ -67,10 +67,9 @@ public class UserAiContextServiceBean implements UserAiContextService {
         return dataManager.load(UserAiProfile.class)
                 .query(QUERY_CURRENT_PROFILE)
                 .parameter("user", userSessionSource.getUserSession().getUser())
-                .view("_local")
+                .view("userAiProfile-view")
                 .optional()
                 .orElse(null);
     }
 }
-
 

@@ -2,9 +2,12 @@ package com.company.hunttech.web.screens.useraiconfiguration;
 
 import com.company.hunttech.ai.AiProviderCatalog;
 import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.service.AiCredentialService;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.PasswordField;
+import com.haulmont.cuba.gui.screen.StandardEditor.BeforeCommitChangesEvent;
 import com.haulmont.cuba.gui.screen.StandardEditor.InitEntityEvent;
 import com.haulmont.cuba.gui.screen.Screen.InitEvent;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
@@ -28,6 +31,10 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
     private LookupField<String> providerCodeField;
     @Inject
     private TextField<String> defaultModelNameField;
+    @Inject
+    private PasswordField apiKeyField;
+    @Inject
+    private AiCredentialService aiCredentialService;
 
     private User parentUser;
     private String lastAutomaticallyAppliedModel;
@@ -63,6 +70,24 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
             getEditedEntity().setUser(parentUser);
         }
         setDefaultModelForProvider(getEditedEntity().getProviderCode());
+        apiKeyField.setValue(null);
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        String newSecret = apiKeyField.getValue();
+        if (isConfigured(newSecret)) {
+            try {
+                getEditedEntity().setApiKeyEncrypted(aiCredentialService.encryptUserSecret(newSecret));
+                apiKeyField.setValue(null);
+            } catch (RuntimeException e) {
+                event.preventCommit();
+                return;
+            }
+        }
+        // Never write plaintext, including a legacy value accidentally loaded
+        // by an older view or supplied by a previous editor implementation.
+        getEditedEntity().setApiKey(null);
     }
 
     private void setDefaultModelForProvider(String providerCode) {

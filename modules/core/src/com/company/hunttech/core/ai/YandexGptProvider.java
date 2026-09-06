@@ -17,6 +17,7 @@ public class YandexGptProvider extends AbstractOpenAiCompatibleProvider {
     @Override protected String getApiUrl() { return "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"; }
     @Override protected String getDefaultModel() { return "yandexgpt/latest"; }
     @Override protected String getProviderDisplayName() { return "YandexGPT"; }
+    @Override public boolean supportsStreaming() { return false; }
 
     @Override
     public String generateText(String prompt, String systemContext, String apiKey, String modelName,

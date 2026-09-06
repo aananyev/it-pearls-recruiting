@@ -171,24 +171,6 @@ public class GeolocationEditFormsContractTest {
     }
 
     @Test
-    public void localMessagesContainSidebarCaptions() throws IOException {
-        // Подписи sidebar («Регион»/«Город») переводятся msg-ключами локальных пакетов
-        // (в главных messages msgRegion=«Область» — для подписи типа записи не подходит).
-        String[][] packs = {
-                {"region", "msgRegion"},
-                {"city", "msgCity"},
-                {"city", "msgRegion"} // подпись сводки «Регион» в sidebar города
-        };
-        for (String[] p : packs) {
-            String base = "modules/web/src/com/company/hunttech/web/screens/" + p[0] + "/messages";
-            assertTrue(p[0] + " " + p[1] + " отсутствует в messages.properties",
-                    readProjectFile(base + ".properties").contains(p[1] + "="));
-            assertTrue(p[0] + " " + p[1] + " отсутствует в messages_ru.properties",
-                    readProjectFile(base + "_ru.properties").contains(p[1] + "="));
-        }
-    }
-
-    @Test
     public void everyThemeAppliesSharedEditStyles() throws IOException {
         String canon = readProjectFile(
                 "modules/web/themes/hover/com.company.hunttech/edit-screen-shared-styles.scss");

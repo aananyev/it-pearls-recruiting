@@ -1,5 +1,6 @@
 package com.company.hunttech.core.ai;
 
+import com.company.hunttech.service.AiStreamListener;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -16,6 +17,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +38,8 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
 
     protected final ObjectMapper objectMapper = new ObjectMapper();
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private final ConcurrentMap<String, HttpURLConnection> activeConnections = new ConcurrentHashMap<>();
+    private final Set<String> cancelledRequests = ConcurrentHashMap.newKeySet();
 
     protected abstract String getApiUrl();
 
@@ -50,6 +56,8 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
     @Override
     public AiProviderResponse executeTextWithTokens(String prompt, String systemContext, String apiKey,
                                                     String modelName, Map<String, Object> options) {
+        String requestId = resolveRequestId(options);
+        HttpURLConnection connection = null;
         try {
             ObjectNode requestBody = objectMapper.createObjectNode();
             requestBody.put("model", isConfigured(modelName) ? modelName.trim() : getDefaultModel());
@@ -61,9 +69,10 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
             addMessage(messages, "user", prompt);
             customizeRequestBody(requestBody, options);
 
-            HttpURLConnection connection = openJsonPostConnection(getApiUrl());
+            connection = openJsonPostConnection(getApiUrl());
             connection.setRequestProperty("Authorization", "Bearer " + apiKey.trim());
             customizeConnection(connection);
+            registerRequest(requestId, connection);
             String responseBody = execute(connection, objectMapper.writeValueAsString(requestBody));
 
             JsonNode root = objectMapper.readTree(responseBody);
@@ -84,12 +93,157 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
                 totalTokens = promptTokens + completionTokens;
             }
 
-            return AiProviderResponse.ofText(text, promptTokens, completionTokens, totalTokens);
+            String providerRequestId = root.path("id").isTextual() ? root.path("id").asText() : null;
+            return AiProviderResponse.ofText(text, promptTokens, completionTokens, totalTokens, providerRequestId);
         } catch (IOException e) {
+            if (isCancelled(requestId)) {
+                throw new AiRequestCancelledException(requestId);
+            }
             log.error("{} API request failed: {}", getProviderDisplayName(), e.getMessage(), e);
             throw new RuntimeException("Ошибка запроса к " + getProviderDisplayName() + " API: "
                     + e.getMessage(), e);
+        } finally {
+            unregisterRequest(requestId, connection);
         }
+    }
+
+    @Override
+    public boolean supportsStreaming() {
+        return true;
+    }
+
+    @Override
+    public AiProviderResponse executeTextStreaming(String prompt, String systemContext, String apiKey,
+                                                    String modelName, Map<String, Object> options,
+                                                    AiStreamListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Streaming listener не задан.");
+        }
+        String requestId = resolveRequestId(options);
+        HttpURLConnection connection = null;
+        StringBuilder text = new StringBuilder();
+        String providerRequestId = null;
+        int promptTokens = 0;
+        int completionTokens = 0;
+        try {
+            ObjectNode requestBody = objectMapper.createObjectNode();
+            requestBody.put("model", isConfigured(modelName) ? modelName.trim() : getDefaultModel());
+            requestBody.put("temperature", resolveTemperature(options));
+            requestBody.put("stream", true);
+            requestBody.putObject("stream_options").put("include_usage", true);
+            ArrayNode messages = requestBody.putArray("messages");
+            addMessage(messages, "system", systemContext);
+            addMessage(messages, "user", prompt);
+            customizeRequestBody(requestBody, options);
+
+            connection = openJsonPostConnection(getApiUrl());
+            connection.setRequestProperty("Authorization", "Bearer " + apiKey.trim());
+            connection.setRequestProperty("Accept", "text/event-stream");
+            customizeConnection(connection);
+            registerRequest(requestId, connection);
+            try (OutputStream outputStream = connection.getOutputStream()) {
+                outputStream.write(objectMapper.writeValueAsString(requestBody).getBytes(StandardCharsets.UTF_8));
+            }
+            int responseCode = connection.getResponseCode();
+            if (responseCode < 200 || responseCode >= 300) {
+                throw new IOException("HTTP " + responseCode + ": " + readResponseBody(connection, responseCode));
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.startsWith("data:")) {
+                        continue;
+                    }
+                    String payload = line.substring("data:".length()).trim();
+                    if ("[DONE]".equals(payload)) {
+                        break;
+                    }
+                    JsonNode root = objectMapper.readTree(payload);
+                    if (root.path("id").isTextual()) {
+                        providerRequestId = root.path("id").asText();
+                        listener.onProviderRequestId(providerRequestId);
+                    }
+                    JsonNode delta = root.path("choices").path(0).path("delta").path("content");
+                    if (delta.isTextual() && isConfigured(delta.asText())) {
+                        String part = delta.asText();
+                        text.append(part);
+                        listener.onDelta(part);
+                    }
+                    JsonNode usage = root.path("usage");
+                    promptTokens = usage.path("prompt_tokens").asInt(promptTokens);
+                    completionTokens = usage.path("completion_tokens").asInt(completionTokens);
+                    int reportedTotalTokens = usage.path("total_tokens").asInt(-1);
+                    if (reportedTotalTokens >= 0 || usage.has("prompt_tokens") || usage.has("completion_tokens")) {
+                        listener.onUsage(promptTokens, completionTokens,
+                                reportedTotalTokens >= 0 ? reportedTotalTokens : promptTokens + completionTokens);
+                    }
+                }
+            }
+            if (!isConfigured(text.toString())) {
+                throw new IOException("пустой streaming-ответ");
+            }
+            if (promptTokens == 0 && completionTokens == 0) {
+                promptTokens = prompt != null ? (prompt.length() + (systemContext != null ? systemContext.length() : 0)) / 4 : 0;
+                completionTokens = text.length() / 4;
+            }
+            return AiProviderResponse.ofText(text.toString(), promptTokens, completionTokens,
+                    promptTokens + completionTokens, providerRequestId);
+        } catch (IOException e) {
+            if (isCancelled(requestId)) {
+                throw new AiRequestCancelledException(requestId);
+            }
+            throw new RuntimeException("Ошибка streaming-запроса к " + getProviderDisplayName()
+                    + " API: " + e.getMessage(), e);
+        } finally {
+            unregisterRequest(requestId, connection);
+        }
+    }
+
+    @Override
+    public void cancelRequest(String requestId) {
+        if (!isConfigured(requestId)) {
+            return;
+        }
+        String normalized = requestId.trim();
+        cancelledRequests.add(normalized);
+        HttpURLConnection connection = activeConnections.get(normalized);
+        if (connection != null) {
+            connection.disconnect();
+        }
+    }
+
+    private String resolveRequestId(Map<String, Object> options) {
+        if (options == null || !(options.get("requestId") instanceof String)) {
+            return null;
+        }
+        String requestId = ((String) options.get("requestId")).trim();
+        return requestId.isEmpty() ? null : requestId;
+    }
+
+    private void registerRequest(String requestId, HttpURLConnection connection) {
+        if (requestId == null) {
+            return;
+        }
+        activeConnections.put(requestId, connection);
+        if (cancelledRequests.contains(requestId)) {
+            connection.disconnect();
+        }
+    }
+
+    private void unregisterRequest(String requestId, HttpURLConnection connection) {
+        if (requestId == null) {
+            return;
+        }
+        if (connection != null) {
+            activeConnections.remove(requestId, connection);
+            connection.disconnect();
+        }
+        cancelledRequests.remove(requestId);
+    }
+
+    private boolean isCancelled(String requestId) {
+        return requestId != null && cancelledRequests.contains(requestId);
     }
 
     /** Позволяет провайдеру добавить специфичные параметры запроса. */

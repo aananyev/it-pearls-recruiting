@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION"/>
+        <tableExists tableName="HUNTTECH_AI_CALL_LOG"/>
+    </preConditions>
+
+    <changeSet id="260905-1-addAiAuditSecuritySnapshots" author="hunttech">
+        <addColumn tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION">
+            <column name="PRIVACY_POLICY_VERSION" type="varchar(64)"/>
+        </addColumn>
+        <addColumn tableName="HUNTTECH_AI_CALL_LOG">
+            <column name="PRIVACY_POLICY_VERSION_SNAPSHOT" type="varchar(64)"/>
+            <column name="EXTERNAL_PROCESSING_CONSENT_VERSION_SNAPSHOT" type="varchar(64)"/>
+            <column name="ADMIN_FALLBACK_CONSENT_VERSION_SNAPSHOT" type="varchar(64)"/>
+        </addColumn>
+        <sql dbms="postgresql" splitStatements="true" stripComments="true"><![CDATA[
+            UPDATE HUNTTECH_AI_FUNCTION_CONFIGURATION
+               SET PRIVACY_POLICY_VERSION = 'llm-chat-privacy-v1'
+             WHERE CODE = 'LLM_CHAT'
+               AND (PRIVACY_POLICY_VERSION IS NULL OR btrim(PRIVACY_POLICY_VERSION) = '');
+
+            UPDATE HUNTTECH_AI_CALL_LOG
+               SET PRIVACY_POLICY_VERSION_SNAPSHOT = COALESCE(PRIVACY_POLICY_VERSION_SNAPSHOT, 'LEGACY_NOT_CAPTURED'),
+                   EXTERNAL_PROCESSING_CONSENT_VERSION_SNAPSHOT = COALESCE(EXTERNAL_PROCESSING_CONSENT_VERSION_SNAPSHOT, 'LEGACY_NOT_CAPTURED'),
+                   ADMIN_FALLBACK_CONSENT_VERSION_SNAPSHOT = COALESCE(ADMIN_FALLBACK_CONSENT_VERSION_SNAPSHOT, 'LEGACY_NOT_CAPTURED')
+             WHERE PRIVACY_POLICY_VERSION_SNAPSHOT IS NULL
+                OR EXTERNAL_PROCESSING_CONSENT_VERSION_SNAPSHOT IS NULL
+                OR ADMIN_FALLBACK_CONSENT_VERSION_SNAPSHOT IS NULL;
+        ]]></sql>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_AI_CALL_LOG" columnName="ADMIN_FALLBACK_CONSENT_VERSION_SNAPSHOT"/>
+            <dropColumn tableName="HUNTTECH_AI_CALL_LOG" columnName="EXTERNAL_PROCESSING_CONSENT_VERSION_SNAPSHOT"/>
+            <dropColumn tableName="HUNTTECH_AI_CALL_LOG" columnName="PRIVACY_POLICY_VERSION_SNAPSHOT"/>
+            <dropColumn tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION" columnName="PRIVACY_POLICY_VERSION"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

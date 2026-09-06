@@ -21,7 +21,8 @@ import java.util.Date;
  * Журнал выполнения вызовов к AI (LLM / генерация изображений).
  * <p>
  * Фиксирует все вызовы к AI с метаданными: пользователь, время, длительность,
- * провайдер, модель, токены, стоимость, промпт, ответ, вызывающий экран/сервис и статус.
+ * провайдер, модель, токены, стоимость, вызывающий экран/сервис и статус.
+ * Payload prompt/response не является техническим аудитом и для новых записей не сохраняется.
  */
 @Table(name = "HUNTTECH_AI_CALL_LOG", indexes = {
         @Index(name = "IDX_HUNTTECH_AI_CALL_LOG_USER", columnList = "USER_ID"),
@@ -112,6 +113,18 @@ public class AiCallLog extends StandardEntity {
     /** Размер добавленного блока в code points (диагностика стоимости вызова). */
     @Column(name = "CONTEXT_CODE_POINTS")
     private Integer contextCodePoints;
+
+    /** Policy version effective when this operation was authorized. */
+    @Column(name = "PRIVACY_POLICY_VERSION_SNAPSHOT", length = 64)
+    private String privacyPolicyVersionSnapshot;
+
+    /** User external-processing consent version captured at dispatch time. */
+    @Column(name = "EXTERNAL_PROCESSING_CONSENT_VERSION_SNAPSHOT", length = 64)
+    private String externalProcessingConsentVersionSnapshot;
+
+    /** Separate admin-fallback consent version; null when admin fallback was not used. */
+    @Column(name = "ADMIN_FALLBACK_CONSENT_VERSION_SNAPSHOT", length = 64)
+    private String adminFallbackConsentVersionSnapshot;
 
     public User getUser() {
         return user;
@@ -295,5 +308,29 @@ public class AiCallLog extends StandardEntity {
 
     public void setContextCodePoints(Integer contextCodePoints) {
         this.contextCodePoints = contextCodePoints;
+    }
+
+    public String getPrivacyPolicyVersionSnapshot() {
+        return privacyPolicyVersionSnapshot;
+    }
+
+    public void setPrivacyPolicyVersionSnapshot(String privacyPolicyVersionSnapshot) {
+        this.privacyPolicyVersionSnapshot = privacyPolicyVersionSnapshot;
+    }
+
+    public String getExternalProcessingConsentVersionSnapshot() {
+        return externalProcessingConsentVersionSnapshot;
+    }
+
+    public void setExternalProcessingConsentVersionSnapshot(String externalProcessingConsentVersionSnapshot) {
+        this.externalProcessingConsentVersionSnapshot = externalProcessingConsentVersionSnapshot;
+    }
+
+    public String getAdminFallbackConsentVersionSnapshot() {
+        return adminFallbackConsentVersionSnapshot;
+    }
+
+    public void setAdminFallbackConsentVersionSnapshot(String adminFallbackConsentVersionSnapshot) {
+        this.adminFallbackConsentVersionSnapshot = adminFallbackConsentVersionSnapshot;
     }
 }

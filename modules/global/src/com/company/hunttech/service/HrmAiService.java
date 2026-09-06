@@ -12,6 +12,9 @@ public interface HrmAiService {
     String NAME = "hunttech_HrmAiService";
 
     String FUNCTION_STANDARDIZE_VACANCY = "STANDARDIZE_VACANCY";
+    String FUNCTION_VACANCY_CHECKLIST = "VACANCY_CHECKLIST";
+    String FUNCTION_VACANCY_SEARCH_MAP = "VACANCY_SEARCH_MAP";
+    String FUNCTION_VACANCY_INTERVIEW_PLAN = "VACANCY_INTERVIEW_PLAN";
 
     /**
      * Код диагностической AI-функции «тест подключения» (проверка provider/key/model
@@ -25,6 +28,21 @@ public interface HrmAiService {
      * Стандартизирует исходное описание вакансии через функцию STANDARDIZE_VACANCY.
      */
     String standardizeVacancyDescription(String rawText);
+
+    /**
+     * Генерирует Must-have чек-лист требований к кандидату через функцию VACANCY_CHECKLIST.
+     */
+    String generateChecklist(String vacancyText);
+
+    /**
+     * Генерирует Карту поиска и сорсинга рекрутера через функцию VACANCY_SEARCH_MAP.
+     */
+    String generateSearchMap(String vacancyText);
+
+    /**
+     * Генерирует План продающего собеседования через функцию VACANCY_INTERVIEW_PLAN.
+     */
+    String generateInterviewPlan(String vacancyText);
 
     /**
      * Генерирует vacancy-артефакт через AI-функцию с переданным стабильным кодом.

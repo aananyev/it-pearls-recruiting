@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Административный экран закрытия UNKNOWN_PENDING; записи не удаляются и не повторяются у провайдера. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="reservationsTable"
+        messagesPack="com.company.hunttech.web.screens.llmchatquota">
+    <!-- Data section загружает только резервы с неизвестным результатом. -->
+    <data>
+        <!-- Специальный view содержит только необходимые для сверки поля и безопасный пользовательский контекст. -->
+        <collection id="reservationsDc"
+                    class="com.company.hunttech.entity.ai.LlmChatQuotaReservation"
+                    view="llm-chat-quota-reconciliation-view">
+            <!-- Loader запускается только после проверки specific permission в контроллере. -->
+            <loader id="reservationsDl">
+                <!-- UNKNOWN_PENDING не считается подтверждённым списанием до решения администратора. -->
+                <query><![CDATA[
+                    select e from hunttech_LlmChatQuotaReservation e
+                    where e.status = 'UNKNOWN_PENDING' and e.deleteTs is null
+                    order by e.createTs asc
+                ]]></query>
+            </loader>
+        </collection>
+    </data>
+    <!-- Рабочее окно администратора с достаточной шириной для request ID и аудита. -->
+    <dialogMode width="1300" height="680"/>
+    <!-- Таблица расширяется на всё доступное пространство; remove/edit actions намеренно отсутствуют. -->
+    <layout stylename="llm-chat-quota-reconciliation" expand="reservationsTable" spacing="true">
+        <!-- Пояснение фиксирует последствия выбора для оператора. -->
+        <label value="msg://reconciliationHint" stylename="secondary"/>
+        <!-- Единственные мутационные действия: подтвердить списание или вернуть резерв. -->
+        <hbox id="actionsPanel" spacing="true">
+            <!-- Запрос фактического provider usage и перевод в SETTLED. -->
+            <button id="settledBtn" caption="msg://settledBtn" icon="CHECK" stylename="primary"/>
+            <!-- Подтверждение отсутствия списания и перевод в RELEASED. -->
+            <button id="releasedBtn" caption="msg://releasedBtn" icon="UNDO"/>
+            <!-- Обновление списка pending reservations. -->
+            <button id="refreshBtn" action="reservationsTable.refresh" icon="REFRESH"/>
+        </hbox>
+        <!-- Список не содержит содержимое диалогов и API-секреты. -->
+        <dataGrid id="reservationsTable" width="100%" height="100%" dataContainer="reservationsDc">
+            <!-- Refresh — единственное стандартное действие таблицы. -->
+            <actions>
+                <!-- Повторно загружает только UNKNOWN_PENDING. -->
+                <action id="refresh" type="refresh"/>
+            </actions>
+            <!-- Операционные поля, необходимые для ручной сверки. -->
+            <columns>
+                <!-- Владелец расхода. -->
+                <column property="period.user.name" caption="msg://user"/>
+                <!-- Календарный период квоты. -->
+                <column property="period.periodStart" caption="msg://period"/>
+                <!-- Заголовок диалога без текста переписки. -->
+                <column property="conversation.title" caption="msg://conversation"/>
+                <!-- Идемпотентный идентификатор запроса HRM. -->
+                <column property="requestId" caption="msg://requestId"/>
+                <!-- Заполняется после появления provider adapter. -->
+                <column property="providerRequestId" caption="msg://providerRequestId"/>
+                <!-- Зарезервированный объём до сверки. -->
+                <column property="reservedTokens" caption="msg://reservedTokens"/>
+                <!-- Текущий статус ledger. -->
+                <column property="status" caption="msg://status"/>
+            </columns>
+        </dataGrid>
+    </layout>
+</window>

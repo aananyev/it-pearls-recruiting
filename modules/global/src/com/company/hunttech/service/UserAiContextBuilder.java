@@ -57,6 +57,11 @@ public final class UserAiContextBuilder {
         addData(context, remaining, "communicationConstraints", sanitize(profile.getCommunicationConstraints(), 2000));
 
         // 2. Ключевые идентификаторы профиля.
+        if (profile.getUser() != null) {
+            // Exact name is allowed by the approved policy; the user view contains
+            // no phone, password, API key or access-right fields.
+            addData(context, remaining, "userName", sanitize(profile.getUser().getName(), SHORT_FIELD_LIMIT));
+        }
         addData(context, remaining, "currentPosition", sanitize(profile.getCurrentPosition(), SHORT_FIELD_LIMIT));
         addData(context, remaining, "functionalRole", enumName(profile.getFunctionalRole()));
         addData(context, remaining, "seniorityLevel", enumName(profile.getSeniorityLevel()));

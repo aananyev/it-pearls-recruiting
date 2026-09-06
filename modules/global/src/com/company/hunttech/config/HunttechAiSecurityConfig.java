@@ -19,4 +19,9 @@ public interface HunttechAiSecurityConfig extends Config {
     @Property("hunttech.ai.encryptionKey")
     @DefaultString("")
     String getEncryptionKey();
+
+    /** Previous key is temporary and exists only during a controlled rotation window. */
+    @Property("hunttech.ai.previousEncryptionKey")
+    @DefaultString("")
+    String getPreviousEncryptionKey();
 }
