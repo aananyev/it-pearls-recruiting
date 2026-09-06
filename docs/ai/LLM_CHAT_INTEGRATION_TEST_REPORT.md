@@ -23,7 +23,7 @@
 ## Незакрытые проверки
 
 - authenticated UI через staging reverse proxy/балансировщик;
-- 20–50 одновременных UI-сессий, reconnect и sticky-session;
+- ограниченный reconnect/proxy smoke и sticky-session; массовый прогон 20–50 UI-сессий отменён владельцем;
 - интеграционный тест с sandbox/mock HTTP provider, когда будут утверждены provider/model/region и тестовые credentials;
 - PII-маскирование данных кандидатов — оставлено TODO по распоряжению пользователя.
 

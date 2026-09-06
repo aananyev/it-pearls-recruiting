@@ -89,6 +89,21 @@ public class LlmChatFoundationContractTest {
     }
 
     @Test
+    public void pollingTimerIsDeclaredAsFacetNotLayoutComponent() throws IOException {
+        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/llmchat/llm-chat-screen.xml");
+
+        int facetsStart = descriptor.indexOf("<facets>");
+        int facetsEnd = descriptor.indexOf("</facets>");
+        int layoutStart = descriptor.indexOf("<layout ");
+        assertTrue("Timer must be declared in the screen facets", facetsStart >= 0 && facetsEnd > facetsStart);
+        assertTrue("Timer must be declared before the visual layout", facetsStart < layoutStart);
+        String facets = descriptor.substring(facetsStart, facetsEnd);
+        assertTrue(facets.contains("<timer id=\"streamPollTimer\""));
+        assertFalse("Timer must not be loaded as a visual layout component",
+                descriptor.substring(layoutStart).contains("<timer id=\"streamPollTimer\""));
+    }
+
+    @Test
     public void floatingChatPersistsDialogGeometryAndHasMobileMode() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
         String styles = source("modules/web/themes/hunttech-modern-light/com.company.hunttech/chat-style.css");
@@ -167,11 +182,19 @@ public class LlmChatFoundationContractTest {
     public void mainScreenHasPersistentChatLauncher() throws IOException {
         String descriptor = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/ext-main-screen.xml");
         String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/ExtMainScreen.java");
+        String extension = source("modules/web/src/com/company/hunttech/web/extension/LlmChatLauncherExtension.java");
+        String dragScript = source("modules/web/src/com/company/hunttech/web/extension/llm-chat-launcher.js");
         String styles = source("modules/web/themes/hunttech-modern-light/com.company.hunttech/chat-style.css");
-        assertTrue(descriptor.contains("id=\"llmChatLauncher\""));
-        assertTrue(descriptor.contains("invoke=\"openLlmChat\""));
+        assertFalse("Launcher must not be part of MainScreen layout", descriptor.contains("llmChatLauncherBar"));
         assertTrue(controller.contains("screens.create(LlmChatScreen.class).show()"));
-        assertTrue(styles.contains(".llm-chat-launcher-bar"));
+        assertTrue(controller.contains("UI.getCurrent().addWindow(llmChatLauncherWindow)"));
+        assertTrue(controller.contains("new LlmChatLauncherExtension()"));
+        assertTrue(extension.contains("super.extend(button)"));
+        assertTrue(dragScript.contains("pointerdown"));
+        assertTrue(dragScript.contains("localStorage"));
+        assertTrue(dragScript.contains("threshold = 8"));
+        assertTrue(styles.contains(".llm-chat-launcher-window"));
+        assertTrue(styles.contains(".llm-chat-launcher-spark"));
     }
 
     @Test

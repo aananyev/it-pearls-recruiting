@@ -29,18 +29,6 @@
                     </vbox>
                 </initialLayout>
             </workArea>
-            <!-- Persistent launcher is outside WorkArea, so it remains available
-                 while browse/edit screens are opened. CSS positions it above the
-                 lower-right corner without changing WorkArea geometry. -->
-            <hbox id="llmChatLauncherBar"
-                  stylename="llm-chat-launcher-bar"
-                  width="100%">
-                <button id="llmChatLauncher"
-                        caption="msg://llmChatLauncher"
-                        icon="COMMENT_O"
-                        stylename="llm-chat-launcher"
-                        invoke="openLlmChat"/>
-            </hbox>
         </cssLayout>
     </layout>
 </window>
