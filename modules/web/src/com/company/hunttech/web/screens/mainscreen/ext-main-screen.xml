@@ -34,7 +34,8 @@
                  lower-right corner without changing WorkArea geometry. -->
             <hbox id="llmChatLauncherBar"
                   stylename="llm-chat-launcher-bar"
-                  width="100%">
+                  width="100%"
+                  visible="false">
                 <button id="llmChatLauncher"
                         caption="msg://llmChatLauncher"
                         icon="COMMENT_O"
