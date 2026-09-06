@@ -122,13 +122,11 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
         Action editAction = companiesTable.getAction("edit");
         if (editAction instanceof EditAction) {
             ((EditAction<Company>) editAction).setScreenClass(CompanyReestrEdit.class);
-            ((EditAction<Company>) editAction).setScreenId("hunttech_CompanyReestr.edit");
             ((EditAction<Company>) editAction).setOpenMode(OpenMode.DIALOG);
         }
         Action createAction = companiesTable.getAction("create");
         if (createAction instanceof CreateAction) {
             ((CreateAction<Company>) createAction).setScreenClass(CompanyReestrEdit.class);
-            ((CreateAction<Company>) createAction).setScreenId("hunttech_CompanyReestr.edit");
             ((CreateAction<Company>) createAction).setOpenMode(OpenMode.DIALOG);
         }
     }
