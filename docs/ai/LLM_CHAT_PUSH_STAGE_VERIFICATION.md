@@ -8,9 +8,9 @@
 
 ## Что проверено
 
-- Текущая ветка `feat/llm-chat`, локальный кандидат для staging `542ddd4`; до staging нужен опубликованный и approved commit PR.
-- Widgetset текущей ветки собран Gradle-задачами `:app-web-toolkit:buildWidgetSet :app-web-toolkit:webArchive`.
-- Свежий артефакт `app-web-toolkit-0.442-SNAPSHOT-client.jar` содержит `AppWidgetSet.nocache.js`.
+- Текущая ветка `feat/llm-chat`, локальный кандидат для staging `7c663bd`; до staging нужен опубликованный и approved commit PR.
+- 2026-09-06 widgetset текущей ветки собран Gradle-задачами `:app-web:processResources :app-web-toolkit:buildWidgetSet :app-web-toolkit:webArchive`.
+- Свежий артефакт `app-web-toolkit-0.466-SNAPSHOT-client.jar` содержит `AppWidgetSet.nocache.js`; `app-web-0.466-SNAPSHOT.jar` содержит `LlmChatLauncherExtension` и `llm-chat-launcher.js`.
 - Локальный Vaadin push asset на `http://127.0.0.1:8080/hrm/VAADIN/vaadinPush.debug.js` возвращает HTTP 200.
 - Корректный WebSocket handshake на `/hrm/PUSH/` возвращает HTTP 101 и Vaadin push frame.
 - Concurrency probe: 8 параллельных handshake-запросов, результат `8/8 HTTP 101`.
@@ -36,7 +36,7 @@ scripts/verify-llm-chat-staging.sh https://staging.example/hrm 8
 2. Проверить HTTP 200 widgetset/push asset и WebSocket `101` через фактический proxy/балансировщик.
 3. Выполнить authenticated сценарий: открыть чат, отправить тестовый запрос, убедиться в push-обновлении дельт, завершении и отсутствии повторного provider-вызова.
 4. Разорвать push-канал и убедиться, что recovery polling 3 секунды завершает отображение без дубля сообщения.
-5. Проверить 20–50 одновременных UI-сессий, reconnect, sticky-session/affinity и таймауты proxy.
+5. Проверить ограниченный reconnect/proxy smoke, sticky-session/affinity и таймауты proxy. Массовый прогон 20–50 UI-сессий отменён владельцем и не является обязательным критерием текущего этапа.
 6. Зафиксировать latency первого delta, reconnect rate, error rate и отсутствие утечек между пользователями.
 
 ## Вывод
