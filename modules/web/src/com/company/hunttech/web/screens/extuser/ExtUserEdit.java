@@ -5,6 +5,8 @@ import com.company.hunttech.config.HunttechImageConfig;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.UserSettings;
+import com.company.hunttech.service.UserAvatarManagementService;
+import com.company.hunttech.service.dto.avatar.AvatarApplyMode;
 import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
 import com.company.hunttech.web.util.AvatarImageUploadHelper;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
@@ -70,6 +72,8 @@ public class ExtUserEdit extends Screen {
     private ImageProcessingService imageProcessingService;
     @Inject
     private HunttechImageConfig hunttechImageConfig;
+    @Inject
+    private UserAvatarManagementService userAvatarManagementService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -107,14 +111,12 @@ public class ExtUserEdit extends Screen {
             return;
         }
 
-        UserSettings userSettings = loadUserSettings(user);
-
-        FileDescriptor personalAvatar = (userSettings != null) ? userSettings.getFileImageFace() : null;
+        FileDescriptor personalAvatar = user.getUserAvatar();
 
         if (personalAvatar != null && FileDescriptorImageHelper.fileExists(fileLoader, personalAvatar)) {
-            showAdminPhotoChoiceDialog(user, userSettings, newPhoto, personalAvatar);
+            showAdminPhotoChoiceDialog(user, newPhoto, personalAvatar);
         } else {
-            applyOfficialPhotoUpdate(user, userSettings, newPhoto, true);
+            applyOfficialPhotoUpdate(user, newPhoto, AvatarApplyMode.SMART_DEFAULT);
         }
     }
 
@@ -122,8 +124,11 @@ public class ExtUserEdit extends Screen {
     public void onOfficialPhotoUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
         ExtUser user = getExtUser();
         if (user != null) {
-            removeStoredFileIfUnreferenced(user.getOfficialPhoto(), null, user.getUserAvatar());
-            user.setOfficialPhoto(null);
+            if (userAvatarManagementService != null) {
+                userAvatarManagementService.clearAdminOfficialPhoto(user);
+            } else {
+                user.setOfficialPhoto(null);
+            }
         }
     }
 
@@ -177,32 +182,35 @@ public class ExtUserEdit extends Screen {
     /**
      * Показ модального диалога администратору при обнаружении конфликта изображений
      */
-    private void showAdminPhotoChoiceDialog(ExtUser user, UserSettings userSettings,
-                                            FileDescriptor newPhoto, FileDescriptor personalAvatar) {
+    private void showAdminPhotoChoiceDialog(ExtUser user, FileDescriptor newPhoto, FileDescriptor personalAvatar) {
         String avatarHtml = FileDescriptorImageHelper.buildCandidateFacePreviewHtml(fileLoader, personalAvatar);
         String userName = buildFio(user);
 
         String message = String.format(
-                "У пользователя <b>%s</b> уже загружено изображение в личных настройках.<br/>"
-                        + "Хочешь ли ты поменять его на свое?<br/><br/>Текущее личное фото:<br/>%s",
+                messageBundle.getMessage("msgPhotoChangePrompt"),
                 userName, avatarHtml);
 
         dialogs.createOptionDialog()
-                .withCaption("Изменение фото пользователя")
+                .withCaption(messageBundle.getMessage("msgPhotoChangeCaption"))
                 .withMessage(message)
                 .withContentMode(ContentMode.HTML)
-                .withWidth("450px")
+                .withWidth("480px")
                 .withActions(
-                        new BaseAction("yesAction")
-                                .withCaption("Да")
+                        new BaseAction("officialOnlyAction")
+                                .withCaption(messageBundle.getMessage("msgPhotoOfficialOnly"))
                                 .withPrimary(true)
-                                .withHandler(e -> applyOfficialPhotoUpdate(user, userSettings, newPhoto, true)),
-                        new BaseAction("noAction")
-                                .withCaption("Нет")
-                                .withHandler(e -> applyOfficialPhotoUpdate(user, userSettings, newPhoto, false)),
+                                .withHandler(e -> applyOfficialPhotoUpdate(user, newPhoto, AvatarApplyMode.OFFICIAL_ONLY)),
+                        new BaseAction("overwriteAllAction")
+                                .withCaption(messageBundle.getMessage("msgPhotoOverwriteAll"))
+                                .withHandler(e -> applyOfficialPhotoUpdate(user, newPhoto, AvatarApplyMode.OVERWRITE_ALL)),
                         new BaseAction("cancelAction")
-                                .withCaption("Отмена")
-                                .withHandler(e -> officialPhotoUpload.setValue(null))
+                                .withCaption(messageBundle.getMessage("msgCancel"))
+                                .withHandler(e -> {
+                                    if (userAvatarManagementService != null) {
+                                        userAvatarManagementService.cleanupUnreferencedFile(newPhoto, user.getOfficialPhoto(), user.getUserAvatar());
+                                    }
+                                    officialPhotoUpload.setValue(user.getOfficialPhoto());
+                                })
                 )
                 .show();
     }
@@ -215,29 +223,20 @@ public class ExtUserEdit extends Screen {
     }
 
     /**
-     * Универсальный метод применения изменений изображений для ExtUser и UserSettings
+     * Универсальный метод применения изменений изображений для ExtUser
      */
-    private void applyOfficialPhotoUpdate(ExtUser user, UserSettings userSettings,
-                                          FileDescriptor newPhoto, boolean syncToUserSettings) {
-        FileDescriptor oldOfficial = user.getOfficialPhoto();
-
-        removeStoredFileIfUnreferenced(oldOfficial, user.getUserAvatar(), newPhoto);
-
-        user.setOfficialPhoto(newPhoto);
-        user.setUserAvatar(newPhoto);
-        userDs.setItem(user);
-
-        if (syncToUserSettings && userSettings != null) {
-            FileDescriptor oldSettingsAvatar = userSettings.getFileImageFace();
-
-            userSettings.setFileImageFace(newPhoto);
-
-            removeStoredFileIfUnreferenced(oldSettingsAvatar, oldOfficial, newPhoto);
-
-            dataManager.commit(userSettings);
-            log.debug("Изображение успешно продублировано в UserSettings.fileImageFace для пользователя {}",
-                    user.getLogin());
+    private void applyOfficialPhotoUpdate(ExtUser user, FileDescriptor newPhoto, AvatarApplyMode mode) {
+        if (userAvatarManagementService != null) {
+            userAvatarManagementService.applyAdminOfficialPhoto(user, newPhoto, mode);
+        } else {
+            FileDescriptor oldOfficial = user.getOfficialPhoto();
+            removeStoredFileIfUnreferenced(oldOfficial, user.getUserAvatar(), newPhoto);
+            user.setOfficialPhoto(newPhoto);
+            if (mode == AvatarApplyMode.OVERWRITE_ALL || (mode == AvatarApplyMode.SMART_DEFAULT && user.getUserAvatar() == null)) {
+                user.setUserAvatar(newPhoto);
+            }
         }
+        userDs.setItem(user);
     }
 
     private void removeStoredFileIfUnreferenced(FileDescriptor oldFile,

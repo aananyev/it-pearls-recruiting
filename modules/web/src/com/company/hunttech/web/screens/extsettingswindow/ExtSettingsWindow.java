@@ -8,6 +8,8 @@ import com.company.hunttech.service.AiConsentPolicy;
 import com.company.hunttech.service.GeoDataEnrichmentService;
 import com.company.hunttech.service.HrmAiService;
 import com.company.hunttech.service.UserAiContextService;
+import com.company.hunttech.service.UserAvatarManagementService;
+import com.company.hunttech.service.dto.avatar.ResolvedAvatarInfo;
 import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.AvatarImageUploadHelper;
@@ -51,6 +53,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     private ImageProcessingService imageProcessingService;
     @Inject private HunttechImageConfig hunttechImageConfig;
     private UserAiContextService userAiContextService;
+    @Inject private UserAvatarManagementService userAvatarManagementService;
     @Inject private HrmAiService hrmAiService;
     @Inject private Notifications notifications;
     @Inject private Dialogs dialogs;
@@ -391,17 +394,31 @@ public class ExtSettingsWindow extends SettingsWindow {
             return;
         }
         FileDescriptor newAvatar = processUploadedAvatar(uploaded);
-        FileDescriptor oldAvatar = user.getUserAvatar();
-        removeStoredFileIfUnreferenced(oldAvatar, user.getOfficialPhoto(), newAvatar);
-        user.setUserAvatar(newAvatar);
+        if (userAvatarManagementService != null) {
+            userAvatarManagementService.applyUserPersonalAvatar(user, newAvatar);
+        } else {
+            FileDescriptor oldAvatar = user.getUserAvatar();
+            removeStoredFileIfUnreferenced(oldAvatar, user.getOfficialPhoto(), newAvatar);
+            user.setUserAvatar(newAvatar);
+        }
+        if (userSettings != null) {
+            userSettings.setFileImageFace(newAvatar);
+        }
         refreshProfilePhoto();
     }
 
     private void onUserAvatarCleared() {
         ExtUser user = extUserDs.getItem();
         if (user == null) return;
-        removeStoredFileIfUnreferenced(user.getUserAvatar(), user.getOfficialPhoto(), null);
-        user.setUserAvatar(null);
+        if (userAvatarManagementService != null) {
+            userAvatarManagementService.clearUserPersonalAvatar(user);
+        } else {
+            removeStoredFileIfUnreferenced(user.getUserAvatar(), user.getOfficialPhoto(), null);
+            user.setUserAvatar(null);
+        }
+        if (userSettings != null) {
+            userSettings.setFileImageFace(null);
+        }
         refreshProfilePhoto();
     }
 
@@ -427,7 +444,12 @@ public class ExtSettingsWindow extends SettingsWindow {
     private void refreshProfilePhoto() {
         ExtUser user = extUserDs.getItem();
         userPic.setValueSource(null);
-        FileDescriptor photo = user != null ? user.resolveProfilePhoto() : null;
+        ResolvedAvatarInfo avatarInfo = userAvatarManagementService != null && user != null
+                ? userAvatarManagementService.resolveEffectiveAvatar(user)
+                : null;
+        FileDescriptor photo = avatarInfo != null && avatarInfo.hasFileDescriptor()
+                ? avatarInfo.getFileDescriptor()
+                : (user != null ? user.resolveProfilePhoto() : null);
         if (FileDescriptorImageHelper.fileExists(fileLoader, photo)) {
             userPic.setVisible(true);
             defaultPic.setVisible(false);

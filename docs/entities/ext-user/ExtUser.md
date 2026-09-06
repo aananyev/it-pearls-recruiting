@@ -30,10 +30,10 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-- **Админ загружает фото** (`ExtUserEdit`) → если у пользователя уже есть `userAvatar`, показывается диалог: «только officialPhoto» или «оба слота»; если `userAvatar` пуст — фото пишется в `officialPhoto` и дублируется в `userAvatar`. Старый файл в слоте удаляется из хранилища.
-- **Пользователь в настройках** (`ExtSettingsWindow`) → загрузка только в `userAvatar`; старый личный файл удаляется.
+- **Админ загружает фото** (`ExtUserEditor` / `ExtUserEdit`) → если у пользователя уже есть `userAvatar`, показывается диалог с выбором режима (`AvatarApplyMode`): «только officialPhoto», «перезаписать оба слота» или «отмена»; если `userAvatar` пуст — фото пишется в `officialPhoto` и дублируется в `userAvatar`. Старый файл в слоте удаляется из хранилища через `UserAvatarManagementService.cleanupUnreferencedFile`.
+- **Пользователь в настройках** (`ExtSettingsWindow`) → загрузка только в `userAvatar` через `UserAvatarManagementService.applyUserPersonalAvatar`; старый личный файл безопасно удаляется.
 - **Обработка изображения** → перед сохранением в хранилище `AvatarImageUploadHelper` вызывает [ImageProcessingService](../../services/file-storage/ImageProcessingService.md) (лимит `targetImageSize` px, выходной формат `targetImageFormat`, по умолчанию PNG 1024); мелкие файлы не перекодируются.
-- **Отображение** → `ExtUser.resolveProfilePhoto()` + `FileDescriptorImageHelper.setUserProfilePhoto()`.
+- **Отображение и разрешение** → [UserAvatarManagementService](../../services/UserAvatarManagementService_Spec.md) (`resolveEffectiveAvatar`) с проверкой физической доступности файла в `FileStorage`, каскадным fallback и `ExtUser.resolveProfilePhoto()`.
 
 ---
 

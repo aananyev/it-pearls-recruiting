@@ -2,18 +2,26 @@ package com.company.hunttech.web.screens.extuser;
 
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.service.TelegramIntegrationService;
+import com.company.hunttech.service.UserAvatarManagementService;
+import com.company.hunttech.service.dto.avatar.AvatarApplyMode;
+import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.app.security.user.edit.UserEditor;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.FieldGroup;
+import com.haulmont.cuba.gui.components.FileUploadField;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.Window;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.security.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +47,14 @@ public class ExtUserEditor extends UserEditor {
 
     @Inject
     private TelegramIntegrationService telegramIntegrationService;
+    @Inject
+    private UserAvatarManagementService userAvatarManagementService;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private FileUploadField officialPhotoUpload;
+    @Inject
+    private FileLoader fileLoader;
 
     @Inject
     private Button changePasswordBtn;
@@ -125,6 +141,113 @@ public class ExtUserEditor extends UserEditor {
             telegramField.addValueChangeListener(e -> refreshProfileLabels());
         }
         refreshProfileLabels();
+
+        if (officialPhotoUpload != null) {
+            officialPhotoUpload.addFileUploadSucceedListener(event -> onOfficialPhotoUploadSucceed());
+            officialPhotoUpload.addBeforeValueClearListener(event -> onOfficialPhotoUploadBeforeValueClear());
+        }
+    }
+
+    private void onOfficialPhotoUploadSucceed() {
+        User user = getItem();
+        if (!(user instanceof ExtUser)) {
+            return;
+        }
+        ExtUser extUser = (ExtUser) user;
+        FileDescriptor uploaded = officialPhotoUpload.getFileDescriptor();
+        if (uploaded == null) {
+            Object value = officialPhotoUpload.getValue();
+            if (value instanceof FileDescriptor) {
+                uploaded = (FileDescriptor) value;
+            }
+        }
+        if (uploaded == null) {
+            return;
+        }
+
+        FileDescriptor personalAvatar = extUser.getUserAvatar();
+        boolean hasPersonalAvatar = personalAvatar != null && FileDescriptorImageHelper.fileExists(fileLoader, personalAvatar);
+
+        if (hasPersonalAvatar) {
+            showAdminPhotoChoiceDialog(extUser, uploaded, personalAvatar);
+        } else {
+            if (userAvatarManagementService != null) {
+                userAvatarManagementService.applyAdminOfficialPhoto(extUser, uploaded, AvatarApplyMode.SMART_DEFAULT);
+            } else {
+                extUser.setOfficialPhoto(uploaded);
+                extUser.setUserAvatar(uploaded);
+            }
+            refreshProfileLabels();
+        }
+    }
+
+    private void onOfficialPhotoUploadBeforeValueClear() {
+        User user = getItem();
+        if (user instanceof ExtUser) {
+            ExtUser extUser = (ExtUser) user;
+            if (userAvatarManagementService != null) {
+                userAvatarManagementService.clearAdminOfficialPhoto(extUser);
+            } else {
+                extUser.setOfficialPhoto(null);
+            }
+            refreshProfileLabels();
+        }
+    }
+
+    private void showAdminPhotoChoiceDialog(ExtUser extUser, FileDescriptor newPhoto, FileDescriptor personalAvatar) {
+        String avatarHtml = FileDescriptorImageHelper.buildCandidateFacePreviewHtml(fileLoader, personalAvatar);
+        String userName = buildFio(extUser);
+
+        String message = String.format(
+                getMessage("msgPhotoChangePrompt"),
+                userName, avatarHtml);
+
+        dialogs.createOptionDialog()
+                .withCaption(getMessage("msgPhotoChangeCaption"))
+                .withMessage(message)
+                .withContentMode(ContentMode.HTML)
+                .withWidth("480px")
+                .withActions(
+                        new BaseAction("officialOnlyAction")
+                                .withCaption(getMessage("msgPhotoOfficialOnly"))
+                                .withPrimary(true)
+                                .withHandler(e -> {
+                                    if (userAvatarManagementService != null) {
+                                        userAvatarManagementService.applyAdminOfficialPhoto(extUser, newPhoto, AvatarApplyMode.OFFICIAL_ONLY);
+                                    } else {
+                                        extUser.setOfficialPhoto(newPhoto);
+                                    }
+                                    if (officialPhotoUpload != null) {
+                                        officialPhotoUpload.setValue(newPhoto);
+                                    }
+                                    refreshProfileLabels();
+                                }),
+                        new BaseAction("overwriteAllAction")
+                                .withCaption(getMessage("msgPhotoOverwriteAll"))
+                                .withHandler(e -> {
+                                    if (userAvatarManagementService != null) {
+                                        userAvatarManagementService.applyAdminOfficialPhoto(extUser, newPhoto, AvatarApplyMode.OVERWRITE_ALL);
+                                    } else {
+                                        extUser.setOfficialPhoto(newPhoto);
+                                        extUser.setUserAvatar(newPhoto);
+                                    }
+                                    if (officialPhotoUpload != null) {
+                                        officialPhotoUpload.setValue(newPhoto);
+                                    }
+                                    refreshProfileLabels();
+                                }),
+                        new BaseAction("cancelAction")
+                                .withCaption(getMessage("msgCancel"))
+                                .withHandler(e -> {
+                                    if (userAvatarManagementService != null) {
+                                        userAvatarManagementService.cleanupUnreferencedFile(newPhoto, extUser.getOfficialPhoto(), extUser.getUserAvatar());
+                                    }
+                                    if (officialPhotoUpload != null) {
+                                        officialPhotoUpload.setValue(extUser.getOfficialPhoto());
+                                    }
+                                })
+                )
+                .show();
     }
 
     /**
@@ -177,11 +300,24 @@ public class ExtUserEditor extends UserEditor {
                 log.info("Telegram profile photo successfully saved: FileDescriptor ID={}, name='{}', size={} bytes",
                         photoFd.getId(), photoFd.getName(), photoFd.getSize());
 
-                extUser.setOfficialPhoto(photoFd);
-                extUser.setUserAvatar(photoFd);
+                FileDescriptor personalAvatar = extUser.getUserAvatar();
+                boolean hasPersonalAvatar = personalAvatar != null && FileDescriptorImageHelper.fileExists(fileLoader, personalAvatar);
 
-                refreshProfileLabels();
-                showNotification(getMessage("msgTelegramPhotoSuccess"), NotificationType.HUMANIZED);
+                if (hasPersonalAvatar) {
+                    showAdminPhotoChoiceDialog(extUser, photoFd, personalAvatar);
+                } else {
+                    if (userAvatarManagementService != null) {
+                        userAvatarManagementService.applyAdminOfficialPhoto(extUser, photoFd, AvatarApplyMode.SMART_DEFAULT);
+                    } else {
+                        extUser.setOfficialPhoto(photoFd);
+                        extUser.setUserAvatar(photoFd);
+                    }
+                    if (officialPhotoUpload != null) {
+                        officialPhotoUpload.setValue(photoFd);
+                    }
+                    refreshProfileLabels();
+                    showNotification(getMessage("msgTelegramPhotoSuccess"), NotificationType.HUMANIZED);
+                }
             } else {
                 log.warn("Telegram photo not found or failed to download for identifier '{}'", telegramIdentifier);
                 showNotification(getMessage("msgTelegramPhotoNotFound"), NotificationType.WARNING);
