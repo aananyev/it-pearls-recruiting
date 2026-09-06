@@ -27,6 +27,8 @@ public final class AiProviderCatalog {
         providerOptions.put("Alibaba Qwen", "qwen");
         providerOptions.put("Moonshot Kimi", "kimi");
         providerOptions.put("Z.AI GLM", "glm");
+        providerOptions.put("OpenRouter", "openrouter");
+        providerOptions.put("B.AI", "bai");
         PROVIDER_OPTIONS = Collections.unmodifiableMap(providerOptions);
 
         LinkedHashMap<String, String> defaultModels = new LinkedHashMap<>();
@@ -40,6 +42,8 @@ public final class AiProviderCatalog {
         defaultModels.put("qwen", "qwen-plus");
         defaultModels.put("kimi", "kimi-k2.5");
         defaultModels.put("glm", "glm-5.1");
+        defaultModels.put("openrouter", "openrouter/openai");
+        defaultModels.put("bai", "bai/chat");
         DEFAULT_MODELS = Collections.unmodifiableMap(defaultModels);
     }
 

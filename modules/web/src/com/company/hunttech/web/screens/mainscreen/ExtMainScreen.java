@@ -99,7 +99,7 @@ public class ExtMainScreen extends MainScreen {
 
     private com.vaadin.ui.Window llmChatLauncherWindow;
 
-    /** Opens the modeless chat panel from the persistent main-screen launcher. */
+    /** Opens the compact modal chat panel from the persistent main-screen launcher. */
     public void openLlmChat() {
         screens.create(LlmChatScreen.class).show();
     }
@@ -135,8 +135,8 @@ public class ExtMainScreen extends MainScreen {
         llmChatLauncherWindow.setResizable(false);
         llmChatLauncherWindow.setDraggable(false);
         llmChatLauncherWindow.setModal(false);
-        llmChatLauncherWindow.setWidth(52, com.vaadin.server.Sizeable.Unit.PIXELS);
-        llmChatLauncherWindow.setHeight(52, com.vaadin.server.Sizeable.Unit.PIXELS);
+        llmChatLauncherWindow.setWidth(48, com.vaadin.server.Sizeable.Unit.PIXELS);
+        llmChatLauncherWindow.setHeight(48, com.vaadin.server.Sizeable.Unit.PIXELS);
         llmChatLauncherWindow.setContent(launcher);
 
         UI.getCurrent().addWindow(llmChatLauncherWindow);

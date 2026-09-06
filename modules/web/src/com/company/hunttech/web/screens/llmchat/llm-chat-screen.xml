@@ -4,7 +4,7 @@
         focusComponent="inputArea"
         messagesPack="com.company.hunttech.web.screens.llmchat">
     <!-- Compact floating panel; output is incrementally received through the middleware snapshot. -->
-    <dialogMode width="420" height="640" modal="false" resizable="true" closeable="true"/>
+    <dialogMode width="420px" height="560px" modal="true" resizable="true" closeable="true"/>
     <facets>
         <!-- Recovery polling if Vaadin push is temporarily unavailable. -->
         <timer id="streamPollTimer" delay="3000" autostart="false" repeating="true"/>
