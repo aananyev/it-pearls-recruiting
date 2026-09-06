@@ -4,28 +4,33 @@
 Проект: HRM HuntTech (CUBA 7.3). Канон: навык `chatgpt-hermes-coordination`,
 секция .cursorrules «РАБОТА АГЕНТОВ (GIT-ПРОТОКОЛ)».
 
-## Роли (по умолчанию)
+## Роли и рабочие каталоги (Строгая изоляция)
 
-| Агент | Роль | Что делает |
-|---|---|---|
-| Hermes-1 | CI/CD (единственный девопс) | проверка PR, merge, deploy, restart, миграции, отчёты `.ai/reports/`, pr-watcher |
-| Hermes-2 | разработчик | фичи, ветки `agent/*`, PR; своя сессия Hermes |
-| Antigravity | разработчик | второй поток фич; **Antigravity IDE** (agentic IDE Google), лаунчер `~/bin/antigravity-ide` (форвардер 18080→209.46.2.183); ветки `agent/*`, PR |
+| Агент | Рабочая директория | Ветка / Режим | Допустимые операции |
+|---|---|---|---|
+| **Hermes-1** | `/Users/alekseyananyev/StudioProjects/hunttech_recruiting` | `master` | CI/CD, review, git pull origin master, merge PR, `scripts/start-app.sh`, deploy master, миграции БД. **Категорически запрещено писать фичи.** |
+| **Hermes-2** | `/Users/alekseyananyev/StudioProjects/hrm-hermes2` | `agent/hermes2-*` | Разработка (поток 1), PR в master; своя сессия Hermes. |
+| **Antigravity** | `/Users/alekseyananyev/StudioProjects/hrm-antigravity` | `agent/antigravity-dev` | Разработка (поток 2), эксклюзивные экранные формы, PR в master. |
+| **ChatGPT** | `/Users/alekseyananyev/StudioProjects/chatgpt` | песочница | Исследования, прототипы, архитектурный анализ (без прямого пуша в master). |
 
-Роли меняются только пользователем. Если какой-то агент не работает —
-его роль переходит к другому по согласованию.
+Роли меняются только пользователем. Ни один агент не заходит в рабочий каталог другого агента.
 
-## Защита CompanyEdit (обязательно для Hermes-1)
+## Защита CompanyEdit и CompanyReestrEdit (эксклюзивно для Antigravity)
 
-Hermes-1 выполняет для `CompanyEdit` только проверку PR, merge и CI/CD.
+Hermes-1 выполняет для `CompanyEdit` и `CompanyReestrEdit` только проверку PR, merge и CI/CD.
 При конфликте или дефекте он не заменяет XML, SCSS либо тесты файлами из
 старой ветки, коммита или worktree и не удаляет контрактные тесты формы.
 Если merge меняет любой из файлов ниже вне явно одобренного PR, Hermes-1
 останавливает merge/deploy, сохраняет рабочее дерево и запрашивает UI-review:
 
 - `modules/web/src/com/company/hunttech/web/screens/company/company-edit.xml`;
+- `modules/web/src/com/company/hunttech/web/screens/company/company-reestr-edit.xml`;
+- `modules/web/src/com/company/hunttech/web/screens/company/CompanyEdit.java`;
+- `modules/web/src/com/company/hunttech/web/screens/company/CompanyReestrEdit.java`;
 - `modules/web/themes/*/com.company.hunttech/company-editor.scss`;
-- `modules/core/test/com/company/hunttech/core/CompanyEdit*LayoutContractTest.java`.
+- `modules/core/test/com/company/hunttech/core/CompanyEdit*LayoutContractTest.java`;
+- `modules/core/test/com/company/hunttech/core/CompanyReestrEdit*LayoutContractTest.java`.
+
 
 Перед deploy Hermes-1 обязан проверить итоговый diff относительно свежего
 `origin/master` и выполнить профильные контрактные тесты CompanyEdit.

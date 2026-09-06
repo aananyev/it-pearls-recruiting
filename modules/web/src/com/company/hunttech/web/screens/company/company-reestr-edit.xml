@@ -5,7 +5,7 @@
      label-навигация «Разделы») и адаптивный workspace (toolbar + tabSheet +
      адаптивные аккордеон-секции + footer-действия). -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
-        caption="msg://editorCaption"
+        caption="msg://companyReestrEditorCaption"
         focusComponent="comanyNameField"
         messagesPack="com.company.hunttech.web.screens.company"
         icon="BUILDING">
@@ -235,12 +235,18 @@
                     <vbox id="companyEditorToolbarTitleBox"
                           width="100%"
                           spacing="false">
-                        <label id="companyEditorToolbarTitle"
-                               stylename="edit-toolbar-title"
-                               value="msg://browseCaption"/>
+                        <hbox spacing="true" align="MIDDLE_LEFT">
+                            <label id="companyEditorToolbarTitle"
+                                   stylename="edit-toolbar-title"
+                                   value="msg://companyReestrToolbarTitle"/>
+                            <label id="companyEditorBadge"
+                                   stylename="candidate-status-chip status-active"
+                                   value="msg://companyReestrCaption"
+                                   align="MIDDLE_LEFT"/>
+                        </hbox>
                         <label id="companyEditorToolbarDescription"
                                stylename="edit-toolbar-description"
-                               value="msg://msgCompanyToolbarDescription"/>
+                               value="msg://companyReestrToolbarDescription"/>
                     </vbox>
                     <button id="smartFillCompanyBtn"
                             caption="msg://msgSmartCompanyFill"

@@ -42,8 +42,18 @@ order by e.comanyName]]>
                       hierarchyColumn="companyGroup"
                       dataContainer="companiesDc">
             <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
+                <action id="create" type="create">
+                    <properties>
+                        <property name="screenClass" value="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
+                        <property name="openMode" value="DIALOG"/>
+                    </properties>
+                </action>
+                <action id="edit" type="edit">
+                    <properties>
+                        <property name="screenClass" value="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
+                        <property name="openMode" value="DIALOG"/>
+                    </properties>
+                </action>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>

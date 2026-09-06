@@ -91,9 +91,9 @@
 Правая часть проектируется с адаптивной сеткой полей, предотвращающей переполнение и появление горизонтального скролла на экранах от 1280px до 4K.
 
 ### 4.1 Тулбар (Toolbar)
-- Заголовок: `companyEditorToolbarTitle` (`msg://browseCaption`).
-- Описание: `companyEditorToolbarDescription` (`msg://msgCompanyToolbarDescription`).
-- Кнопка быстрого вызова мастера: `smartFillCompanyBtn` («Умное заполнение реквизитов», icon MAGIC), открывающая `SmartCompanyRequisitesUploadScreen`.
+- Заголовок: `companyEditorToolbarTitle` (`msg://companyReestrToolbarTitle` — «Реестр компаний») и статус-бейдж `companyEditorBadge` (`msg://companyReestrCaption` — «Реестр компаний»).
+- Описание: `companyEditorToolbarDescription` (`msg://companyReestrToolbarDescription` — «Карточка компании из Реестра компаний: реквизиты, адрес, описание и подразделения»).
+- Кнопка быстрого вызова мастера: `smartFillCompanyBtn` («Умное автозаполнение», icon MAGIC), открывающая `SmartCompanyRequisitesUploadScreen`.
 
 ### 4.2 Вкладка 1: «Информация о компании» (`tabConpanyDetails`)
 - Обязательный атрибут: `margin="false"`.

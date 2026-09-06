@@ -173,9 +173,9 @@ public class CompanyReestrEdit extends StandardEditor<Company> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         getWindow().addStyleName("company-reestr-edit-screen");
-        if (log.isDebugEnabled()) {
-            log.debug("CompanyReestrEdit opened: {}", getEditedEntity() != null ? getEditedEntity().getId() : null);
-        }
+        log.info("CompanyReestrEdit opened: entityId={}, entityName={}",
+                getEditedEntity() != null ? getEditedEntity().getId() : null,
+                getEditedEntity() != null ? getEditedEntity().getComanyName() : null);
         updateSidebarTitle();
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setOurClient(false);
@@ -540,7 +540,7 @@ public class CompanyReestrEdit extends StandardEditor<Company> {
             if (name != null && !name.trim().isEmpty()) {
                 companySidebarTitle.setValue(name);
             } else {
-                companySidebarTitle.setValue(messages.getMessage(getClass(), "browseCaption"));
+                companySidebarTitle.setValue(messages.getMessage(getClass(), "companyReestrCaption"));
             }
         }
     }
