@@ -161,8 +161,20 @@
                                 dataContainer="companiesDc"
                                 stylename="borderless grid candidate-browse-grid">
                         <actions>
-                            <action id="create" type="create" screenClass="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
-                            <action id="edit" type="edit" screenClass="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
+                            <action id="create" type="create">
+                                <properties>
+                                    <property name="screenClass" value="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
+                                    <property name="screenId" value="hunttech_CompanyReestr.edit"/>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
+                            </action>
+                            <action id="edit" type="edit">
+                                <properties>
+                                    <property name="screenClass" value="com.company.hunttech.web.screens.company.CompanyReestrEdit"/>
+                                    <property name="screenId" value="hunttech_CompanyReestr.edit"/>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
+                            </action>
                             <action id="remove" type="remove"/>
                             <action id="excel" type="excel"/>
                             <action id="refresh" type="refresh"/>

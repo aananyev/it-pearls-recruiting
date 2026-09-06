@@ -12,6 +12,8 @@ import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.actions.list.CreateAction;
+import com.haulmont.cuba.gui.actions.list.EditAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -105,6 +107,7 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
     @Subscribe
     public void onInit(InitEvent event) {
         setupTableColumns();
+        setupTableActions();
         setupTableSelection();
         setupFilterActions();
         setupSidebarButtons();
@@ -113,6 +116,21 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
         detailTitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
         detailSubtitle.setAlignment(Component.Alignment.MIDDLE_CENTER);
         detailLocation.setAlignment(Component.Alignment.MIDDLE_CENTER);
+    }
+
+    private void setupTableActions() {
+        Action editAction = companiesTable.getAction("edit");
+        if (editAction instanceof EditAction) {
+            ((EditAction<Company>) editAction).setScreenClass(CompanyReestrEdit.class);
+            ((EditAction<Company>) editAction).setScreenId("hunttech_CompanyReestr.edit");
+            ((EditAction<Company>) editAction).setOpenMode(OpenMode.DIALOG);
+        }
+        Action createAction = companiesTable.getAction("create");
+        if (createAction instanceof CreateAction) {
+            ((CreateAction<Company>) createAction).setScreenClass(CompanyReestrEdit.class);
+            ((CreateAction<Company>) createAction).setScreenId("hunttech_CompanyReestr.edit");
+            ((CreateAction<Company>) createAction).setOpenMode(OpenMode.DIALOG);
+        }
     }
 
     private void setupTableColumns() {

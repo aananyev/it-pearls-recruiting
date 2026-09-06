@@ -51,6 +51,7 @@ import java.util.Set;
 @UiController("hunttech_CompanyReestr.edit")
 @UiDescriptor("company-reestr-edit.xml")
 @EditedEntityContainer("companyDc")
+@PrimaryEditorScreen(Company.class)
 @LoadDataBeforeShow
 public class CompanyReestrEdit extends StandardEditor<Company> {
     private static final Logger log = LoggerFactory.getLogger(CompanyReestrEdit.class);

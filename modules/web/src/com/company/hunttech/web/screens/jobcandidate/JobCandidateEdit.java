@@ -9,6 +9,7 @@ import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.web.StandartPrioritySkills;
 import com.company.hunttech.web.StandartRoles;
 import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
+import com.company.hunttech.web.screens.company.CompanyReestrEdit;
 import com.company.hunttech.web.screens.fragments.SkillLabelData;
 import com.company.hunttech.web.screens.fragments.Skillsbar;
 import com.company.hunttech.web.screens.jobcandidate.HistoryRowData;
@@ -2000,7 +2001,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         try {
             Screen companyEdit = screenBuilders.editor(Company.class, this)
                     .newEntity()
-                    .withScreenId("hunttech_Company.edit")
+                    .withScreenClass(CompanyReestrEdit.class)
                     .withOpenMode(OpenMode.DIALOG)
                     .withTransformation(this::mergeCreatedCompany)
                     .withField(currentCompanyField)
