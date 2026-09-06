@@ -93,6 +93,13 @@ public final class FileDescriptorImageHelper {
 
     public static void setUserProfilePhoto(Image image, FileLoader fileLoader, ExtUser user) {
         FileDescriptor photo = user != null ? user.resolveProfilePhoto() : null;
+        if (photo != null && !fileExists(fileLoader, photo) && user != null) {
+            if (user.getOfficialPhoto() != null && fileExists(fileLoader, user.getOfficialPhoto())) {
+                photo = user.getOfficialPhoto();
+            } else if (user.getFileImageFace() != null && fileExists(fileLoader, user.getFileImageFace())) {
+                photo = user.getFileImageFace();
+            }
+        }
         setImageSource(image, fileLoader, photo, StdPictures.NO_CANDIDATE.getId());
     }
 
