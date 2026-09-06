@@ -178,8 +178,8 @@ public class CompanyReestrEditLayoutContractTest {
         String browseXml = readProjectFile("modules/web/src/com/company/hunttech/web/screens/company/company-reestr-browse.xml");
         assertTrue("действия create в browse XML должны содержать property screenClass",
                 browseXml.contains("<property name=\"screenClass\" value=\"com.company.hunttech.web.screens.company.CompanyReestrEdit\"/>"));
-        assertTrue("действия create/edit в browse XML должны содержать property screenId",
-                browseXml.contains("<property name=\"screenId\" value=\"hunttech_CompanyReestr.edit\"/>"));
+        assertFalse("действия create/edit в browse XML не должны содержать property screenId во избежание ошибки EditorClassBuilder does not support screenId",
+                browseXml.contains("<property name=\"screenId\""));
 
         String browseJavaCode = readProjectFile("modules/web/src/com/company/hunttech/web/screens/company/CompanyReestrBrowse.java");
         assertTrue("browse-контроллер обязан вызывать setupTableActions",
@@ -188,6 +188,8 @@ public class CompanyReestrEditLayoutContractTest {
                 browseJavaCode.contains("((EditAction<Company>) editAction).setScreenClass(CompanyReestrEdit.class);"));
         assertTrue("browse-контроллер обязан настраивать CreateAction со screenClass CompanyReestrEdit",
                 browseJavaCode.contains("((CreateAction<Company>) createAction).setScreenClass(CompanyReestrEdit.class);"));
+        assertFalse("browse-контроллер не должен вызывать setScreenId во избежание конфликта с EditorClassBuilder",
+                browseJavaCode.contains("setScreenId"));
     }
 
     private static String readProjectFile(String relativePath) throws IOException {
