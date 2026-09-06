@@ -99,6 +99,8 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 
 Проверка выполнена командой `./gradlew :app-core:test --tests com.company.hunttech.core.LlmChatSecurityContractTest --tests com.company.hunttech.core.LlmChatFoundationContractTest --tests com.company.hunttech.service.AiExecutionServiceBeanTest :app-core:compileJava :app-web:compileJava --no-daemon --console=plain`; результат: `BUILD SUCCESSFUL`.
 
+2026-09-06 на `HEAD c3ca2ff` этот набор запущен с `:app-core:cleanTest`, поэтому filter не мог опереться на устаревший результат; снова получен `BUILD SUCCESSFUL`. Дополнительно проверены синтаксис клиентского drag-скрипта, компиляция web-модуля и сборка тем. Это подтверждает локальный implementation slice overlay launcher, но не меняет verdict `REWORK` до authenticated staging evidence.
+
 ## Что делать на следующем этапе
 
 Сначала закрыть замечания аналитика по этапу 4, затем перейти к authenticated staging gate этапа 5:

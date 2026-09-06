@@ -56,6 +56,7 @@
 - Собственная копия Tomcat на 8081 запускалась только локально и остановлена. Оставить её параллельно нельзя безопасно без изоляции DB-owned Telegram-настройки: при `telegram_bot_start=true` она конфликтует с уже работающим ботом (`409`). Общий экземпляр 8080 не перенастраивался намеренно.
 - В UI shell 8080 ранее открывалась форма входа, но финальная проверка после reload получила `ERR_CONNECTION_REFUSED`; authenticated chat flow не подтвержден. Проверка 20–50 UI-сессий пользователем отменена.
 - Локальный targeted-прогон на текущем `HEAD` успешен, но authenticated staging, WebSocket через proxy, recovery polling и provider sandbox по-прежнему не проверены из-за отсутствия staging-входных данных.
+- 2026-09-06 на `HEAD c3ca2ff` принудительно повторены `LlmChatSecurityContractTest`, `LlmChatFoundationContractTest` и `AiExecutionServiceBeanTest`, а также компиляция `app-core`/`app-web`: `BUILD SUCCESSFUL`. В срез включён отдельный draggable launcher вне компоновки MainScreen; локальный прогон не заменяет authenticated staging evidence.
 
 ## Следующий этап
 
