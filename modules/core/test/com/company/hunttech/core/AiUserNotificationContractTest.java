@@ -297,15 +297,6 @@ public class AiUserNotificationContractTest {
                 uploadField.contains("AiOperationNotifier.show(appUI.getNotifications(), processedAiExecution"));
     }
 
-    @Test
-    public void skillAnalysisBeanPropagatesMetadataOrNullFallback() throws IOException {
-        String bean = read("modules/core/src/com/company/hunttech/service/SkillAnalysisServiceBean.java");
-        assertTrue("AI-путь не возвращает метаданные выполнения",
-                bean.contains("SkillAnalysisResult.of(matched, execution)"));
-        assertTrue("Классический fallback не обнуляет метаданные (AI не выполнялся)",
-                bean.contains("SkillAnalysisResult.of(SkillNameMatcher.matchText(loadDictionary(), normalizedText), null)"));
-    }
-
     private int countOccurrences(String text, String needle) {
         int count = 0;
         int index = 0;

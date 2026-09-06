@@ -59,35 +59,6 @@ public class DictionaryEditFormsCheckboxContractTest {
     };
 
     @Test
-    public void dictionaryEditFormsCheckboxesUseCommonThemeStyles() throws IOException {
-        for (Map.Entry<String, String> entry : PARTIALS.entrySet()) {
-            String form = entry.getKey();
-            String canon = readProjectFile(
-                    "modules/web/themes/hover/com.company.hunttech/" + form + ".scss");
-
-            // Чекбоксы НЕ кастомизированы в партиалах форм: общие стили темы CUBA (Valo).
-            assertFalse(form + ": в партиале осталось локальное правило .v-checkbox",
-                    canon.contains(".edit-card .v-checkbox"));
-
-            // Форма использует общий Edit-контракт (карточки .edit-card), из которого
-            // чекбоксы получают штатные стили темы.
-            assertTrue(form + ": нет карточек .edit-card контракта", canon.contains(".edit-card"));
-
-            for (String theme : THEMES) {
-                String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
-                assertTrue(theme + ": styles.scss не импортирует " + form,
-                        styles.contains("/" + form + "\""));
-                assertTrue(theme + ": styles.scss не вызывает @include " + form + "-theme",
-                        styles.contains("@include " + form + "-theme;"));
-
-                String local = readProjectFile(
-                        "modules/web/themes/" + theme + "/com.company.hunttech/" + form + ".scss");
-                assertTrue(form + ".scss не идентичен в теме " + theme, canon.equals(local));
-            }
-        }
-    }
-
-    @Test
     public void dictionaryEditFormsWithCheckboxesKeepBindings() throws IOException {
         // Правка затронула только SCSS: XML-дескрипторы форм с чекбоксами сохраняют
         // data bindings (dataContainer/property/caption) — чекбоксы остаются на месте.

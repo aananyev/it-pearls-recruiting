@@ -7,6 +7,7 @@ import com.company.hunttech.service.SmartOpenPositionIngestService;
 import com.company.hunttech.service.SmartOpenPositionParsedData;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileStorageException;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
@@ -24,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 @UiController("hunttech_SmartOpenPositionUploadScreen")
@@ -101,6 +103,8 @@ public class SmartOpenPositionUploadScreen extends Screen {
     private UserSession userSession;
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
+    @Inject
+    private Dialogs dialogs;
 
     private SmartOpenPositionParsedData currentParsedData;
     private OpenPosition existingDuplicatePosition;
@@ -439,6 +443,64 @@ public class SmartOpenPositionUploadScreen extends Screen {
             log.warn("[SMART_VACANCY_OPENING_UI] onSaveNewPositionClick вызван при currentParsedData == null");
             return;
         }
+
+        // 1. Проверка на дубликат: если дубликат обнаружен, запрашиваем явное подтверждение
+        if (existingDuplicatePosition != null) {
+            log.warn("[SMART_VACANCY_OPENING_UI] Попытка создания вакансии при наличии существующего дубликата: ID={}, name='{}'",
+                    existingDuplicatePosition.getVacansyID(), existingDuplicatePosition.getVacansyName());
+            dialogs.createOptionDialog()
+                    .withCaption("Обнаружен дубликат вакансии")
+                    .withMessage("В базе уже существует открытая вакансия с похожим наименованием:\n«" +
+                            existingDuplicatePosition.getVacansyName() + "» (ID: " +
+                            (existingDuplicatePosition.getVacansyID() != null ? existingDuplicatePosition.getVacansyID() : "") +
+                            ").\n\nВы действительно хотите создать новую вакансию-дубликат?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES).withHandler(e -> checkMissingFieldsAndProceed()),
+                            new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
+                    )
+                    .show();
+            return;
+        }
+
+        checkMissingFieldsAndProceed();
+    }
+
+    private void checkMissingFieldsAndProceed() {
+        // 2. Проверка нехватки ключевых данных: если не указан проект, город или зарплатная вилка
+        List<String> missing = new ArrayList<>();
+        if (currentParsedData.getProjectName() == null || currentParsedData.getProjectName().trim().isEmpty()) {
+            missing.add("Проект (вакансия будет привязана к проекту по умолчанию)");
+        }
+        if (currentParsedData.getCityName() == null || currentParsedData.getCityName().trim().isEmpty()) {
+            missing.add("Город/локация не указаны");
+        }
+        if (currentParsedData.getSalaryMin() == null && currentParsedData.getSalaryMax() == null) {
+            missing.add("Зарплатная вилка не указана");
+        }
+
+        if (!missing.isEmpty()) {
+            log.info("[SMART_VACANCY_OPENING_UI] Обнаружена нехватка данных перед сохранением: {}", missing);
+            StringBuilder sb = new StringBuilder("В описании вакансии не указаны следующие данные:\n");
+            for (String item : missing) {
+                sb.append("• ").append(item).append("\n");
+            }
+            sb.append("\nСоздать черновик вакансии с текущими данными?");
+
+            dialogs.createOptionDialog()
+                    .withCaption("Неполные данные вакансии")
+                    .withMessage(sb.toString())
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES).withHandler(e -> doCreatePosition()),
+                            new DialogAction(DialogAction.Type.NO)
+                    )
+                    .show();
+            return;
+        }
+
+        doCreatePosition();
+    }
+
+    private void doCreatePosition() {
         ExtUser currentUser = (ExtUser) userSession.getCurrentOrSubstitutedUser();
         log.info("[SMART_VACANCY_OPENING_UI] Нажата кнопка 'Открыть позицию'. Текущий пользователь: '{}', Вакансия: '{}'",
                 currentUser != null ? currentUser.getLogin() : "null", currentParsedData.getVacansyName());
@@ -450,7 +512,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
             log.info("[SMART_VACANCY_OPENING_UI] ✓ Вакансия успешно открыта! ID={}, Сообщение: '{}'",
                     createdPosition != null ? createdPosition.getId() : "null", result.getMessage());
             notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Вакансия открыта")
+                    .withCaption("Черновик создан")
                     .withDescription(result.getMessage())
                     .show();
             close(StandardOutcome.COMMIT);

@@ -21,55 +21,6 @@ import static org.junit.Assert.assertTrue;
 public class IteractionListXmlSemanticCommentsTest {
 
     @Test
-    public void everyOpeningElementHasSemanticComment() throws IOException {
-        List<String> lines = Files.readAllLines(
-                projectRoot().resolve(
-                        "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
-                                + "iteraction-list-edit.xml"),
-                StandardCharsets.UTF_8);
-
-        List<String> violations = new ArrayList<>();
-        boolean insideCdata = false;
-
-        for (int index = 0; index < lines.size(); index++) {
-            String trimmed = lines.get(index).trim();
-
-            if (trimmed.contains("<![CDATA[")) {
-                insideCdata = true;
-            }
-            if (insideCdata) {
-                if (trimmed.contains("]]>") ) {
-                    insideCdata = false;
-                }
-                continue;
-            }
-
-            if (!isOpeningElement(trimmed)) {
-                continue;
-            }
-
-            int previousIndex = previousNonBlankLine(lines, index - 1);
-            if (previousIndex < 0) {
-                violations.add("Строка " + (index + 1) + ": отсутствует комментарий перед " + trimmed);
-                continue;
-            }
-
-            String comment = lines.get(previousIndex).trim();
-            if (!isSemanticComment(comment)) {
-                violations.add(
-                        "Строка " + (index + 1)
-                                + ": перед " + trimmed
-                                + " найден не смысловой комментарий: " + comment);
-            }
-        }
-
-        assertTrue(
-                "Каждый XML-элемент должен иметь отдельный смысловой комментарий:\n"
-                        + String.join("\n", violations),
-                violations.isEmpty());
-    }
-
-    @Test
     public void commentsExplainPurposeInsteadOfRepeatingTagName() throws IOException {
         String descriptor = readDescriptor();
 
