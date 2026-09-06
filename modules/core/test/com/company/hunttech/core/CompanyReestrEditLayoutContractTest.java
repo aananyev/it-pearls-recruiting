@@ -169,6 +169,27 @@ public class CompanyReestrEditLayoutContractTest {
                 javaCode.contains("loadDepartments()"));
     }
 
+    @Test
+    public void testCompanyReestrBrowseWiringAndPrimaryEditorScreen() throws IOException {
+        String editJavaCode = readProjectFile("modules/web/src/com/company/hunttech/web/screens/company/CompanyReestrEdit.java");
+        assertTrue("CompanyReestrEdit обязан иметь аннотацию @PrimaryEditorScreen(Company.class)",
+                editJavaCode.contains("@PrimaryEditorScreen(Company.class)"));
+
+        String browseXml = readProjectFile("modules/web/src/com/company/hunttech/web/screens/company/company-reestr-browse.xml");
+        assertTrue("действия create в browse XML должны содержать property screenClass",
+                browseXml.contains("<property name=\"screenClass\" value=\"com.company.hunttech.web.screens.company.CompanyReestrEdit\"/>"));
+        assertTrue("действия create/edit в browse XML должны содержать property screenId",
+                browseXml.contains("<property name=\"screenId\" value=\"hunttech_CompanyReestr.edit\"/>"));
+
+        String browseJavaCode = readProjectFile("modules/web/src/com/company/hunttech/web/screens/company/CompanyReestrBrowse.java");
+        assertTrue("browse-контроллер обязан вызывать setupTableActions",
+                browseJavaCode.contains("setupTableActions();"));
+        assertTrue("browse-контроллер обязан настраивать EditAction со screenClass CompanyReestrEdit",
+                browseJavaCode.contains("((EditAction<Company>) editAction).setScreenClass(CompanyReestrEdit.class);"));
+        assertTrue("browse-контроллер обязан настраивать CreateAction со screenClass CompanyReestrEdit",
+                browseJavaCode.contains("((CreateAction<Company>) createAction).setScreenClass(CompanyReestrEdit.class);"));
+    }
+
     private static String readProjectFile(String relativePath) throws IOException {
         return new String(
                 Files.readAllBytes(projectRoot().resolve(relativePath)),
