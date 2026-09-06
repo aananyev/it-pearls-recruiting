@@ -65,10 +65,10 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 ## Обязательные шаги до release
 
 1. Развернуть approved commit из PR в отдельном staging с выключенным chat feature flag.
-2. Запустить `scripts/verify-llm-chat-staging.sh <staging-app-url> 20` через фактический reverse proxy/балансировщик; зафиксировать asset 200, WebSocket 101 и результат concurrency.
+2. Запустить `scripts/verify-llm-chat-staging.sh <staging-app-url> 8` через фактический reverse proxy/балансировщик; зафиксировать asset 200, WebSocket 101 и результат ограниченного transport smoke.
 3. Выполнить authenticated UI-сценарий: открыть floating chat, отправить сообщение через sandbox/mock provider, проверить push delta, завершение, историю и отсутствие повторного provider call.
 4. Принудительно разорвать push-канал; проверить recovery polling 3 секунды, отсутствие дубля ответа и сохранение owner isolation.
-5. Выполнить 20–50 одновременных UI-сессий, reconnect и проверку sticky-session/affinity и proxy timeouts.
+5. Выполнить ограниченный reconnect/proxy smoke и проверку sticky-session/affinity и proxy timeouts. Массовый прогон 20–50 UI-сессий отменён владельцем.
 6. Проверить сценарии quota: общая квота, индивидуальный override с `effectiveTo`/причиной, нулевая квота, конкурентные запросы, timeout, cancel и `UNKNOWN_PENDING`.
 7. Проверить routing matrix: успешный личный API не расходует admin quota; fallback без consent запрещён; fallback с consent использует только разрешённые provider/model/region.
 8. Выполнить security acceptance: чужая conversation недоступна, admin history доступна только по permission, ключи отсутствуют в UI/log/error/audit, prompt injection не отменяет privacy policy.
@@ -100,6 +100,8 @@ GRADLE_USER_HOME=/private/tmp/hrm-pr230-gradle ./gradlew :app-core:test \\
 Проверка выполнена командой `./gradlew :app-core:test --tests com.company.hunttech.core.LlmChatSecurityContractTest --tests com.company.hunttech.core.LlmChatFoundationContractTest --tests com.company.hunttech.service.AiExecutionServiceBeanTest :app-core:compileJava :app-web:compileJava --no-daemon --console=plain`; результат: `BUILD SUCCESSFUL`.
 
 2026-09-06 на `HEAD c3ca2ff` этот набор запущен с `:app-core:cleanTest`, поэтому filter не мог опереться на устаревший результат; снова получен `BUILD SUCCESSFUL`. Дополнительно проверены синтаксис клиентского drag-скрипта, компиляция web-модуля и сборка тем. Это подтверждает локальный implementation slice overlay launcher, но не меняет verdict `REWORK` до authenticated staging evidence.
+
+2026-09-06 на актуальном кандидате повторены `LlmChatSecurityContractTest` (4), `LlmChatFoundationContractTest` (19) и `AiExecutionServiceBeanTest` (16) с `:app-core:cleanTest`: `BUILD SUCCESSFUL`, failures/errors отсутствуют. Также собраны web JAR с `LlmChatLauncherExtension`/`llm-chat-launcher.js` и client JAR с `AppWidgetSet.nocache.js`. Это не закрывает staging и runtime security gates.
 
 ## Что делать на следующем этапе
 

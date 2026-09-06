@@ -1,13 +1,13 @@
 # Текущий статус плавающего LLM-чата HRM HuntTech
 
-Дата: 2026-09-05
+Дата: 2026-09-06
 
 Это компактный источник текущего состояния. Подробные отчёты оставлены как evidence и не являются отдельным планом работ.
 
 ## Контекст и ограничения
 
 - Репозиторий: `aananyev/it-pearls-recruiting`.
-- PR: [#230](https://github.com/aananyev/it-pearls-recruiting/pull/230), ветка `feat/llm-chat`.
+- PR: [#234](https://github.com/aananyev/it-pearls-recruiting/pull/234), ветка `feat/llm-chat`.
 - Production не затрагивается; любые production-действия требуют отдельного распоряжения.
 - Именование субагентов в коммуникации и отчетах строго по должностям; технические nicknames платформы не используются как имена.
 - Кандидатские/CV-данные чат не извлекает; PII-маскирование пользовательских вставок — TODO по распоряжению пользователя.
@@ -57,6 +57,7 @@
 - В UI shell 8080 ранее открывалась форма входа, но финальная проверка после reload получила `ERR_CONNECTION_REFUSED`; authenticated chat flow не подтвержден. Проверка 20–50 UI-сессий пользователем отменена.
 - Локальный targeted-прогон на текущем `HEAD` успешен, но authenticated staging, WebSocket через proxy, recovery polling и provider sandbox по-прежнему не проверены из-за отсутствия staging-входных данных.
 - 2026-09-06 на `HEAD c3ca2ff` принудительно повторены `LlmChatSecurityContractTest`, `LlmChatFoundationContractTest` и `AiExecutionServiceBeanTest`, а также компиляция `app-core`/`app-web`: `BUILD SUCCESSFUL`. В срез включён отдельный draggable launcher вне компоновки MainScreen; локальный прогон не заменяет authenticated staging evidence.
+- 2026-09-06 повторно собран текущий кандидат: `LlmChatSecurityContractTest` (4), `LlmChatFoundationContractTest` (19) и `AiExecutionServiceBeanTest` (16) прошли без failures/errors; JAR web содержит launcher, а client JAR — `AppWidgetSet.nocache.js`. Это локальное evidence, не staging acceptance.
 
 ## Следующий этап
 
