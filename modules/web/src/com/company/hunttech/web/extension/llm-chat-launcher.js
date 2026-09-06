@@ -12,7 +12,7 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                 return;
             }
 
-            var threshold = 8;
+            var threshold = 6;
             var margin = 24;
             var dragging = false;
             var moved = false;
