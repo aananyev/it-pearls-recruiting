@@ -20,32 +20,34 @@ import static org.junit.Assert.assertNotNull;
 public class AIProviderCatalogTest {
 
     @Test
-    public void globalCatalogMatchesCoreProviders() {
-        List<AbstractOpenAiCompatibleProvider> providers = Arrays.asList(
-                new YandexGptProvider(),
-                new GigaChatProvider(),
-                new OpenAiProvider(),
-                new AnthropicProvider(),
-                new GeminiProvider(),
-                new GrokProvider(),
-                new DeepSeekProvider(),
-                new QwenProvider(),
-                new KimiProvider(),
-                new GlmProvider());
+        public void globalCatalogMatchesCoreProviders() {
+            List<AbstractOpenAiCompatibleProvider> providers = Arrays.asList(
+                    new YandexGptProvider(),
+                    new GigaChatProvider(),
+                    new OpenAiProvider(),
+                    new AnthropicProvider(),
+                    new GeminiProvider(),
+                    new GrokProvider(),
+                    new DeepSeekProvider(),
+                    new QwenProvider(),
+                    new KimiProvider(),
+                    new GlmProvider(),
+                    new OpenRouterProvider(),
+                    new BAIProvider());
 
-        Map<String, String> modelsByProvider = new LinkedHashMap<>();
-        for (AbstractOpenAiCompatibleProvider provider : providers) {
-            modelsByProvider.put(provider.getProviderCode(), provider.getDefaultModel());
-        }
+            Map<String, String> modelsByProvider = new LinkedHashMap<>();
+            for (AbstractOpenAiCompatibleProvider provider : providers) {
+                modelsByProvider.put(provider.getProviderCode(), provider.getDefaultModel());
+            }
 
-        assertEquals("Каталог должен содержать ровно десять уникальных кодов", 10,
-                modelsByProvider.size());
-        assertEquals(modelsByProvider, AiProviderCatalog.getDefaultModels());
-        assertEquals(modelsByProvider.keySet(),
-                new java.util.LinkedHashSet<>(AiProviderCatalog.getProviderOptions().values()));
-        assertEquals("deepseek-v4-flash", AiProviderCatalog.getDefaultModel("deepseek"));
-        for (Map.Entry<String, String> entry : modelsByProvider.entrySet()) {
-            assertNotNull("Для провайдера " + entry.getKey() + " не задана модель", entry.getValue());
+            assertEquals("Каталог должен содержать ровно двенадцать уникальных кодов", 12,
+                    modelsByProvider.size());
+            assertEquals(modelsByProvider, AiProviderCatalog.getDefaultModels());
+            assertEquals(modelsByProvider.keySet(),
+                    new java.util.LinkedHashSet<>(AiProviderCatalog.getProviderOptions().values()));
+            assertEquals("deepseek-v4-flash", AiProviderCatalog.getDefaultModel("deepseek"));
+            for (Map.Entry<String, String> entry : modelsByProvider.entrySet()) {
+                assertNotNull("Для провайдера " + entry.getKey() + " не задана модель", entry.getValue());
+            }
         }
-    }
 }
