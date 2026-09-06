@@ -8,6 +8,7 @@ import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.PersonelReserve;
 import com.company.hunttech.web.extension.ChangeFaviconExtension;
+import com.company.hunttech.web.extension.LlmChatLauncherExtension;
 import com.company.hunttech.web.screens.llmchat.LlmChatScreen;
 import com.haulmont.cuba.core.app.ConfigStorageService;
 import com.haulmont.cuba.core.config.AppPropertiesLocator;
@@ -29,6 +30,7 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.app.main.MainScreen;
 import com.vaadin.ui.AbstractOrderedLayout;
+import com.vaadin.ui.UI;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
@@ -95,9 +97,51 @@ public class ExtMainScreen extends MainScreen {
     @Inject
     private Screens screens;
 
+    private com.vaadin.ui.Window llmChatLauncherWindow;
+
     /** Opens the modeless chat panel from the persistent main-screen launcher. */
     public void openLlmChat() {
         screens.create(LlmChatScreen.class).show();
+    }
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        createLlmChatLauncher();
+    }
+
+    private void createLlmChatLauncher() {
+        if (llmChatLauncherWindow != null || UI.getCurrent() == null
+                || userSession == null || userSession.getUser() == null) {
+            return;
+        }
+
+        com.vaadin.ui.Button launcher = new com.vaadin.ui.Button();
+        launcher.setId("llmChatLauncher");
+        launcher.setHtmlContentAllowed(true);
+        launcher.setCaption("<span class=\"llm-chat-launcher-icon\" aria-hidden=\"true\">"
+                + "<span class=\"llm-chat-launcher-bubble\">&#xf0e5;</span>"
+                + "<span class=\"llm-chat-launcher-spark\">&#10022;</span></span>"
+                + "<span class=\"llm-chat-launcher-label\">Открыть AI-чат</span>");
+        launcher.setDescription("Открыть AI-чат");
+        launcher.setStyleName("llm-chat-launcher");
+        launcher.setSizeFull();
+        launcher.addClickListener(event -> openLlmChat());
+
+        llmChatLauncherWindow = new com.vaadin.ui.Window();
+        llmChatLauncherWindow.setId("llmChatLauncherWindow");
+        llmChatLauncherWindow.setStyleName("llm-chat-launcher-window");
+        llmChatLauncherWindow.setCaption("");
+        llmChatLauncherWindow.setClosable(false);
+        llmChatLauncherWindow.setResizable(false);
+        llmChatLauncherWindow.setDraggable(false);
+        llmChatLauncherWindow.setModal(false);
+        llmChatLauncherWindow.setWidth(52, com.vaadin.server.Sizeable.Unit.PIXELS);
+        llmChatLauncherWindow.setHeight(52, com.vaadin.server.Sizeable.Unit.PIXELS);
+        llmChatLauncherWindow.setContent(launcher);
+
+        UI.getCurrent().addWindow(llmChatLauncherWindow);
+        new LlmChatLauncherExtension().extend(launcher,
+                "hunttech.llm-chat.launcher." + userSession.getUser().getId());
     }
 
     @Subscribe
