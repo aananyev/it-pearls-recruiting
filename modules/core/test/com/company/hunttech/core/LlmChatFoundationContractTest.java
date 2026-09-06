@@ -89,6 +89,21 @@ public class LlmChatFoundationContractTest {
     }
 
     @Test
+    public void pollingTimerIsDeclaredAsFacetNotLayoutComponent() throws IOException {
+        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/llmchat/llm-chat-screen.xml");
+
+        int facetsStart = descriptor.indexOf("<facets>");
+        int facetsEnd = descriptor.indexOf("</facets>");
+        int layoutStart = descriptor.indexOf("<layout ");
+        assertTrue("Timer must be declared in the screen facets", facetsStart >= 0 && facetsEnd > facetsStart);
+        assertTrue("Timer must be declared before the visual layout", facetsStart < layoutStart);
+        String facets = descriptor.substring(facetsStart, facetsEnd);
+        assertTrue(facets.contains("<timer id=\"streamPollTimer\""));
+        assertFalse("Timer must not be loaded as a visual layout component",
+                descriptor.substring(layoutStart).contains("<timer id=\"streamPollTimer\""));
+    }
+
+    @Test
     public void floatingChatPersistsDialogGeometryAndHasMobileMode() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
         String styles = source("modules/web/themes/hunttech-modern-light/com.company.hunttech/chat-style.css");
