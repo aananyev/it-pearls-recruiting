@@ -172,6 +172,10 @@ public class CompanyReestrEdit extends StandardEditor<Company> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
+        getWindow().addStyleName("company-reestr-edit-screen");
+        if (log.isDebugEnabled()) {
+            log.debug("CompanyReestrEdit opened: {}", getEditedEntity() != null ? getEditedEntity().getId() : null);
+        }
         updateSidebarTitle();
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setOurClient(false);
