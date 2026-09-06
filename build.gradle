@@ -296,7 +296,7 @@ configure(webModule) {
 
     task deploy(dependsOn: [assemble, cleanConf], type: CubaDeployment) {
         appName = webContextName
-        appJars(modulePrefix + '-global', modulePrefix + '-gui', modulePrefix + '-web')
+        appJars(modulePrefix + '-global', modulePrefix + '-gui', modulePrefix + '-web', modulePrefix + '-web-toolkit')
         copy {
             from "images"
             into "$cuba.tomcat.dir/webapps/${webContextName}/VAADIN/images"
