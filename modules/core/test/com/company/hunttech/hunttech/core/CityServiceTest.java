@@ -44,8 +44,9 @@ public class CityServiceTest {
     public void testCreateCity() {
         City city = dataManager.create(City.class);
         String uniqueName = "TestCity-" + UUID.randomUUID();
+        String phoneCode = String.format("%04d", Math.abs(UUID.randomUUID().hashCode() % 10000));
         city.setCityRuName(uniqueName);
-        city.setCityPhoneCode(String.valueOf(UUID.randomUUID().hashCode() & 0xFFFF).substring(0, 4));
+        city.setCityPhoneCode(phoneCode);
 
         City saved = tracker.track(dataManager.commit(city, "city-edit-view"));
 

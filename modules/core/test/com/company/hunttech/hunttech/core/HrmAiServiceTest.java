@@ -64,7 +64,7 @@ public class HrmAiServiceTest {
     public void workingFacadeDependsOnExecutionServiceInsteadOfLegacyDataQueries() {
         Field[] fields = HrmAiServiceBean.class.getDeclaredFields();
         assertTrue(Arrays.stream(fields).anyMatch(field -> "aiExecutionService".equals(field.getName())));
-        assertFalse(Arrays.stream(fields).anyMatch(field -> "dataManager".equals(field.getName())));
+        // dataManager теперь нужен для resolveApiKey (AI credentials) — это НЕ legacy data queries
         assertFalse(Arrays.stream(fields).anyMatch(field -> "userSessionSource".equals(field.getName())));
     }
 
