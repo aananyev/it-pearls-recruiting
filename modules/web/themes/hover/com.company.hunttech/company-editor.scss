@@ -425,7 +425,9 @@
 
     // Гарантированный вертикальный скроллинг содержимого вкладок
     .edit-workspace-scroll,
-    .v-scrollbox.edit-workspace-scroll {
+    .edit-workspace-scroll > .v-scrollable,
+    .v-scrollbox.edit-workspace-scroll,
+    .v-scrollbox.edit-workspace-scroll > .v-scrollable {
       box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
@@ -435,17 +437,16 @@
       scrollbar-width: thin;
     }
 
-    // Вложенный .v-scrollable: без height-форсинга — Vaadin сам выставляет
-    // inline-высоту; !important перебивал замеры и сжимал вкладку до строки
-    // (регрессия сент. 2026, CompanyEditTabLayoutContractTest).
-    .edit-workspace-scroll > .v-scrollable,
-    .v-scrollbox.edit-workspace-scroll > .v-scrollable {
-      box-sizing: border-box !important;
-      width: 100% !important;
-      overflow-x: hidden !important;
-      overflow-y: auto !important;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+    // Внешний контейнер company-editor-content-scroll фиксирует TabSheet на 100% высоты
+    // без прокрутки ярлыков вкладок (прокрутка карточек выполняется внутри каждой вкладки).
+    .v-scrollbox.company-editor-content-scroll {
+      overflow: hidden !important;
+
+      > .v-scrollable {
+        overflow: hidden !important;
+        height: 100% !important;
+        max-height: 100% !important;
+      }
     }
 
     // Вкладочный scrollBox CompanyEdit (companyDetailsScroll и аналоги): высоту
@@ -1183,6 +1184,53 @@
       .company-main-tab-top-checks > .v-slot,
       .company-main-tab-top-checks > .v-expand > .v-slot {
         flex-basis: 220px !important;
+      }
+    }
+
+    // Первая вкладка формы CompanyReestrEdit: компоновка по ширине и высоте с
+    // гарантированным вертикальным скроллингом содержимого при переполнении.
+    .company-details-tab {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+
+      .v-scrollbox {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+
+        > .v-scrollable {
+          box-sizing: border-box !important;
+          width: 100% !important;
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: thin;
+        }
+      }
+
+      .edit-workspace-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: min-content !important;
+        padding: 12px 16px 24px 16px !important;
+      }
+
+      .edit-card,
+      .edit-accordion-section {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 0 16px 0 !important;
       }
     }
 
