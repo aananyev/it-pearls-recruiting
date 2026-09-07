@@ -46,6 +46,7 @@ import java.util.Set;
 @UiDescriptor("company-edit.xml")
 @EditedEntityContainer("companyDc")
 @LoadDataBeforeShow
+@PrimaryEditorScreen(Company.class)
 public class CompanyEdit extends StandardEditor<Company> {
     private static final Logger log = LoggerFactory.getLogger(CompanyEdit.class);
 
