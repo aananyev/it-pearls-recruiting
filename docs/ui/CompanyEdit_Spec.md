@@ -103,12 +103,13 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
   2. identity `edit-sidebar-identity` — живой title `companySidebarTitle` по центру, без подписи типа записи;
   3. навигация `label-navigation` — полоса-заголовок «Разделы» (`label-nav-title company-editor-navigation-title`, inset-линии §4.1) + 3 пункта 27px (`label-nav-item`, активный `#ffb11b`); пункты по высоте контента (`height: auto`, перенос длинной подписи), локальное wrap-правило с принудительной высотой отсутствует (контракт §3.1); на одноблочных вкладках контейнер скрывается (правило 3.6);
   4. spacer `edit-sidebar-spacer` (100%×100%) + hint `edit-sidebar-hint`.
-- **Workspace**: toolbar (`edit-toolbar-title` 20px + `edit-toolbar-description`), tabSheet `edit-tabs` (НЕ framed; общие стили тем), вкладки:
-  - `tabConpanyDetails` — scrollBox `edit-workspace-scroll` → `edit-workspace-content` → карточки `edit-card`+`showAsPanel`: `companyMainCard` («Реквизиты компании», включая телефон, email и веб-сайт) и `companyAddressCard` («Адрес компании»);
-  - `companyDescriptionTab` — карточка `companyDescriptionCard` с двумя RichTextArea;
-  - `tabCompanyDepartament` — карточка `companyDepartmentsCard` с dataGrid `departmentOfCompanyTable` + buttonsPanel.
+- **Workspace**: toolbar (`edit-toolbar-title` 20px + `edit-toolbar-description`), общий scrollBox `companyEditorContentScrollBox`, tabSheet `edit-tabs` (НЕ framed; общие стили тем), 4 вкладки:
+  - `tabConpanyDetails` — scrollBox `company-tab-scroll` → `edit-workspace-content` → карточки `edit-card`+`showAsPanel`: `companyMainCard` («Реквизиты компании», включая телефон, email и веб-сайт) и `companyAddressCard` («Адрес компании»);
+  - `companyRequisitesTab` — scrollBox `company-tab-scroll` → карточка «Официальные реквизиты»;
+  - `companyDescriptionTab` — scrollBox `company-tab-scroll` → карточка `companyDescriptionCard` с двумя RichTextArea;
+  - `tabCompanyDepartament` — scrollBox `company-tab-scroll` → карточка `companyDepartmentsCard` с dataGrid `departmentOfCompanyTable` + buttonsPanel.
   - Строки парных полей внутри workspace сохраняют две колонки при достаточной ширине и переносятся в одну без горизонтального выхода при сужении окна. Sidebar остаётся фиксированной панелью 270px: его размер, состав и компоновка не участвуют в адаптивном правиле.
-  - Вкладка `tabConpanyDetails` использует локальный поток `.company-main-tab`: технические Vaadin `v-expand/v-slot` образуют адаптивные пары полей (основа 260px) и переносятся без выхода за карточку. Это правило не применяется к sidebar и другим вкладкам.
+  - Вкладка `tabConpanyDetails` использует локальный поток `.company-main-tab`: технические Vaadin `v-expand/v-slot` образуют адаптивные пары полей (основа 260px) и переносятся без выхода за карточку. Чекбоксы изолированы от правила `min-width: 280px` селектором `:not(.v-checkbox)`.
 - **Footer** `edit-footer-actions`: expand-спейсер + группа AUTO/MIDDLE_RIGHT (`spacing="true"`) → `company-editor-primary-action` / `company-editor-secondary-action` (40px/14px/600).
 
 Локальный SCSS: `company-editor.scss` в 7 темах (md5-идентичны), подключение `@import` + `@include company-editor-theme` в `styles.scss` каждой темы. Новые msg-ключи: `msgCompanySidebarHint`, `msgCompanyToolbarDescription`, `msgCompanyMainSection`, `msgCompanyAddressSection`, `msgCompanyDescriptionSection`, `msgCompanyDepartmentsSection`, `msgCompanyGroup` (в `screens/company/messages.properties` и `messages_ru.properties`); исправлена опечатка `msgCompanyDetail` (→ «Информация о компании») в главных messages.
@@ -119,6 +120,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-07 | Каноническая фиксация компоновки первой вкладки: исключение чекбоксов из правила min-width: 280px (селектор :not(.v-checkbox)), строгий порядок полей на hbox+box.expandRatio, сохранение каскада companyEditorContentScrollBox + company-tab-scroll. |
 | 2026-09-04 | Убрана лишняя карточка `companyMainContactsCard` из правой части первой вкладки: существующие поля телефона, email и сайта перенесены в `companyMainCard` без изменения id, bindings, actions и состава компонентов. Sidebar и остальные вкладки не изменялись. |
 | 2026-09-02 | Пересобрана визуальная компоновка правой части первой вкладки: технические Vaadin-обёртки полей сведены в единый адаптивный поток только под `.company-main-tab`; карточки и пары полей не выходят за рабочую область. Sidebar, остальные вкладки, bindings и состав input-компонентов не изменялись. |
 | 2026-09-02 | Исправлена адаптивная компоновка правой части: `company-main-tab` больше не наследует высоту полей ввода; внутренние `.v-expand/.v-slot` строк hbox возвращаются в normal flow с переносом. Размер, компоновка и содержимое sidebar не изменялись. |
