@@ -866,23 +866,35 @@
       overflow-x: hidden !important;
     }
 
-    // CDP-фикс: hbox с парой чекбоксов (ourLegalEnityCheckBox + checkBoxOurClient) в
-    // первой карточке — каждый чекбокс получает width:100% от Vaadin и вылезает
-    // вправо на 1020px (2 × 1020 = 2040). Превращаем hbox во flex-контейнер с
-    // равномерным распределением.
+    // Чекбоксы первой вкладки: прижаты влево без растяжения во flex-контейнере
     .edit-workspace-content .company-main-tab-top-checks {
-      box-sizing: border-box !important;
       display: flex !important;
       flex-wrap: wrap !important;
       gap: 8px !important;
       max-width: 100% !important;
+
+      > .v-slot,
+      > .v-expand > .v-slot {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        &:last-child {
+          flex: 1 1 0 !important;
+          width: 100% !important;
+        }
+      }
+
+      .edit-form-control {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+      }
     }
-    .edit-workspace-content .v-horizontallayout > .v-slot > .v-checkbox,
-    .company-main-tab-top-checks > .v-checkbox {
-      box-sizing: border-box !important;
-      flex: 1 1 0 !important;
-      min-width: 0 !important;
-      max-width: 50% !important;
+
+    .company-main-tab .edit-workspace-content .edit-form-control {
+      min-width: 280px;
     }
     /* Адаптивная верстка TabSheet и рабочей области без выхода за правую границу */
     .edit-screen-layout,
