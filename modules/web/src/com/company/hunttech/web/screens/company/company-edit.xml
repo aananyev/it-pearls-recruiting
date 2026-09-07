@@ -341,14 +341,14 @@
                                             <textField id="phoneMainField"
                                                        dataContainer="companyDc"
                                                        property="phone"
-                                                       caption="Телефон"
+                                                       caption="msg://msgPhone"
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="emailMainField"
                                                        dataContainer="companyDc"
                                                        property="email"
-                                                       caption="Email"
+                                                       caption="msg://msgEmail"
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
@@ -357,7 +357,7 @@
                                         <textField id="websiteMainField"
                                                    dataContainer="companyDc"
                                                    property="website"
-                                                   caption="Веб-сайт"
+                                                   caption="msg://msgWebsite"
                                                    stylename="edit-form-control"
                                                    width="100%"/>
                                     </vbox>
