@@ -425,9 +425,7 @@
 
     // Гарантированный вертикальный скроллинг содержимого вкладок
     .edit-workspace-scroll,
-    .edit-workspace-scroll > .v-scrollable,
-    .v-scrollbox.edit-workspace-scroll,
-    .v-scrollbox.edit-workspace-scroll > .v-scrollable {
+    .v-scrollbox.edit-workspace-scroll {
       box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
@@ -437,16 +435,17 @@
       scrollbar-width: thin;
     }
 
-    // Внешний контейнер company-editor-content-scroll фиксирует TabSheet на 100% высоты
-    // без прокрутки ярлыков вкладок (прокрутка карточек выполняется внутри каждой вкладки).
-    .v-scrollbox.company-editor-content-scroll {
-      overflow: hidden !important;
-
-      > .v-scrollable {
-        overflow: hidden !important;
-        height: 100% !important;
-        max-height: 100% !important;
-      }
+    // Вложенный .v-scrollable: без height-форсинга — Vaadin сам выставляет
+    // inline-высоту; !important перебивал замеры и сжимал вкладку до строки
+    // (регрессия сент. 2026, CompanyEditTabLayoutContractTest).
+    .edit-workspace-scroll > .v-scrollable,
+    .v-scrollbox.edit-workspace-scroll > .v-scrollable {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
     }
 
     // Вкладочный scrollBox CompanyEdit (companyDetailsScroll и аналоги): высоту
