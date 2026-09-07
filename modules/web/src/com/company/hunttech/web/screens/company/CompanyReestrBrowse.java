@@ -121,17 +121,39 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
     private void setupTableActions() {
         Action editAction = companiesTable.getAction("edit");
         if (editAction instanceof EditAction) {
-            ((EditAction<Company>) editAction).setScreenClass(CompanyReestrEdit.class);
+            ((EditAction<Company>) editAction).setScreenClass(CompanyEdit.class);
             ((EditAction<Company>) editAction).setOpenMode(OpenMode.DIALOG);
         }
         Action createAction = companiesTable.getAction("create");
         if (createAction instanceof CreateAction) {
-            ((CreateAction<Company>) createAction).setScreenClass(CompanyReestrEdit.class);
+            ((CreateAction<Company>) createAction).setScreenClass(CompanyEdit.class);
             ((CreateAction<Company>) createAction).setOpenMode(OpenMode.DIALOG);
         }
         if (editAction != null) {
             companiesTable.setItemClickAction(editAction);
         }
+    }
+
+    @Subscribe("companiesTable.edit")
+    public void onCompaniesTableEdit(Action.ActionPerformedEvent event) {
+        Company selected = companiesTable.getSingleSelected();
+        if (selected != null) {
+            screenBuilders.editor(companiesTable)
+                    .withScreenClass(CompanyEdit.class)
+                    .editEntity(selected)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .show();
+        }
+    }
+
+    @Subscribe("companiesTable.create")
+    public void onCompaniesTableCreate(Action.ActionPerformedEvent event) {
+        Company newCompany = metadata.create(Company.class);
+        screenBuilders.editor(companiesTable)
+                .withScreenClass(CompanyEdit.class)
+                .newEntity(newCompany)
+                .withOpenMode(OpenMode.DIALOG)
+                .show();
     }
 
     private void setupTableColumns() {
@@ -260,7 +282,7 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
             Company selected = companiesTable.getSingleSelected();
             if (selected != null) {
                 screenBuilders.editor(companiesTable)
-                        .withScreenClass(CompanyReestrEdit.class)
+                        .withScreenClass(CompanyEdit.class)
                         .editEntity(selected)
                         .withOpenMode(OpenMode.DIALOG)
                         .show();

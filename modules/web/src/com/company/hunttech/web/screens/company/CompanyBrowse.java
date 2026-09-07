@@ -96,6 +96,28 @@ public class CompanyBrowse extends StandardLookup<Company> {
 
     private Map<UUID, String> companyDescriptionCache = Collections.emptyMap();
 
+    @Subscribe("companiesTable.edit")
+    public void onCompaniesTableEdit(Action.ActionPerformedEvent event) {
+        Company selected = companiesTable.getSingleSelected();
+        if (selected != null) {
+            screenBuilders.editor(companiesTable)
+                    .withScreenClass(CompanyEdit.class)
+                    .editEntity(selected)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .show();
+        }
+    }
+
+    @Subscribe("companiesTable.create")
+    public void onCompaniesTableCreate(Action.ActionPerformedEvent event) {
+        Company newCompany = metadata.create(Company.class);
+        screenBuilders.editor(companiesTable)
+                .withScreenClass(CompanyEdit.class)
+                .newEntity(newCompany)
+                .withOpenMode(OpenMode.DIALOG)
+                .show();
+    }
+
     @Subscribe("smartUploadBtn")
     public void onSmartUploadBtnClick(Button.ClickEvent event) {
         openSmartCompanyUploadDialog();
