@@ -19,6 +19,7 @@ import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.data.Datasource;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,8 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private static final String PROFILE_NAVIGATION_STYLE = "borderless user-ai-profile-nav-item label-nav-item";
     private static final String ACTIVE_PROFILE_NAVIGATION_STYLE =
             "borderless user-ai-profile-nav-item user-ai-profile-nav-item-active label-nav-item label-nav-item-active";
+    private static final String TAB_NAV_STYLE = "borderless label-nav-item";
+    private static final String ACTIVE_TAB_NAV_STYLE = "borderless label-nav-item label-nav-item-active";
 
     @Inject
     private UiComponents uiComponents;
@@ -118,6 +121,17 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private TabSheet settingsTabSheet;
 
     @Inject
+    private Button navTabMyInfo;
+    @Inject
+    private Button navTabInterface;
+    @Inject
+    private Button navTabMail;
+    @Inject
+    private Button navTabAi;
+    @Inject
+    private Button navTabGeo;
+
+    @Inject
     private VBoxLayout geoSettingsNavigation;
     @Inject
     private VBoxLayout userAiProfileSensitiveWarningBox;
@@ -142,14 +156,39 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
+        initTabsNavigation();
         initEmailSettingsNavigation();
         initAiSettingsNavigation();
         initUserAiProfileNavigation();
         initInterfaceSettingsNavigation();
         initTabSheetSync();
         TabSheet.Tab initialTab = settingsTabSheet != null ? settingsTabSheet.getSelectedTab() : null;
-        updateNavigationBlockVisibility(initialTab != null && initialTab.getName() != null ? initialTab.getName() : "msgMyInfo");
+        String initialTabName = initialTab != null && initialTab.getName() != null ? initialTab.getName() : "msgMyInfo";
+        updateTabsNavigationStyles(initialTabName);
+        updateNavigationBlockVisibility(initialTabName);
         this.initialized = true;
+    }
+
+    private void initTabsNavigation() {
+        bindTabNavButton(navTabMyInfo, "msgMyInfo");
+        bindTabNavButton(navTabInterface, "msgInterface");
+        bindTabNavButton(navTabMail, "mailAccessTab");
+        bindTabNavButton(navTabAi, "aiAccessTab");
+        bindTabNavButton(navTabGeo, "geoApiAccessTab");
+    }
+
+    private void bindTabNavButton(Button btn, String tabName) {
+        if (btn == null) {
+            return;
+        }
+        btn.setAction(new BaseAction("navTabAction_" + tabName) {
+            @Override
+            public void actionPerform(Component component) {
+                if (settingsTabSheet != null) {
+                    settingsTabSheet.setSelectedTab(tabName);
+                }
+            }
+        });
     }
 
     private void initTabSheetSync() {
@@ -160,6 +199,7 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
                     return;
                 }
                 String tabName = selectedTab.getName();
+                updateTabsNavigationStyles(tabName);
                 updateNavigationBlockVisibility(tabName);
                 if ("msgMyInfo".equals(tabName)) {
                     updateUserAiProfileNavigationStyles(userAiProfileProfessionalNav);
@@ -176,22 +216,24 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         }
     }
 
+    private void updateTabsNavigationStyles(String tabName) {
+        setTabNavButtonActive(navTabMyInfo, "msgMyInfo".equals(tabName));
+        setTabNavButtonActive(navTabInterface, "msgInterface".equals(tabName));
+        setTabNavButtonActive(navTabMail, "mailAccessTab".equals(tabName));
+        setTabNavButtonActive(navTabAi, "aiAccessTab".equals(tabName));
+        setTabNavButtonActive(navTabGeo, "geoApiAccessTab".equals(tabName));
+    }
+
+    private void setTabNavButtonActive(Button btn, boolean active) {
+        if (btn == null) {
+            return;
+        }
+        btn.setStyleName(active ? ACTIVE_TAB_NAV_STYLE : TAB_NAV_STYLE);
+    }
+
     private void updateNavigationBlockVisibility(String tabName) {
-        if (userAiProfileSectionNavigation != null) {
-            userAiProfileSectionNavigation.setVisible("msgMyInfo".equals(tabName));
-        }
-        if (interfaceSettingsNavigation != null) {
-            interfaceSettingsNavigation.setVisible("msgInterface".equals(tabName));
-        }
-        if (emailSettingsNavigation != null) {
-            emailSettingsNavigation.setVisible("mailAccessTab".equals(tabName));
-        }
-        if (aiSettingsNavigation != null) {
-            aiSettingsNavigation.setVisible("aiAccessTab".equals(tabName));
-        }
-        if (geoSettingsNavigation != null) {
-            geoSettingsNavigation.setVisible("geoApiAccessTab".equals(tabName));
-        }
+        // Пять блоков секционной навигации перманентно скрыты в XML дескрипторе в пользу общей навигации по вкладкам.
+        // Здесь по активной вкладке управляется только видимость предупреждения о чувствительных данных.
         if (userAiProfileSensitiveWarningBox != null) {
             userAiProfileSensitiveWarningBox.setVisible("msgMyInfo".equals(tabName) || "aiAccessTab".equals(tabName));
         }

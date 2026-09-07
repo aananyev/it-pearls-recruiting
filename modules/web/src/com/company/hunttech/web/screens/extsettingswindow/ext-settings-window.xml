@@ -84,8 +84,18 @@
                             <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value"/>
                         </vbox>
 
-                        <!-- Навигация: Профиль и ИИ -->
-                        <vbox id="userAiProfileSectionNavigation" width="100%" spacing="false" stylename="user-ai-profile-navigation label-navigation">
+                        <!-- Навигация: Вкладки экрана настроек -->
+                        <vbox id="settingsTabsNavigation" width="100%" spacing="false" stylename="settings-tabs-navigation label-navigation">
+                            <label value="msg://tabsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
+                            <button id="navTabMyInfo" caption="msg://msgMyInfo" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
+                            <button id="navTabInterface" caption="msg://msgInterface" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabMail" caption="msg://msgEmailSettings" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabAi" caption="msg://msgAiSettings" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabGeo" caption="msg://msgGeoApiSettings" width="100%" stylename="borderless label-nav-item"/>
+                        </vbox>
+
+                        <!-- Навигация: Профиль и ИИ (скрыта в пользу навигации по вкладкам) -->
+                        <vbox id="userAiProfileSectionNavigation" width="100%" spacing="false" visible="false" stylename="user-ai-profile-navigation label-navigation">
                             <label width="100%" value="msg://aiProfileNavigationTitle" stylename="label-nav-title job-candidate-section-title user-ai-profile-navigation-title" align="MIDDLE_CENTER"/>
                             <label width="100%" value="msg://professionalProfile" stylename="user-ai-profile-nav-item user-ai-profile-nav-item-active label-nav-item label-nav-item-active"/>
                             <label width="100%" value="msg://recruitingProfile" stylename="user-ai-profile-nav-item label-nav-item"/>
@@ -95,8 +105,8 @@
                             <label width="100%" value="msg://aiContextPreview" stylename="user-ai-profile-nav-item label-nav-item"/>
                         </vbox>
 
-                        <!-- Навигация: Интерфейс -->
-                        <vbox id="interfaceSettingsNavigation" width="100%" spacing="false" stylename="settings-section-navigation label-navigation">
+                        <!-- Навигация: Интерфейс (скрыта в пользу навигации по вкладкам) -->
+                        <vbox id="interfaceSettingsNavigation" width="100%" spacing="false" visible="false" stylename="settings-section-navigation label-navigation">
                             <label value="msg://interfaceSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://interfaceSettingsWindowSection" width="100%" stylename="settings-section-nav-item settings-section-nav-item-active label-nav-item label-nav-item-active"/>
                             <label value="msg://interfaceSettingsAppearanceSection" width="100%" stylename="settings-section-nav-item label-nav-item"/>
@@ -104,23 +114,23 @@
                             <label value="msg://interfaceSettingsStartupSection" width="100%" stylename="settings-section-nav-item label-nav-item"/>
                         </vbox>
 
-                        <!-- Навигация: Почта -->
-                        <vbox id="emailSettingsNavigation" width="100%" spacing="false" stylename="settings-section-navigation label-navigation">
+                        <!-- Навигация: Почта (скрыта в пользу навигации по вкладкам) -->
+                        <vbox id="emailSettingsNavigation" width="100%" spacing="false" visible="false" stylename="settings-section-navigation label-navigation">
                             <label value="msg://emailSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://emailSettingsSmtpSection" width="100%" stylename="settings-section-nav-item settings-section-nav-item-active label-nav-item label-nav-item-active"/>
                             <label value="msg://emailSettingsPop3Section" width="100%" stylename="settings-section-nav-item label-nav-item"/>
                             <label value="msg://emailSettingsImapSection" width="100%" stylename="settings-section-nav-item label-nav-item"/>
                         </vbox>
 
-                        <!-- Навигация: ИИ Подключения -->
-                        <vbox id="aiSettingsNavigation" width="100%" spacing="false" stylename="ai-settings-navigation label-navigation">
+                        <!-- Навигация: ИИ Подключения (скрыта в пользу навигации по вкладкам) -->
+                        <vbox id="aiSettingsNavigation" width="100%" spacing="false" visible="false" stylename="ai-settings-navigation label-navigation">
                             <label value="msg://aiSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title ai-settings-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://aiSettingsSourceSection" width="100%" stylename="ai-settings-nav-item ai-settings-nav-item-active label-nav-item label-nav-item-active"/>
                             <label value="msg://aiSettingsConnectionsSection" width="100%" stylename="ai-settings-nav-item label-nav-item"/>
                         </vbox>
 
-                        <!-- Навигация: Geo-API -->
-                        <vbox id="geoSettingsNavigation" width="100%" spacing="false" stylename="ai-settings-navigation label-navigation">
+                        <!-- Навигация: Geo-API (скрыта в пользу навигации по вкладкам) -->
+                        <vbox id="geoSettingsNavigation" width="100%" spacing="false" visible="false" stylename="ai-settings-navigation label-navigation">
                             <label value="msg://geoSettingsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title ai-settings-navigation-title" align="MIDDLE_CENTER"/>
                             <label value="msg://geoSettingsDaDataSection" width="100%" stylename="ai-settings-nav-item ai-settings-nav-item-active label-nav-item label-nav-item-active"/>
                         </vbox>
@@ -151,114 +161,112 @@
                             <vbox id="userAiProfileContent" width="100%" spacing="true" stylename="edit-workspace-content">
                                 <hbox id="userAiProfileToolbar" width="100%" spacing="true" expand="userAiProfileTitleBox" stylename="user-ai-profile-toolbar edit-toolbar">
                                     <vbox id="userAiProfileTitleBox" width="100%" spacing="false">
-                                        <label value="msg://aiProfileTitle" stylename="h1"/>
-                                        <label value="msg://aiProfileDescription" width="100%" stylename="user-ai-profile-help"/>
+                                        <label value="msg://aiProfileTitle" stylename="h1 edit-toolbar-title"/>
+                                        <label value="msg://aiProfileDescription" width="100%" stylename="user-ai-profile-help edit-toolbar-description edit-help"/>
                                     </vbox>
                                     <hbox id="userAiProfileToolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="user-ai-profile-toolbar-actions edit-toolbar-actions">
-                                        <button id="previewAiContextBtn" caption="msg://previewAiContext" stylename="primary" invoke="previewAiContext"/>
-                                        <button id="clearAiProfileBtn" caption="msg://clearAiProfile" stylename="danger" invoke="clearAiProfile"/>
+                                        <button id="previewAiContextBtn" caption="msg://previewAiContext" icon="EYE" stylename="primary" invoke="previewAiContext"/>
+                                        <button id="clearAiProfileBtn" caption="msg://clearAiProfile" icon="TRASH" stylename="danger" invoke="clearAiProfile"/>
                                     </hbox>
                                 </hbox>
                                 
-                                <groupBox id="professionalProfileGroup" caption="msg://professionalProfile" width="100%" spacing="true"  collapsable="true" collapsed="false" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
-                                    <grid width="100%" spacing="true">
-                                        <columns><column flex="1"/><column flex="1"/></columns>
-                                        <rows>
-                                            <row>
-                                                <textField id="currentPositionField" datasource="userAiProfileDs" property="currentPosition" caption="msg://currentPosition" maxLength="255" width="100%"/>
-                                                <lookupField id="functionalRoleField" datasource="userAiProfileDs" property="functionalRole" caption="msg://functionalRole" width="100%"/>
-                                            </row>
-                                            <row>
-                                                <lookupField id="seniorityLevelField" datasource="userAiProfileDs" property="seniorityLevel" caption="msg://seniorityLevel" width="100%"/>
-                                                <textField id="professionalExperienceYearsField" datasource="userAiProfileDs" property="professionalExperienceYears" caption="msg://professionalExperienceYears" width="100%"/>
-                                            </row>
-                                            <row>
-                                                <textField id="recruitingExperienceYearsField" datasource="userAiProfileDs" property="recruitingExperienceYears" caption="msg://recruitingExperienceYears" width="100%" colspan="2"/>
-                                            </row>
-                                            <row><textArea id="aboutMeField" datasource="userAiProfileDs" property="aboutMe" caption="msg://aboutMe" maxLength="2000" rows="3" width="100%" colspan="2"/></row>
-                                            <row>
-                                                <textArea id="currentResponsibilitiesField" datasource="userAiProfileDs" property="currentResponsibilities" caption="msg://currentResponsibilities" maxLength="4000" rows="3" width="100%"/>
-                                                <textArea id="educationField" datasource="userAiProfileDs" property="education" caption="msg://education" maxLength="4000" rows="3" width="100%"/>
-                                            </row>
-                                            <row>
-                                                <textArea id="certificationsField" datasource="userAiProfileDs" property="certifications" caption="msg://certifications" maxLength="4000" rows="3" width="100%"/>
-                                                <textArea id="domainExpertiseField" datasource="userAiProfileDs" property="domainExpertise" caption="msg://domainExpertise" maxLength="4000" rows="3" width="100%"/>
-                                            </row>
-                                            <row><textArea id="industriesField" datasource="userAiProfileDs" property="industries" caption="msg://industries" maxLength="4000" rows="2" width="100%" colspan="2"/></row>
-                                        </rows>
-                                    </grid>
-                                </groupBox>
-
-                                <groupBox id="recruitingProfileGroup" caption="msg://recruitingProfile" width="100%" spacing="true"  collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
-                                    <grid width="100%" spacing="true">
-                                        <columns><column flex="1"/><column flex="1"/></columns>
-                                        <rows>
-                                            <row>
-                                                <textArea id="recruitingSpecializationsField" datasource="userAiProfileDs" property="recruitingSpecializations" caption="msg://recruitingSpecializations" maxLength="4000" rows="3" width="100%"/>
-                                                <textArea id="targetRolesField" datasource="userAiProfileDs" property="targetRoles" caption="msg://targetRoles" maxLength="4000" rows="3" width="100%"/>
-                                            </row>
-                                            <row>
-                                                <textField id="candidateLevelsField" datasource="userAiProfileDs" property="candidateLevels" caption="msg://candidateLevels" maxLength="255" width="100%"/>
-                                                <textArea id="hiringGeographiesField" datasource="userAiProfileDs" property="hiringGeographies" caption="msg://hiringGeographies" maxLength="2000" rows="2" width="100%"/>
-                                            </row>
-                                            <row>
-                                                <textArea id="decisionPrioritiesField" datasource="userAiProfileDs" property="decisionPriorities" caption="msg://decisionPriorities" maxLength="4000" rows="3" width="100%"/>
-                                                <textArea id="clientAndProjectContextField" datasource="userAiProfileDs" property="clientAndProjectContext" caption="msg://clientAndProjectContext" maxLength="4000" rows="3" width="100%"/>
-                                            </row>
-                                        </rows>
-                                    </grid>
-                                </groupBox>
-
-                                <groupBox id="responsePreferencesGroup" caption="msg://responsePreferences" width="100%" spacing="true"  collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
-                                    <grid width="100%" spacing="true">
-                                        <columns><column flex="1"/><column flex="1"/></columns>
-                                        <rows>
-                                            <row>
-                                                <lookupField id="preferredLanguageField" datasource="userAiProfileDs" property="preferredLanguage" caption="msg://preferredLanguage" width="100%"/>
-                                                <lookupField id="responseDetailLevelField" datasource="userAiProfileDs" property="responseDetailLevel" caption="msg://responseDetailLevel" width="100%"/>
-                                            </row>
-                                            <row>
-                                                <lookupField id="communicationStyleField" datasource="userAiProfileDs" property="communicationStyle" caption="msg://communicationStyle" width="100%"/>
-                                                <lookupField id="terminologyLevelField" datasource="userAiProfileDs" property="terminologyLevel" caption="msg://terminologyLevel" width="100%"/>
-                                            </row>
-                                            <row><lookupField id="preferredAnswerStructureField" datasource="userAiProfileDs" property="preferredAnswerStructure" caption="msg://preferredAnswerStructure" width="100%" colspan="2"/></row>
-                                            <row>
-                                                <textArea id="customAiInstructionsField" datasource="userAiProfileDs" property="customAiInstructions" caption="msg://customAiInstructions" description="msg://customAiInstructionsDescription" maxLength="4000" rows="3" width="100%"/>
-                                                <textArea id="communicationConstraintsField" datasource="userAiProfileDs" property="communicationConstraints" caption="msg://communicationConstraints" maxLength="2000" rows="3" width="100%"/>
-                                            </row>
-                                        </rows>
-                                    </grid>
-                                </groupBox>
-
-                                <groupBox id="goalsGroup" caption="msg://goalsAndInterests" width="100%" spacing="true"  collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
-                                    <grid width="100%" spacing="true">
-                                        <columns><column flex="1"/><column flex="1"/></columns>
-                                        <rows>
-                                            <row>
-                                                <textArea id="professionalGoalsField" datasource="userAiProfileDs" property="professionalGoals" caption="msg://professionalGoals" maxLength="4000" rows="3" width="100%"/>
-                                                <textArea id="professionalInterestsField" datasource="userAiProfileDs" property="professionalInterests" caption="msg://professionalInterests" maxLength="4000" rows="3" width="100%"/>
-                                            </row>
-                                            <row>
-                                                <textArea id="developmentAreasField" datasource="userAiProfileDs" property="developmentAreas" caption="msg://developmentAreas" maxLength="4000" rows="3" width="100%"/>
-                                                <textArea id="currentPrioritiesField" datasource="userAiProfileDs" property="currentPriorities" caption="msg://currentPriorities" maxLength="4000" rows="3" width="100%"/>
-                                            </row>
-                                        </rows>
-                                    </grid>
-                                </groupBox>
-
-                                <groupBox id="privacyGroup" caption="msg://privacyAndBoundaries" width="100%" spacing="true"  collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section user-ai-profile-privacy edit-accordion-section">
+                                <groupBox id="professionalProfileGroup" caption="msg://professionalProfile" width="100%" spacing="true" collapsable="true" collapsed="false" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
                                     <vbox width="100%" spacing="true">
-                                        <checkBox id="profileEnabledField" datasource="userAiProfileDs" property="profileEnabled" caption="msg://profileEnabled"/>
-                                        <checkBox id="externalProcessingAllowedField" datasource="userAiProfileDs" property="externalProcessingAllowed" caption="msg://externalProcessingAllowed"/>
-                                        <label value="msg://externalProcessingConsentText" width="100%" stylename="user-ai-profile-help"/>
-                                        <checkBox id="adminFallbackConsentField" datasource="userAiProfileDs" property="adminFallbackConsent" caption="msg://adminFallbackConsent"/>
-                                        <label value="msg://adminFallbackConsentText" width="100%" stylename="user-ai-profile-help"/>
-                                        <label id="consentAcceptedAtLabel" width="100%" stylename="h4"/>
+                                        <hbox width="100%" spacing="true">
+                                            <textField id="currentPositionField" datasource="userAiProfileDs" property="currentPosition" caption="msg://currentPosition" maxLength="255" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <lookupField id="functionalRoleField" datasource="userAiProfileDs" property="functionalRole" caption="msg://functionalRole" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true">
+                                            <lookupField id="seniorityLevelField" datasource="userAiProfileDs" property="seniorityLevel" caption="msg://seniorityLevel" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textField id="professionalExperienceYearsField" datasource="userAiProfileDs" property="professionalExperienceYears" caption="msg://professionalExperienceYears" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true">
+                                            <textField id="recruitingExperienceYearsField" datasource="userAiProfileDs" property="recruitingExperienceYears" caption="msg://recruitingExperienceYears" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <vbox width="100%" spacing="false">
+                                            <textArea id="aboutMeField" datasource="userAiProfileDs" property="aboutMe" caption="msg://aboutMe" maxLength="2000" rows="3" width="100%" stylename="edit-form-control"/>
+                                        </vbox>
+                                        <hbox width="100%" spacing="true">
+                                            <textArea id="currentResponsibilitiesField" datasource="userAiProfileDs" property="currentResponsibilities" caption="msg://currentResponsibilities" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="educationField" datasource="userAiProfileDs" property="education" caption="msg://education" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true">
+                                            <textArea id="certificationsField" datasource="userAiProfileDs" property="certifications" caption="msg://certifications" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="domainExpertiseField" datasource="userAiProfileDs" property="domainExpertise" caption="msg://domainExpertise" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <vbox width="100%" spacing="false">
+                                            <textArea id="industriesField" datasource="userAiProfileDs" property="industries" caption="msg://industries" maxLength="4000" rows="2" width="100%" stylename="edit-form-control"/>
+                                        </vbox>
                                     </vbox>
                                 </groupBox>
 
-                                <groupBox id="previewGroup" caption="msg://aiContextPreview" width="100%" spacing="true"  collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
-                                    <textArea id="aiContextPreviewArea" width="100%" rows="10" editable="false" stylename="user-ai-profile-preview"/>
+                                <groupBox id="recruitingProfileGroup" caption="msg://recruitingProfile" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true">
+                                            <textArea id="recruitingSpecializationsField" datasource="userAiProfileDs" property="recruitingSpecializations" caption="msg://recruitingSpecializations" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="targetRolesField" datasource="userAiProfileDs" property="targetRoles" caption="msg://targetRoles" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true">
+                                            <textField id="candidateLevelsField" datasource="userAiProfileDs" property="candidateLevels" caption="msg://candidateLevels" maxLength="255" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="hiringGeographiesField" datasource="userAiProfileDs" property="hiringGeographies" caption="msg://hiringGeographies" maxLength="2000" rows="2" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true">
+                                            <textArea id="decisionPrioritiesField" datasource="userAiProfileDs" property="decisionPriorities" caption="msg://decisionPriorities" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="clientAndProjectContextField" datasource="userAiProfileDs" property="clientAndProjectContext" caption="msg://clientAndProjectContext" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                    </vbox>
+                                </groupBox>
+
+                                <groupBox id="responsePreferencesGroup" caption="msg://responsePreferences" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true">
+                                            <lookupField id="preferredLanguageField" datasource="userAiProfileDs" property="preferredLanguage" caption="msg://preferredLanguage" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <lookupField id="responseDetailLevelField" datasource="userAiProfileDs" property="responseDetailLevel" caption="msg://responseDetailLevel" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true">
+                                            <lookupField id="communicationStyleField" datasource="userAiProfileDs" property="communicationStyle" caption="msg://communicationStyle" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <lookupField id="terminologyLevelField" datasource="userAiProfileDs" property="terminologyLevel" caption="msg://terminologyLevel" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <vbox width="100%" spacing="false">
+                                            <lookupField id="preferredAnswerStructureField" datasource="userAiProfileDs" property="preferredAnswerStructure" caption="msg://preferredAnswerStructure" width="100%" stylename="edit-form-control"/>
+                                        </vbox>
+                                        <hbox width="100%" spacing="true">
+                                            <textArea id="customAiInstructionsField" datasource="userAiProfileDs" property="customAiInstructions" caption="msg://customAiInstructions" description="msg://customAiInstructionsDescription" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="communicationConstraintsField" datasource="userAiProfileDs" property="communicationConstraints" caption="msg://communicationConstraints" maxLength="2000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                    </vbox>
+                                </groupBox>
+
+                                <groupBox id="goalsGroup" caption="msg://goalsAndInterests" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true">
+                                            <textArea id="professionalGoalsField" datasource="userAiProfileDs" property="professionalGoals" caption="msg://professionalGoals" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="professionalInterestsField" datasource="userAiProfileDs" property="professionalInterests" caption="msg://professionalInterests" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true">
+                                            <textArea id="developmentAreasField" datasource="userAiProfileDs" property="developmentAreas" caption="msg://developmentAreas" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <textArea id="currentPrioritiesField" datasource="userAiProfileDs" property="currentPriorities" caption="msg://currentPriorities" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        </hbox>
+                                    </vbox>
+                                </groupBox>
+
+                                <groupBox id="privacyGroup" caption="msg://privacyAndBoundaries" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section user-ai-profile-privacy edit-accordion-section">
+                                    <vbox width="100%" spacing="true">
+                                        <checkBox id="profileEnabledField" datasource="userAiProfileDs" property="profileEnabled" caption="msg://profileEnabled"/>
+                                        <vbox width="100%" spacing="false">
+                                            <checkBox id="externalProcessingAllowedField" datasource="userAiProfileDs" property="externalProcessingAllowed" caption="msg://externalProcessingAllowed"/>
+                                            <label value="msg://externalProcessingConsentText" width="100%" stylename="user-ai-profile-help edit-help"/>
+                                        </vbox>
+                                        <vbox width="100%" spacing="false">
+                                            <checkBox id="adminFallbackConsentField" datasource="userAiProfileDs" property="adminFallbackConsent" caption="msg://adminFallbackConsent"/>
+                                            <label value="msg://adminFallbackConsentText" width="100%" stylename="user-ai-profile-help edit-help"/>
+                                        </vbox>
+                                        <label id="consentAcceptedAtLabel" width="100%" stylename="h4 edit-sidebar-subtitle"/>
+                                    </vbox>
+                                </groupBox>
+
+                                <groupBox id="previewGroup" caption="msg://aiContextPreview" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
+                                    <textArea id="aiContextPreviewArea" width="100%" rows="10" editable="false" stylename="edit-form-control user-ai-profile-preview"/>
                                 </groupBox>
                             </vbox>
                         </scrollBox>
@@ -279,14 +287,14 @@
                                       expand="interfaceSettingsTitleBox"
                                       stylename="settings-section-toolbar edit-toolbar">
                                     <vbox id="interfaceSettingsTitleBox" width="100%" spacing="false">
-                                        <label value="msg://interfaceSettingsPageTitle" stylename="h1"/>
-                                        <label value="msg://interfaceSettingsPageDescription" width="100%" stylename="settings-section-help"/>
+                                        <label value="msg://interfaceSettingsPageTitle" stylename="h1 edit-toolbar-title"/>
+                                        <label value="msg://interfaceSettingsPageDescription" width="100%" stylename="settings-section-help edit-toolbar-description edit-help"/>
                                     </vbox>
                                     <buttonsPanel id="interfaceSettingsToolbarActions"
                                                   align="MIDDLE_RIGHT"
                                                   stylename="settings-section-toolbar-actions edit-toolbar-actions">
-                                        <button id="changePasswordBtn" icon="icons/change-pass.png"/>
-                                        <button id="resetScreenSettingsBtn" icon="icons/trash.png" stylename="danger"/>
+                                        <button id="changePasswordBtn" icon="icons/change-pass.png" caption="msg://changePassw" stylename="secondary"/>
+                                        <button id="resetScreenSettingsBtn" icon="icons/trash.png" caption="msg://resetScreenSettings" stylename="danger"/>
                                     </buttonsPanel>
                                 </hbox>
                                 <vbox id="interfaceAppearanceCard"
@@ -295,22 +303,22 @@
                                       stylename="settings-section-card interface-settings-card edit-card">
                                     <vbox id="interfaceAppearanceHeader" width="100%" spacing="false">
                                         <label value="msg://interfaceSettingsAppearanceTitle" stylename="h3 settings-section-card-title edit-card-title"/>
-                                        <label value="msg://interfaceSettingsAppearanceDescription" width="100%" stylename="settings-section-help"/>
+                                        <label value="msg://interfaceSettingsAppearanceDescription" width="100%" stylename="settings-section-help edit-help"/>
                                     </vbox>
                                     <grid id="grid" spacing="true" width="100%">
                                         <columns><column flex="0"/><column flex="1"/></columns>
                                         <rows>
-                                            <row><label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT"/><optionsGroup id="modeOptions"/></row>
-                                            <row><label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT"/><lookupField id="appThemeField" required="true" width="100%" requiredMessage="msg://mainWindowThemeMsg"/></row>
-                                            <row><label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT"/><lookupField id="appLangField" width="100%"/></row>
+                                            <row><label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT" stylename="bold"/><optionsGroup id="modeOptions"/></row>
+                                            <row><label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="appThemeField" required="true" width="100%" requiredMessage="msg://mainWindowThemeMsg" stylename="edit-form-control"/></row>
+                                            <row><label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="appLangField" width="100%" stylename="edit-form-control"/></row>
                                             <row>
-                                                <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT"/>
+                                                <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT" stylename="bold"/>
                                                 <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneLookup">
-                                                    <lookupField id="timeZoneLookup" width="100%"/>
+                                                    <lookupField id="timeZoneLookup" width="100%" stylename="edit-form-control"/>
                                                     <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
                                                 </hbox>
                                             </row>
-                                            <row><label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT"/><lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="100%"/></row>
+                                            <row><label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="100%" stylename="edit-form-control"/></row>
                                         </rows>
                                     </grid>
                                 </vbox>
