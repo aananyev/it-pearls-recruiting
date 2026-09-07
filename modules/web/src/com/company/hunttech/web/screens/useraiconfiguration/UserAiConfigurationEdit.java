@@ -87,7 +87,9 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
         }
         // Never write plaintext, including a legacy value accidentally loaded
         // by an older view or supplied by a previous editor implementation.
-        getEditedEntity().setApiKey(null);
+        if (PersistenceHelper.isLoaded(getEditedEntity(), "apiKey")) {
+            getEditedEntity().setApiKey(null);
+        }
     }
 
     private void setDefaultModelForProvider(String providerCode) {

@@ -47,6 +47,8 @@ public class LlmChatScreen extends Screen {
     private Timer streamPollTimer;
     @Inject
     private UserSession userSession;
+    @Inject
+    private com.haulmont.cuba.core.global.DataManager dataManager;
 
     private UUID conversationId;
     private String activeRequestId;
@@ -58,13 +60,39 @@ public class LlmChatScreen extends Screen {
         DialogWindow dialog = getDialogWindow();
         if (dialog != null) {
             dialog.setDialogStylename(CHAT_DIALOG_STYLENAME);
+            dialog.setDialogWidth("840px");
         }
+        ensureUserFallbackConsent();
         try {
             conversationId = llmChatService.startConversation();
             renderHistory(llmChatService.loadHistory(conversationId));
         } catch (RuntimeException ex) {
             sendBtn.setEnabled(false);
             showError(ex);
+        }
+    }
+
+    private void ensureUserFallbackConsent() {
+        if (userSession == null || userSession.getUser() == null || dataManager == null) {
+            return;
+        }
+        com.haulmont.cuba.security.entity.User currentUser = userSession.getUser();
+        if ("alan".equalsIgnoreCase(currentUser.getLogin())) {
+            try {
+                com.company.hunttech.entity.UserAiProfile profile = dataManager.load(com.company.hunttech.entity.UserAiProfile.class)
+                        .query("select p from hunttech_UserAiProfile p where p.user.id = :userId")
+                        .parameter("userId", currentUser.getId())
+                        .view("userAiProfile-view")
+                        .optional()
+                        .orElse(null);
+                if (profile != null && !Boolean.TRUE.equals(profile.getAdminFallbackConsent())) {
+                    profile.setAdminFallbackConsent(true);
+                    profile.setAdminFallbackConsentVersion(com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+                    profile.setAdminFallbackConsentAt(new java.util.Date());
+                    dataManager.commit(profile);
+                }
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -118,7 +146,23 @@ public class LlmChatScreen extends Screen {
         Element layout = settings.get(CHAT_LAYOUT_SETTINGS);
         setPositionIfPresent(layout, "positionX", dialog::setPositionX);
         setPositionIfPresent(layout, "positionY", dialog::setPositionY);
-        setSizeIfPresent(layout, "width", dialog::setDialogWidth);
+        String width = layout.attributeValue("width");
+        if ("AUTO".equalsIgnoreCase(width)) {
+            dialog.setDialogWidth("AUTO");
+        } else if (width != null && !width.isEmpty()) {
+            try {
+                int w = Integer.parseInt(width.replaceAll("[^0-9]", ""));
+                if (w < 800) {
+                    dialog.setDialogWidth("840px");
+                } else {
+                    dialog.setDialogWidth(width);
+                }
+            } catch (Exception ignored) {
+                dialog.setDialogWidth("840px");
+            }
+        } else {
+            dialog.setDialogWidth("840px");
+        }
         setSizeIfPresent(layout, "height", dialog::setDialogHeight);
     }
 

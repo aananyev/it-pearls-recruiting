@@ -316,7 +316,7 @@ public class LlmChatServiceBean implements LlmChatService {
                         }
                     });
             if (result == null || result.getText() == null || result.getText().trim().isEmpty()) {
-                settleFailedQuota(session);
+                settleFailedQuota(session, null);
                 session.complete("ERROR", "AI-провайдер вернул пустой ответ.");
                 publishStreamEvent(session, true);
                 return;
@@ -350,7 +350,7 @@ public class LlmChatServiceBean implements LlmChatService {
         } catch (RuntimeException failure) {
             if (!quotaSettled) {
                 try {
-                    settleFailedQuota(session);
+                    settleFailedQuota(session, failure);
                 } catch (RuntimeException reconciliationFailure) {
                     // Preserve the original user-facing failure; the reservation is
                     // still visible to the administrator for manual reconciliation.
@@ -397,12 +397,42 @@ public class LlmChatServiceBean implements LlmChatService {
         streamingSessions.entrySet().removeIf(entry -> entry.getValue().isFinishedBefore(threshold));
     }
 
-    private void settleFailedQuota(StreamingSession session) {
+    private void settleFailedQuota(StreamingSession session, Throwable failure) {
         if (session.getObservedTotalTokens() != null) {
             settleObservedUsage(session.quota, session.getObservedTotalTokens(), session.getProviderRequestId());
+        } else if (isNonConsumingError(failure)) {
+            releaseFailedReservation(session.quota, session.getProviderRequestId());
         } else {
             markQuotaPending(session.quota, session.getProviderRequestId());
         }
+    }
+
+    private boolean isNonConsumingError(Throwable failure) {
+        if (failure == null) {
+            return false;
+        }
+        String msg = failure.getMessage();
+        if (msg == null) {
+            return false;
+        }
+        return msg.contains("HTTP 401") || msg.contains("HTTP 402")
+                || msg.contains("HTTP 400") || msg.contains("HTTP 403")
+                || msg.contains("HTTP 404") || msg.contains("Insufficient Balance")
+                || msg.contains("invalid_api_key") || msg.contains("Incorrect API key")
+                || msg.contains("Персональный API-ключ не настроен")
+                || msg.contains("не настроено активное корпоративное подключение");
+    }
+
+    private void releaseFailedReservation(QuotaReservationContext context, String providerRequestId) {
+        LlmChatQuotaPeriod period = dataManager.load(LlmChatQuotaPeriod.class)
+                .id(context.periodId).view("llm-chat-quota-period-view").one();
+        LlmChatQuotaReservation reservation = dataManager.load(LlmChatQuotaReservation.class)
+                .id(context.reservationId).view("llm-chat-quota-reservation-view").one();
+        period.setReservedTokens(Math.max(0, safeInt(period.getReservedTokens()) - context.reservedTokens));
+        reservation.setSettledTokens(0);
+        reservation.setStatus("RELEASED");
+        reservation.setProviderRequestId(providerRequestId);
+        dataManager.commit(new CommitContext(period, reservation));
     }
 
     private LlmChatStreamState resolveExistingStreamingState(LlmChatConversation conversation,

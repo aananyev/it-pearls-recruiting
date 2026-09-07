@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260907-2-setLlmChatDefaultPositionBottomRight" author="hunttech">
+        <sql>
+            UPDATE hunttech_user_settings
+            SET llm_chat_button_position = '{"align":"bottom-right","right":24,"bottom":24}'
+            WHERE llm_chat_button_position IS NULL
+               OR llm_chat_button_position = ''
+               OR llm_chat_button_position NOT LIKE '%bottom-right%';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

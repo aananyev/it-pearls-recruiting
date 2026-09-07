@@ -194,4 +194,12 @@
     <include file="260905-1-addAiAuditSecuritySnapshots.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Сохранение местоположения кнопки LLM-чата в UserSettings. -->
+    <include file="260907-1-addLlmChatButtonPosition.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260907-2-setLlmChatDefaultPositionBottomRight.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260908-1-setAlanFallbackAndChatAdminConfig.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

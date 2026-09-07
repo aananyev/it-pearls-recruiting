@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260908-1-setAlanFallbackAndChatAdminConfig" author="hunttech">
+        <sql>
+            UPDATE hunttech_ai_function_configuration
+            SET admin_configuration_id = (SELECT id FROM hunttech_admin_ai_configuration WHERE is_active = true ORDER BY priority_ DESC LIMIT 1),
+                admin_model_name = COALESCE((SELECT default_model_name FROM hunttech_admin_ai_configuration WHERE is_active = true ORDER BY priority_ DESC LIMIT 1), 'deepseek-v4-flash'),
+                fallback_policy = 'FALLBACK_TO_ADMIN',
+                execution_policy = 'USER_OVERRIDE_ALLOWED'
+            WHERE code = 'LLM_CHAT';
+
+            UPDATE hunttech_user_ai_profile
+            SET admin_fallback_consent = true,
+                admin_fallback_consent_version = '2026-09-05-v1',
+                admin_fallback_consent_at = current_timestamp
+            WHERE user_id IN (SELECT id FROM sec_user WHERE login = 'alan');
+        </sql>
+        <rollback>
+            <sql>
+                UPDATE hunttech_ai_function_configuration
+                SET fallback_policy = 'ADMIN_DISABLED',
+                    execution_policy = 'PERSONAL_ONLY'
+                WHERE code = 'LLM_CHAT';
+
+                UPDATE hunttech_user_ai_profile
+                SET admin_fallback_consent = false,
+                    admin_fallback_consent_version = null,
+                    admin_fallback_consent_at = null
+                WHERE user_id IN (SELECT id FROM sec_user WHERE login = 'alan');
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

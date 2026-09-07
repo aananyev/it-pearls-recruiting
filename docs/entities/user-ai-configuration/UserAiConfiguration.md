@@ -40,7 +40,7 @@
 | View | Назначение |
 |------|------------|
 | `userAiConfiguration-browse-view` | Browse без apiKey |
-| `userAiConfiguration-edit-view` | Edit (модаль) |
+| `userAiConfiguration-edit-view` | Edit (модаль: user, providerCode, defaultModelName, isActive, apiKey, apiKeyEncrypted) |
 | `userAiConfiguration-view` | Полный _local + user |
 
 | Экран | Controller |
@@ -76,3 +76,4 @@
 | 2026-06-27 | Edit-модаль в ExtUser; сущность и миграции AI |
 | 2026-07-21 | Личная вкладка AI в пользовательских настройках переведена на таблицу конфигураций; добавлено тестирование подключения |
 | 2026-07-21 | В личные AI-настройки добавлен провайдер DeepSeek с моделью `deepseek-v4-flash` |
+| 2026-09-08 | Data View Integrity: в `userAiConfiguration-edit-view` включён атрибут `apiKey` для исключения `UnfetchedAttributeException` при очистке legacy-ключа в `UserAiConfigurationEdit` |
