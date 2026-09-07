@@ -886,14 +886,15 @@
         }
       }
 
-      .edit-form-control {
+      .edit-form-control,
+      .v-checkbox {
         flex: 0 0 auto !important;
         width: auto !important;
         min-width: 0 !important;
       }
     }
 
-    .company-main-tab .edit-workspace-content .edit-form-control {
+    .company-main-tab .edit-workspace-content .edit-form-control:not(.v-checkbox) {
       min-width: 280px !important;
     }
     /* Адаптивная верстка TabSheet и рабочей области без выхода за правую границу */
