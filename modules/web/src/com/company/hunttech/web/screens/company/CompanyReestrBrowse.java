@@ -134,28 +134,6 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
         }
     }
 
-    @Subscribe("companiesTable.edit")
-    public void onCompaniesTableEdit(Action.ActionPerformedEvent event) {
-        Company selected = companiesTable.getSingleSelected();
-        if (selected != null) {
-            screenBuilders.editor(companiesTable)
-                    .withScreenClass(CompanyEdit.class)
-                    .editEntity(selected)
-                    .withOpenMode(OpenMode.DIALOG)
-                    .show();
-        }
-    }
-
-    @Subscribe("companiesTable.create")
-    public void onCompaniesTableCreate(Action.ActionPerformedEvent event) {
-        Company newCompany = metadata.create(Company.class);
-        screenBuilders.editor(companiesTable)
-                .withScreenClass(CompanyEdit.class)
-                .newEntity(newCompany)
-                .withOpenMode(OpenMode.DIALOG)
-                .show();
-    }
-
     private void setupTableColumns() {
         companiesTable.addGeneratedColumn("companyLogoColumn", company -> {
             HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
