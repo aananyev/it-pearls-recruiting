@@ -673,7 +673,8 @@ public class LlmChatServiceBean implements LlmChatService {
                 .map(LlmUserQuotaOverride::getMonthlyQuotaTokens)
                 .orElse(null);
         int quotaTokens = override != null ? override : safeQuota(function.getDefaultMonthlyTokenQuota());
-        if (quotaTokens <= 0) {
+        boolean isUnlimited = quotaTokens == -1 || quotaTokens == Integer.MAX_VALUE;
+        if (!isUnlimited && quotaTokens <= 0) {
             throw new DevelopmentException("Месячная квота LLM-чата ещё не настроена администратором.");
         }
 
@@ -685,11 +686,15 @@ public class LlmChatServiceBean implements LlmChatService {
                 .view("llm-chat-quota-period-view")
                 .optional()
                 .orElseGet(() -> createQuotaPeriod(user, periodStart, quotaTokens));
+        if (period.getQuotaTokens() == null || period.getQuotaTokens() != quotaTokens) {
+            period.setQuotaTokens(quotaTokens);
+        }
         int estimatedTokens = Math.max(1, (message.codePointCount(0, message.length()) + 3) / 4
                 + Math.max(1, function.getMaxTokens() == null ? 1200 : function.getMaxTokens()));
         int used = safeInt(period.getConsumedTokens()) + safeInt(period.getReservedTokens())
                 + safeInt(period.getPendingTokens());
-        if (used + estimatedTokens > safeInt(period.getQuotaTokens())) {
+        if (!isUnlimited && safeInt(period.getQuotaTokens()) != -1 && safeInt(period.getQuotaTokens()) != Integer.MAX_VALUE
+                && (used + estimatedTokens > safeInt(period.getQuotaTokens()))) {
             throw new DevelopmentException("Месячная квота чата исчерпана или занята текущими запросами.");
         }
         period.setReservedTokens(safeInt(period.getReservedTokens()) + estimatedTokens);

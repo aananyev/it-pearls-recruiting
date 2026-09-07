@@ -378,9 +378,12 @@
                                 <!-- Колонки сохраняют исходный набор безопасно отображаемых свойств. -->
                                 <columns>
                                     <!-- Provider code идентифицирует AI-провайдера. -->
+                                    <column id="isPrimary" caption="msg://UserAiConfiguration.isPrimary"/>
                                     <column id="providerCode"/>
                                     <!-- Default model name показывает выбранную модель провайдера. -->
                                     <column id="defaultModelName"/>
+                                    <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
+                                    <column id="priority" caption="msg://UserAiConfiguration.priority"/>
                                     <!-- Active-state показывает доступность конфигурации. -->
                                     <column id="isActive"/>
                                 </columns>

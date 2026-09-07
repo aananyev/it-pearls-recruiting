@@ -155,6 +155,10 @@
     <include file="260821-7-configureTelegramBotSetup.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- UserSettings: поля для интеграции с Geo-API. -->
+    <include file="260822-1-addUserSettingsGeoApiFields.xml"
+             relativeToChangelogFile="true"/>
+
     <!-- CompanySearchAiService: Seed AI-функции COMPANY_WEB_SEARCH_PARSE_JSON для интеллектуального поиска компаний в интернете. -->
     <include file="260822-2-addCompanyWebSearchAiFunction.xml"
              relativeToChangelogFile="true"/>
@@ -200,6 +204,10 @@
     <include file="260907-2-setLlmChatDefaultPositionBottomRight.xml"
              relativeToChangelogFile="true"/>
     <include file="260908-1-setAlanFallbackAndChatAdminConfig.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260908-2-addUserAiConfigurationFallbackFields.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260908-3-setAlanUnlimitedLlmQuota.xml"
              relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

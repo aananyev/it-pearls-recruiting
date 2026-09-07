@@ -41,6 +41,15 @@ public class UserAiConfiguration extends StandardEntity {
     @Column(name = "IS_ACTIVE")
     private Boolean isActive = true;
 
+    @Column(name = "IS_PRIMARY")
+    private Boolean isPrimary = false;
+
+    @Column(name = "MAX_RETRIES")
+    private Integer maxRetries = 2;
+
+    @Column(name = "PRIORITY_")
+    private Integer priority = 10;
+
     public User getUser() {
         return user;
     }
@@ -87,5 +96,29 @@ public class UserAiConfiguration extends StandardEntity {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public Boolean getIsPrimary() {
+        return isPrimary;
+    }
+
+    public void setIsPrimary(Boolean isPrimary) {
+        this.isPrimary = isPrimary;
+    }
+
+    public Integer getMaxRetries() {
+        return maxRetries;
+    }
+
+    public void setMaxRetries(Integer maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 }

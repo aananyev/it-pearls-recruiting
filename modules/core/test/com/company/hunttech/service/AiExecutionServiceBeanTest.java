@@ -21,14 +21,18 @@ import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.security.entity.User;
+import com.company.hunttech.core.ai.AiProviderResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +40,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -399,7 +404,7 @@ public class AiExecutionServiceBeanTest {
         AiExecutionResult result = service.executeText("LLM_CHAT", Collections.singletonMap("message", "Привет"));
 
         assertEquals(AiCredentialOwner.ADMIN, result.getCredentialOwner());
-        verify(provider).executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any());
+        verify(provider, times(2)).executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any());
         verify(adminProvider).executeTextWithTokens(anyString(), anyString(), eq("admin-key"), eq("gpt-test"), any());
     }
 
@@ -439,8 +444,126 @@ public class AiExecutionServiceBeanTest {
             assertTrue(expected.getMessage().contains("отдельное согласие"));
         }
         assertTrue("Admin fallback must require separate consent", rejected);
-        verify(provider).executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any());
+        verify(provider, times(2)).executeTextWithTokens(anyString(), anyString(), eq("personal-key"), eq("personal-model"), any());
         verify(providerRegistry, never()).getProvider("admin-provider");
+    }
+
+    @Test
+    public void multipleUserConfigs_fallbackToSecondaryWhenPrimaryFailsWithRetries() {
+        function.setCode("JOB_DESCRIPTION_GEN");
+        function.setExecutionPolicy(AiExecutionPolicy.USER_OVERRIDE_ALLOWED);
+        function.setFallbackPolicy(AiFallbackPolicy.NO_FALLBACK);
+
+        UserAiConfiguration primary = new UserAiConfiguration();
+        primary.setUser(user);
+        primary.setProviderCode("primary-prov");
+        primary.setApiKeyEncrypted("primary-secret");
+        primary.setDefaultModelName("primary-model");
+        primary.setIsPrimary(true);
+        primary.setMaxRetries(2);
+        primary.setIsActive(true);
+
+        UserAiConfiguration secondary = new UserAiConfiguration();
+        secondary.setUser(user);
+        secondary.setProviderCode("secondary-prov");
+        secondary.setApiKeyEncrypted("secondary-secret");
+        secondary.setDefaultModelName("secondary-model");
+        secondary.setIsPrimary(false);
+        secondary.setMaxRetries(1);
+        secondary.setPriority(10);
+        secondary.setIsActive(true);
+
+        FluentLoader userConfigLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(dataManager.load(UserAiConfiguration.class)).thenReturn(userConfigLoader);
+        when(userConfigLoader.query(anyString()).parameter(anyString(), any()).view(anyString()).list())
+                .thenReturn(Arrays.asList(primary, secondary));
+
+        AIProvider primaryProvider = mock(AIProvider.class);
+        AIProvider secondaryProvider = mock(AIProvider.class);
+        when(providerRegistry.getProvider("primary-prov")).thenReturn(primaryProvider);
+        when(providerRegistry.getProvider("secondary-prov")).thenReturn(secondaryProvider);
+        when(aiSecretService.decrypt("primary-secret")).thenReturn("primary-key");
+        when(aiSecretService.decrypt("secondary-secret")).thenReturn("secondary-key");
+
+        when(primaryProvider.executeTextWithTokens(anyString(), anyString(), eq("primary-key"), eq("primary-model"), any()))
+                .thenThrow(new RuntimeException("primary 503 unavailable"));
+        when(secondaryProvider.executeTextWithTokens(anyString(), anyString(), eq("secondary-key"), eq("secondary-model"), any()))
+                .thenReturn(AiProviderResponse.ofText("Ответ от запасной пользовательской нейросети", 50, 25, 75));
+
+        AiExecutionResult result = service.executeText("JOB_DESCRIPTION_GEN",
+                Collections.singletonMap("vacancyName", "Java Developer"));
+
+        assertNotNull(result);
+        assertEquals("secondary-prov", result.getProviderCode());
+        assertEquals("secondary-model", result.getModelName());
+        assertEquals("Ответ от запасной пользовательской нейросети", result.getText());
+
+        // Primary был вызван ровно 2 раза (maxRetries = 2)
+        verify(primaryProvider, times(2))
+                .executeTextWithTokens(anyString(), anyString(), eq("primary-key"), eq("primary-model"), any());
+        // Secondary был вызван 1 раз
+        verify(secondaryProvider, times(1))
+                .executeTextWithTokens(anyString(), anyString(), eq("secondary-key"), eq("secondary-model"), any());
+    }
+
+    @Test
+    public void multipleUserConfigs_allFail_thenAdminFallbackIsInvoked() {
+        function.setCode("LLM_CHAT");
+        function.setPromptTemplate("${message}");
+        function.setExecutionPolicy(AiExecutionPolicy.USER_OVERRIDE_ALLOWED);
+        function.setFallbackPolicy(AiFallbackPolicy.FALLBACK_TO_ADMIN);
+
+        UserAiConfiguration primary = new UserAiConfiguration();
+        primary.setUser(user);
+        primary.setProviderCode("primary-prov");
+        primary.setApiKeyEncrypted("primary-secret");
+        primary.setDefaultModelName("primary-model");
+        primary.setIsPrimary(true);
+        primary.setMaxRetries(2);
+        primary.setIsActive(true);
+
+        FluentLoader userConfigLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(dataManager.load(UserAiConfiguration.class)).thenReturn(userConfigLoader);
+        when(userConfigLoader.query(anyString()).parameter(anyString(), any()).view(anyString()).list())
+                .thenReturn(Collections.singletonList(primary));
+
+        UserAiProfile profile = new UserAiProfile();
+        profile.setAdminFallbackConsent(true);
+        profile.setAdminFallbackConsentVersion(AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+        profile.setAdminFallbackConsentAt(new Date());
+        stubProfile(profile);
+
+        AdminAiConfiguration admin = new AdminAiConfiguration();
+        admin.setProviderCode("admin-provider");
+        admin.setDefaultModelName("admin-model");
+        admin.setActive(true);
+        admin.setApiKeyEncrypted("admin-secret");
+        function.setAdminConfiguration(admin);
+
+        AIProvider primaryProvider = mock(AIProvider.class);
+        AIProvider adminProvider = mock(AIProvider.class);
+        when(providerRegistry.getProvider("primary-prov")).thenReturn(primaryProvider);
+        when(providerRegistry.getProvider("admin-provider")).thenReturn(adminProvider);
+        when(aiSecretService.decrypt("primary-secret")).thenReturn("primary-key");
+        when(aiSecretService.decrypt("admin-secret")).thenReturn("admin-key");
+
+        when(primaryProvider.executeTextWithTokens(anyString(), anyString(), eq("primary-key"), eq("primary-model"), any()))
+                .thenThrow(new RuntimeException("primary 500 error"));
+        when(adminProvider.executeTextWithTokens(anyString(), anyString(), eq("admin-key"), eq("admin-model"), any()))
+                .thenReturn(AiProviderResponse.ofText("Ответ от административной нейросети", 80, 40, 120));
+
+        AiExecutionResult result = service.executeText("LLM_CHAT",
+                Collections.singletonMap("message", "Привет"));
+
+        assertNotNull(result);
+        assertEquals(AiCredentialOwner.ADMIN, result.getCredentialOwner());
+        assertEquals("admin-provider", result.getProviderCode());
+        assertEquals("Ответ от административной нейросети", result.getText());
+
+        verify(primaryProvider, times(2))
+                .executeTextWithTokens(anyString(), anyString(), eq("primary-key"), eq("primary-model"), any());
+        verify(adminProvider, times(1))
+                .executeTextWithTokens(anyString(), anyString(), eq("admin-key"), eq("admin-model"), any());
     }
 
     private void stubOverride(UserAiFunctionOverride override) {

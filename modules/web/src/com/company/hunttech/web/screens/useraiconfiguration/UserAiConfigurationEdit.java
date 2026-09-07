@@ -3,6 +3,8 @@ package com.company.hunttech.web.screens.useraiconfiguration;
 import com.company.hunttech.ai.AiProviderCatalog;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.service.AiCredentialService;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FluentLoader;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.TextField;
@@ -20,6 +22,8 @@ import com.haulmont.cuba.gui.screen.Screen.BeforeShowEvent;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.inject.Inject;
+import java.util.List;
+import java.util.UUID;
 
 @UiController("hunttech_UserAiConfiguration.edit")
 @UiDescriptor("user-ai-configuration-edit.xml")
@@ -35,6 +39,8 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
     private PasswordField apiKeyField;
     @Inject
     private AiCredentialService aiCredentialService;
+    @Inject
+    private DataManager dataManager;
 
     private User parentUser;
     private String lastAutomaticallyAppliedModel;
@@ -83,6 +89,22 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
             } catch (RuntimeException e) {
                 event.preventCommit();
                 return;
+            }
+        }
+        if (Boolean.TRUE.equals(getEditedEntity().getIsPrimary()) && getEditedEntity().getUser() != null) {
+            String jpql = getEditedEntity().getId() == null
+                    ? "select e from hunttech_UserAiConfiguration e where e.user.id = :userId and e.isPrimary = true"
+                    : "select e from hunttech_UserAiConfiguration e where e.user.id = :userId and e.id <> :currentId and e.isPrimary = true";
+            FluentLoader.ByQuery<UserAiConfiguration, UUID> queryLoader = dataManager.load(UserAiConfiguration.class)
+                    .query(jpql)
+                    .parameter("userId", getEditedEntity().getUser().getId());
+            if (getEditedEntity().getId() != null) {
+                queryLoader.parameter("currentId", getEditedEntity().getId());
+            }
+            List<UserAiConfiguration> others = queryLoader.view("userAiConfiguration-view").list();
+            for (UserAiConfiguration o : others) {
+                o.setIsPrimary(false);
+                dataManager.commit(o);
             }
         }
         // Never write plaintext, including a legacy value accidentally loaded

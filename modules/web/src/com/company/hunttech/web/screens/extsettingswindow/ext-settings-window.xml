@@ -471,8 +471,11 @@
                                            editable="false"
                                            stylename="ai-settings-table">
                                         <columns>
+                                            <column id="isPrimary" caption="msg://UserAiConfiguration.isPrimary"/>
                                             <column id="providerCode"/>
                                             <column id="defaultModelName"/>
+                                            <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
+                                            <column id="priority" caption="msg://UserAiConfiguration.priority"/>
                                             <column id="isActive"/>
                                         </columns>
                                         <rows datasource="userAiConfigsDs"/>

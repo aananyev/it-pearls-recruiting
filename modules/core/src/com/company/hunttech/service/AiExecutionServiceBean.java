@@ -28,10 +28,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -105,14 +110,19 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
+        List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
+
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
-            validateUserOverride(userOverride, currentUser, functionCode);
-            return executeWithUser(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
+            if (userCandidates.isEmpty()) {
+                throw new DevelopmentException(
+                        "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
+            }
+            return executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
                     callerSource, startTime, userContext, requestId);
         }
-        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && isUsableUserOverride(userOverride, currentUser)) {
+        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
-                return executeWithUser(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
+                return executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
                         callerSource, startTime, userContext, requestId);
             } catch (RuntimeException userFailure) {
                 if (userFailure instanceof AiRequestCancelledException) {
@@ -121,7 +131,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
                         && resolveAdminConfiguration(function) != null) {
                     ensureAdminFallbackAllowed(function, currentUser, userContext);
-                    log.warn("Персональное AI-подключение функции {} недоступно; используется разрешённый admin fallback. Причина: {}",
+                    log.warn("Персональные AI-подключения функции {} недоступны; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
                     return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
                             callerSource, startTime, userContext, requestId);
@@ -130,7 +140,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
                         userContext);
                 throw new DevelopmentException(
-                        "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
+                        "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
         }
         ensureAdminFallbackAllowed(function, currentUser, userContext);
@@ -160,6 +170,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         UserContextAttachment userContext = resolveUserContext(function, currentUser);
         String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
+        List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
         AtomicBoolean emitted = new AtomicBoolean(false);
         AiStreamListener guardedListener = delta -> {
             if (delta != null && !delta.isEmpty()) {
@@ -168,14 +179,17 @@ public class AiExecutionServiceBean implements AiExecutionService {
             listener.onDelta(delta);
         };
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
-            validateUserOverride(userOverride, currentUser, functionCode);
-            return executeWithUserStreaming(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
-                    callerSource, startTime, userContext, requestId, guardedListener);
+            if (userCandidates.isEmpty()) {
+                throw new DevelopmentException(
+                        "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
+            }
+            return executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
+                    callerSource, startTime, userContext, requestId, emitted, guardedListener);
         }
-        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && isUsableUserOverride(userOverride, currentUser)) {
+        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
-                return executeWithUserStreaming(function, userOverride, prompt, effectiveSystemPrompt, currentUser,
-                        callerSource, startTime, userContext, requestId, guardedListener);
+                return executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
+                        callerSource, startTime, userContext, requestId, emitted, guardedListener);
             } catch (RuntimeException userFailure) {
                 // Never append a second provider response after partial output.
                 if (emitted.get() || userFailure instanceof AiRequestCancelledException) {
@@ -184,11 +198,13 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
                         && resolveAdminConfiguration(function) != null) {
                     ensureAdminFallbackAllowed(function, currentUser, userContext);
+                    log.warn("Персональные AI-подключения функции {} недоступны; используется разрешённый admin fallback. Причина: {}",
+                            functionCode, userFailure.getClass().getSimpleName());
                     return executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
                             callerSource, startTime, userContext, requestId, guardedListener);
                 }
                 throw new DevelopmentException(
-                        "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
+                        "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
         }
         ensureAdminFallbackAllowed(function, currentUser, userContext);
@@ -216,13 +232,17 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
+        List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
-            validateUserOverride(userOverride, currentUser, functionCode);
-            return executeWithUserImage(function, userOverride, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+            if (userCandidates.isEmpty()) {
+                throw new DevelopmentException(
+                        "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
+            }
+            return executeWithUserCandidatesImage(function, userCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
         }
-        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && isUsableUserOverride(userOverride, currentUser)) {
+        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
-                return executeWithUserImage(function, userOverride, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+                return executeWithUserCandidatesImage(function, userCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
             } catch (RuntimeException userFailure) {
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
                         && isUsableAdminConfiguration(function.getAdminConfiguration())) {
@@ -234,20 +254,235 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
                         null);
                 throw new DevelopmentException(
-                        "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
+                        "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
         }
         return executeWithAdminImage(function, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
     }
 
-    private AiExecutionResult executeWithUserImage(AiFunctionConfiguration function,
-                                                   UserAiFunctionOverride override,
-                                                   String prompt, byte[] sourceImage, String sourceMimeType,
-                                                   User currentUser, String callerSource, long startTime) {
-        UserAiConfiguration configuration = override.getUserAiConfiguration();
+    private static class UserExecutionCandidate {
+        private final UserAiConfiguration configuration;
+        private final String modelOverride;
+
+        private UserExecutionCandidate(UserAiConfiguration configuration, String modelOverride) {
+            this.configuration = configuration;
+            this.modelOverride = modelOverride;
+        }
+    }
+
+    private List<UserExecutionCandidate> resolveUserExecutionCandidates(User currentUser,
+                                                                        UserAiFunctionOverride userOverride,
+                                                                        AiFunctionConfiguration function) {
+        if (currentUser == null) {
+            return Collections.emptyList();
+        }
+        List<UserAiConfiguration> usableConfigs = new ArrayList<>();
+        try {
+            com.haulmont.cuba.core.global.FluentLoader<UserAiConfiguration, UUID> loader =
+                    dataManager != null ? dataManager.load(UserAiConfiguration.class) : null;
+            if (loader != null) {
+                List<UserAiConfiguration> loaded = loader
+                        .query("select c from hunttech_UserAiConfiguration c where c.user.id = :userId and (c.isActive is null or c.isActive = true) order by c.priority desc, c.createTs asc")
+                        .parameter("userId", currentUser.getId())
+                        .view("user-ai-configuration-ai-execution-view")
+                        .list();
+                if (loaded != null) {
+                    for (UserAiConfiguration c : loaded) {
+                        if (isUsableUserConfiguration(c, currentUser)) {
+                            usableConfigs.add(c);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить список личных AI-подключений пользователя {}: {}",
+                    currentUser.getLogin(), e.getMessage());
+        }
+
+        UserAiConfiguration overrideConfig = null;
+        String overrideModel = null;
+        if (userOverride != null && Boolean.TRUE.equals(userOverride.getEnabled())
+                && isUsableUserConfiguration(userOverride.getUserAiConfiguration(), currentUser)) {
+            overrideConfig = userOverride.getUserAiConfiguration();
+            if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(userOverride.getModelName())) {
+                overrideModel = userOverride.getModelName();
+            }
+            if (overrideConfig.getId() != null) {
+                boolean alreadyInList = false;
+                for (UserAiConfiguration c : usableConfigs) {
+                    if (overrideConfig.getId().equals(c.getId())) {
+                        alreadyInList = true;
+                        break;
+                    }
+                }
+                if (!alreadyInList) {
+                    usableConfigs.add(overrideConfig);
+                }
+            }
+        }
+
+        final UserAiConfiguration finalOverrideConfig = overrideConfig;
+        usableConfigs.sort((a, b) -> {
+            if (finalOverrideConfig != null && finalOverrideConfig.getId() != null) {
+                boolean aIsOverride = finalOverrideConfig.getId().equals(a.getId());
+                boolean bIsOverride = finalOverrideConfig.getId().equals(b.getId());
+                if (aIsOverride != bIsOverride) {
+                    return aIsOverride ? -1 : 1; // Явно заданный оверрайд функции на 1 месте
+                }
+            }
+            boolean aPrimary = Boolean.TRUE.equals(a.getIsPrimary());
+            boolean bPrimary = Boolean.TRUE.equals(b.getIsPrimary());
+            if (aPrimary != bPrimary) {
+                return aPrimary ? -1 : 1; // Основная нейросеть пользователя на следующем месте
+            }
+            int pA = a.getPriority() != null ? a.getPriority() : 0;
+            int pB = b.getPriority() != null ? b.getPriority() : 0;
+            if (pA != pB) {
+                return Integer.compare(pB, pA); // по убыванию приоритета
+            }
+            Date tA = a.getCreateTs() != null ? a.getCreateTs() : new Date(0);
+            Date tB = b.getCreateTs() != null ? b.getCreateTs() : new Date(0);
+            return tA.compareTo(tB);
+        });
+
+        List<UserExecutionCandidate> candidates = new ArrayList<>();
+        Set<UUID> seenIds = new HashSet<>();
+        for (UserAiConfiguration c : usableConfigs) {
+            UUID id = c.getId();
+            if (id != null && seenIds.add(id)) {
+                String model = (finalOverrideConfig != null && id.equals(finalOverrideConfig.getId()))
+                        ? overrideModel : null;
+                candidates.add(new UserExecutionCandidate(c, model));
+            }
+        }
+        return candidates;
+    }
+
+    private boolean isUsableUserConfiguration(UserAiConfiguration configuration, User currentUser) {
+        return configuration != null
+                && configuration.getUser() != null
+                && currentUser != null
+                && configuration.getUser().getId().equals(currentUser.getId())
+                && (configuration.getIsActive() == null || Boolean.TRUE.equals(configuration.getIsActive()))
+                && isConfigured(configuration.getProviderCode())
+                && hasUserCredential(configuration);
+    }
+
+    private int resolveMaxRetries(UserAiConfiguration config) {
+        if (config != null && config.getMaxRetries() != null && config.getMaxRetries() > 0) {
+            return config.getMaxRetries();
+        }
+        return 2; // По умолчанию 2 попытки
+    }
+
+    private AiExecutionResult executeWithUserCandidatesText(AiFunctionConfiguration function,
+                                                            List<UserExecutionCandidate> candidates,
+                                                            String prompt,
+                                                            String effectiveSystemPrompt,
+                                                            User currentUser,
+                                                            String callerSource,
+                                                            long startTime,
+                                                            UserContextAttachment userContext,
+                                                            String requestId) {
+        RuntimeException lastException = null;
+        for (UserExecutionCandidate candidate : candidates) {
+            UserAiConfiguration config = candidate.configuration;
+            int maxAttempts = resolveMaxRetries(config);
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    return executeWithUserConfig(function, config, candidate.modelOverride, prompt,
+                            effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
+                } catch (RuntimeException e) {
+                    lastException = e;
+                    if (e instanceof AiRequestCancelledException) {
+                        throw e;
+                    }
+                    log.warn("Попытка {}/{} вызова пользовательской AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
+                            attempt, maxAttempts, config.getProviderCode(), config.getDefaultModelName(), e.getMessage());
+                }
+            }
+            log.warn("Пользовательская AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
+                    config.getProviderCode(), config.getDefaultModelName(), maxAttempts);
+        }
+        throw lastException != null ? lastException
+                : new DevelopmentException("Не удалось выполнить текстовый запрос через персональные AI-подключения.");
+    }
+
+    private AiExecutionResult executeWithUserCandidatesStreaming(AiFunctionConfiguration function,
+                                                                 List<UserExecutionCandidate> candidates,
+                                                                 String prompt,
+                                                                 String effectiveSystemPrompt,
+                                                                 User currentUser,
+                                                                 String callerSource,
+                                                                 long startTime,
+                                                                 UserContextAttachment userContext,
+                                                                 String requestId,
+                                                                 AtomicBoolean emitted,
+                                                                 AiStreamListener guardedListener) {
+        RuntimeException lastException = null;
+        for (UserExecutionCandidate candidate : candidates) {
+            UserAiConfiguration config = candidate.configuration;
+            int maxAttempts = resolveMaxRetries(config);
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    return executeWithUserConfigStreaming(function, config, candidate.modelOverride, prompt,
+                            effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId, guardedListener);
+                } catch (RuntimeException e) {
+                    lastException = e;
+                    if (emitted.get() || e instanceof AiRequestCancelledException) {
+                        throw e;
+                    }
+                    log.warn("Попытка {}/{} стриминг-вызова пользовательской AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
+                            attempt, maxAttempts, config.getProviderCode(), config.getDefaultModelName(), e.getMessage());
+                }
+            }
+            log.warn("Пользовательская AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
+                    config.getProviderCode(), config.getDefaultModelName(), maxAttempts);
+        }
+        throw lastException != null ? lastException
+                : new DevelopmentException("Не удалось выполнить стриминг-запрос через персональные AI-подключения.");
+    }
+
+    private AiExecutionResult executeWithUserCandidatesImage(AiFunctionConfiguration function,
+                                                             List<UserExecutionCandidate> candidates,
+                                                             String prompt,
+                                                             byte[] sourceImage,
+                                                             String sourceMimeType,
+                                                             User currentUser,
+                                                             String callerSource,
+                                                             long startTime) {
+        RuntimeException lastException = null;
+        for (UserExecutionCandidate candidate : candidates) {
+            UserAiConfiguration config = candidate.configuration;
+            int maxAttempts = resolveMaxRetries(config);
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    return executeWithUserConfigImage(function, config, candidate.modelOverride, prompt,
+                            sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+                } catch (RuntimeException e) {
+                    lastException = e;
+                    if (e instanceof AiRequestCancelledException) {
+                        throw e;
+                    }
+                    log.warn("Попытка {}/{} вызова пользовательской генерации изображения [{}] ({}) завершилась ошибкой: {}",
+                            attempt, maxAttempts, config.getProviderCode(), config.getDefaultModelName(), e.getMessage());
+                }
+            }
+            log.warn("Пользовательская AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
+                    config.getProviderCode(), config.getDefaultModelName(), maxAttempts);
+        }
+        throw lastException != null ? lastException
+                : new DevelopmentException("Не удалось сгенерировать изображение через персональные AI-подключения.");
+    }
+
+    private AiExecutionResult executeWithUserConfigImage(AiFunctionConfiguration function,
+                                                         UserAiConfiguration configuration,
+                                                         String modelOverride,
+                                                         String prompt, byte[] sourceImage, String sourceMimeType,
+                                                         User currentUser, String callerSource, long startTime) {
         String model = configuration.getDefaultModelName();
-        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
-            model = override.getModelName();
+        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(modelOverride)) {
+            model = modelOverride;
         }
         try {
             byte[] image = executeProviderImage(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
@@ -294,16 +529,16 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
     }
 
-    private AiExecutionResult executeWithUser(AiFunctionConfiguration function,
-                                              UserAiFunctionOverride override,
-                                              String prompt,
-                                              String effectiveSystemPrompt,
-                                              User currentUser, String callerSource, long startTime,
-                                              UserContextAttachment userContext, String requestId) {
-        UserAiConfiguration configuration = override.getUserAiConfiguration();
+    private AiExecutionResult executeWithUserConfig(AiFunctionConfiguration function,
+                                                    UserAiConfiguration configuration,
+                                                    String modelOverride,
+                                                    String prompt,
+                                                    String effectiveSystemPrompt,
+                                                    User currentUser, String callerSource, long startTime,
+                                                    UserContextAttachment userContext, String requestId) {
         String model = configuration.getDefaultModelName();
-        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
-            model = override.getModelName();
+        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(modelOverride)) {
+            model = modelOverride;
         }
         try {
             AiProviderResponse response = executeProvider(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
@@ -355,16 +590,16 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
     }
 
-    private AiExecutionResult executeWithUserStreaming(AiFunctionConfiguration function,
-                                                       UserAiFunctionOverride override,
-                                                       String prompt, String effectiveSystemPrompt,
-                                                       User currentUser, String callerSource, long startTime,
-                                                       UserContextAttachment userContext, String requestId,
-                                                       AiStreamListener listener) {
-        UserAiConfiguration configuration = override.getUserAiConfiguration();
+    private AiExecutionResult executeWithUserConfigStreaming(AiFunctionConfiguration function,
+                                                             UserAiConfiguration configuration,
+                                                             String modelOverride,
+                                                             String prompt, String effectiveSystemPrompt,
+                                                             User currentUser, String callerSource, long startTime,
+                                                             UserContextAttachment userContext, String requestId,
+                                                             AiStreamListener listener) {
         String model = configuration.getDefaultModelName();
-        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
-            model = override.getModelName();
+        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(modelOverride)) {
+            model = modelOverride;
         }
         try {
             AiProviderResponse response = executeProviderStreaming(configuration.getProviderCode(),
@@ -722,13 +957,6 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
     }
 
-    private void validateUserOverride(UserAiFunctionOverride override, User currentUser, String functionCode) {
-        if (!isUsableUserOverride(override, currentUser)) {
-            throw new DevelopmentException(
-                    "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
-        }
-    }
-
     /**
      * Chat is allowed to use the administrative credential only after the user
      * explicitly accepted the separate fallback consent. Other AI functions
@@ -779,19 +1007,6 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     e.getClass().getSimpleName());
             return null;
         }
-    }
-
-    private boolean isUsableUserOverride(UserAiFunctionOverride override, User currentUser) {
-        if (override == null || !Boolean.TRUE.equals(override.getEnabled())) {
-            return false;
-        }
-        UserAiConfiguration configuration = override.getUserAiConfiguration();
-        return configuration != null
-                && configuration.getUser() != null
-                && configuration.getUser().getId().equals(currentUser.getId())
-                && Boolean.TRUE.equals(configuration.getIsActive())
-                && isConfigured(configuration.getProviderCode())
-                && hasUserCredential(configuration);
     }
 
     private String resolveUserApiKey(UserAiConfiguration configuration) {
