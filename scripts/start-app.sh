@@ -180,6 +180,10 @@ HEAP_DUMP_DIR="${HEAP_DUMP_DIR:-$ROOT/deploy/tomcat/logs/heapdumps}"
 GC_LOG_FILE="${GC_LOG_FILE:-$ROOT/deploy/tomcat/logs/gc.log}"
 JVM_DIAGNOSTICS_DIR="${JVM_DIAGNOSTICS_DIR:-$ROOT/deploy/tomcat/logs/diagnostics}"
 
+# Оптимизация старта: отключить FTS (уже в local.app.properties), убрать ненужные проверки
+# CUBA warmup: ~30-60 сек для hrm-core (metadata, JMX, бот) + ~10 сек для hrm (VAADIN)
+# По умолчанию даём 5 минут (300 сек), можно переопределить WAIT_TIMEOUT
+
 log() { printf '%s\n' "$*"; }
 
 is_project_java() {

@@ -57,7 +57,9 @@ public class TelegramBotComponent {
 
     @PreDestroy
     protected void closeSession() throws IOException {
-        //де-инициализируйте конфигурацию здесь если есть такая необходимость
-        //например закройте connection если таковой имеется
+        // де-инициализируйте конфигурацию здесь если есть такая необходимость
+        // например закройте connection если таковой имеется
+        String stopStatus = telegramBotService.telegramBotStop();
+        logger.debug(stopStatus);
     }
 }

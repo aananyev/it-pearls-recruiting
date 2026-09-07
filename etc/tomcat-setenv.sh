@@ -14,4 +14,10 @@ CATALINA_OPTS="-Xmx2048m -Dfile.encoding=UTF-8 -Dapp.home=\"$APP_HOME\""
 
 CATALINA_OPTS="$CATALINA_OPTS -Dcom.sun.management.jmxremote"
 
-JPDA_OPTS="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"
+# JPDA debug — отключён по умолчанию (включается через JPDA_ENABLED=true).
+# Конфликт при рестарте: порт 8787 не освобождается старым процессом.
+if [ "${JPDA_ENABLED:-false}" = "true" ]; then
+    JPDA_OPTS="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"
+else
+    JPDA_OPTS=""
+fi
