@@ -42,13 +42,16 @@ public class CompanyEditLayoutContractTest {
         assertTrue("sidebar не 270px (контракт §4.2)",
                 xml.contains("width=\"270px\""));
         assertTrue(xml.contains("stylename=\"edit-screen-layout\""));
-        assertTrue(xml.contains("stylename=\"edit-workspace\""));
+        // workspace может иметь дополнительные классы (company-editor-workspace)
+        assertTrue("нет edit-workspace в stylename",
+                xml.contains("stylename=\"edit-workspace") || xml.contains("stylename=\"edit-workspace "));
         assertTrue(xml.contains("stylename=\"label-navigation\""));
         assertTrue(xml.contains("label-nav-title"));
         assertTrue("нет активного пункта по умолчанию",
                 xml.contains("label-nav-item label-nav-item-active"));
         assertTrue(xml.contains("stylename=\"edit-footer-actions\""));
-        assertTrue(xml.contains("stylename=\"edit-toolbar\""));
+        assertTrue("нет edit-toolbar в stylename",
+                xml.contains("stylename=\"edit-toolbar") || xml.contains("stylename=\"edit-toolbar "));
         assertTrue("вкладки без контрактного edit-tabs",
                 xml.contains("stylename=\"edit-tabs\""));
         assertFalse("tabSheet остался framed (ломает контрактный вид вкладок)",

@@ -286,16 +286,12 @@
                                                       dataContainer="companyDc"
                                                       caption="msg://msgOurLegalEntity"
                                                       property="ourLegalEntity"
-                                                      stylename="edit-form-control"
-                                                      box.expandRatio="0"/>
+                                                      stylename="edit-form-control"/>
                                             <checkBox id="checkBoxOurClient"
                                                       caption="mainMsg://msgOurClient"
                                                       dataContainer="companyDc"
                                                       property="ourClient"
-                                                      stylename="edit-form-control"
-                                                      box.expandRatio="0"/>
-                                            <!-- spacer для заполнения оставшегося пространства -->
-                                            <vbox width="100%"/>
+                                                      stylename="edit-form-control"/>
                                         </hbox>
                                         <hbox spacing="true" width="100%">
                                             <textField id="comanyNameField"
@@ -373,30 +369,34 @@
                                     <vbox id="companyAddressFieldsBox"
                                           width="100%"
                                           spacing="true">
-                                        <lookupPickerField id="countryOfCompanyField"
-                                                           dataContainer="companyDc"
-                                                           optionsContainer="countryOfCompaniesDc"
-                                                           property="countryOfCompany"
-                                                           caption="msg://msgCountryOfCompany"
-                                                           stylename="edit-form-control"
-                                                           width="100%"
-                                                           required="true">
-                                            <actions>
-                                                <action id="lookup" type="picker_lookup"/>
-                                            </actions>
-                                        </lookupPickerField>
-                                        <lookupPickerField id="regionOfCompanyField"
-                                                           dataContainer="companyDc"
-                                                           optionsContainer="regionOfCompaniesDc"
-                                                           property="regionOfCompany"
-                                                           caption="msg://msgRegionOfCompany"
-                                                           stylename="edit-form-control"
-                                                           width="100%"
-                                                           required="true">
-                                            <actions>
-                                                <action id="lookup" type="picker_lookup"/>
-                                            </actions>
-                                        </lookupPickerField>
+                                        <hbox spacing="true" width="100%">
+                                            <lookupPickerField id="countryOfCompanyField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="countryOfCompaniesDc"
+                                                               property="countryOfCompany"
+                                                               caption="msg://msgCountryOfCompany"
+                                                               stylename="edit-form-control"
+                                                               box.expandRatio="1"
+                                                               width="100%"
+                                                               required="true">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <lookupPickerField id="regionOfCompanyField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="regionOfCompaniesDc"
+                                                               property="regionOfCompany"
+                                                               caption="msg://msgRegionOfCompany"
+                                                               stylename="edit-form-control"
+                                                               box.expandRatio="1"
+                                                               width="100%"
+                                                               required="true">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </hbox>
                                         <lookupPickerField id="cityOfCompanyField"
                                                            dataContainer="companyDc"
                                                            optionsContainer="cityOfCompaniesDc"
@@ -748,7 +748,7 @@
                                                       property="companyDescription"
                                                       stylename="edit-form-control"
                                                       width="100%"
-                                                      height="200px"/>
+                                                      height="260px"/>
                                     </vbox>
                                 </groupBox>
                                 <groupBox id="companyWorkingConditionsCard"
