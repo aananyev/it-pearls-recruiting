@@ -361,6 +361,9 @@ configure(webToolkitModule) {
     task deploy(dependsOn: webArchive, type: Copy) {
         from webArchive
         into "$cuba.tomcat.dir/webapps/${webContextName}/WEB-INF/lib"
+        // Также копируем скомпилированный widgetset в VAADIN/widgetsets веб-приложения
+        from file("$buildDir/web/VAADIN/widgetsets")
+        into "$cuba.tomcat.dir/webapps/${webContextName}/VAADIN/widgetsets"
     }
 }
 
