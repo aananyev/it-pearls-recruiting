@@ -334,6 +334,10 @@ configure_jvm_diagnostics() {
 -XX:+HeapDumpOnOutOfMemoryError \
 -XX:HeapDumpPath=${HEAP_DUMP_DIR} \
 -Xlog:gc*:file=${GC_LOG_FILE}:time,uptime,level,tags:filecount=5,filesize=20M"
+  # JPDA debug (если включён через JPDA_ENABLED=true в tomcat-setenv.sh)
+  if [ -n "${JPDA_OPTS:-}" ]; then
+    CATALINA_OPTS="${CATALINA_OPTS} ${JPDA_OPTS}"
+  fi
   export CATALINA_OPTS
 
   log "JVM heap: -Xms${LOCAL_JAVA_XMS} -Xmx${LOCAL_JAVA_XMX}"
