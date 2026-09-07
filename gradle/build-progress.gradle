@@ -1,0 +1,164 @@
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
+
+// Оценка веса (длительности в условных единицах) для различных типов задач
+def getTaskEstimatedWeight(Task task) {
+    String name = task.name
+    if (name.contains("buildScssThemes")) return 130
+    if (name.contains("buildWidgetSet")) return 90
+    if (name.contains("compileJava")) return 22
+    if (name.contains("compileTestJava")) return 16
+    if (name.contains("test")) return 25
+    if (name.contains("deploy")) return 10
+    if (name.contains("updateDb")) return 12
+    if (name.contains("assembleDbScripts")) return 8
+    if (name.contains("clean")) return 2
+    if (name.contains("classes") || name.contains("resources")) return 2
+    return 3
+}
+
+def formatDuration(long millis) {
+    if (millis <= 0) return "0с"
+    long seconds = Math.round(millis / 1000.0)
+    if (seconds < 60) return "${seconds}с"
+    long minutes = seconds / 60
+    long remSeconds = seconds % 60
+    if (minutes < 60) {
+        return remSeconds > 0 ? "${minutes}м ${remSeconds}с" : "${minutes}м"
+    }
+    long hours = minutes / 60
+    long remMinutes = minutes % 60
+    return "${hours}ч ${remMinutes}м"
+}
+
+def renderProgressBar(int percent, int barWidth = 20) {
+    percent = Math.max(0, Math.min(100, percent))
+    int completed = (int) Math.round((percent / 100.0) * barWidth)
+    int remaining = barWidth - completed
+    StringBuilder sb = new StringBuilder("[")
+    for (int i = 0; i < completed; i++) {
+        if (i == completed - 1 && remaining > 0) sb.append(">")
+        else sb.append("=")
+    }
+    for (int i = 0; i < remaining; i++) {
+        sb.append(" ")
+    }
+    sb.append("]")
+    return sb.toString()
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    List<Task> allTasks = taskGraph.allTasks
+    int totalCount = allTasks.size()
+    if (totalCount == 0) return
+
+    long totalWeight = 0
+    Map<String, Integer> tempWeights = new HashMap<>()
+    for (Task t : allTasks) {
+        int w = getTaskEstimatedWeight(t)
+        tempWeights.put(t.path, w)
+        totalWeight += w
+    }
+    final Map<String, Integer> weights = Collections.unmodifiableMap(tempWeights)
+    if (totalWeight <= 0) totalWeight = 1
+
+    long buildStartTime = System.currentTimeMillis()
+    AtomicInteger completedTasks = new AtomicInteger(0)
+    AtomicLong completedWeight = new AtomicLong(0)
+    AtomicReference<Task> activeTask = new AtomicReference<Task>(null)
+    AtomicLong activeTaskStartTime = new AtomicLong(0)
+
+    def ticker = Executors.newSingleThreadScheduledExecutor({ Runnable r ->
+        Thread th = new Thread(r, "build-progress-ticker")
+        th.daemon = true
+        return th
+    })
+
+    // Периодическое обновление статуса для длительных задач
+    ticker.scheduleAtFixedRate({
+        try {
+            Task cur = activeTask.get()
+            if (cur != null) {
+                long now = System.currentTimeMillis()
+                long taskElapsed = now - activeTaskStartTime.get()
+                if (taskElapsed >= 7000) { // если задача выполняется дольше 7 секунд
+                    long totalElapsed = now - buildStartTime
+                    long compW = completedWeight.get()
+                    int curTaskWeight = weights.get(cur.path) ?: 3
+                    double taskProgressFraction = Math.min(0.92, (double) taskElapsed / Math.max(1000.0, curTaskWeight * 1000.0))
+                    double effectiveCompW = compW + (curTaskWeight * taskProgressFraction)
+                    int percent = (int) Math.min(99, Math.round((effectiveCompW * 100.0) / totalWeight))
+
+                    double msPerWeight = totalElapsed / Math.max(1.0, effectiveCompW)
+                    long remWeight = Math.max(0, (long) (totalWeight - effectiveCompW))
+                    long etaMs = (long) (remWeight * msPerWeight)
+
+                    String bar = renderProgressBar(percent, 20)
+                    println "⏳ СБОРКА: ${bar} ${percent}% | Выполняется ${cur.path} (${formatDuration(taskElapsed)}) | Прошло: ${formatDuration(totalElapsed)} | До завершения ~ ${formatDuration(etaMs)}"
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+    }, 10, 10, TimeUnit.SECONDS)
+
+    taskGraph.addTaskExecutionListener(new TaskExecutionListener() {
+        @Override
+        void beforeExecute(Task task) {
+            try {
+                activeTask.set(task)
+                activeTaskStartTime.set(System.currentTimeMillis())
+
+                long now = System.currentTimeMillis()
+                long elapsed = Math.max(1, now - buildStartTime)
+                long compW = completedWeight.get()
+                int current = completedTasks.get()
+                int percent = (int) Math.min(99, Math.round((compW * 100.0) / totalWeight))
+
+                String etaStr
+                if (compW > 0 && elapsed > 1500) {
+                    double msPerWeight = (double) elapsed / compW
+                    msPerWeight = Math.max(150.0, msPerWeight)
+                    long remWeight = Math.max(0, totalWeight - compW)
+                    long etaMs = (long) (remWeight * msPerWeight)
+                    etaStr = formatDuration(etaMs)
+                } else {
+                    long remWeight = Math.max(0, totalWeight - compW)
+                    etaStr = formatDuration(remWeight * 850L)
+                }
+
+                String bar = renderProgressBar(percent, 20)
+                println "▶ [${bar} ${percent}% | ${current + 1}/${totalCount} | Осталось ~ ${etaStr}] ${task.path}"
+            } catch (Throwable ignored) {
+            }
+        }
+
+        @Override
+        void afterExecute(Task task, TaskState state) {
+            try {
+                activeTask.set(null)
+                int current = completedTasks.incrementAndGet()
+                int w = weights.get(task.path) ?: 3
+                long compW = completedWeight.addAndGet(w)
+                long now = System.currentTimeMillis()
+                long elapsed = Math.max(1, now - buildStartTime)
+                int percent = (int) Math.min(100, Math.round((compW * 100.0) / totalWeight))
+
+                if (current >= totalCount || percent >= 100) {
+                    ticker.shutdownNow()
+                    if (state.failure == null) {
+                        String bar = renderProgressBar(100, 20)
+                        println "🏁 [${bar} 100% (${totalCount}/${totalCount}) | Время сборки: ${formatDuration(elapsed)}] Сборка успешно завершена.\n"
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+    })
+
+    gradle.buildFinished {
+        ticker.shutdownNow()
+    }
+}

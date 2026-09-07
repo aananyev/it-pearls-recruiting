@@ -316,7 +316,7 @@ public class LlmChatServiceBean implements LlmChatService {
                         }
                     });
             if (result == null || result.getText() == null || result.getText().trim().isEmpty()) {
-                settleFailedQuota(session, null);
+                settleFailedQuota(session);
                 session.complete("ERROR", "AI-провайдер вернул пустой ответ.");
                 publishStreamEvent(session, true);
                 return;
@@ -395,6 +395,10 @@ public class LlmChatServiceBean implements LlmChatService {
     private void cleanupStreamingSessions() {
         long threshold = System.currentTimeMillis() - STREAM_SESSION_TTL_MS;
         streamingSessions.entrySet().removeIf(entry -> entry.getValue().isFinishedBefore(threshold));
+    }
+
+    private void settleFailedQuota(StreamingSession session) {
+        settleFailedQuota(session, null);
     }
 
     private void settleFailedQuota(StreamingSession session, Throwable failure) {

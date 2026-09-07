@@ -15,9 +15,9 @@
             WHERE code = 'LLM_CHAT';
 
             UPDATE hunttech_user_ai_profile
-            SET admin_fallback_consent = true,
-                admin_fallback_consent_version = '2026-09-05-v1',
-                admin_fallback_consent_at = current_timestamp
+            SET ADMIN_FALLBACK_CONSENT = true,
+                ADMIN_FALLBACK_CONSENT_VERSION = '2026-09-05-v1',
+                ADMIN_FALLBACK_CONSENT_AT = current_timestamp
             WHERE user_id IN (SELECT id FROM sec_user WHERE login = 'alan');
         </sql>
         <rollback>
@@ -28,9 +28,9 @@
                 WHERE code = 'LLM_CHAT';
 
                 UPDATE hunttech_user_ai_profile
-                SET admin_fallback_consent = false,
-                    admin_fallback_consent_version = null,
-                    admin_fallback_consent_at = null
+                SET ADMIN_FALLBACK_CONSENT = false,
+                    ADMIN_FALLBACK_CONSENT_VERSION = null,
+                    ADMIN_FALLBACK_CONSENT_AT = null
                 WHERE user_id IN (SELECT id FROM sec_user WHERE login = 'alan');
             </sql>
         </rollback>
