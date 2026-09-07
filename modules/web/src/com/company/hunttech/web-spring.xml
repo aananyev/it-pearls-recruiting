@@ -6,6 +6,9 @@
     <!-- Annotation-based beans -->
     <context:component-scan base-package="com.company.hunttech,com.company.hunttech,com.hunttech.hrm"/>
 
+    <bean id="mainScreenBackgroundService" class="com.company.hunttech.web.screens.mainscreen.MainScreenBackgroundService"/>
+    <alias name="mainScreenBackgroundService" alias="hunttech_MainScreenBackgroundService"/>
+
     <gui:screens base-packages="com.company.hunttech.web"/>
     <bean id="hunttech_proxyCreator" class="com.haulmont.cuba.web.sys.remoting.WebRemoteProxyBeanCreator">
         <property name="serverSelector" ref="cuba_ServerSelector"/>

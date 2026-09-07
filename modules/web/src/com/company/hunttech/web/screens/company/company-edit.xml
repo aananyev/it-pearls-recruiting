@@ -215,7 +215,7 @@
                   width="100%"
                   height="100%"
                   spacing="false"
-                  expand="companyEditorContentScrollBox">
+                  expand="mainTab">
                 <!-- Toolbar: заголовок «Компании», описание и кнопка умного заполнения формы -->
                 <hbox id="companyEditorToolbar"
                       stylename="edit-toolbar"
@@ -240,30 +240,24 @@
                             description="msg://msgSmartCompanyFillHint"
                             align="MIDDLE_RIGHT"/>
                 </hbox>
-                <!-- НОВЫЙ: общий scrollBox для вкладок (эталон IteractionListEdit) -->
-                <scrollBox id="companyEditorContentScrollBox"
-                           width="100%"
-                           height="100%"
-                           orientation="vertical"
-                           scrollBars="vertical"
-                           stylename="edit-workspace edit-workspace-scroll company-editor-content-scroll">
-                    <!-- Вкладки компании: 4 вкладки с выверенной сеткой полей -->
-                    <tabSheet id="mainTab"
-                              stylename="edit-tabs"
-                              width="100%"
-                              height="100%">
+                <!-- Вкладки компании: 4 вкладки с выверенной сеткой полей -->
+                <tabSheet id="mainTab"
+                          stylename="edit-tabs"
+                          width="100%"
+                          height="100%">
                     <!-- Вкладка 1: Информация о компании -->
                     <tab id="tabConpanyDetails"
                          caption="mainMsg://msgCompanyDetail"
                          margin="false"
                          spacing="true"
+                         expand="companyDetailsScroll"
                          stylename="company-main-tab">
                         <scrollBox id="companyDetailsScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="company-tab-scroll">
+                                   stylename="edit-workspace edit-workspace-scroll">
                             <vbox id="companyDetailsContent"
                                   width="100%"
                                   spacing="true"
@@ -337,14 +331,14 @@
                                             <textField id="phoneMainField"
                                                        dataContainer="companyDc"
                                                        property="phone"
-                                                       caption="msg://msgPhone"
+                                                       caption="Телефон"
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="emailMainField"
                                                        dataContainer="companyDc"
                                                        property="email"
-                                                       caption="msg://msgEmail"
+                                                       caption="Email"
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
@@ -353,7 +347,7 @@
                                         <textField id="websiteMainField"
                                                    dataContainer="companyDc"
                                                    property="website"
-                                                   caption="msg://msgWebsite"
+                                                   caption="Веб-сайт"
                                                    stylename="edit-form-control"
                                                    width="100%"/>
                                     </vbox>
@@ -427,13 +421,14 @@
                          caption="Официальные реквизиты"
                          margin="false"
                          spacing="true"
+                         expand="companyRequisitesScroll"
                          stylename="company-requisites-tab">
                         <scrollBox id="companyRequisitesScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="company-tab-scroll">
+                                   stylename="edit-workspace edit-workspace-scroll">
                             <vbox id="companyRequisitesContent"
                                   width="100%"
                                   spacing="true"
@@ -722,13 +717,14 @@
                          caption="msg://msgCompanyDescription"
                          margin="false"
                          spacing="true"
+                         expand="companyDescriptionScroll"
                          stylename="company-description-tab">
                         <scrollBox id="companyDescriptionScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="company-tab-scroll">
+                                   stylename="edit-workspace edit-workspace-scroll">
                             <vbox id="companyDescriptionContent"
                                   width="100%"
                                   spacing="true"
@@ -778,13 +774,14 @@
                          caption="mainMsg://msgCompanyDepartament"
                          margin="false"
                          spacing="true"
+                         expand="companyDepartmentsScroll"
                          stylename="company-departments-tab">
                         <scrollBox id="companyDepartmentsScroll"
                                    width="100%"
                                    height="100%"
                                    orientation="vertical"
                                    scrollBars="vertical"
-                                   stylename="company-tab-scroll">
+                                   stylename="edit-workspace edit-workspace-scroll">
                             <vbox id="companyDepartmentsContent"
                                   width="100%"
                                   height="100%"
@@ -827,12 +824,10 @@
                         </scrollBox>
                     </tab>
                 </tabSheet>
-                </scrollBox>
-                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю. ВНЕ scrollBox, НО В workspace. -->
+                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю. -->
                 <hbox id="editActions"
                       stylename="edit-footer-actions"
                       width="100%"
-                      height="AUTO"
                       expand="bottomActionsSpacer"
                       align="MIDDLE_RIGHT"
                       spacing="false">

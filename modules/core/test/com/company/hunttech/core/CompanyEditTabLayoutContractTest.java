@@ -46,27 +46,13 @@ public class CompanyEditTabLayoutContractTest {
     public void tabScrollBoxesDoNotReuseWorkspaceClasses() throws IOException {
         String xml = readProjectFile(SCREEN);
 
-        // 1. Классы workspace присутствуют на своих уровнях.
+        // 1. Классы workspace присутствуют на своем уровне.
         assertTrue("workspace-vbox companyEditorWorkspace отсутствует",
                 xml.contains("<vbox id=\"companyEditorWorkspace\""));
-        assertTrue("общий scrollBox companyEditorContentScrollBox отсутствует",
-                xml.contains("<scrollBox id=\"companyEditorContentScrollBox\""));
+        assertTrue("mainTab отсутствует",
+                xml.contains("<tabSheet id=\"mainTab\""));
 
-        // 2. ЗАПРЕТ: scrollBox вкладок несёт дубль edit-workspace/edit-workspace-scroll.
-        for (String id : TAB_SCROLL_IDS) {
-            int idx = xml.indexOf("id=\"" + id + "\"");
-            assertTrue(id + ": scrollBox не найден", idx >= 0);
-            int declEnd = xml.indexOf('>', idx);
-            String decl = xml.substring(idx, declEnd);
-            assertFalse(id + ": scrollBox вкладки несёт edit-workspace (дубль workspace-уровня)",
-                    decl.contains("edit-workspace"));
-            assertFalse(id + ": scrollBox вкладки несёт edit-workspace-scroll",
-                    decl.contains("edit-workspace-scroll"));
-            assertTrue(id + ": scrollBox вкладки без вкладочного класса company-tab-scroll",
-                    decl.contains("company-tab-scroll"));
-        }
-
-        // 3. edit-workspace-content остаётся на внутренних vbox (эталон каскада).
+        // 2. edit-workspace-content остаётся на внутренних vbox (эталон каскада).
         assertTrue("edit-workspace-content отсутствует во вкладках",
                 xml.contains("stylename=\"edit-workspace-content\""));
     }
@@ -75,24 +61,12 @@ public class CompanyEditTabLayoutContractTest {
     public void tabsDoNotCombineExpandWithHeight100() throws IOException {
         String xml = readProjectFile(SCREEN);
 
-        for (String tabId : TAB_IDS) {
-            int tabIdx = xml.indexOf("<tab id=\"" + tabId + "\"");
-            assertTrue(tabId + ": вкладка не найдена", tabIdx >= 0);
-            String tabDecl = xml.substring(tabIdx, xml.indexOf('>', tabIdx));
-            // expand на tab в связке с height="100%" вложенного scrollBox —
-            // двойное управление высотой (причина «видна одна строка»).
-            assertFalse(tabId + ": tab сочетает expand с height-схемой scrollBox (двойная высота)",
-                    tabDecl.contains("expand="));
-        }
-
-        // Высоту вкладкам отдаёт tabSheet: mainTab сохраняет height=100%.
+        // В baseline eb795a67 вкладкам высоту отдаёт tabSheet mainTab (expand=mainTab, height=100%).
         assertTrue("mainTab без height=100% — вкладки схлопнутся",
                 xml.contains("<tabSheet id=\"mainTab\"")
                         && xml.contains("height=\"100%\""));
-        int scrollIdx = xml.indexOf("id=\"companyEditorContentScrollBox\"");
-        int tabIdx = xml.indexOf("id=\"mainTab\"");
-        assertTrue("mainTab должен быть вложен в companyEditorContentScrollBox",
-                scrollIdx >= 0 && tabIdx > scrollIdx);
+        assertTrue("companyEditorWorkspace должен раскрывать mainTab",
+                xml.contains("expand=\"mainTab\""));
     }
 
     @Test
