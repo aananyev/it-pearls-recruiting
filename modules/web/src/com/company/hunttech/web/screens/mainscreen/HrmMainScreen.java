@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
@@ -35,6 +36,7 @@ public class HrmMainScreen extends ExtMainScreen {
     private static final Logger log = LoggerFactory.getLogger(HrmMainScreen.class);
 
     @Inject
+    @Named(MainScreenBackgroundService.NAME)
     private MainScreenBackgroundService mainScreenBackgroundService;
     @Inject
     private UserSession userSession;

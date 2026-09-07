@@ -35,7 +35,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component(MainScreenBackgroundService.NAME)
 public class MainScreenBackgroundService {
 
-    public static final String NAME = "hunttech_MainScreenBackgroundService";
+    public static final String NAME = "mainScreenBackgroundService";
+    public static final String LEGACY_NAME = "hunttech_MainScreenBackgroundService";
     public static final String CUSTOM_BACKGROUND_PREFIX = "hrm-main-background-";
     public static final int VARIANT_COUNT = 10;
 

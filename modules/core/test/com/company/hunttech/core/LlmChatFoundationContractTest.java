@@ -80,7 +80,7 @@ public class LlmChatFoundationContractTest {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
         String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
 
-        assertTrue(descriptor.contains("dialogMode width=\"420\" height=\"640\""));
+        assertTrue(descriptor.contains("dialogMode width=\"420px\" height=\"560px\""));
         assertTrue(controller.contains("llmChatService.startStreaming"));
         assertTrue(controller.contains("pollStreaming"));
         assertTrue(descriptor.contains("streamPollTimer"));
@@ -192,7 +192,7 @@ public class LlmChatFoundationContractTest {
         assertTrue(extension.contains("super.extend(button)"));
         assertTrue(dragScript.contains("pointerdown"));
         assertTrue(dragScript.contains("localStorage"));
-        assertTrue(dragScript.contains("threshold = 8"));
+        assertTrue(dragScript.contains("threshold = 6"));
         assertTrue(styles.contains(".llm-chat-launcher-window"));
         assertTrue(styles.contains(".llm-chat-launcher-spark"));
     }

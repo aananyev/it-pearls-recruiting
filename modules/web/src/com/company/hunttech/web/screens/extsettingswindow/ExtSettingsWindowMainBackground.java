@@ -23,6 +23,7 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.data.Datasource;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -58,6 +59,7 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     @Inject
     private Label<String> mainScreenBackgroundStatusLabel;
     @Inject
+    @Named(MainScreenBackgroundService.NAME)
     private MainScreenBackgroundService mainScreenBackgroundService;
     @Inject
     private MainScreenBackgroundImageProcessor imageProcessor;
