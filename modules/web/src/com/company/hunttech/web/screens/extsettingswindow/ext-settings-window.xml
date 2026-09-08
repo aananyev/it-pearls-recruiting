@@ -70,17 +70,22 @@
                                     showClearButton="true"/>
                         </vbox>
                         
-                        <!-- Идентификация пользователя: 4-уровневая типографика -->
+                        <!-- Идентификация пользователя: 4-уровневая типографика (hunttech-edit-screen-design) -->
                         <vbox id="userAiProfileIdentity" width="100%" spacing="false" stylename="user-ai-profile-identity edit-sidebar-identity">
                             <label id="userProfileNameLabel" width="100%" stylename="h2 bold user-ai-profile-name edit-sidebar-title" align="MIDDLE_CENTER"/>
                             <label id="currentPositionSidebarLabel" width="100%" stylename="h4 bold user-ai-profile-position edit-sidebar-subtitle" align="MIDDLE_CENTER"/>
+                            <label id="userLoginSidebarLabel" width="100%" stylename="edit-help candidate-sidebar-city bold" align="MIDDLE_CENTER"/>
+                            <label id="userEmailSidebarLabel" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
                         </vbox>
                         
-                        <!-- Сводка и статус -->
-                        <vbox id="userAiProfileSummary" width="100%" spacing="true" stylename="user-ai-profile-summary edit-sidebar-summary">
-                            <label id="profileStatusLabel" width="100%" stylename="user-ai-profile-status bold edit-help"/>
-                            <label id="profileCompletionLabel" width="100%" stylename="h4 user-ai-profile-summary-value"/>
-                            <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value edit-help"/>
+                        <!-- Сводка и статус: секция с заголовком по стандарту edit-screen-design -->
+                        <vbox id="userAiProfileSummaryBox" width="100%" spacing="false">
+                            <label value="msg://profileSummaryTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
+                            <vbox id="userAiProfileSummary" width="100%" spacing="true" stylename="user-ai-profile-summary edit-sidebar-summary">
+                                <label id="profileStatusLabel" width="100%" stylename="user-ai-profile-status bold edit-help"/>
+                                <label id="profileCompletionLabel" width="100%" stylename="h4 user-ai-profile-summary-value"/>
+                                <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value edit-help"/>
+                            </vbox>
                         </vbox>
 
                         <!-- Навигация: Вкладки экрана настроек -->

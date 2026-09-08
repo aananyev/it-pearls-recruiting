@@ -83,6 +83,8 @@ public class ExtSettingsWindow extends SettingsWindow {
 
     @Inject private Label<String> userProfileNameLabel;
     @Inject private Label<String> currentPositionSidebarLabel;
+    @Inject private Label<String> userLoginSidebarLabel;
+    @Inject private Label<String> userEmailSidebarLabel;
     @Inject private Label<String> profileStatusLabel;
     @Inject private Label<String> profileCompletionLabel;
     @Inject private Label<String> profileConfirmedAtLabel;
@@ -483,6 +485,14 @@ public class ExtSettingsWindow extends SettingsWindow {
         userProfileNameLabel.setValue(displayName);
         currentPositionSidebarLabel.setValue(profile != null && !isBlank(profile.getCurrentPosition())
                 ? profile.getCurrentPosition() : getMessage("positionNotSpecified"));
+        if (userLoginSidebarLabel != null) {
+            userLoginSidebarLabel.setValue(currentUser.getLogin() != null ? "@" + currentUser.getLogin() : "");
+        }
+        if (userEmailSidebarLabel != null) {
+            String email = currentUser.getEmail();
+            userEmailSidebarLabel.setValue(email != null && !email.isEmpty() ? email : "");
+            userEmailSidebarLabel.setVisible(email != null && !email.isEmpty());
+        }
         boolean active = profile != null
                 && Boolean.TRUE.equals(profile.getProfileEnabled())
                 && Boolean.TRUE.equals(profile.getExternalProcessingAllowed());

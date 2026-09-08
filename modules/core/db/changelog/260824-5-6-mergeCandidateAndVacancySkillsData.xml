@@ -23,7 +23,7 @@
             </sqlCheck>
         </preConditions>
         <comment>Данные сгенерированы AI-анализом навыков кандидатов (SKILLS_EXTRACT, 260815-2). Применяется идемпотентно: если на проде уже 306 строк с активными записями — пропускается.</comment>
-        <sqlFile path="update/postgres/26/260824-5-candidate_skill_data.sql"
+        <sqlFile path="../update/postgres/26/260824-5-candidate_skill_data.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
@@ -37,7 +37,7 @@
             </sqlCheck>
         </preConditions>
         <comment>Навыки открытых вакансий (skillsList), сгенерированные через CV_SMART_PARSE_JSON / SKILLS_EXTRACT. Применяется идемпотентно.</comment>
-        <sqlFile path="update/postgres/26/260824-6-skill_tree_data.sql"
+        <sqlFile path="../update/postgres/26/260824-6-skill_tree_data.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>

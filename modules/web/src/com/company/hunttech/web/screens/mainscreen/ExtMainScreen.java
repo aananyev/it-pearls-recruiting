@@ -126,7 +126,7 @@ public class ExtMainScreen extends MainScreen {
         launcher.setId("llmChatLauncher");
         launcher.setHtmlContentAllowed(true);
         launcher.setCaption("<span class=\"llm-chat-launcher-icon\" aria-hidden=\"true\">"
-                + "<svg class=\"llm-chat-svg-icon\" viewBox=\"0 0 28 28\" width=\"34\" height=\"34\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+                + "<svg class=\"llm-chat-svg-icon\" viewBox=\"0 0 28 28\" width=\"100%\" height=\"100%\" preserveAspectRatio=\"xMidYMid meet\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
                 + "<path d=\"M18 4H7C4.79 4 3 5.79 3 8v6c0 2.21 1.79 4 4 4v3.5l4.38-3.5H18c2.21 0 4-1.79 4-4V8c0-2.21-1.79-4-4-4z\" fill=\"#ffffff\"/>"
                 + "<path d=\"M21 8h1c1.66 0 3 1.34 3 3v6c0 1.66-1.34 3-3 3h-1.5L17 22.5V20h-3c-.35 0-.68-.06-1-.17A4.004 4.004 0 0 0 16 17v-5c0-1.86-1.28-3.41-3-3.86.62-.7 1.54-1.14 2.56-1.14H21z\" fill=\"rgba(255,255,255,0.45)\"/>"
                 + "<rect x=\"6.5\" y=\"8\" width=\"8\" height=\"1.8\" rx=\"0.9\" fill=\"#4f46e5\"/>"
@@ -158,7 +158,7 @@ public class ExtMainScreen extends MainScreen {
 
         String storageKey = "hunttech.llm-chat.launcher." + userSession.getUser().getId();
         String initialPosition = loadUserChatPosition();
-        new LlmChatLauncherExtension().extend(launcher, storageKey, initialPosition, this::saveUserChatPosition);
+        new LlmChatLauncherExtension().extend(llmChatLauncherWindow, storageKey, initialPosition, this::saveUserChatPosition);
     }
 
     private String loadUserChatPosition() {
@@ -273,14 +273,18 @@ public class ExtMainScreen extends MainScreen {
     }
 
     private void signIconsChecksAndGenerate() {
-        if (signIconService.checkUserIcons()) {
-            createDefaultIcons();
+        try {
+            if (signIconService != null && signIconService.checkUserIcons()) {
+                createDefaultIcons();
 
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                    .withCaption(messageBundle.getMessage("msgInfo"))
-                    .withDescription(messageBundle.getMessage("msgCreateDefaultSing"))
-                    .show();
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .withCaption(messageBundle.getMessage("msgInfo"))
+                        .withDescription(messageBundle.getMessage("msgCreateDefaultSing"))
+                        .show();
+            }
+        } catch (Exception e) {
+            log.debug("Cannot check or create user icons: {}", e.getMessage());
         }
     }
 

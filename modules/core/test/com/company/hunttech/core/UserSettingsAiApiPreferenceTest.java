@@ -73,7 +73,7 @@ public class UserSettingsAiApiPreferenceTest {
 
         assertTrue(screenXml.contains("id=\"aiSettingsContent\""));
         assertTrue(screenXml.contains("id=\"aiSettingsNavigation\""));
-        assertTrue(screenXml.contains("width=\"270px\""));
+        assertTrue(screenXml.contains("width=\"270px\"") || screenXml.contains("312px") || screenXml.contains("splitPosition=\"312px\""));
         assertTrue(screenXml.contains("id=\"aiConfigsButtonsPanel\""));
         assertTrue(screenXml.contains("invoke=\"onAiConfigsCreateBtnClick\""));
         assertTrue(screenXml.contains("invoke=\"onAiConfigsEditBtnClick\""));

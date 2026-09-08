@@ -377,12 +377,15 @@
                             <table id="aiConfigsTable" width="100%" height="100%" editable="false">
                                 <!-- Колонки сохраняют исходный набор безопасно отображаемых свойств. -->
                                 <columns>
-                                    <!-- Provider code идентифицирует AI-провайдера. -->
+                                    <!-- Флаг основной конфигурации провайдера. -->
                                     <column id="isPrimary" caption="msg://UserAiConfiguration.isPrimary"/>
+                                    <!-- Provider code идентифицирует AI-провайдера. -->
                                     <column id="providerCode"/>
                                     <!-- Default model name показывает выбранную модель провайдера. -->
                                     <column id="defaultModelName"/>
+                                    <!-- Максимальное количество попыток повтора. -->
                                     <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
+                                    <!-- Приоритет использования конфигурации. -->
                                     <column id="priority" caption="msg://UserAiConfiguration.priority"/>
                                     <!-- Active-state показывает доступность конфигурации. -->
                                     <column id="isActive"/>

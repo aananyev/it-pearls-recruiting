@@ -19,7 +19,7 @@ public class ExtSettingsWindowInterfaceLayout extends ExtSettingsWindowEmailNavi
 
     private static final String INTERFACE_LABEL_WIDTH = "190px";
     private static final String INTERFACE_CONTROL_WIDTH = "100%";
-    private static final String AUTO_TIME_ZONE_WIDTH = "96px";
+    private static final String AUTO_TIME_ZONE_WIDTH = "140px";
 
     @Inject
     private Label mainWindowLabel;
