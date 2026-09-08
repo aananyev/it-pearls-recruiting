@@ -78,8 +78,18 @@
                             <label id="userEmailSidebarLabel" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
                         </vbox>
                         
+                        <!-- Навигация: Вкладки экрана настроек (соответствуют вкладкам settingsTabSheet) -->
+                        <vbox id="settingsTabsNavigation" width="100%" spacing="false" stylename="settings-tabs-navigation label-navigation">
+                            <label value="msg://tabsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
+                            <button id="navTabMyInfo" caption="msg://msgMyInfo" icon="USER" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
+                            <button id="navTabInterface" caption="msg://msgInterface" icon="DESKTOP" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabMail" caption="msg://msgEmailSettings" icon="ENVELOPE" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabAi" caption="msg://msgAiSettings" icon="SLIDERS" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabGeo" caption="msg://msgGeoApiSettings" icon="GLOBE" width="100%" stylename="borderless label-nav-item"/>
+                        </vbox>
+
                         <!-- Сводка и статус: секция с заголовком по стандарту edit-screen-design -->
-                        <vbox id="userAiProfileSummaryBox" width="100%" spacing="false">
+                        <vbox id="userAiProfileSummaryBox" width="100%" spacing="false" stylename="user-ai-profile-summary-section">
                             <label value="msg://profileSummaryTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
                             <vbox id="userAiProfileSummary" width="100%" spacing="true" stylename="user-ai-profile-summary edit-sidebar-summary">
                                 <label id="profileStatusLabel" width="100%" stylename="user-ai-profile-status bold edit-help"/>
@@ -87,19 +97,6 @@
                                 <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value edit-help"/>
                             </vbox>
                         </vbox>
-
-                        <!-- Навигация: Вкладки экрана настроек -->
-                        <vbox id="settingsTabsNavigation" width="100%" spacing="false" stylename="settings-tabs-navigation label-navigation">
-                            <label value="msg://tabsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
-                            <button id="navTabMyInfo" caption="msg://msgMyInfo" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
-                            <button id="navTabInterface" caption="msg://msgInterface" width="100%" stylename="borderless label-nav-item"/>
-                            <button id="navTabMail" caption="msg://msgEmailSettings" width="100%" stylename="borderless label-nav-item"/>
-                            <button id="navTabAi" caption="msg://msgAiSettings" width="100%" stylename="borderless label-nav-item"/>
-                            <button id="navTabGeo" caption="msg://msgGeoApiSettings" width="100%" stylename="borderless label-nav-item"/>
-                        </vbox>
-
-                        <!-- Фиксированный спейсер внизу скроллера сайдбара -->
-                        <vbox id="sidebarSpacer" width="100%" height="16px" stylename="edit-sidebar-spacer"/>
 
                         <!-- Навигация: Профиль и ИИ (скрыта в пользу навигации по вкладкам) -->
                         <vbox id="userAiProfileSectionNavigation" width="100%" spacing="false" visible="false" stylename="user-ai-profile-navigation label-navigation">
