@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260822-1-addUserSettingsGeoApiFields" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_USER_SETTINGS"/>
+            <not>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="GEO_API_KEY"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_SETTINGS">
+            <column name="GEO_API_KEY" type="varchar(255)"/>
+            <column name="GEO_API_SECRET" type="varchar(255)"/>
+            <column name="GEO_API_URL" type="varchar(255)"/>
+            <column name="GEO_AUTO_FETCH_FLAGS" type="boolean" defaultValueBoolean="true"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -7,6 +7,7 @@ import com.company.hunttech.core.SignIconService;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.PersonelReserve;
+import com.company.hunttech.entity.UserSettings;
 import com.company.hunttech.web.extension.ChangeFaviconExtension;
 import com.company.hunttech.web.extension.LlmChatLauncherExtension;
 import com.company.hunttech.web.screens.llmchat.LlmChatScreen;
@@ -17,6 +18,7 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
@@ -96,12 +98,17 @@ public class ExtMainScreen extends MainScreen {
     private ConfigStorageService configStorageService;
     @Inject
     private Screens screens;
+    @Inject
+    private Metadata metadata;
+
+    private static final String QUERY_LOAD_USER_SETTINGS =
+            "select e from hunttech_UserSettings e where e.user.id = :userId";
 
     private com.vaadin.ui.Window llmChatLauncherWindow;
 
     /** Opens the compact modal chat panel from the persistent main-screen launcher. */
     public void openLlmChat() {
-        screens.create(LlmChatScreen.class).show();
+        screens.create(LlmChatScreen.class, com.haulmont.cuba.gui.screen.OpenMode.DIALOG).show();
     }
 
     @Subscribe
@@ -119,8 +126,14 @@ public class ExtMainScreen extends MainScreen {
         launcher.setId("llmChatLauncher");
         launcher.setHtmlContentAllowed(true);
         launcher.setCaption("<span class=\"llm-chat-launcher-icon\" aria-hidden=\"true\">"
-                + "<span class=\"llm-chat-launcher-bubble\">&#xf0e5;</span>"
-                + "<span class=\"llm-chat-launcher-spark\">&#10022;</span></span>"
+                + "<svg class=\"llm-chat-svg-icon\" viewBox=\"0 0 28 28\" width=\"34\" height=\"34\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+                + "<path d=\"M18 4H7C4.79 4 3 5.79 3 8v6c0 2.21 1.79 4 4 4v3.5l4.38-3.5H18c2.21 0 4-1.79 4-4V8c0-2.21-1.79-4-4-4z\" fill=\"#ffffff\"/>"
+                + "<path d=\"M21 8h1c1.66 0 3 1.34 3 3v6c0 1.66-1.34 3-3 3h-1.5L17 22.5V20h-3c-.35 0-.68-.06-1-.17A4.004 4.004 0 0 0 16 17v-5c0-1.86-1.28-3.41-3-3.86.62-.7 1.54-1.14 2.56-1.14H21z\" fill=\"rgba(255,255,255,0.45)\"/>"
+                + "<rect x=\"6.5\" y=\"8\" width=\"8\" height=\"1.8\" rx=\"0.9\" fill=\"#4f46e5\"/>"
+                + "<rect x=\"6.5\" y=\"11.5\" width=\"6\" height=\"1.8\" rx=\"0.9\" fill=\"#7c3aed\"/>"
+                + "</svg>"
+                + "<span class=\"llm-chat-launcher-spark\" aria-hidden=\"true\"></span>"
+                + "</span>"
                 + "<span class=\"llm-chat-launcher-label\">Открыть AI-чат</span>");
         launcher.setDescription("Открыть AI-чат");
         launcher.setStyleName("llm-chat-launcher");
@@ -129,19 +142,105 @@ public class ExtMainScreen extends MainScreen {
 
         llmChatLauncherWindow = new com.vaadin.ui.Window();
         llmChatLauncherWindow.setId("llmChatLauncherWindow");
-        llmChatLauncherWindow.setStyleName("llm-chat-launcher-window");
+        llmChatLauncherWindow.setStyleName("borderless llm-chat-launcher-window");
         llmChatLauncherWindow.setCaption("");
         llmChatLauncherWindow.setClosable(false);
         llmChatLauncherWindow.setResizable(false);
         llmChatLauncherWindow.setDraggable(false);
         llmChatLauncherWindow.setModal(false);
-        llmChatLauncherWindow.setWidth(48, com.vaadin.server.Sizeable.Unit.PIXELS);
-        llmChatLauncherWindow.setHeight(48, com.vaadin.server.Sizeable.Unit.PIXELS);
+        llmChatLauncherWindow.setWidth(56, com.vaadin.server.Sizeable.Unit.PIXELS);
+        llmChatLauncherWindow.setHeight(56, com.vaadin.server.Sizeable.Unit.PIXELS);
+        llmChatLauncherWindow.setPositionX(9999);
+        llmChatLauncherWindow.setPositionY(9999);
         llmChatLauncherWindow.setContent(launcher);
 
         UI.getCurrent().addWindow(llmChatLauncherWindow);
-        new LlmChatLauncherExtension().extend(launcher,
-                "hunttech.llm-chat.launcher." + userSession.getUser().getId());
+
+        String storageKey = "hunttech.llm-chat.launcher." + userSession.getUser().getId();
+        String initialPosition = loadUserChatPosition();
+        new LlmChatLauncherExtension().extend(launcher, storageKey, initialPosition, this::saveUserChatPosition);
+    }
+
+    private String loadUserChatPosition() {
+        if (userSession == null || userSession.getUser() == null) {
+            return "{\"align\":\"bottom-right\",\"right\":24,\"bottom\":24}";
+        }
+        try {
+            String position = dataManager.load(UserSettings.class)
+                    .query(QUERY_LOAD_USER_SETTINGS)
+                    .parameter("userId", userSession.getUser().getId())
+                    .view("userSettings-view")
+                    .optional()
+                    .map(UserSettings::getLlmChatButtonPosition)
+                    .orElse(null);
+            if (position == null || position.trim().isEmpty()) {
+                return UserSettings.DEFAULT_LLM_CHAT_BUTTON_POSITION;
+            }
+            return position;
+        } catch (Exception e) {
+            log.warn("Cannot load chat button position for user {}: {}",
+                    userSession.getUser().getId(), e.getMessage());
+            return UserSettings.DEFAULT_LLM_CHAT_BUTTON_POSITION;
+        }
+    }
+
+    private static final int MAX_POSITION_JSON_LENGTH = 255;
+
+    private synchronized UserSettings findOrCreateUserSettings(UUID userId) {
+        UserSettings settings = dataManager.load(UserSettings.class)
+                .query(QUERY_LOAD_USER_SETTINGS)
+                .parameter("userId", userId)
+                .view("userSettings-view")
+                .optional()
+                .orElse(null);
+        if (settings != null) {
+            return settings;
+        }
+
+        ExtUser extUser = dataManager.load(ExtUser.class)
+                .id(userId)
+                .view("extUser-view")
+                .optional()
+                .orElse(null);
+        if (extUser == null) {
+            return null;
+        }
+
+        UserSettings newSettings = metadata.create(UserSettings.class);
+        newSettings.setUser(extUser);
+        return newSettings;
+    }
+
+    private void saveUserChatPosition(String positionJson) {
+        if (userSession == null || userSession.getUser() == null || positionJson == null) {
+            return;
+        }
+        String trimmed = positionJson.trim();
+        if (trimmed.isEmpty() || trimmed.length() > MAX_POSITION_JSON_LENGTH
+                || !trimmed.startsWith("{") || !trimmed.endsWith("}")) {
+            log.warn("Invalid chat position payload: {}", positionJson);
+            return;
+        }
+        UUID userId = userSession.getUser().getId();
+        for (int attempt = 1; attempt <= 2; attempt++) {
+            try {
+                UserSettings settings = findOrCreateUserSettings(userId);
+                if (settings == null) {
+                    log.warn("Cannot save chat button position: ExtUser {} not found", userId);
+                    return;
+                }
+                settings.setLlmChatButtonPosition(trimmed);
+                dataManager.commit(settings);
+                log.debug("Saved LLM chat launcher position for user {}: {}", userId, trimmed);
+                return;
+            } catch (Exception e) {
+                if (attempt == 1) {
+                    log.warn("Attempt 1 failed to save chat button position for user {}: {}, retrying", userId, e.getMessage());
+                } else {
+                    log.warn("Failed to save chat button position for user {}: {}", userId, e.getMessage());
+                }
+            }
+        }
     }
 
     @Subscribe

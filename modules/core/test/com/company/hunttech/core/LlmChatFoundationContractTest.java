@@ -80,7 +80,7 @@ public class LlmChatFoundationContractTest {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
         String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
 
-        assertTrue(descriptor.contains("dialogMode width=\"420px\" height=\"560px\""));
+        assertTrue(descriptor.contains("dialogMode width=\"840px\" height=\"560px\""));
         assertTrue(controller.contains("llmChatService.startStreaming"));
         assertTrue(controller.contains("pollStreaming"));
         assertTrue(descriptor.contains("streamPollTimer"));
@@ -185,16 +185,43 @@ public class LlmChatFoundationContractTest {
         String extension = source("modules/web/src/com/company/hunttech/web/extension/LlmChatLauncherExtension.java");
         String dragScript = source("modules/web/src/com/company/hunttech/web/extension/llm-chat-launcher.js");
         String styles = source("modules/web/themes/hunttech-modern-light/com.company.hunttech/chat-style.css");
+        String userSettings = source("modules/global/src/com/company/hunttech/entity/UserSettings.java");
+        String migration = source("modules/core/db/changelog/260907-1-addLlmChatButtonPosition.xml")
+                + source("modules/core/db/update/postgres/26/260907-1-addLlmChatButtonPosition.sql");
+
         assertFalse("Launcher must not be part of MainScreen layout", descriptor.contains("llmChatLauncherBar"));
-        assertTrue(controller.contains("screens.create(LlmChatScreen.class).show()"));
+        assertTrue(controller.contains("screens.create(LlmChatScreen.class"));
+        assertTrue(controller.contains("OpenMode.DIALOG"));
         assertTrue(controller.contains("UI.getCurrent().addWindow(llmChatLauncherWindow)"));
         assertTrue(controller.contains("new LlmChatLauncherExtension()"));
+        assertTrue(controller.contains("loadUserChatPosition()"));
+        assertTrue(controller.contains("saveUserChatPosition"));
+
         assertTrue(extension.contains("super.extend(button)"));
+        assertTrue(extension.contains("PositionChangeListener"));
+        assertTrue(extension.contains("savePosition"));
+
         assertTrue(dragScript.contains("pointerdown"));
         assertTrue(dragScript.contains("localStorage"));
         assertTrue(dragScript.contains("threshold = 6"));
+        assertTrue(dragScript.contains("serverPosition"));
+        assertTrue(dragScript.contains("savePosition"));
+        assertTrue(dragScript.contains("llm-chat-launcher-custom-position"));
+
         assertTrue(styles.contains(".llm-chat-launcher-window"));
         assertTrue(styles.contains(".llm-chat-launcher-spark"));
+        assertTrue(styles.contains("right: 24px !important;"));
+        assertTrue(styles.contains("bottom: 24px !important;"));
+        assertTrue(styles.contains(".llm-chat-launcher-custom-position"));
+
+        assertTrue(userSettings.contains("llmChatButtonPosition"));
+        assertTrue(userSettings.contains("LLM_CHAT_BUTTON_POSITION"));
+        assertTrue(migration.contains("LLM_CHAT_BUTTON_POSITION"));
+        String defaultMigration = source("modules/core/db/changelog/260907-2-setLlmChatDefaultPositionBottomRight.xml");
+        assertTrue(defaultMigration.contains("bottom-right"));
+        String alanFallbackMigration = source("modules/core/db/changelog/260908-1-setAlanFallbackAndChatAdminConfig.xml");
+        assertTrue(alanFallbackMigration.contains("ADMIN_FALLBACK_CONSENT"));
+        assertTrue(alanFallbackMigration.contains("LLM_CHAT"));
     }
 
     @Test

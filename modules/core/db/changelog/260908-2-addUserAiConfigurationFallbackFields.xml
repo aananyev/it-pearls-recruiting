@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260908-2-addUserAiConfiguration-isPrimary" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+            <not>
+                <columnExists tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="IS_PRIMARY"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_AI_CONFIGURATION">
+            <column name="IS_PRIMARY" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="IS_PRIMARY"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="260908-2-addUserAiConfiguration-maxRetries" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+            <not>
+                <columnExists tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="MAX_RETRIES"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_AI_CONFIGURATION">
+            <column name="MAX_RETRIES" type="integer" defaultValueNumeric="2"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="MAX_RETRIES"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="260908-2-addUserAiConfiguration-priority" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+            <not>
+                <columnExists tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="PRIORITY_"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_AI_CONFIGURATION">
+            <column name="PRIORITY_" type="integer" defaultValueNumeric="10"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="PRIORITY_"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

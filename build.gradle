@@ -30,6 +30,7 @@ def webToolkitModule = project(":${modulePrefix}-web-toolkit")
 def servletApi = 'javax.servlet:javax.servlet-api:3.1.0'
 
 apply(plugin: 'cuba')
+apply from: 'gradle/build-progress.gradle'
 
 configurations.all {
     resolutionStrategy {
@@ -41,7 +42,7 @@ configurations.all {
 cuba {
     artifact {
         group = 'com.company.hunttech'
-        version = '0.492'
+        version = '0.494'
         isSnapshot = true
     }
     tomcat {

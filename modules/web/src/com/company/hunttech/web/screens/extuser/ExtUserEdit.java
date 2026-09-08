@@ -145,10 +145,14 @@ public class ExtUserEdit extends Screen {
         }
         screenBuilders.editor(UserAiConfiguration.class, this)
                 .withScreenClass(UserAiConfigurationEdit.class)
+                .withOpenMode(OpenMode.DIALOG)
                 .newEntity()
                 .withInitializer(entity -> {
                     entity.setUser(user);
                     entity.setIsActive(true);
+                    entity.setIsPrimary(false);
+                    entity.setMaxRetries(2);
+                    entity.setPriority(10);
                 })
                 .withAfterCloseListener(afterCloseEvent -> refreshAiConfigs())
                 .build()
@@ -161,9 +165,16 @@ public class ExtUserEdit extends Screen {
         if (selected == null) {
             return;
         }
+        UserAiConfiguration toEdit = dataManager.load(UserAiConfiguration.class)
+                .id(selected.getId())
+                .view("userAiConfiguration-edit-view")
+                .optional()
+                .orElse(selected);
+
         screenBuilders.editor(UserAiConfiguration.class, this)
                 .withScreenClass(UserAiConfigurationEdit.class)
-                .editEntity(selected)
+                .withOpenMode(OpenMode.DIALOG)
+                .editEntity(toEdit)
                 .withAfterCloseListener(afterCloseEvent -> refreshAiConfigs())
                 .build()
                 .show();

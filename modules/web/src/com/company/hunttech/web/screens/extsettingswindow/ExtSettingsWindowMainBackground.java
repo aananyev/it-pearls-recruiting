@@ -59,6 +59,8 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     @Inject
     private Label<String> mainScreenBackgroundStatusLabel;
     @Inject
+    private Label<String> llmChatButtonPositionStatusLabel;
+    @Inject
     @Named(MainScreenBackgroundService.NAME)
     private MainScreenBackgroundService mainScreenBackgroundService;
     @Inject
@@ -110,6 +112,7 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         mainScreenBackgroundUpload.addFileUploadErrorListener(
                 event -> onMainScreenBackgroundUploadError());
         refreshBackgroundStatus();
+        refreshLlmChatPositionStatus();
     }
 
     private void initBackgroundNavigation() {
@@ -385,6 +388,67 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(REMOVE_ERROR)
                     .show();
+        }
+    }
+
+    public void resetMyLlmChatPosition() {
+        if (userSettingsDs.getItem() != null) {
+            String defaultPos = UserSettings.DEFAULT_LLM_CHAT_BUTTON_POSITION;
+            userSettingsDs.getItem().setLlmChatButtonPosition(defaultPos);
+            refreshLlmChatPositionStatus();
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Кнопка AI-чата перемещена в правый нижний край экрана. Нажмите «ОК» для сохранения.")
+                    .show();
+        }
+    }
+
+    public void resetAllUsersLlmChatPosition() {
+        dialogs.createOptionDialog()
+                .withCaption("Подтверждение")
+                .withMessage("Переместить вызов AI-чата в правый нижний край экрана для всех пользователей системы?")
+                .withActions(
+                        new com.haulmont.cuba.gui.components.DialogAction(com.haulmont.cuba.gui.components.DialogAction.Type.YES, com.haulmont.cuba.gui.components.Action.Status.PRIMARY).withHandler(e -> {
+                            try {
+                                String defaultPos = UserSettings.DEFAULT_LLM_CHAT_BUTTON_POSITION;
+                                if (userSettingsDs.getItem() != null) {
+                                    userSettingsDs.getItem().setLlmChatButtonPosition(defaultPos);
+                                }
+                                int updated = 0;
+                                java.util.List<UserSettings> allSettings = dataManager.load(UserSettings.class)
+                                        .query("select e from hunttech_UserSettings e")
+                                        .view("userSettings-view")
+                                        .list();
+                                com.haulmont.cuba.core.global.CommitContext commitContext = new com.haulmont.cuba.core.global.CommitContext();
+                                for (UserSettings us : allSettings) {
+                                    us.setLlmChatButtonPosition(defaultPos);
+                                    commitContext.addInstanceToCommit(us);
+                                    updated++;
+                                }
+                                dataManager.commit(commitContext);
+                                refreshLlmChatPositionStatus();
+                                notifications.create(Notifications.NotificationType.TRAY)
+                                        .withCaption("Вызов AI-чата перемещен в правый нижний край у всех пользователей (" + updated + ").")
+                                        .show();
+                            } catch (Exception ex) {
+                                notifications.create(Notifications.NotificationType.ERROR)
+                                        .withCaption("Не удалось обновить: " + ex.getMessage())
+                                        .show();
+                            }
+                        }),
+                        new com.haulmont.cuba.gui.components.DialogAction(com.haulmont.cuba.gui.components.DialogAction.Type.NO)
+                ).show();
+    }
+
+    private void refreshLlmChatPositionStatus() {
+        if (llmChatButtonPositionStatusLabel == null) {
+            return;
+        }
+        UserSettings settings = userSettingsDs.getItem();
+        String pos = settings != null ? settings.getLlmChatButtonPosition() : null;
+        if (pos == null || pos.trim().isEmpty() || pos.contains("bottom-right")) {
+            llmChatButtonPositionStatusLabel.setValue("Правый нижний край экрана");
+        } else {
+            llmChatButtonPositionStatusLabel.setValue("Пользовательские координаты");
         }
     }
 }

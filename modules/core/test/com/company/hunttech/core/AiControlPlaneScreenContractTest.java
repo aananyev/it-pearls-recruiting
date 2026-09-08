@@ -88,6 +88,22 @@ public class AiControlPlaneScreenContractTest {
         assertTrue(menu.contains("screen=\"hunttech_UserAiConfiguration.browse\""));
     }
 
+    @Test
+    public void userAiConfigurationEditViewHasDataViewIntegrityForApiKey() throws IOException {
+        String views = readProjectFile("modules/global/src/com/company/hunttech/views.xml");
+        String editView = between(views,
+                "name=\"userAiConfiguration-edit-view\"",
+                "</view>");
+        assertTrue("userAiConfiguration-edit-view must declare apiKey for Data View Integrity",
+                editView.contains("<property name=\"apiKey\"/>"));
+        assertTrue("userAiConfiguration-edit-view must declare apiKeyEncrypted",
+                editView.contains("<property name=\"apiKeyEncrypted\"/>"));
+
+        String editDescriptor = readProjectFile("modules/web/src/com/company/hunttech/web/screens/useraiconfiguration/user-ai-configuration-edit.xml");
+        assertTrue("userAiConfigurationDc must use userAiConfiguration-edit-view",
+                editDescriptor.contains("view=\"userAiConfiguration-edit-view\""));
+    }
+
     private String between(String source, String start, String end) {
         int startIndex = source.indexOf(start);
         int endIndex = source.indexOf(end, startIndex + start.length());

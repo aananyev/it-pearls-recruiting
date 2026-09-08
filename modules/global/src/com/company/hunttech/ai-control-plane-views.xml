@@ -54,6 +54,9 @@
         <property name="providerCode"/>
         <property name="defaultModelName"/>
         <property name="isActive"/>
+        <property name="isPrimary"/>
+        <property name="maxRetries"/>
+        <property name="priority"/>
     </view>
     <!-- Core-only view добавляет ciphertext и transitional API_KEY для фактического вызова. -->
     <view entity="hunttech_UserAiConfiguration" name="user-ai-configuration-ai-execution-view" extends="user-ai-configuration-override-picker-view">

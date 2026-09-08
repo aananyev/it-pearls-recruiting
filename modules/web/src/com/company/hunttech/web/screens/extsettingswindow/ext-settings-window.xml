@@ -30,33 +30,32 @@
     <!-- Полновысотный Split-View: фиксированный сайдбар слева на всю высоту экрана, TabSheet и рабочая область справа -->
     <layout expand="settingsMainLayout" stylename="ext-settings-window edit-screen-layout" spacing="false" width="100%" height="100%">
         <hbox id="settingsMainLayout" width="100%" height="100%" spacing="false" expand="settingsWorkspaceBox" stylename="edit-screen-layout">
-            <!-- ЛЕВЫЙ САЙДБАР (270px) НА ВСЮ ВЫСОТУ ЭКРАНА -->
+            <!-- ЛЕВЫЙ САЙДБАР (312px) НА ВСЮ ВЫСОТУ ЭКРАНА (стандарт hunttech-edit-screen-design) -->
             <vbox id="userAiProfileSidebar"
-                  width="270px"
+                  width="312px"
                   height="100%"
                   spacing="false"
                   stylename="user-ai-profile-sidebar edit-sidebar">
                 <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical" scrollBars="vertical">
                     <vbox width="100%" spacing="true">
-                        <!-- DropZone & Avatar -->
+                        <!-- DropZone & Avatar (стандарт 120px) -->
                         <vbox id="dropZone"
                               spacing="true"
-                              width="200px"
-                              height="236px"
+                              width="100%"
                               align="TOP_CENTER"
                               expand="picVBox"
                               stylename="dropzone-container user-ai-profile-avatar edit-sidebar-visual">
                             <vbox id="picVBox" align="TOP_CENTER" spacing="true">
                                 <ovaFallbackImage id="userPic"
-                                                  width="176px"
-                                                  height="176px"
-                                                  ovalWidth="176px"
-                                                  ovalHeight="176px"
+                                                  width="120px"
+                                                  height="120px"
+                                                  ovalWidth="120px"
+                                                  ovalHeight="120px"
                                                   fallbackThemePath="icons/no-programmer.jpeg"
                                                   visible="true"
                                                   align="TOP_CENTER"
                                                   scaleMode="SCALE_DOWN"/>
-                                <image id="defaultPic" width="100%" visible="false" align="TOP_CENTER" stylename="widget-border" scaleMode="FILL">
+                                <image id="defaultPic" width="120px" height="120px" visible="false" align="TOP_CENTER" stylename="widget-border" scaleMode="SCALE_DOWN">
                                     <theme path="icons/no-programmer.jpeg"/>
                                 </image>
                             </vbox>
@@ -71,17 +70,17 @@
                                     showClearButton="true"/>
                         </vbox>
                         
-                        <!-- Идентификация пользователя -->
+                        <!-- Идентификация пользователя: 4-уровневая типографика -->
                         <vbox id="userAiProfileIdentity" width="100%" spacing="false" stylename="user-ai-profile-identity edit-sidebar-identity">
-                            <label id="userProfileNameLabel" width="100%" stylename="h2 user-ai-profile-name edit-sidebar-title" align="MIDDLE_CENTER"/>
-                            <label id="currentPositionSidebarLabel" width="100%" stylename="h4 user-ai-profile-position edit-sidebar-subtitle" align="MIDDLE_CENTER"/>
+                            <label id="userProfileNameLabel" width="100%" stylename="h2 bold user-ai-profile-name edit-sidebar-title" align="MIDDLE_CENTER"/>
+                            <label id="currentPositionSidebarLabel" width="100%" stylename="h4 bold user-ai-profile-position edit-sidebar-subtitle" align="MIDDLE_CENTER"/>
                         </vbox>
                         
                         <!-- Сводка и статус -->
                         <vbox id="userAiProfileSummary" width="100%" spacing="true" stylename="user-ai-profile-summary edit-sidebar-summary">
-                            <label id="profileStatusLabel" width="100%" stylename="user-ai-profile-status"/>
+                            <label id="profileStatusLabel" width="100%" stylename="user-ai-profile-status bold edit-help"/>
                             <label id="profileCompletionLabel" width="100%" stylename="h4 user-ai-profile-summary-value"/>
-                            <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value"/>
+                            <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value edit-help"/>
                         </vbox>
 
                         <!-- Навигация: Вкладки экрана настроек -->
@@ -93,6 +92,9 @@
                             <button id="navTabAi" caption="msg://msgAiSettings" width="100%" stylename="borderless label-nav-item"/>
                             <button id="navTabGeo" caption="msg://msgGeoApiSettings" width="100%" stylename="borderless label-nav-item"/>
                         </vbox>
+
+                        <!-- Фиксированный спейсер внизу скроллера сайдбара -->
+                        <vbox id="sidebarSpacer" width="100%" height="16px" stylename="edit-sidebar-spacer"/>
 
                         <!-- Навигация: Профиль и ИИ (скрыта в пользу навигации по вкладкам) -->
                         <vbox id="userAiProfileSectionNavigation" width="100%" spacing="false" visible="false" stylename="user-ai-profile-navigation label-navigation">
@@ -306,7 +308,7 @@
                                         <label value="msg://interfaceSettingsAppearanceDescription" width="100%" stylename="settings-section-help edit-help"/>
                                     </vbox>
                                     <grid id="grid" spacing="true" width="100%">
-                                        <columns><column flex="0"/><column flex="1"/></columns>
+                                        <columns><column width="220px"/><column flex="1"/></columns>
                                         <rows>
                                             <row><label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT" stylename="bold"/><optionsGroup id="modeOptions"/></row>
                                             <row><label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="appThemeField" required="true" width="100%" requiredMessage="msg://mainWindowThemeMsg" stylename="edit-form-control"/></row>
@@ -426,51 +428,63 @@
                                       expand="aiSettingsTitleBox"
                                       stylename="ai-settings-toolbar edit-toolbar">
                                     <vbox id="aiSettingsTitleBox" width="100%" spacing="false">
-                                        <label value="msg://aiSettingsPageTitle" stylename="h1"/>
-                                        <label value="msg://aiSettingsPageDescription" width="100%" stylename="ai-settings-help"/>
+                                        <label value="msg://aiSettingsPageTitle" stylename="h1 edit-toolbar-title"/>
+                                        <label value="msg://aiSettingsPageDescription" width="100%" stylename="settings-section-help edit-toolbar-description edit-help"/>
                                     </vbox>
-                                    <hbox id="aiConfigsButtonsPanel" spacing="true" align="MIDDLE_RIGHT" stylename="ai-settings-toolbar-actions edit-toolbar-actions">
-                                        <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION" invoke="onAiConfigsCreateBtnClick"/>
-                                        <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT" enable="false" invoke="onAiConfigsEditBtnClick"/>
-                                        <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE" enable="false" invoke="onAiConfigsRemoveBtnClick"/>
-                                        <button id="aiConfigsTestBtn" caption="msg://msgAiTestConnection" icon="KEY" enable="false" invoke="onAiConfigsTestBtnClick"/>
-                                    </hbox>
                                 </hbox>
                                 <vbox id="personalAiApiPreferenceBox"
                                       spacing="true"
                                       width="100%"
                                       stylename="ai-settings-card ai-settings-preference-card edit-card">
                                     <label value="msg://aiSettingsPreferenceTitle" stylename="h3 ai-settings-card-title edit-card-title"/>
-                                    <checkBox id="preferPersonalAiApiSettingsField"
-                                              datasource="userSettingsDs"
-                                              property="preferPersonalAiApiSettings"
-                                              caption="msg://preferPersonalAiApiSettings"
-                                              stylename="ai-settings-preference-checkbox"/>
-                                    <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="ai-settings-help"/>
-                                    <checkBox id="preferPersonalPromptsField"
-                                              datasource="userSettingsDs"
-                                              property="preferPersonalPrompts"
-                                              caption="msg://preferPersonalPrompts"
-                                              stylename="ai-settings-preference-checkbox"/>
-                                    <label value="msg://preferPersonalPromptsHint" width="100%" stylename="ai-settings-help"/>
+                                    <vbox spacing="true" width="100%">
+                                        <checkBox id="preferPersonalAiApiSettingsField"
+                                                  datasource="userSettingsDs"
+                                                  property="preferPersonalAiApiSettings"
+                                                  caption="msg://preferPersonalAiApiSettings"
+                                                  stylename="ai-settings-preference-checkbox bold"/>
+                                        <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="settings-section-help edit-help"/>
+                                    </vbox>
+                                    <vbox spacing="true" width="100%">
+                                        <checkBox id="preferPersonalPromptsField"
+                                                  datasource="userSettingsDs"
+                                                  property="preferPersonalPrompts"
+                                                  caption="msg://preferPersonalPrompts"
+                                                  stylename="ai-settings-preference-checkbox bold"/>
+                                        <label value="msg://preferPersonalPromptsHint" width="100%" stylename="settings-section-help edit-help"/>
+                                    </vbox>
                                 </vbox>
                                 <vbox id="aiConnectionsCard"
                                       width="100%"
-                                      height="360px"
+                                      minHeight="320px"
                                       spacing="true"
                                       expand="aiConfigsTable"
                                       stylename="ai-settings-card ai-settings-connections-card edit-card">
                                     <vbox id="aiConnectionsHeader" width="100%" spacing="false">
                                         <label value="msg://aiSettingsConnectionsTitle" stylename="h3 ai-settings-card-title edit-card-title"/>
-                                        <label value="msg://aiSettingsConnectionsDescription" width="100%" stylename="ai-settings-help"/>
+                                        <label value="msg://aiSettingsConnectionsDescription" width="100%" stylename="settings-section-help edit-help"/>
                                     </vbox>
                                     <table id="aiConfigsTable"
                                            width="100%"
                                            height="100%"
+                                           minHeight="200px"
                                            editable="false"
                                            stylename="ai-settings-table">
-                                        <columns><column id="providerCode"/><column id="defaultModelName"/><column id="isActive"/></columns>
+                                        <columns>
+                                            <column id="isPrimary" caption="msg://UserAiConfiguration.isPrimary"/>
+                                            <column id="providerCode"/>
+                                            <column id="defaultModelName"/>
+                                            <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
+                                            <column id="priority" caption="msg://UserAiConfiguration.priority"/>
+                                            <column id="isActive"/>
+                                        </columns>
                                         <rows datasource="userAiConfigsDs"/>
+                                        <buttonsPanel id="aiConfigsButtonsPanel">
+                                            <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION" invoke="onAiConfigsCreateBtnClick" stylename="primary"/>
+                                            <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT" enable="false" invoke="onAiConfigsEditBtnClick"/>
+                                            <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE" enable="false" invoke="onAiConfigsRemoveBtnClick" stylename="danger"/>
+                                            <button id="aiConfigsTestBtn" caption="msg://msgAiTestConnection" icon="KEY" enable="false" invoke="onAiConfigsTestBtnClick" stylename="secondary"/>
+                                        </buttonsPanel>
                                     </table>
                                 </vbox>
                             </vbox>

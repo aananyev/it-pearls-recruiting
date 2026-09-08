@@ -17,6 +17,8 @@ import javax.validation.constraints.NotNull;
 public class UserSettings extends StandardEntity {
     private static final long serialVersionUID = -294638674422970184L;
 
+    public static final String DEFAULT_LLM_CHAT_BUTTON_POSITION = "{\"align\":\"bottom-right\",\"right\":24,\"bottom\":24}";
+
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @OnDeleteInverse(DeletePolicy.DENY)
     @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -238,6 +240,17 @@ public class UserSettings extends StandardEntity {
 
     public String getSmtpServer() {
         return smtpServer;
+    }
+
+    @Column(name = "LLM_CHAT_BUTTON_POSITION", length = 255)
+    private String llmChatButtonPosition;
+
+    public String getLlmChatButtonPosition() {
+        return llmChatButtonPosition;
+    }
+
+    public void setLlmChatButtonPosition(String llmChatButtonPosition) {
+        this.llmChatButtonPosition = llmChatButtonPosition;
     }
 
     public void setSmtpServer(String smtpServer) {

@@ -1,141 +1,84 @@
-@import url('https://fonts.googleapis.com/css?family=Lato');
-
-.chat-container {
-	background-color: rgba(0, 0, 0, 0.4);
-	border-radius: 25px;
-	box-shadow: 0px 0px 10px 5px rgba(0,0,0,0.7);
-	overflow: hidden;
-	padding: 15px;
-	position: relative;
-	width: 320px;
-	max-width: 100%;
-}
-
-.chat {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: flex-start;
-	list-style-type: none;
-	padding: 0;
-	margin: 0;
-}
-
-.message {
-	background-color: rgba(255, 255, 255, 0.9);
-	border-radius: 50px;
-	box-shadow: 0px 15px 5px 0px rgba(0,0,0,0.5);
-	position: relative;
-	margin-bottom: 30px;
-}
-
-.message.left {
-	padding: 15px 20px 15px 70px;
-}
-
-.message.right {
-	align-self: flex-end;
-	padding: 15px 70px 15px 20px;
-}
-
-.logo {
-	border-radius: 50%;
-	box-shadow: 0px 10px 10px 0px rgba(0,0,0,0.7);
-	object-fit: cover;
-	position: absolute;
-	left: 10px;
-	top: -10px;
-	width: 50px;
-	height: 50px;
-}
-
-.message.right .logo {
-	left: auto;
-	right: 10px;
-}
-
-.message p {
-	margin: 0;
-}
-
-.text_input {
-	font-size: 16px;
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 10px 15px;
-	width: 100%;
-}
-
-footer {
-    background-color: #222;
-    color: #fff;
-    font-size: 14px;
-    bottom: 0;
-    position: fixed;
-    left: 0;
-    right: 0;
-    text-align: center;
-    z-index: 999;
-}
-
-footer p {
-    margin: 10px 0;
-}
-
-footer i {
-    color: red;
-}
-
-footer a {
-    color: #3c97bf;
-    text-decoration: none;
-}
-
 /* Viewport overlay launcher for the compact HRM LLM chat. */
+.v-window.llm-chat-launcher-window,
+#llmChatLauncherWindow.v-window,
 .llm-chat-launcher-window {
     position: fixed !important;
+    right: 24px !important;
+    bottom: 24px !important;
+    left: auto !important;
+    top: auto !important;
     z-index: 1001 !important;
-    width: 52px !important;
-    height: 52px !important;
+    width: 56px !important;
+    height: 56px !important;
     overflow: visible !important;
     background: transparent !important;
+    background-color: transparent !important;
     border: 0 !important;
+    border-radius: 50% !important;
     box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    touch-action: none !important;
+}
+
+.v-window.llm-chat-launcher-window.llm-chat-launcher-custom-position,
+#llmChatLauncherWindow.v-window.llm-chat-launcher-custom-position,
+.llm-chat-launcher-window.llm-chat-launcher-custom-position {
+    right: auto !important;
+    bottom: auto !important;
 }
 
 .llm-chat-launcher-window .v-window-header,
-.llm-chat-launcher-window .v-window-outerheader {
+.llm-chat-launcher-window .v-window-outerheader,
+.llm-chat-launcher-window .v-window-closebox,
+.llm-chat-launcher-window .v-window-resizeHandler {
     display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
 }
 
 .llm-chat-launcher-window .v-window-wrap,
 .llm-chat-launcher-window .v-window-contents,
+.llm-chat-launcher-window .v-window-contents > .v-scrollable,
 .llm-chat-launcher-window .v-panel-content {
     padding: 0 !important;
     border: 0 !important;
     background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 50% !important;
+    overflow: visible !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .llm-chat-launcher {
-    width: 52px !important;
-    height: 52px !important;
-    min-width: 52px !important;
-    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
     padding: 0 !important;
     border-radius: 50% !important;
     border: 0 !important;
     color: #ffffff !important;
-    background: linear-gradient(145deg, #5b7cfa, #7d4cff) !important;
-    box-shadow: 0 8px 22px rgba(39, 45, 110, .32) !important;
+    background: linear-gradient(145deg, #4f46e5, #7c3aed) !important;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.42) !important;
     cursor: grab !important;
     transition: transform .16s ease, box-shadow .16s ease !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    touch-action: none !important;
 }
 
 .llm-chat-launcher:hover {
-    transform: translateY(-1px) scale(1.04);
-    box-shadow: 0 10px 26px rgba(39, 45, 110, .42) !important;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.52) !important;
 }
 
 .llm-chat-launcher:focus {
@@ -144,32 +87,41 @@ footer a {
 }
 
 .llm-chat-launcher:active,
-.llm-chat-launcher-window.llm-chat-launcher-dragging .llm-chat-launcher {
+body.llm-chat-launcher-dragging .llm-chat-launcher,
+.llm-chat-launcher-window.llm-chat-launcher-dragging .llm-chat-launcher,
+.llm-chat-launcher-window.llm-chat-launcher-dragging {
     cursor: grabbing !important;
-    transform: scale(.98);
+    transform: scale(.97);
+}
+
+body.llm-chat-launcher-dragging {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    cursor: grabbing !important;
 }
 
 .llm-chat-launcher-icon {
     position: relative;
-    display: inline-block;
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    font-size: 25px;
-    font-family: FontAwesome;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    pointer-events: none;
 }
 
-.llm-chat-launcher-bubble {
-    font-family: FontAwesome;
+.llm-chat-svg-icon {
+    display: block;
+    width: 34px;
+    height: 34px;
+    pointer-events: none;
 }
 
 .llm-chat-launcher-spark {
     position: absolute;
-    right: -3px;
-    top: -6px;
-    font-family: sans-serif;
-    font-size: 13px;
-    line-height: 13px;
+    width: 0;
+    height: 0;
+    overflow: hidden;
 }
 
 .llm-chat-launcher-label {
@@ -185,20 +137,30 @@ footer a {
 }
 
 @media (max-width: 640px) {
+    .v-window.llm-chat-launcher-window,
+    #llmChatLauncherWindow.v-window,
     .llm-chat-launcher-window {
         width: 48px !important;
         height: 48px !important;
+        right: 16px !important;
+        bottom: 16px !important;
     }
-
+    .v-window.llm-chat-launcher-window.llm-chat-launcher-custom-position,
+    #llmChatLauncherWindow.v-window.llm-chat-launcher-custom-position,
+    .llm-chat-launcher-window.llm-chat-launcher-custom-position {
+        right: auto !important;
+        bottom: auto !important;
+    }
     .llm-chat-launcher {
         width: 48px !important;
         height: 48px !important;
         min-width: 48px !important;
         min-height: 48px !important;
     }
-
-    .llm-chat-launcher-icon {
-        transform: scale(.92);
+    .llm-chat-launcher-icon,
+    .llm-chat-svg-icon {
+        width: 24px;
+        height: 24px;
     }
 }
 
@@ -210,17 +172,17 @@ footer a {
 
 /* The dialog itself is styled so the native CUBA drag/resize state remains usable. */
 .llm-chat-window {
-    width: 420px !important;
+    width: 840px !important;
     height: 560px !important;
     max-width: calc(100vw - 24px) !important;
     max-height: calc(100vh - 24px) !important;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
     .llm-chat-window {
         width: calc(100vw - 32px) !important;
         height: calc(100vh - 32px) !important;
-        max-width: 420px !important;
+        max-width: 840px !important;
         max-height: 560px !important;
         border-radius: 12px !important;
     }

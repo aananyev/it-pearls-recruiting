@@ -27,6 +27,7 @@ import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow;
 import org.slf4j.Logger;
@@ -287,10 +288,14 @@ public class ExtSettingsWindow extends SettingsWindow {
          */
         screenBuilders.editor(UserAiConfiguration.class, this)
                 .withScreenClass(UserAiConfigurationEdit.class)
+                .withOpenMode(OpenMode.DIALOG)
                 .newEntity()
                 .withInitializer(entity -> {
                     entity.setUser(currentUser);
                     entity.setIsActive(true);
+                    entity.setIsPrimary(false);
+                    entity.setMaxRetries(2);
+                    entity.setPriority(10);
                 })
                 .withAfterCloseListener(afterCloseEvent -> refreshAiConfigs())
                 .build()
@@ -299,10 +304,22 @@ public class ExtSettingsWindow extends SettingsWindow {
 
     public void onAiConfigsEditBtnClick() {
         UserAiConfiguration selected = aiConfigsTable.getSingleSelected();
-        if (selected == null) return;
+        if (selected == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(getMessage("aiConfigSelectToEdit"))
+                    .show();
+            return;
+        }
+        UserAiConfiguration toEdit = dataManager.load(UserAiConfiguration.class)
+                .id(selected.getId())
+                .view("userAiConfiguration-edit-view")
+                .optional()
+                .orElse(selected);
+
         screenBuilders.editor(UserAiConfiguration.class, this)
                 .withScreenClass(UserAiConfigurationEdit.class)
-                .editEntity(selected)
+                .withOpenMode(OpenMode.DIALOG)
+                .editEntity(toEdit)
                 .withAfterCloseListener(afterCloseEvent -> refreshAiConfigs())
                 .build()
                 .show();

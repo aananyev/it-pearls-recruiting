@@ -98,12 +98,32 @@
                                        width="100%"
                                        stylename="edit-form-control"
                                        caption="msg://userDefaultModelName.caption"/>
+                            <!-- Признак основной нейросети (используется первой). -->
+                            <checkBox id="isPrimaryField"
+                                      dataContainer="userAiConfigurationDc"
+                                      property="isPrimary"
+                                      width="100%"
+                                      caption="msg://userIsPrimary.caption"/>
                             <!-- Признак активности конфигурации. -->
                             <checkBox id="isActiveField"
                                       dataContainer="userAiConfigurationDc"
                                       property="isActive"
                                       width="100%"
                                       caption="msg://userIsActive.caption"/>
+                            <!-- Количество пробных обращений при недоступности. -->
+                            <textField id="maxRetriesField"
+                                       dataContainer="userAiConfigurationDc"
+                                       property="maxRetries"
+                                       width="100%"
+                                       stylename="edit-form-control"
+                                       caption="msg://userMaxRetries.caption"/>
+                            <!-- Приоритет в очереди перебора нейросетей. -->
+                            <textField id="priorityField"
+                                       dataContainer="userAiConfigurationDc"
+                                       property="priority"
+                                       width="100%"
+                                       stylename="edit-form-control"
+                                       caption="msg://userPriority.caption"/>
                         </groupBox>
                         <!-- Карточка «Безопасность»: персональный API-ключ (secret-поле). -->
                         <groupBox id="securitySection" caption="Безопасность" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
