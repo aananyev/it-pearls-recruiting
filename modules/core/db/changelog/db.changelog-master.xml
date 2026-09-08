@@ -213,5 +213,7 @@
              relativeToChangelogFile="true"/>
     <include file="260908-5-reconcileMissingSchemaAndGeoLinks.xml"
              relativeToChangelogFile="true"/>
+    <include file="260908-6-updateLlmChatPromptAndPersonalization.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

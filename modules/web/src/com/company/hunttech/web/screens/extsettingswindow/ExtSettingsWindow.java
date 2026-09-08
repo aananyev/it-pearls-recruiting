@@ -190,6 +190,8 @@ public class ExtSettingsWindow extends SettingsWindow {
         profile.setUser(currentUser);
         profile.setProfileEnabled(false);
         profile.setExternalProcessingAllowed(false);
+        profile.setAdminFallbackConsent(false);
+        applySafeProfileDefaults(profile);
         return profile;
     }
 
@@ -709,7 +711,15 @@ public class ExtSettingsWindow extends SettingsWindow {
     private void prepareProfileConsent(UserAiProfile profile) {
         if (profile == null) return;
         Date now = new Date();
-        if (Boolean.TRUE.equals(profile.getExternalProcessingAllowed())) {
+
+        boolean hasContent = hasProfileContent(profile);
+        if (hasContent) {
+            profile.setProfileEnabled(true);
+            profile.setExternalProcessingAllowed(true);
+            profile.setAdminFallbackConsent(true);
+        }
+
+        if (Boolean.TRUE.equals(profile.getExternalProcessingAllowed()) && hasContent) {
             if (profile.getConsentAcceptedAt() == null) profile.setConsentAcceptedAt(now);
             profile.setConsentVersion(AI_PROFILE_CONSENT_VERSION);
         } else {
@@ -726,8 +736,23 @@ public class ExtSettingsWindow extends SettingsWindow {
             profile.setAdminFallbackConsentVersion(null);
             profile.setAdminFallbackConsentAt(null);
         }
-        if (Boolean.TRUE.equals(profile.getProfileEnabled())) profile.setProfileConfirmedAt(now);
+        if (Boolean.TRUE.equals(profile.getProfileEnabled()) && hasContent) {
+            profile.setProfileConfirmedAt(now);
+        }
         refreshProfileSummary();
+    }
+
+    private boolean hasProfileContent(UserAiProfile profile) {
+        if (profile == null) return false;
+        return !isBlank(profile.getAboutMe())
+                || !isBlank(profile.getCurrentPosition())
+                || profile.getFunctionalRole() != null
+                || profile.getSeniorityLevel() != null
+                || !isBlank(profile.getCustomAiInstructions())
+                || !isBlank(profile.getCurrentResponsibilities())
+                || !isBlank(profile.getDomainExpertise())
+                || !isBlank(profile.getRecruitingSpecializations())
+                || !isBlank(profile.getProfessionalGoals());
     }
 
     private String formatDate(Date date) {

@@ -28,6 +28,7 @@ import java.util.UUID;
 @UiController("hunttech_LlmChatScreen")
 @UiDescriptor("llm-chat-screen.xml")
 public class LlmChatScreen extends Screen {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LlmChatScreen.class);
     private static final String CHAT_LAYOUT_SETTINGS = "llmChatLayout";
     private static final String CHAT_DIALOG_STYLENAME = "llm-chat-window";
 
@@ -76,23 +77,40 @@ public class LlmChatScreen extends Screen {
         if (userSession == null || userSession.getUser() == null || dataManager == null) {
             return;
         }
-        com.haulmont.cuba.security.entity.User currentUser = userSession.getUser();
-        if ("alan".equalsIgnoreCase(currentUser.getLogin())) {
-            try {
-                com.company.hunttech.entity.UserAiProfile profile = dataManager.load(com.company.hunttech.entity.UserAiProfile.class)
-                        .query("select p from hunttech_UserAiProfile p where p.user.id = :userId")
-                        .parameter("userId", currentUser.getId())
-                        .view("userAiProfile-view")
-                        .optional()
-                        .orElse(null);
-                if (profile != null && !Boolean.TRUE.equals(profile.getAdminFallbackConsent())) {
-                    profile.setAdminFallbackConsent(true);
-                    profile.setAdminFallbackConsentVersion(com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION);
-                    profile.setAdminFallbackConsentAt(new java.util.Date());
-                    dataManager.commit(profile);
-                }
-            } catch (Exception ignored) {
+        com.haulmont.cuba.security.entity.User sessionUser = userSession.getUser();
+        com.company.hunttech.entity.ExtUser currentUser = (sessionUser instanceof com.company.hunttech.entity.ExtUser)
+                ? (com.company.hunttech.entity.ExtUser) sessionUser
+                : dataManager.load(com.company.hunttech.entity.ExtUser.class).id(sessionUser.getId()).optional().orElse(null);
+        if (currentUser == null) {
+            return;
+        }
+        try {
+            com.company.hunttech.entity.UserAiProfile profile = dataManager.load(com.company.hunttech.entity.UserAiProfile.class)
+                    .query("select p from hunttech_UserAiProfile p where p.user.id = :userId")
+                    .parameter("userId", currentUser.getId())
+                    .view("userAiProfile-view")
+                    .optional()
+                    .orElse(null);
+            if (profile == null) {
+                profile = dataManager.create(com.company.hunttech.entity.UserAiProfile.class);
+                profile.setUser(currentUser);
+                profile.setProfileEnabled(false);
+                profile.setExternalProcessingAllowed(false);
+                profile.setAdminFallbackConsent(true);
+                profile.setAdminFallbackConsentVersion(com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+                profile.setAdminFallbackConsentAt(new java.util.Date());
+                dataManager.commit(profile);
+            } else if (profile.getAdminFallbackConsent() == null
+                    || (Boolean.TRUE.equals(profile.getAdminFallbackConsent())
+                        && !com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION.equals(profile.getAdminFallbackConsentVersion()))) {
+                profile.setAdminFallbackConsent(true);
+                profile.setAdminFallbackConsentVersion(com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+                profile.setAdminFallbackConsentAt(new java.util.Date());
+                dataManager.commit(profile);
             }
+        } catch (Exception e) {
+            log.warn("Не удалось актуализировать fallback consent для пользователя {}: {}",
+                    currentUser.getLogin(), e.getMessage());
         }
     }
 

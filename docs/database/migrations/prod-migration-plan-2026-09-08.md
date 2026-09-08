@@ -109,6 +109,7 @@ su - postgres -c "pg_restore -l $BACKUP_DIR/hunttech_pre_migration.dump | head -
    * Seed недостающих функций: `COMPANY_REQUISITES_PARSE_JSON`, `COMPANY_WEB_SEARCH_PARSE_JSON`, `LLM_CHAT` (через changelog `260908-5` / `260904-2`).
    * Обновление промпта `CV_SMART_PARSE_JSON` до v2 (с поддержкой `education` и `workExperience` согласно `260821-4`).
    * Накат дефолтов `INCLUDE_USER_CONTEXT` по матрице уместности персонализации (`260817-2`).
+   * Актуализация системного промпта `LLM_CHAT` с персонализацией по «Обо мне» и активация профилей (`260908-6-updateLlmChatPromptAndPersonalization.sql`).
 3. **Пользовательские настройки и квоты**:
    * `260907-2-setLlmChatDefaultPositionBottomRight.sql` (дефолтная позиция кнопки чата в правый нижний угол).
    * `260908-1-setAlanFallbackAndChatAdminConfig.sql` (привязка LLM_CHAT к активному провайдеру).
