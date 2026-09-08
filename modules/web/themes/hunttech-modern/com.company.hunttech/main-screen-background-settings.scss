@@ -3,7 +3,7 @@
 @mixin main-screen-background-settings {
   .ext-settings-window {
     .main-screen-background-card {
-      max-width: 980px;
+      width: 100% !important;
       padding: 0 !important;
       overflow: hidden;
       border-top: 3px solid $v-selection-color !important;

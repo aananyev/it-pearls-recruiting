@@ -122,7 +122,7 @@
                                         <label value="Кнопка вызова AI-чата и её плавающий контейнер объединены в единый интерактивный элемент. Кнопку можно зажать мышью и свободно перемещать в любую точку экрана. При необходимости вы можете вернуть её в правый нижний край экрана или применить это положение для всех пользователей."
                                                width="100%"
                                                stylename="settings-section-help edit-help"/>
-                                        <vbox id="llmChatButtonActions" spacing="true">
+                                        <hbox id="llmChatButtonActions" spacing="true" stylename="llm-chat-button-actions edit-field-row">
                                             <button id="resetMyLlmChatPositionBtn"
                                                     caption="Переместить в правый нижний край"
                                                     invoke="resetMyLlmChatPosition"
@@ -131,7 +131,7 @@
                                                     caption="Переместить у всех пользователей в правый нижний край"
                                                     invoke="resetAllUsersLlmChatPosition"
                                                     stylename="secondary"/>
-                                        </vbox>
+                                        </hbox>
                                     </vbox>
                                 </vbox>
                             </vbox>

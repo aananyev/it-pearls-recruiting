@@ -161,6 +161,7 @@
       font-weight: 700 !important;
       line-height: 24px !important;
       white-space: normal !important;
+      text-align: center !important;
       overflow-wrap: anywhere;
       word-break: normal;
     }
@@ -174,6 +175,19 @@
       line-height: 1.4 !important;
       opacity: 1 !important;
       white-space: normal !important;
+      text-align: center !important;
+    }
+
+    .user-ai-profile-identity {
+      box-sizing: border-box;
+      width: 100% !important;
+      text-align: center !important;
+      margin-top: 6px;
+      margin-bottom: 10px;
+
+      .v-label {
+        text-align: center !important;
+      }
     }
 
     .user-ai-profile-avatar {
@@ -194,13 +208,13 @@
 
       .v-image,
       .ht-oval-image {
-        width: 176px !important;
-        height: 176px !important;
+        width: 120px !important;
+        height: 120px !important;
         margin: 0 auto;
         overflow: hidden !important;
         background: rgba(255, 255, 255, 0.08) !important;
         border: 2px solid rgba(255, 255, 255, 0.92) !important;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
       }
 
       img,
@@ -211,18 +225,44 @@
       }
     }
 
+    .user-avatar-upload {
+      box-sizing: border-box;
+      width: 100% !important;
+      text-align: center !important;
+      margin-top: 6px !important;
+
+      .v-button {
+        min-height: 28px !important;
+        height: 28px !important;
+        padding: 0 10px !important;
+        font-size: 12px !important;
+      }
+    }
+
     .user-ai-profile-summary {
       box-sizing: border-box;
-      padding: 8px 10px !important;
+      padding: 10px 12px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
       border-radius: 8px !important;
-    }
 
-    .user-ai-profile-summary .v-label {
-      color: #f8fafc !important;
-      white-space: normal !important;
+      .v-label {
+        color: #f8fafc !important;
+        white-space: normal !important;
+      }
+
+      .v-label.user-ai-profile-status {
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+      }
+
+      .v-label.user-ai-profile-summary-value {
+        color: rgba(248, 250, 252, 0.90) !important;
+        font-size: 12px !important;
+        line-height: 16px !important;
+      }
     }
 
     .job-candidate-navigation,
@@ -565,22 +605,52 @@
       padding: 16px 18px 20px !important;
     }
 
-    .interface-settings-card .v-gridlayout-slot {
-      padding-top: 6px;
-      padding-bottom: 6px;
+    .interface-settings-card {
+      margin-bottom: 20px !important;
     }
 
-    .interface-settings-card .v-gridlayout .v-label {
-      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+    .interface-settings-rows {
+      box-sizing: border-box;
+      width: 100% !important;
+      padding-top: 6px;
+    }
+
+    .interface-field-row {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 40px;
+      margin-bottom: 12px;
+      align-items: center;
+
+      > .v-widget,
+      > .v-slot {
+        min-width: 0;
+      }
+    }
+
+    .interface-field-label {
+      box-sizing: border-box;
+      flex: 0 1 220px;
+      min-width: 0;
+      max-width: 220px;
+      width: 220px;
+      overflow-wrap: anywhere;
+      color: mix($v-font-color, $v-panel-background-color, 88%) !important;
       font-size: 14px !important;
-      line-height: 1.4 !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
       white-space: normal !important;
     }
 
-    .interface-settings-card .v-gridlayout-slot:first-child .v-label {
-      min-height: 36px;
-      display: flex;
+    .llm-chat-button-actions {
+      margin-top: 8px;
       align-items: center;
+      flex-wrap: wrap;
+
+      .v-button {
+        margin-right: 8px;
+        margin-bottom: 6px;
+      }
     }
 
     .email-settings-grid,
@@ -588,10 +658,7 @@
     .email-settings-grid table,
     .user-ai-profile-section .v-gridlayout,
     .user-ai-profile-section .v-gridlayout > div,
-    .user-ai-profile-section .v-gridlayout table,
-    .interface-settings-card .v-gridlayout,
-    .interface-settings-card .v-gridlayout > div,
-    .interface-settings-card .v-gridlayout table {
+    .user-ai-profile-section .v-gridlayout table {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;

@@ -67,7 +67,8 @@
                                     width="100%"
                                     showFileName="false"
                                     dropZone="dropZone"
-                                    showClearButton="true"/>
+                                    showClearButton="true"
+                                    stylename="user-avatar-upload"/>
                         </vbox>
                         
                         <!-- Идентификация пользователя: 4-уровневая типографика (hunttech-edit-screen-design) -->
@@ -312,22 +313,32 @@
                                         <label value="msg://interfaceSettingsAppearanceTitle" stylename="h3 settings-section-card-title edit-card-title"/>
                                         <label value="msg://interfaceSettingsAppearanceDescription" width="100%" stylename="settings-section-help edit-help"/>
                                     </vbox>
-                                    <grid id="grid" spacing="true" width="100%" stylename="interface-settings-grid edit-field-row">
-                                        <columns><column width="220px"/><column flex="1"/></columns>
-                                        <rows>
-                                            <row><label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT" stylename="bold"/><optionsGroup id="modeOptions"/></row>
-                                            <row><label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="appThemeField" required="true" width="100%" requiredMessage="msg://mainWindowThemeMsg" stylename="edit-form-control"/></row>
-                                            <row><label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="appLangField" width="100%" stylename="edit-form-control"/></row>
-                                            <row>
-                                                <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT" stylename="bold"/>
-                                                <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneLookup">
-                                                    <lookupField id="timeZoneLookup" width="100%" stylename="edit-form-control"/>
-                                                    <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
-                                                </hbox>
-                                            </row>
-                                            <row><label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="100%" stylename="edit-form-control"/></row>
-                                        </rows>
-                                    </grid>
+                                    <grid id="grid" visible="false"/>
+                                    <vbox id="interfaceFormRows" width="100%" spacing="true" stylename="interface-settings-rows">
+                                        <hbox width="100%" spacing="true" expand="modeOptions" stylename="edit-field-row interface-field-row">
+                                            <label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <optionsGroup id="modeOptions" align="MIDDLE_LEFT"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="appThemeField" stylename="edit-field-row interface-field-row">
+                                            <label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <lookupField id="appThemeField" required="true" width="100%" requiredMessage="msg://mainWindowThemeMsg" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="appLangField" stylename="edit-field-row interface-field-row">
+                                            <label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <lookupField id="appLangField" width="100%" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="timeZoneBox" stylename="edit-field-row interface-field-row">
+                                            <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneLookup">
+                                                <lookupField id="timeZoneLookup" width="100%" stylename="edit-form-control"/>
+                                                <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
+                                            </hbox>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="defaultScreenField" stylename="edit-field-row interface-field-row">
+                                            <label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="100%" stylename="edit-form-control"/>
+                                        </hbox>
+                                    </vbox>
                                 </vbox>
                             </vbox>
                         </scrollBox>
