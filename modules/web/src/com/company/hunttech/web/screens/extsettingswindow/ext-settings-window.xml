@@ -313,7 +313,6 @@
                                         <label value="msg://interfaceSettingsAppearanceTitle" stylename="h3 settings-section-card-title edit-card-title"/>
                                         <label value="msg://interfaceSettingsAppearanceDescription" width="100%" stylename="settings-section-help edit-help"/>
                                     </vbox>
-                                    <grid id="grid" visible="false"/>
                                     <vbox id="interfaceFormRows" width="100%" spacing="true" stylename="interface-settings-rows">
                                         <hbox width="100%" spacing="true" expand="modeOptions" stylename="edit-field-row interface-field-row">
                                             <label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
