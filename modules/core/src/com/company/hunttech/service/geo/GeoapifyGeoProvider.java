@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.net.URLEncoder;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * @see <a href="https://apidocs.geoapify.com/docs/geocoding/forward-geocoding">Geoapify Geocoding API</a>
  * @see <a href="https://geoapify.com/boundaries-api">Geoapify Boundaries API</a>
  */
-@Service("hunttech_GeoapifyGeoProvider")
+@Component("hunttech_GeoapifyGeoProvider")
 public class GeoapifyGeoProvider implements GeoDataProvider {
 
     private static final Logger log = LoggerFactory.getLogger(GeoapifyGeoProvider.class);

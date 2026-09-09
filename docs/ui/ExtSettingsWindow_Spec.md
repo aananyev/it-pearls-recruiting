@@ -206,7 +206,7 @@ settings
         └── settingsTabSheet [ext-settings-tabs]
             ├── msgMyInfo
             │   └── userAiProfileMainBox
-            │       ├── userAiProfileSidebar (270 px)
+            │       ├── userAiProfileSidebar (312 px, scrollBox: sidebar-scrollbox / sidebar-content-box)
             │       │   └── userPic [OvaFallbackImage, 176×176]
             │       └── userAiProfileContentScrollBox
             │           ├── previewAiContextBtn [invoke=previewAiContext]
@@ -214,11 +214,11 @@ settings
             │               └── aiContextPreviewArea
             ├── msgInterface
             │   └── interfaceSettingsMainBox
-            │       ├── interfaceSettingsSidebar (270 px)
+            │       ├── interfaceSettingsSidebar (312 px)
             │       └── interfaceSettingsContentScrollBox
             ├── mailAccessTab
             │   └── emailSettingsMainBox
-            │       ├── emailSettingsSidebar (270 px)
+            │       ├── emailSettingsSidebar (312 px)
             │       └── emailSettingsContentScrollBox
             │           └── emailSettingsContent
             │               ├── emailSettingsToolbar
@@ -228,7 +228,7 @@ settings
             │                   └── imapSettingsSection — свёрнут
             └── aiAccessTab
                 └── aiSettingsMainBox
-                    ├── aiSettingsSidebar (270 px)
+                    ├── aiSettingsSidebar (312 px)
                     └── aiSettingsContent
                         ├── aiSettingsToolbar
                         ├── personalAiApiPreferenceBox
@@ -237,7 +237,7 @@ settings
                         └── aiConnectionsCard
 ```
 
-Ширина боковых панелей задана существующим XML и не меняется. При ширине viewport до 1366 px локальный SCSS уменьшает фактическую ширину панели до 250 px, не перестраивая XML и не перенося компоненты.
+Ширина боковых панелей стандартизирована до 312 px (по стандарту `hunttech-edit-screen-design`). При ширине viewport до 1366 px адаптивный SCSS уменьшает фактическую ширину панели до 290 px, а при viewport до 1100 px — до 260 px. Внутренний скролл-контейнер (`.c-scrollbox-content`, `.sidebar-content-box`, `.edit-sidebar-content`) имеет строгие симметричные отступы 16 px слева и справа, гарантирующие, что все блоки (кнопки аватара, карточка профиля, предупреждения, навигационные плашки) не выходят за границы sidebar и не прилипают к разделителю.
 
 ## 5. Функциональные контракты
 
@@ -340,7 +340,9 @@ Core-сервис должен быть доступен после `AppBeans.ge
 - акцент заголовка и активной навигации `#ffb11b`;
 - правая граница `rgba(15, 23, 42, 0.78)`;
 - тень `5px 0 20px rgba(15, 23, 42, 0.18)`;
-- ширина 270 px, при viewport до 1366 px — 250 px;
+- ширина 312 px (по стандарту `hunttech-edit-screen-design`), адаптивно при viewport до 1366 px — 290 px, до 1100 px — 260 px;
+- отступы контента: внутренний скролл-контейнер (`.c-scrollbox-content`, `.sidebar-content-box`, `.edit-sidebar-content`) имеет строгие симметричные отступы 16 px слева и справа (`padding: 14px 16px 16px !important;`), уменьшающиеся до 14 px (viewport <= 1366 px) и 12 px (viewport <= 1100 px);
+- все дочерние элементы (`.user-avatar-upload`, `.user-ai-profile-summary`, карточки предупреждений, заголовки и кнопки навигации) обладают `box-sizing: border-box`, `width: 100% !important;` и скруглением 6–8 px, гарантируя отсутствие горизонтального переполнения и прилипания к внешним границам панели;
 - подсказки и служебные блоки оформляются полупрозрачными карточками внутри тёмной панели.
 
 ### 6.3. Вкладки
@@ -514,6 +516,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-09 | Стандартизация компоновки и боковых отступов sidebar во всех 7 темах: ширина 312 px (адаптивная 290 px / 260 px), симметричные отступы 16 px слева и справа (`.c-scrollbox-content`, `.sidebar-content-box`, `.edit-sidebar-content`), нормализация `box-sizing` и радиусов кнопок загрузки аватара, карточек сводки и навигационных элементов без вылета за границы панели |
 | 2026-07-28 | Эталонный экран начал использовать глобальные stylename Edit-форм поверх legacy-классов: sidebar, navigation, toolbar, card, accordion и runtime navigation-buttons получили общий UI API без изменения component ID и бизнес-логики |
 | 2026-07-25 | Восстановлена кнопка «Показать передаваемые данные»: фактический controller формирует preview локально через общий `UserAiContextBuilder`, отражает несохранённые значения, раскрывает секцию и фокусирует результат без remote-передачи `UserAiProfile` |
 | 2026-07-25 | Исправлен cross-context доступ: `ImageProcessingService` и `UserAiContextService` разрешаются по стабильному CUBA service name и вызываются через middleware proxy; class-based `AppBeans` lookup удалён |

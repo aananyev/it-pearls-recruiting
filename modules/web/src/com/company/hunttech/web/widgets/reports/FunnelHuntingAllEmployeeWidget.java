@@ -106,7 +106,6 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
         reaearchers = dataManager.load(ExtUser.class)
                 .query(QUERY_RESEARCHERS)
                 .view(EXT_USER_DASHBOARD_VIEW)
-                .cacheable(true)
                 .list();
         bulkCounts = loadBulkCounts();
     }

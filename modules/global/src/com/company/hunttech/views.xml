@@ -1263,17 +1263,6 @@
             </property>
         </property>
     </view>
-    <view entity="hunttech_OpenPosition" name="openPosition-edit-view" extends="_minimal">
-        <!-- Только поля, реально используемые в JobCandidateEdit.
-             Остальные поля (_local) не загружаются. -->
-        <property name="vacansyName"/>
-        <property name="openClose"/>
-        <property name="priority"/>
-        <property name="lastOpenDate"/>
-        <property name="comment"/>
-        <property name="owner" view="_minimal"/>
-        <!-- projectName переопределяется inline в job-candidate-edit.xml -->
-    </view>
     <view entity="hunttech_ItearctionRequirements" name="itearctionRequirements-view" extends="_local">
         <property name="iteraction" view="_local"/>
         <property name="iteractionRequirement" view="_local"/>

@@ -142,12 +142,20 @@ su - postgres -c "pg_restore -l $BACKUP_DIR/hunttech_pre_migration.dump | head -
 
 ---
 
-## 3. План отката (Rollback Procedure)
 
-В случае нештатной ситуации при накате DDL/DML:
-1. При ошибке выполнения транзакции: PostgreSQL выполняет автоматический `ROLLBACK`.
-2. При частичном сбое или порче данных:
-   ```bash
-   su - postgres -c "dropdb hunttech && createdb -O cuba hunttech"
-   su - postgres -c "pg_restore -d hunttech $BACKUP_DIR/hunttech_pre_migration.dump"
-   ```
+---
+
+## 4. Журнал точечных синхронизаций данных (DML)
+
+### 4.1. Синхронизация профиля пользователя alan (2026-09-09 08:22 UTC)
+- **Цель**: перенос профессионального ИИ-профиля (`UserAiProfile` / `HUNTTECH_USER_AI_PROFILE`) пользователя `alan` (`a9c2a715-96a4-42c2-bbb1-5603739d4fb4`) из локальной базы на Production.
+- **Ограничения**: `ExtUser` (`sec_user`) не затрагивается; изменения вносятся только в `hunttech_user_ai_profile`.
+- **Примененные данные**:
+  - `current_position`: Директор центра разработки программного обеспечения
+  - `functional_role`: 80 (Executive)
+  - `seniority_level`: 60 (Executive)
+  - `professional_experience_years`: 29
+  - `recruiting_experience_years`: 11
+  - `about_me`, `current_responsibilities`, `education`, `certifications`, `domain_expertise`, `industries`, `recruiting_specializations`, `target_roles`, `candidate_levels`, `hiring_geographies`, `decision_priorities`, `client_project_context`, `professional_goals`, `professional_interests`, `development_areas`, `current_priorities`.
+- **Статус**: Успешно применен (`UPDATE 1`, версия 4).
+

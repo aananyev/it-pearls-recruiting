@@ -22,6 +22,10 @@ import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.data.Datasource;
 
+import com.haulmont.cuba.core.global.AppBeans;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
@@ -43,6 +47,7 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     private static final Set<String> SUPPORTED_EXTENSIONS = new LinkedHashSet<>(
             Arrays.asList(".png", ".jpg", ".jpeg", ".webp"));
     private static final String STATUS_THEME = "Используется случайный фон активной темы.";
+    private static final Logger log = LoggerFactory.getLogger(ExtSettingsWindowMainBackground.class);
     private static final String STATUS_CUSTOM = "Используется пользовательский фон.";
     private static final String UPLOAD_ERROR =
             "Не удалось загрузить изображение. Проверьте формат, содержимое и размер файла.";
@@ -97,13 +102,16 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     public void init(Map<String, Object> params) {
         super.init(params);
         initBackgroundNavigation();
+        ensureMainScreenBackgroundService();
+        ensureImageProcessor();
+
         mainScreenBackgroundUpload.setPermittedExtensions(SUPPORTED_EXTENSIONS);
         mainScreenBackgroundUpload.setFileSizeLimit(
                 MainScreenBackgroundImageProcessor.MAX_INPUT_BYTES);
 
         FileDescriptor storedFile = userSettingsDs.getItem() == null
                 ? null : userSettingsDs.getItem().getFileImageFace();
-        currentBackground = mainScreenBackgroundService.isCustomBackground(storedFile)
+        currentBackground = (mainScreenBackgroundService != null && storedFile != null && mainScreenBackgroundService.isCustomBackground(storedFile))
                 ? storedFile : null;
         mainScreenBackgroundUpload.setValue(currentBackground);
 
@@ -191,6 +199,14 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         String originalName = uploaded.getName();
         FileDescriptor normalizedDescriptor = null;
         try {
+            if (ensureImageProcessor() == null) {
+                mainScreenBackgroundUpload.setValue(currentBackground);
+                refreshBackgroundStatus();
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption("Сервис обработки изображений временно недоступен")
+                        .show();
+                return;
+            }
             MainScreenBackgroundImageProcessor.ProcessedImage processed;
             try (InputStream stream = fileLoader.openStream(uploaded)) {
                 processed = imageProcessor.process(stream.readAllBytes(), originalName);
@@ -338,6 +354,10 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     }
 
     private void cleanupUnreferencedBackgrounds(UUID settingsId) {
+        if (ensureMainScreenBackgroundService() == null) {
+            log.warn("MainScreenBackgroundService недоступен: очистка неиспользуемых фонов отложена");
+            return;
+        }
         UUID activeFileId = loadActiveFileId(settingsId);
         Set<FileDescriptor> cleanupCandidates = new LinkedHashSet<>(pendingRemoval);
         cleanupCandidates.addAll(pendingCreated);
@@ -450,5 +470,27 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         } else {
             llmChatButtonPositionStatusLabel.setValue("Пользовательские координаты");
         }
+    }
+
+    private MainScreenBackgroundService ensureMainScreenBackgroundService() {
+        if (mainScreenBackgroundService == null) {
+            try {
+                mainScreenBackgroundService = AppBeans.get(MainScreenBackgroundService.class);
+            } catch (Exception e) {
+                log.warn("MainScreenBackgroundService недоступен через AppBeans: {}", e.getMessage());
+            }
+        }
+        return mainScreenBackgroundService;
+    }
+
+    private MainScreenBackgroundImageProcessor ensureImageProcessor() {
+        if (imageProcessor == null) {
+            try {
+                imageProcessor = AppBeans.get(MainScreenBackgroundImageProcessor.class);
+            } catch (Exception e) {
+                log.warn("MainScreenBackgroundImageProcessor недоступен через AppBeans: {}", e.getMessage());
+            }
+        }
+        return imageProcessor;
     }
 }

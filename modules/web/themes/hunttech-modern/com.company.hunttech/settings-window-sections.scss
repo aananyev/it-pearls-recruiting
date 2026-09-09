@@ -112,11 +112,21 @@
       box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
       overflow: hidden !important;
 
-      .v-scrollable {
+      .c-scrollbox,
+      .sidebar-scrollbox,
+      .edit-sidebar-scroll {
         box-sizing: border-box;
         width: 100% !important;
         height: 100% !important;
-        padding: 14px 16px 12px !important;
+      }
+
+      .c-scrollbox-content,
+      .sidebar-content-box,
+      .edit-sidebar-content,
+      .v-scrollable {
+        box-sizing: border-box;
+        width: 100% !important;
+        padding: 14px 16px 16px !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
       }
@@ -124,7 +134,10 @@
 
     .settings-section-sidebar > .v-slot,
     .user-ai-profile-sidebar > .v-slot,
-    .ai-settings-sidebar > .v-slot {
+    .ai-settings-sidebar > .v-slot,
+    .sidebar-content-box > .v-slot,
+    .edit-sidebar-content > .v-slot {
+      box-sizing: border-box;
       width: 100% !important;
       min-width: 0;
     }
@@ -230,17 +243,22 @@
       width: 100% !important;
       text-align: center !important;
       margin-top: 6px !important;
+      padding: 0 4px !important;
 
       .v-button {
+        box-sizing: border-box !important;
         min-height: 28px !important;
         height: 28px !important;
         padding: 0 10px !important;
+        border-radius: 6px !important;
         font-size: 12px !important;
       }
     }
 
     .user-ai-profile-summary {
       box-sizing: border-box;
+      width: 100% !important;
+      margin: 4px 0 0 0 !important;
       padding: 10px 12px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
@@ -299,6 +317,8 @@
       min-height: 34px !important;
       height: auto !important;
       padding: 6px 10px !important;
+      margin: 0 0 4px 0 !important;
+      border-radius: 6px !important;
       color: #ffb11b !important;
       font-size: 14px !important;
       font-weight: 700 !important;
@@ -319,15 +339,17 @@
     .label-nav-item,
     .v-button-label-nav-item {
       box-sizing: border-box;
+      width: 100% !important;
       min-height: 32px !important;
       padding: 6px 12px !important;
+      margin: 1px 0 !important;
+      border-radius: 6px !important;
       color: rgba(248, 250, 252, 0.88) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
       line-height: 20px !important;
       background: transparent !important;
       border-left: 3px solid transparent !important;
-      border-radius: 0 5px 5px 0 !important;
       transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
       white-space: normal !important;
       text-align: left !important;
@@ -451,7 +473,27 @@
     }
 
     .user-ai-profile-toolbar {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      flex-wrap: wrap !important;
+      gap: 12px 16px !important;
       min-height: 64px;
+
+      > .v-slot:first-child {
+        flex: 1 1 280px !important;
+        min-width: 0 !important;
+      }
+
+      > .v-slot:last-child {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      > .v-spacing {
+        display: none !important;
+      }
     }
 
     .settings-section-toolbar {
@@ -484,8 +526,36 @@
     .settings-section-toolbar-actions,
     .user-ai-profile-toolbar-actions,
     .ai-settings-toolbar-actions {
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      flex-wrap: wrap !important;
+      gap: 10px !important;
+      width: auto !important;
+      min-width: 0 !important;
       padding-right: 16px !important;
-      white-space: nowrap !important;
+
+      > .v-slot {
+        display: inline-flex !important;
+        width: auto !important;
+        min-width: 0 !important;
+        position: static !important;
+        margin: 0 !important;
+      }
+
+      > .v-spacing {
+        display: none !important;
+      }
+
+      .v-button {
+        position: static !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        white-space: nowrap !important;
+        width: auto !important;
+        min-width: 0 !important;
+      }
     }
 
     .ai-settings-toolbar .v-button {
@@ -793,6 +863,9 @@
         max-width: 290px !important;
         padding: 0 !important;
 
+        .c-scrollbox-content,
+        .sidebar-content-box,
+        .edit-sidebar-content,
         .v-scrollable {
           padding-left: 14px !important;
           padding-right: 14px !important;
@@ -820,6 +893,14 @@
         width: 260px !important;
         min-width: 260px !important;
         max-width: 260px !important;
+
+        .c-scrollbox-content,
+        .sidebar-content-box,
+        .edit-sidebar-content,
+        .v-scrollable {
+          padding-left: 12px !important;
+          padding-right: 12px !important;
+        }
       }
 
       .edit-field-row {
