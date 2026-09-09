@@ -53,6 +53,7 @@ public class HrmMainScreen extends ExtMainScreen {
     @Subscribe
     public void onAfterShowBackground(AfterShowEvent event) {
         refreshBackground();
+        createLlmChatLauncher();
     }
 
     @EventListener

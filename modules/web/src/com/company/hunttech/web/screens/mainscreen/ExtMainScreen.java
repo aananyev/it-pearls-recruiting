@@ -116,7 +116,7 @@ public class ExtMainScreen extends MainScreen {
         createLlmChatLauncher();
     }
 
-    private void createLlmChatLauncher() {
+    protected void createLlmChatLauncher() {
         if (llmChatLauncherWindow != null || UI.getCurrent() == null
                 || userSession == null || userSession.getUser() == null) {
             return;
@@ -140,6 +140,10 @@ public class ExtMainScreen extends MainScreen {
         launcher.setSizeFull();
         launcher.addClickListener(event -> openLlmChat());
 
+        String storageKey = "hunttech.llm-chat.launcher." + userSession.getUser().getId();
+        String initialPosition = loadUserChatPosition();
+        int[] initialCoords = parsePositionCoordinates(initialPosition);
+
         llmChatLauncherWindow = new com.vaadin.ui.Window();
         llmChatLauncherWindow.setId("llmChatLauncherWindow");
         llmChatLauncherWindow.setStyleName("borderless llm-chat-launcher-window");
@@ -150,14 +154,17 @@ public class ExtMainScreen extends MainScreen {
         llmChatLauncherWindow.setModal(false);
         llmChatLauncherWindow.setWidth(56, com.vaadin.server.Sizeable.Unit.PIXELS);
         llmChatLauncherWindow.setHeight(56, com.vaadin.server.Sizeable.Unit.PIXELS);
-        llmChatLauncherWindow.setPositionX(9999);
-        llmChatLauncherWindow.setPositionY(9999);
+        if (initialCoords != null) {
+            llmChatLauncherWindow.setPositionX(initialCoords[0]);
+            llmChatLauncherWindow.setPositionY(initialCoords[1]);
+        } else {
+            llmChatLauncherWindow.setPositionX(DEFAULT_OFFSCREEN_POSITION);
+            llmChatLauncherWindow.setPositionY(DEFAULT_OFFSCREEN_POSITION);
+        }
         llmChatLauncherWindow.setContent(launcher);
 
         UI.getCurrent().addWindow(llmChatLauncherWindow);
 
-        String storageKey = "hunttech.llm-chat.launcher." + userSession.getUser().getId();
-        String initialPosition = loadUserChatPosition();
         new LlmChatLauncherExtension().extend(llmChatLauncherWindow, storageKey, initialPosition, this::saveUserChatPosition);
     }
 
@@ -211,6 +218,28 @@ public class ExtMainScreen extends MainScreen {
         return newSettings;
     }
 
+    private static final int MAX_COORDINATE_BOUND = 9000;
+    private static final int DEFAULT_OFFSCREEN_POSITION = 9999;
+
+    private int[] parsePositionCoordinates(String positionJson) {
+        if (positionJson == null || !positionJson.contains("left") || !positionJson.contains("top")) {
+            return null;
+        }
+        try {
+            java.util.regex.Matcher mLeft = java.util.regex.Pattern.compile("\"left\"\\s*:\\s*(\\d+)").matcher(positionJson);
+            java.util.regex.Matcher mTop = java.util.regex.Pattern.compile("\"top\"\\s*:\\s*(\\d+)").matcher(positionJson);
+            if (mLeft.find() && mTop.find()) {
+                int left = Integer.parseInt(mLeft.group(1));
+                int top = Integer.parseInt(mTop.group(1));
+                if (left >= 0 && top >= 0 && left < MAX_COORDINATE_BOUND && top < MAX_COORDINATE_BOUND) {
+                    return new int[]{left, top};
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     private void saveUserChatPosition(String positionJson) {
         if (userSession == null || userSession.getUser() == null || positionJson == null) {
             return;
@@ -221,6 +250,16 @@ public class ExtMainScreen extends MainScreen {
             log.warn("Invalid chat position payload: {}", positionJson);
             return;
         }
+
+        int[] coords = parsePositionCoordinates(trimmed);
+        if (coords != null && llmChatLauncherWindow != null) {
+            llmChatLauncherWindow.setPositionX(coords[0]);
+            llmChatLauncherWindow.setPositionY(coords[1]);
+        } else if (trimmed.contains("bottom-right") && llmChatLauncherWindow != null) {
+            llmChatLauncherWindow.setPositionX(DEFAULT_OFFSCREEN_POSITION);
+            llmChatLauncherWindow.setPositionY(DEFAULT_OFFSCREEN_POSITION);
+        }
+
         UUID userId = userSession.getUser().getId();
         for (int attempt = 1; attempt <= 2; attempt++) {
             try {

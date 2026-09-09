@@ -4,6 +4,7 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
     connector.initialize = function (storageKey, serverPosition) {
         const margin = 24;
         const threshold = 6;
+        const MAX_COORDINATE_BOUND = 9000;
         let attached = false;
         let observer = null;
         let currentWindowElement = null;
@@ -93,13 +94,21 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                     applyDefaultBottomRight();
                     return;
                 }
-                var rect = windowElement.getBoundingClientRect();
-                var width = rect.width || 56;
-                var height = rect.height || 56;
-                var maxLeft = Math.max(margin, window.innerWidth - width - margin);
-                var maxTop = Math.max(margin, window.innerHeight - height - margin);
-                var clampedLeft = Math.min(Math.max(margin, Math.round(left)), maxLeft);
-                var clampedTop = Math.min(Math.max(margin, Math.round(top)), maxTop);
+                const vpWidth = window.innerWidth || document.documentElement.clientWidth || 1024;
+                const vpHeight = window.innerHeight || document.documentElement.clientHeight || 768;
+                const rect = windowElement.getBoundingClientRect();
+                const width = rect.width && rect.width > 0 ? rect.width : 56;
+                const height = rect.height && rect.height > 0 ? rect.height : 56;
+                const headerEl = document.querySelector('.c-app-menubar, .c-main-header, .v-menubar');
+                let headerBottom = 0;
+                if (headerEl && typeof headerEl.getBoundingClientRect === 'function') {
+                    headerBottom = Math.round(headerEl.getBoundingClientRect().bottom);
+                }
+                const minTop = Math.max(headerBottom > 0 ? headerBottom + 8 : 64, margin);
+                const maxLeft = Math.max(margin, vpWidth - width - margin);
+                const maxTop = Math.max(minTop, vpHeight - height - margin);
+                const clampedLeft = Math.min(Math.max(margin, Math.round(left)), maxLeft);
+                const clampedTop = Math.min(Math.max(minTop, Math.round(top)), maxTop);
 
                 hasCustomPosition = true;
                 windowElement.classList.add('llm-chat-launcher-custom-position');
@@ -129,12 +138,25 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                     applyDefaultBottomRight();
                     return;
                 }
-                if (saved && isFinite(saved.left) && isFinite(saved.top) && saved.left >= 0 && saved.top >= 0) {
+                if (saved && isFinite(saved.left) && isFinite(saved.top) && saved.left >= 0 && saved.top >= 0 && saved.left < MAX_COORDINATE_BOUND && saved.top < MAX_COORDINATE_BOUND) {
                     applyPosition(saved.left, saved.top, true);
                     return;
                 }
                 // По умолчанию — правый нижний край экрана
                 applyDefaultBottomRight();
+            }
+
+            function savePositionDefault() {
+                const defJson = JSON.stringify({ align: 'bottom-right', right: margin, bottom: margin });
+                serverPosition = defJson;
+                if (storageKey) {
+                    try {
+                        window.localStorage.setItem(storageKey, defJson);
+                    } catch (ignore) {}
+                }
+                if (typeof connector.savePosition === 'function') {
+                    connector.savePosition(defJson);
+                }
             }
 
             function savePosition(left, top) {
@@ -143,7 +165,8 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                 if (!isFinite(roundLeft) || !isFinite(roundTop)) {
                     return;
                 }
-                var posJson = JSON.stringify({ left: roundLeft, top: roundTop });
+                const posJson = JSON.stringify({ left: roundLeft, top: roundTop });
+                serverPosition = posJson;
                 if (storageKey) {
                     try {
                         window.localStorage.setItem(storageKey, posJson);
@@ -326,6 +349,14 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                     event.stopImmediatePropagation();
                     return false;
                 }
+            }, true);
+
+            // Правый клик (contextmenu) сбрасывает лаунчер в безопасный правый нижний угол без открытия диалога чата
+            button.addEventListener('contextmenu', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyDefaultBottomRight();
+                savePositionDefault();
             }, true);
 
             window.addEventListener('resize', function () {
