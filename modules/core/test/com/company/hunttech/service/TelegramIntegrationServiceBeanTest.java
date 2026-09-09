@@ -271,6 +271,37 @@ public class TelegramIntegrationServiceBeanTest {
         assertEquals(Integer.valueOf(202), res.getMessageId());
     }
 
+    @Test
+    public void testSaveUserProfilePhotoToFileStorage_ByUsername() {
+        mockClientProvider.chat = new Chat();
+        mockClientProvider.chat.setId(777L);
+        byte[] validJpg = new byte[120];
+        validJpg[0] = (byte) 0xFF;
+        validJpg[1] = (byte) 0xD8;
+        validJpg[2] = (byte) 0xFF;
+        mockClientProvider.downloadedBytes = validJpg;
+
+        PhotoSize large = createPhotoSize("f_large", "uniq_large", 640, 640, 16384);
+        UserProfilePhotos photos = new UserProfilePhotos();
+        photos.setTotalCount(1);
+        photos.setPhotos(Collections.singletonList(Collections.singletonList(large)));
+        mockClientProvider.userProfilePhotos = photos;
+        mockClientProvider.file = createFile("f_large", "photos/f_large.jpg");
+
+        FileDescriptor fd = service.saveUserProfilePhotoToFileStorage("@some_user", "avatar.jpg");
+        assertNotNull(fd);
+        assertTrue(fileSaved.get());
+        assertTrue(dataCommitted.get());
+    }
+
+    @Test
+    public void testSaveUserProfilePhotoToFileStorage_Empty_ReturnsNull() {
+        FileDescriptor fd = service.saveUserProfilePhotoToFileStorage("", null);
+        assertNull(fd);
+        FileDescriptor fdNull = service.saveUserProfilePhotoToFileStorage((String) null, null);
+        assertNull(fdNull);
+    }
+
     private PhotoSize createPhotoSize(String fileId, String fileUniqueId, int width, int height, int fileSize) {
         PhotoSize ps = new PhotoSize();
         ps.setFileId(fileId);
