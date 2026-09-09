@@ -47,8 +47,6 @@ public class LlmChatScreen extends Screen {
     @Inject
     private Button sendBtn;
     @Inject
-    private Button cancelBtn;
-    @Inject
     private Timer streamPollTimer;
     @Inject
     private UserSession userSession;
@@ -66,6 +64,16 @@ public class LlmChatScreen extends Screen {
         if (dialog != null) {
             dialog.setDialogStylename(CHAT_DIALOG_STYLENAME);
             dialog.setDialogWidth("840px");
+            dialog.setDialogHeight("560px");
+            dialog.setModal(false);
+            dialog.setResizable(true);
+            dialog.setCloseable(true);
+            com.vaadin.ui.Window vWindow = dialog.unwrap(com.vaadin.ui.Window.class);
+            if (vWindow != null) {
+                vWindow.setModal(false);
+                vWindow.setDraggable(true);
+                vWindow.setResizable(true);
+            }
         }
         ensureUserFallbackConsent();
         try {
@@ -125,6 +133,36 @@ public class LlmChatScreen extends Screen {
             chatUi.getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
         }
         restoreDialogGeometry(getSettings());
+        sendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
+        sendBtn.setDescription("Отправить сообщение (Enter, перенос строки — Shift+Enter)");
+        com.vaadin.ui.TextArea vTextArea = inputArea.unwrap(com.vaadin.ui.TextArea.class);
+        if (vTextArea != null) {
+            vTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.EAGER);
+            vTextArea.addShortcutListener(new com.vaadin.event.ShortcutListener("SendOnEnter",
+                    com.vaadin.event.ShortcutAction.KeyCode.ENTER, new int[0]) {
+                @Override
+                public void handleAction(Object sender, Object target) {
+                    executeSend();
+                }
+            });
+        }
+        if (chatUi != null && chatUi.getPage() != null && chatUi.getPage().getJavaScript() != null) {
+            chatUi.getPage().getJavaScript().execute(
+                    "(function() {" +
+                    "  var ta = document.querySelector('.llm-chat-input-area textarea');" +
+                    "  if (ta && !ta._enterBound) {" +
+                    "    ta._enterBound = true;" +
+                    "    ta.addEventListener('keydown', function(e) {" +
+                    "      if (e.key === 'Enter' && !e.shiftKey) {" +
+                    "        e.preventDefault();" +
+                    "        var btn = document.querySelector('.llm-chat-send-btn');" +
+                    "        if (btn) btn.click();" +
+                    "      }" +
+                    "    });" +
+                    "  }" +
+                    "})()"
+            );
+        }
     }
 
     @EventListener
@@ -232,6 +270,13 @@ public class LlmChatScreen extends Screen {
 
     @Subscribe("sendBtn")
     public void onSend(Button.ClickEvent event) {
+        executeSend();
+    }
+
+    private void executeSend() {
+        if (!sendBtn.isEnabled()) {
+            return;
+        }
         String message = inputArea.getValue();
         if (message == null || message.trim().isEmpty()) {
             notifications.create(Notifications.NotificationType.WARNING)
@@ -242,7 +287,6 @@ public class LlmChatScreen extends Screen {
         final String request = message.trim();
         inputArea.setEnabled(false);
         sendBtn.setEnabled(false);
-        cancelBtn.setEnabled(true);
         if (activeRequestId == null || !request.equals(activeRequestText)) {
             activeRequestId = UUID.randomUUID().toString();
             activeRequestText = request;
@@ -269,23 +313,6 @@ public class LlmChatScreen extends Screen {
         } catch (RuntimeException ex) {
             streamPollTimer.stop();
             resetControls(false);
-            showError(ex);
-        }
-    }
-
-    @Subscribe("cancelBtn")
-    public void onCancel(Button.ClickEvent event) {
-        if (conversationId == null || activeRequestId == null) {
-            return;
-        }
-        try {
-            llmChatService.cancelMessage(conversationId, activeRequestId);
-            cancelBtn.setEnabled(false);
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Отмена запрошена")
-                    .withDescription("Ответ не будет сохранён; провайдер может успеть учесть фактическое usage.")
-                    .show();
-        } catch (RuntimeException ex) {
             showError(ex);
         }
     }
@@ -339,7 +366,6 @@ public class LlmChatScreen extends Screen {
         }
         inputArea.setEnabled(true);
         sendBtn.setEnabled(true);
-        cancelBtn.setEnabled(false);
     }
 
     private void showError(Exception ex) {

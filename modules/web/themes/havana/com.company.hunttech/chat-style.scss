@@ -212,18 +212,18 @@ body.llm-chat-launcher-dragging {
 
 /* The dialog itself is styled so the native CUBA drag/resize state remains usable. */
 .llm-chat-window {
-    width: 840px !important;
-    height: 560px !important;
+    min-width: 400px;
+    min-height: 320px;
     max-width: calc(100vw - 24px) !important;
     max-height: calc(100vh - 24px) !important;
 }
 
 @media (max-width: 900px) {
     .llm-chat-window {
-        width: calc(100vw - 32px) !important;
-        height: calc(100vh - 32px) !important;
-        max-width: 840px !important;
-        max-height: 560px !important;
+        min-width: 320px;
+        min-height: 280px;
+        max-width: calc(100vw - 16px) !important;
+        max-height: calc(100vh - 16px) !important;
         border-radius: 12px !important;
     }
 }
@@ -563,3 +563,83 @@ body.v-dark,
     }
 }
 
+/* ==========================================================================
+   LLM Chat Input Bar & Telegram-Style Send Button
+   ========================================================================== */
+
+.llm-chat-input-bar {
+    align-items: center !important;
+    padding-top: 4px;
+}
+
+.llm-chat-input-area {
+    .v-textarea {
+        border-radius: 16px !important;
+        padding: 8px 12px !important;
+        resize: none !important;
+        font-family: inherit !important;
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+    }
+}
+
+.llm-chat-send-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: linear-gradient(135deg, #2aabee 0%, #229ed9 100%) !important;
+    box-shadow: 0 2px 8px rgba(34, 158, 217, 0.4) !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important;
+
+    .v-button-wrap {
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .v-button-caption {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+    }
+
+    .llm-chat-send-svg {
+        display: block !important;
+        width: 20px !important;
+        height: 20px !important;
+        transform: translate(-1px, 1px) !important;
+    }
+
+    &:hover:not(.v-disabled) {
+        transform: scale(1.06) !important;
+        box-shadow: 0 4px 14px rgba(34, 158, 217, 0.55) !important;
+        background: linear-gradient(135deg, #38b4f2 0%, #25a4e0 100%) !important;
+    }
+
+    &:active:not(.v-disabled) {
+        transform: scale(0.95) !important;
+    }
+
+    &.v-disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+        background: #9aa0a6 !important;
+    }
+}
