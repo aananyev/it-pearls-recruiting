@@ -46,6 +46,8 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("property=\"numberIteraction\""));
         assertTrue(xml.contains("id=\"dateIteractionField\""));
         assertTrue(xml.contains("property=\"dateIteraction\""));
+        assertTrue(xml.contains("resolution=\"DAY\""));
+        assertTrue(xml.contains("dateFormat=\"dd.MM.yyyy\""));
         assertOrdered(xml,
                 "id=\"iteractionCandidateNameLabel\"",
                 "id=\"iteractionVacancyNameLabel\"",

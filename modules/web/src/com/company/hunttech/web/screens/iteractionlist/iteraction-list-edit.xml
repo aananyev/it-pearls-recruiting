@@ -189,13 +189,15 @@
                                        caption="msg://msgNumber"
                                        width="100%"
                                        align="MIDDLE_LEFT"/>
-                            <!-- Read-only поле показывает дату и время взаимодействия из редактируемой сущности. -->
+                            <!-- Read-only поле показывает дату взаимодействия (только календарная дата без времени и минут). -->
                             <dateField id="dateIteractionField"
                                        stylename="iteraction-list-service-field"
                                        dataContainer="iteractionListDc"
                                        property="dateIteraction"
                                        editable="false"
                                        caption="msg://msgDate"
+                                       resolution="DAY"
+                                       dateFormat="dd.MM.yyyy"
                                        width="100%"
                                        align="MIDDLE_LEFT"/>
                         </vbox>
