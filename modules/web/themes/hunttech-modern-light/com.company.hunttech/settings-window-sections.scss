@@ -92,6 +92,10 @@
     .settings-section-sidebar,
     .user-ai-profile-sidebar,
     .ai-settings-sidebar {
+      box-sizing: border-box !important;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
     }
@@ -99,7 +103,7 @@
     .settings-section-sidebar,
     .user-ai-profile-sidebar,
     .ai-settings-sidebar {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 312px !important;
       min-width: 312px !important;
       max-width: 312px !important;
@@ -115,20 +119,30 @@
       .c-scrollbox,
       .sidebar-scrollbox,
       .edit-sidebar-scroll {
-        box-sizing: border-box;
+        box-sizing: border-box !important;
         width: 100% !important;
+        max-width: 312px !important;
         height: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
       }
 
       .c-scrollbox-content,
       .sidebar-content-box,
-      .edit-sidebar-content,
-      .v-scrollable {
-        box-sizing: border-box;
+      .edit-sidebar-content {
+        box-sizing: border-box !important;
         width: 100% !important;
-        padding: 14px 16px 16px !important;
+        max-width: 100% !important;
+        padding: 14px 16px 16px 16px !important;
+        margin: 0 !important;
         overflow-x: hidden !important;
-        overflow-y: auto !important;
+        overflow-y: visible !important;
+      }
+
+      .v-scrollable {
+        padding: 0 !important;
       }
     }
 
@@ -137,9 +151,12 @@
     .ai-settings-sidebar > .v-slot,
     .sidebar-content-box > .v-slot,
     .edit-sidebar-content > .v-slot {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 100% !important;
-      min-width: 0;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
     .user-ai-profile-sidebar .v-spacing,
@@ -525,7 +542,10 @@
 
     .settings-section-toolbar-actions,
     .user-ai-profile-toolbar-actions,
-    .ai-settings-toolbar-actions {
+    .ai-settings-toolbar-actions,
+    .c-buttons-panel.settings-section-toolbar-actions,
+    .c-buttons-panel.user-ai-profile-toolbar-actions,
+    .c-buttons-panel.ai-settings-toolbar-actions {
       display: inline-flex !important;
       flex-direction: row !important;
       align-items: center !important;
@@ -534,7 +554,19 @@
       gap: 10px !important;
       width: auto !important;
       min-width: 0 !important;
+      padding: 0 !important;
       padding-right: 16px !important;
+      margin: 0 !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+      }
 
       > .v-slot {
         display: inline-flex !important;
@@ -542,6 +574,11 @@
         min-width: 0 !important;
         position: static !important;
         margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
       }
 
       > .v-spacing {
@@ -855,6 +892,9 @@
 
   @media (max-width: 1366px) {
     .ext-settings-window {
+      .v-slot-settings-section-sidebar,
+      .v-slot-user-ai-profile-sidebar,
+      .v-slot-ai-settings-sidebar,
       .settings-section-sidebar,
       .user-ai-profile-sidebar,
       .ai-settings-sidebar {
@@ -865,10 +905,13 @@
 
         .c-scrollbox-content,
         .sidebar-content-box,
-        .edit-sidebar-content,
-        .v-scrollable {
+        .edit-sidebar-content {
           padding-left: 14px !important;
           padding-right: 14px !important;
+        }
+
+        .v-scrollable {
+          padding: 0 !important;
         }
       }
 
@@ -887,6 +930,9 @@
 
   @media (max-width: 1100px) {
     .ext-settings-window {
+      .v-slot-settings-section-sidebar,
+      .v-slot-user-ai-profile-sidebar,
+      .v-slot-ai-settings-sidebar,
       .settings-section-sidebar,
       .user-ai-profile-sidebar,
       .ai-settings-sidebar {
@@ -896,10 +942,13 @@
 
         .c-scrollbox-content,
         .sidebar-content-box,
-        .edit-sidebar-content,
-        .v-scrollable {
+        .edit-sidebar-content {
           padding-left: 12px !important;
           padding-right: 12px !important;
+        }
+
+        .v-scrollable {
+          padding: 0 !important;
         }
       }
 

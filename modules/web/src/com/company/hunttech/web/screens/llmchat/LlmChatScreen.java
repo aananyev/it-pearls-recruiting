@@ -7,6 +7,8 @@ import com.company.hunttech.service.LlmChatStreamState;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DialogWindow;
+import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.ScrollBoxLayout;
 import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.settings.Settings;
@@ -37,7 +39,9 @@ public class LlmChatScreen extends Screen {
     @Inject
     private Notifications notifications;
     @Inject
-    private TextArea<String> historyArea;
+    private ScrollBoxLayout historyScrollBox;
+    @Inject
+    private Label<String> historyLabel;
     @Inject
     private TextArea<String> inputArea;
     @Inject
@@ -291,15 +295,20 @@ public class LlmChatScreen extends Screen {
     }
 
     private void renderHistory(List<LlmChatMessage> messages, String liveText) {
-        StringBuilder rendered = new StringBuilder();
-        for (LlmChatMessage message : messages) {
-            rendered.append("USER".equals(message.getRole()) ? "Вы" : "ИИ")
-                    .append(":\n").append(message.getContent()).append("\n\n");
+        String html = MarkdownRenderer.renderChatHistory(messages, liveText);
+        historyLabel.setValue(html);
+        scrollToBottom();
+    }
+
+    private void scrollToBottom() {
+        try {
+            com.vaadin.ui.Panel panel = historyScrollBox.unwrap(com.vaadin.ui.Panel.class);
+            if (panel != null) {
+                panel.setScrollTop(Integer.MAX_VALUE / 2);
+            }
+        } catch (Exception ex) {
+            log.debug("Не удалось выполнить автоскролл historyScrollBox: {}", ex.getMessage());
         }
-        if (liveText != null && !liveText.isEmpty()) {
-            rendered.append("ИИ:\n").append(liveText).append("\n");
-        }
-        historyArea.setValue(rendered.toString());
     }
 
     private void applyStreamState(LlmChatStreamState state) {
