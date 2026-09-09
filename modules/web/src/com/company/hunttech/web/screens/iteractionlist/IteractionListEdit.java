@@ -1227,7 +1227,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++) {
             Iteraction interaction = index < mostPopular.size()
                     ? mostPopular.get(index) : null;
-            Button popularButton = createPopularInteractionButton(index, interaction);
+            Button popularButton = createPopularInteractionButton(interaction);
             mostPopularHbox.add(popularButton);
             popularButtons.add(popularButton);
         }
@@ -1240,12 +1240,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     /**
-     * Реальная кнопка восстанавливает исторический формат быстрой кнопки
-     * 2024 года: порядковый номер частоты и название типа взаимодействия.
+     * Создаёт быструю кнопку для взаимодействия: название типа взаимодействия
+     * на кнопке и во всплывающей подсказке совпадают.
      * Точный Iteraction сохраняется в listener. Заглушка не имеет listener
      * и disabled, поэтому не может изменить поле или DataContext.
      */
-    private Button createPopularInteractionButton(int index, Iteraction interaction) {
+    private Button createPopularInteractionButton(Iteraction interaction) {
         Button popularButton = uiComponents.create(Button.class);
         popularButton.setWidth("100%");
         popularButton.setStyleName("iteraction-list-popular-button");
@@ -1257,11 +1257,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             return popularButton;
         }
 
-        popularButton.setCaption(new StringBuilder()
-                .append(index + 1)
-                .append(". ")
-                .append(interaction.getIterationName())
-                .toString());
+        popularButton.setCaption(interaction.getIterationName());
         popularButton.setDescription(interaction.getIterationName());
         popularButton.addClickListener(clickEvent -> {
             iteractionTypeField.setValue(interaction);
