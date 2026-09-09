@@ -649,6 +649,12 @@
     }
 
     @media (max-width: 1100px) {
+      .v-slot-iteraction-list-sidebar {
+        width: 252px !important;
+        min-width: 252px !important;
+        max-width: 252px !important;
+      }
+
       .iteraction-list-vacancy-state-summary {
         gap: 6px;
       }
