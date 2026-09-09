@@ -66,14 +66,9 @@ public class LlmChatScreen extends Screen {
             dialog.setDialogWidth("840px");
             dialog.setDialogHeight("560px");
             dialog.setModal(false);
+            dialog.setDraggable(true);
             dialog.setResizable(true);
             dialog.setCloseable(true);
-            com.vaadin.ui.Window vWindow = dialog.unwrap(com.vaadin.ui.Window.class);
-            if (vWindow != null) {
-                vWindow.setModal(false);
-                vWindow.setDraggable(true);
-                vWindow.setResizable(true);
-            }
         }
         ensureUserFallbackConsent();
         try {
