@@ -269,8 +269,12 @@ public class CountryReestrBrowse extends StandardLookup<Country> {
     private void updateSidebarDetails(Country country) {
         openEditCardBtn.setEnabled(true);
 
-        // Флаг в шапке профиля
-        if (country.getFileFlag() != null) {
+        // Флаг в шапке профиля: сначала прямое BLOB-поле flagImage, затем fileFlag, затем fallback
+        byte[] flagBytes = country.getFlagImage();
+        if (flagBytes != null && flagBytes.length > 0) {
+            logoPic.setSource(StreamResource.class)
+                    .setStreamSupplier(() -> new java.io.ByteArrayInputStream(flagBytes));
+        } else if (country.getFileFlag() != null) {
             logoPic.setSource(FileDescriptorResource.class).setFileDescriptor(country.getFileFlag());
         } else {
             logoPic.applyFallback();

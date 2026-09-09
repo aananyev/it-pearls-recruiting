@@ -77,6 +77,8 @@
         <property name="capital"/>
         <property name="phoneCode"/>
         <property name="fileFlag"/>
+        <property name="flagImage"/>
+        <property name="flagUrl"/>
     </view>
     <view entity="hunttech_Country" name="country-edit-view" extends="_minimal">
         <property name="countryRuName"/>
@@ -102,6 +104,8 @@
     <view entity="hunttech_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
         <property name="fileFlag"/>
+        <property name="flagImage"/>
+        <property name="flagUrl"/>
     </view>
     <view entity="hunttech_CompanyDepartament" name="companyDepartament-browse-view" extends="_minimal">
         <property name="departamentRuName"/>

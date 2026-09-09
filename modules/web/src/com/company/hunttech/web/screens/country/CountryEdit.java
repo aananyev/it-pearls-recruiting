@@ -1,16 +1,27 @@
 package com.company.hunttech.web.screens.country;
 
 import com.company.hunttech.entity.Country;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.FileDescriptorResource;
+import com.haulmont.cuba.gui.components.FileUploadField;
+import com.haulmont.cuba.gui.components.StreamResource;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.StandardEditor;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
+import org.apache.commons.io.IOUtils;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 @UiController("hunttech_Country.edit")
 @UiDescriptor("country-edit.xml")
@@ -27,6 +38,10 @@ public class CountryEdit extends StandardEditor<Country> {
     @Inject
     private Button countryRegionsNav;
     @Inject
+    private OvaFallbackImage countryFlagImage;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
     private com.company.hunttech.service.GeoDataEnrichmentService geoDataEnrichmentService;
     @Inject
     private com.haulmont.cuba.gui.Notifications notifications;
@@ -42,6 +57,76 @@ public class CountryEdit extends StandardEditor<Country> {
 
     private final java.util.Set<com.haulmont.cuba.core.entity.FileDescriptor> pendingRemovalDescriptors = new java.util.HashSet<>();
     private final java.util.Set<com.haulmont.cuba.core.entity.FileDescriptor> createdUncommittedDescriptors = new java.util.HashSet<>();
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        updateFlagImage();
+    }
+
+    @Subscribe(id = "countryDc", target = Target.DATA_CONTAINER)
+    public void onCountryDcItemChange(InstanceContainer.ItemChangeEvent<Country> event) {
+        updateFlagImage();
+    }
+
+    @Subscribe(id = "countryDc", target = Target.DATA_CONTAINER)
+    public void onCountryDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<Country> event) {
+        if ("flagImage".equals(event.getProperty())) {
+            updateFlagImage();
+        } else if ("fileFlag".equals(event.getProperty())) {
+            if (event.getValue() == null) {
+                Country country = getEditedEntity();
+                if (country != null) {
+                    country.setFlagImage(null);
+                    country.setFlagUrl(null);
+                }
+            }
+            updateFlagImage();
+        }
+    }
+
+    @Subscribe("countryFlagFileUpload")
+    public void onCountryFlagFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        Country country = getEditedEntity();
+        com.haulmont.cuba.core.entity.FileDescriptor fd = country.getFileFlag();
+        if (fd != null && fileLoader != null) {
+            try (InputStream is = fileLoader.openStream(fd)) {
+                if (is != null) {
+                    byte[] bytes = IOUtils.toByteArray(is);
+                    if (bytes != null && bytes.length > 0) {
+                        country.setFlagImage(bytes);
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Не удалось синхронизировать файл флага в BLOB flagImage: {}", ex.getMessage());
+            }
+        }
+        updateFlagImage();
+    }
+
+    /**
+     * Отображает флаг государства из прямого BLOB-поля (flagImage) через StreamResource.
+     * При отсутствии BLOB используется fileFlag, затем theme fallback (icons/dictionaries/country.png).
+     */
+    private void updateFlagImage() {
+        if (countryFlagImage == null) {
+            return;
+        }
+        Country country = getEditedEntity();
+        if (country == null) {
+            countryFlagImage.applyFallback();
+            return;
+        }
+        byte[] flagBytes = country.getFlagImage();
+        if (flagBytes != null && flagBytes.length > 0) {
+            countryFlagImage.setSource(StreamResource.class)
+                    .setStreamSupplier(() -> new ByteArrayInputStream(flagBytes));
+        } else if (country.getFileFlag() != null) {
+            countryFlagImage.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(country.getFileFlag());
+        } else {
+            countryFlagImage.applyFallback();
+        }
+    }
 
     @com.haulmont.cuba.gui.screen.Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
@@ -155,6 +240,8 @@ public class CountryEdit extends StandardEditor<Country> {
                         }
                     }
                 }
+
+                updateFlagImage();
 
                 notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.TRAY)
                         .withCaption(anyFieldFilled ? "Реквизиты страны успешно заполнены" : "Реквизиты страны уже заполнены")

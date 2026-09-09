@@ -42,8 +42,8 @@
                   height="100%"
                   spacing="true"
                   expand="countrySidebarSpacer">
-                <!-- Визуальный блок sidebar: прямоугольный флаг страны 200×120 с fallback icons/dictionaries/country.png
-                     и загрузкой файла флага. -->
+                <!-- Визуальный блок sidebar: круглый флаг страны (OvalFallbackImage) с fallback icons/dictionaries/country.png,
+                     получающий данные из BLOB-поля flagImage сущности Country. -->
                 <vbox id="countryVisual"
                       stylename="edit-sidebar-visual"
                       width="100%"
@@ -52,16 +52,16 @@
                     <vbox id="countryLogoPicBox"
                           spacing="false"
                           align="MIDDLE_CENTER">
-                        <fallbackImage id="countryFlagFileImage"
-                                       dataContainer="countryDc"
-                                       property="fileFlag"
-                                       width="200px"
-                                       height="120px"
-                                       fallbackThemePath="icons/dictionaries/country.png"
-                                       visible="true"
-                                       align="MIDDLE_CENTER"
-                                       stylename="country-flag-rectangular-image"
-                                       scaleMode="CONTAIN"/>
+                        <ovaFallbackImage id="countryFlagImage"
+                                          width="176px"
+                                          height="176px"
+                                          ovalWidth="176px"
+                                          ovalHeight="176px"
+                                          fallbackThemePath="icons/dictionaries/country.png"
+                                          visible="true"
+                                          align="MIDDLE_CENTER"
+                                          stylename="dictionary-logo-image"
+                                          scaleMode="SCALE_DOWN"/>
                     </vbox>
                     <upload id="countryFlagFileUpload"
                             fileStoragePutMode="IMMEDIATE"
