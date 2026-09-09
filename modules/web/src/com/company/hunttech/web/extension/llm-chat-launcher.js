@@ -194,13 +194,15 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                     suppressClick = true;
                     window.setTimeout(function () {
                         suppressClick = false;
-                    }, 200);
+                    }, 250);
 
                     var rect = windowElement.getBoundingClientRect();
                     savePosition(rect.left, rect.top);
                     if (event && event.cancelable) {
                         event.preventDefault();
                     }
+                } else if (!hasCustomPosition) {
+                    applyDefaultBottomRight();
                 }
             }
 
@@ -279,6 +281,12 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
 
                 document.body.classList.add('llm-chat-launcher-dragging');
                 windowElement.classList.add('llm-chat-launcher-dragging');
+                windowElement.classList.add('llm-chat-launcher-custom-position');
+                windowElement.style.setProperty('right', 'auto', 'important');
+                windowElement.style.setProperty('bottom', 'auto', 'important');
+                windowElement.style.setProperty('left', Math.round(startLeft) + 'px', 'important');
+                windowElement.style.setProperty('top', Math.round(startTop) + 'px', 'important');
+
                 attachDragListeners();
             }
 

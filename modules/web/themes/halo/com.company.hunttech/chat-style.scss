@@ -3,10 +3,6 @@
 #llmChatLauncherWindow.v-window,
 .llm-chat-launcher-window {
     position: fixed !important;
-    right: 24px !important;
-    bottom: 24px !important;
-    left: auto !important;
-    top: auto !important;
     z-index: 1001 !important;
     width: 56px !important;
     height: 56px !important;
@@ -19,11 +15,27 @@
     padding: 0 !important;
     margin: 0 !important;
     touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
 }
 
+/* По умолчанию в правом нижнем углу */
+.v-window.llm-chat-launcher-window:not(.llm-chat-launcher-custom-position):not(.llm-chat-launcher-dragging),
+#llmChatLauncherWindow.v-window:not(.llm-chat-launcher-custom-position):not(.llm-chat-launcher-dragging),
+.llm-chat-launcher-window:not(.llm-chat-launcher-custom-position):not(.llm-chat-launcher-dragging) {
+    right: 24px !important;
+    bottom: 24px !important;
+    left: auto !important;
+    top: auto !important;
+}
+
+/* При кастомной позиции или драге — абсолютный приоритет top/left */
 .v-window.llm-chat-launcher-window.llm-chat-launcher-custom-position,
 #llmChatLauncherWindow.v-window.llm-chat-launcher-custom-position,
-.llm-chat-launcher-window.llm-chat-launcher-custom-position {
+.llm-chat-launcher-window.llm-chat-launcher-custom-position,
+.v-window.llm-chat-launcher-window.llm-chat-launcher-dragging,
+#llmChatLauncherWindow.v-window.llm-chat-launcher-dragging,
+.llm-chat-launcher-window.llm-chat-launcher-dragging {
     right: auto !important;
     bottom: auto !important;
 }
@@ -112,6 +124,16 @@ body.llm-chat-launcher-dragging {
     border: 0 !important;
 }
 
+.llm-chat-launcher-icon,
+.llm-chat-svg-icon,
+.llm-chat-svg-icon *,
+.llm-chat-launcher-spark,
+.llm-chat-launcher-label {
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+}
+
 .llm-chat-launcher-icon {
     position: relative;
     display: flex !important;
@@ -121,7 +143,6 @@ body.llm-chat-launcher-dragging {
     height: 100% !important;
     min-width: 100% !important;
     min-height: 100% !important;
-    pointer-events: none;
 }
 
 .llm-chat-svg-icon {
@@ -130,7 +151,6 @@ body.llm-chat-launcher-dragging {
     height: 100% !important;
     min-width: 100% !important;
     min-height: 100% !important;
-    pointer-events: none;
 }
 
 .llm-chat-launcher-spark {
@@ -158,12 +178,21 @@ body.llm-chat-launcher-dragging {
     .llm-chat-launcher-window {
         width: 48px !important;
         height: 48px !important;
+    }
+    .v-window.llm-chat-launcher-window:not(.llm-chat-launcher-custom-position):not(.llm-chat-launcher-dragging),
+    #llmChatLauncherWindow.v-window:not(.llm-chat-launcher-custom-position):not(.llm-chat-launcher-dragging),
+    .llm-chat-launcher-window:not(.llm-chat-launcher-custom-position):not(.llm-chat-launcher-dragging) {
         right: 16px !important;
         bottom: 16px !important;
+        left: auto !important;
+        top: auto !important;
     }
     .v-window.llm-chat-launcher-window.llm-chat-launcher-custom-position,
     #llmChatLauncherWindow.v-window.llm-chat-launcher-custom-position,
-    .llm-chat-launcher-window.llm-chat-launcher-custom-position {
+    .llm-chat-launcher-window.llm-chat-launcher-custom-position,
+    .v-window.llm-chat-launcher-window.llm-chat-launcher-dragging,
+    #llmChatLauncherWindow.v-window.llm-chat-launcher-dragging,
+    .llm-chat-launcher-window.llm-chat-launcher-dragging {
         right: auto !important;
         bottom: auto !important;
     }
