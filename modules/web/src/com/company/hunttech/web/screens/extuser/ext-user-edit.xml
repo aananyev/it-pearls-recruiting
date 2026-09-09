@@ -146,7 +146,12 @@
                                                     <!-- Поле ввода Telegram ID или username пользователя -->
                                                     <textField id="telegramField" datasource="userDs" property="telegram" width="100%" inputPrompt="msg://msgTelegramPrompt" stylename="edit-form-control"/>
                                                     <!-- Кнопка загрузки фотографии пользователя из Telegram в профиль -->
-                                                    <button id="fetchTelegramPhotoBtn" caption="msg://msgFetchPhoto" icon="font-icon:CAMERA" invoke="fetchTelegramPhoto" stylename="primary ext-user-editor-primary-action telegram-fetch-photo-btn"/>
+                                                    <button id="loadTelegramPhotoButton"
+                                                            caption="msg://msgLoadTelegramPhoto"
+                                                            icon="font-icon:CAMERA"
+                                                            invoke="fetchTelegramPhoto"
+                                                            stylename="secondary"
+                                                            description="msg://msgLoadTelegramPhotoDesc"/>
                                                 </hbox>
                                             </field>
                                         </column>

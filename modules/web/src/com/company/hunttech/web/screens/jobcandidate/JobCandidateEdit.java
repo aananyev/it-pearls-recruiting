@@ -6,6 +6,7 @@ import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.GetRoleService;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.service.TelegramIntegrationService;
 import com.company.hunttech.web.StandartPrioritySkills;
 import com.company.hunttech.web.StandartRoles;
 import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
@@ -83,6 +84,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionPropertyContainer<SocialNetworkURLs> jobCandidateSocialNetworksDc;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private TelegramIntegrationService telegramIntegrationService;
+    @Inject
+    private Messages messages;
     //    @Inject
 //    private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
     @Inject
@@ -169,6 +174,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> phoneField;
     private TextField<String> skypeNameField;
     private TextField<String> telegramNameField;
+    private Button loadTelegramPhotoButton;
     private TextField<String> whatsupNameField;
     private TextField<String> wiberNameField;
     private DataGrid<SocialNetworkURLs> socialNetworkTable;
@@ -1827,11 +1833,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .getComponentNN("priorityCommunicationMethodRadioButton");
         socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow().getComponentNN("socialNetworkTable");
         addSocialNetworkListsButton = (Button) getWindow().getComponentNN("addSocialNetworkListsButton");
+        loadTelegramPhotoButton = (Button) getWindow().getComponentNN("loadTelegramPhotoButton");
+        loadTelegramPhotoButton.addClickListener(this::onLoadTelegramPhotoButtonClick);
 
         emailField.addTextChangeListener(e -> enableDisableContacts());
         phoneField.addTextChangeListener(e -> enableDisableContacts());
         mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
-        telegramNameField.addTextChangeListener(e -> enableDisableContacts());
+        telegramNameField.addTextChangeListener(e -> {
+            enableDisableContacts();
+            updateLoadTelegramButtonState(e.getText());
+        });
         whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
         wiberNameField.addTextChangeListener(e -> enableDisableContacts());
         skypeNameField.addTextChangeListener(e -> enableDisableContacts());
@@ -1841,7 +1852,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         emailField.addValueChangeListener(this::onEmailFieldValueChange);
         mobilePhoneField.addValueChangeListener(this::onMobilePhoneFieldValueChange);
         skypeNameField.addValueChangeListener(this::onSkypeNameFieldValueChange);
-        telegramNameField.addValueChangeListener(this::onTelegramNameFieldValueChange);
+        telegramNameField.addValueChangeListener(e -> {
+            this.onTelegramNameFieldValueChange(e);
+            updateLoadTelegramButtonState();
+        });
 
         socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
         socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
@@ -1852,8 +1866,65 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         initSocialNeiworkTable();
         setAddSocialNetworkButtonEnable();
         trimTelegramName();
+        updateLoadTelegramButtonState();
         tabContactInfoInitialized = true;
         enableDisableContacts();
+    }
+
+    private String resolveTelegramAccount() {
+        String telegramAccount = telegramNameField != null ? telegramNameField.getValue() : null;
+        if (StringUtils.isBlank(telegramAccount)) {
+            telegramAccount = getEditedEntity().getTelegramName();
+        }
+        return telegramAccount;
+    }
+
+    public void onLoadTelegramPhotoButtonClick(Button.ClickEvent event) {
+        String telegramAccount = resolveTelegramAccount();
+        if (StringUtils.isBlank(telegramAccount)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messages.getMessage(getClass(), "msgTelegramNameRequired"))
+                    .show();
+            return;
+        }
+
+        try {
+            FileDescriptor fd = telegramIntegrationService.saveUserProfilePhotoToFileStorage(telegramAccount, null);
+            if (fd != null) {
+                FileDescriptor mergedFd = dataContext.merge(fd);
+                getEditedEntity().setFileImageFace(mergedFd);
+                if (fileImageFaceUpload != null) {
+                    fileImageFaceUpload.setValue(mergedFd);
+                }
+                if (candidatePic != null) {
+                    candidatePic.setSource(candidatePic.createResource(FileDescriptorResource.class)
+                            .setFileDescriptor(mergedFd));
+                }
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage(getClass(), "msgTelegramPhotoSuccess"))
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messages.getMessage(getClass(), "msgTelegramPhotoNotFound"))
+                        .show();
+            }
+        } catch (Exception e) {
+            log.error("Error fetching Telegram profile photo for account '{}'", telegramAccount, e);
+            String errorDetails = StringUtils.defaultIfBlank(e.getMessage(), e.getClass().getSimpleName());
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(String.format(messages.getMessage(getClass(), "msgTelegramPhotoError"), errorDetails))
+                    .show();
+        }
+    }
+
+    private void updateLoadTelegramButtonState() {
+        updateLoadTelegramButtonState(resolveTelegramAccount());
+    }
+
+    private void updateLoadTelegramButtonState(String value) {
+        if (loadTelegramPhotoButton != null) {
+            loadTelegramPhotoButton.setEnabled(StringUtils.isNotBlank(value));
+        }
     }
 
     public void initSocialNeiworkTable() {

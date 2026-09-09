@@ -1056,6 +1056,11 @@
                                                            property="telegramName"
                                                            stylename="edit-form-control"
                                                            width="100%"/>
+                                                <button id="loadTelegramPhotoButton"
+                                                        caption="msg://msgLoadTelegramPhoto"
+                                                        icon="font-icon:CAMERA"
+                                                        stylename="secondary"
+                                                        description="msg://msgLoadTelegramPhotoDesc"/>
                                             </hbox>
                                         </vbox>
                                         <!-- Дополнительные контакты + Приоритет -->
