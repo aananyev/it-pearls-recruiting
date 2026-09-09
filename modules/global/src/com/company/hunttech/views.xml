@@ -9,6 +9,7 @@
         <property name="regionType"/>
         <property name="capital"/>
         <property name="timeZone"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_Region" name="region-browse-view" extends="_minimal">
         <property name="regionRuName"/>
@@ -42,6 +43,7 @@
         <property name="regionEngName"/>
         <property name="regionCode"/>
         <property name="isoCode"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_Region" name="region-view" extends="_minimal">
         <property name="regionRuName"/>
@@ -63,6 +65,7 @@
         <property name="fiasId"/>
         <property name="population"/>
         <property name="timeZone"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_Country" name="country-browse-view" extends="_minimal">
         <property name="countryRuName"/>
@@ -94,9 +97,11 @@
         <property name="countryEngName"/>
         <property name="countryShortName"/>
         <property name="alpha3Code"/>
+        <property name="fileFlag"/>
     </view>
     <view entity="hunttech_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
+        <property name="fileFlag"/>
     </view>
     <view entity="hunttech_CompanyDepartament" name="companyDepartament-browse-view" extends="_minimal">
         <property name="departamentRuName"/>
@@ -493,13 +498,13 @@
     <view entity="hunttech_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true"
           overwrite="true">
         <property name="grade" view="_local"/>
-        <property name="cityPosition" view="_local"/>
+        <property name="cityPosition" view="city-picker-view"/>
         <property name="positionType" view="_local">
         </property>
         <property name="skillsList" view="skillTree-openPosition-tab-view"/>
         <property name="parentOpenPosition" view="_local">
         </property>
-        <property name="cities" view="_local"/>
+        <property name="cities" view="city-picker-view"/>
         <property name="owner" view="_local"/>
         <property name="projectName" view="_local">
             <property name="projectDepartment" view="_local">
@@ -723,15 +728,18 @@
         <property name="cityRuName"/>
         <property name="cityEngName"/>
         <property name="cityPhoneCode"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-location-view" extends="_minimal">
         <property name="cityRuName"/>
         <property name="cityEngName"/>
         <property name="cityRegion" view="region-browse-view"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-view" extends="_local">
         <property name="cityRegion" view="region-picker-view"/>
         <property name="openPosition" view="_minimal"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_Company" name="company-browse-view" extends="_minimal">
         <property name="comanyName"/>
@@ -1367,7 +1375,7 @@
     </view>
     <view entity="hunttech_SkillsFilterLastSelection" name="skillsFilterLastSelection-view" extends="_local">
         <property name="position" view="_local"/>
-        <property name="city" view="_local"/>
+        <property name="city" view="city-picker-view"/>
         <property name="openPosition" view="_local"/>
         <property name="jobCandidates" view="_local"/>
         <property name="user" view="_local"/>
