@@ -40,12 +40,8 @@ public class IteractionListVisualAlignmentTest {
         assertEquals(4, count(descriptor, "<column width=\"50%\"/>"));
         assertEquals(0, count(descriptor, "<column flex=\"1\"/>"));
 
-        assertTrue(descriptor.contains("id=\"iteractionListNavigationTitle\""));
-        assertTrue(descriptor.contains(
-                "stylename=\"label-navigation iteraction-list-navigation\""));
-        assertTrue(descriptor.contains(
-                "stylename=\"label-nav-title iteraction-list-navigation-title\""));
-        assertEquals(4, count(descriptor, "label-nav-item iteraction-list-nav-item"));
+        assertFalse(descriptor.contains("id=\"iteractionListNavigation\""));
+        assertFalse(descriptor.contains("id=\"iteractionListNavigationTitle\""));
 
         assertEquals(2, count(descriptor,
                 "stylename=\"edit-form-control iteraction-list-primary-picker\""));
@@ -54,22 +50,15 @@ public class IteractionListVisualAlignmentTest {
                 "id=\"iteractionVacancyNameLabel\"",
                 "id=\"iteractionServiceCard\"",
                 "id=\"vacancyStateSummary\"",
-                "id=\"iteractionListNavigation\"");
+                "id=\"iteractionVacancyCard\"");
 
-        String result = section(
-                descriptor,
-                "id=\"resultAccordion\"",
-                "id=\"commentAccordion\"");
-        assertTrue(result.contains("height=\"AUTO\""));
-        assertTrue(result.contains("iteraction-list-result-section"));
-        assertTrue(result.contains("id=\"resultAccordionBody\""));
-        assertTrue(result.contains("iteraction-list-result-body"));
-        assertTrue(result.contains("iteraction-list-result-grid"));
+        assertTrue(descriptor.contains("id=\"iteractionMainInfoCard\""));
+        assertTrue(descriptor.contains("iteraction-list-form-grid iteraction-list-result-grid"));
 
         String state = section(
                 descriptor,
                 "id=\"vacancyStateSummary\"",
-                "id=\"iteractionListNavigation\"");
+                "id=\"iteractionVacancyCard\"");
         assertTrue(state.startsWith("id=\"vacancyStateSummary\""));
         assertEquals(2, count(state, "width=\"50%\""));
 
@@ -148,9 +137,7 @@ public class IteractionListVisualAlignmentTest {
     public void sectionTitlesHaveTwoInsetLinesLikeInfoCaption() throws IOException {
         String descriptor = descriptor();
 
-        // Оба заголовка разделов sidebar несут свои локальные классы полосы.
-        assertTrue(descriptor.contains(
-                "stylename=\"label-nav-title iteraction-list-navigation-title\""));
+        // Заголовок карточки вакансии в sidebar несет локальный класс полосы.
         assertTrue(descriptor.contains("iteraction-list-sidebar-card-title"));
         assertTrue(descriptor.contains("value=\"mainMsg://msgVacancy\""));
 

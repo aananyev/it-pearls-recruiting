@@ -34,7 +34,7 @@ public class IteractionListLayoutStorageContractTest {
                         "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml")
                         .toFile());
 
-        String participants = section(xml, "id=\"participantsAccordion\"", "id=\"interactionAccordion\"");
+        String participants = section(xml, "id=\"gridIterationData\"", "id=\"iteractionTypeField\"");
         assertTrue(participants.contains("height=\"AUTO\""));
         assertTrue(participants.contains("id=\"candidateField\""));
         assertTrue(participants.contains("id=\"vacancyFiels\""));

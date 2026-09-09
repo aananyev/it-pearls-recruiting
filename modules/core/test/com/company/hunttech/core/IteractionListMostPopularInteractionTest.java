@@ -105,7 +105,7 @@ public class IteractionListMostPopularInteractionTest {
                 "id=\"mostPopularQuickActions\"",
                 "id=\"mostPopularHbox\"",
                 "id=\"iteractionListContentScrollBox\"",
-                "id=\"participantsAccordion\"",
+                "id=\"iteractionMainInfoCard\"",
                 "id=\"editActions\"");
         assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
         assertFalse(workspace.contains("id=\"popularAccordion\""));

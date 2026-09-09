@@ -223,6 +223,14 @@
       background: $v-panel-background-color !important;
     }
 
+    .iteraction-list-unified-card {
+      margin: 0 0 16px !important;
+    }
+
+    .iteraction-list-unified-body {
+      padding: 16px !important;
+    }
+
     .iteraction-list-flat-section-active,
     .iteraction-list-flat-section:focus-within {
       border-color: $v-selection-color !important;

@@ -42,10 +42,7 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"mostPopularQuickActions\"",
                 "id=\"mostPopularHbox\"",
                 "id=\"iteractionListContentScrollBox\"",
-                "id=\"participantsAccordion\"",
-                "id=\"interactionAccordion\"",
-                "id=\"resultAccordion\"",
-                "id=\"commentAccordion\"",
+                "id=\"iteractionMainInfoCard\"",
                 "id=\"editActions\"");
         assertFalse(descriptor.contains("<tabSheet"));
         assertFalse(descriptor.contains("<groupBox"));
@@ -53,23 +50,20 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void workspaceContainsFourPermanentVBoxInputBlocks() throws IOException {
+    public void workspaceContainsUnifiedInputBlockAndSeparateQuickActions() throws IOException {
         String descriptor = descriptor();
 
-        assertEquals(1, count(descriptor, "id=\"participantsAccordion\""));
-        assertEquals(1, count(descriptor, "id=\"interactionAccordion\""));
-        assertEquals(1, count(descriptor, "id=\"resultAccordion\""));
-        assertEquals(1, count(descriptor, "id=\"commentAccordion\""));
-        assertEquals(4, count(descriptor,
-                "stylename=\"iteraction-list-flat-section-title edit-card-title\""));
-        assertEquals(4, count(descriptor,
-                "stylename=\"iteraction-list-flat-section-body"));
+        assertEquals(1, count(descriptor, "id=\"mostPopularQuickActions\""));
+        assertEquals(1, count(descriptor, "id=\"iteractionMainInfoCard\""));
+        assertEquals(1, count(descriptor, "id=\"iteractionMainInfoBody\""));
         assertFalse(descriptor.contains("collapsable="));
         assertFalse(descriptor.contains("collapsed="));
         assertFalse(descriptor.contains("showAsPanel="));
         assertFalse(descriptor.contains("id=\"popularAccordion\""));
-        assertTrue(descriptor.contains("iteraction-list-flat-section-active"));
-        assertTrue(descriptor.contains("id=\"participantsAccordionContent\""));
+        assertFalse(descriptor.contains("id=\"participantsAccordion\""));
+        assertFalse(descriptor.contains("id=\"interactionAccordion\""));
+        assertFalse(descriptor.contains("id=\"resultAccordion\""));
+        assertFalse(descriptor.contains("id=\"commentAccordion\""));
     }
 
     @Test
@@ -77,8 +71,8 @@ public class IteractionListEditAccordionLayoutTest {
             throws IOException {
         String participants = section(
                 descriptor(),
-                "id=\"participantsAccordion\"",
-                "id=\"interactionAccordion\"");
+                "id=\"gridIterationData\"",
+                "id=\"iteractionTypeField\"");
 
         assertEquals(2, count(participants, "<column width=\"50%\"/>"));
         assertEquals(0, count(participants, "<column flex=\"1\"/>"));
@@ -120,13 +114,12 @@ public class IteractionListEditAccordionLayoutTest {
         String controller = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
 
-        assertEquals(5, count(controller, "private VBoxLayout"));
+        assertFalse(controller.contains("iteractionListNavigation"));
+        assertFalse(controller.contains("participantsAccordionNav"));
         assertFalse(controller.contains("GroupBoxLayout"));
         assertFalse(controller.contains("setExpanded("));
         assertFalse(controller.contains("addExpandedStateChangeListener"));
         assertFalse(controller.contains("popularAccordionNav"));
-        assertTrue(controller.contains("ACTIVE_SECTION_STYLE"));
-        assertTrue(controller.contains("selectSection("));
     }
 
     @Test
