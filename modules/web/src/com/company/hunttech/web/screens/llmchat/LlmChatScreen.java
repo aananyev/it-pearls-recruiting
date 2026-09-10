@@ -32,6 +32,7 @@ import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /** Compact floating chat shell with incremental provider output. */
@@ -154,15 +155,21 @@ public class LlmChatScreen extends Screen {
                 }
             });
         }
-        com.vaadin.ui.JavaScript js = com.vaadin.ui.JavaScript.getCurrent();
+        com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
+                ? chatUi.getPage().getJavaScript()
+                : com.vaadin.ui.JavaScript.getCurrent();
         if (js != null) {
             if (!hrmEntityBridgeRegistered) {
                 hrmEntityBridgeRegistered = true;
                 js.addFunction("hunttechOpenHrmEntity", (JsonArray arguments) -> {
                     if (arguments != null && arguments.length() >= 2) {
-                        String entityType = arguments.getString(0);
-                        String entityId = arguments.getString(1);
-                        openHrmEntityScreen(entityType, entityId);
+                        try {
+                            String entityType = arguments.getString(0);
+                            String entityId = arguments.getString(1);
+                            openHrmEntityScreen(entityType, entityId);
+                        } catch (Exception ex) {
+                            log.warn("Ошибка обработки параметров вызова hunttechOpenHrmEntity: {}", ex.getMessage());
+                        }
                     }
                 });
             }
@@ -198,6 +205,11 @@ public class LlmChatScreen extends Screen {
                     "})()"
             );
         }
+    }
+
+    @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        hrmEntityBridgeRegistered = false;
     }
 
     @EventListener
@@ -430,7 +442,7 @@ public class LlmChatScreen extends Screen {
         }
 
         try {
-            switch (entityType.toLowerCase(java.util.Locale.ROOT)) {
+            switch (entityType.toLowerCase(Locale.ROOT)) {
                 case "candidate":
                     if (!security.isEntityOpPermitted(JobCandidate.class, EntityOp.READ)) {
                         notifications.create(Notifications.NotificationType.WARNING)
