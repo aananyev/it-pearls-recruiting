@@ -84,8 +84,7 @@
                 <scrollBox id="companySidebarScroll"
                            width="100%"
                            height="100%"
-                           orientation="vertical"
-                           scrollBars="vertical">
+                           orientation="vertical">
                     <vbox id="companySidebarScrollContent"
                           width="100%"
                           spacing="true">
@@ -97,8 +96,7 @@
                               align="TOP_CENTER">
                             <!-- Обёртка аватара: 176×176 круг по эталону CompanyReestrBrowse -->
                             <vbox id="companyLogoPicBox"
-                                  width="176px"
-                                  height="176px"
+                                  width="100%"
                                   spacing="false"
                                   align="TOP_CENTER">
                                 <ovaFallbackImage id="companyLogoFileImage"
@@ -111,7 +109,7 @@
                                                   ovalBackground="#3a3e44"
                                                   fallbackThemePath="icons/no-company.png"
                                                   visible="true"
-                                                  align="MIDDLE_CENTER"
+                                                  align="TOP_CENTER"
                                                   stylename="job-candidate-avatar company-editor-logo-image"
                                                   scaleMode="SCALE_DOWN"/>
                             </vbox>
@@ -119,7 +117,7 @@
                             <upload id="companyLogoFileUpload"
                                     fileStoragePutMode="IMMEDIATE"
                                     dataContainer="companyDc"
-                                    align="MIDDLE_CENTER"
+                                    align="TOP_CENTER"
                                     showFileName="false"
                                     dropZone="companyEditorSidebarVisual"
                                     showClearButton="true"
