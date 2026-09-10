@@ -179,6 +179,45 @@ public class HrmChatDataRetrieverContractTest {
         assertTrue(rendererSource.contains("📋"));
     }
 
+    @Test
+    public void screenBuildersNavigationAndThemeIntegrity() throws IOException {
+        String screenSource = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+
+        // Проверка навигации через ScreenBuilders
+        assertTrue(screenSource.contains("screenBuilders.editor(JobCandidate.class, this)"));
+        assertTrue(screenSource.contains("screenBuilders.editor(OpenPosition.class, this)"));
+        assertTrue(screenSource.contains("screenBuilders.editor(IteractionList.class, this)"));
+        assertTrue(screenSource.contains("withOpenMode(OpenMode.NEW_TAB)"));
+
+        // Data View Integrity при открытии редакторов
+        assertTrue(screenSource.contains(".view(\"jobCandidate-view\")"));
+        assertTrue(screenSource.contains(".view(\"openPosition-view\")"));
+        assertTrue(screenSource.contains(".view(\"iteractionList-edit-view\")"));
+
+        // Безопасность
+        assertTrue(screenSource.contains("security.isEntityOpPermitted(JobCandidate.class, EntityOp.READ)"));
+        assertTrue(screenSource.contains("security.isEntityOpPermitted(OpenPosition.class, EntityOp.READ)"));
+        assertTrue(screenSource.contains("security.isEntityOpPermitted(IteractionList.class, EntityOp.READ)"));
+
+        // JavaScript мост
+        assertTrue(screenSource.contains("hunttechOpenHrmEntity"));
+        assertTrue(screenSource.contains("hrmEntityBridgeRegistered"));
+
+        // Синхронизация стилей по всем 7 темам
+        String[] themes = {"hunttech-modern-light", "hunttech-modern-dark", "hunttech-modern", "helium", "halo", "havana", "hover"};
+        for (String theme : themes) {
+            String scss = source("modules/web/themes/" + theme + "/com.company.hunttech/chat-style.scss");
+            String css = source("modules/web/themes/" + theme + "/com.company.hunttech/chat-style.css");
+
+            assertTrue("SCSS for " + theme + " must include .llm-hrm-entity-link", scss.contains(".llm-hrm-entity-link"));
+            assertTrue("CSS for " + theme + " must include .llm-hrm-entity-link", css.contains(".llm-hrm-entity-link"));
+            assertTrue("SCSS for " + theme + " must include candidate entity styling", scss.contains("[data-entity=\"candidate\"]"));
+            assertTrue("CSS for " + theme + " must include candidate entity styling", css.contains("[data-entity=\"candidate\"]"));
+            assertTrue("SCSS for " + theme + " must include focus-visible", scss.contains(":focus-visible"));
+            assertTrue("CSS for " + theme + " must include focus-visible", css.contains(":focus-visible"));
+        }
+    }
+
     private String source(String relativePath) throws IOException {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) root = root.getParent();
