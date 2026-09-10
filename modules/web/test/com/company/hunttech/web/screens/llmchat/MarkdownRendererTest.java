@@ -128,4 +128,54 @@ class MarkdownRendererTest {
         assertTrue(html.contains("Подбираю дополнительные контакты..."));
         assertTrue(html.contains("llm-chat-cursor"));
     }
+
+    @Test
+    void testHrmCandidateLink() {
+        String raw = "Рекомендую ознакомиться: [Иван Иванов](hrm://candidate/a1b2c3d4-e5f6-7890-abcd-ef1234567890)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"candidate\""));
+        assertTrue(html.contains("data-id=\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\""));
+        assertTrue(html.contains("href=\"#main/0/hunttech_JobCandidate.edit?id=a1b2c3d4-e5f6-7890-abcd-ef1234567890\""));
+        assertTrue(html.contains("<span class=\"llm-entity-icon\">👤</span>"));
+        assertTrue(html.contains("Иван Иванов"));
+    }
+
+    @Test
+    void testHrmVacancyLink() {
+        String raw = "Открытая позиция: [Senior Java Developer](hrm://vacancy/12345678-1234-1234-1234-123456789abc)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"vacancy\""));
+        assertTrue(html.contains("data-id=\"12345678-1234-1234-1234-123456789abc\""));
+        assertTrue(html.contains("href=\"#main/0/hunttech_OpenPosition.edit?id=12345678-1234-1234-1234-123456789abc\""));
+        assertTrue(html.contains("<span class=\"llm-entity-icon\">💼</span>"));
+        assertTrue(html.contains("Senior Java Developer"));
+    }
+
+    @Test
+    void testHrmInteractionLink() {
+        String raw = "Смотри [Интервью от 05.09](hrm://interaction/ffffffff-ffff-ffff-ffff-ffffffffffff)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"interaction\""));
+        assertTrue(html.contains("data-id=\"ffffffff-ffff-ffff-ffff-ffffffffffff\""));
+        assertTrue(html.contains("href=\"#main/0/hunttech_IteractionList.edit?id=ffffffff-ffff-ffff-ffff-ffffffffffff\""));
+        assertTrue(html.contains("<span class=\"llm-entity-icon\">📋</span>"));
+        assertTrue(html.contains("Интервью от 05.09"));
+    }
+
+    @Test
+    void testInvalidUuidInHrmLinkFallback() {
+        String raw = "Опасная ссылка [Взлом](hrm://candidate/javascript:alert(1)) и [Не UUID](hrm://candidate/not-a-uuid)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertFalse(html.contains("href=\"#main/0/hunttech_JobCandidate.edit?id="));
+        assertFalse(html.contains("javascript:alert(1)"));
+        assertTrue(html.contains("Взлом"));
+        assertTrue(html.contains("Не UUID"));
+    }
 }

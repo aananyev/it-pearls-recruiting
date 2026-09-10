@@ -289,3 +289,169 @@ body.llm-chat-launcher-dragging {
     box-shadow: none !important;
     background: #9aa0a6 !important;
 }
+
+/* ==========================================================================
+   HRM Entity Links & Interactive Badges
+   ========================================================================== */
+
+.llm-chat-msg-body .llm-hrm-entity-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    margin: 1px 2px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-decoration: none !important;
+    vertical-align: baseline;
+    cursor: pointer;
+    background: rgba(79, 70, 229, 0.08);
+    border: 1px solid rgba(79, 70, 229, 0.25);
+    color: #4338ca;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link .llm-entity-icon {
+    font-size: 13px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link:hover {
+    background: rgba(79, 70, 229, 0.16);
+    border-color: rgba(79, 70, 229, 0.5);
+    color: #3730a3;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.18);
+    transform: translateY(-1px);
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"] {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.25);
+    color: #1d4ed8;
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"]:hover {
+    background: rgba(37, 99, 235, 0.16);
+    border-color: rgba(37, 99, 235, 0.5);
+    color: #1e40af;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.18);
+    transform: translateY(-1px);
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"] {
+    background: rgba(13, 148, 136, 0.08);
+    border-color: rgba(13, 148, 136, 0.25);
+    color: #0f766e;
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"]:hover {
+    background: rgba(13, 148, 136, 0.16);
+    border-color: rgba(13, 148, 136, 0.5);
+    color: #115e59;
+    box-shadow: 0 2px 6px rgba(13, 148, 136, 0.18);
+    transform: translateY(-1px);
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"] {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.25);
+    color: #6d28d9;
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"]:hover {
+    background: rgba(124, 58, 237, 0.16);
+    border-color: rgba(124, 58, 237, 0.5);
+    color: #5b21b6;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.18);
+    transform: translateY(-1px);
+}
+
+.llm-chat-msg-body .llm-hrm-entity-link[data-entity]:active {
+    transform: translateY(0) !important;
+    box-shadow: none !important;
+}
+
+/* Dark mode entity links */
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link,
+body.dark .llm-chat-msg-body .llm-hrm-entity-link,
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link,
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link {
+    background: rgba(99, 102, 241, 0.18) !important;
+    border-color: rgba(129, 140, 248, 0.35) !important;
+    color: #a5b4fc !important;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link:hover,
+body.dark .llm-chat-msg-body .llm-hrm-entity-link:hover,
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link:hover,
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link:hover {
+    background: rgba(99, 102, 241, 0.3) !important;
+    border-color: rgba(129, 140, 248, 0.6) !important;
+    color: #c7d2fe !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"],
+body.dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"],
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"],
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"] {
+    background: rgba(59, 130, 246, 0.18) !important;
+    border-color: rgba(96, 165, 250, 0.35) !important;
+    color: #93c5fd !important;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"]:hover,
+body.dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"]:hover,
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"]:hover,
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link[data-entity="candidate"]:hover {
+    background: rgba(59, 130, 246, 0.3) !important;
+    border-color: rgba(96, 165, 250, 0.6) !important;
+    color: #bfdbfe !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"],
+body.dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"],
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"],
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"] {
+    background: rgba(20, 184, 166, 0.18) !important;
+    border-color: rgba(45, 212, 191, 0.35) !important;
+    color: #5eead4 !important;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"]:hover,
+body.dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"]:hover,
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"]:hover,
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link[data-entity="vacancy"]:hover {
+    background: rgba(20, 184, 166, 0.3) !important;
+    border-color: rgba(45, 212, 191, 0.6) !important;
+    color: #99f6e4 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"],
+body.dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"],
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"],
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"] {
+    background: rgba(139, 92, 246, 0.18) !important;
+    border-color: rgba(167, 139, 250, 0.35) !important;
+    color: #c4b5fd !important;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"]:hover,
+body.dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"]:hover,
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"]:hover,
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"]:hover {
+    background: rgba(139, 92, 246, 0.3) !important;
+    border-color: rgba(167, 139, 250, 0.6) !important;
+    color: #ddd6fe !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}

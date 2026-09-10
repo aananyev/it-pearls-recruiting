@@ -286,27 +286,30 @@ public class MarkdownRenderer {
             if (url.startsWith("hrm://candidate/")) {
                 String id = url.substring("hrm://candidate/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
-                    String cubaUrl = "#main/0/hunttech_JobCandidate.edit?id=" + escapeHtml(id);
-                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" title=\"Открыть кандидата в HRM\">"
-                            + "👤 " + label + "</a>";
+                    String safeId = escapeHtml(id);
+                    String cubaUrl = "#main/0/hunttech_JobCandidate.edit?id=" + safeId;
+                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"candidate\" data-id=\"" + safeId + "\" title=\"Открыть карточку кандидата в HRM\">"
+                            + "<span class=\"llm-entity-icon\">👤</span> " + label + "</a>";
                 } else {
                     replacement = label;
                 }
             } else if (url.startsWith("hrm://vacancy/")) {
                 String id = url.substring("hrm://vacancy/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
-                    String cubaUrl = "#main/0/hunttech_OpenPosition.edit?id=" + escapeHtml(id);
-                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" title=\"Открыть вакансию в HRM\">"
-                            + "💼 " + label + "</a>";
+                    String safeId = escapeHtml(id);
+                    String cubaUrl = "#main/0/hunttech_OpenPosition.edit?id=" + safeId;
+                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"vacancy\" data-id=\"" + safeId + "\" title=\"Открыть карточку вакансии в HRM\">"
+                            + "<span class=\"llm-entity-icon\">💼</span> " + label + "</a>";
                 } else {
                     replacement = label;
                 }
             } else if (url.startsWith("hrm://interaction/")) {
                 String id = url.substring("hrm://interaction/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
-                    String cubaUrl = "#main/0/hunttech_IteractionList.edit?id=" + escapeHtml(id);
-                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" title=\"Открыть взаимодействие в HRM\">"
-                            + "📋 " + label + "</a>";
+                    String safeId = escapeHtml(id);
+                    String cubaUrl = "#main/0/hunttech_IteractionList.edit?id=" + safeId;
+                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"interaction\" data-id=\"" + safeId + "\" title=\"Открыть карточку взаимодействия в HRM\">"
+                            + "<span class=\"llm-entity-icon\">📋</span> " + label + "</a>";
                 } else {
                     replacement = label;
                 }

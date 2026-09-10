@@ -19,6 +19,14 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.UI;
+import com.company.hunttech.entity.IteractionList;
+import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.OpenPosition;
+import com.haulmont.cuba.core.global.Security;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.screen.OpenMode;
+import com.haulmont.cuba.security.entity.EntityOp;
+import elemental.json.JsonArray;
 import org.dom4j.Element;
 import org.springframework.context.event.EventListener;
 
@@ -52,11 +60,16 @@ public class LlmChatScreen extends Screen {
     private UserSession userSession;
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private Security security;
 
     private UUID conversationId;
     private String activeRequestId;
     private String activeRequestText;
     private UI chatUi;
+    private boolean hrmEntityBridgeRegistered = false;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -141,8 +154,19 @@ public class LlmChatScreen extends Screen {
                 }
             });
         }
-        if (chatUi != null && chatUi.getPage() != null && chatUi.getPage().getJavaScript() != null) {
-            chatUi.getPage().getJavaScript().execute(
+        com.vaadin.ui.JavaScript js = com.vaadin.ui.JavaScript.getCurrent();
+        if (js != null) {
+            if (!hrmEntityBridgeRegistered) {
+                hrmEntityBridgeRegistered = true;
+                js.addFunction("hunttechOpenHrmEntity", (JsonArray arguments) -> {
+                    if (arguments != null && arguments.length() >= 2) {
+                        String entityType = arguments.getString(0);
+                        String entityId = arguments.getString(1);
+                        openHrmEntityScreen(entityType, entityId);
+                    }
+                });
+            }
+            js.execute(
                     "(function() {" +
                     "  var ta = document.querySelector('.llm-chat-input-area textarea');" +
                     "  if (ta && !ta._enterBound) {" +
@@ -154,6 +178,22 @@ public class LlmChatScreen extends Screen {
                     "        if (btn) btn.click();" +
                     "      }" +
                     "    });" +
+                    "  }" +
+                    "  if (!window._hunttechHrmLinkHandlerAttached) {" +
+                    "    window._hunttechHrmLinkHandlerAttached = true;" +
+                    "    document.addEventListener('click', function(e) {" +
+                    "      var target = e.target;" +
+                    "      var link = target ? (target.closest ? target.closest('.llm-hrm-entity-link') : null) : null;" +
+                    "      if (link && window.hunttechOpenHrmEntity) {" +
+                    "        var entity = link.getAttribute('data-entity');" +
+                    "        var id = link.getAttribute('data-id');" +
+                    "        if (entity && id) {" +
+                    "          e.preventDefault();" +
+                    "          e.stopPropagation();" +
+                    "          window.hunttechOpenHrmEntity(entity, id);" +
+                    "        }" +
+                    "      }" +
+                    "    }, true);" +
                     "  }" +
                     "})()"
             );
@@ -368,6 +408,114 @@ public class LlmChatScreen extends Screen {
                 .withCaption("Не удалось выполнить запрос к ИИ")
                 .withDescription(ex.getMessage() == null ? "Проверьте настройки AI и согласие на fallback." : ex.getMessage())
                 .show();
+    }
+
+    private void openHrmEntityScreen(String entityType, String entityId) {
+        if (entityType == null || entityType.trim().isEmpty()) {
+            return;
+        }
+        String trimmedId = entityId == null ? "" : entityId.trim();
+        if (trimmedId.isEmpty()) {
+            return;
+        }
+        UUID id;
+        try {
+            id = UUID.fromString(trimmedId);
+        } catch (IllegalArgumentException e) {
+            log.warn("Некорректный UUID сущности HRM в ссылке чата: {}", entityId);
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Некорректный идентификатор сущности")
+                    .show();
+            return;
+        }
+
+        try {
+            switch (entityType.toLowerCase(java.util.Locale.ROOT)) {
+                case "candidate":
+                    if (!security.isEntityOpPermitted(JobCandidate.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра кандидата")
+                                .show();
+                        return;
+                    }
+                    JobCandidate candidate = dataManager.load(JobCandidate.class)
+                            .id(id)
+                            .view("jobCandidate-view")
+                            .optional()
+                            .orElse(null);
+                    if (candidate != null) {
+                        screenBuilders.editor(JobCandidate.class, this)
+                                .editEntity(candidate)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Кандидат не найден или был удалён")
+                                .show();
+                    }
+                    break;
+
+                case "vacancy":
+                    if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра вакансии")
+                                .show();
+                        return;
+                    }
+                    OpenPosition vacancy = dataManager.load(OpenPosition.class)
+                            .id(id)
+                            .view("openPosition-view")
+                            .optional()
+                            .orElse(null);
+                    if (vacancy != null) {
+                        screenBuilders.editor(OpenPosition.class, this)
+                                .editEntity(vacancy)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Вакансия не найдена или была удалена")
+                                .show();
+                    }
+                    break;
+
+                case "interaction":
+                    if (!security.isEntityOpPermitted(IteractionList.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра взаимодействия")
+                                .show();
+                        return;
+                    }
+                    IteractionList interaction = dataManager.load(IteractionList.class)
+                            .id(id)
+                            .view("iteractionList-edit-view")
+                            .optional()
+                            .orElse(null);
+                    if (interaction != null) {
+                        screenBuilders.editor(IteractionList.class, this)
+                                .editEntity(interaction)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Взаимодействие не найдено или было удалено")
+                                .show();
+                    }
+                    break;
+
+                default:
+                    log.warn("Неизвестный тип сущности HRM в чате: {}", entityType);
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Неподдерживаемый тип сущности: " + entityType)
+                            .show();
+            }
+        } catch (Exception ex) {
+            log.error("Ошибка при открытии сущности {} ({}) из LLM-чата", entityType, id, ex);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Не удалось открыть карточку")
+                    .withDescription("Проверьте права доступа или обратитесь к администратору.")
+                    .show();
+        }
     }
 
 }
