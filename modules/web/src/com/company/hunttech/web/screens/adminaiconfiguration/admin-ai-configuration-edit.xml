@@ -105,6 +105,12 @@
                             <passwordField id="apiKeyInput" caption="msg://adminNewApiKey.caption" secret="true" width="100%" stylename="edit-form-control"/>
                             <!-- Пояснение заменяет запрещённую функцию «показать ключ». -->
                             <label value="Введите значение только для создания или замены ключа. Существующий ключ не загружается в это поле." width="100%"/>
+                            <!-- Проверка соединения с введённым или сохранённым ключом -->
+                            <button id="testConnectionBtn"
+                                    caption="msg://testConnectionBtn.caption"
+                                    icon="font-icon:CHECK"
+                                    invoke="onTestConnectionClick"
+                                    stylename="admin-ai-configuration-test-btn"/>
                         </groupBox>
                     </vbox>
                 </scrollBox>

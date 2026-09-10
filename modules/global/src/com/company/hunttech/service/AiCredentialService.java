@@ -29,4 +29,23 @@ public interface AiCredentialService {
     int rotateSecrets();
 
     void testAdminConnection(UUID configurationId);
+
+    /**
+     * Проверяет подключение к AI-провайдеру с заданными параметрами.
+     *
+     * <p>Может вызываться как для корпоративных настроек администратора, так и для
+     * персональных настроек произвольного пользователя системы. Если передан новый
+     * незашифрованный ключ (plainApiKey), проверка выполняется с ним (без сохранения в БД).
+     * Если plainApiKey не задан, сервис расшифровывает encryptedApiKey.</p>
+     *
+     * @param providerCode    код провайдера (из AiProviderCatalog)
+     * @param modelName       имя модели (null или пустое — модель по умолчанию провайдера)
+     * @param plainApiKey     новый введённый API-ключ в открытом виде (или null)
+     * @param encryptedApiKey ранее сохранённый зашифрованный ключ (или null)
+     * @param baseApiUrl      базовый URL API (опционально, или null)
+     * @return результат проверки со статусом, сообщением и расширенной диагностикой причин неудачи
+     */
+    AiConnectionTestResult testConnection(String providerCode, String modelName,
+                                          String plainApiKey, String encryptedApiKey,
+                                          String baseApiUrl);
 }
