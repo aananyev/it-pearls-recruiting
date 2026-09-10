@@ -220,7 +220,12 @@ body.llm-chat-launcher-dragging {
     padding-top: 4px;
 }
 
-.llm-chat-input-area .v-textarea {
+.llm-chat-input-area.v-textarea,
+.llm-chat-input-area.c-textarea,
+.llm-chat-input-area.v-widget,
+.llm-chat-input-area .v-textarea,
+.llm-chat-input-area textarea,
+textarea.llm-chat-input-area {
     border-radius: 16px !important;
     padding: 8px 12px !important;
     resize: none !important;
@@ -264,13 +269,18 @@ body.llm-chat-launcher-dragging {
     justify-content: center !important;
     line-height: 1 !important;
     padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .llm-chat-send-btn .llm-chat-send-svg {
     display: block !important;
-    width: 20px !important;
-    height: 20px !important;
-    transform: translate(-1px, 1px) !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    transform: translate(-1px, 0) !important;
 }
 
 .llm-chat-send-btn:hover:not(.v-disabled) {

@@ -719,7 +719,11 @@ body.v-dark,
 }
 
 .llm-chat-input-area {
-    .v-textarea {
+    &.v-textarea,
+    &.c-textarea,
+    &.v-widget,
+    .v-textarea,
+    textarea {
         border-radius: 16px !important;
         padding: 8px 12px !important;
         resize: none !important;
@@ -763,13 +767,18 @@ body.v-dark,
         justify-content: center !important;
         line-height: 1 !important;
         padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
     }
 
     .llm-chat-send-svg {
         display: block !important;
-        width: 20px !important;
-        height: 20px !important;
-        transform: translate(-1px, 1px) !important;
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        min-height: 30px !important;
+        transform: translate(-1px, 0) !important;
     }
 
     &:hover:not(.v-disabled) {

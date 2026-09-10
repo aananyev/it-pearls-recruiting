@@ -84,6 +84,7 @@ public class LlmChatScreen extends Screen {
             dialog.setResizable(true);
             dialog.setCloseable(true);
         }
+        inputArea.setTrimming(false);
         ensureUserFallbackConsent();
         try {
             conversationId = llmChatService.startConversation();
@@ -142,23 +143,28 @@ public class LlmChatScreen extends Screen {
             chatUi.getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
         }
         restoreDialogGeometry(getSettings());
-        sendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
+        inputArea.setTrimming(false);
+        sendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" preserveAspectRatio=\"xMidYMid meet\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
         sendBtn.setDescription("Отправить сообщение (Enter, перенос строки — Shift+Enter)");
         com.vaadin.ui.TextArea vTextArea = inputArea.unwrap(com.vaadin.ui.TextArea.class);
         if (vTextArea != null) {
-            vTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.EAGER);
-            vTextArea.addShortcutListener(new com.vaadin.event.ShortcutListener("SendOnEnter",
-                    com.vaadin.event.ShortcutAction.KeyCode.ENTER, new int[0]) {
-                @Override
-                public void handleAction(Object sender, Object target) {
-                    executeSend();
-                }
-            });
+            vTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.TIMEOUT);
+            vTextArea.setValueChangeTimeout(300);
         }
         com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
                 ? chatUi.getPage().getJavaScript()
                 : com.vaadin.ui.JavaScript.getCurrent();
         if (js != null) {
+            js.addFunction("hunttechSendChatMessage", (JsonArray arguments) -> {
+                if (arguments != null && arguments.length() >= 1) {
+                    try {
+                        String msg = arguments.getString(0);
+                        executeSend(msg);
+                    } catch (Exception ex) {
+                        log.warn("Ошибка обработки вызова hunttechSendChatMessage: {}", ex.getMessage());
+                    }
+                }
+            });
             if (!hrmEntityBridgeRegistered) {
                 hrmEntityBridgeRegistered = true;
                 js.addFunction("hunttechOpenHrmEntity", (JsonArray arguments) -> {
@@ -175,16 +181,57 @@ public class LlmChatScreen extends Screen {
             }
             js.execute(
                     "(function() {" +
-                    "  var ta = document.querySelector('.llm-chat-input-area textarea');" +
-                    "  if (ta && !ta._enterBound) {" +
-                    "    ta._enterBound = true;" +
-                    "    ta.addEventListener('keydown', function(e) {" +
-                    "      if (e.key === 'Enter' && !e.shiftKey) {" +
-                    "        e.preventDefault();" +
-                    "        var btn = document.querySelector('.llm-chat-send-btn');" +
-                    "        if (btn) btn.click();" +
+                    "  function isChatInput(el) {" +
+                    "    if (!el) return false;" +
+                    "    if (el.tagName === 'TEXTAREA') {" +
+                    "      if (el.classList && (el.classList.contains('llm-chat-input-area') || el.classList.contains('v-textarea'))) {" +
+                    "        return true;" +
                     "      }" +
-                    "    });" +
+                    "      if (el.closest && (el.closest('.llm-chat-input-bar') || el.closest('.llm-chat-input-area') || el.closest('.llm-chat-screen'))) {" +
+                    "        return true;" +
+                    "      }" +
+                    "    }" +
+                    "    return false;" +
+                    "  }" +
+                    "  if (!window._hunttechChatKeyHandlerAttached) {" +
+                    "    window._hunttechChatKeyHandlerAttached = true;" +
+                    "    document.addEventListener('keydown', function(e) {" +
+                    "      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {" +
+                    "        var target = e.target;" +
+                    "        if (isChatInput(target)) {" +
+                    "          e.preventDefault();" +
+                    "          e.stopPropagation();" +
+                    "          var btn = document.querySelector('.llm-chat-send-btn');" +
+                    "          if (btn && (btn.classList.contains('v-disabled') || btn.disabled)) {" +
+                    "            return;" +
+                    "          }" +
+                    "          var text = target.value;" +
+                    "          if (window.hunttechSendChatMessage) {" +
+                    "            target.value = '';" +
+                    "            window.hunttechSendChatMessage(text);" +
+                    "          } else if (btn) {" +
+                    "            btn.click();" +
+                    "          }" +
+                    "        }" +
+                    "      }" +
+                    "    }, true);" +
+                    "  }" +
+                    "  if (!window._hunttechChatSendClickHandlerAttached) {" +
+                    "    window._hunttechChatSendClickHandlerAttached = true;" +
+                    "    document.addEventListener('click', function(e) {" +
+                    "      var target = e.target;" +
+                    "      var btn = target ? (target.closest ? target.closest('.llm-chat-send-btn') : null) : null;" +
+                    "      if (btn && !btn.classList.contains('v-disabled') && !btn.disabled && window.hunttechSendChatMessage) {" +
+                    "        var ta = document.querySelector('.llm-chat-input-bar textarea, textarea.llm-chat-input-area, .llm-chat-input-area textarea, .llm-chat-screen textarea');" +
+                    "        if (ta && ta.value && ta.value.trim().length > 0) {" +
+                    "          e.preventDefault();" +
+                    "          e.stopPropagation();" +
+                    "          var text = ta.value;" +
+                    "          ta.value = '';" +
+                    "          window.hunttechSendChatMessage(text);" +
+                    "        }" +
+                    "      }" +
+                    "    }, true);" +
                     "  }" +
                     "  if (!window._hunttechHrmLinkHandlerAttached) {" +
                     "    window._hunttechHrmLinkHandlerAttached = true;" +
@@ -210,6 +257,12 @@ public class LlmChatScreen extends Screen {
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
         hrmEntityBridgeRegistered = false;
+        if (chatUi != null && chatUi.getPage() != null && chatUi.getPage().getJavaScript() != null) {
+            try {
+                chatUi.getPage().getJavaScript().removeFunction("hunttechSendChatMessage");
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @EventListener
@@ -317,14 +370,20 @@ public class LlmChatScreen extends Screen {
 
     @Subscribe("sendBtn")
     public void onSend(Button.ClickEvent event) {
-        executeSend();
+        executeSend(null);
     }
 
     private void executeSend() {
+        executeSend(null);
+    }
+
+    private void executeSend(String rawText) {
         if (!sendBtn.isEnabled()) {
             return;
         }
-        String message = inputArea.getValue();
+        String message = (rawText != null && !rawText.trim().isEmpty())
+                ? rawText
+                : inputArea.getValue();
         if (message == null || message.trim().isEmpty()) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("Введите сообщение")
@@ -332,6 +391,7 @@ public class LlmChatScreen extends Screen {
             return;
         }
         final String request = message.trim();
+        inputArea.setValue("");
         inputArea.setEnabled(false);
         sendBtn.setEnabled(false);
         if (activeRequestId == null || !request.equals(activeRequestText)) {
@@ -410,9 +470,12 @@ public class LlmChatScreen extends Screen {
     private void resetControls(boolean clearInput) {
         if (clearInput) {
             inputArea.setValue("");
+        } else if (activeRequestText != null && !activeRequestText.isEmpty()) {
+            inputArea.setValue(activeRequestText);
         }
         inputArea.setEnabled(true);
         sendBtn.setEnabled(true);
+        inputArea.focus();
     }
 
     private void showError(Exception ex) {
