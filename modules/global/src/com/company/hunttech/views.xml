@@ -1582,6 +1582,7 @@
         <property name="cityPosition" view="_minimal"/>
         <property name="projectName" view="_minimal"/>
         <property name="owner" view="_minimal"/>
+        <property name="skillsList" view="_minimal"/>
     </view>
 
     <view entity="hunttech_JobCandidate" name="jobCandidate-llm-view" extends="_minimal">
@@ -1610,6 +1611,8 @@
             <property name="textCV"/>
             <property name="resumePosition" view="_minimal"/>
         </property>
+        <property name="candidateSkills" view="candidateSkill-view"/>
+        <property name="skillTree" view="_minimal"/>
     </view>
 
     <view entity="hunttech_IteractionList" name="iteractionList-llm-view" extends="_minimal">

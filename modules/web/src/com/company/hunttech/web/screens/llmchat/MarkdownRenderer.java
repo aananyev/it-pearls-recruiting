@@ -301,6 +301,15 @@ public class MarkdownRenderer {
                 } else {
                     replacement = label;
                 }
+            } else if (url.startsWith("hrm://interaction/")) {
+                String id = url.substring("hrm://interaction/".length()).trim();
+                if (UUID_PATTERN.matcher(id).matches()) {
+                    String cubaUrl = "#main/0/hunttech_IteractionList.edit?id=" + escapeHtml(id);
+                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" title=\"Открыть взаимодействие в HRM\">"
+                            + "📋 " + label + "</a>";
+                } else {
+                    replacement = label;
+                }
             } else if (url.startsWith("hrm://")) {
                 replacement = label;
             } else if (url.startsWith("#")) {

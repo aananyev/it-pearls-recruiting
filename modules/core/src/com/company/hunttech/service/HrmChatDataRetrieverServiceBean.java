@@ -2,9 +2,12 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.dto.HrmDataContextSnapshot;
 import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.IteractionList;
+import com.company.hunttech.entity.SkillTree;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.Security;
@@ -144,7 +147,9 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
                         .append(" or lower(e.cityPosition.cityRuName) like :").append(paramName)
                         .append(" or lower(e.projectName.projectName) like :").append(paramName)
                         .append(" or lower(e.positionType.positionRuName) like :").append(paramName)
-                        .append(" or lower(e.positionType.positionEnName) like :").append(paramName).append(")");
+                        .append(" or lower(e.positionType.positionEnName) like :").append(paramName)
+                        .append(" or exists (select s from e.skillsList s where s.deleteTs is null and lower(s.skillName) like :").append(paramName).append(")")
+                        .append(")");
                 params.put(paramName, "%" + keywords.get(i) + "%");
             }
             jpql.append(") ");
@@ -183,7 +188,10 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
                         .append(" or lower(e.personPosition.positionRuName) like :").append(paramName)
                         .append(" or lower(e.personPosition.positionEnName) like :").append(paramName)
                         .append(" or lower(e.cityOfResidence.cityRuName) like :").append(paramName)
-                        .append(" or lower(e.currentCompany.comanyName) like :").append(paramName).append(")");
+                        .append(" or lower(e.currentCompany.comanyName) like :").append(paramName)
+                        .append(" or lower(e.skillTree.skillName) like :").append(paramName)
+                        .append(" or exists (select cs from hunttech_CandidateSkill cs where cs.candidate = e and cs.deleteTs is null and lower(cs.skill.skillName) like :").append(paramName).append(")")
+                        .append(")");
                 params.put(paramName, "%" + keywords.get(i) + "%");
             }
             jpql.append(") ");
@@ -300,6 +308,8 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
         sb.append("=== Срез данных HRM HuntTech (Режим чтения) ===\n");
         sb.append("Важно: используй эти реальные факты из базы HRM для составления точного, сжатого и полезного доклада.\n\n");
 
+        Map<UUID, String> funnelsByVacancy = loadFunnelsForVacancies(vacancies);
+
         if (!vacancies.isEmpty()) {
             sb.append("#### Вакансии (найдено ").append(vacancies.size()).append("):\n");
             for (OpenPosition v : vacancies) {
@@ -331,6 +341,21 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
                 if (v.getShortDescription() != null && !v.getShortDescription().trim().isEmpty()) {
                     sb.append("\n  Краткое описание: ").append(truncate(v.getShortDescription().trim(), 250));
                 }
+                if (v.getSkillsList() != null && !v.getSkillsList().isEmpty()) {
+                    List<String> vSkills = new ArrayList<>();
+                    for (SkillTree st : v.getSkillsList()) {
+                        if (st != null && st.getSkillName() != null && !st.getSkillName().trim().isEmpty()) {
+                            vSkills.add(st.getSkillName().trim());
+                        }
+                    }
+                    if (!vSkills.isEmpty()) {
+                        sb.append(" | Требуемые навыки: ").append(String.join(", ", vSkills.subList(0, Math.min(vSkills.size(), 6))));
+                    }
+                }
+                String funnel = funnelsByVacancy.get(v.getId());
+                if (funnel != null) {
+                    sb.append("\n  ").append(funnel);
+                }
                 sb.append("\n");
             }
             sb.append("\n");
@@ -351,6 +376,23 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
                 }
                 if (c.getCurrentCompany() != null && c.getCurrentCompany().getComanyName() != null) {
                     sb.append(" | Тек. компания: ").append(c.getCurrentCompany().getComanyName());
+                }
+                List<String> skills = new ArrayList<>();
+                if (c.getSkillTree() != null && c.getSkillTree().getSkillName() != null) {
+                    skills.add(c.getSkillTree().getSkillName().trim() + " (основной)");
+                }
+                if (c.getCandidateSkills() != null) {
+                    for (CandidateSkill cs : c.getCandidateSkills()) {
+                        if (cs != null && cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                            String sName = cs.getSkill().getSkillName().trim();
+                            if (!skills.contains(sName) && !skills.contains(sName + " (основной)")) {
+                                skills.add(sName);
+                            }
+                        }
+                    }
+                }
+                if (!skills.isEmpty()) {
+                    sb.append(" | Навыки: ").append(String.join(", ", skills.subList(0, Math.min(skills.size(), 8))));
                 }
                 if (c.getEmail() != null && !c.getEmail().trim().isEmpty()) {
                     sb.append(" | Email: ").append(c.getEmail().trim());
@@ -379,10 +421,13 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
                 String vacStr = (it.getVacancy() != null && it.getVacancy().getVacansyName() != null)
                         ? it.getVacancy().getVacansyName().trim() : null;
 
-                sb.append("- ").append(dateStr).append(" | ").append(typeStr)
+                sb.append("- ").append(dateStr).append(" | [").append(typeStr).append("](hrm://interaction/").append(it.getId()).append(")")
                         .append(" | ").append(candStr);
                 if (vacStr != null) {
                     sb.append(" (по вакансии: ").append(vacStr).append(")");
+                }
+                if (it.getRating() != null) {
+                    sb.append(" | Оценка: ").append(it.getRating() + 1).append("/5");
                 }
                 if (it.getComment() != null && !it.getComment().trim().isEmpty()) {
                     sb.append("\n  Комментарий: ").append(truncate(it.getComment().trim(), 200));
@@ -437,5 +482,52 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
     private String cleanCvText(String raw) {
         if (raw == null) return "";
         return raw.replaceAll("\\r?\\n+", " ").replaceAll("\\s{2,}", " ");
+    }
+
+    private Map<UUID, String> loadFunnelsForVacancies(List<OpenPosition> vacancies) {
+        if (vacancies == null || vacancies.isEmpty()
+                || !security.isEntityOpPermitted(metadata.getClassNN(IteractionList.class), EntityOp.READ)) {
+            return Collections.emptyMap();
+        }
+        try {
+            List<KeyValueEntity> rows = dataManager.loadValues(
+                    "select e.vacancy.id, e.iteractionType.iterationName, count(e) from hunttech_IteractionList e " +
+                    "where e.vacancy in :vacancies and e.deleteTs is null " +
+                    "group by e.vacancy.id, e.iteractionType.iterationName " +
+                    "order by e.vacancy.id, count(e) desc")
+                    .parameter("vacancies", vacancies)
+                    .properties("vacancyId", "stageName", "stageCount")
+                    .list();
+            if (rows.isEmpty()) {
+                return Collections.emptyMap();
+            }
+
+            Map<UUID, List<String>> stagePartsByVac = new LinkedHashMap<>();
+            Map<UUID, Long> totalByVac = new HashMap<>();
+
+            for (KeyValueEntity row : rows) {
+                UUID vacId = row.getValue("vacancyId");
+                String stage = row.getValue("stageName");
+                Long count = row.getValue("stageCount");
+                if (vacId != null && count != null) {
+                    totalByVac.put(vacId, totalByVac.getOrDefault(vacId, 0L) + count);
+                    List<String> list = stagePartsByVac.computeIfAbsent(vacId, k -> new ArrayList<>());
+                    if (list.size() < 5) {
+                        list.add((stage != null ? stage : "Этап") + ": " + count);
+                    }
+                }
+            }
+
+            Map<UUID, String> result = new HashMap<>();
+            for (Map.Entry<UUID, List<String>> entry : stagePartsByVac.entrySet()) {
+                UUID vacId = entry.getKey();
+                long total = totalByVac.getOrDefault(vacId, 0L);
+                result.put(vacId, "Воронка (всего " + total + "): " + String.join(", ", entry.getValue()));
+            }
+            return result;
+        } catch (Exception e) {
+            log.warn("Не удалось рассчитать пакетную воронку по вакансиям", e);
+            return Collections.emptyMap();
+        }
     }
 }

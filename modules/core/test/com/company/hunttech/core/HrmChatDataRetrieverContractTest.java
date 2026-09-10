@@ -17,13 +17,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Контрактные тесты для Этапа 1 интеграции LLM-чата со срезом данных HRM HuntTech:
+ * Контрактные тесты для интеграции LLM-чата со срезом данных HRM HuntTech:
  * 1. DTO среза данных (HrmDataContextSnapshot)
  * 2. Data View Integrity в views.xml (openPosition-llm-view, jobCandidate-llm-view, etc.)
  * 3. Read-Only архитектура сервиса извлечения данных (HrmChatDataRetrieverService)
  * 4. Изоляция истории сообщений чата от технического контекста
  * 5. Миграции системного промпта и changelog-master
- * 6. Поддержка ссылок hrm:// в MarkdownRenderer
+ * 6. Поддержка ссылок hrm:// в MarkdownRenderer (candidate, vacancy, interaction)
+ * 7. Этап 2: Поиск по навыкам, агрегация воронки по вакансиям и история взаимодействий
  */
 public class HrmChatDataRetrieverContractTest {
 
@@ -76,6 +77,7 @@ public class HrmChatDataRetrieverContractTest {
         assertTrue(viewsXml.contains("<property name=\"salaryMin\"/>"));
         assertTrue(viewsXml.contains("<property name=\"salaryMax\"/>"));
         assertTrue(viewsXml.contains("<property name=\"shortDescription\"/>"));
+        assertTrue("openPosition-llm-view must declare skillsList", viewsXml.contains("<property name=\"skillsList\" view=\"_minimal\"/>"));
 
         // jobCandidate-llm-view
         assertTrue("views.xml must declare jobCandidate-llm-view", viewsXml.contains("name=\"jobCandidate-llm-view\""));
@@ -84,6 +86,8 @@ public class HrmChatDataRetrieverContractTest {
         assertTrue(viewsXml.contains("<property name=\"cityOfResidence\" view=\"_minimal\">"));
         assertTrue(viewsXml.contains("<property name=\"personPosition\" view=\"_minimal\">"));
         assertTrue(viewsXml.contains("<property name=\"candidateCv\" view=\"_minimal\">"));
+        assertTrue("jobCandidate-llm-view must declare candidateSkills", viewsXml.contains("<property name=\"candidateSkills\" view=\"candidateSkill-view\"/>"));
+        assertTrue("jobCandidate-llm-view must declare skillTree", viewsXml.contains("<property name=\"skillTree\" view=\"_minimal\"/>"));
 
         // candidateCV-llm-view
         assertTrue("views.xml must declare candidateCV-llm-view", viewsXml.contains("name=\"candidateCV-llm-view\""));
@@ -118,6 +122,23 @@ public class HrmChatDataRetrieverContractTest {
     }
 
     @Test
+    public void stage2SkillsAndFunnelCapabilities() throws IOException {
+        String serviceBean = source("modules/core/src/com/company/hunttech/service/HrmChatDataRetrieverServiceBean.java");
+
+        // Поиск по навыкам в JPQL
+        assertTrue("Must search vacancies by required skills", serviceBean.contains("exists (select s from e.skillsList s"));
+        assertTrue("Must search candidates by candidateSkills", serviceBean.contains("exists (select cs from hunttech_CandidateSkill cs"));
+        assertTrue("Must search candidates by primary skillTree", serviceBean.contains("lower(e.skillTree.skillName) like :"));
+
+        // Расчет агрегатов воронки
+        assertTrue("Must include batch funnel aggregator", serviceBean.contains("loadFunnelsForVacancies"));
+        assertTrue("Must group interactions by stage", serviceBean.contains("group by e.vacancy.id, e.iteractionType.iterationName"));
+
+        // Вывод ссылок на взаимодействия
+        assertTrue("Must include interaction entity link", serviceBean.contains("hrm://interaction/"));
+    }
+
+    @Test
     public void chatServiceIsolatesHistoryFromTechnicalContext() throws IOException {
         String chatService = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
 
@@ -148,11 +169,14 @@ public class HrmChatDataRetrieverContractTest {
 
         assertTrue(rendererSource.contains("hrm://candidate/"));
         assertTrue(rendererSource.contains("hrm://vacancy/"));
+        assertTrue(rendererSource.contains("hrm://interaction/"));
         assertTrue(rendererSource.contains("llm-hrm-entity-link"));
         assertTrue(rendererSource.contains("hunttech_JobCandidate.edit?id="));
         assertTrue(rendererSource.contains("hunttech_OpenPosition.edit?id="));
+        assertTrue(rendererSource.contains("hunttech_IteractionList.edit?id="));
         assertTrue(rendererSource.contains("👤"));
         assertTrue(rendererSource.contains("💼"));
+        assertTrue(rendererSource.contains("📋"));
     }
 
     private String source(String relativePath) throws IOException {
