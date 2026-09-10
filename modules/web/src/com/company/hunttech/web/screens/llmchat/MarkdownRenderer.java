@@ -18,12 +18,14 @@ public class MarkdownRenderer {
     private static final Pattern INLINE_CODE_PATTERN = Pattern.compile("`([^`]+)`");
     private static final Pattern BOLD_PATTERN = Pattern.compile("(\\*\\*|__)(.+?)\\1");
     private static final Pattern ITALIC_PATTERN = Pattern.compile("(?<![*_])([*_])([^*_\\n]+?)\\1(?![*_])");
-    private static final Pattern LINK_PATTERN = Pattern.compile("\\[([^\\]]+)\\]\\((https?://[^\\s\\)\"]+)\\)");
+    private static final Pattern LINK_PATTERN = Pattern.compile("\\[([^\\]]+)\\]\\(((?:https?://|hrm://|#)[^\\s\\)\"]+)\\)");
     private static final Pattern HEADER_PATTERN = Pattern.compile("^(#{1,6})\\s+(.+)$");
     private static final Pattern BLOCKQUOTE_PATTERN = Pattern.compile("^>\\s?(.*)$");
     private static final Pattern UNORDERED_LIST_PATTERN = Pattern.compile("^[-*+]\\s+(.+)$");
     private static final Pattern ORDERED_LIST_PATTERN = Pattern.compile("^(\\d+)\\.\\s+(.+)$");
     private static final Pattern HORIZONTAL_RULE_PATTERN = Pattern.compile("^(?:---|_{3,}|\\*{3,})$");
+    private static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+    private static final Pattern INTERNAL_HASH_PATTERN = Pattern.compile("^#([a-zA-Z0-9_\\-\\./\\?=&]+)$");
 
     /**
      * Renders complete chat history and optional live streaming text into a safe HTML container.
@@ -280,8 +282,38 @@ public class MarkdownRenderer {
         while (linkMatcher.find()) {
             String label = linkMatcher.group(1);
             String url = linkMatcher.group(2);
-            String replacement = "<a href=\"" + url + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"llm-md-link\">"
-                    + label + "</a>";
+            String replacement;
+            if (url.startsWith("hrm://candidate/")) {
+                String id = url.substring("hrm://candidate/".length()).trim();
+                if (UUID_PATTERN.matcher(id).matches()) {
+                    String cubaUrl = "#main/0/hunttech_JobCandidate.edit?id=" + escapeHtml(id);
+                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" title=\"Открыть кандидата в HRM\">"
+                            + "👤 " + label + "</a>";
+                } else {
+                    replacement = label;
+                }
+            } else if (url.startsWith("hrm://vacancy/")) {
+                String id = url.substring("hrm://vacancy/".length()).trim();
+                if (UUID_PATTERN.matcher(id).matches()) {
+                    String cubaUrl = "#main/0/hunttech_OpenPosition.edit?id=" + escapeHtml(id);
+                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" title=\"Открыть вакансию в HRM\">"
+                            + "💼 " + label + "</a>";
+                } else {
+                    replacement = label;
+                }
+            } else if (url.startsWith("hrm://")) {
+                replacement = label;
+            } else if (url.startsWith("#")) {
+                if (INTERNAL_HASH_PATTERN.matcher(url).matches()) {
+                    replacement = "<a href=\"" + escapeHtml(url) + "\" class=\"llm-md-link\" title=\"Перейти\">"
+                            + label + "</a>";
+                } else {
+                    replacement = label;
+                }
+            } else {
+                replacement = "<a href=\"" + escapeHtml(url) + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"llm-md-link\">"
+                        + label + "</a>";
+            }
             linkMatcher.appendReplacement(linkBuf, Matcher.quoteReplacement(replacement));
         }
         linkMatcher.appendTail(linkBuf);

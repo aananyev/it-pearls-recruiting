@@ -215,5 +215,7 @@
              relativeToChangelogFile="true"/>
     <include file="260908-6-updateLlmChatPromptAndPersonalization.xml"
              relativeToChangelogFile="true"/>
+    <include file="260910-1-enableLlmChatHrmDataGrounding.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

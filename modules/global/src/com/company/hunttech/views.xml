@@ -1561,4 +1561,81 @@
         <property name="openPosition" view="_minimal"/>
         <property name="skill" view="_minimal"/>
     </view>
+
+    <!-- Оптимизированные Read-Only представления для LLM-чата (Data View Integrity) -->
+    <view entity="hunttech_OpenPosition" name="openPosition-llm-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="signDraft"/>
+        <property name="priority"/>
+        <property name="rating"/>
+        <property name="lastOpenDate"/>
+        <property name="closingDate"/>
+        <property name="remoteWork"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="salaryComment"/>
+        <property name="shortDescription"/>
+        <property name="grade" view="_minimal"/>
+        <property name="positionType" view="_minimal"/>
+        <property name="cityPosition" view="_minimal"/>
+        <property name="projectName" view="_minimal"/>
+        <property name="owner" view="_minimal"/>
+    </view>
+
+    <view entity="hunttech_JobCandidate" name="jobCandidate-llm-view" extends="_minimal">
+        <property name="fullName"/>
+        <property name="firstName"/>
+        <property name="secondName"/>
+        <property name="middleName"/>
+        <property name="email"/>
+        <property name="phone"/>
+        <property name="mobilePhone"/>
+        <property name="telegramName"/>
+        <property name="skypeName"/>
+        <property name="status"/>
+        <property name="currentCompany" view="_minimal">
+            <property name="comanyName"/>
+            <property name="companyShortName"/>
+        </property>
+        <property name="cityOfResidence" view="_minimal">
+            <property name="cityRuName"/>
+        </property>
+        <property name="personPosition" view="_minimal">
+            <property name="positionRuName"/>
+            <property name="positionEnName"/>
+        </property>
+        <property name="candidateCv" view="_minimal">
+            <property name="textCV"/>
+            <property name="resumePosition" view="_minimal"/>
+        </property>
+    </view>
+
+    <view entity="hunttech_IteractionList" name="iteractionList-llm-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="comment"/>
+        <property name="rating"/>
+        <property name="communicationMethod"/>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="number"/>
+        </property>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="vacancy" view="_minimal"/>
+        <property name="recrutier" view="_minimal"/>
+    </view>
+
+    <view entity="hunttech_CandidateCV" name="candidateCV-llm-view" extends="_minimal">
+        <property name="textCV"/>
+        <property name="letter"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="toVacancy" view="_minimal"/>
+        <property name="resumePosition" view="_minimal"/>
+    </view>
 </views>
