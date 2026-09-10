@@ -217,5 +217,7 @@
              relativeToChangelogFile="true"/>
     <include file="260910-1-enableLlmChatHrmDataGrounding.xml"
              relativeToChangelogFile="true"/>
+    <include file="260910-2-add100kLlmTokensForAlan.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
