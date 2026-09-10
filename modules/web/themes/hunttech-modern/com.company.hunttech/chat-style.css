@@ -455,3 +455,18 @@ body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity="interaction"]:h
     color: #ddd6fe !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
 }
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link:focus-visible,
+body.dark .llm-chat-msg-body .llm-hrm-entity-link:focus-visible,
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link:focus-visible,
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link:focus-visible {
+    outline-color: #818cf8;
+}
+
+body.hunttech-modern-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity]:active,
+body.dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity]:active,
+body.v-dark .llm-chat-msg-body .llm-hrm-entity-link[data-entity]:active,
+[data-theme='dark'] .llm-chat-msg-body .llm-hrm-entity-link[data-entity]:active {
+    transform: translateY(0) !important;
+    box-shadow: none !important;
+}

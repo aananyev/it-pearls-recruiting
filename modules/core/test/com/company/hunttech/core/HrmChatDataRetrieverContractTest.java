@@ -215,6 +215,10 @@ public class HrmChatDataRetrieverContractTest {
             assertTrue("CSS for " + theme + " must include candidate entity styling", css.contains("[data-entity=\"candidate\"]"));
             assertTrue("SCSS for " + theme + " must include focus-visible", scss.contains(":focus-visible"));
             assertTrue("CSS for " + theme + " must include focus-visible", css.contains(":focus-visible"));
+            assertTrue("SCSS for " + theme + " must include focus-visible outline color", scss.contains("outline-color: #818cf8;"));
+            assertTrue("CSS for " + theme + " must include focus-visible outline color", css.contains("outline-color: #818cf8;"));
+            assertTrue("SCSS for " + theme + " must include active state reset", scss.contains("[data-entity]:active"));
+            assertTrue("CSS for " + theme + " must include active state reset", css.contains("[data-entity]:active"));
         }
     }
 

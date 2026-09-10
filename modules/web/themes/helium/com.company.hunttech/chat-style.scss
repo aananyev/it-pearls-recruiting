@@ -696,6 +696,15 @@ body.v-dark,
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
                 }
             }
+
+            &:focus-visible {
+                outline-color: #818cf8;
+            }
+
+            &[data-entity]:active {
+                transform: translateY(0) !important;
+                box-shadow: none !important;
+            }
         }
     }
 }
