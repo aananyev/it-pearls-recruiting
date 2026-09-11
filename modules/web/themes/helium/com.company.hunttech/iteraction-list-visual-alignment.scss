@@ -563,15 +563,29 @@
       max-width: 50% !important;
     }
 
+    // Выравнивание колонок по левой и правой границе формы.
+    // participants-grid состоит из 2 слотов (50/50).
+    // result-grid состоит из 3 слотов: 2 верхних (50/50) и последний (colspan=2, 100%).
+    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:first-child,
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:first-child {
+      left: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 8px !important;
+    }
+
     .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:last-child,
-    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:nth-last-child(2) {
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:nth-child(2) {
       left: 50% !important;
+      padding-left: 8px !important;
+      padding-right: 0 !important;
     }
 
     .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:last-child {
       left: 0 !important;
       width: 100% !important;
       max-width: 100% !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
     }
 
     .iteraction-list-participants-grid .v-gridlayout-slot > *,
@@ -648,7 +662,83 @@
       padding-top: 10px !important;
     }
 
+    // Адаптивное поведение правой рабочей области и защита от выхода за границы
+    .iteraction-list-workspace,
+    .v-slot-iteraction-list-workspace {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .iteraction-list-content,
+    .iteraction-list-flat-content,
+    .iteraction-list-unified-card,
+    .iteraction-list-unified-body,
+    .iteraction-list-unified-body > .v-slot {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .iteraction-list-dynamic-panel,
+    .iteraction-list-dynamic-panel > .v-slot,
+    .iteraction-list-dynamic-panel .v-button {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    @media (max-width: 1440px) {
+      .iteraction-list-popular-button {
+        padding: 4px 6px !important;
+        font-size: 12px !important;
+        line-height: 15px !important;
+      }
+
+      .iteraction-list-popular-button .v-button-caption {
+        font-size: 12px !important;
+        line-height: 15px !important;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .iteraction-list-quick-actions {
+        padding: 10px 12px 12px !important;
+      }
+
+      .iteraction-list-popular-button {
+        height: 56px !important;
+        min-height: 56px !important;
+        padding: 3px 5px !important;
+        font-size: 11px !important;
+        line-height: 14px !important;
+      }
+
+      .iteraction-list-popular-button .v-button-caption {
+        max-height: 42px !important;
+        font-size: 11px !important;
+        line-height: 14px !important;
+      }
+
+      .iteraction-list-flat-content {
+        padding-top: 8px !important;
+      }
+
+      .iteraction-list-unified-body {
+        padding: 12px !important;
+      }
+    }
+
     @media (max-width: 1100px) {
+      .v-slot-iteraction-list-sidebar {
+        width: 252px !important;
+        min-width: 252px !important;
+        max-width: 252px !important;
+      }
+
       .iteraction-list-vacancy-state-summary {
         gap: 6px;
       }
@@ -656,6 +746,29 @@
       .iteraction-list-vacancy-state-summary > .v-slot {
         width: calc(50% - 3px) !important;
         max-width: calc(50% - 3px) !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .iteraction-list-popular-buttons {
+        min-height: 48px !important;
+      }
+
+      .iteraction-list-popular-button {
+        height: 48px !important;
+        min-height: 48px !important;
+        font-size: 10px !important;
+        line-height: 13px !important;
+        padding: 2px 4px !important;
+      }
+
+      .iteraction-list-popular-button .v-button-caption {
+        font-size: 10px !important;
+        line-height: 13px !important;
+      }
+
+      .iteraction-list-footer {
+        padding: 8px 10px !important;
       }
     }
   }

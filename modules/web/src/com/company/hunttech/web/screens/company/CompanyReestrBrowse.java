@@ -122,12 +122,12 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
         Action editAction = companiesTable.getAction("edit");
         if (editAction instanceof EditAction) {
             ((EditAction<Company>) editAction).setScreenClass(CompanyEdit.class);
-            ((EditAction<Company>) editAction).setOpenMode(OpenMode.DIALOG);
+            ((EditAction<Company>) editAction).setOpenMode(OpenMode.NEW_TAB);
         }
         Action createAction = companiesTable.getAction("create");
         if (createAction instanceof CreateAction) {
             ((CreateAction<Company>) createAction).setScreenClass(CompanyEdit.class);
-            ((CreateAction<Company>) createAction).setOpenMode(OpenMode.DIALOG);
+            ((CreateAction<Company>) createAction).setOpenMode(OpenMode.NEW_TAB);
         }
         if (editAction != null) {
             companiesTable.setItemClickAction(editAction);
@@ -262,7 +262,7 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
                 screenBuilders.editor(companiesTable)
                         .withScreenClass(CompanyEdit.class)
                         .editEntity(selected)
-                        .withOpenMode(OpenMode.DIALOG)
+                        .withOpenMode(OpenMode.NEW_TAB)
                         .show();
             }
         });

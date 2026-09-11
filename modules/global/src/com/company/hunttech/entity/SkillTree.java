@@ -46,7 +46,7 @@ public class SkillTree extends StandardEntity {
     protected CandidateCV candidateCV;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SPECIALISATION_ID")
     protected Specialisation specialisation;
 

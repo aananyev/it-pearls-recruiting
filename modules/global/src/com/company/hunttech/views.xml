@@ -9,6 +9,7 @@
         <property name="regionType"/>
         <property name="capital"/>
         <property name="timeZone"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_Region" name="region-browse-view" extends="_minimal">
         <property name="regionRuName"/>
@@ -42,6 +43,7 @@
         <property name="regionEngName"/>
         <property name="regionCode"/>
         <property name="isoCode"/>
+        <property name="fileRegionEmblem"/>
     </view>
     <view entity="hunttech_Region" name="region-view" extends="_minimal">
         <property name="regionRuName"/>
@@ -63,6 +65,7 @@
         <property name="fiasId"/>
         <property name="population"/>
         <property name="timeZone"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_Country" name="country-browse-view" extends="_minimal">
         <property name="countryRuName"/>
@@ -74,6 +77,8 @@
         <property name="capital"/>
         <property name="phoneCode"/>
         <property name="fileFlag"/>
+        <property name="flagImage"/>
+        <property name="flagUrl"/>
     </view>
     <view entity="hunttech_Country" name="country-edit-view" extends="_minimal">
         <property name="countryRuName"/>
@@ -94,9 +99,13 @@
         <property name="countryEngName"/>
         <property name="countryShortName"/>
         <property name="alpha3Code"/>
+        <property name="fileFlag"/>
     </view>
     <view entity="hunttech_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
+        <property name="fileFlag"/>
+        <property name="flagImage"/>
+        <property name="flagUrl"/>
     </view>
     <view entity="hunttech_CompanyDepartament" name="companyDepartament-browse-view" extends="_minimal">
         <property name="departamentRuName"/>
@@ -493,13 +502,13 @@
     <view entity="hunttech_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true"
           overwrite="true">
         <property name="grade" view="_local"/>
-        <property name="cityPosition" view="_local"/>
+        <property name="cityPosition" view="city-picker-view"/>
         <property name="positionType" view="_local">
         </property>
         <property name="skillsList" view="skillTree-openPosition-tab-view"/>
         <property name="parentOpenPosition" view="_local">
         </property>
-        <property name="cities" view="_local"/>
+        <property name="cities" view="city-picker-view"/>
         <property name="owner" view="_local"/>
         <property name="projectName" view="_local">
             <property name="projectDepartment" view="_local">
@@ -723,15 +732,18 @@
         <property name="cityRuName"/>
         <property name="cityEngName"/>
         <property name="cityPhoneCode"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-location-view" extends="_minimal">
         <property name="cityRuName"/>
         <property name="cityEngName"/>
         <property name="cityRegion" view="region-browse-view"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_City" name="city-view" extends="_local">
         <property name="cityRegion" view="region-picker-view"/>
         <property name="openPosition" view="_minimal"/>
+        <property name="fileCityEmblem"/>
     </view>
     <view entity="hunttech_Company" name="company-browse-view" extends="_minimal">
         <property name="comanyName"/>
@@ -1263,17 +1275,6 @@
             </property>
         </property>
     </view>
-    <view entity="hunttech_OpenPosition" name="openPosition-edit-view" extends="_minimal">
-        <!-- Только поля, реально используемые в JobCandidateEdit.
-             Остальные поля (_local) не загружаются. -->
-        <property name="vacansyName"/>
-        <property name="openClose"/>
-        <property name="priority"/>
-        <property name="lastOpenDate"/>
-        <property name="comment"/>
-        <property name="owner" view="_minimal"/>
-        <!-- projectName переопределяется inline в job-candidate-edit.xml -->
-    </view>
     <view entity="hunttech_ItearctionRequirements" name="itearctionRequirements-view" extends="_local">
         <property name="iteraction" view="_local"/>
         <property name="iteractionRequirement" view="_local"/>
@@ -1378,7 +1379,7 @@
     </view>
     <view entity="hunttech_SkillsFilterLastSelection" name="skillsFilterLastSelection-view" extends="_local">
         <property name="position" view="_local"/>
-        <property name="city" view="_local"/>
+        <property name="city" view="city-picker-view"/>
         <property name="openPosition" view="_local"/>
         <property name="jobCandidates" view="_local"/>
         <property name="user" view="_local"/>
@@ -1559,5 +1560,85 @@
     <view entity="hunttech_OpenPositionSkill" name="openPositionSkill-view" extends="_local">
         <property name="openPosition" view="_minimal"/>
         <property name="skill" view="_minimal"/>
+    </view>
+
+    <!-- Оптимизированные Read-Only представления для LLM-чата (Data View Integrity) -->
+    <view entity="hunttech_OpenPosition" name="openPosition-llm-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="signDraft"/>
+        <property name="priority"/>
+        <property name="rating"/>
+        <property name="lastOpenDate"/>
+        <property name="closingDate"/>
+        <property name="remoteWork"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="salaryComment"/>
+        <property name="shortDescription"/>
+        <property name="grade" view="_minimal"/>
+        <property name="positionType" view="_minimal"/>
+        <property name="cityPosition" view="_minimal"/>
+        <property name="projectName" view="_minimal"/>
+        <property name="owner" view="_minimal"/>
+        <property name="skillsList" view="_minimal"/>
+    </view>
+
+    <view entity="hunttech_JobCandidate" name="jobCandidate-llm-view" extends="_minimal">
+        <property name="fullName"/>
+        <property name="firstName"/>
+        <property name="secondName"/>
+        <property name="middleName"/>
+        <property name="email"/>
+        <property name="phone"/>
+        <property name="mobilePhone"/>
+        <property name="telegramName"/>
+        <property name="skypeName"/>
+        <property name="status"/>
+        <property name="currentCompany" view="_minimal">
+            <property name="comanyName"/>
+            <property name="companyShortName"/>
+        </property>
+        <property name="cityOfResidence" view="_minimal">
+            <property name="cityRuName"/>
+        </property>
+        <property name="personPosition" view="_minimal">
+            <property name="positionRuName"/>
+            <property name="positionEnName"/>
+        </property>
+        <property name="candidateCv" view="_minimal">
+            <property name="textCV"/>
+            <property name="resumePosition" view="_minimal"/>
+        </property>
+        <property name="candidateSkills" view="candidateSkill-view"/>
+        <property name="skillTree" view="_minimal"/>
+    </view>
+
+    <view entity="hunttech_IteractionList" name="iteractionList-llm-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="comment"/>
+        <property name="rating"/>
+        <property name="communicationMethod"/>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="number"/>
+        </property>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="vacancy" view="_minimal"/>
+        <property name="recrutier" view="_minimal"/>
+    </view>
+
+    <view entity="hunttech_CandidateCV" name="candidateCV-llm-view" extends="_minimal">
+        <property name="textCV"/>
+        <property name="letter"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="toVacancy" view="_minimal"/>
+        <property name="resumePosition" view="_minimal"/>
     </view>
 </views>

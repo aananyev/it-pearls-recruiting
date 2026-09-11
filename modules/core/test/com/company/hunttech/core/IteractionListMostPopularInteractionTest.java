@@ -61,7 +61,7 @@ public class IteractionListMostPopularInteractionTest {
                 "for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++)"));
         assertTrue(builder.contains(
                 "Iteraction interaction = index < mostPopular.size()"));
-        assertTrue(builder.contains("createPopularInteractionButton(index, interaction)"));
+        assertTrue(builder.contains("createPopularInteractionButton(interaction)"));
         assertTrue(builder.contains("mostPopularHbox.add(popularButton)"));
         assertTrue(builder.contains("mostPopularHbox.expand(popularButton)"));
         assertTrue(builder.contains("mostPopular = Collections.emptyList()"));
@@ -73,19 +73,19 @@ public class IteractionListMostPopularInteractionTest {
         String controller = controller();
         String factory = section(
                 controller,
-                "private Button createPopularInteractionButton(int index, Iteraction interaction)",
+                "private Button createPopularInteractionButton(Iteraction interaction)",
                 "@Subscribe\n    public void onAfterShow");
 
         assertTrue(factory.contains("if (interaction == null)"));
         assertTrue(factory.contains("popularButton.setCaption(EMPTY_POPULAR_CAPTION)"));
         assertTrue(factory.contains("popularButton.setEnabled(false)"));
         assertTrue(factory.contains("return popularButton"));
-        // Историческая подпись быстрой кнопки 2024 года: «N. Название типа».
-        assertTrue(factory.contains(".append(index + 1)"));
-        assertTrue(factory.contains(".append(\". \")"));
-        assertTrue(factory.contains("interaction.getIterationName()"));
+        // Подпись быстрой кнопки совпадает со всплывающей подсказкой (название взаимодействия).
+        assertTrue(factory.contains("popularButton.setCaption(interaction.getIterationName())"));
+        assertTrue(factory.contains("popularButton.setDescription(interaction.getIterationName())"));
         assertTrue(factory.contains("iteractionTypeField.setValue(interaction)"));
         assertTrue(factory.contains("iteractionTypeField.focus()"));
+        assertFalse(factory.contains(".append(index + 1)"));
         assertFalse(factory.contains("getCaption().substring"));
 
         String emptyBranch = section(
@@ -105,7 +105,7 @@ public class IteractionListMostPopularInteractionTest {
                 "id=\"mostPopularQuickActions\"",
                 "id=\"mostPopularHbox\"",
                 "id=\"iteractionListContentScrollBox\"",
-                "id=\"participantsAccordion\"",
+                "id=\"iteractionMainInfoCard\"",
                 "id=\"editActions\"");
         assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
         assertFalse(workspace.contains("id=\"popularAccordion\""));

@@ -2,9 +2,12 @@ package com.company.hunttech.web.screens.adminaiconfiguration;
 
 import com.company.hunttech.ai.AiProviderCatalog;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
+import com.company.hunttech.service.AiConnectionTestResult;
 import com.company.hunttech.service.AiCredentialService;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.PasswordField;
 import com.haulmont.cuba.gui.components.TextField;
@@ -19,6 +22,7 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 import javax.inject.Inject;
+import java.util.Date;
 
 @UiController("hunttech_AdminAiConfiguration.edit")
 @UiDescriptor("admin-ai-configuration-edit.xml")
@@ -31,11 +35,15 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
     @Inject
     private TextField<String> defaultModelNameField;
     @Inject
+    private TextField<String> baseApiUrlField;
+    @Inject
     private PasswordField apiKeyInput;
     @Inject
     private AiCredentialService aiCredentialService;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Dialogs dialogs;
     @Inject
     private Button mainNav;
     @Inject
@@ -97,6 +105,53 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
     public void focusSecuritySection() {
         apiKeyInput.focus();
         setActiveNavigation(securityNav);
+    }
+
+    /**
+     * Проверяет подключение к AI-провайдеру с текущими реквизитами формы.
+     * Если введён новый ключ в apiKeyInput, проверяется он; иначе проверяется
+     * существующий сохранённый зашифрованный ключ.
+     */
+    public void onTestConnectionClick() {
+        String providerCode = providerCodeField.getValue();
+        String modelName = defaultModelNameField.getValue();
+        String plainKey = apiKeyInput.getValue();
+        String encryptedKey = getEditedEntity().getApiKeyEncrypted();
+        String baseUrl = baseApiUrlField != null ? baseApiUrlField.getValue() : getEditedEntity().getBaseApiUrl();
+
+        AiConnectionTestResult result = aiCredentialService.testConnection(
+                providerCode, modelName, plainKey, encryptedKey, baseUrl
+        );
+
+        if (result.isSuccess()) {
+            getEditedEntity().setLastTestStatus("SUCCESS");
+            getEditedEntity().setLastTestAt(new Date());
+            getEditedEntity().setLastError(null);
+
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withCaption("Подключение успешно установлено")
+                    .withDescription(result.getMessage())
+                    .withContentMode(ContentMode.TEXT)
+                    .show();
+        } else {
+            getEditedEntity().setLastTestStatus("FAILED");
+            getEditedEntity().setLastTestAt(new Date());
+            getEditedEntity().setLastError(result.getMessage());
+
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка подключения к AI-провайдеру")
+                    .withDescription(result.getMessage())
+                    .withContentMode(ContentMode.TEXT)
+                    .show();
+
+            dialogs.createMessageDialog()
+                    .withCaption("Диагностика подключения к AI")
+                    .withMessage(result.getDetailedError())
+                    .withContentMode(ContentMode.HTML)
+                    .withWidth("620px")
+                    .show();
+        }
     }
 
     private void applyDefaultModel(String providerCode) {

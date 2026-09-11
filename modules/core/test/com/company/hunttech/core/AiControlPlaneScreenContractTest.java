@@ -104,6 +104,21 @@ public class AiControlPlaneScreenContractTest {
                 editDescriptor.contains("view=\"userAiConfiguration-edit-view\""));
     }
 
+    @Test
+    public void testConnectionButtonsAreDeclaredInCorporateAndPersonalEditors() throws IOException {
+        String adminEdit = readProjectFile(ADMIN_EDIT);
+        assertTrue("AdminAiConfigurationEdit must declare testConnectionBtn",
+                adminEdit.contains("<button id=\"testConnectionBtn\""));
+        assertTrue("AdminAiConfigurationEdit testConnectionBtn must invoke onTestConnectionClick",
+                adminEdit.contains("invoke=\"onTestConnectionClick\""));
+
+        String userEdit = readProjectFile("modules/web/src/com/company/hunttech/web/screens/useraiconfiguration/user-ai-configuration-edit.xml");
+        assertTrue("UserAiConfigurationEdit must declare testConnectionBtn",
+                userEdit.contains("<button id=\"testConnectionBtn\""));
+        assertTrue("UserAiConfigurationEdit testConnectionBtn must invoke onTestConnectionClick",
+                userEdit.contains("invoke=\"onTestConnectionClick\""));
+    }
+
     private String between(String source, String start, String end) {
         int startIndex = source.indexOf(start);
         int endIndex = source.indexOf(end, startIndex + start.length());

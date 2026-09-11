@@ -5,6 +5,7 @@ import com.company.hunttech.service.TelegramIntegrationService;
 import com.company.hunttech.service.UserAvatarManagementService;
 import com.company.hunttech.service.dto.avatar.AvatarApplyMode;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileLoader;
@@ -16,6 +17,7 @@ import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.FieldGroup;
+import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.FileUploadField;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TabSheet;
@@ -86,9 +88,11 @@ public class ExtUserEditor extends UserEditor {
     private Label<String> positionDetailLabel;
 
     @Inject
+    private OvaFallbackImage userPic;
+    @Inject
     private TextField<String> telegramField;
     @Inject
-    private Button fetchTelegramPhotoBtn;
+    private Button loadTelegramPhotoButton;
 
     @Inject
     private FieldGroup contactsFieldGroup;
@@ -137,8 +141,12 @@ public class ExtUserEditor extends UserEditor {
         // Sidebar-лейблы профиля (ФИО, login, статус, Email, должность) заполняются из userDs;
         // при смене item (открытие другого пользователя, переcommit) значения обновляются повторно.
         userDs.addItemChangeListener(e -> refreshProfileLabels());
+        updateLoadTelegramButtonState();
         if (telegramField != null) {
-            telegramField.addValueChangeListener(e -> refreshProfileLabels());
+            telegramField.addValueChangeListener(e -> {
+                refreshProfileLabels();
+                updateLoadTelegramButtonState();
+            });
         }
         refreshProfileLabels();
 
@@ -245,6 +253,7 @@ public class ExtUserEditor extends UserEditor {
                                     if (officialPhotoUpload != null) {
                                         officialPhotoUpload.setValue(extUser.getOfficialPhoto());
                                     }
+                                    refreshProfileLabels();
                                 })
                 )
                 .show();
@@ -272,19 +281,13 @@ public class ExtUserEditor extends UserEditor {
 
         if (StringUtils.isBlank(rawTelegram)) {
             log.warn("fetchTelegramPhoto: Telegram field is empty for user '{}'", userLogin);
-            showNotification(getMessage("msgTelegramPhotoEmpty"), NotificationType.WARNING);
+            showNotification(getMessage("msgTelegramNameRequired"), NotificationType.WARNING);
             return;
         }
 
         String telegramIdentifier = rawTelegram.trim();
         log.info("fetchTelegramPhoto: requesting photo for Telegram identifier '{}' (user '{}')",
                 telegramIdentifier, userLogin);
-
-        if (!telegramIntegrationService.isConfigured()) {
-            log.warn("fetchTelegramPhoto: TelegramIntegrationService is not configured or bot disabled");
-            showNotification(getMessage("msgTelegramNotConfigured"), NotificationType.ERROR);
-            return;
-        }
 
         try {
             String safeLogin = extUser.getLogin() != null
@@ -325,6 +328,17 @@ public class ExtUserEditor extends UserEditor {
         } catch (Exception e) {
             log.error("Exception during fetchTelegramPhoto for identifier '{}': {}", telegramIdentifier, e.getMessage(), e);
             showNotification(String.format(getMessage("msgTelegramPhotoError"), e.getMessage()), NotificationType.ERROR);
+        }
+    }
+
+    private void updateLoadTelegramButtonState() {
+        String val = telegramField != null ? telegramField.getValue() : null;
+        if (StringUtils.isBlank(val) && getItem() instanceof ExtUser) {
+            val = ((ExtUser) getItem()).getTelegram();
+        }
+        boolean enabled = StringUtils.isNotBlank(val);
+        if (loadTelegramPhotoButton != null) {
+            loadTelegramPhotoButton.setEnabled(enabled);
         }
     }
 
@@ -450,6 +464,22 @@ public class ExtUserEditor extends UserEditor {
                 telegramLabel.setValue(cleanTg.startsWith("@") ? cleanTg : "@" + cleanTg);
             } else {
                 telegramLabel.setValue("-");
+            }
+        }
+        refreshUserPic();
+    }
+
+    private void refreshUserPic() {
+        if (userPic == null) {
+            return;
+        }
+        User user = getItem();
+        if (user instanceof ExtUser) {
+            FileDescriptor photo = ((ExtUser) user).getOfficialPhoto();
+            if (FileDescriptorImageHelper.fileExists(fileLoader, photo)) {
+                userPic.setSource(userPic.createResource(FileDescriptorResource.class).setFileDescriptor(photo));
+            } else {
+                userPic.applyFallback();
             }
         }
     }

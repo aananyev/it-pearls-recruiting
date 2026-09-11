@@ -566,6 +566,46 @@ public class AiExecutionServiceBeanTest {
                 .executeTextWithTokens(anyString(), anyString(), eq("admin-key"), eq("admin-model"), any());
     }
 
+    @Test
+    public void llmChat_withPersonalization_injectsAboutMeAndLogsContextStatistics() {
+        function.setCode("LLM_CHAT");
+        function.setPromptTemplate("${message}");
+        function.setSystemPrompt("Ты — ассистент рекрутера.");
+        function.setIncludeUserContext(true);
+        function.setPrivacyPolicyVersion(AiConsentPolicy.LLM_CHAT_PRIVACY_POLICY_VERSION);
+        function.setExecutionPolicy(AiExecutionPolicy.ADMIN_ONLY);
+
+        com.company.hunttech.service.dto.AiUserContext ctx = new com.company.hunttech.service.dto.AiUserContext();
+        ctx.setActive(true);
+        ctx.getProfileData().put("aboutMe", "IT-рекрутер с опытом 5 лет, веду поиск Senior Java разработчиков");
+        ctx.getProfileData().put("currentPosition", "Ведущий рекрутер");
+        ctx.getCustomInstructions().add("Учитывай специфику найма в финтех");
+        stubProfileContext(ctx);
+
+        UserAiProfile profile = new UserAiProfile();
+        profile.setAdminFallbackConsent(true);
+        profile.setAdminFallbackConsentVersion(AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+        profile.setAdminFallbackConsentAt(new Date());
+        stubProfile(profile);
+
+        service.executeText("LLM_CHAT", Collections.singletonMap("message", "Как составить оффер?"));
+
+        ArgumentCaptor<String> systemCaptor = ArgumentCaptor.forClass(String.class);
+        verify(provider).executeTextWithTokens(anyString(), systemCaptor.capture(), anyString(), anyString(), any());
+        String systemPrompt = systemCaptor.getValue();
+        assertTrue(systemPrompt.contains("aboutMe: IT-рекрутер с опытом 5 лет"));
+        assertTrue(systemPrompt.contains("currentPosition: Ведущий рекрутер"));
+        assertTrue(systemPrompt.contains("Учитывай специфику найма в финтех"));
+
+        ArgumentCaptor<CommitContext> commitCaptor = ArgumentCaptor.forClass(CommitContext.class);
+        verify(dataManager).commit(commitCaptor.capture());
+        AiCallLog logged = (AiCallLog) commitCaptor.getValue().getCommitInstances().iterator().next();
+        assertEquals(Boolean.TRUE, logged.getContextIncluded());
+        assertNotNull(logged.getContextCodePoints());
+        assertTrue(logged.getContextCodePoints() > 0);
+        assertEquals("LLM_CHAT", logged.getFunctionCode());
+    }
+
     private void stubOverride(UserAiFunctionOverride override) {
         FluentLoader overrideLoader = (FluentLoader) dataManager.load(UserAiFunctionOverride.class);
         when(overrideLoader.query(anyString()).parameter(anyString(), any()).parameter(anyString(), any())

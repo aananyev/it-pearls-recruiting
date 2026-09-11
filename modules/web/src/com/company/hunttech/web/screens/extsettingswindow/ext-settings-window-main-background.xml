@@ -18,7 +18,7 @@
                                      Соседние блоки вкладки «Интерфейс» не перестраиваются. -->
                                 <vbox id="mainScreenBackgroundCard"
                                       width="100%"
-                                      spacing="false"
+                                      spacing="true"
                                       stylename="settings-section-card interface-settings-card main-screen-background-card edit-card">
                                     <hbox id="mainScreenBackgroundHeader"
                                           width="100%"
@@ -94,7 +94,7 @@
                                 <!-- Карточка настройки положения кнопки AI-чата -->
                                 <vbox id="llmChatButtonCard"
                                       width="100%"
-                                      spacing="false"
+                                      spacing="true"
                                       stylename="settings-section-card interface-settings-card edit-card">
                                     <hbox id="llmChatButtonHeader"
                                           width="100%"
@@ -122,7 +122,7 @@
                                         <label value="Кнопка вызова AI-чата и её плавающий контейнер объединены в единый интерактивный элемент. Кнопку можно зажать мышью и свободно перемещать в любую точку экрана. При необходимости вы можете вернуть её в правый нижний край экрана или применить это положение для всех пользователей."
                                                width="100%"
                                                stylename="settings-section-help edit-help"/>
-                                        <hbox id="llmChatButtonActions" spacing="true">
+                                        <hbox id="llmChatButtonActions" spacing="true" stylename="llm-chat-button-actions edit-field-row">
                                             <button id="resetMyLlmChatPositionBtn"
                                                     caption="Переместить в правый нижний край"
                                                     invoke="resetMyLlmChatPosition"

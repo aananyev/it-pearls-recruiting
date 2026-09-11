@@ -62,49 +62,41 @@
             </loader>
         </collection>
     </data>
-    <!-- Полноэкранный модальный режим диалога (контракт §5.3). -->
-    <dialogMode height="100%"
-                width="100%"
-                modal="true"/>
-    <!-- Корневой layout: локальный namespace company-editor + общий контракт
-         edit-screen-layout; слева sidebar 270px, справа workspace (toolbar +
-         вкладки + footer). -->
-    <layout stylename="company-editor"
+    <!-- Корневой layout: полноэкранная компоновка edit-screen-layout;
+         слева sidebar 312px со стилями CompanyReestrBrowse, справа адаптивный workspace (toolbar + вкладки + footer). -->
+    <layout stylename="job-candidate-editor company-editor"
+            width="100%"
+            height="100%"
             expand="companyEditorMainLayout"
             spacing="false">
         <hbox id="companyEditorMainLayout"
-              stylename="edit-screen-layout"
+              stylename="job-candidate-main-layout edit-screen-layout"
               width="100%"
               height="100%"
               expand="companyEditorWorkspace"
               spacing="false">
-            <!-- Sidebar компании: визуальный блок (логотип + умная обработка + загрузка),
-                 идентификация, label-навигация «Разделы», spacer и подсказка. -->
+            <!-- Sidebar компании: оформление внутренних элементов в едином стиле с CompanyReestrBrowse -->
             <vbox id="companyEditorSidebar"
-                  stylename="edit-sidebar"
-                  width="270px"
+                  stylename="job-candidate-sidebar edit-sidebar"
+                  width="312px"
                   height="100%"
                   spacing="false">
                 <scrollBox id="companySidebarScroll"
                            width="100%"
                            height="100%"
-                           orientation="vertical"
-                           scrollBars="vertical">
+                           orientation="vertical">
                     <vbox id="companySidebarScrollContent"
                           width="100%"
                           spacing="true">
-                        <!-- Визуальный блок: круглый логотип компании 176×176 (эталон
-                             JobCandidateEdit) с fallback icons/no-company.png при отсутствии
-                             файла и кнопки «Загрузить», «Умная обработка» и «Очистить». -->
+                        <!-- Шапка профиля компании: круглый логотип и кнопки управления фото -->
                         <vbox id="companyEditorSidebarVisual"
-                              stylename="edit-sidebar-visual"
+                              stylename="job-candidate-profile-header edit-sidebar-visual"
                               width="100%"
                               spacing="true"
                               align="TOP_CENTER">
-                            <!-- Обёртка аватара: 176×176 правильный круг -->
+                            <!-- Обёртка аватара: 176×176 круг по эталону CompanyReestrBrowse -->
                             <vbox id="companyLogoPicBox"
-                                  width="176px"
-                                  height="176px"
+                                  width="100%"
                                   spacing="false"
                                   align="TOP_CENTER">
                                 <ovaFallbackImage id="companyLogoFileImage"
@@ -117,15 +109,15 @@
                                                   ovalBackground="#3a3e44"
                                                   fallbackThemePath="icons/no-company.png"
                                                   visible="true"
-                                                  align="MIDDLE_CENTER"
-                                                  stylename="company-editor-logo-image"
+                                                  align="TOP_CENTER"
+                                                  stylename="job-candidate-avatar company-editor-logo-image"
                                                   scaleMode="SCALE_DOWN"/>
                             </vbox>
                             <!-- Загрузчик логотипа: файл IMMEDIATE пишется в fileCompanyLogo -->
                             <upload id="companyLogoFileUpload"
                                     fileStoragePutMode="IMMEDIATE"
                                     dataContainer="companyDc"
-                                    align="MIDDLE_CENTER"
+                                    align="TOP_CENTER"
                                     showFileName="false"
                                     dropZone="companyEditorSidebarVisual"
                                     showClearButton="true"
@@ -138,43 +130,73 @@
                                     width="100%"
                                     description="Удалить фон, сделать его прозрачным и улучшить качество без изменения логотипа"/>
                         </vbox>
-                        <!-- Идентификация: наименование компании и форма собственности -->
+                        <!-- Идентификация: наименование компании и город (стили CompanyReestrBrowse) -->
                         <vbox id="companyEditorSidebarIdentity"
                               stylename="edit-sidebar-identity"
                               width="100%"
                               spacing="false"
-                              align="TOP_CENTER">
+                              align="MIDDLE_CENTER">
                             <label id="companySidebarTitle"
-                                   stylename="edit-sidebar-title"
+                                   stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
                                    width="100%"
+                                   align="MIDDLE_CENTER"
                                    value="msg://browseCaption"/>
                             <label id="companySidebarName"
                                    dataContainer="companyDc"
                                    property="companyShortName"
-                                   stylename="bold"
+                                   stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                   align="MIDDLE_CENTER"
+                                   width="100%"/>
+                            <label id="companySidebarCity"
+                                   dataContainer="companyDc"
+                                   property="cityOfCompany.cityRuName"
+                                   stylename="edit-help candidate-sidebar-city"
+                                   align="MIDDLE_CENTER"
                                    width="100%"/>
                         </vbox>
-                        <!-- Сводка ключевых реквизитов компании -->
-                        <vbox id="companyEditorSidebarSummary"
-                              stylename="edit-sidebar-summary"
+                        <!-- Секция: Реквизиты и статус (стили CompanyReestrBrowse) -->
+                        <vbox id="companySidebarTermsCard"
                               width="100%"
-                              spacing="true">
-                            <hbox id="companySidebarInnBox" spacing="true" width="100%">
-                                <label value="ИНН:" stylename="bold"/>
-                                <label id="companySidebarInn" dataContainer="companyDc" property="inn" width="100%"/>
-                            </hbox>
-                            <hbox id="companySidebarCityBox" spacing="true" width="100%">
-                                <label value="Город:" stylename="bold"/>
-                                <label id="companySidebarCity" dataContainer="companyDc" property="cityOfCompany.cityRuName" width="100%"/>
-                            </hbox>
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="РЕКВИЗИТЫ И СТАТУС"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="companySidebarTermsGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="ИНН:" stylename="bold"/>
+                                        <label id="companySidebarInn" dataContainer="companyDc" property="inn"/>
+                                    </row>
+                                    <row>
+                                        <label value="Наш клиент:" stylename="bold"/>
+                                        <label id="companySidebarOurClient" dataContainer="companyDc" property="ourClient"/>
+                                    </row>
+                                    <row>
+                                        <label value="Наше юр. лицо:" stylename="bold"/>
+                                        <label id="companySidebarOurLegalEntity" dataContainer="companyDc" property="ourLegalEntity"/>
+                                    </row>
+                                    <row>
+                                        <label value="Холдинг / Группа:" stylename="bold"/>
+                                        <label id="companySidebarGroup" dataContainer="companyDc" property="companyGroup.companyRuGroupName"/>
+                                    </row>
+                                </rows>
+                            </grid>
                         </vbox>
-                        <!-- Разделы (label-навигация): 4 вкладки компании -->
+                        <!-- Секция: Разделы (label-навигация по вкладкам) -->
                         <vbox id="companyEditorSidebarNavigation"
-                              stylename="label-navigation"
+                              stylename="job-candidate-navigation label-navigation"
                               width="100%"
                               spacing="false">
-                            <label value="Разделы"
-                                   stylename="label-nav-title company-editor-navigation-title"/>
+                            <label value="РАЗДЕЛЫ"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"
+                                   width="100%"/>
                             <button id="companyEditorNavMain"
                                     stylename="borderless label-nav-item label-nav-item-active"
                                     icon="BUILDING"
@@ -196,11 +218,11 @@
                                     caption="mainMsg://msgCompanyDepartament"
                                     width="100%"/>
                         </vbox>
-                        <!-- Spacer отделяет навигацию от нижней подсказки. -->
+                        <!-- Spacer отделяет навигацию от нижней подсказки: 16px фиксированный отступ. -->
                         <vbox id="companySidebarSpacer"
-                              stylename="edit-sidebar-spacer"
+                              stylename="job-candidate-sidebar-spacer edit-sidebar-spacer"
                               width="100%"
-                              height="100%"/>
+                              height="16px"/>
                         <!-- Подсказка о назначении формы в нижней части sidebar. -->
                         <label id="companySidebarHint"
                                stylename="edit-sidebar-hint"
@@ -211,7 +233,7 @@
             </vbox>
             <!-- Workspace: toolbar с заголовком, вкладки компании и footer-действия ОК/Отмена. -->
             <vbox id="companyEditorWorkspace"
-                  stylename="edit-workspace"
+                  stylename="job-candidate-workspace edit-workspace"
                   width="100%"
                   height="100%"
                   spacing="false"
@@ -242,7 +264,7 @@
                 </hbox>
                 <!-- Вкладки компании: 4 вкладки с выверенной сеткой полей -->
                 <tabSheet id="mainTab"
-                          stylename="edit-tabs"
+                          stylename="framed job-candidate-tabs edit-tabs"
                           width="100%"
                           height="100%">
                     <!-- Вкладка 1: Информация о компании -->
@@ -250,6 +272,7 @@
                          caption="mainMsg://msgCompanyDetail"
                          margin="false"
                          spacing="true"
+                         icon="BUILDING"
                          expand="companyDetailsScroll"
                          stylename="company-main-tab">
                         <scrollBox id="companyDetailsScroll"
@@ -262,10 +285,10 @@
                                   width="100%"
                                   spacing="true"
                                   stylename="edit-workspace-content">
-                                <!-- Карточка «Реквизиты компании»: наименования, группа, директор (поле Форма собственности убрано) -->
+                                <!-- Карточка «Реквизиты компании»: наименования, группа, директор и контакты -->
                                 <groupBox id="companyMainCard"
                                           caption="msg://msgCompanyMainSection"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -287,7 +310,7 @@
                                                       property="ourClient"
                                                       stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox spacing="true" width="100%">
+                                        <hbox spacing="true" width="100%" stylename="company-field-row">
                                             <textField id="comanyNameField"
                                                        dataContainer="companyDc"
                                                        property="comanyName"
@@ -298,12 +321,12 @@
                                             <textField id="companyShortNameField"
                                                        dataContainer="companyDc"
                                                        property="companyShortName"
-                                                       caption="mainMsg://msgCountryShortName"
+                                                       caption="msg://msgCompanyShortName"
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox spacing="true" width="100%">
+                                        <hbox spacing="true" width="100%" stylename="company-field-row">
                                             <lookupPickerField id="companyGroupLookupPickerField"
                                                                dataContainer="companyDc"
                                                                property="companyGroup"
@@ -325,37 +348,36 @@
                                                 </actions>
                                             </lookupPickerField>
                                         </hbox>
-                                        <!-- Контактные поля остаются в основной карточке, чтобы не создавать
-                                             третью визуальную панель первой вкладки и не менять их bindings. -->
-                                        <hbox spacing="true" width="100%">
+                                        <!-- Контактные поля: телефон, email, сайт в компактной 3-колоночной строке -->
+                                        <hbox spacing="true" width="100%" stylename="company-field-row">
                                             <textField id="phoneMainField"
                                                        dataContainer="companyDc"
                                                        property="phone"
-                                                       caption="Телефон"
+                                                       caption="msg://msgPhone"
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
                                             <textField id="emailMainField"
                                                        dataContainer="companyDc"
                                                        property="email"
-                                                       caption="Email"
+                                                       caption="msg://msgEmail"
+                                                       stylename="edit-form-control"
+                                                       box.expandRatio="1"
+                                                       width="100%"/>
+                                            <textField id="websiteMainField"
+                                                       dataContainer="companyDc"
+                                                       property="website"
+                                                       caption="msg://msgWebsite"
                                                        stylename="edit-form-control"
                                                        box.expandRatio="1"
                                                        width="100%"/>
                                         </hbox>
-                                        <!-- Сайт занимает всю строку: одиночное поле не требует отдельной карточки. -->
-                                        <textField id="websiteMainField"
-                                                   dataContainer="companyDc"
-                                                   property="website"
-                                                   caption="Веб-сайт"
-                                                   stylename="edit-form-control"
-                                                   width="100%"/>
                                     </vbox>
                                 </groupBox>
                                 <!-- Карточка «Адрес компании» -->
                                 <groupBox id="companyAddressCard"
                                           caption="msg://msgCompanyAddressSection"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -363,7 +385,7 @@
                                     <vbox id="companyAddressFieldsBox"
                                           width="100%"
                                           spacing="true">
-                                        <hbox spacing="true" width="100%">
+                                        <hbox spacing="true" width="100%" stylename="company-field-row">
                                             <lookupPickerField id="countryOfCompanyField"
                                                                dataContainer="companyDc"
                                                                optionsContainer="countryOfCompaniesDc"
@@ -390,19 +412,20 @@
                                                     <action id="lookup" type="picker_lookup"/>
                                                 </actions>
                                             </lookupPickerField>
+                                            <lookupPickerField id="cityOfCompanyField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="cityOfCompaniesDc"
+                                                               property="cityOfCompany"
+                                                               caption="msg://msgCityOfCompany"
+                                                               stylename="edit-form-control"
+                                                               box.expandRatio="1"
+                                                               width="100%"
+                                                               required="true">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
                                         </hbox>
-                                        <lookupPickerField id="cityOfCompanyField"
-                                                           dataContainer="companyDc"
-                                                           optionsContainer="cityOfCompaniesDc"
-                                                           property="cityOfCompany"
-                                                           caption="msg://msgCityOfCompany"
-                                                           stylename="edit-form-control"
-                                                           width="100%"
-                                                           required="true">
-                                            <actions>
-                                                <action id="lookup" type="picker_lookup"/>
-                                            </actions>
-                                        </lookupPickerField>
                                         <textArea id="addressOfCompanyField"
                                                   dataContainer="companyDc"
                                                   property="addressOfCompany"
@@ -421,6 +444,7 @@
                          caption="Официальные реквизиты"
                          margin="false"
                          spacing="true"
+                         icon="FILE_TEXT_O"
                          expand="companyRequisitesScroll"
                          stylename="company-requisites-tab">
                         <scrollBox id="companyRequisitesScroll"
@@ -448,7 +472,7 @@
                                 <!-- Карточка 1: Основные юридические реквизиты -->
                                 <groupBox id="companyRequisitesMainCard"
                                           caption="Основные юридические реквизиты"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -544,7 +568,7 @@
                                 <!-- Карточка 2: Адреса и местонахождение организации -->
                                 <groupBox id="companyRequisitesAddressCard"
                                           caption="Адрес и местонахождение организации"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -634,7 +658,7 @@
                                 <!-- Карточка 3: Банковские реквизиты -->
                                 <groupBox id="companyRequisitesBankCard"
                                           caption="Банковские реквизиты"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -678,7 +702,7 @@
                                 <!-- Карточка 4: Официальные контакты -->
                                 <groupBox id="companyRequisitesContactsCard"
                                           caption="Официальные контакты"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -717,6 +741,7 @@
                          caption="msg://msgCompanyDescription"
                          margin="false"
                          spacing="true"
+                         icon="INFO_CIRCLE"
                          expand="companyDescriptionScroll"
                          stylename="company-description-tab">
                         <scrollBox id="companyDescriptionScroll"
@@ -731,7 +756,7 @@
                                   stylename="edit-workspace-content">
                                 <groupBox id="companyDescriptionCard"
                                           caption="msg://msgCompanyDescriptionSection"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -749,7 +774,7 @@
                                 </groupBox>
                                 <groupBox id="companyWorkingConditionsCard"
                                           caption="msg://msgCompanyWorkCondition"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -774,6 +799,7 @@
                          caption="mainMsg://msgCompanyDepartament"
                          margin="false"
                          spacing="true"
+                         icon="SITEMAP"
                          expand="companyDepartmentsScroll"
                          stylename="company-departments-tab">
                         <scrollBox id="companyDepartmentsScroll"
@@ -790,7 +816,7 @@
                                   stylename="edit-workspace-content">
                                 <groupBox id="companyDepartmentsCard"
                                           caption="msg://msgCompanyDepartmentsSection"
-                                          stylename="edit-card"
+                                          stylename="edit-accordion-section edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
@@ -824,22 +850,26 @@
                         </scrollBox>
                     </tab>
                 </tabSheet>
-                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю. -->
+                <!-- Footer-действия: стандартный подвал действий Edit-форм HRM -->
                 <hbox id="editActions"
-                      stylename="edit-footer-actions"
+                      stylename="job-candidate-bottom-bar edit-footer-actions"
                       width="100%"
-                      expand="bottomActionsSpacer"
                       align="MIDDLE_RIGHT"
-                      spacing="false">
-                    <vbox id="bottomActionsSpacer"
-                          width="100%"
-                          height="1px"/>
+                      spacing="true">
                     <hbox id="bottomActionsGroup"
                           width="AUTO"
                           align="MIDDLE_RIGHT"
                           spacing="true">
-                        <button action="windowCommitAndClose" stylename="company-editor-primary-action"/>
-                        <button action="windowClose" stylename="company-editor-secondary-action"/>
+                        <button id="windowCommitAndCloseButton"
+                                action="windowCommitAndClose"
+                                caption="mainMsg://actions.Ok"
+                                icon="CHECK"
+                                stylename="primary company-editor-primary-action"/>
+                        <button id="windowCloseButton"
+                                action="windowClose"
+                                caption="mainMsg://actions.Cancel"
+                                icon="BAN"
+                                stylename="secondary company-editor-secondary-action"/>
                     </hbox>
                 </hbox>
             </vbox>

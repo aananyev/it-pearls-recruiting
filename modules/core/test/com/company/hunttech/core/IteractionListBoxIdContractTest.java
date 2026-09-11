@@ -39,13 +39,9 @@ public class IteractionListBoxIdContractTest {
             "vacancyRatingContextBox",
             "iteractionListToolbarBox",
             "iteractionListSectionsBox",
-            "participantsSectionHeaderBox",
-            "interactionSectionHeaderBox",
-            "interactionSectionBodyBox",
-            "dynamicActionFieldsBox",
-            "resultSectionHeaderBox",
-            "commentSectionHeaderBox",
-            "commentSectionBodyBox"
+            "iteractionMainInfoCard",
+            "iteractionMainInfoBody",
+            "dynamicActionFieldsBox"
     ));
 
     @Test

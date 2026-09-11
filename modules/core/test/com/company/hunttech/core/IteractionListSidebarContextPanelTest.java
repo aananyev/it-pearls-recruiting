@@ -46,6 +46,8 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("property=\"numberIteraction\""));
         assertTrue(xml.contains("id=\"dateIteractionField\""));
         assertTrue(xml.contains("property=\"dateIteraction\""));
+        assertTrue(xml.contains("resolution=\"DAY\""));
+        assertTrue(xml.contains("dateFormat=\"dd.MM.yyyy\""));
         assertOrdered(xml,
                 "id=\"iteractionCandidateNameLabel\"",
                 "id=\"iteractionVacancyNameLabel\"",
@@ -56,7 +58,7 @@ public class IteractionListSidebarContextPanelTest {
     }
 
     @Test
-    public void vacancyStatusAndPriorityAppearBeforeLabelNavigation() throws IOException {
+    public void vacancyStatusAndPriorityAppearBeforeVacancyCard() throws IOException {
         String xml = descriptor();
 
         assertOrdered(xml,
@@ -64,14 +66,15 @@ public class IteractionListSidebarContextPanelTest {
                 "id=\"vacancyStateSummary\"",
                 "id=\"statusOfVacansyLabel\"",
                 "id=\"currentPriorityLabel\"",
-                "id=\"iteractionListNavigation\"");
+                "id=\"iteractionVacancyCard\"");
 
         String stateSummary = section(
                 xml,
                 "id=\"vacancyStateSummary\"",
-                "id=\"iteractionListNavigation\"");
+                "id=\"iteractionVacancyCard\"");
         assertTrue(stateSummary.contains("id=\"alternativeVacancyLinkButton\""));
         assertTrue(stateSummary.contains("id=\"trafficLighterImage\""));
+        assertFalse(xml.contains("id=\"iteractionListNavigation\""));
 
         String lowerVacancyCard = section(
                 xml,

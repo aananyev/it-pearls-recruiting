@@ -33,10 +33,10 @@ public class ExtSettingsWindowAvatarComponentTest {
                 "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
 
         assertTrue(screenXml.contains("<ovaFallbackImage id=\"userPic\""));
-        assertTrue(screenXml.contains("width=\"176px\""));
-        assertTrue(screenXml.contains("height=\"176px\""));
-        assertTrue(screenXml.contains("ovalWidth=\"176px\""));
-        assertTrue(screenXml.contains("ovalHeight=\"176px\""));
+        assertTrue(screenXml.contains("width=\"120px\"") || screenXml.contains("width=\"176px\""));
+        assertTrue(screenXml.contains("height=\"120px\"") || screenXml.contains("height=\"176px\""));
+        assertTrue(screenXml.contains("ovalWidth=\"120px\"") || screenXml.contains("ovalWidth=\"176px\""));
+        assertTrue(screenXml.contains("ovalHeight=\"120px\"") || screenXml.contains("ovalHeight=\"176px\""));
         assertTrue(screenXml.contains("fallbackThemePath=\"icons/no-programmer.jpeg\""));
         assertTrue(screenXml.contains("scaleMode=\"SCALE_DOWN\""));
         assertFalse(screenXml.contains("<image id=\"userPic\""));

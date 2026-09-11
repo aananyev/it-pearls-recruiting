@@ -41,10 +41,10 @@ configurations.all {
 
 cuba {
     artifact {
-        group = 'com.company.hunttech'
-        version = '0.495'
-        isSnapshot = true
-    }
+              group = 'com.company.hunttech'
+              version = '0.541'
+              isSnapshot = true
+          }
     tomcat {
         dir = "$project.rootDir/deploy/tomcat"
     }

@@ -189,13 +189,15 @@
                                        caption="msg://msgNumber"
                                        width="100%"
                                        align="MIDDLE_LEFT"/>
-                            <!-- Read-only поле показывает дату и время взаимодействия из редактируемой сущности. -->
+                            <!-- Read-only поле показывает дату взаимодействия (только календарная дата без времени и минут). -->
                             <dateField id="dateIteractionField"
                                        stylename="iteraction-list-service-field"
                                        dataContainer="iteractionListDc"
                                        property="dateIteraction"
                                        editable="false"
                                        caption="msg://msgDate"
+                                       resolution="DAY"
+                                       dateFormat="dd.MM.yyyy"
                                        width="100%"
                                        align="MIDDLE_LEFT"/>
                         </vbox>
@@ -276,40 +278,6 @@
                     </hbox>
                 </vbox>
 
-                <!-- Контейнер label-навигации хранит постоянный заголовок и runtime-кнопки перехода к четырём блокам формы. -->
-                <vbox id="iteractionListNavigation"
-                      width="100%"
-                      height="AUTO"
-                      spacing="false"
-                      stylename="label-navigation iteraction-list-navigation">
-                    <!-- Заголовок «Разделы формы» остаётся первым компонентом и не удаляется controller-ом;
-                         стиль — полоса-заголовок с двумя горизонтальными inset-линиями (контракт §4.1). -->
-                    <label id="iteractionListNavigationTitle"
-                           width="100%"
-                           height="AUTO"
-                           value="msg://msgAccordionNavigation"
-                           stylename="label-nav-title iteraction-list-navigation-title"/>
-                    <!-- Fallback-пункт первого раздела показывает активное состояние до создания runtime-кнопок. -->
-                    <label width="100%"
-                           height="AUTO"
-                           value="msg://msgAccordionParticipants"
-                           stylename="label-nav-item iteraction-list-nav-item label-nav-item-active iteraction-list-nav-item-active"/>
-                    <!-- Fallback-пункт обозначает переход к выбору типа и дополнительных параметров действия. -->
-                    <label width="100%"
-                           height="AUTO"
-                           value="msg://msgAccordionInteraction"
-                           stylename="label-nav-item iteraction-list-nav-item"/>
-                    <!-- Fallback-пункт обозначает переход к оценке, рекрутёру и способу связи. -->
-                    <label width="100%"
-                           height="AUTO"
-                           value="msg://msgAccordionResult"
-                           stylename="label-nav-item iteraction-list-nav-item"/>
-                    <!-- Fallback-пункт обозначает переход к обязательному комментарию взаимодействия. -->
-                    <label width="100%"
-                           height="AUTO"
-                           value="msg://msgAccordionComment"
-                           stylename="label-nav-item iteraction-list-nav-item"/>
-                </vbox>
 
                 <!-- Карточка вакансии раскрывает бизнес-контекст выбранной позиции без перехода в отдельный экран. -->
                 <vbox id="iteractionVacancyCard"
@@ -529,50 +497,31 @@
                           margin="true"
                           stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
 
-                        <!-- Первый блок определяет участников взаимодействия: кандидата и вакансию. -->
-                        <vbox id="participantsAccordion"
+                        <!-- Единый блок всей информации взаимодействия объединяет участников, тип, результат и комментарий. -->
+                        <vbox id="iteractionMainInfoCard"
                               width="100%"
                               height="AUTO"
                               spacing="false"
-                              stylename="iteraction-list-flat-section iteraction-list-flat-section-active iteraction-list-form-section iteraction-list-participants-section edit-card">
-                            <!-- Header визуально отделяет название блока участников от его полей. -->
-                            <vbox id="participantsSectionHeaderBox"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="false"
-                                  margin="true"
-                                  stylename="iteraction-list-flat-section-header">
-                                <!-- Заголовок сообщает, что блок связывает кандидата с вакансией. -->
-                                <label value="msg://msgAccordionParticipants"
-                                       width="100%"
-                                       height="AUTO"
-                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
-                            </vbox>
-                            <!-- Body содержит picker-поля и фильтр доступных вакансий. -->
-                            <vbox id="participantsAccordionContent"
+                              stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-unified-card edit-card">
+                            <!-- Body содержит все поля ввода формы в едином блоке. -->
+                            <vbox id="iteractionMainInfoBody"
                                   width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
-                                  stylename="iteraction-list-flat-section-body iteraction-list-section-content">
-                                <!-- Grid размещает поля кандидата и вакансии в двух равных колонках. -->
+                                  stylename="iteraction-list-flat-section-body iteraction-list-unified-body iteraction-list-section-content">
+                                <!-- Участники: Кандидат и Вакансия -->
                                 <grid id="gridIterationData"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
                                       stylename="iteraction-list-form-grid iteraction-list-participants-grid">
-                                    <!-- Columns объявляют двухколоночную структуру основного контекста взаимодействия. -->
                                     <columns>
-                                        <!-- Левая колонка занимает ровно половину ширины и не вытесняет vacancy-picker длинным ФИО. -->
                                         <column width="50%"/>
-                                        <!-- Правая колонка сохраняет половину ширины независимо от длины значения кандидата. -->
                                         <column width="50%"/>
                                     </columns>
-                                    <!-- Rows группируют логически связанные поля grid. -->
                                     <rows>
-                                        <!-- Единственная строка располагает candidateField и vacancyFiels на одном уровне. -->
                                         <row id="row">
-                                            <!-- SuggestionPickerField ищет кандидата по ФИО, исключая заблокированные и технические записи. -->
                                             <suggestionPickerField id="candidateField"
                                                                    inputPrompt="mainMsg://msgStartInput"
                                                                    minSearchStringLength="3"
@@ -583,14 +532,10 @@
                                                                    required="true"
                                                                    dataContainer="iteractionListDc"
                                                                    property="candidate">
-                                                <!-- Actions предоставляют выбор кандидата из lookup и открытие его карточки. -->
                                                 <actions>
-                                                    <!-- Lookup action открывает стандартный экран выбора кандидата. -->
                                                     <action id="lookup" type="picker_lookup"/>
-                                                    <!-- Open action открывает карточку уже выбранного кандидата для просмотра или редактирования. -->
                                                     <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                 </actions>
-                                                <!-- Suggestion query выполняет безопасный поиск по подстроке имени в заданном narrow view. -->
                                                 <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                        view="jobCandidate-iteraction-list-suggestion-view"
                                                        escapeValueForLike="true"
@@ -612,18 +557,14 @@
                                                                height="AUTO"
                                                                width="100%"
                                                                stylename="edit-form-control iteraction-list-primary-picker">
-                                                <!-- Actions позволяют выбрать вакансию из списка и открыть её editor. -->
                                                 <actions>
-                                                    <!-- Lookup action открывает стандартный список допустимых вакансий. -->
                                                     <action id="lookup" type="picker_lookup"/>
-                                                    <!-- Open action открывает карточку уже выбранной вакансии. -->
                                                     <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                 </actions>
                                             </lookupPickerField>
                                         </row>
                                     </rows>
                                 </grid>
-                                <!-- CheckBox включает фильтрацию вакансий только по активным подпискам текущего пользователя. -->
                                 <checkBox id="onlyMySubscribeCheckBox"
                                           width="100%"
                                           height="AUTO"
@@ -631,36 +572,8 @@
                                           description="msg://msgOnlyMySebscribeDec"
                                           caption="msg://msgOnlyMySubscribe"
                                           stylename="iteraction-list-subscription-filter"/>
-                            </vbox>
-                        </vbox>
 
-                        <!-- Второй блок определяет тип взаимодействия и динамические дополнительные значения. -->
-                        <vbox id="interactionAccordion"
-                              width="100%"
-                              height="AUTO"
-                              spacing="false"
-                              stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
-                            <!-- Header визуально отделяет название блока действия от динамических полей. -->
-                            <vbox id="interactionSectionHeaderBox"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="false"
-                                  margin="true"
-                                  stylename="iteraction-list-flat-section-header">
-                                <!-- Заголовок сообщает, что блок описывает тип и выполняемое действие. -->
-                                <label value="msg://msgAccordionInteraction"
-                                       width="100%"
-                                       height="AUTO"
-                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
-                            </vbox>
-                            <!-- Body содержит обязательный тип взаимодействия и controller-управляемую динамическую область. -->
-                            <vbox id="interactionSectionBodyBox"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="true"
-                                  margin="true"
-                                  stylename="iteraction-list-flat-section-body iteraction-list-dynamic-fields iteraction-list-section-content">
-                                <!-- LookupPickerField выбирает тип взаимодействия из ветки iteractionTypesDc. -->
+                                <!-- Тип взаимодействия и динамические поля действия -->
                                 <lookupPickerField id="iteractionTypeField"
                                                    optionsContainer="iteractionTypesDc"
                                                    caption="msg://msgIteractionType"
@@ -670,89 +583,47 @@
                                                    required="true"
                                                    dataContainer="iteractionListDc"
                                                    property="iteractionType">
-                                    <!-- Actions оставляют стандартный lookup для сложного выбора типа. -->
                                     <actions>
-                                        <!-- Lookup action открывает справочник доступных типов взаимодействий. -->
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
                                 </lookupPickerField>
-                                <!-- ButtonsPanel резервирует область, чьё содержимое и видимость зависят от выбранного типа. -->
                                 <buttonsPanel id="buttonsPanelCallAction"
                                               width="100%"
                                               height="AUTO"
                                               align="BOTTOM_LEFT"
                                               stylename="iteraction-list-dynamic-panel">
-                                    <!-- Внутренний VBox располагает controller-action и три альтернативных dynamic value поля. -->
                                     <vbox id="dynamicActionFieldsBox" width="100%" height="AUTO" spacing="true">
-                                        <!-- Button вызывает callActionEntity для типа взаимодействия с внешним экраном или действием. -->
                                         <button id="buttonCallAction"
                                                 invoke="callActionEntity"
                                                 width="100%"
                                                 align="BOTTOM_LEFT"/>
-                                        <!-- TextField хранит строковое дополнительное значение для interaction type с addType=1. -->
                                         <textField id="addString"
                                                    dataContainer="iteractionListDc"
                                                    property="addString"
                                                    width="100%"/>
-                                        <!-- DateField хранит дополнительную дату для interaction type с addType=2. -->
                                         <dateField id="addDate"
                                                    dataContainer="iteractionListDc"
                                                    property="addDate"
                                                    width="100%"/>
-                                        <!-- TextField хранит числовое дополнительное значение для interaction type с addType=3. -->
                                         <textField id="addInteger"
                                                    dataContainer="iteractionListDc"
                                                    property="addInteger"
                                                    width="100%"/>
                                     </vbox>
                                 </buttonsPanel>
-                            </vbox>
-                        </vbox>
 
-                        <!-- Третий блок фиксирует оценку результата, ответственного рекрутёра и способ связи. -->
-                        <vbox id="resultAccordion"
-                              width="100%"
-                              height="AUTO"
-                              spacing="false"
-                              stylename="iteraction-list-flat-section iteraction-list-result-section iteraction-list-form-section edit-card">
-                            <!-- Header визуально отделяет название блока оценки от его полей. -->
-                            <vbox id="resultSectionHeaderBox"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="false"
-                                  margin="true"
-                                  stylename="iteraction-list-flat-section-header">
-                                <!-- Заголовок сообщает, что блок описывает оценку и канал коммуникации. -->
-                                <label value="msg://msgAccordionResult"
-                                       width="100%"
-                                       height="AUTO"
-                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
-                            </vbox>
-                            <!-- Body растёт по AUTO и содержит grid результата без фиксированной высоты. -->
-                            <vbox id="resultAccordionBody"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="true"
-                                  margin="true"
-                                  stylename="iteraction-list-flat-section-body iteraction-list-result-body iteraction-list-section-content">
-                                <!-- Grid размещает оценку и рекрутёра в первой строке, способ связи — на всю вторую строку. -->
+                                <!-- Оценка, рекрутер и способ связи -->
                                 <grid id="resultAccordionGrid"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
                                       stylename="iteraction-list-form-grid iteraction-list-result-grid">
-                                    <!-- Columns объявляют две равные колонки результата. -->
                                     <columns>
-                                        <!-- Левая колонка занимает ровно половину ширины и не вытесняет поле рекрутёра. -->
                                         <column width="50%"/>
-                                        <!-- Правая колонка сохраняет половину ширины независимо от текста оценки. -->
                                         <column width="50%"/>
                                     </columns>
-                                    <!-- Rows задают основную строку оценки и отдельную строку способа связи. -->
                                     <rows>
-                                        <!-- Первая строка объединяет обязательную оценку и выбранного рекрутёра. -->
                                         <row id="rating">
-                                            <!-- LookupField сохраняет оценку коммуникации в свойство rating. -->
                                             <lookupField id="ratingField"
                                                          required="true"
                                                          align="MIDDLE_LEFT"
@@ -762,7 +633,6 @@
                                                          description="msg://msgRatingDecription"
                                                          stylename="edit-form-control"
                                                          width="100%"/>
-                                            <!-- LookupPickerField выбирает ответственного рекрутёра из активных usersDc. -->
                                             <lookupPickerField id="recrutierField"
                                                                caption="msg://msgRecrutier"
                                                                width="100%"
@@ -770,16 +640,12 @@
                                                                property="recrutier"
                                                                stylename="edit-form-control"
                                                                optionsContainer="usersDc">
-                                                <!-- Actions предоставляют стандартный lookup пользователя. -->
                                                 <actions>
-                                                    <!-- Lookup action открывает список активных пользователей для выбора рекрутёра. -->
                                                     <action id="lookup" type="picker_lookup"/>
                                                 </actions>
                                             </lookupPickerField>
                                         </row>
-                                        <!-- Вторая строка выделена способу связи и растягивает поле на обе колонки. -->
                                         <row>
-                                            <!-- TextField сохраняет канал коммуникации, например телефон, email или мессенджер. -->
                                             <textField id="communicationMethodField"
                                                        width="100%"
                                                        caption="msg://msgCommunicationMethod"
@@ -790,35 +656,7 @@
                                         </row>
                                     </rows>
                                 </grid>
-                            </vbox>
-                        </vbox>
 
-                        <!-- Четвёртый блок хранит содержательный комментарий рекрутёра о взаимодействии. -->
-                        <vbox id="commentAccordion"
-                              width="100%"
-                              height="AUTO"
-                              spacing="false"
-                              stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-comment-section edit-card">
-                            <!-- Header визуально отделяет название комментария от многострочного поля. -->
-                            <vbox id="commentSectionHeaderBox"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="false"
-                                  margin="true"
-                                  stylename="iteraction-list-flat-section-header">
-                                <!-- Заголовок обозначает последний смысловой раздел формы. -->
-                                <label value="msg://msgAccordionComment"
-                                       width="100%"
-                                       height="AUTO"
-                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
-                            </vbox>
-                            <!-- Body задаёт внутренние отступы для многострочного комментария. -->
-                            <vbox id="commentSectionBodyBox"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="true"
-                                  margin="true"
-                                  stylename="iteraction-list-flat-section-body">
                                 <!-- TextArea сохраняет обязательное бизнес-описание контакта в свойство comment. -->
                                 <textArea id="commentField"
                                           dataContainer="iteractionListDc"

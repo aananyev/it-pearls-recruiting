@@ -1,6 +1,7 @@
 package com.company.hunttech.service;
 
 import com.company.hunttech.LlmChatStreamEvent;
+import com.company.hunttech.dto.HrmDataContextSnapshot;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
@@ -92,6 +93,8 @@ public class LlmChatServiceBean implements LlmChatService {
     private Events events;
     @Inject
     private Security security;
+    @Inject
+    private HrmChatDataRetrieverService hrmChatDataRetrieverService;
     @Resource(name = "scheduler")
     private TaskScheduler scheduler;
 
@@ -157,10 +160,14 @@ public class LlmChatServiceBean implements LlmChatService {
             throw new DevelopmentException("Запрос отменён до обращения к AI-провайдеру.");
         }
 
+        HrmDataContextSnapshot snapshot = hrmChatDataRetrieverService.retrieveContextForMessage(message.trim());
+
         Map<String, Object> context = new HashMap<>();
-        // Only the chat message is supplied. Candidate/CV entities are never
-        // resolved or attached to this contract.
         context.put("message", message.trim());
+        if (!snapshot.isEmpty()) {
+            context.put("message", message.trim() + "\n\n" + snapshot.getFormattedContext());
+            context.put("hrmContext", snapshot.getFormattedContext());
+        }
         context.put("callerSource", "LlmChatService");
         context.put("requestId", requestId.trim());
         AiExecutionResult result;
@@ -291,8 +298,14 @@ public class LlmChatServiceBean implements LlmChatService {
     }
 
     private void executeStreaming(StreamingSession session) {
+        HrmDataContextSnapshot snapshot = hrmChatDataRetrieverService.retrieveContextForMessage(session.userMessage.getContent());
+
         Map<String, Object> context = new HashMap<>();
         context.put("message", session.userMessage.getContent());
+        if (!snapshot.isEmpty()) {
+            context.put("message", session.userMessage.getContent() + "\n\n" + snapshot.getFormattedContext());
+            context.put("hrmContext", snapshot.getFormattedContext());
+        }
         context.put("callerSource", "LlmChatService.streaming");
         context.put("requestId", session.requestId);
         boolean quotaSettled = false;

@@ -153,119 +153,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private InteractionService interactionService;
 
-    // Четыре постоянных блока и левый индекс относятся только к presentation-слою:
-    // навигация не меняет entity, loaders, сервисы или порядок бизнес-обработчиков.
-    @Inject
-    private VBoxLayout iteractionListNavigation;
-    @Inject
-    private VBoxLayout participantsAccordion;
-    @Inject
-    private VBoxLayout interactionAccordion;
-    @Inject
-    private VBoxLayout resultAccordion;
-    @Inject
-    private VBoxLayout commentAccordion;
-
-    private Button participantsAccordionNav;
-    private Button interactionAccordionNav;
-    private Button resultAccordionNav;
-    private Button commentAccordionNav;
-
     private static final int POPULAR_INTERACTION_BUTTONS = 5;
     private static final String EMPTY_POPULAR_CAPTION = "Нет данных";
-    private static final String NAVIGATION_STYLE =
-            "borderless iteraction-list-nav-item label-nav-item";
-    private static final String ACTIVE_NAVIGATION_STYLE =
-            "borderless iteraction-list-nav-item label-nav-item label-nav-item-active";
-    private static final String ACTIVE_SECTION_STYLE =
-            "iteraction-list-flat-section-active";
 
-    @Subscribe
     protected void onInitIteractionNavigation(InitEvent event) {
-        initSectionNavigation();
-    }
-
-    /**
-     * Заменяет XML fallback LABEL на четыре keyboard-доступные кнопки.
-     * Клик выделяет постоянный блок и переводит фокус в первое рабочее поле;
-     * высота и видимость остальных блоков при этом не меняются.
-     */
-    private void initSectionNavigation() {
-        Component navigationTitle = iteractionListNavigation.getComponent(0);
-        iteractionListNavigation.removeAll();
-        iteractionListNavigation.add(navigationTitle);
-
-        participantsAccordionNav = createNavigationButton(
-                "participantsAccordionNav", "msgAccordionParticipants",
-                () -> selectSection(participantsAccordion, participantsAccordionNav, candidateField::focus));
-        interactionAccordionNav = createNavigationButton(
-                "interactionAccordionNav", "msgAccordionInteraction",
-                () -> selectSection(interactionAccordion, interactionAccordionNav, iteractionTypeField::focus));
-        resultAccordionNav = createNavigationButton(
-                "resultAccordionNav", "msgAccordionResult",
-                () -> selectSection(resultAccordion, resultAccordionNav, ratingField::focus));
-        commentAccordionNav = createNavigationButton(
-                "commentAccordionNav", "msgAccordionComment",
-                () -> selectSection(commentAccordion, commentAccordionNav, commentField::focus));
-
-        iteractionListNavigation.add(participantsAccordionNav);
-        iteractionListNavigation.add(interactionAccordionNav);
-        iteractionListNavigation.add(resultAccordionNav);
-        iteractionListNavigation.add(commentAccordionNav);
-
-        selectSection(participantsAccordion, participantsAccordionNav, () -> { });
-    }
-
-    private Button createNavigationButton(String id, String messageKey, Runnable handler) {
-        Button button = uiComponents.create(Button.class);
-        button.setId(id);
-        button.setCaption(messageBundle.getMessage(messageKey));
-        button.setWidth("100%");
-        button.setStyleName(NAVIGATION_STYLE);
-        button.addClickListener(clickEvent -> handler.run());
-        return button;
-    }
-
-    /**
-     * Меняет только presentation-state: выбранный блок и пункт навигации получают
-     * active-style, после чего focus обеспечивает штатную прокрутку ScrollBox.
-     */
-    private void selectSection(VBoxLayout selectedSection,
-                               Button selectedNavigationButton,
-                               Runnable focusHandler) {
-        updateSectionStyles(selectedSection);
-        updateNavigationStyles(selectedNavigationButton);
-        focusHandler.run();
-    }
-
-    private void updateSectionStyles(VBoxLayout selectedSection) {
-        setSectionActive(participantsAccordion, participantsAccordion == selectedSection);
-        setSectionActive(interactionAccordion, interactionAccordion == selectedSection);
-        setSectionActive(resultAccordion, resultAccordion == selectedSection);
-        setSectionActive(commentAccordion, commentAccordion == selectedSection);
-    }
-
-    private void setSectionActive(VBoxLayout section, boolean active) {
-        if (active) {
-            section.addStyleName(ACTIVE_SECTION_STYLE);
-        } else {
-            section.removeStyleName(ACTIVE_SECTION_STYLE);
-        }
-    }
-
-    private void updateNavigationStyles(Button selectedNavigationButton) {
-        participantsAccordionNav.setStyleName(
-                participantsAccordionNav == selectedNavigationButton
-                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
-        interactionAccordionNav.setStyleName(
-                interactionAccordionNav == selectedNavigationButton
-                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
-        resultAccordionNav.setStyleName(
-                resultAccordionNav == selectedNavigationButton
-                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
-        commentAccordionNav.setStyleName(
-                commentAccordionNav == selectedNavigationButton
-                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        // Блок label-навигации в sidebar удален за ненадобностью по требованию пользователя.
     }
 
     private static final String QUERY_CHAIN_LAST =
@@ -1227,7 +1119,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++) {
             Iteraction interaction = index < mostPopular.size()
                     ? mostPopular.get(index) : null;
-            Button popularButton = createPopularInteractionButton(index, interaction);
+            Button popularButton = createPopularInteractionButton(interaction);
             mostPopularHbox.add(popularButton);
             popularButtons.add(popularButton);
         }
@@ -1240,12 +1132,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     /**
-     * Реальная кнопка восстанавливает исторический формат быстрой кнопки
-     * 2024 года: порядковый номер частоты и название типа взаимодействия.
+     * Создаёт быструю кнопку для взаимодействия: название типа взаимодействия
+     * на кнопке и во всплывающей подсказке совпадают.
      * Точный Iteraction сохраняется в listener. Заглушка не имеет listener
      * и disabled, поэтому не может изменить поле или DataContext.
      */
-    private Button createPopularInteractionButton(int index, Iteraction interaction) {
+    private Button createPopularInteractionButton(Iteraction interaction) {
         Button popularButton = uiComponents.create(Button.class);
         popularButton.setWidth("100%");
         popularButton.setStyleName("iteraction-list-popular-button");
@@ -1257,11 +1149,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             return popularButton;
         }
 
-        popularButton.setCaption(new StringBuilder()
-                .append(index + 1)
-                .append(". ")
-                .append(interaction.getIterationName())
-                .toString());
+        popularButton.setCaption(interaction.getIterationName());
         popularButton.setDescription(interaction.getIterationName());
         popularButton.addClickListener(clickEvent -> {
             iteractionTypeField.setValue(interaction);

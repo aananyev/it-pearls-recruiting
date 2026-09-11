@@ -2,10 +2,14 @@ package com.company.hunttech.web.screens.useraiconfiguration;
 
 import com.company.hunttech.ai.AiProviderCatalog;
 import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.service.AiConnectionTestResult;
 import com.company.hunttech.service.AiCredentialService;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentLoader;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.PasswordField;
@@ -41,6 +45,10 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
     private AiCredentialService aiCredentialService;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private Dialogs dialogs;
 
     private User parentUser;
     private String lastAutomaticallyAppliedModel;
@@ -130,6 +138,44 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
             lastAutomaticallyAppliedModel = defaultModel;
         } else {
             lastAutomaticallyAppliedModel = null;
+        }
+    }
+
+    /**
+     * Проверяет подключение к AI-провайдеру с текущими параметрами формы.
+     * Пользователь системы может проверить как новый введённый ключ (до сохранения),
+     * так и ранее сохранённое персональное подключение.
+     */
+    public void onTestConnectionClick() {
+        String providerCode = providerCodeField.getValue();
+        String modelName = defaultModelNameField.getValue();
+        String plainKey = apiKeyField.getValue();
+        String encryptedKey = getEditedEntity().getApiKeyEncrypted();
+
+        AiConnectionTestResult result = aiCredentialService.testConnection(
+                providerCode, modelName, plainKey, encryptedKey, null
+        );
+
+        if (result.isSuccess()) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withCaption("Подключение успешно установлено")
+                    .withDescription(result.getMessage())
+                    .withContentMode(ContentMode.TEXT)
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка подключения к AI-провайдеру")
+                    .withDescription(result.getMessage())
+                    .withContentMode(ContentMode.TEXT)
+                    .show();
+
+            dialogs.createMessageDialog()
+                    .withCaption("Диагностика подключения к AI")
+                    .withMessage(result.getDetailedError())
+                    .withContentMode(ContentMode.HTML)
+                    .withWidth("620px")
+                    .show();
         }
     }
 

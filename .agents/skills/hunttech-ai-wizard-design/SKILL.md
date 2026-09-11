@@ -50,7 +50,7 @@ description: >-
 |---|------|------------------------|-------------------------|
 | **1** | **DTO** | Создать/расширить `MyEntityParsedData` в `modules/global/` | Поля сущности, описание деятельности, условия, сниппеты, геттеры/сеттеры |
 | **2** | **Interface** | Создать `MyEntitySearchAiService` в `modules/global/` | Константа `NAME = "hunttech_..."`, константа `FUNCTION_...`, методы поиска и применения |
-| **3** | **Core Service** | Создать `MyEntitySearchAiServiceBean` в `modules/core/` | `@Service(NAME)`, вызов `aiExecutionService.executeText`, fallback, безопасный парсинг JSON |
+| **3** | **Core Service** | Создать `MyEntitySearchAiServiceBean` в `modules/core/` | `@Service(NAME)`, вызов стандартного Java-сервиса `aiExecutionService.executeText`, фиксация статистики использования и контроль непревышения лимитов пользователя, fallback, безопасный парсинг JSON |
 | **4** | **AI Seed SQL** | Создать SQL-миграцию в `modules/core/db/update/postgres/26/` | Вставка в `HUNTTECH_AI_FUNCTION_CONFIGURATION` с системным промптом и шаблоном |
 | **5** | **Liquibase XML**| Создать XML в `modules/core/db/changelog/` + подключить в `db.changelog-master.xml` | `dbms="postgresql"`, `<preConditions onFail="HALT">`, блок `<![CDATA[ ... ]]>` |
 | **6** | **web-spring.xml**| Добавить `<entry key="..." value="..."/>` в `modules/web/src/.../web-spring.xml` | В секцию `cuba_WebRemoteProxyBeanCreator` (`remoteServices`) |

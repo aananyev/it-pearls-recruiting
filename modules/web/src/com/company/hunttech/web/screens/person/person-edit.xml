@@ -207,8 +207,23 @@
                                     <textField id="mobilePhoneField" property="mobPhone" caption="msg://msgMobPhone" width="100%" stylename="edit-form-control"/>
                                     <!-- Skype (в нижнем регистре, уникальный). -->
                                     <textField id="skypeNameField" property="skypeName" caption="mainMsg://msgSkype" width="100%" stylename="edit-form-control"/>
-                                    <!-- Telegram (уникальный). -->
-                                    <textField id="telegramNameField" property="telegramName" caption="mainMsg://msgTelegram" width="100%" stylename="edit-form-control"/>
+                                    <!-- Telegram (уникальный) со строчной кнопкой загрузки фото из профиля. -->
+                                    <hbox id="telegramBox"
+                                          caption="mainMsg://msgTelegram"
+                                          width="100%"
+                                          spacing="true"
+                                          expand="telegramNameField">
+                                        <textField id="telegramNameField"
+                                                   dataContainer="personDc"
+                                                   property="telegramName"
+                                                   width="100%"
+                                                   stylename="edit-form-control"/>
+                                        <button id="loadTelegramPhotoButton"
+                                                caption="msg://msgLoadTelegramPhoto"
+                                                icon="font-icon:CAMERA"
+                                                stylename="secondary"
+                                                description="msg://msgLoadTelegramPhotoDesc"/>
+                                    </hbox>
                                     <!-- Viber (уникальный). -->
                                     <textField id="wiberNameField" property="wiberName" caption="mainMsg://msgViber" width="100%" stylename="edit-form-control"/>
                                     <!-- WhatsApp (в нижнем регистре, уникальный). -->

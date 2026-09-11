@@ -209,5 +209,15 @@
              relativeToChangelogFile="true"/>
     <include file="260908-3-setAlanUnlimitedLlmQuota.xml"
              relativeToChangelogFile="true"/>
+    <include file="260908-4-addGeoFlagsAndEmblems.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260908-5-reconcileMissingSchemaAndGeoLinks.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260908-6-updateLlmChatPromptAndPersonalization.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260910-1-enableLlmChatHrmDataGrounding.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260910-2-add100kLlmTokensForAlan.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

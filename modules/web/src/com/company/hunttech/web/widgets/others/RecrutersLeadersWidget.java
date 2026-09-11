@@ -128,7 +128,6 @@ public class RecrutersLeadersWidget extends ScreenFragment {
         List<ExtUser> employees = dataManager.load(ExtUser.class)
                 .query(QUERY_GET_RECRUTERS_LIST)
                 .view(EXT_USER_DASHBOARD_VIEW)
-                .cacheable(true)
                 .list();
 
         Map<UUID, Long> interviewCounts = loadInterviewCounts(employees);

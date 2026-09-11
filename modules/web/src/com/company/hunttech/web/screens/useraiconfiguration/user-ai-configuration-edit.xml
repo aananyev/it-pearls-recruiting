@@ -133,6 +133,12 @@
                                            width="100%"
                                            stylename="edit-form-control"
                                            caption="msg://userApiKey.caption"/>
+                            <!-- Проверка соединения с введённым или сохранённым ключом -->
+                            <button id="testConnectionBtn"
+                                    caption="msg://testConnectionBtn.caption"
+                                    icon="font-icon:CHECK"
+                                    invoke="onTestConnectionClick"
+                                    stylename="user-ai-configuration-test-btn"/>
                         </groupBox>
                     </vbox>
                 </scrollBox>

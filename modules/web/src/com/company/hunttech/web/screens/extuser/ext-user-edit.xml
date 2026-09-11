@@ -146,7 +146,12 @@
                                                     <!-- Поле ввода Telegram ID или username пользователя -->
                                                     <textField id="telegramField" datasource="userDs" property="telegram" width="100%" inputPrompt="msg://msgTelegramPrompt" stylename="edit-form-control"/>
                                                     <!-- Кнопка загрузки фотографии пользователя из Telegram в профиль -->
-                                                    <button id="fetchTelegramPhotoBtn" caption="msg://msgFetchPhoto" icon="font-icon:CAMERA" invoke="fetchTelegramPhoto" stylename="primary ext-user-editor-primary-action telegram-fetch-photo-btn"/>
+                                                    <button id="loadTelegramPhotoButton"
+                                                            caption="msg://msgLoadTelegramPhoto"
+                                                            icon="font-icon:CAMERA"
+                                                            invoke="fetchTelegramPhoto"
+                                                            stylename="secondary"
+                                                            description="msg://msgLoadTelegramPhotoDesc"/>
                                                 </hbox>
                                             </field>
                                         </column>
@@ -377,12 +382,15 @@
                             <table id="aiConfigsTable" width="100%" height="100%" editable="false">
                                 <!-- Колонки сохраняют исходный набор безопасно отображаемых свойств. -->
                                 <columns>
-                                    <!-- Provider code идентифицирует AI-провайдера. -->
+                                    <!-- Флаг основной конфигурации провайдера. -->
                                     <column id="isPrimary" caption="msg://UserAiConfiguration.isPrimary"/>
+                                    <!-- Provider code идентифицирует AI-провайдера. -->
                                     <column id="providerCode"/>
                                     <!-- Default model name показывает выбранную модель провайдера. -->
                                     <column id="defaultModelName"/>
+                                    <!-- Максимальное количество попыток повтора. -->
                                     <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
+                                    <!-- Приоритет использования конфигурации. -->
                                     <column id="priority" caption="msg://UserAiConfiguration.priority"/>
                                     <!-- Active-state показывает доступность конфигурации. -->
                                     <column id="isActive"/>

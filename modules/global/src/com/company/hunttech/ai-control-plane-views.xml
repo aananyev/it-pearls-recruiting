@@ -57,6 +57,7 @@
         <property name="isPrimary"/>
         <property name="maxRetries"/>
         <property name="priority"/>
+        <property name="createTs"/>
     </view>
     <!-- Core-only view добавляет ciphertext и transitional API_KEY для фактического вызова. -->
     <view entity="hunttech_UserAiConfiguration" name="user-ai-configuration-ai-execution-view" extends="user-ai-configuration-override-picker-view">

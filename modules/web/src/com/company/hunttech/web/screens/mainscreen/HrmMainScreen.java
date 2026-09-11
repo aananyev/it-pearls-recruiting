@@ -53,6 +53,7 @@ public class HrmMainScreen extends ExtMainScreen {
     @Subscribe
     public void onAfterShowBackground(AfterShowEvent event) {
         refreshBackground();
+        createLlmChatLauncher();
     }
 
     @EventListener
@@ -66,9 +67,14 @@ public class HrmMainScreen extends ExtMainScreen {
             if (currentUi == null) {
                 throw new IllegalStateException("Vaadin UI недоступен");
             }
-            Resource resource = mainScreenBackgroundService.resolveForUser(
-                    userSession.getUser(), currentUi.getTheme(), userSession);
-            applyBackground(currentUi, resource);
+            if (mainScreenBackgroundService == null) {
+                mainScreenBackgroundService = com.haulmont.cuba.core.global.AppBeans.get(MainScreenBackgroundService.class);
+            }
+            if (mainScreenBackgroundService != null) {
+                Resource resource = mainScreenBackgroundService.resolveForUser(
+                        userSession.getUser(), currentUi.getTheme(), userSession);
+                applyBackground(currentUi, resource);
+            }
         } catch (RuntimeException e) {
             log.warn("Cannot apply background: {}", e.getMessage(), e);
         }

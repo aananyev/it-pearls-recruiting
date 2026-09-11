@@ -19,6 +19,7 @@ import com.company.hunttech.service.dto.AiUserContext;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.core.global.EntityStates;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.TemplateHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -78,6 +79,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
     @Inject
     private DataManager dataManager;
+    @Inject
+    private EntityStates entityStates;
     @Inject
     private Metadata metadata;
     @Inject
@@ -340,8 +343,10 @@ public class AiExecutionServiceBean implements AiExecutionService {
             if (pA != pB) {
                 return Integer.compare(pB, pA); // по убыванию приоритета
             }
-            Date tA = a.getCreateTs() != null ? a.getCreateTs() : new Date(0);
-            Date tB = b.getCreateTs() != null ? b.getCreateTs() : new Date(0);
+            Date tA = (entityStates != null && entityStates.isLoaded(a, "createTs") && a.getCreateTs() != null)
+                    ? a.getCreateTs() : new Date(0);
+            Date tB = (entityStates != null && entityStates.isLoaded(b, "createTs") && b.getCreateTs() != null)
+                    ? b.getCreateTs() : new Date(0);
             return tA.compareTo(tB);
         });
 

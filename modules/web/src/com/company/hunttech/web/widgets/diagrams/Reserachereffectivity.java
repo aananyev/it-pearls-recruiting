@@ -135,7 +135,6 @@ public class Reserachereffectivity extends ScreenFragment {
             return dataManager.load(ExtUser.class)
                     .query(QUERY_RESEARCHERS_WITH_ROLE + " order by f.lastName, f.firstName")
                     .view(RESEARCHER_DASHBOARD_VIEW)
-                    .cacheable(true)
                     .parameter("groupNames", groupNames)
                     .parameter("userRole", userRole)
                     .list();
@@ -143,7 +142,6 @@ public class Reserachereffectivity extends ScreenFragment {
         return dataManager.load(ExtUser.class)
                 .query(QUERY_RESEARCHERS + " order by f.lastName, f.firstName")
                 .view(RESEARCHER_DASHBOARD_VIEW)
-                .cacheable(true)
                 .parameter("groupNames", groupNames)
                 .list();
     }

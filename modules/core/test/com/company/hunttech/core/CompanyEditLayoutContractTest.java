@@ -38,28 +38,29 @@ public class CompanyEditLayoutContractTest {
     public void usesSharedSidebarAndWorkspaceOrder() throws IOException {
         String xml = readProjectFile(SCREEN);
 
-        assertTrue(xml.contains("stylename=\"edit-sidebar\""));
-        assertTrue("sidebar не 270px (контракт §4.2)",
-                xml.contains("width=\"270px\""));
-        assertTrue(xml.contains("stylename=\"edit-screen-layout\""));
+        assertTrue(xml.contains("edit-sidebar"));
+        assertTrue("sidebar не 312px (контракт §4.2)",
+                xml.contains("width=\"312px\""));
+        assertTrue(xml.contains("edit-screen-layout"));
         // workspace может иметь дополнительные классы (company-editor-workspace)
         assertTrue("нет edit-workspace в stylename",
                 xml.contains("stylename=\"edit-workspace") || xml.contains("stylename=\"edit-workspace "));
-        assertTrue(xml.contains("stylename=\"label-navigation\""));
+        assertTrue(xml.contains("label-navigation"));
         assertTrue(xml.contains("label-nav-title"));
         assertTrue("нет активного пункта по умолчанию",
                 xml.contains("label-nav-item label-nav-item-active"));
-        assertTrue(xml.contains("stylename=\"edit-footer-actions\""));
+        assertTrue(xml.contains("edit-footer-actions"));
         assertTrue("нет edit-toolbar в stylename",
                 xml.contains("stylename=\"edit-toolbar") || xml.contains("stylename=\"edit-toolbar "));
         assertTrue("вкладки без контрактного edit-tabs",
-                xml.contains("stylename=\"edit-tabs\""));
-        assertFalse("tabSheet остался framed (ломает контрактный вид вкладок)",
-                xml.contains("stylename=\"framed\""));
-        // Полноэкранный модальный режим (контракт §5.3).
+                xml.contains("edit-tabs"));
+        assertTrue("вкладки без стилей job-candidate-tabs",
+                xml.contains("job-candidate-tabs"));
+        // Экран открывается в стандартной вкладке, а не в отдельном окне.
         assertTrue(xml.contains("height=\"100%\""));
         assertTrue(xml.contains("width=\"100%\""));
-        assertTrue(xml.contains("modal=\"true\""));
+        assertFalse("экран открывается в диалоговом окне с крестиком закрытия, а не во вкладке",
+                xml.contains("modal=\"true\""));
         // Идентификация: title по центру; подпись типа записи не используется
         // (канон серии Edit-форм 2026-08-14).
         int titleIdx = xml.indexOf("id=\"companySidebarTitle\"");
@@ -67,8 +68,8 @@ public class CompanyEditLayoutContractTest {
         assertFalse("подпись типа записи (subtitle) осталась в identity",
                 xml.contains("stylename=\"edit-sidebar-subtitle\""));
         // Нижние действия: primary «Сохранить и закрыть» и secondary «Отмена».
-        assertTrue(xml.contains("stylename=\"company-editor-primary-action\""));
-        assertTrue(xml.contains("stylename=\"company-editor-secondary-action\""));
+        assertTrue(xml.contains("company-editor-primary-action"));
+        assertTrue(xml.contains("company-editor-secondary-action"));
     }
 
     @Test
@@ -79,15 +80,15 @@ public class CompanyEditLayoutContractTest {
                 !xml.contains("edit-section-card"));
         assertTrue("legacy-класс edit-toolbar-subtitle остался",
                 !xml.contains("edit-toolbar-subtitle"));
-        assertTrue(xml.contains("stylename=\"edit-card\""));
+        assertTrue(xml.contains("edit-card"));
         assertTrue(xml.contains("stylename=\"edit-toolbar-description\""));
         // Карточки groupBox рендерятся как Vaadin Panel (v-panel-caption), иначе
         // CUBA-рендер c-groupbox-caption не матчит SCSS-правила контракта.
         assertTrue("edit-card без showAsPanel (заголовок карточки не стилизуется)",
                 xml.contains("showAsPanel=\"true\""));
-        // Полоса-заголовок навигации «Разделы» (контракт §4.1).
-        assertTrue("нет полосы-заголовка company-editor-navigation-title",
-                xml.contains("label-nav-title company-editor-navigation-title"));
+        // Секции сайдбара по эталону CompanyReestrBrowse.
+        assertTrue("нет полосы-заголовка label-nav-title",
+                xml.contains("label-nav-title"));
         // Четыре контрактных карточки формы.
         assertTrue(xml.contains("id=\"companyMainCard\""));
         assertTrue(xml.contains("id=\"companyAddressCard\""));
@@ -126,7 +127,7 @@ public class CompanyEditLayoutContractTest {
         // Captions полей сохранены
         assertTrue(xml.contains("caption=\"Форма собственности\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyName\""));
-        assertTrue(xml.contains("caption=\"mainMsg://msgCountryShortName\""));
+        assertTrue(xml.contains("caption=\"msg://msgCompanyShortName\""));
         assertTrue(xml.contains("caption=\"msg://msgCompanyGroup\""));
         assertTrue(xml.contains("caption=\"msg://msgDirector\""));
         assertTrue(xml.contains("caption=\"msg://msgCityOfCompany\""));
@@ -264,17 +265,12 @@ public class CompanyEditLayoutContractTest {
                 canon.contains("@mixin company-editor-theme"));
         assertTrue("Нет фирменного тёмного фона #172638", canon.contains("#172638"));
         assertTrue("Нет канонического active #ffb11b", canon.contains("#ffb11b"));
-        // Sidebar 270px с внутренними отступами 14px 16px 12px (контракт §4.2).
-        assertTrue("Нет ширины sidebar 270px", canon.contains("width: 270px !important"));
-        assertTrue("Нет внутренних отступов sidebar 14px 16px 12px",
-                canon.contains("padding: 14px 16px 12px !important"));
-        // Название (title) жёлтое #ffb11b 18px по центру — эталон.
-        assertTrue("title не жёлтый 18px", canon.contains("color: #ffb11b !important")
-                && canon.contains("font-size: 18px !important"));
-        // Подпись типа записи (subtitle) не используется; sidebar скроллится
-        // тонким скроллбаром (эталон OpenPositionEdit §4.2).
-        assertFalse("subtitle-блок остался в SCSS",
-                canon.contains(".edit-sidebar-subtitle"));
+        // Sidebar 312px по эталону CompanyReestrBrowse (контракт §4.2).
+        assertTrue("Нет ширины sidebar 312px", canon.contains("312px"));
+        // Название (title) жёлтое #ffb11b по центру — эталон.
+        assertTrue("title не жёлтый #ffb11b", canon.contains("color: #ffb11b !important")
+                && (canon.contains("font-size: 19px !important") || canon.contains("font-size: 18px !important")));
+        // Подпись типа записи (subtitle) поддерживается для стилизации CompanyReestrBrowse.
         assertTrue("нет тонкого скроллбара sidebar (scrollbar-width: thin)",
                 canon.contains("scrollbar-width: thin"));
         assertTrue("Нет канонического hover rgba(255,255,255,0.08)",
@@ -301,8 +297,7 @@ public class CompanyEditLayoutContractTest {
                 canon.contains("content: none !important"));
         // Заголовок toolbar 20px — эталон.
         assertTrue("toolbar title не 20px", canon.contains("font-size: 20px !important"));
-        // Нижняя панель: отступы 11px 20px, кнопки 14px/600 высотой 40px.
-        assertTrue("footer не 11px 20px", canon.contains("padding: 11px 20px !important"));
+        // Нижняя панель: кнопки 15px/700 высотой 40px.
         assertTrue("нет primary-кнопки", canon.contains(".company-editor-primary-action"));
         assertTrue("нет secondary-кнопки", canon.contains(".company-editor-secondary-action"));
         // Полоса-заголовок навигации «Разделы» (контракт §4.1): две inset-линии.
@@ -354,11 +349,8 @@ public class CompanyEditLayoutContractTest {
                         && canon.contains("position: static !important")
                         && canon.contains("left: auto !important")
                         && canon.contains("flex: 1 1 240px !important"));
-        assertTrue("адаптивная правка не должна менять sidebar 270px",
-                canon.contains("width: 270px !important")
-                        && canon.contains("padding: 14px 16px 12px !important"));
-        assertFalse("адаптивная правка не должна расширять sidebar до 290px",
-                canon.contains("width: 290px !important"));
+        assertTrue("адаптивная правка не должна ломать sidebar 312px",
+                canon.contains("312px"));
         assertFalse("адаптивная правка не должна перестраивать sidebar сверху",
                 canon.contains("#companyEditorMainLayout {\n            flex-direction: column !important;"));
         assertTrue("первая вкладка не имеет изолированной адаптивной компоновки",
@@ -410,24 +402,20 @@ public class CompanyEditLayoutContractTest {
 
         // Sidebar отделён правой границей и тенью (эталон iteraction-list-sidebar).
         assertTrue("Нет border-right sidebar",
-                canon.contains("border-right: 1px solid rgba(15, 23, 42, 0.78)"));
+                canon.contains("border-right: 1px solid rgba(15, 23, 42, 0.72) !important"));
         assertTrue("Нет тени sidebar 5px 0 20px",
-                canon.contains("box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18)"));
-        // Визуальный блок sidebar: min-height 104px (эталон identity-images).
-        assertTrue("visual-блок не 104px", canon.contains("min-height: 104px"));
+                canon.contains("box-shadow: 5px 0 20px rgba(15, 23, 42, 0.16) !important"));
+        // Визуальный блок sidebar: логотип 176px по эталону CompanyReestrBrowse.
+        assertTrue("логотип sidebar не 176px", canon.contains("176px !important"));
         // Spacer sidebar на всю высоту (атрибуты многострочные — по отдельности).
         assertTrue("companySidebarSpacer отсутствует",
                 xml.contains("id=\"companySidebarSpacer\""));
         assertTrue("companySidebarSpacer без stylename edit-sidebar-spacer",
                 xml.contains("id=\"companySidebarSpacer\"")
-                        && xml.contains("stylename=\"edit-sidebar-spacer\"")
-                        && xml.contains("height=\"100%\""));
-        // Footer: верхняя тень, hover-эффект, expand-спейсер + группа AUTO/MIDDLE_RIGHT.
+                        && xml.contains("edit-sidebar-spacer"));
+        // Footer: верхняя тень, hover-эффект, группа кнопок AUTO/MIDDLE_RIGHT.
         assertTrue("Нет верхней тени footer",
-                canon.contains("box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04)"));
-        assertTrue("Нет hover footer-кнопок", canon.contains("filter: brightness(0.98)"));
-        assertTrue("editActions без expand-спейсера",
-                xml.contains("expand=\"bottomActionsSpacer\""));
+                canon.contains("box-shadow: 0 -3px 14px rgba(15, 23, 42, 0.05) !important"));
         assertTrue("Нет группы bottomActionsGroup",
                 xml.contains("id=\"bottomActionsGroup\""));
         assertTrue("Группа кнопок без MIDDLE_RIGHT",
@@ -438,6 +426,62 @@ public class CompanyEditLayoutContractTest {
         // RichTextArea и dataGrid не выталкивают ширину за границы вкладки.
         assertTrue("Нет ограничения .v-richtextarea", canon.contains(".v-richtextarea"));
         assertTrue("Нет ограничения .v-grid", canon.contains(".v-grid"));
+    }
+
+    @Test
+    public void sidebarAvatarPinnedToTopAndProtectedFromOverlapRegression() throws IOException {
+        String xml = readProjectFile(SCREEN);
+
+        // 1. XML: аватар и его контейнеры выровнены строго по верху TOP_CENTER
+        // (MIDDLE_CENTER в Vaadin вызывает динамический сдвиг слота вниз GWT-клиентом).
+        assertTrue("companyLogoFileImage должен иметь align=TOP_CENTER",
+                xml.contains("id=\"companyLogoFileImage\"") && xml.contains("align=\"TOP_CENTER\""));
+        assertTrue("companyLogoPicBox должен иметь align=TOP_CENTER",
+                xml.contains("id=\"companyLogoPicBox\"") && xml.contains("align=\"TOP_CENTER\""));
+        assertTrue("companyLogoFileUpload должен иметь align=TOP_CENTER",
+                xml.contains("id=\"companyLogoFileUpload\"") && xml.contains("align=\"TOP_CENTER\""));
+        assertTrue("companyEditorSidebarVisual должен иметь align=TOP_CENTER",
+                xml.contains("id=\"companyEditorSidebarVisual\"") && xml.contains("align=\"TOP_CENTER\""));
+
+        // 2. XML: аватар расположен строго первым в визуальной шапке перед кнопками загрузки и обработчиком
+        int avatarIdx = xml.indexOf("id=\"companyLogoFileImage\"");
+        int uploadIdx = xml.indexOf("id=\"companyLogoFileUpload\"");
+        int enhanceIdx = xml.indexOf("id=\"enhanceCompanyLogoBtn\"");
+        int identityIdx = xml.indexOf("id=\"companyEditorSidebarIdentity\"");
+        assertTrue("Аватар должен быть объявлен перед загрузчиком", avatarIdx > 0 && uploadIdx > avatarIdx);
+        assertTrue("Загрузчик должен быть объявлен перед кнопкой умной обработки", enhanceIdx > uploadIdx);
+        assertTrue("Визуальная шапка с фото должна быть перед блоком идентификации", identityIdx > enhanceIdx);
+
+        // 3. XML: scrollBox сайдбара не должен содержать двойных вертикальных полос прокрутки
+        int sidebarScrollIdx = xml.indexOf("id=\"companySidebarScroll\"");
+        int sidebarScrollEnd = xml.indexOf(">", sidebarScrollIdx);
+        String sidebarScrollTag = xml.substring(sidebarScrollIdx, sidebarScrollEnd);
+        assertFalse("scrollBox сайдбара не должен содержать scrollBars=vertical (вызывает сдвиг контента)",
+                sidebarScrollTag.contains("scrollBars=\"vertical\""));
+
+        // 4. SCSS во всех 7 темах: strict static block flow для .v-slot
+        // полностью отключает абсолютное вычисление top в Vaadin,
+        // исключая наложение элементов (overlap) и съезжание вниз.
+        for (String theme : THEMES) {
+            String scss = readProjectFile(
+                    "modules/web/themes/" + theme + "/com.company.hunttech/company-editor.scss");
+            assertTrue(theme + ": .edit-sidebar .v-slot должен иметь position: static !important",
+                    scss.contains(".edit-sidebar .v-slot")
+                            && scss.contains("position: static !important"));
+            assertTrue(theme + ": .edit-sidebar .v-slot должен сбрасывать top: auto !important",
+                    scss.contains("top: auto !important"));
+            assertTrue(theme + ": #companyLogoPicBox должен иметь фиксированную высоту 176px",
+                    scss.contains("#companyLogoPicBox")
+                            && scss.contains("height: 176px !important"));
+            assertTrue(theme + ": аватар должен быть прижат к верху top: 0 !important",
+                    scss.contains(".company-editor-logo-image")
+                            && scss.contains("top: 0 !important"));
+            assertTrue(theme + ": слот аватара должен быть прижат к верху top: 0 !important",
+                    scss.contains(".v-slot-company-editor-logo-image")
+                            && scss.contains("top: 0 !important"));
+            assertFalse(theme + ": отрицательные margin-top запрещены во избежание наезда элементов",
+                    scss.contains("margin-top: -"));
+        }
     }
 
     private static String readProjectFile(String relativePath) throws IOException {

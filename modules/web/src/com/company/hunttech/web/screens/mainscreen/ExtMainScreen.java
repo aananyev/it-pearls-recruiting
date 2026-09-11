@@ -116,7 +116,7 @@ public class ExtMainScreen extends MainScreen {
         createLlmChatLauncher();
     }
 
-    private void createLlmChatLauncher() {
+    protected void createLlmChatLauncher() {
         if (llmChatLauncherWindow != null || UI.getCurrent() == null
                 || userSession == null || userSession.getUser() == null) {
             return;
@@ -126,7 +126,7 @@ public class ExtMainScreen extends MainScreen {
         launcher.setId("llmChatLauncher");
         launcher.setHtmlContentAllowed(true);
         launcher.setCaption("<span class=\"llm-chat-launcher-icon\" aria-hidden=\"true\">"
-                + "<svg class=\"llm-chat-svg-icon\" viewBox=\"0 0 28 28\" width=\"34\" height=\"34\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+                + "<svg class=\"llm-chat-svg-icon\" viewBox=\"0 0 28 28\" width=\"100%\" height=\"100%\" preserveAspectRatio=\"xMidYMid meet\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
                 + "<path d=\"M18 4H7C4.79 4 3 5.79 3 8v6c0 2.21 1.79 4 4 4v3.5l4.38-3.5H18c2.21 0 4-1.79 4-4V8c0-2.21-1.79-4-4-4z\" fill=\"#ffffff\"/>"
                 + "<path d=\"M21 8h1c1.66 0 3 1.34 3 3v6c0 1.66-1.34 3-3 3h-1.5L17 22.5V20h-3c-.35 0-.68-.06-1-.17A4.004 4.004 0 0 0 16 17v-5c0-1.86-1.28-3.41-3-3.86.62-.7 1.54-1.14 2.56-1.14H21z\" fill=\"rgba(255,255,255,0.45)\"/>"
                 + "<rect x=\"6.5\" y=\"8\" width=\"8\" height=\"1.8\" rx=\"0.9\" fill=\"#4f46e5\"/>"
@@ -140,6 +140,10 @@ public class ExtMainScreen extends MainScreen {
         launcher.setSizeFull();
         launcher.addClickListener(event -> openLlmChat());
 
+        String storageKey = "hunttech.llm-chat.launcher." + userSession.getUser().getId();
+        String initialPosition = loadUserChatPosition();
+        int[] initialCoords = parsePositionCoordinates(initialPosition);
+
         llmChatLauncherWindow = new com.vaadin.ui.Window();
         llmChatLauncherWindow.setId("llmChatLauncherWindow");
         llmChatLauncherWindow.setStyleName("borderless llm-chat-launcher-window");
@@ -150,15 +154,18 @@ public class ExtMainScreen extends MainScreen {
         llmChatLauncherWindow.setModal(false);
         llmChatLauncherWindow.setWidth(56, com.vaadin.server.Sizeable.Unit.PIXELS);
         llmChatLauncherWindow.setHeight(56, com.vaadin.server.Sizeable.Unit.PIXELS);
-        llmChatLauncherWindow.setPositionX(9999);
-        llmChatLauncherWindow.setPositionY(9999);
+        if (initialCoords != null) {
+            llmChatLauncherWindow.setPositionX(initialCoords[0]);
+            llmChatLauncherWindow.setPositionY(initialCoords[1]);
+        } else {
+            llmChatLauncherWindow.setPositionX(DEFAULT_OFFSCREEN_POSITION);
+            llmChatLauncherWindow.setPositionY(DEFAULT_OFFSCREEN_POSITION);
+        }
         llmChatLauncherWindow.setContent(launcher);
 
         UI.getCurrent().addWindow(llmChatLauncherWindow);
 
-        String storageKey = "hunttech.llm-chat.launcher." + userSession.getUser().getId();
-        String initialPosition = loadUserChatPosition();
-        new LlmChatLauncherExtension().extend(launcher, storageKey, initialPosition, this::saveUserChatPosition);
+        new LlmChatLauncherExtension().extend(llmChatLauncherWindow, storageKey, initialPosition, this::saveUserChatPosition);
     }
 
     private String loadUserChatPosition() {
@@ -211,6 +218,28 @@ public class ExtMainScreen extends MainScreen {
         return newSettings;
     }
 
+    private static final int MAX_COORDINATE_BOUND = 9000;
+    private static final int DEFAULT_OFFSCREEN_POSITION = 9999;
+
+    private int[] parsePositionCoordinates(String positionJson) {
+        if (positionJson == null || !positionJson.contains("left") || !positionJson.contains("top")) {
+            return null;
+        }
+        try {
+            java.util.regex.Matcher mLeft = java.util.regex.Pattern.compile("\"left\"\\s*:\\s*(\\d+)").matcher(positionJson);
+            java.util.regex.Matcher mTop = java.util.regex.Pattern.compile("\"top\"\\s*:\\s*(\\d+)").matcher(positionJson);
+            if (mLeft.find() && mTop.find()) {
+                int left = Integer.parseInt(mLeft.group(1));
+                int top = Integer.parseInt(mTop.group(1));
+                if (left >= 0 && top >= 0 && left < MAX_COORDINATE_BOUND && top < MAX_COORDINATE_BOUND) {
+                    return new int[]{left, top};
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     private void saveUserChatPosition(String positionJson) {
         if (userSession == null || userSession.getUser() == null || positionJson == null) {
             return;
@@ -221,6 +250,16 @@ public class ExtMainScreen extends MainScreen {
             log.warn("Invalid chat position payload: {}", positionJson);
             return;
         }
+
+        int[] coords = parsePositionCoordinates(trimmed);
+        if (coords != null && llmChatLauncherWindow != null) {
+            llmChatLauncherWindow.setPositionX(coords[0]);
+            llmChatLauncherWindow.setPositionY(coords[1]);
+        } else if (trimmed.contains("bottom-right") && llmChatLauncherWindow != null) {
+            llmChatLauncherWindow.setPositionX(DEFAULT_OFFSCREEN_POSITION);
+            llmChatLauncherWindow.setPositionY(DEFAULT_OFFSCREEN_POSITION);
+        }
+
         UUID userId = userSession.getUser().getId();
         for (int attempt = 1; attempt <= 2; attempt++) {
             try {
@@ -273,14 +312,18 @@ public class ExtMainScreen extends MainScreen {
     }
 
     private void signIconsChecksAndGenerate() {
-        if (signIconService.checkUserIcons()) {
-            createDefaultIcons();
+        try {
+            if (signIconService != null && signIconService.checkUserIcons()) {
+                createDefaultIcons();
 
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                    .withCaption(messageBundle.getMessage("msgInfo"))
-                    .withDescription(messageBundle.getMessage("msgCreateDefaultSing"))
-                    .show();
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .withCaption(messageBundle.getMessage("msgInfo"))
+                        .withDescription(messageBundle.getMessage("msgCreateDefaultSing"))
+                        .show();
+            }
+        } catch (Exception e) {
+            log.debug("Cannot check or create user icons: {}", e.getMessage());
         }
     }
 

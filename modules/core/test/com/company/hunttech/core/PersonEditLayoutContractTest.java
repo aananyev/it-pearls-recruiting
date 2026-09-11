@@ -172,6 +172,10 @@ public class PersonEditLayoutContractTest {
         assertTrue(xml.contains("invoke=\"focusMainSection\""));
         assertTrue(xml.contains("invoke=\"focusContactsSection\""));
         assertTrue(xml.contains("invoke=\"focusLocationSection\""));
+
+        // Кнопка загрузки фото из Telegram в строке telegramBox
+        assertTrue(xml.contains("id=\"loadTelegramPhotoButton\""));
+        assertTrue(xml.contains("id=\"telegramBox\""));
     }
 
     @Test
@@ -182,6 +186,9 @@ public class PersonEditLayoutContractTest {
         assertTrue(java.contains("onFileImageFaceUploadFileUploadSucceed"));
         assertTrue(java.contains("FileDescriptorResource"));
         assertTrue(java.contains("personPic.createResource"));
+        // Обработчик загрузки фото из Telegram
+        assertTrue(java.contains("onLoadTelegramPhotoButtonClick"));
+        assertTrue(java.contains("saveUserProfilePhotoToFileStorage"));
         // Fallback-аватар при отсутствии файла (эталон SkillTreeEdit onAfterShow).
         assertTrue(java.contains("onAfterShow(AfterShowEvent"));
         assertTrue(java.contains("personPic.applyFallback()"));

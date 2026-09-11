@@ -3,11 +3,12 @@ package com.company.hunttech.web.extension;
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.server.AbstractJavaScriptExtension;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Window;
 import elemental.json.JsonArray;
 
 import java.io.Serializable;
 
-/** Adds viewport-safe drag behavior to the native LLM chat launcher button. */
+/** Adds viewport-safe drag behavior to the native LLM chat launcher element and its window. */
 @JavaScript("llm-chat-launcher.js")
 public class LlmChatLauncherExtension extends AbstractJavaScriptExtension {
 
@@ -22,6 +23,19 @@ public class LlmChatLauncherExtension extends AbstractJavaScriptExtension {
 
     public void extend(Button button, String storageKey, String initialPosition, PositionChangeListener listener) {
         super.extend(button);
+        initExtension(storageKey, initialPosition, listener);
+    }
+
+    public void extend(Window window, String storageKey) {
+        extend(window, storageKey, null, null);
+    }
+
+    public void extend(Window window, String storageKey, String initialPosition, PositionChangeListener listener) {
+        super.extend(window);
+        initExtension(storageKey, initialPosition, listener);
+    }
+
+    private void initExtension(String storageKey, String initialPosition, PositionChangeListener listener) {
         if (listener != null) {
             addFunction("savePosition", (JsonArray arguments) -> {
                 if (arguments != null && arguments.length() > 0) {

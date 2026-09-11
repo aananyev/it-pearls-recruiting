@@ -92,6 +92,10 @@
     .settings-section-sidebar,
     .user-ai-profile-sidebar,
     .ai-settings-sidebar {
+      box-sizing: border-box !important;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
     }
@@ -99,10 +103,10 @@
     .settings-section-sidebar,
     .user-ai-profile-sidebar,
     .ai-settings-sidebar {
-      box-sizing: border-box;
-      width: 270px !important;
-      min-width: 270px !important;
-      max-width: 270px !important;
+      box-sizing: border-box !important;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       height: 100% !important;
       padding: 0 !important;
       color: #f8fafc !important;
@@ -112,21 +116,47 @@
       box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
       overflow: hidden !important;
 
-      .v-scrollable {
-        box-sizing: border-box;
+      .c-scrollbox,
+      .sidebar-scrollbox,
+      .edit-sidebar-scroll {
+        box-sizing: border-box !important;
         width: 100% !important;
+        max-width: 312px !important;
         height: 100% !important;
-        padding: 14px 16px 12px !important;
+        padding: 0 !important;
+        margin: 0 !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
+      }
+
+      .c-scrollbox-content,
+      .sidebar-content-box,
+      .edit-sidebar-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 14px 16px 16px 16px !important;
+        margin: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+      }
+
+      .v-scrollable {
+        padding: 0 !important;
       }
     }
 
     .settings-section-sidebar > .v-slot,
     .user-ai-profile-sidebar > .v-slot,
-    .ai-settings-sidebar > .v-slot {
+    .ai-settings-sidebar > .v-slot,
+    .sidebar-content-box > .v-slot,
+    .edit-sidebar-content > .v-slot {
+      box-sizing: border-box !important;
       width: 100% !important;
-      min-width: 0;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
     .user-ai-profile-sidebar .v-spacing,
@@ -161,6 +191,7 @@
       font-weight: 700 !important;
       line-height: 24px !important;
       white-space: normal !important;
+      text-align: center !important;
       overflow-wrap: anywhere;
       word-break: normal;
     }
@@ -174,6 +205,19 @@
       line-height: 1.4 !important;
       opacity: 1 !important;
       white-space: normal !important;
+      text-align: center !important;
+    }
+
+    .user-ai-profile-identity {
+      box-sizing: border-box;
+      width: 100% !important;
+      text-align: center !important;
+      margin-top: 6px;
+      margin-bottom: 10px;
+
+      .v-label {
+        text-align: center !important;
+      }
     }
 
     .user-ai-profile-avatar {
@@ -194,13 +238,13 @@
 
       .v-image,
       .ht-oval-image {
-        width: 176px !important;
-        height: 176px !important;
+        width: 120px !important;
+        height: 120px !important;
         margin: 0 auto;
         overflow: hidden !important;
         background: rgba(255, 255, 255, 0.08) !important;
         border: 2px solid rgba(255, 255, 255, 0.92) !important;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
       }
 
       img,
@@ -211,24 +255,57 @@
       }
     }
 
+    .user-avatar-upload {
+      box-sizing: border-box;
+      width: 100% !important;
+      text-align: center !important;
+      margin-top: 6px !important;
+      padding: 0 4px !important;
+
+      .v-button {
+        box-sizing: border-box !important;
+        min-height: 28px !important;
+        height: 28px !important;
+        padding: 0 10px !important;
+        border-radius: 6px !important;
+        font-size: 12px !important;
+      }
+    }
+
     .user-ai-profile-summary {
       box-sizing: border-box;
-      padding: 8px 10px !important;
+      width: 100% !important;
+      margin: 4px 0 0 0 !important;
+      padding: 10px 12px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
       border-radius: 8px !important;
-    }
 
-    .user-ai-profile-summary .v-label {
-      color: #f8fafc !important;
-      white-space: normal !important;
+      .v-label {
+        color: #f8fafc !important;
+        white-space: normal !important;
+      }
+
+      .v-label.user-ai-profile-status {
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+      }
+
+      .v-label.user-ai-profile-summary-value {
+        color: rgba(248, 250, 252, 0.90) !important;
+        font-size: 12px !important;
+        line-height: 16px !important;
+      }
     }
 
     .job-candidate-navigation,
     .settings-section-navigation,
     .user-ai-profile-navigation,
-    .ai-settings-navigation {
+    .ai-settings-navigation,
+    .settings-tabs-navigation,
+    .user-ai-profile-summary-section {
       display: block !important;
       width: 100% !important;
       min-width: 0 !important;
@@ -247,6 +324,7 @@
     .user-ai-profile-navigation .job-candidate-section-title,
     .ai-settings-navigation .label-nav-title,
     .ai-settings-navigation .job-candidate-section-title,
+    .settings-tabs-navigation .label-nav-title,
     .settings-section-navigation-title,
     .user-ai-profile-navigation-title,
     .ai-settings-navigation-title {
@@ -256,6 +334,8 @@
       min-height: 34px !important;
       height: auto !important;
       padding: 6px 10px !important;
+      margin: 0 0 4px 0 !important;
+      border-radius: 6px !important;
       color: #ffb11b !important;
       font-size: 14px !important;
       font-weight: 700 !important;
@@ -272,17 +352,21 @@
 
     .settings-section-nav-item,
     .user-ai-profile-nav-item,
-    .ai-settings-nav-item {
+    .ai-settings-nav-item,
+    .label-nav-item,
+    .v-button-label-nav-item {
       box-sizing: border-box;
-      min-height: 24px !important;
-      padding: 4px 10px !important;
-      color: rgba(248, 250, 252, 0.82) !important;
+      width: 100% !important;
+      min-height: 32px !important;
+      padding: 6px 12px !important;
+      margin: 1px 0 !important;
+      border-radius: 6px !important;
+      color: rgba(248, 250, 252, 0.88) !important;
       font-size: 13px !important;
-      font-weight: 500 !important;
-      line-height: 18px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
       background: transparent !important;
       border-left: 3px solid transparent !important;
-      border-radius: 0 5px 5px 0 !important;
       transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
       white-space: normal !important;
       text-align: left !important;
@@ -295,11 +379,17 @@
         white-space: normal !important;
       }
 
+      .v-icon {
+        margin-right: 8px !important;
+        font-size: 14px !important;
+        color: rgba(248, 250, 252, 0.75) !important;
+      }
+
       .v-button-caption {
         display: block !important;
         width: 100% !important;
         font-size: 13px !important;
-        line-height: 17px !important;
+        line-height: 18px !important;
         white-space: normal !important;
         overflow-wrap: anywhere !important;
         word-break: normal !important;
@@ -309,17 +399,29 @@
 
     .settings-section-nav-item:hover,
     .user-ai-profile-nav-item:hover,
-    .ai-settings-nav-item:hover {
+    .ai-settings-nav-item:hover,
+    .label-nav-item:hover,
+    .v-button-label-nav-item:hover {
       color: #ffffff !important;
       background: rgba(255, 255, 255, 0.08) !important;
+
+      .v-icon {
+        color: #ffb11b !important;
+      }
     }
 
     .settings-section-nav-item-active,
     .user-ai-profile-nav-item-active,
-    .ai-settings-nav-item-active {
+    .ai-settings-nav-item-active,
+    .label-nav-item-active,
+    .v-button-label-nav-item-active {
       color: #ffb11b !important;
-      background: rgba(255, 177, 27, 0.11) !important;
+      background: rgba(255, 177, 27, 0.14) !important;
       border-left-color: #ffb11b !important;
+
+      .v-icon {
+        color: #ffb11b !important;
+      }
     }
 
     .settings-section-hint,
@@ -388,7 +490,27 @@
     }
 
     .user-ai-profile-toolbar {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      flex-wrap: wrap !important;
+      gap: 12px 16px !important;
       min-height: 64px;
+
+      > .v-slot:first-child {
+        flex: 1 1 280px !important;
+        min-width: 0 !important;
+      }
+
+      > .v-slot:last-child {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      > .v-spacing {
+        display: none !important;
+      }
     }
 
     .settings-section-toolbar {
@@ -420,9 +542,57 @@
 
     .settings-section-toolbar-actions,
     .user-ai-profile-toolbar-actions,
-    .ai-settings-toolbar-actions {
+    .ai-settings-toolbar-actions,
+    .c-buttons-panel.settings-section-toolbar-actions,
+    .c-buttons-panel.user-ai-profile-toolbar-actions,
+    .c-buttons-panel.ai-settings-toolbar-actions {
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      flex-wrap: wrap !important;
+      gap: 10px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      padding: 0 !important;
       padding-right: 16px !important;
-      white-space: nowrap !important;
+      margin: 0 !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+      }
+
+      > .v-slot {
+        display: inline-flex !important;
+        width: auto !important;
+        min-width: 0 !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+
+      > .v-spacing {
+        display: none !important;
+      }
+
+      .v-button {
+        position: static !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        white-space: nowrap !important;
+        width: auto !important;
+        min-width: 0 !important;
+      }
     }
 
     .ai-settings-toolbar .v-button {
@@ -436,7 +606,9 @@
     .ai-settings-card,
     .user-ai-profile-section,
     .interface-settings-card,
-    .email-settings-card {
+    .email-settings-card,
+    .edit-card,
+    .edit-accordion-section {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
@@ -448,15 +620,18 @@
     }
 
     .settings-section-card,
-    .ai-settings-card {
+    .ai-settings-card,
+    .edit-card {
       padding: 20px 22px 22px;
     }
 
-    .user-ai-profile-section {
+    .user-ai-profile-section,
+    .edit-accordion-section {
       overflow: hidden;
     }
 
-    .user-ai-profile-section .v-panel-caption {
+    .user-ai-profile-section .v-panel-caption,
+    .edit-accordion-section .v-panel-caption {
       min-height: 50px;
       padding: 12px 16px;
       color: mix($v-font-color, $v-panel-background-color, 90%) !important;
@@ -468,7 +643,8 @@
     }
 
     .settings-section-card-title,
-    .ai-settings-card-title {
+    .ai-settings-card-title,
+    .edit-card-title {
       color: mix($v-font-color, $v-panel-background-color, 90%) !important;
       font-size: 18px !important;
       font-weight: 700 !important;
@@ -478,23 +654,110 @@
 
     .settings-section-card .settings-section-help,
     .user-ai-profile-content .user-ai-profile-help,
-    .ai-settings-content .ai-settings-help {
+    .ai-settings-content .ai-settings-help,
+    .edit-help {
       color: mix($v-font-color, $v-panel-background-color, 68%) !important;
       font-size: 13px !important;
       line-height: 1.45 !important;
       opacity: 1 !important;
     }
 
-    .interface-settings-card .v-gridlayout-slot {
-      padding-top: 6px;
-      padding-bottom: 6px;
+    // Адаптивные строки полей и двухколоночные макеты
+    .edit-field-row {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
 
-    .interface-settings-card .v-label {
-      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
-      font-size: 15px !important;
-      line-height: 38px !important;
+    .edit-field-row > .v-slot,
+    .edit-row-half > .v-slot,
+    .edit-row-server-port > .v-slot,
+    .edit-row-auth > .v-slot {
+      min-width: 0 !important;
+    }
+
+    .settings-checkbox-cell {
+      display: flex !important;
+      align-items: center !important;
+      padding-top: 24px !important;
+    }
+
+    // Карточки согласий и предпочтений
+    .ai-preference-item,
+    .privacy-consent-card {
+      box-sizing: border-box !important;
+      padding: 14px 16px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 45%) !important;
+      border: 1px solid rgba($v-font-color, 0.12) !important;
+      border-radius: 6px !important;
+      transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+
+      &:hover {
+        background: mix($v-app-background-color, $v-panel-background-color, 30%) !important;
+        border-color: rgba($v-font-color, 0.22) !important;
+      }
+
+      &:focus-within {
+        border-color: $v-selection-color !important;
+        box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+      }
+    }
+
+    .ai-settings-preferences-row {
+      margin-top: 6px;
+    }
+
+    .email-settings-card-content {
+      padding: 16px 18px 20px !important;
+    }
+
+    .interface-settings-card {
+      margin-bottom: 20px !important;
+    }
+
+    .interface-settings-rows {
+      box-sizing: border-box;
+      width: 100% !important;
+      padding-top: 6px;
+    }
+
+    .interface-field-row {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 40px;
+      margin-bottom: 12px;
+      align-items: center;
+
+      > .v-widget,
+      > .v-slot {
+        min-width: 0;
+      }
+    }
+
+    .interface-field-label {
+      box-sizing: border-box;
+      flex: 0 1 220px;
+      min-width: 0;
+      max-width: 220px;
+      width: 220px;
+      overflow-wrap: anywhere;
+      color: mix($v-font-color, $v-panel-background-color, 88%) !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
       white-space: normal !important;
+    }
+
+    .llm-chat-button-actions {
+      margin-top: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+
+      .v-button {
+        margin-right: 8px;
+        margin-bottom: 6px;
+      }
     }
 
     .email-settings-grid,
@@ -502,10 +765,7 @@
     .email-settings-grid table,
     .user-ai-profile-section .v-gridlayout,
     .user-ai-profile-section .v-gridlayout > div,
-    .user-ai-profile-section .v-gridlayout table,
-    .interface-settings-card .v-gridlayout,
-    .interface-settings-card .v-gridlayout > div,
-    .interface-settings-card .v-gridlayout table {
+    .user-ai-profile-section .v-gridlayout table {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
@@ -632,17 +892,26 @@
 
   @media (max-width: 1366px) {
     .ext-settings-window {
+      .v-slot-settings-section-sidebar,
+      .v-slot-user-ai-profile-sidebar,
+      .v-slot-ai-settings-sidebar,
       .settings-section-sidebar,
       .user-ai-profile-sidebar,
       .ai-settings-sidebar {
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
+        width: 290px !important;
+        min-width: 290px !important;
+        max-width: 290px !important;
         padding: 0 !important;
 
-        .v-scrollable {
+        .c-scrollbox-content,
+        .sidebar-content-box,
+        .edit-sidebar-content {
           padding-left: 14px !important;
           padding-right: 14px !important;
+        }
+
+        .v-scrollable {
+          padding: 0 !important;
         }
       }
 
@@ -655,6 +924,91 @@
       .settings-section-card,
       .ai-settings-card {
         padding: 16px 18px 18px;
+      }
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .ext-settings-window {
+      .v-slot-settings-section-sidebar,
+      .v-slot-user-ai-profile-sidebar,
+      .v-slot-ai-settings-sidebar,
+      .settings-section-sidebar,
+      .user-ai-profile-sidebar,
+      .ai-settings-sidebar {
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
+
+        .c-scrollbox-content,
+        .sidebar-content-box,
+        .edit-sidebar-content {
+          padding-left: 12px !important;
+          padding-right: 12px !important;
+        }
+
+        .v-scrollable {
+          padding: 0 !important;
+        }
+      }
+
+      .edit-field-row {
+        display: block !important;
+        height: auto !important;
+
+        &.v-horizontallayout > .v-slot {
+          display: block !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          margin-bottom: 12px !important;
+        }
+
+        &.v-horizontallayout > .v-spacing {
+          display: none !important;
+        }
+      }
+
+      .settings-checkbox-cell {
+        padding-top: 4px !important;
+      }
+
+      .edit-row-spacer,
+      .v-slot-edit-row-spacer {
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 0 !important;
+      }
+
+      .interface-settings-grid {
+        display: block !important;
+        width: 100% !important;
+
+        .v-gridlayout-slot {
+          display: block !important;
+          width: 100% !important;
+          padding: 4px 0 !important;
+        }
+      }
+
+      .edit-toolbar {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+
+        .edit-toolbar-actions {
+          margin-top: 10px !important;
+          align-self: flex-start !important;
+        }
+      }
+
+      .ai-settings-preferences-row {
+        display: block !important;
+
+        &.v-horizontallayout > .v-slot {
+          display: block !important;
+          width: 100% !important;
+          margin-bottom: 12px !important;
+        }
       }
     }
   }

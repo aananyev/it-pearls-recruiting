@@ -36,8 +36,16 @@
                   height="100%"
                   spacing="false"
                   stylename="user-ai-profile-sidebar edit-sidebar">
-                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical" scrollBars="vertical">
-                    <vbox width="100%" spacing="true">
+                <scrollBox id="sidebarScrollBox"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical"
+                           scrollBars="vertical"
+                           stylename="sidebar-scrollbox edit-sidebar-scroll">
+                    <vbox id="sidebarContentBox"
+                          width="100%"
+                          spacing="true"
+                          stylename="sidebar-content-box edit-sidebar-content">
                         <!-- DropZone & Avatar (стандарт 120px) -->
                         <vbox id="dropZone"
                               spacing="true"
@@ -67,34 +75,37 @@
                                     width="100%"
                                     showFileName="false"
                                     dropZone="dropZone"
-                                    showClearButton="true"/>
+                                    showClearButton="true"
+                                    stylename="user-avatar-upload"/>
                         </vbox>
                         
-                        <!-- Идентификация пользователя: 4-уровневая типографика -->
+                        <!-- Идентификация пользователя: 4-уровневая типографика (hunttech-edit-screen-design) -->
                         <vbox id="userAiProfileIdentity" width="100%" spacing="false" stylename="user-ai-profile-identity edit-sidebar-identity">
                             <label id="userProfileNameLabel" width="100%" stylename="h2 bold user-ai-profile-name edit-sidebar-title" align="MIDDLE_CENTER"/>
                             <label id="currentPositionSidebarLabel" width="100%" stylename="h4 bold user-ai-profile-position edit-sidebar-subtitle" align="MIDDLE_CENTER"/>
+                            <label id="userLoginSidebarLabel" width="100%" stylename="edit-help candidate-sidebar-city bold" align="MIDDLE_CENTER"/>
+                            <label id="userEmailSidebarLabel" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
                         </vbox>
                         
-                        <!-- Сводка и статус -->
-                        <vbox id="userAiProfileSummary" width="100%" spacing="true" stylename="user-ai-profile-summary edit-sidebar-summary">
-                            <label id="profileStatusLabel" width="100%" stylename="user-ai-profile-status bold edit-help"/>
-                            <label id="profileCompletionLabel" width="100%" stylename="h4 user-ai-profile-summary-value"/>
-                            <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value edit-help"/>
-                        </vbox>
-
-                        <!-- Навигация: Вкладки экрана настроек -->
+                        <!-- Навигация: Вкладки экрана настроек (соответствуют вкладкам settingsTabSheet) -->
                         <vbox id="settingsTabsNavigation" width="100%" spacing="false" stylename="settings-tabs-navigation label-navigation">
                             <label value="msg://tabsNavigationTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
-                            <button id="navTabMyInfo" caption="msg://msgMyInfo" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
-                            <button id="navTabInterface" caption="msg://msgInterface" width="100%" stylename="borderless label-nav-item"/>
-                            <button id="navTabMail" caption="msg://msgEmailSettings" width="100%" stylename="borderless label-nav-item"/>
-                            <button id="navTabAi" caption="msg://msgAiSettings" width="100%" stylename="borderless label-nav-item"/>
-                            <button id="navTabGeo" caption="msg://msgGeoApiSettings" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabMyInfo" caption="msg://msgMyInfo" icon="USER" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
+                            <button id="navTabInterface" caption="msg://msgInterface" icon="DESKTOP" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabMail" caption="msg://msgEmailSettings" icon="ENVELOPE" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabAi" caption="msg://msgAiSettings" icon="SLIDERS" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabGeo" caption="msg://msgGeoApiSettings" icon="GLOBE" width="100%" stylename="borderless label-nav-item"/>
                         </vbox>
 
-                        <!-- Фиксированный спейсер внизу скроллера сайдбара -->
-                        <vbox id="sidebarSpacer" width="100%" height="16px" stylename="edit-sidebar-spacer"/>
+                        <!-- Сводка и статус: секция с заголовком по стандарту edit-screen-design -->
+                        <vbox id="userAiProfileSummaryBox" width="100%" spacing="false" stylename="user-ai-profile-summary-section">
+                            <label value="msg://profileSummaryTitle" width="100%" stylename="label-nav-title job-candidate-section-title settings-section-navigation-title" align="MIDDLE_CENTER"/>
+                            <vbox id="userAiProfileSummary" width="100%" spacing="true" stylename="user-ai-profile-summary edit-sidebar-summary">
+                                <label id="profileStatusLabel" width="100%" stylename="user-ai-profile-status bold edit-help"/>
+                                <label id="profileCompletionLabel" width="100%" stylename="h4 user-ai-profile-summary-value"/>
+                                <label id="profileConfirmedAtLabel" width="100%" stylename="h4 user-ai-profile-summary-value edit-help"/>
+                            </vbox>
+                        </vbox>
 
                         <!-- Навигация: Профиль и ИИ (скрыта в пользу навигации по вкладкам) -->
                         <vbox id="userAiProfileSectionNavigation" width="100%" spacing="false" visible="false" stylename="user-ai-profile-navigation label-navigation">
@@ -162,41 +173,44 @@
                                    stylename="user-ai-profile-content edit-workspace-scroll">
                             <vbox id="userAiProfileContent" width="100%" spacing="true" stylename="edit-workspace-content">
                                 <hbox id="userAiProfileToolbar" width="100%" spacing="true" expand="userAiProfileTitleBox" stylename="user-ai-profile-toolbar edit-toolbar">
-                                    <vbox id="userAiProfileTitleBox" width="100%" spacing="false">
+                                    <vbox id="userAiProfileTitleBox" spacing="false">
                                         <label value="msg://aiProfileTitle" stylename="h1 edit-toolbar-title"/>
                                         <label value="msg://aiProfileDescription" width="100%" stylename="user-ai-profile-help edit-toolbar-description edit-help"/>
                                     </vbox>
-                                    <hbox id="userAiProfileToolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="user-ai-profile-toolbar-actions edit-toolbar-actions">
+                                    <buttonsPanel id="userAiProfileToolbarActions"
+                                                  align="MIDDLE_RIGHT"
+                                                  stylename="user-ai-profile-toolbar-actions edit-toolbar-actions">
                                         <button id="previewAiContextBtn" caption="msg://previewAiContext" icon="EYE" stylename="primary" invoke="previewAiContext"/>
                                         <button id="clearAiProfileBtn" caption="msg://clearAiProfile" icon="TRASH" stylename="danger" invoke="clearAiProfile"/>
-                                    </hbox>
+                                    </buttonsPanel>
                                 </hbox>
                                 
                                 <groupBox id="professionalProfileGroup" caption="msg://professionalProfile" width="100%" spacing="true" collapsable="true" collapsed="false" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
                                     <vbox width="100%" spacing="true">
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textField id="currentPositionField" datasource="userAiProfileDs" property="currentPosition" caption="msg://currentPosition" maxLength="255" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <lookupField id="functionalRoleField" datasource="userAiProfileDs" property="functionalRole" caption="msg://functionalRole" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <lookupField id="seniorityLevelField" datasource="userAiProfileDs" property="seniorityLevel" caption="msg://seniorityLevel" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textField id="professionalExperienceYearsField" datasource="userAiProfileDs" property="professionalExperienceYears" caption="msg://professionalExperienceYears" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textField id="recruitingExperienceYearsField" datasource="userAiProfileDs" property="recruitingExperienceYears" caption="msg://recruitingExperienceYears" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                            <vbox width="100%" box.expandRatio="1" stylename="edit-row-spacer"/>
                                         </hbox>
-                                        <vbox width="100%" spacing="false">
+                                        <vbox width="100%" spacing="false" stylename="edit-field-row">
                                             <textArea id="aboutMeField" datasource="userAiProfileDs" property="aboutMe" caption="msg://aboutMe" maxLength="2000" rows="3" width="100%" stylename="edit-form-control"/>
                                         </vbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textArea id="currentResponsibilitiesField" datasource="userAiProfileDs" property="currentResponsibilities" caption="msg://currentResponsibilities" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="educationField" datasource="userAiProfileDs" property="education" caption="msg://education" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textArea id="certificationsField" datasource="userAiProfileDs" property="certifications" caption="msg://certifications" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="domainExpertiseField" datasource="userAiProfileDs" property="domainExpertise" caption="msg://domainExpertise" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <vbox width="100%" spacing="false">
+                                        <vbox width="100%" spacing="false" stylename="edit-field-row">
                                             <textArea id="industriesField" datasource="userAiProfileDs" property="industries" caption="msg://industries" maxLength="4000" rows="2" width="100%" stylename="edit-form-control"/>
                                         </vbox>
                                     </vbox>
@@ -204,15 +218,15 @@
 
                                 <groupBox id="recruitingProfileGroup" caption="msg://recruitingProfile" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
                                     <vbox width="100%" spacing="true">
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textArea id="recruitingSpecializationsField" datasource="userAiProfileDs" property="recruitingSpecializations" caption="msg://recruitingSpecializations" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="targetRolesField" datasource="userAiProfileDs" property="targetRoles" caption="msg://targetRoles" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textField id="candidateLevelsField" datasource="userAiProfileDs" property="candidateLevels" caption="msg://candidateLevels" maxLength="255" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="hiringGeographiesField" datasource="userAiProfileDs" property="hiringGeographies" caption="msg://hiringGeographies" maxLength="2000" rows="2" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textArea id="decisionPrioritiesField" datasource="userAiProfileDs" property="decisionPriorities" caption="msg://decisionPriorities" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="clientAndProjectContextField" datasource="userAiProfileDs" property="clientAndProjectContext" caption="msg://clientAndProjectContext" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
@@ -221,18 +235,18 @@
 
                                 <groupBox id="responsePreferencesGroup" caption="msg://responsePreferences" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
                                     <vbox width="100%" spacing="true">
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <lookupField id="preferredLanguageField" datasource="userAiProfileDs" property="preferredLanguage" caption="msg://preferredLanguage" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <lookupField id="responseDetailLevelField" datasource="userAiProfileDs" property="responseDetailLevel" caption="msg://responseDetailLevel" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <lookupField id="communicationStyleField" datasource="userAiProfileDs" property="communicationStyle" caption="msg://communicationStyle" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <lookupField id="terminologyLevelField" datasource="userAiProfileDs" property="terminologyLevel" caption="msg://terminologyLevel" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <vbox width="100%" spacing="false">
+                                        <vbox width="100%" spacing="false" stylename="edit-field-row">
                                             <lookupField id="preferredAnswerStructureField" datasource="userAiProfileDs" property="preferredAnswerStructure" caption="msg://preferredAnswerStructure" width="100%" stylename="edit-form-control"/>
                                         </vbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textArea id="customAiInstructionsField" datasource="userAiProfileDs" property="customAiInstructions" caption="msg://customAiInstructions" description="msg://customAiInstructionsDescription" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="communicationConstraintsField" datasource="userAiProfileDs" property="communicationConstraints" caption="msg://communicationConstraints" maxLength="2000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
@@ -241,11 +255,11 @@
 
                                 <groupBox id="goalsGroup" caption="msg://goalsAndInterests" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section edit-accordion-section">
                                     <vbox width="100%" spacing="true">
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textArea id="professionalGoalsField" datasource="userAiProfileDs" property="professionalGoals" caption="msg://professionalGoals" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="professionalInterestsField" datasource="userAiProfileDs" property="professionalInterests" caption="msg://professionalInterests" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <textArea id="developmentAreasField" datasource="userAiProfileDs" property="developmentAreas" caption="msg://developmentAreas" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                             <textArea id="currentPrioritiesField" datasource="userAiProfileDs" property="currentPriorities" caption="msg://currentPriorities" maxLength="4000" rows="3" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
                                         </hbox>
@@ -254,13 +268,15 @@
 
                                 <groupBox id="privacyGroup" caption="msg://privacyAndBoundaries" width="100%" spacing="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="user-ai-profile-section user-ai-profile-privacy edit-accordion-section">
                                     <vbox width="100%" spacing="true">
-                                        <checkBox id="profileEnabledField" datasource="userAiProfileDs" property="profileEnabled" caption="msg://profileEnabled"/>
-                                        <vbox width="100%" spacing="false">
-                                            <checkBox id="externalProcessingAllowedField" datasource="userAiProfileDs" property="externalProcessingAllowed" caption="msg://externalProcessingAllowed"/>
+                                        <vbox width="100%" spacing="false" stylename="privacy-consent-card">
+                                            <checkBox id="profileEnabledField" datasource="userAiProfileDs" property="profileEnabled" caption="msg://profileEnabled" stylename="bold"/>
+                                        </vbox>
+                                        <vbox width="100%" spacing="false" stylename="privacy-consent-card">
+                                            <checkBox id="externalProcessingAllowedField" datasource="userAiProfileDs" property="externalProcessingAllowed" caption="msg://externalProcessingAllowed" stylename="bold"/>
                                             <label value="msg://externalProcessingConsentText" width="100%" stylename="user-ai-profile-help edit-help"/>
                                         </vbox>
-                                        <vbox width="100%" spacing="false">
-                                            <checkBox id="adminFallbackConsentField" datasource="userAiProfileDs" property="adminFallbackConsent" caption="msg://adminFallbackConsent"/>
+                                        <vbox width="100%" spacing="false" stylename="privacy-consent-card">
+                                            <checkBox id="adminFallbackConsentField" datasource="userAiProfileDs" property="adminFallbackConsent" caption="msg://adminFallbackConsent" stylename="bold"/>
                                             <label value="msg://adminFallbackConsentText" width="100%" stylename="user-ai-profile-help edit-help"/>
                                         </vbox>
                                         <label id="consentAcceptedAtLabel" width="100%" stylename="h4 edit-sidebar-subtitle"/>
@@ -307,22 +323,31 @@
                                         <label value="msg://interfaceSettingsAppearanceTitle" stylename="h3 settings-section-card-title edit-card-title"/>
                                         <label value="msg://interfaceSettingsAppearanceDescription" width="100%" stylename="settings-section-help edit-help"/>
                                     </vbox>
-                                    <grid id="grid" spacing="true" width="100%">
-                                        <columns><column width="220px"/><column flex="1"/></columns>
-                                        <rows>
-                                            <row><label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT" stylename="bold"/><optionsGroup id="modeOptions"/></row>
-                                            <row><label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="appThemeField" required="true" width="100%" requiredMessage="msg://mainWindowThemeMsg" stylename="edit-form-control"/></row>
-                                            <row><label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="appLangField" width="100%" stylename="edit-form-control"/></row>
-                                            <row>
-                                                <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT" stylename="bold"/>
-                                                <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneLookup">
-                                                    <lookupField id="timeZoneLookup" width="100%" stylename="edit-form-control"/>
-                                                    <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
-                                                </hbox>
-                                            </row>
-                                            <row><label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT" stylename="bold"/><lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="100%" stylename="edit-form-control"/></row>
-                                        </rows>
-                                    </grid>
+                                    <vbox id="interfaceFormRows" width="100%" spacing="true" stylename="interface-settings-rows">
+                                        <hbox width="100%" spacing="true" expand="modeOptions" stylename="edit-field-row interface-field-row">
+                                            <label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <optionsGroup id="modeOptions" align="MIDDLE_LEFT"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="appThemeField" stylename="edit-field-row interface-field-row">
+                                            <label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <lookupField id="appThemeField" required="true" width="100%" requiredMessage="msg://mainWindowThemeMsg" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="appLangField" stylename="edit-field-row interface-field-row">
+                                            <label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <lookupField id="appLangField" width="100%" stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="timeZoneBox" stylename="edit-field-row interface-field-row">
+                                            <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneLookup">
+                                                <lookupField id="timeZoneLookup" width="100%" stylename="edit-form-control"/>
+                                                <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
+                                            </hbox>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" expand="defaultScreenField" stylename="edit-field-row interface-field-row">
+                                            <label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT" stylename="bold interface-field-label"/>
+                                            <lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="100%" stylename="edit-form-control"/>
+                                        </hbox>
+                                    </vbox>
                                 </vbox>
                             </vbox>
                         </scrollBox>
@@ -343,8 +368,8 @@
                                       expand="emailSettingsTitleBox"
                                       stylename="settings-section-toolbar edit-toolbar">
                                     <vbox id="emailSettingsTitleBox" width="100%" spacing="false">
-                                        <label value="msg://emailSettingsPageTitle" stylename="h1"/>
-                                        <label value="msg://emailSettingsPageDescription" width="100%" stylename="settings-section-help"/>
+                                        <label value="msg://emailSettingsPageTitle" stylename="h1 edit-toolbar-title"/>
+                                        <label value="msg://emailSettingsPageDescription" width="100%" stylename="settings-section-help edit-toolbar-description edit-help"/>
                                     </vbox>
                                 </hbox>
                                 <vbox id="emailSettingsAccordion" width="100%" spacing="true">
@@ -352,57 +377,72 @@
                                               caption="SMTP"
                                               width="100%"
                                               spacing="true"
-                                              
                                               collapsable="true"
                                               collapsed="false"
                                               showAsPanel="true"
                                               stylename="user-ai-profile-section edit-accordion-section">
-                                        <vbox id="smtpSettingsCard" width="100%" spacing="true">
-                                            <label value="msg://emailSettingsSmtpDescription" width="100%" stylename="settings-section-help"/>
-                                            <textField id="smtpServer" caption="SMTP server" width="100%"/>
-                                            <textField id="smtpPort" datatype="int" caption="SMTP port" width="100%">
-                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                            </textField>
-                                            <checkBox id="smtpPasswordRequired" caption="msg://msgSMTPPasswordRequired"/>
-                                            <textField id="smtpPassword" caption="SMTP password" width="100%"/>
+                                        <vbox id="smtpSettingsCard" width="100%" spacing="true" stylename="email-settings-card-content">
+                                            <label value="msg://emailSettingsSmtpDescription" width="100%" stylename="settings-section-help edit-help"/>
+                                            <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-server-port">
+                                                <textField id="smtpServer" caption="SMTP server" width="100%" box.expandRatio="7" stylename="edit-form-control"/>
+                                                <textField id="smtpPort" datatype="int" caption="SMTP port" width="100%" box.expandRatio="3" stylename="edit-form-control">
+                                                    <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                                </textField>
+                                            </hbox>
+                                            <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-auth">
+                                                <vbox width="100%" box.expandRatio="3" align="MIDDLE_LEFT" stylename="settings-checkbox-cell">
+                                                    <checkBox id="smtpPasswordRequired" caption="msg://msgSMTPPasswordRequired"/>
+                                                </vbox>
+                                                <textField id="smtpPassword" caption="SMTP password" width="100%" box.expandRatio="7" stylename="edit-form-control"/>
+                                            </hbox>
                                         </vbox>
                                     </groupBox>
                                     <groupBox id="pop3SettingsSection"
                                               caption="POP3"
                                               width="100%"
                                               spacing="true"
-                                              
                                               collapsable="true"
                                               collapsed="true"
                                               showAsPanel="true"
                                               stylename="user-ai-profile-section edit-accordion-section">
-                                        <vbox id="pop3SettingsCard" width="100%" spacing="true">
-                                            <label value="msg://emailSettingsPop3Description" width="100%" stylename="settings-section-help"/>
-                                            <textField id="pop3Server" caption="POP3 server" width="100%"/>
-                                            <textField id="pop3Port" datatype="int" caption="POP3 port" width="100%">
-                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                            </textField>
-                                            <checkBox id="pop3PasswordRequired" caption="msg://msgPop3PasswordRequired"/>
-                                            <textField id="pop3Password" caption="POP3 password" width="100%"/>
+                                        <vbox id="pop3SettingsCard" width="100%" spacing="true" stylename="email-settings-card-content">
+                                            <label value="msg://emailSettingsPop3Description" width="100%" stylename="settings-section-help edit-help"/>
+                                            <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-server-port">
+                                                <textField id="pop3Server" caption="POP3 server" width="100%" box.expandRatio="7" stylename="edit-form-control"/>
+                                                <textField id="pop3Port" datatype="int" caption="POP3 port" width="100%" box.expandRatio="3" stylename="edit-form-control">
+                                                    <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                                </textField>
+                                            </hbox>
+                                            <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-auth">
+                                                <vbox width="100%" box.expandRatio="3" align="MIDDLE_LEFT" stylename="settings-checkbox-cell">
+                                                    <checkBox id="pop3PasswordRequired" caption="msg://msgPop3PasswordRequired"/>
+                                                </vbox>
+                                                <textField id="pop3Password" caption="POP3 password" width="100%" box.expandRatio="7" stylename="edit-form-control"/>
+                                            </hbox>
                                         </vbox>
                                     </groupBox>
                                     <groupBox id="imapSettingsSection"
                                               caption="IMAP"
                                               width="100%"
                                               spacing="true"
-                                              
                                               collapsable="true"
                                               collapsed="true"
                                               showAsPanel="true"
                                               stylename="user-ai-profile-section edit-accordion-section">
-                                        <vbox id="imapSettingsCard" width="100%" spacing="true">
-                                            <label value="msg://emailSettingsImapDescription" width="100%" stylename="settings-section-help"/>
-                                            <textField id="imapServer" caption="IMAP server" width="100%"/>
-                                            <textField id="imapPort" datatype="int" caption="IMAP port" width="100%">
-                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                            </textField>
-                                            <checkBox id="imapPasswordRequired" caption="msg://msgImapPasswordRequired"/>
-                                            <textField id="imapPassword" caption="IMAP password" width="100%"/>
+                                        <vbox id="imapSettingsCard" width="100%" spacing="true" stylename="email-settings-card-content">
+                                            <label value="msg://emailSettingsImapDescription" width="100%" stylename="settings-section-help edit-help"/>
+                                            <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-server-port">
+                                                <textField id="imapServer" caption="IMAP server" width="100%" box.expandRatio="7" stylename="edit-form-control"/>
+                                                <textField id="imapPort" datatype="int" caption="IMAP port" width="100%" box.expandRatio="3" stylename="edit-form-control">
+                                                    <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                                </textField>
+                                            </hbox>
+                                            <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-auth">
+                                                <vbox width="100%" box.expandRatio="3" align="MIDDLE_LEFT" stylename="settings-checkbox-cell">
+                                                    <checkBox id="imapPasswordRequired" caption="msg://msgImapPasswordRequired"/>
+                                                </vbox>
+                                                <textField id="imapPassword" caption="IMAP password" width="100%" box.expandRatio="7" stylename="edit-form-control"/>
+                                            </hbox>
                                         </vbox>
                                     </groupBox>
                                 </vbox>
@@ -437,22 +477,24 @@
                                       width="100%"
                                       stylename="ai-settings-card ai-settings-preference-card edit-card">
                                     <label value="msg://aiSettingsPreferenceTitle" stylename="h3 ai-settings-card-title edit-card-title"/>
-                                    <vbox spacing="true" width="100%">
-                                        <checkBox id="preferPersonalAiApiSettingsField"
-                                                  datasource="userSettingsDs"
-                                                  property="preferPersonalAiApiSettings"
-                                                  caption="msg://preferPersonalAiApiSettings"
-                                                  stylename="ai-settings-preference-checkbox bold"/>
-                                        <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="settings-section-help edit-help"/>
-                                    </vbox>
-                                    <vbox spacing="true" width="100%">
-                                        <checkBox id="preferPersonalPromptsField"
-                                                  datasource="userSettingsDs"
-                                                  property="preferPersonalPrompts"
-                                                  caption="msg://preferPersonalPrompts"
-                                                  stylename="ai-settings-preference-checkbox bold"/>
-                                        <label value="msg://preferPersonalPromptsHint" width="100%" stylename="settings-section-help edit-help"/>
-                                    </vbox>
+                                    <hbox width="100%" spacing="true" stylename="ai-settings-preferences-row edit-field-row edit-row-half">
+                                        <vbox width="100%" box.expandRatio="1" spacing="true" stylename="ai-preference-item">
+                                            <checkBox id="preferPersonalAiApiSettingsField"
+                                                      datasource="userSettingsDs"
+                                                      property="preferPersonalAiApiSettings"
+                                                      caption="msg://preferPersonalAiApiSettings"
+                                                      stylename="ai-settings-preference-checkbox bold"/>
+                                            <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="settings-section-help edit-help"/>
+                                        </vbox>
+                                        <vbox width="100%" box.expandRatio="1" spacing="true" stylename="ai-preference-item">
+                                            <checkBox id="preferPersonalPromptsField"
+                                                      datasource="userSettingsDs"
+                                                      property="preferPersonalPrompts"
+                                                      caption="msg://preferPersonalPrompts"
+                                                      stylename="ai-settings-preference-checkbox bold"/>
+                                            <label value="msg://preferPersonalPromptsHint" width="100%" stylename="settings-section-help edit-help"/>
+                                        </vbox>
+                                    </hbox>
                                 </vbox>
                                 <vbox id="aiConnectionsCard"
                                       width="100%"
@@ -509,8 +551,8 @@
                                       expand="geoSettingsTitleBox"
                                       stylename="ai-settings-toolbar edit-toolbar">
                                     <vbox id="geoSettingsTitleBox" width="100%" spacing="false">
-                                        <label value="msg://geoSettingsPageTitle" stylename="h1"/>
-                                        <label value="msg://geoSettingsPageDescription" width="100%" stylename="ai-settings-help"/>
+                                        <label value="msg://geoSettingsPageTitle" stylename="h1 edit-toolbar-title"/>
+                                        <label value="msg://geoSettingsPageDescription" width="100%" stylename="settings-section-help edit-toolbar-description edit-help"/>
                                     </vbox>
                                     <buttonsPanel id="geoButtonsPanel" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions ai-settings-toolbar-actions">
                                         <button id="testGeoApiBtn"
@@ -525,38 +567,47 @@
                                       width="100%"
                                       stylename="ai-settings-card edit-card">
                                     <label value="msg://geoDaDataCardTitle" stylename="h3 ai-settings-card-title edit-card-title"/>
-                                    <form id="geoSettingsForm" datasource="userSettingsDs" width="100%">
-                                        <column width="100%">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
                                             <passwordField id="geoApiKeyField"
+                                                           datasource="userSettingsDs"
                                                            property="geoApiKey"
                                                            caption="msg://msgGeoApiKey"
                                                            width="100%"
+                                                           box.expandRatio="1"
                                                            stylename="edit-form-control"/>
                                             <passwordField id="geoApiSecretField"
+                                                           datasource="userSettingsDs"
                                                            property="geoApiSecret"
                                                            caption="msg://msgGeoApiSecret"
                                                            width="100%"
+                                                           box.expandRatio="1"
                                                            stylename="edit-form-control"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" stylename="edit-field-row">
                                             <textField id="geoApiUrlField"
+                                                       datasource="userSettingsDs"
                                                        property="geoApiUrl"
                                                        caption="msg://msgGeoApiUrl"
                                                        width="100%"
                                                        stylename="edit-form-control"
                                                        inputPrompt="https://suggestions.dadata.ru/suggestions/api/4_1/rs"/>
-                                        </column>
-                                    </form>
+                                        </hbox>
+                                    </vbox>
                                 </vbox>
                                 <vbox id="geoOptionsCard"
                                       spacing="true"
                                       width="100%"
                                       stylename="ai-settings-card edit-card">
                                     <label value="msg://geoOptionsCardTitle" stylename="h3 ai-settings-card-title edit-card-title"/>
-                                    <checkBox id="geoAutoFetchFlagsField"
-                                              datasource="userSettingsDs"
-                                              property="geoAutoFetchFlags"
-                                              caption="msg://msgGeoAutoFetchFlags"
-                                              stylename="ai-settings-preference-checkbox"/>
-                                    <label value="msg://msgGeoAutoFetchFlagsHint" width="100%" stylename="ai-settings-help"/>
+                                    <vbox width="100%" spacing="true" stylename="ai-preference-item">
+                                        <checkBox id="geoAutoFetchFlagsField"
+                                                  datasource="userSettingsDs"
+                                                  property="geoAutoFetchFlags"
+                                                  caption="msg://msgGeoAutoFetchFlags"
+                                                  stylename="ai-settings-preference-checkbox bold"/>
+                                        <label value="msg://msgGeoAutoFetchFlagsHint" width="100%" stylename="ai-settings-help edit-help"/>
+                                    </vbox>
                                 </vbox>
                             </vbox>
                         </scrollBox>

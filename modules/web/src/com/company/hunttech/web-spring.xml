@@ -8,6 +8,7 @@
 
     <bean id="mainScreenBackgroundService" class="com.company.hunttech.web.screens.mainscreen.MainScreenBackgroundService"/>
     <alias name="mainScreenBackgroundService" alias="hunttech_MainScreenBackgroundService"/>
+    <alias name="hunttech_MainScreenBackgroundImageProcessor" alias="imageProcessor"/>
 
     <gui:screens base-packages="com.company.hunttech.web"/>
     <bean id="hunttech_proxyCreator" class="com.haulmont.cuba.web.sys.remoting.WebRemoteProxyBeanCreator">

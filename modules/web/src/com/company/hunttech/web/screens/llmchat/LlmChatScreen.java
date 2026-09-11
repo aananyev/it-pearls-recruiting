@@ -7,6 +7,9 @@ import com.company.hunttech.service.LlmChatStreamState;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DialogWindow;
+import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.ScrollBoxLayout;
+import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.settings.Settings;
@@ -17,17 +20,28 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.UI;
+import com.company.hunttech.entity.IteractionList;
+import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.OpenPosition;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Security;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.screen.OpenMode;
+import com.haulmont.cuba.security.entity.EntityOp;
+import elemental.json.JsonArray;
 import org.dom4j.Element;
 import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /** Compact floating chat shell with incremental provider output. */
 @UiController("hunttech_LlmChatScreen")
 @UiDescriptor("llm-chat-screen.xml")
 public class LlmChatScreen extends Screen {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LlmChatScreen.class);
     private static final String CHAT_LAYOUT_SETTINGS = "llmChatLayout";
     private static final String CHAT_DIALOG_STYLENAME = "llm-chat-window";
 
@@ -36,24 +50,41 @@ public class LlmChatScreen extends Screen {
     @Inject
     private Notifications notifications;
     @Inject
-    private TextArea<String> historyArea;
+    private ScrollBoxLayout historyScrollBox;
+    @Inject
+    private Label<String> historyLabel;
     @Inject
     private TextArea<String> inputArea;
     @Inject
     private Button sendBtn;
-    @Inject
-    private Button cancelBtn;
     @Inject
     private Timer streamPollTimer;
     @Inject
     private UserSession userSession;
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private Security security;
+
+    // Hermes tab components
+    @Inject
+    private TabSheet chatTabSheet;
+    @Inject
+    private ScrollBoxLayout hermesHistoryScrollBox;
+    @Inject
+    private Label<String> hermesHistoryLabel;
+    @Inject
+    private TextArea<String> hermesInputArea;
+    @Inject
+    private Button hermesSendBtn;
 
     private UUID conversationId;
     private String activeRequestId;
     private String activeRequestText;
     private UI chatUi;
+    private boolean hrmEntityBridgeRegistered = false;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -61,7 +92,13 @@ public class LlmChatScreen extends Screen {
         if (dialog != null) {
             dialog.setDialogStylename(CHAT_DIALOG_STYLENAME);
             dialog.setDialogWidth("840px");
+            dialog.setDialogHeight("560px");
+            dialog.setModal(false);
+            dialog.setDraggable(true);
+            dialog.setResizable(true);
+            dialog.setCloseable(true);
         }
+        inputArea.setTrimming(false);
         ensureUserFallbackConsent();
         try {
             conversationId = llmChatService.startConversation();
@@ -76,23 +113,40 @@ public class LlmChatScreen extends Screen {
         if (userSession == null || userSession.getUser() == null || dataManager == null) {
             return;
         }
-        com.haulmont.cuba.security.entity.User currentUser = userSession.getUser();
-        if ("alan".equalsIgnoreCase(currentUser.getLogin())) {
-            try {
-                com.company.hunttech.entity.UserAiProfile profile = dataManager.load(com.company.hunttech.entity.UserAiProfile.class)
-                        .query("select p from hunttech_UserAiProfile p where p.user.id = :userId")
-                        .parameter("userId", currentUser.getId())
-                        .view("userAiProfile-view")
-                        .optional()
-                        .orElse(null);
-                if (profile != null && !Boolean.TRUE.equals(profile.getAdminFallbackConsent())) {
-                    profile.setAdminFallbackConsent(true);
-                    profile.setAdminFallbackConsentVersion(com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION);
-                    profile.setAdminFallbackConsentAt(new java.util.Date());
-                    dataManager.commit(profile);
-                }
-            } catch (Exception ignored) {
+        com.haulmont.cuba.security.entity.User sessionUser = userSession.getUser();
+        com.company.hunttech.entity.ExtUser currentUser = (sessionUser instanceof com.company.hunttech.entity.ExtUser)
+                ? (com.company.hunttech.entity.ExtUser) sessionUser
+                : dataManager.load(com.company.hunttech.entity.ExtUser.class).id(sessionUser.getId()).optional().orElse(null);
+        if (currentUser == null) {
+            return;
+        }
+        try {
+            com.company.hunttech.entity.UserAiProfile profile = dataManager.load(com.company.hunttech.entity.UserAiProfile.class)
+                    .query("select p from hunttech_UserAiProfile p where p.user.id = :userId")
+                    .parameter("userId", currentUser.getId())
+                    .view("userAiProfile-view")
+                    .optional()
+                    .orElse(null);
+            if (profile == null) {
+                profile = dataManager.create(com.company.hunttech.entity.UserAiProfile.class);
+                profile.setUser(currentUser);
+                profile.setProfileEnabled(false);
+                profile.setExternalProcessingAllowed(false);
+                profile.setAdminFallbackConsent(true);
+                profile.setAdminFallbackConsentVersion(com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+                profile.setAdminFallbackConsentAt(new java.util.Date());
+                dataManager.commit(profile);
+            } else if (profile.getAdminFallbackConsent() == null
+                    || (Boolean.TRUE.equals(profile.getAdminFallbackConsent())
+                        && !com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION.equals(profile.getAdminFallbackConsentVersion()))) {
+                profile.setAdminFallbackConsent(true);
+                profile.setAdminFallbackConsentVersion(com.company.hunttech.service.AiConsentPolicy.ADMIN_FALLBACK_VERSION);
+                profile.setAdminFallbackConsentAt(new java.util.Date());
+                dataManager.commit(profile);
             }
+        } catch (Exception e) {
+            log.warn("Не удалось актуализировать fallback consent для пользователя {}: {}",
+                    currentUser.getLogin(), e.getMessage());
         }
     }
 
@@ -103,6 +157,150 @@ public class LlmChatScreen extends Screen {
             chatUi.getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
         }
         restoreDialogGeometry(getSettings());
+        inputArea.setTrimming(false);
+        sendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" preserveAspectRatio=\"xMidYMid meet\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
+        sendBtn.setDescription("Отправить сообщение (Enter, перенос строки — Shift+Enter)");
+        com.vaadin.ui.TextArea vTextArea = inputArea.unwrap(com.vaadin.ui.TextArea.class);
+        if (vTextArea != null) {
+            vTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.TIMEOUT);
+            vTextArea.setValueChangeTimeout(300);
+        }
+        
+        // Initialize Hermes tab (disabled for now - placeholder for future integration)
+        hermesInputArea.setEnabled(false);
+        hermesSendBtn.setEnabled(false);
+        
+        // Add tab change listener to handle tab-specific behavior
+        chatTabSheet.addSelectedTabChangeListener(tabChangeEvent -> {
+            TabSheet.Tab selectedTab = tabChangeEvent.getSelectedTab();
+            if (selectedTab != null) {
+                String tabId = selectedTab.getName();
+                if ("hermesChatTab".equals(tabId)) {
+                    // Hermes tab selected - show placeholder message
+                    if (hermesHistoryLabel.getValue() == null || hermesHistoryLabel.getValue().isEmpty()) {
+                        hermesHistoryLabel.setValue("<div class=\"llm-chat-empty-hint\" style=\"text-align: center; padding: 40px 20px; color: #888;\">"
+                                + "<div style=\"font-size: 48px; margin-bottom: 16px;\">🤖</div>"
+                                + "<div style=\"font-size: 16px; font-weight: 500; margin-bottom: 8px;\">Hermes Chat</div>"
+                                + "<div style=\"font-size: 13px; line-height: 1.5;\">Интеграция с Hermes AI будет доступна в следующих версиях.</div>"
+                                + "<div style=\"font-size: 12px; margin-top: 12px; color: #aaa;\">Пока используйте вкладку «Локальный чат» для общения с ИИ.</div>"
+                                + "</div>");
+                    }
+                }
+            }
+        });
+        
+        com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
+                ? chatUi.getPage().getJavaScript()
+                : com.vaadin.ui.JavaScript.getCurrent();
+        if (js != null) {
+            js.addFunction("hunttechSendChatMessage", (JsonArray arguments) -> {
+                if (arguments != null && arguments.length() >= 1) {
+                    try {
+                        String msg = arguments.getString(0);
+                        executeSend(msg);
+                    } catch (Exception ex) {
+                        log.warn("Ошибка обработки вызова hunttechSendChatMessage: {}", ex.getMessage());
+                    }
+                }
+            });
+            if (!hrmEntityBridgeRegistered) {
+                hrmEntityBridgeRegistered = true;
+                js.addFunction("hunttechOpenHrmEntity", (JsonArray arguments) -> {
+                    if (arguments != null && arguments.length() >= 2) {
+                        try {
+                            String entityType = arguments.getString(0);
+                            String entityId = arguments.getString(1);
+                            openHrmEntityScreen(entityType, entityId);
+                        } catch (Exception ex) {
+                            log.warn("Ошибка обработки параметров вызова hunttechOpenHrmEntity: {}", ex.getMessage());
+                        }
+                    }
+                });
+            }
+            js.execute(
+                    "(function() {" +
+                    "  function isChatInput(el) {" +
+                    "    if (!el) return false;" +
+                    "    if (el.tagName === 'TEXTAREA') {" +
+                    "      if (el.classList && (el.classList.contains('llm-chat-input-area') || el.classList.contains('v-textarea'))) {" +
+                    "        return true;" +
+                    "      }" +
+                    "      if (el.closest && (el.closest('.llm-chat-input-bar') || el.closest('.llm-chat-input-area') || el.closest('.llm-chat-screen'))) {" +
+                    "        return true;" +
+                    "      }" +
+                    "    }" +
+                    "    return false;" +
+                    "  }" +
+                    "  if (!window._hunttechChatKeyHandlerAttached) {" +
+                    "    window._hunttechChatKeyHandlerAttached = true;" +
+                    "    document.addEventListener('keydown', function(e) {" +
+                    "      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {" +
+                    "        var target = e.target;" +
+                    "        if (isChatInput(target)) {" +
+                    "          e.preventDefault();" +
+                    "          e.stopPropagation();" +
+                    "          var btn = document.querySelector('.llm-chat-send-btn');" +
+                    "          if (btn && (btn.classList.contains('v-disabled') || btn.disabled)) {" +
+                    "            return;" +
+                    "          }" +
+                    "          var text = target.value;" +
+                    "          if (window.hunttechSendChatMessage) {" +
+                    "            target.value = '';" +
+                    "            window.hunttechSendChatMessage(text);" +
+                    "          } else if (btn) {" +
+                    "            btn.click();" +
+                    "          }" +
+                    "        }" +
+                    "      }" +
+                    "    }, true);" +
+                    "  }" +
+                    "  if (!window._hunttechChatSendClickHandlerAttached) {" +
+                    "    window._hunttechChatSendClickHandlerAttached = true;" +
+                    "    document.addEventListener('click', function(e) {" +
+                    "      var target = e.target;" +
+                    "      var btn = target ? (target.closest ? target.closest('.llm-chat-send-btn') : null) : null;" +
+                    "      if (btn && !btn.classList.contains('v-disabled') && !btn.disabled && window.hunttechSendChatMessage) {" +
+                    "        var ta = document.querySelector('.llm-chat-input-bar textarea, textarea.llm-chat-input-area, .llm-chat-input-area textarea, .llm-chat-screen textarea');" +
+                    "        if (ta && ta.value && ta.value.trim().length > 0) {" +
+                    "          e.preventDefault();" +
+                    "          e.stopPropagation();" +
+                    "          var text = ta.value;" +
+                    "          ta.value = '';" +
+                    "          window.hunttechSendChatMessage(text);" +
+                    "        }" +
+                    "      }" +
+                    "    }, true);" +
+                    "  }" +
+                    "  if (!window._hunttechHrmLinkHandlerAttached) {" +
+                    "    window._hunttechHrmLinkHandlerAttached = true;" +
+                    "    document.addEventListener('click', function(e) {" +
+                    "      var target = e.target;" +
+                    "      var link = target ? (target.closest ? target.closest('.llm-hrm-entity-link') : null) : null;" +
+                    "      if (link && window.hunttechOpenHrmEntity) {" +
+                    "        var entity = link.getAttribute('data-entity');" +
+                    "        var id = link.getAttribute('data-id');" +
+                    "        if (entity && id) {" +
+                    "          e.preventDefault();" +
+                    "          e.stopPropagation();" +
+                    "          window.hunttechOpenHrmEntity(entity, id);" +
+                    "        }" +
+                    "      }" +
+                    "    }, true);" +
+                    "  }" +
+                    "})()"
+            );
+        }
+    }
+
+    @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        hrmEntityBridgeRegistered = false;
+        if (chatUi != null && chatUi.getPage() != null && chatUi.getPage().getJavaScript() != null) {
+            try {
+                chatUi.getPage().getJavaScript().removeFunction("hunttechSendChatMessage");
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @EventListener
@@ -210,7 +408,20 @@ public class LlmChatScreen extends Screen {
 
     @Subscribe("sendBtn")
     public void onSend(Button.ClickEvent event) {
-        String message = inputArea.getValue();
+        executeSend(null);
+    }
+
+    private void executeSend() {
+        executeSend(null);
+    }
+
+    private void executeSend(String rawText) {
+        if (!sendBtn.isEnabled()) {
+            return;
+        }
+        String message = (rawText != null && !rawText.trim().isEmpty())
+                ? rawText
+                : inputArea.getValue();
         if (message == null || message.trim().isEmpty()) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("Введите сообщение")
@@ -218,9 +429,9 @@ public class LlmChatScreen extends Screen {
             return;
         }
         final String request = message.trim();
+        inputArea.setValue("");
         inputArea.setEnabled(false);
         sendBtn.setEnabled(false);
-        cancelBtn.setEnabled(true);
         if (activeRequestId == null || !request.equals(activeRequestText)) {
             activeRequestId = UUID.randomUUID().toString();
             activeRequestText = request;
@@ -251,37 +462,25 @@ public class LlmChatScreen extends Screen {
         }
     }
 
-    @Subscribe("cancelBtn")
-    public void onCancel(Button.ClickEvent event) {
-        if (conversationId == null || activeRequestId == null) {
-            return;
-        }
-        try {
-            llmChatService.cancelMessage(conversationId, activeRequestId);
-            cancelBtn.setEnabled(false);
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Отмена запрошена")
-                    .withDescription("Ответ не будет сохранён; провайдер может успеть учесть фактическое usage.")
-                    .show();
-        } catch (RuntimeException ex) {
-            showError(ex);
-        }
-    }
-
     private void renderHistory(List<LlmChatMessage> messages) {
         renderHistory(messages, null);
     }
 
     private void renderHistory(List<LlmChatMessage> messages, String liveText) {
-        StringBuilder rendered = new StringBuilder();
-        for (LlmChatMessage message : messages) {
-            rendered.append("USER".equals(message.getRole()) ? "Вы" : "ИИ")
-                    .append(":\n").append(message.getContent()).append("\n\n");
+        String html = MarkdownRenderer.renderChatHistory(messages, liveText);
+        historyLabel.setValue(html);
+        scrollToBottom();
+    }
+
+    private void scrollToBottom() {
+        try {
+            com.vaadin.ui.Panel panel = historyScrollBox.unwrap(com.vaadin.ui.Panel.class);
+            if (panel != null) {
+                panel.setScrollTop(Integer.MAX_VALUE / 2);
+            }
+        } catch (Exception ex) {
+            log.debug("Не удалось выполнить автоскролл historyScrollBox: {}", ex.getMessage());
         }
-        if (liveText != null && !liveText.isEmpty()) {
-            rendered.append("ИИ:\n").append(liveText).append("\n");
-        }
-        historyArea.setValue(rendered.toString());
     }
 
     private void applyStreamState(LlmChatStreamState state) {
@@ -309,10 +508,12 @@ public class LlmChatScreen extends Screen {
     private void resetControls(boolean clearInput) {
         if (clearInput) {
             inputArea.setValue("");
+        } else if (activeRequestText != null && !activeRequestText.isEmpty()) {
+            inputArea.setValue(activeRequestText);
         }
         inputArea.setEnabled(true);
         sendBtn.setEnabled(true);
-        cancelBtn.setEnabled(false);
+        inputArea.focus();
     }
 
     private void showError(Exception ex) {
@@ -320,6 +521,114 @@ public class LlmChatScreen extends Screen {
                 .withCaption("Не удалось выполнить запрос к ИИ")
                 .withDescription(ex.getMessage() == null ? "Проверьте настройки AI и согласие на fallback." : ex.getMessage())
                 .show();
+    }
+
+    private void openHrmEntityScreen(String entityType, String entityId) {
+        if (entityType == null || entityType.trim().isEmpty()) {
+            return;
+        }
+        String trimmedId = entityId == null ? "" : entityId.trim();
+        if (trimmedId.isEmpty()) {
+            return;
+        }
+        UUID id;
+        try {
+            id = UUID.fromString(trimmedId);
+        } catch (IllegalArgumentException e) {
+            log.warn("Некорректный UUID сущности HRM в ссылке чата: {}", entityId);
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Некорректный идентификатор сущности")
+                    .show();
+            return;
+        }
+
+        try {
+            switch (entityType.toLowerCase(Locale.ROOT)) {
+                case "candidate":
+                    if (!security.isEntityOpPermitted(JobCandidate.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра кандидата")
+                                .show();
+                        return;
+                    }
+                    JobCandidate candidate = dataManager.load(JobCandidate.class)
+                            .id(id)
+                            .view("jobCandidate-view")
+                            .optional()
+                            .orElse(null);
+                    if (candidate != null) {
+                        screenBuilders.editor(JobCandidate.class, this)
+                                .editEntity(candidate)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Кандидат не найден или был удалён")
+                                .show();
+                    }
+                    break;
+
+                case "vacancy":
+                    if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра вакансии")
+                                .show();
+                        return;
+                    }
+                    OpenPosition vacancy = dataManager.load(OpenPosition.class)
+                            .id(id)
+                            .view("openPosition-view")
+                            .optional()
+                            .orElse(null);
+                    if (vacancy != null) {
+                        screenBuilders.editor(OpenPosition.class, this)
+                                .editEntity(vacancy)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Вакансия не найдена или была удалена")
+                                .show();
+                    }
+                    break;
+
+                case "interaction":
+                    if (!security.isEntityOpPermitted(IteractionList.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра взаимодействия")
+                                .show();
+                        return;
+                    }
+                    IteractionList interaction = dataManager.load(IteractionList.class)
+                            .id(id)
+                            .view("iteractionList-edit-view")
+                            .optional()
+                            .orElse(null);
+                    if (interaction != null) {
+                        screenBuilders.editor(IteractionList.class, this)
+                                .editEntity(interaction)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Взаимодействие не найдено или было удалено")
+                                .show();
+                    }
+                    break;
+
+                default:
+                    log.warn("Неизвестный тип сущности HRM в чате: {}", entityType);
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Неподдерживаемый тип сущности: " + entityType)
+                            .show();
+            }
+        } catch (Exception ex) {
+            log.error("Ошибка при открытии сущности {} ({}) из LLM-чата", entityType, id, ex);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Не удалось открыть карточку")
+                    .withDescription("Проверьте права доступа или обратитесь к администратору.")
+                    .show();
+        }
     }
 
 }

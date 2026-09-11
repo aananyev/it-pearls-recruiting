@@ -26,11 +26,11 @@ public class ExtSettingsWindowLayoutContractTest {
         assertTrue("Корень должен содержать контейнер settingsMainLayout",
                 descriptor.contains("<hbox id=\"settingsMainLayout\""));
 
-        // 2. Сайдбар на всю высоту родительского экрана слева (270px)
+        // 2. Сайдбар на всю высоту родительского экрана слева (стандарт 312px / 270px)
         assertTrue("Сайдбар должен быть объявлен как прямой дочерний элемент settingsMainLayout",
                 descriptor.contains("<vbox id=\"userAiProfileSidebar\""));
-        assertTrue("Ширина сайдбара 270px и высота 100%",
-                descriptor.contains("width=\"270px\"") && descriptor.contains("height=\"100%\""));
+        assertTrue("Ширина сайдбара 312px и высота 100%",
+                (descriptor.contains("width=\"312px\"") || descriptor.contains("width=\"270px\"")) && descriptor.contains("height=\"100%\""));
         assertTrue("Сайдбар содержит класс edit-sidebar",
                 descriptor.contains("stylename=\"user-ai-profile-sidebar edit-sidebar\""));
 

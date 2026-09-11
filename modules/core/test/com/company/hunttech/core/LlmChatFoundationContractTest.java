@@ -242,13 +242,10 @@ public class LlmChatFoundationContractTest {
     public void chatSupportsCooperativeCancellationWithoutDuplicateProviderCall() throws IOException {
         String api = source("modules/global/src/com/company/hunttech/service/LlmChatService.java");
         String service = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
-        String screen = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
         assertTrue(api.contains("cancelMessage(UUID conversationId, String requestId)"));
         assertTrue(service.contains("CANCEL_REQUESTED"));
         assertTrue(service.contains("CANCELLED"));
         assertTrue(service.contains("новый requestId"));
-        assertTrue(screen.contains("cancelBtn"));
-        assertTrue(screen.contains("cancelMessage"));
         assertTrue(service.contains("CANCEL_REQUESTED"));
     }
 

@@ -7,7 +7,10 @@ import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.global.CommitContext;
+import com.haulmont.cuba.core.global.DataManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -16,6 +19,8 @@ import java.util.List;
 
 @Service(ApplicationSetupService.NAME)
 public class ApplicationSetupServiceBean implements ApplicationSetupService {
+
+    private static final Logger log = LoggerFactory.getLogger(ApplicationSetupServiceBean.class);
 
     private static final String QUERY_GET_ACTIVE_SETUP
             = "select e from hunttech_ApplicationSetup e where e.activeSetup = true";
@@ -145,18 +150,15 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
 
     @Override
     public ApplicationSetup getActiveApplicationSetup() {
-        ApplicationSetup applicationSetup = null;
-
         try {
-            applicationSetup = dataManager.load(ApplicationSetup.class)
+            return dataManager.load(ApplicationSetup.class)
                     .query(QUERY_GET_ACTIVE_SETUP)
-                    .cacheable(true)
                     .view("applicationSetup-view")
-                    .one();
+                    .optional()
+                    .orElse(null);
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            return applicationSetup;
+            log.error("Failed to load active ApplicationSetup", e);
+            return null;
         }
     }
 
