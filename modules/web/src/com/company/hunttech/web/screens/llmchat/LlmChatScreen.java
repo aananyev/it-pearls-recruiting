@@ -34,6 +34,8 @@ import com.company.hunttech.service.dto.HermesChatResponse;
 import elemental.json.JsonArray;
 import org.dom4j.Element;
 import org.springframework.context.event.EventListener;
+import com.haulmont.cuba.core.sys.AppContext;
+import com.haulmont.cuba.core.sys.SecurityContext;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -639,11 +641,13 @@ public class LlmChatScreen extends Screen {
     private void initHermesTab() {
         if (hermesConversationId == null) {
             try {
+                log.info("Инициализация диалога Hermes для текущего пользователя");
                 hermesConversationId = hermesChatService.startHermesConversation();
+                log.info("Создан/получен Hermes диалог convId={}", hermesConversationId);
                 List<HermesChatMessage> history = hermesChatService.loadHermesHistory(hermesConversationId);
                 renderHermesHistory(history);
             } catch (Exception ex) {
-                log.warn("Не удалось инициализировать Hermes диалог: {}", ex.getMessage());
+                log.warn("Не удалось инициализировать Hermes диалог: {}", ex.getMessage(), ex);
                 renderHermesHistory(Collections.emptyList());
             }
         }
@@ -681,6 +685,7 @@ public class LlmChatScreen extends Screen {
 
         final UUID convId = hermesConversationId;
         final UI ui = (chatUi != null) ? chatUi : UI.getCurrent();
+        final SecurityContext securityContext = AppContext.getSecurityContext();
 
         // Показываем сообщение пользователя сразу со статусом ожидания ответа
         List<HermesChatMessage> currentHistory = hermesChatService.loadHermesHistory(convId);
@@ -689,9 +694,18 @@ public class LlmChatScreen extends Screen {
         pendingList.add(pendingUserMsg);
         renderHermesHistory(pendingList, "Hermes обрабатывает запрос...");
 
+        log.info("executeHermesSend: отправка сообщения в Hermes Agent (convId={}, length={})", convId, request.length());
+        log.debug("executeHermesSend: prompt preview: {}", request.length() > 80 ? request.substring(0, 80) + "..." : request);
+
         new Thread(() -> {
+            AppContext.setSecurityContext(securityContext);
+            long threadStart = System.currentTimeMillis();
             try {
+                log.info("Hermes background thread started: convId={}", convId);
                 HermesChatResponse resp = hermesChatService.sendHermesMessage(convId, request);
+                long elapsed = System.currentTimeMillis() - threadStart;
+                log.info("Hermes background thread finished: convId={}, success={}, elapsed={}ms, error={}",
+                        convId, resp.isSuccess(), elapsed, resp.getErrorMessage());
                 if (ui != null) {
                     ui.access(() -> {
                         resetHermesControls(true);
@@ -706,7 +720,8 @@ public class LlmChatScreen extends Screen {
                     });
                 }
             } catch (Exception ex) {
-                log.error("Ошибка при обращении к Hermes Agent: {}", ex.getMessage(), ex);
+                long elapsed = System.currentTimeMillis() - threadStart;
+                log.error("Ошибка при обращении к Hermes Agent в фоновом потоке (elapsed={}ms): {}", elapsed, ex.getMessage(), ex);
                 if (ui != null) {
                     ui.access(() -> {
                         resetHermesControls(false);
@@ -719,8 +734,10 @@ public class LlmChatScreen extends Screen {
                         }
                     });
                 }
+            } finally {
+                AppContext.setSecurityContext(null);
             }
-        }).start();
+        }, "HermesChatWorker-" + convId).start();
     }
 
     private void renderHermesHistory(List<HermesChatMessage> messages) {

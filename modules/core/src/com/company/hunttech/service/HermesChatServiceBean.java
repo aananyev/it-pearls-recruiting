@@ -157,38 +157,48 @@ public class HermesChatServiceBean implements HermesChatService {
                 .optional()
                 .orElse(null);
 
+        log.info("sendHermesMessage: convId={}, пользователь={}, длина сообщения={}",
+                conversationId, currentUser.getLogin(), message.length());
+
         // 1. Выполняем запрос к Hermes Agent с перебором моделей по утвержденному сценарию:
         //    Сначала подключается модель из пользовательских настроек (UserAiConfiguration).
         //    Если ни одна пользовательская модель не настроена или не отвечает — административные модели (AdminAiConfiguration).
         List<HermesExecutionCandidate> candidates = resolveExecutionCandidates(currentUser);
+        log.info("Определено {} кандидатов для выполнения запроса к Hermes: {}", candidates.size(), candidates);
+
         String assistantText = null;
         String newSessionId = lastHermesSessionId;
         HermesExecutionCandidate successfulCandidate = null;
         Exception lastException = null;
 
-        for (HermesExecutionCandidate candidate : candidates) {
+        for (int i = 0; i < candidates.size(); i++) {
+            HermesExecutionCandidate candidate = candidates.get(i);
             try {
-                log.info("Попытка выполнения запроса к Hermes через {}: {}", candidate.getSource(), candidate);
+                log.info("Попытка #{}/{} выполнения запроса к Hermes через [{}]: provider={}, model={}, baseUrl={}",
+                        i + 1, candidates.size(), candidate.getSource(), candidate.getProviderCode(),
+                        candidate.getModelName(), candidate.getBaseUrl());
                 HermesExecutionResult execResult = executeHermesCli(message.trim(), lastHermesSessionId, candidate);
                 assistantText = execResult.cleanedText;
                 if (execResult.sessionId != null && !execResult.sessionId.isEmpty()) {
                     newSessionId = execResult.sessionId;
                 }
                 successfulCandidate = candidate;
-                log.info("Hermes успешно ответил, используя подключение {}: provider={}, model={}",
-                        candidate.getSource(), candidate.getProviderCode(), candidate.getModelName());
+                log.info("Hermes успешно ответил через [{}] (provider={}, model={}, sessionId={}, responseLength={})",
+                        candidate.getSource(), candidate.getProviderCode(), candidate.getModelName(),
+                        newSessionId, assistantText != null ? assistantText.length() : 0);
                 break;
             } catch (Exception ex) {
                 lastException = ex;
-                log.warn("Подключение к модели Hermes {} не ответило: {}. Пробуем следующий вариант...",
-                        candidate, ex.getMessage());
+                log.warn("Подключение к модели Hermes #{}/{} [{}] не ответило: {}. Пробуем следующий вариант...",
+                        i + 1, candidates.size(), candidate.getSource(), ex.getMessage(), ex);
             }
         }
 
         if (assistantText == null) {
             long duration = System.currentTimeMillis() - startTime;
             String errorDetail = lastException != null ? lastException.getMessage() : "нет ответа от моделей";
-            log.error("Все варианты подключения к модели Hermes завершились ошибкой: {}", errorDetail, lastException);
+            log.error("Все варианты подключения к модели Hermes завершились ошибкой (всего {} вариантов): {}",
+                    candidates.size(), errorDetail, lastException);
             return HermesChatResponse.error(conversationId, "Ошибка Hermes Agent: " + errorDetail, duration);
         }
 
@@ -447,8 +457,13 @@ public class HermesChatServiceBean implements HermesChatService {
             command.addAll(hermesArgs);
         }
 
-        log.info("Запуск Hermes Agent через: {}", String.join(" ", command));
+        List<String> maskedCommand = new ArrayList<>();
+        for (String part : command) {
+            maskedCommand.add(part.replaceAll("(?i)(key=)('[^']*'|[^'\\s]+)", "$1***"));
+        }
+        log.info("Запуск процесса Hermes CLI (timeout={}s): {}", config.getTimeoutSeconds(), String.join(" ", maskedCommand));
 
+        long cliStart = System.currentTimeMillis();
         ProcessBuilder pb = new ProcessBuilder(command);
         Process process = pb.start();
 
@@ -478,16 +493,26 @@ public class HermesChatServiceBean implements HermesChatService {
 
         int timeoutSeconds = config.getTimeoutSeconds();
         boolean completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+        long duration = System.currentTimeMillis() - cliStart;
+
         if (!completed) {
             process.destroyForcibly();
             stdoutFuture.cancel(true);
             stderrFuture.cancel(true);
+            log.error("Таймаут выполнения Hermes CLI после {} мс (лимит {} с)", duration, timeoutSeconds);
             throw new RuntimeException("Превышено время ожидания ответа от Hermes Agent (" + timeoutSeconds + " с)");
         }
 
         String stdout = stdoutFuture.get(5, TimeUnit.SECONDS);
         String stderr = stderrFuture.get(5, TimeUnit.SECONDS);
         int exitCode = process.exitValue();
+
+        log.info("Процесс Hermes CLI завершился: exitCode={}, время={} мс, длина stdout={}, длина stderr={}",
+                exitCode, duration, stdout != null ? stdout.length() : 0, stderr != null ? stderr.length() : 0);
+        if (stderr != null && !stderr.trim().isEmpty()) {
+            log.warn("Hermes CLI stderr (первые 300 символов): {}",
+                    stderr.length() > 300 ? stderr.substring(0, 300) + "..." : stderr);
+        }
 
         if (exitCode != 0 && (stdout == null || stdout.trim().isEmpty())) {
             // Если сессия не найдена на сервере, повторяем запрос без флага --resume
@@ -498,7 +523,10 @@ public class HermesChatServiceBean implements HermesChatService {
             throw new RuntimeException("Hermes завершился с кодом " + exitCode + ": " + stderr);
         }
 
-        return parseHermesOutput(stdout);
+        HermesExecutionResult result = parseHermesOutput(stdout);
+        log.info("Результат парсинга ответа Hermes: длина ответа={}, sessionId={}",
+                result.cleanedText != null ? result.cleanedText.length() : 0, result.sessionId);
+        return result;
     }
 
     private String shellEscape(String value) {
