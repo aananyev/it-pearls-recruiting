@@ -6,6 +6,7 @@ import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.TextArea;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.Screen;
@@ -24,6 +25,8 @@ import java.math.BigDecimal;
 public class AiCallLogBrowse extends StandardLookup<AiCallLog> {
 
     @Inject
+    private CollectionLoader<AiCallLog> aiCallLogsDl;
+    @Inject
     private GroupTable<AiCallLog> aiCallLogsTable;
     @Inject
     private UiComponents uiComponents;
@@ -33,6 +36,20 @@ public class AiCallLogBrowse extends StandardLookup<AiCallLog> {
     private TextArea<String> responseTextArea;
     @Inject
     private TextArea<String> errorTextArea;
+
+    private String functionCodeFilter;
+
+    public void setFunctionCodeFilter(String functionCode) {
+        this.functionCodeFilter = functionCode;
+    }
+
+    @Subscribe
+    public void onBeforeShow(Screen.BeforeShowEvent event) {
+        if (functionCodeFilter != null && !functionCodeFilter.trim().isEmpty()) {
+            aiCallLogsDl.setCondition(com.haulmont.cuba.core.global.queryconditions.JpqlCondition.where("{E}.functionCode = :functionCode"));
+            aiCallLogsDl.setParameter("functionCode", functionCodeFilter.trim());
+        }
+    }
 
     @Subscribe
     public void onInit(Screen.InitEvent event) {

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Реестр функций AI: Split-View (Master-Detail) Browse в стандарте HuntTech Reestr -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://reestrCaption"
+        focusComponent="aiFunctionsTable"
+        messagesPack="com.company.hunttech.web.screens.aifunctionconfiguration"
+        icon="TASKS">
+    <!-- Data section: безопасная загрузка с view без prompt LOB и секретов -->
+    <data readOnly="true">
+        <collection id="aiFunctionsDc"
+                    class="com.company.hunttech.entity.ai.AiFunctionConfiguration"
+                    view="ai-function-configuration-browse-view">
+            <loader id="aiFunctionsDl">
+                <query><![CDATA[select e from hunttech_AiFunctionConfiguration e order by e.name asc]]></query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="720" width="1200"/>
+
+    <!-- Корневой контейнер с двухпанельной разметкой Split-View -->
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="tableBox" stylename="job-candidate-main-layout edit-screen-layout">
+
+            <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР 312px): Стандарт hunttech-reestr-screen -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+
+                        <!-- Шапка профиля функции: логотип 120x120px и 4-уровневая типографика -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="detailPic"
+                                              width="120px" height="120px"
+                                              ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              fallbackThemePath="icons/ai/ai-function-configuration.png"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailName" value="msg://selectFunctionPrompt"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailCode" value=""
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailCapability" value=""
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                                <label id="detailStatus" value=""
+                                       stylename="edit-help candidate-sidebar-city"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="true"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Панель быстрых действий -->
+                        <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="editBtn" caption="msg://openCard" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                            <button id="copyCodeBtn" caption="msg://copyCode" icon="COPY" enabled="false" width="100%"/>
+                            <button id="callLogsBtn" caption="msg://viewCallLogs" icon="HISTORY" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция 1: Маршрутизация и исполнение -->
+                        <vbox id="routingSection" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://sectionRouting" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="routingGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns>
+                                    <column flex="1"/>
+                                    <column flex="1"/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="msg://fieldExecutionPolicy" stylename="bold"/>
+                                        <label id="detailExecutionPolicy" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldFallbackPolicy" stylename="bold"/>
+                                        <label id="detailFallbackPolicy" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldAdminConfiguration" stylename="bold"/>
+                                        <label id="detailAdminConfig" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldAdminModelName" stylename="bold"/>
+                                        <label id="detailAdminModel" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldIncludeUserContext" stylename="bold"/>
+                                        <label id="detailIncludeUserContext" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldAllowModelOverride" stylename="bold"/>
+                                        <label id="detailAllowOverride" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция 2: Параметры LLM и лимиты -->
+                        <vbox id="limitsSection" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://sectionLlmLimits" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="limitsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns>
+                                    <column flex="1"/>
+                                    <column flex="1"/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="msg://fieldTemperature" stylename="bold"/>
+                                        <label id="detailTemperature" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldMaxTokens" stylename="bold"/>
+                                        <label id="detailMaxTokens" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldMonthlyQuota" stylename="bold"/>
+                                        <label id="detailMonthlyQuota" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldConfigVersion" stylename="bold"/>
+                                        <label id="detailConfigVersion" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция 3: Описание и назначение -->
+                        <vbox id="descriptionSection" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://sectionDescription" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <label id="detailDescription" value="msg://noDescription" width="100%" htmlEnabled="true" stylename="job-candidate-readiness edit-help"/>
+                        </vbox>
+
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ: Тулбар, фильтр, DataGrid -->
+            <vbox id="tableBox" width="100%" height="100%" spacing="true" expand="aiFunctionsTable" stylename="candidate-table-card">
+                <!-- Командный тулбар -->
+                <hbox id="buttonsPanel" spacing="true" stylename="candidate-filter-bar">
+                    <button action="aiFunctionsTable.create" stylename="primary"/>
+                    <button action="aiFunctionsTable.edit"/>
+                    <button action="aiFunctionsTable.remove"/>
+                    <button action="aiFunctionsTable.refresh"/>
+                    <button id="toggleActiveBtn" caption="msg://toggleActive" icon="ADJUST" enabled="false"/>
+                </hbox>
+
+                <!-- Сворачиваемый Generic Filter -->
+                <filter id="filter" dataLoader="aiFunctionsDl" applyTo="aiFunctionsTable" collapsable="true" collapsed="true">
+                    <properties include=".*"/>
+                </filter>
+
+                <!-- Таблица AI-функций с пагинатором rowsCount 24px -->
+                <dataGrid id="aiFunctionsTable" width="100%" dataContainer="aiFunctionsDc" selectionMode="SINGLE">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                        <action id="refresh" type="refresh"/>
+                    </actions>
+                    <columns>
+                        <column id="activeStatus" caption="msg://colStatus" width="110px" sortable="false"/>
+                        <column property="code" caption="msg://colCode" width="220px"/>
+                        <column property="name" caption="msg://colName" minimumWidth="200px"/>
+                        <column property="capability" caption="msg://colCapability" width="130px"/>
+                        <column property="executionPolicy" caption="msg://colExecutionPolicy" width="140px"/>
+                        <column property="adminConfiguration" caption="msg://colAdminConfig" width="160px"/>
+                        <column property="adminModelName" caption="msg://colModel" width="150px"/>
+                        <column property="defaultMonthlyTokenQuota" caption="msg://colQuota" width="120px"/>
+                        <column property="temperature" caption="msg://colTemperature" width="100px"/>
+                        <column property="maxTokens" caption="msg://colMaxTokens" width="110px"/>
+                    </columns>
+                    <rowsCount id="tableRowsCount"/>
+                </dataGrid>
+
+                <hbox id="lookupActions" spacing="true" visible="false">
+                    <button action="lookupSelectAction"/>
+                    <button action="lookupCancelAction"/>
+                </hbox>
+            </vbox>
+
+        </hbox>
+    </layout>
+</window>

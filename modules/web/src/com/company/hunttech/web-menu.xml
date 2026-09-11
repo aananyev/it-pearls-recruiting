@@ -123,6 +123,8 @@
               caption="mainMsg://menu_config.hunttech_UserAiDashboard" icon="PIE_CHART"/>
         <item screen="hunttech_AiFunctionConfiguration.browse"
               caption="mainMsg://menu_config.hunttech_AiFunctionConfiguration.browse" icon="SLIDERS"/>
+        <item screen="hunttech_AiFunctionConfiguration.reestr"
+              caption="mainMsg://menu_config.hunttech_AiFunctionConfiguration.reestr" icon="TASKS"/>
         <item screen="hunttech_AiCallLog.browse"
               caption="mainMsg://menu_config.hunttech_AiCallLog.browse" icon="HISTORY"/>
         <item screen="hunttech_AdminAiConfiguration.browse"
