@@ -1,0 +1,602 @@
+package com.company.hunttech.service;
+
+import com.company.hunttech.config.HunttechHermesConfig;
+import com.company.hunttech.core.ai.AiSecretService;
+import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.entity.ai.AdminAiConfiguration;
+import com.company.hunttech.entity.ai.LlmChatConversation;
+import com.company.hunttech.entity.ai.LlmChatMessage;
+import com.company.hunttech.service.dto.HermesChatMessage;
+import com.company.hunttech.service.dto.HermesChatResponse;
+import com.company.hunttech.service.dto.HermesConnectionStatus;
+import com.haulmont.cuba.core.global.CommitContext;
+import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.security.entity.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Реализация сервиса взаимодействия с Hermes Agent (профиль hrm-viewer в Docker).
+ */
+@Service(HermesChatService.NAME)
+public class HermesChatServiceBean implements HermesChatService {
+    private static final Logger log = LoggerFactory.getLogger(HermesChatServiceBean.class);
+
+    private static final String HERMES_CONVERSATION_TITLE_PREFIX = "Hermes: ";
+    private static final String PROVIDER_HERMES = "hermes";
+    private static final Pattern SESSION_ID_PATTERN = Pattern.compile("session_id:\\s*(\\S+)");
+
+    @Inject
+    private Configuration configuration;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
+    private AiSecretService aiSecretService;
+
+    @Override
+    public UUID startHermesConversation() {
+        ExtUser currentUser = getCurrentUser();
+        if (currentUser == null) {
+            throw new IllegalStateException("Пользователь не авторизован");
+        }
+
+        // Ищем активный диалог Hermes для данного пользователя
+        String title = HERMES_CONVERSATION_TITLE_PREFIX + getHermesConfig().getProfile();
+        LlmChatConversation conversation = dataManager.load(LlmChatConversation.class)
+                .query("select e from hunttech_LlmChatConversation e " +
+                        "where e.user.id = :userId and e.title = :title and e.status = 'ACTIVE' and e.deleteTs is null " +
+                        "order by e.createTs desc")
+                .parameter("userId", currentUser.getId())
+                .parameter("title", title)
+                .optional()
+                .orElse(null);
+
+        if (conversation == null) {
+            conversation = metadata.create(LlmChatConversation.class);
+            conversation.setUser(currentUser);
+            conversation.setTitle(title);
+            conversation.setStatus("ACTIVE");
+            conversation.setLastMessageAt(new Date());
+            conversation = dataManager.commit(conversation);
+        }
+
+        return conversation.getId();
+    }
+
+    @Override
+    public List<HermesChatMessage> loadHermesHistory(UUID conversationId) {
+        if (conversationId == null) {
+            return new ArrayList<>();
+        }
+
+        ExtUser currentUser = getCurrentUser();
+        UUID currentUserId = currentUser != null ? currentUser.getId() : null;
+
+        List<LlmChatMessage> messages = dataManager.load(LlmChatMessage.class)
+                .query("select e from hunttech_LlmChatMessage e " +
+                        "where e.conversation.id = :conversationId and e.conversation.user.id = :userId and e.deleteTs is null " +
+                        "order by e.sequenceNo asc")
+                .parameter("conversationId", conversationId)
+                .parameter("userId", currentUserId)
+                .list();
+
+        List<HermesChatMessage> dtoList = new ArrayList<>();
+        for (LlmChatMessage msg : messages) {
+            HermesChatMessage dto = new HermesChatMessage();
+            dto.setId(msg.getId());
+            dto.setRole("USER".equalsIgnoreCase(msg.getRole()) ? "user" : "assistant");
+            dto.setContent(msg.getContent());
+            dto.setCreateTs(msg.getCreateTs());
+            dto.setSequenceNo(msg.getSequenceNo());
+            dto.setHermesSessionId(msg.getProviderRequestId());
+            dtoList.add(dto);
+        }
+
+        return dtoList;
+    }
+
+    @Override
+    public HermesChatResponse sendHermesMessage(UUID conversationId, String message) {
+        long startTime = System.currentTimeMillis();
+        if (conversationId == null) {
+            throw new IllegalArgumentException("Идентификатор диалога не указан");
+        }
+        if (message == null || message.trim().isEmpty()) {
+            throw new IllegalArgumentException("Сообщение не может быть пустым");
+        }
+
+        ExtUser currentUser = getCurrentUser();
+        if (currentUser == null) {
+            throw new IllegalStateException("Пользователь не авторизован");
+        }
+
+        LlmChatConversation conversation = dataManager.load(LlmChatConversation.class)
+                .id(conversationId)
+                .optional()
+                .orElseThrow(() -> new IllegalArgumentException("Диалог не найден: " + conversationId));
+
+        // Вычисляем следующий sequenceNo
+        Integer maxSeq = dataManager.loadValue("select max(e.sequenceNo) from hunttech_LlmChatMessage e " +
+                "where e.conversation.id = :convId and e.deleteTs is null", Integer.class)
+                .parameter("convId", conversationId)
+                .optional()
+                .orElse(0);
+
+        // Ищем последнюю сессию Hermes для непрерывности контекста
+        String lastHermesSessionId = dataManager.loadValue(
+                "select e.providerRequestId from hunttech_LlmChatMessage e " +
+                        "where e.conversation.id = :convId and e.providerRequestId is not null and e.deleteTs is null " +
+                        "order by e.sequenceNo desc", String.class)
+                .parameter("convId", conversationId)
+                .optional()
+                .orElse(null);
+
+        // 1. Выполняем запрос к Hermes Agent с перебором моделей по утвержденному сценарию:
+        //    Сначала подключается модель из пользовательских настроек (UserAiConfiguration).
+        //    Если ни одна пользовательская модель не настроена или не отвечает — административные модели (AdminAiConfiguration).
+        List<HermesExecutionCandidate> candidates = resolveExecutionCandidates(currentUser);
+        String assistantText = null;
+        String newSessionId = lastHermesSessionId;
+        HermesExecutionCandidate successfulCandidate = null;
+        Exception lastException = null;
+
+        for (HermesExecutionCandidate candidate : candidates) {
+            try {
+                log.info("Попытка выполнения запроса к Hermes через {}: {}", candidate.getSource(), candidate);
+                HermesExecutionResult execResult = executeHermesCli(message.trim(), lastHermesSessionId, candidate);
+                assistantText = execResult.cleanedText;
+                if (execResult.sessionId != null && !execResult.sessionId.isEmpty()) {
+                    newSessionId = execResult.sessionId;
+                }
+                successfulCandidate = candidate;
+                log.info("Hermes успешно ответил, используя подключение {}: provider={}, model={}",
+                        candidate.getSource(), candidate.getProviderCode(), candidate.getModelName());
+                break;
+            } catch (Exception ex) {
+                lastException = ex;
+                log.warn("Подключение к модели Hermes {} не ответило: {}. Пробуем следующий вариант...",
+                        candidate, ex.getMessage());
+            }
+        }
+
+        if (assistantText == null) {
+            long duration = System.currentTimeMillis() - startTime;
+            String errorDetail = lastException != null ? lastException.getMessage() : "нет ответа от моделей";
+            log.error("Все варианты подключения к модели Hermes завершились ошибкой: {}", errorDetail, lastException);
+            return HermesChatResponse.error(conversationId, "Ошибка Hermes Agent: " + errorDetail, duration);
+        }
+
+        // 2. Атомарно сохраняем сообщение пользователя, ответ ассистента и состояние диалога в едином CommitContext
+        String effectiveProvider = (successfulCandidate != null && successfulCandidate.getProviderCode() != null)
+                ? successfulCandidate.getProviderCode() : PROVIDER_HERMES;
+        String effectiveModel = (successfulCandidate != null && successfulCandidate.getModelName() != null)
+                ? successfulCandidate.getModelName() : getHermesConfig().getProfile();
+
+        LlmChatMessage userMsg = metadata.create(LlmChatMessage.class);
+        userMsg.setConversation(conversation);
+        userMsg.setRole("USER");
+        userMsg.setContent(message.trim());
+        userMsg.setSequenceNo(maxSeq + 1);
+        userMsg.setStatus("COMPLETED");
+        userMsg.setProviderCode(effectiveProvider);
+        userMsg.setModelName(effectiveModel);
+
+        LlmChatMessage assistantMsg = metadata.create(LlmChatMessage.class);
+        assistantMsg.setConversation(conversation);
+        assistantMsg.setRole("ASSISTANT");
+        assistantMsg.setContent(assistantText);
+        assistantMsg.setSequenceNo(maxSeq + 2);
+        assistantMsg.setStatus("COMPLETED");
+        assistantMsg.setProviderCode(effectiveProvider);
+        assistantMsg.setModelName(effectiveModel);
+        assistantMsg.setProviderRequestId(newSessionId);
+
+        conversation.setLastMessageAt(new Date());
+
+        CommitContext commitContext = new CommitContext();
+        commitContext.addInstanceToCommit(userMsg);
+        commitContext.addInstanceToCommit(assistantMsg);
+        commitContext.addInstanceToCommit(conversation);
+        dataManager.commit(commitContext);
+
+        long duration = System.currentTimeMillis() - startTime;
+        return new HermesChatResponse(conversationId, assistantText, newSessionId, duration);
+    }
+
+    private List<HermesExecutionCandidate> resolveExecutionCandidates(ExtUser currentUser) {
+        List<HermesExecutionCandidate> candidates = new ArrayList<>();
+
+        // 1. Сначала пользовательские настройки (isPrimary DESC, priority DESC)
+        if (currentUser != null) {
+            try {
+                List<UserAiConfiguration> userConfigs = dataManager.load(UserAiConfiguration.class)
+                        .query("select c from hunttech_UserAiConfiguration c " +
+                                "where c.user.id = :userId and (c.isActive is null or c.isActive = true) " +
+                                "order by c.isPrimary desc, c.priority desc")
+                        .parameter("userId", currentUser.getId())
+                        .list();
+                for (UserAiConfiguration uc : userConfigs) {
+                    String apiKey = resolveUserApiKey(uc);
+                    if (apiKey != null && !apiKey.trim().isEmpty() && uc.getProviderCode() != null) {
+                        candidates.add(new HermesExecutionCandidate("USER", uc.getProviderCode().trim(),
+                                uc.getDefaultModelName(), apiKey.trim(), null));
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Ошибка загрузки пользовательских AI-конфигураций: {}", e.getMessage());
+            }
+        }
+
+        // 2. Если ни одна пользовательская модель не отвечает — административные модели (priority DESC)
+        try {
+            List<AdminAiConfiguration> adminConfigs = dataManager.load(AdminAiConfiguration.class)
+                    .query("select c from hunttech_AdminAiConfiguration c " +
+                            "where (c.active is null or c.active = true) " +
+                            "order by c.priority desc")
+                    .list();
+            for (AdminAiConfiguration ac : adminConfigs) {
+                String apiKey = null;
+                if (ac.getApiKeyEncrypted() != null && !ac.getApiKeyEncrypted().trim().isEmpty()) {
+                    try {
+                        apiKey = aiSecretService.decrypt(ac.getApiKeyEncrypted());
+                    } catch (Exception e) {
+                        log.warn("Не удалось расшифровать ключ AdminAiConfiguration {}: {}", ac.getName(), e.getMessage());
+                    }
+                }
+                if (apiKey != null && !apiKey.trim().isEmpty() && ac.getProviderCode() != null) {
+                    candidates.add(new HermesExecutionCandidate("ADMIN", ac.getProviderCode().trim(),
+                            ac.getDefaultModelName(), apiKey.trim(), ac.getBaseApiUrl()));
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Ошибка загрузки административных AI-конфигураций: {}", e.getMessage());
+        }
+
+        // 3. Резервное подключение по умолчанию из профиля контейнера
+        candidates.add(new HermesExecutionCandidate("CONTAINER_DEFAULT", null, null, null, null));
+
+        return candidates;
+    }
+
+    private String resolveUserApiKey(UserAiConfiguration configuration) {
+        if (configuration.getApiKeyEncrypted() != null && !configuration.getApiKeyEncrypted().trim().isEmpty()) {
+            try {
+                return aiSecretService.decrypt(configuration.getApiKeyEncrypted());
+            } catch (Exception e) {
+                log.warn("Не удалось расшифровать ключ UserAiConfiguration: {}", e.getMessage());
+            }
+        }
+        return configuration.getApiKey();
+    }
+
+    @Override
+    public HermesConnectionStatus checkHermesConnection() {
+        long startTime = System.currentTimeMillis();
+        HunttechHermesConfig config = getHermesConfig();
+        try {
+            // Быстрая проверка через docker ps / inspect контейнера
+            List<String> cmd = new ArrayList<>();
+            if (config.getSshEnabled()) {
+                cmd.add("ssh");
+                cmd.add("-o");
+                cmd.add("BatchMode=yes");
+                cmd.add("-o");
+                cmd.add("ConnectTimeout=5");
+                cmd.add("-o");
+                cmd.add("StrictHostKeyChecking=accept-new");
+                if (config.getSshPort() != 22) {
+                    cmd.add("-p");
+                    cmd.add(String.valueOf(config.getSshPort()));
+                }
+                cmd.add(config.getSshUser() + "@" + config.getSshHost());
+                cmd.add("docker inspect -f '{{.State.Status}}' " + shellEscape(config.getContainerName()));
+            } else {
+                cmd.add("docker");
+                cmd.add("inspect");
+                cmd.add("-f");
+                cmd.add("{{.State.Status}}");
+                cmd.add(config.getContainerName());
+            }
+
+            ProcessBuilder pb = new ProcessBuilder(cmd);
+            Process process = pb.start();
+            boolean finished = process.waitFor(10, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                return new HermesConnectionStatus(false, config.getSshHost(), config.getContainerName(),
+                        config.getProfile(), "Таймаут подключения (10 с)", System.currentTimeMillis() - startTime);
+            }
+
+            int exitCode = process.exitValue();
+            String stdout = readStream(process.getInputStream()).trim();
+            long duration = System.currentTimeMillis() - startTime;
+
+            if (exitCode == 0 && "running".equalsIgnoreCase(stdout)) {
+                return new HermesConnectionStatus(true, config.getSshHost(), config.getContainerName(),
+                        config.getProfile(), "Контейнер активен (статус: running)", duration);
+            } else {
+                String stderr = readStream(process.getErrorStream()).trim();
+                return new HermesConnectionStatus(false, config.getSshHost(), config.getContainerName(),
+                        config.getProfile(), "Контейнер недоступен (код " + exitCode + "): " + stderr + " " + stdout, duration);
+            }
+        } catch (Exception ex) {
+            long duration = System.currentTimeMillis() - startTime;
+            return new HermesConnectionStatus(false, config.getSshHost(), config.getContainerName(),
+                    config.getProfile(), "Ошибка соединения: " + ex.getMessage(), duration);
+        }
+    }
+
+    private HermesExecutionResult executeHermesCli(String prompt, String resumeSessionId,
+                                                   HermesExecutionCandidate candidate) throws Exception {
+        HunttechHermesConfig config = getHermesConfig();
+        List<String> command = new ArrayList<>();
+
+        // Формируем переменные окружения для передачи в docker
+        Map<String, String> envVars = new HashMap<>();
+        if (candidate != null && candidate.getApiKey() != null && !candidate.getApiKey().isEmpty()) {
+            String provider = candidate.getProviderCode() != null
+                    ? candidate.getProviderCode().toLowerCase(Locale.ROOT) : "";
+            switch (provider) {
+                case "deepseek":
+                    envVars.put("DEEPSEEK_API_KEY", candidate.getApiKey());
+                    if (candidate.getBaseUrl() != null && !candidate.getBaseUrl().isEmpty()) {
+                        envVars.put("DEEPSEEK_BASE_URL", candidate.getBaseUrl());
+                    }
+                    break;
+                case "openai":
+                    envVars.put("OPENAI_API_KEY", candidate.getApiKey());
+                    if (candidate.getBaseUrl() != null && !candidate.getBaseUrl().isEmpty()) {
+                        envVars.put("OPENAI_BASE_URL", candidate.getBaseUrl());
+                    }
+                    break;
+                case "openrouter":
+                    envVars.put("OPENROUTER_API_KEY", candidate.getApiKey());
+                    break;
+                case "anthropic":
+                    envVars.put("ANTHROPIC_API_KEY", candidate.getApiKey());
+                    break;
+                default:
+                    envVars.put(provider.toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9_]", "") + "_API_KEY", candidate.getApiKey());
+                    break;
+            }
+        }
+
+        // Собираем аргументы вызова hermes chat
+        List<String> hermesArgs = new ArrayList<>();
+        hermesArgs.add("hermes");
+        hermesArgs.add("-p");
+        hermesArgs.add(config.getProfile());
+        hermesArgs.add("chat");
+
+        if (candidate != null && candidate.getProviderCode() != null && !candidate.getProviderCode().isEmpty()) {
+            hermesArgs.add("--provider");
+            hermesArgs.add(candidate.getProviderCode());
+        }
+        if (candidate != null && candidate.getModelName() != null && !candidate.getModelName().isEmpty()) {
+            hermesArgs.add("-m");
+            hermesArgs.add(candidate.getModelName());
+        }
+        if (resumeSessionId != null && !resumeSessionId.trim().isEmpty()) {
+            hermesArgs.add("--resume");
+            hermesArgs.add(resumeSessionId.trim());
+        }
+        hermesArgs.add("--query-file");
+        hermesArgs.add("-");
+        hermesArgs.add("--oneshot");
+        hermesArgs.add("-Q");
+
+        if (config.getSshEnabled()) {
+            command.add("ssh");
+            command.add("-o");
+            command.add("BatchMode=yes");
+            command.add("-o");
+            command.add("ConnectTimeout=15");
+            command.add("-o");
+            command.add("StrictHostKeyChecking=accept-new");
+            if (config.getSshPort() != 22) {
+                command.add("-p");
+                command.add(String.valueOf(config.getSshPort()));
+            }
+            command.add(config.getSshUser() + "@" + config.getSshHost());
+
+            StringBuilder remoteCmd = new StringBuilder();
+            remoteCmd.append("docker exec -i");
+            for (Map.Entry<String, String> entry : envVars.entrySet()) {
+                remoteCmd.append(" -e ").append(entry.getKey()).append("=").append(shellEscape(entry.getValue()));
+            }
+            remoteCmd.append(" ").append(shellEscape(config.getContainerName()));
+            for (String arg : hermesArgs) {
+                remoteCmd.append(" ").append(shellEscape(arg));
+            }
+            command.add(remoteCmd.toString());
+        } else {
+            command.add("docker");
+            command.add("exec");
+            command.add("-i");
+            for (Map.Entry<String, String> entry : envVars.entrySet()) {
+                command.add("-e");
+                command.add(entry.getKey() + "=" + entry.getValue());
+            }
+            command.add(config.getContainerName());
+            command.addAll(hermesArgs);
+        }
+
+        log.info("Запуск Hermes Agent через: {}", String.join(" ", command));
+
+        ProcessBuilder pb = new ProcessBuilder(command);
+        Process process = pb.start();
+
+        // Безопасная передача промпта через STDIN (исключает шелл-инъекции и поломку спецсимволов)
+        try (OutputStream os = process.getOutputStream()) {
+            os.write(prompt.getBytes(StandardCharsets.UTF_8));
+            os.flush();
+        }
+
+        // Асинхронное чтение stdout и stderr во избежание deadlock при переполнении буфера пайпа OS
+        CompletableFuture<String> stdoutFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return readStream(process.getInputStream());
+            } catch (Exception e) {
+                log.warn("Ошибка чтения stdout процесса Hermes: {}", e.getMessage());
+                return "";
+            }
+        });
+        CompletableFuture<String> stderrFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return readStream(process.getErrorStream());
+            } catch (Exception e) {
+                log.warn("Ошибка чтения stderr процесса Hermes: {}", e.getMessage());
+                return "";
+            }
+        });
+
+        int timeoutSeconds = config.getTimeoutSeconds();
+        boolean completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+        if (!completed) {
+            process.destroyForcibly();
+            stdoutFuture.cancel(true);
+            stderrFuture.cancel(true);
+            throw new RuntimeException("Превышено время ожидания ответа от Hermes Agent (" + timeoutSeconds + " с)");
+        }
+
+        String stdout = stdoutFuture.get(5, TimeUnit.SECONDS);
+        String stderr = stderrFuture.get(5, TimeUnit.SECONDS);
+        int exitCode = process.exitValue();
+
+        if (exitCode != 0 && (stdout == null || stdout.trim().isEmpty())) {
+            // Если сессия не найдена на сервере, повторяем запрос без флага --resume
+            if (stderr != null && stderr.contains("Session not found") && resumeSessionId != null) {
+                log.warn("Сессия Hermes {} не найдена на сервере, повторяем запрос без --resume", resumeSessionId);
+                return executeHermesCli(prompt, null, candidate);
+            }
+            throw new RuntimeException("Hermes завершился с кодом " + exitCode + ": " + stderr);
+        }
+
+        return parseHermesOutput(stdout);
+    }
+
+    private String shellEscape(String value) {
+        if (value == null) {
+            return "''";
+        }
+        return "'" + value.replace("'", "'\\''") + "'";
+    }
+
+    public static class HermesExecutionCandidate {
+        private final String source;
+        private final String providerCode;
+        private final String modelName;
+        private final String apiKey;
+        private final String baseUrl;
+
+        public HermesExecutionCandidate(String source, String providerCode, String modelName, String apiKey, String baseUrl) {
+            this.source = source;
+            this.providerCode = providerCode;
+            this.modelName = modelName;
+            this.apiKey = apiKey;
+            this.baseUrl = baseUrl;
+        }
+
+        public String getSource() { return source; }
+        public String getProviderCode() { return providerCode; }
+        public String getModelName() { return modelName; }
+        public String getApiKey() { return apiKey; }
+        public String getBaseUrl() { return baseUrl; }
+
+        @Override
+        public String toString() {
+            return "[" + source + "] " + (providerCode != null ? providerCode : "default") +
+                    (modelName != null ? " (" + modelName + ")" : "");
+        }
+    }
+
+    private HermesExecutionResult parseHermesOutput(String rawOutput) {
+        HermesExecutionResult result = new HermesExecutionResult();
+        if (rawOutput == null) {
+            result.cleanedText = "";
+            return result;
+        }
+
+        String[] lines = rawOutput.split("\r?\n");
+        StringBuilder sb = new StringBuilder();
+
+        for (String line : lines) {
+            Matcher m = SESSION_ID_PATTERN.matcher(line);
+            if (m.find()) {
+                result.sessionId = m.group(1).trim();
+                continue;
+            }
+
+            // Фильтрация технических баннеров Hermes
+            String trimmed = line.trim();
+            if (trimmed.startsWith("⚠️") || trimmed.startsWith("⚠") || trimmed.startsWith("↻")) {
+                continue;
+            }
+            if (trimmed.startsWith("Warning:") || trimmed.startsWith("Normalized model")) {
+                continue;
+            }
+
+            sb.append(line).append("\n");
+        }
+
+        result.cleanedText = sb.toString().trim();
+        return result;
+    }
+
+    private String readStream(java.io.InputStream is) throws Exception {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            return sb.toString();
+        }
+    }
+
+    private ExtUser getCurrentUser() {
+        if (userSessionSource == null || userSessionSource.getUserSession() == null) {
+            return null;
+        }
+        User user = userSessionSource.getUserSession().getUser();
+        if (user instanceof ExtUser) {
+            return (ExtUser) user;
+        }
+        return dataManager.load(ExtUser.class).id(user.getId()).optional().orElse(null);
+    }
+
+    private HunttechHermesConfig getHermesConfig() {
+        return configuration.getConfig(HunttechHermesConfig.class);
+    }
+
+    private static class HermesExecutionResult {
+        String cleanedText = "";
+        String sessionId = null;
+    }
+}

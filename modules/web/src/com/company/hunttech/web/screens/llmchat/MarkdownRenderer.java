@@ -81,6 +81,62 @@ public class MarkdownRenderer {
     }
 
     /**
+     * Renders Hermes chat history and optional live status text.
+     */
+    public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String emptyHint) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div class=\"llm-chat-messages-container\">");
+
+        boolean hasMessages = messages != null && !messages.isEmpty();
+        boolean hasLiveText = liveText != null && !liveText.trim().isEmpty();
+
+        if (!hasMessages && !hasLiveText) {
+            String hint = (emptyHint != null && !emptyHint.trim().isEmpty())
+                    ? emptyHint
+                    : "Задайте вопрос Hermes Agent (профиль hrm-viewer). Агент подключен к базе данных HRM в режиме чтения.";
+            sb.append("<div class=\"llm-chat-empty-hint\">")
+              .append(escapeHtml(hint))
+              .append("</div>");
+            sb.append("</div>");
+            return sb.toString();
+        }
+
+        if (hasMessages) {
+            for (com.company.hunttech.service.dto.HermesChatMessage message : messages) {
+                boolean isUser = "user".equalsIgnoreCase(message.getRole());
+                String author = isUser ? "Вы" : "Hermes Agent (hrm-viewer)";
+                String roleClass = isUser ? "llm-chat-msg-user" : "llm-chat-msg-ai";
+                String content = message.getContent() != null ? message.getContent() : "";
+
+                sb.append("<div class=\"llm-chat-msg ").append(roleClass).append("\">");
+                sb.append("<div class=\"llm-chat-msg-header\">");
+                sb.append("<span class=\"llm-chat-msg-author\">").append(escapeHtml(author)).append("</span>");
+                sb.append("</div>");
+                sb.append("<div class=\"llm-chat-msg-body\">");
+                sb.append(renderMarkdown(content));
+                sb.append("</div>");
+                sb.append("</div>");
+            }
+        }
+
+        if (hasLiveText) {
+            sb.append("<div class=\"llm-chat-msg llm-chat-msg-ai llm-chat-msg-live\">");
+            sb.append("<div class=\"llm-chat-msg-header\">");
+            sb.append("<span class=\"llm-chat-msg-author\">Hermes Agent (hrm-viewer)</span>");
+            sb.append("<span class=\"llm-chat-live-badge\">Выполняется запрос...</span>");
+            sb.append("</div>");
+            sb.append("<div class=\"llm-chat-msg-body\">");
+            sb.append(renderMarkdown(liveText));
+            sb.append("<span class=\"llm-chat-cursor\"></span>");
+            sb.append("</div>");
+            sb.append("</div>");
+        }
+
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    /**
      * Translates a markdown string into safe, styled HTML.
      */
     public static String renderMarkdown(String text) {

@@ -28,11 +28,16 @@ import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.security.entity.EntityOp;
+import com.company.hunttech.service.HermesChatService;
+import com.company.hunttech.service.dto.HermesChatMessage;
+import com.company.hunttech.service.dto.HermesChatResponse;
 import elemental.json.JsonArray;
 import org.dom4j.Element;
 import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -47,6 +52,8 @@ public class LlmChatScreen extends Screen {
 
     @Inject
     private LlmChatService llmChatService;
+    @Inject
+    private HermesChatService hermesChatService;
     @Inject
     private Notifications notifications;
     @Inject
@@ -83,6 +90,8 @@ public class LlmChatScreen extends Screen {
     private UUID conversationId;
     private String activeRequestId;
     private String activeRequestText;
+    private UUID hermesConversationId;
+    private String activeHermesRequestText;
     private UI chatUi;
     private boolean hrmEntityBridgeRegistered = false;
 
@@ -166,29 +175,29 @@ public class LlmChatScreen extends Screen {
             vTextArea.setValueChangeTimeout(300);
         }
         
-        // Initialize Hermes tab (disabled for now - placeholder for future integration)
-        hermesInputArea.setEnabled(false);
-        hermesSendBtn.setEnabled(false);
-        
+        // Initialize Hermes tab
+        hermesInputArea.setTrimming(false);
+        hermesInputArea.setEnabled(true);
+        hermesSendBtn.setEnabled(true);
+        hermesSendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" preserveAspectRatio=\"xMidYMid meet\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
+        hermesSendBtn.setDescription("Отправить сообщение в Hermes (Enter, перенос строки — Shift+Enter)");
+        com.vaadin.ui.TextArea vHermesTextArea = hermesInputArea.unwrap(com.vaadin.ui.TextArea.class);
+        if (vHermesTextArea != null) {
+            vHermesTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.TIMEOUT);
+            vHermesTextArea.setValueChangeTimeout(300);
+        }
+
         // Add tab change listener to handle tab-specific behavior
         chatTabSheet.addSelectedTabChangeListener(tabChangeEvent -> {
             TabSheet.Tab selectedTab = tabChangeEvent.getSelectedTab();
             if (selectedTab != null) {
                 String tabId = selectedTab.getName();
                 if ("hermesChatTab".equals(tabId)) {
-                    // Hermes tab selected - show placeholder message
-                    if (hermesHistoryLabel.getValue() == null || hermesHistoryLabel.getValue().isEmpty()) {
-                        hermesHistoryLabel.setValue("<div class=\"llm-chat-empty-hint\" style=\"text-align: center; padding: 40px 20px; color: #888;\">"
-                                + "<div style=\"font-size: 48px; margin-bottom: 16px;\">🤖</div>"
-                                + "<div style=\"font-size: 16px; font-weight: 500; margin-bottom: 8px;\">Hermes Chat</div>"
-                                + "<div style=\"font-size: 13px; line-height: 1.5;\">Интеграция с Hermes AI будет доступна в следующих версиях.</div>"
-                                + "<div style=\"font-size: 12px; margin-top: 12px; color: #aaa;\">Пока используйте вкладку «Локальный чат» для общения с ИИ.</div>"
-                                + "</div>");
-                    }
+                    initHermesTab();
                 }
             }
         });
-        
+
         com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
                 ? chatUi.getPage().getJavaScript()
                 : com.vaadin.ui.JavaScript.getCurrent();
@@ -200,6 +209,16 @@ public class LlmChatScreen extends Screen {
                         executeSend(msg);
                     } catch (Exception ex) {
                         log.warn("Ошибка обработки вызова hunttechSendChatMessage: {}", ex.getMessage());
+                    }
+                }
+            });
+            js.addFunction("hunttechSendHermesChatMessage", (JsonArray arguments) -> {
+                if (arguments != null && arguments.length() >= 1) {
+                    try {
+                        String msg = arguments.getString(0);
+                        executeHermesSend(msg);
+                    } catch (Exception ex) {
+                        log.warn("Ошибка обработки вызова hunttechSendHermesChatMessage: {}", ex.getMessage());
                     }
                 }
             });
@@ -239,7 +258,22 @@ public class LlmChatScreen extends Screen {
                     "        if (isChatInput(target)) {" +
                     "          e.preventDefault();" +
                     "          e.stopPropagation();" +
-                    "          var btn = document.querySelector('.llm-chat-send-btn');" +
+                    "          var isHermes = target.closest && (target.closest('#hermesChatTab') || target.closest('[id*=\"hermes\"]'));" +
+                    "          if (isHermes) {" +
+                    "            var hBtn = document.querySelector('#hermesSendBtn, [id*=\"hermesSendBtn\"]');" +
+                    "            if (hBtn && (hBtn.classList.contains('v-disabled') || hBtn.disabled)) {" +
+                    "              return;" +
+                    "            }" +
+                    "            var hText = target.value;" +
+                    "            if (window.hunttechSendHermesChatMessage) {" +
+                    "              target.value = '';" +
+                    "              window.hunttechSendHermesChatMessage(hText);" +
+                    "            } else if (hBtn) {" +
+                    "              hBtn.click();" +
+                    "            }" +
+                    "            return;" +
+                    "          }" +
+                    "          var btn = document.querySelector('#localChatTab .llm-chat-send-btn, .llm-chat-send-btn');" +
                     "          if (btn && (btn.classList.contains('v-disabled') || btn.disabled)) {" +
                     "            return;" +
                     "          }" +
@@ -259,14 +293,28 @@ public class LlmChatScreen extends Screen {
                     "    document.addEventListener('click', function(e) {" +
                     "      var target = e.target;" +
                     "      var btn = target ? (target.closest ? target.closest('.llm-chat-send-btn') : null) : null;" +
-                    "      if (btn && !btn.classList.contains('v-disabled') && !btn.disabled && window.hunttechSendChatMessage) {" +
-                    "        var ta = document.querySelector('.llm-chat-input-bar textarea, textarea.llm-chat-input-area, .llm-chat-input-area textarea, .llm-chat-screen textarea');" +
-                    "        if (ta && ta.value && ta.value.trim().length > 0) {" +
-                    "          e.preventDefault();" +
-                    "          e.stopPropagation();" +
-                    "          var text = ta.value;" +
-                    "          ta.value = '';" +
-                    "          window.hunttechSendChatMessage(text);" +
+                    "      if (btn && !btn.classList.contains('v-disabled') && !btn.disabled) {" +
+                    "        var isHermesBtn = btn.closest && (btn.closest('#hermesChatTab') || btn.closest('[id*=\"hermes\"]')) || (btn.id && btn.id.indexOf('hermes') >= 0);" +
+                    "        if (isHermesBtn && window.hunttechSendHermesChatMessage) {" +
+                    "          var hTa = document.querySelector('#hermesChatTab textarea, [id*=\"hermesInputArea\"] textarea, textarea[id*=\"hermesInputArea\"]');" +
+                    "          if (hTa && hTa.value && hTa.value.trim().length > 0) {" +
+                    "            e.preventDefault();" +
+                    "            e.stopPropagation();" +
+                    "            var hText = hTa.value;" +
+                    "            hTa.value = '';" +
+                    "            window.hunttechSendHermesChatMessage(hText);" +
+                    "          }" +
+                    "          return;" +
+                    "        }" +
+                    "        if (window.hunttechSendChatMessage) {" +
+                    "          var ta = document.querySelector('#localChatTab textarea, .llm-chat-input-bar textarea, textarea.llm-chat-input-area, .llm-chat-input-area textarea, .llm-chat-screen textarea');" +
+                    "          if (ta && ta.value && ta.value.trim().length > 0) {" +
+                    "            e.preventDefault();" +
+                    "            e.stopPropagation();" +
+                    "            var text = ta.value;" +
+                    "            ta.value = '';" +
+                    "            window.hunttechSendChatMessage(text);" +
+                    "          }" +
                     "        }" +
                     "      }" +
                     "    }, true);" +
@@ -298,6 +346,7 @@ public class LlmChatScreen extends Screen {
         if (chatUi != null && chatUi.getPage() != null && chatUi.getPage().getJavaScript() != null) {
             try {
                 chatUi.getPage().getJavaScript().removeFunction("hunttechSendChatMessage");
+                chatUi.getPage().getJavaScript().removeFunction("hunttechSendHermesChatMessage");
             } catch (Exception ignored) {
             }
         }
@@ -520,6 +569,138 @@ public class LlmChatScreen extends Screen {
         notifications.create(Notifications.NotificationType.ERROR)
                 .withCaption("Не удалось выполнить запрос к ИИ")
                 .withDescription(ex.getMessage() == null ? "Проверьте настройки AI и согласие на fallback." : ex.getMessage())
+                .show();
+    }
+
+    @Subscribe("hermesSendBtn")
+    public void onHermesSend(Button.ClickEvent event) {
+        executeHermesSend(null);
+    }
+
+    private void initHermesTab() {
+        if (hermesConversationId == null) {
+            try {
+                hermesConversationId = hermesChatService.startHermesConversation();
+                List<HermesChatMessage> history = hermesChatService.loadHermesHistory(hermesConversationId);
+                renderHermesHistory(history);
+            } catch (Exception ex) {
+                log.warn("Не удалось инициализировать Hermes диалог: {}", ex.getMessage());
+                renderHermesHistory(Collections.emptyList());
+            }
+        }
+        hermesInputArea.focus();
+    }
+
+    private void executeHermesSend(String rawText) {
+        if (!hermesSendBtn.isEnabled()) {
+            return;
+        }
+        String message = (rawText != null && !rawText.trim().isEmpty())
+                ? rawText
+                : hermesInputArea.getValue();
+        if (message == null || message.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Введите сообщение для Hermes")
+                    .show();
+            return;
+        }
+        final String request = message.trim();
+        hermesInputArea.setValue("");
+        hermesInputArea.setEnabled(false);
+        hermesSendBtn.setEnabled(false);
+        activeHermesRequestText = request;
+
+        if (hermesConversationId == null) {
+            try {
+                hermesConversationId = hermesChatService.startHermesConversation();
+            } catch (Exception ex) {
+                resetHermesControls(false);
+                showHermesError(ex);
+                return;
+            }
+        }
+
+        final UUID convId = hermesConversationId;
+        final UI ui = (chatUi != null) ? chatUi : UI.getCurrent();
+
+        // Показываем сообщение пользователя сразу со статусом ожидания ответа
+        List<HermesChatMessage> currentHistory = hermesChatService.loadHermesHistory(convId);
+        HermesChatMessage pendingUserMsg = new HermesChatMessage("user", request);
+        List<HermesChatMessage> pendingList = new ArrayList<>(currentHistory);
+        pendingList.add(pendingUserMsg);
+        renderHermesHistory(pendingList, "Hermes обрабатывает запрос...");
+
+        new Thread(() -> {
+            try {
+                HermesChatResponse resp = hermesChatService.sendHermesMessage(convId, request);
+                if (ui != null) {
+                    ui.access(() -> {
+                        resetHermesControls(true);
+                        activeHermesRequestText = null;
+                        renderHermesHistory(hermesChatService.loadHermesHistory(convId));
+                        if (!resp.isSuccess() && resp.getErrorMessage() != null) {
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withCaption("Hermes Agent")
+                                    .withDescription(resp.getErrorMessage())
+                                    .show();
+                        }
+                    });
+                }
+            } catch (Exception ex) {
+                log.error("Ошибка при обращении к Hermes Agent: {}", ex.getMessage(), ex);
+                if (ui != null) {
+                    ui.access(() -> {
+                        resetHermesControls(false);
+                        showHermesError(ex);
+                        try {
+                            renderHermesHistory(hermesChatService.loadHermesHistory(convId));
+                        } catch (Exception historyEx) {
+                            log.warn("Не удалось перезагрузить историю диалога Hermes после ошибки: {}", historyEx.getMessage());
+                            renderHermesHistory(currentHistory);
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void renderHermesHistory(List<HermesChatMessage> messages) {
+        renderHermesHistory(messages, null);
+    }
+
+    private void renderHermesHistory(List<HermesChatMessage> messages, String liveText) {
+        String html = MarkdownRenderer.renderHermesChatHistory(messages, liveText,
+                "Задайте вопрос Hermes Agent (профиль hrm-viewer). Агент подключен к базе данных HRM в режиме чтения.");
+        hermesHistoryLabel.setValue(html);
+        scrollToBottomHermes();
+    }
+
+    private void scrollToBottomHermes() {
+        try {
+            com.vaadin.ui.Panel panel = hermesHistoryScrollBox.unwrap(com.vaadin.ui.Panel.class);
+            if (panel != null) {
+                panel.setScrollTop(Integer.MAX_VALUE / 2);
+            }
+        } catch (Exception ex) {
+            log.debug("Не удалось выполнить автоскролл hermesHistoryScrollBox: {}", ex.getMessage());
+        }
+    }
+
+    private void resetHermesControls(boolean clearInput) {
+        if (clearInput) {
+            hermesInputArea.setValue("");
+        } else if (activeHermesRequestText != null && !activeHermesRequestText.isEmpty()) {
+            hermesInputArea.setValue(activeHermesRequestText);
+        }
+        hermesInputArea.setEnabled(true);
+        hermesSendBtn.setEnabled(true);
+        hermesInputArea.focus();
+    }
+
+    private void showHermesError(Exception ex) {
+        notifications.create(Notifications.NotificationType.ERROR)
+                .withCaption("Ошибка Hermes Agent")
+                .withDescription(ex.getMessage() == null ? "Не удалось связаться с агентом на сервере." : ex.getMessage())
                 .show();
     }
 
