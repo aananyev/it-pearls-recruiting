@@ -13,7 +13,7 @@
         <tabSheet id="chatTabSheet" width="100%" height="100%" stylename="framed llm-chat-tabsheet">
             <!-- ВКЛАДКА 1: ЛОКАЛЬНЫЙ ЧАТ -->
             <tab id="localChatTab" caption="msg://tabLocalChat" margin="true" spacing="true">
-                <vbox width="100%" height="100%" spacing="false" expand="historyScrollBox">
+                <vbox width="100%" height="100%" spacing="false" expand="historyScrollBox" stylename="local-chat-tab-pane">
                     <vbox width="100%" spacing="false" stylename="llm-chat-header">
                         <label value="msg://screenTitle" stylename="h2"/>
                         <label value="msg://screenDescription" width="100%" stylename="user-ai-profile-help"/>
@@ -21,16 +21,16 @@
                     <scrollBox id="historyScrollBox" width="100%" height="100%" orientation="vertical" scrollBars="vertical" stylename="llm-chat-history-scroll">
                         <label id="historyLabel" width="100%" htmlEnabled="true" stylename="llm-chat-history-content"/>
                     </scrollBox>
-                    <hbox id="inputBar" width="100%" spacing="true" expand="inputArea" stylename="llm-chat-input-bar">
-                        <textArea id="inputArea" width="100%" rows="2" stylename="llm-chat-input-area"/>
-                        <button id="sendBtn" stylename="llm-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT"/>
+                    <hbox id="inputBar" width="100%" spacing="true" expand="inputArea" stylename="llm-chat-input-bar local-chat-input-bar">
+                        <textArea id="inputArea" width="100%" rows="2" stylename="llm-chat-input-area local-chat-input-area"/>
+                        <button id="sendBtn" stylename="llm-chat-send-btn local-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT"/>
                     </hbox>
                 </vbox>
             </tab>
             
             <!-- ВКЛАДКА 2: HERMES -->
             <tab id="hermesChatTab" caption="msg://tabHermes" margin="true" spacing="true">
-                <vbox width="100%" height="100%" spacing="false" expand="hermesHistoryScrollBox">
+                <vbox width="100%" height="100%" spacing="false" expand="hermesHistoryScrollBox" stylename="hermes-chat-tab-pane">
                     <vbox width="100%" spacing="false" stylename="llm-chat-header">
                         <label value="msg://hermesScreenTitle" stylename="h2"/>
                         <label value="msg://hermesScreenDescription" width="100%" stylename="user-ai-profile-help"/>
@@ -38,9 +38,9 @@
                     <scrollBox id="hermesHistoryScrollBox" width="100%" height="100%" orientation="vertical" scrollBars="vertical" stylename="llm-chat-history-scroll">
                         <label id="hermesHistoryLabel" width="100%" htmlEnabled="true" stylename="llm-chat-history-content"/>
                     </scrollBox>
-                    <hbox id="hermesInputBar" width="100%" spacing="true" expand="hermesInputArea" stylename="llm-chat-input-bar">
-                        <textArea id="hermesInputArea" width="100%" rows="2" stylename="llm-chat-input-area" enabled="false"/>
-                        <button id="hermesSendBtn" stylename="llm-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT" enabled="false"/>
+                    <hbox id="hermesInputBar" width="100%" spacing="true" expand="hermesInputArea" stylename="llm-chat-input-bar hermes-chat-input-bar">
+                        <textArea id="hermesInputArea" width="100%" rows="2" stylename="llm-chat-input-area hermes-chat-input-area"/>
+                        <button id="hermesSendBtn" stylename="llm-chat-send-btn hermes-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT"/>
                     </hbox>
                 </vbox>
             </tab>

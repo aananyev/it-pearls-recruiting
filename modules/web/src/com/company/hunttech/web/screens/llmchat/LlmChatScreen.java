@@ -194,9 +194,16 @@ public class LlmChatScreen extends Screen {
                 String tabId = selectedTab.getName();
                 if ("hermesChatTab".equals(tabId)) {
                     initHermesTab();
+                } else if ("localChatTab".equals(tabId)) {
+                    inputArea.focus();
                 }
             }
         });
+
+        TabSheet.Tab initialSelectedTab = chatTabSheet.getSelectedTab();
+        if (initialSelectedTab != null && "hermesChatTab".equals(initialSelectedTab.getName())) {
+            initHermesTab();
+        }
 
         com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
                 ? chatUi.getPage().getJavaScript()
@@ -241,10 +248,57 @@ public class LlmChatScreen extends Screen {
                     "  function isChatInput(el) {" +
                     "    if (!el) return false;" +
                     "    if (el.tagName === 'TEXTAREA') {" +
-                    "      if (el.classList && (el.classList.contains('llm-chat-input-area') || el.classList.contains('v-textarea'))) {" +
+                    "      if (el.classList && (" +
+                    "          el.classList.contains('llm-chat-input-area') ||" +
+                    "          el.classList.contains('v-textarea') ||" +
+                    "          el.classList.contains('hermes-chat-input-area') ||" +
+                    "          el.classList.contains('local-chat-input-area')" +
+                    "      )) {" +
                     "        return true;" +
                     "      }" +
-                    "      if (el.closest && (el.closest('.llm-chat-input-bar') || el.closest('.llm-chat-input-area') || el.closest('.llm-chat-screen'))) {" +
+                    "      if (el.closest && (" +
+                    "          el.closest('.llm-chat-input-bar') ||" +
+                    "          el.closest('.llm-chat-input-area') ||" +
+                    "          el.closest('.hermes-chat-tab-pane') ||" +
+                    "          el.closest('.local-chat-tab-pane') ||" +
+                    "          el.closest('.llm-chat-screen')" +
+                    "      )) {" +
+                    "        return true;" +
+                    "      }" +
+                    "    }" +
+                    "    return false;" +
+                    "  }" +
+                    "  function isHermesContext(el) {" +
+                    "    if (!el) return false;" +
+                    "    if (el.classList && (" +
+                    "        el.classList.contains('hermes-chat-input-area') ||" +
+                    "        el.classList.contains('hermes-chat-send-btn') ||" +
+                    "        el.classList.contains('hermes-chat-tab-pane') ||" +
+                    "        el.classList.contains('hermes-chat-input-bar')" +
+                    "    )) {" +
+                    "      return true;" +
+                    "    }" +
+                    "    if (el.closest && (" +
+                    "        el.closest('.hermes-chat-tab-pane') ||" +
+                    "        el.closest('.hermes-chat-input-bar') ||" +
+                    "        el.closest('.hermes-chat-input-area') ||" +
+                    "        el.closest('.hermes-chat-send-btn') ||" +
+                    "        el.closest('[cuba-id=\"hermesChatTab\"]') ||" +
+                    "        el.closest('[cuba-id=\"hermesInputArea\"]') ||" +
+                    "        el.closest('[cuba-id=\"hermesSendBtn\"]') ||" +
+                    "        el.closest('#hermesChatTab') ||" +
+                    "        el.closest('[id*=\"hermes\"]')" +
+                    "    )) {" +
+                    "      return true;" +
+                    "    }" +
+                    "    var selectedTab = document.querySelector('.llm-chat-tabsheet .v-tabsheet-tabitem-selected, .v-tabsheet-tabitem-selected');" +
+                    "    if (selectedTab && selectedTab.textContent && selectedTab.textContent.toLowerCase().indexOf('hermes') >= 0) {" +
+                    "      return true;" +
+                    "    }" +
+                    "    var hermesPane = document.querySelector('.hermes-chat-tab-pane');" +
+                    "    if (hermesPane && hermesPane.offsetParent !== null) {" +
+                    "      var localPane = document.querySelector('.local-chat-tab-pane');" +
+                    "      if (!localPane || localPane.offsetParent === null) {" +
                     "        return true;" +
                     "      }" +
                     "    }" +
@@ -258,9 +312,9 @@ public class LlmChatScreen extends Screen {
                     "        if (isChatInput(target)) {" +
                     "          e.preventDefault();" +
                     "          e.stopPropagation();" +
-                    "          var isHermes = target.closest && (target.closest('#hermesChatTab') || target.closest('[id*=\"hermes\"]'));" +
+                    "          var isHermes = isHermesContext(target);" +
                     "          if (isHermes) {" +
-                    "            var hBtn = document.querySelector('#hermesSendBtn, [id*=\"hermesSendBtn\"]');" +
+                    "            var hBtn = document.querySelector('.hermes-chat-send-btn, #hermesSendBtn, [cuba-id=\"hermesSendBtn\"]');" +
                     "            if (hBtn && (hBtn.classList.contains('v-disabled') || hBtn.disabled)) {" +
                     "              return;" +
                     "            }" +
@@ -273,16 +327,16 @@ public class LlmChatScreen extends Screen {
                     "            }" +
                     "            return;" +
                     "          }" +
-                    "          var btn = document.querySelector('#localChatTab .llm-chat-send-btn, .llm-chat-send-btn');" +
-                    "          if (btn && (btn.classList.contains('v-disabled') || btn.disabled)) {" +
+                    "          var lBtn = document.querySelector('.local-chat-send-btn, #sendBtn, .llm-chat-send-btn');" +
+                    "          if (lBtn && (lBtn.classList.contains('v-disabled') || lBtn.disabled)) {" +
                     "            return;" +
                     "          }" +
-                    "          var text = target.value;" +
+                    "          var lText = target.value;" +
                     "          if (window.hunttechSendChatMessage) {" +
                     "            target.value = '';" +
-                    "            window.hunttechSendChatMessage(text);" +
-                    "          } else if (btn) {" +
-                    "            btn.click();" +
+                    "            window.hunttechSendChatMessage(lText);" +
+                    "          } else if (lBtn) {" +
+                    "            lBtn.click();" +
                     "          }" +
                     "        }" +
                     "      }" +
@@ -294,26 +348,31 @@ public class LlmChatScreen extends Screen {
                     "      var target = e.target;" +
                     "      var btn = target ? (target.closest ? target.closest('.llm-chat-send-btn') : null) : null;" +
                     "      if (btn && !btn.classList.contains('v-disabled') && !btn.disabled) {" +
-                    "        var isHermesBtn = btn.closest && (btn.closest('#hermesChatTab') || btn.closest('[id*=\"hermes\"]')) || (btn.id && btn.id.indexOf('hermes') >= 0);" +
-                    "        if (isHermesBtn && window.hunttechSendHermesChatMessage) {" +
-                    "          var hTa = document.querySelector('#hermesChatTab textarea, [id*=\"hermesInputArea\"] textarea, textarea[id*=\"hermesInputArea\"]');" +
-                    "          if (hTa && hTa.value && hTa.value.trim().length > 0) {" +
-                    "            e.preventDefault();" +
-                    "            e.stopPropagation();" +
-                    "            var hText = hTa.value;" +
-                    "            hTa.value = '';" +
-                    "            window.hunttechSendHermesChatMessage(hText);" +
+                    "        var isHermesBtn = isHermesContext(btn);" +
+                    "        if (isHermesBtn) {" +
+                    "          if (window.hunttechSendHermesChatMessage) {" +
+                    "            var hTa = document.querySelector('.hermes-chat-input-area textarea, textarea.hermes-chat-input-area, .hermes-chat-tab-pane textarea, [cuba-id=\"hermesInputArea\"] textarea');" +
+                    "            if (hTa && hTa.value && hTa.value.trim().length > 0) {" +
+                    "              e.preventDefault();" +
+                    "              e.stopPropagation();" +
+                    "              var hText = hTa.value;" +
+                    "              hTa.value = '';" +
+                    "              window.hunttechSendHermesChatMessage(hText);" +
+                    "            }" +
                     "          }" +
                     "          return;" +
                     "        }" +
                     "        if (window.hunttechSendChatMessage) {" +
-                    "          var ta = document.querySelector('#localChatTab textarea, .llm-chat-input-bar textarea, textarea.llm-chat-input-area, .llm-chat-input-area textarea, .llm-chat-screen textarea');" +
-                    "          if (ta && ta.value && ta.value.trim().length > 0) {" +
+                    "          var lTa = document.querySelector('.local-chat-input-area textarea, textarea.local-chat-input-area, .local-chat-tab-pane textarea, #localChatTab textarea');" +
+                    "          if (!lTa) {" +
+                    "            lTa = document.querySelector('.llm-chat-input-bar textarea, textarea.llm-chat-input-area');" +
+                    "          }" +
+                    "          if (lTa && lTa.value && lTa.value.trim().length > 0) {" +
                     "            e.preventDefault();" +
                     "            e.stopPropagation();" +
-                    "            var text = ta.value;" +
-                    "            ta.value = '';" +
-                    "            window.hunttechSendChatMessage(text);" +
+                    "            var lText = lTa.value;" +
+                    "            lTa.value = '';" +
+                    "            window.hunttechSendChatMessage(lText);" +
                     "          }" +
                     "        }" +
                     "      }" +
