@@ -9,6 +9,7 @@ import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DialogWindow;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.ScrollBoxLayout;
+import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.settings.Settings;
@@ -22,6 +23,7 @@ import com.vaadin.ui.UI;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.screen.OpenMode;
@@ -65,6 +67,18 @@ public class LlmChatScreen extends Screen {
     private ScreenBuilders screenBuilders;
     @Inject
     private Security security;
+
+    // Hermes tab components
+    @Inject
+    private TabSheet chatTabSheet;
+    @Inject
+    private ScrollBoxLayout hermesHistoryScrollBox;
+    @Inject
+    private Label<String> hermesHistoryLabel;
+    @Inject
+    private TextArea<String> hermesInputArea;
+    @Inject
+    private Button hermesSendBtn;
 
     private UUID conversationId;
     private String activeRequestId;
@@ -151,6 +165,30 @@ public class LlmChatScreen extends Screen {
             vTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.TIMEOUT);
             vTextArea.setValueChangeTimeout(300);
         }
+        
+        // Initialize Hermes tab (disabled for now - placeholder for future integration)
+        hermesInputArea.setEnabled(false);
+        hermesSendBtn.setEnabled(false);
+        
+        // Add tab change listener to handle tab-specific behavior
+        chatTabSheet.addSelectedTabChangeListener(tabChangeEvent -> {
+            TabSheet.Tab selectedTab = tabChangeEvent.getSelectedTab();
+            if (selectedTab != null) {
+                String tabId = selectedTab.getName();
+                if ("hermesChatTab".equals(tabId)) {
+                    // Hermes tab selected - show placeholder message
+                    if (hermesHistoryLabel.getValue() == null || hermesHistoryLabel.getValue().isEmpty()) {
+                        hermesHistoryLabel.setValue("<div class=\"llm-chat-empty-hint\" style=\"text-align: center; padding: 40px 20px; color: #888;\">"
+                                + "<div style=\"font-size: 48px; margin-bottom: 16px;\">🤖</div>"
+                                + "<div style=\"font-size: 16px; font-weight: 500; margin-bottom: 8px;\">Hermes Chat</div>"
+                                + "<div style=\"font-size: 13px; line-height: 1.5;\">Интеграция с Hermes AI будет доступна в следующих версиях.</div>"
+                                + "<div style=\"font-size: 12px; margin-top: 12px; color: #aaa;\">Пока используйте вкладку «Локальный чат» для общения с ИИ.</div>"
+                                + "</div>");
+                    }
+                }
+            }
+        });
+        
         com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
                 ? chatUi.getPage().getJavaScript()
                 : com.vaadin.ui.JavaScript.getCurrent();
