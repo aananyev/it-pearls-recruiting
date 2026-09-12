@@ -7,7 +7,6 @@
         icon="CODE_FORK">
     <!-- Секция данных: корневой контейнер навыка, коллекция корневых навыков и специализаций. -->
     <data>
-        <!-- Корневой контейнер навыка с edit-view; загрузчик берёт id из editor. -->
         <instance id="skillTreeDc"
                   class="com.company.hunttech.entity.SkillTree"
                   view="skillTree-edit-view">
@@ -94,6 +93,9 @@
                             showFileName="false"
                             dropZone="skillTreeVisual"
                             showClearButton="true"
+                            accept="image/png,image/jpeg,image/webp"
+                            permittedExtensions=".png,.jpg,.jpeg,.webp"
+                            fileSizeLimit="15728640"
                             property="fileImageLogo"/>
                 </vbox>
                 <!-- Блок идентификации: название навыка и тип записи из контейнера. -->

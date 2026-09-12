@@ -61,6 +61,10 @@ public class SkillTree extends StandardEntity {
     @JoinColumn(name = "FILE_IMAGE_LOGO")
     protected FileDescriptor fileImageLogo;
 
+    @Lob
+    @Column(name = "LOGO_IMAGE")
+    protected byte[] logoImage;
+
     @Column(name = "STYLE_HIGHLIGHTING", length = 128)
     @Length(message = "{msg://hunttech_SkillTree.styleHighlighting.validation.Length}", max = 64)
     private String styleHighlighting;
@@ -165,5 +169,13 @@ public class SkillTree extends StandardEntity {
 
     public FileDescriptor getFileImageLogo() {
         return fileImageLogo;
+    }
+
+    public void setLogoImage(byte[] logoImage) {
+        this.logoImage = logoImage;
+    }
+
+    public byte[] getLogoImage() {
+        return logoImage;
     }
 }

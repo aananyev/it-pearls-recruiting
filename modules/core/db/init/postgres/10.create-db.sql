@@ -391,6 +391,7 @@ create table HUNTTECH_SKILL_TREE (
     STYLE_HIGHLIGHTING varchar(128),
     NOT_PARSING boolean,
     PRIORITY_SKILL integer,
+    LOGO_IMAGE bytea,
     --
     primary key (ID)
 )^

@@ -12,8 +12,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.gui.model.InstanceContainer;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedHashMap;
@@ -24,6 +32,10 @@ import java.util.Map;
 @EditedEntityContainer("skillTreeDc")
 @LoadDataBeforeShow
 public class SkillTreeEdit extends StandardEditor<SkillTree> {
+    private static final Logger log = LoggerFactory.getLogger(SkillTreeEdit.class);
+
+    @Inject
+    private FileLoader fileLoader;
     @Inject
     private TextField<String> wikiPateField;
     @Inject
@@ -205,15 +217,58 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
         return retStr;
     }
 
+    @Subscribe(id = "skillTreeDc", target = Target.DATA_CONTAINER)
+    public void onSkillTreeDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<SkillTree> event) {
+        if ("logoImage".equals(event.getProperty())) {
+            updateSkillLogoImage();
+        } else if ("fileImageLogo".equals(event.getProperty())) {
+            if (event.getValue() == null) {
+                SkillTree skill = getEditedEntity();
+                if (skill != null) {
+                    skill.setLogoImage(null);
+                }
+            }
+            updateSkillLogoImage();
+        }
+    }
+
     @Subscribe("fileImageSkillUpload")
     public void onFileImageSkillUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        try {
-            FileDescriptorResource fileDescriptorResource = skillPic.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(fileImageSkillUpload.getFileDescriptor());
+        SkillTree skill = getEditedEntity();
+        com.haulmont.cuba.core.entity.FileDescriptor fd = fileImageSkillUpload.getFileDescriptor();
+        if (skill != null && fd != null && fileLoader != null) {
+            try (InputStream is = fileLoader.openStream(fd)) {
+                if (is != null) {
+                    byte[] bytes = IOUtils.toByteArray(is);
+                    if (bytes != null && bytes.length > 0) {
+                        skill.setLogoImage(bytes);
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Не удалось синхронизировать файл логотипа в BLOB logoImage: {}", ex.getMessage());
+            }
+        }
+        updateSkillLogoImage();
+    }
 
-            skillPic.setSource(fileDescriptorResource);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+    private void updateSkillLogoImage() {
+        if (skillPic == null) {
+            return;
+        }
+        SkillTree skill = getEditedEntity();
+        if (skill == null) {
+            skillPic.applyFallback();
+            return;
+        }
+        byte[] logoBytes = skill.getLogoImage();
+        if (logoBytes != null && logoBytes.length > 0) {
+            skillPic.setSource(StreamResource.class)
+                    .setStreamSupplier(() -> new ByteArrayInputStream(logoBytes));
+        } else if (skill.getFileImageLogo() != null) {
+            skillPic.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(skill.getFileImageLogo());
+        } else {
+            skillPic.applyFallback();
         }
     }
 
@@ -232,13 +287,11 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        // Если логотип не задан — показать fallback-аватар OvaFallbackImage
-        // (как эталон JobCandidateEdit: applyFallback при отсутствии файла).
-        if (getEditedEntity().getFileImageLogo() == null) {
-            skillPic.applyFallback();
-        }
+        updateSkillLogoImage();
         String comment = skillCommentRichTextArea.getValue();
-        if (skillPic.getValueSource().getValue() == null &&
+        if ((skillPic.getValueSource() == null || skillPic.getValueSource().getValue() == null) &&
+                getEditedEntity().getLogoImage() == null &&
+                getEditedEntity().getFileImageLogo() == null &&
                 comment != null && !comment.trim().isEmpty()) {
             setLogo();
         }

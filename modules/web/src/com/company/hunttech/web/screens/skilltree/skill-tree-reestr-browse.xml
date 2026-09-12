@@ -14,8 +14,10 @@
     <data readOnly="true">
         <!-- Коллекция навыков для дерева (иерархия через skillTree parent) -->
         <collection id="skillTreesDc"
-                    class="com.company.hunttech.entity.SkillTree"
-                    view="skillTree-reestr-browse-view">
+                    class="com.company.hunttech.entity.SkillTree">
+            <view extends="skillTree-reestr-browse-view">
+                <property name="logoImage"/>
+            </view>
             <loader id="skillTreesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_SkillTree e
@@ -183,8 +185,9 @@
                                   width="100%"
                                   height="100%"
                                   dataContainer="skillTreesDc"
+                                  hierarchyColumn="skillName"
                                   hierarchyProperty="skillTree"
-                                  stylename="borderless grid candidate-browse-grid">
+                                  stylename="borderless grid candidate-browse-grid skill-tree-reestr-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -194,16 +197,16 @@
                         </actions>
                         <columns>
                             <!-- Превью логотипа навыка (генерируется контроллером) -->
-                            <column id="skillLogoColumn" caption="Лого" width="60px" sortable="false"/>
+                            <column id="skillLogoColumn" caption="ЛОГО" width="60px" resizable="false" sortable="false"/>
                             <!-- Иерархическая колонка: название навыка (раскрытие узлов дерева) -->
                             <column id="skillName" property="skillName"
-                                    caption="msg://msgSkill" expandRatio="1" minWidth="220px"/>
+                                    caption="msg://msgSkill" expandRatio="1" minWidth="240px"/>
                             <!-- Специализация -->
                             <column id="specialisation" property="specialisation.specRuName"
                                     caption="msg://msgSpecialisation" width="200px"/>
                             <!-- Приоритет навыка -->
-                            <column id="prioritySkill" property="prioritySkill"
-                                    caption="msg://msgPrioritySkill" width="110px" align="CENTER"/>
+                            <column id="prioritySkill"
+                                    caption="msg://msgPrioritySkill" width="160px" align="CENTER"/>
                         </columns>
                         <rowsCount/>
                     </treeDataGrid>

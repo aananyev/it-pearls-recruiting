@@ -622,6 +622,7 @@
         <property name="skillTree" view="skillTree-picker-view"/>
         <property name="specialisation" view="specialisation-picker-view"/>
         <property name="fileImageLogo" view="_minimal"/>
+        <property name="logoImage"/>
     </view>
     <view entity="hunttech_SkillTree" name="skillTree-parser-view" extends="_minimal">
         <property name="skillName"/>

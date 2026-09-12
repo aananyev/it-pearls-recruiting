@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260912-2-addSkillTreeLogoImage" author="hunttech">
+        <sql splitStatements="true">
+            alter table HUNTTECH_SKILL_TREE add column if not exists LOGO_IMAGE bytea;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

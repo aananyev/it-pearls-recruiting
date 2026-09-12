@@ -71,7 +71,7 @@
                             accept="image/png,image/jpeg,image/webp"
                             permittedExtensions=".png,.jpg,.jpeg,.webp"
                             fileSizeLimit="15728640"
-                            dropZone="positionLogoImage"
+                            dropZone="visual"
                             showClearButton="true"
                             showFileName="false"
                             align="MIDDLE_CENTER"

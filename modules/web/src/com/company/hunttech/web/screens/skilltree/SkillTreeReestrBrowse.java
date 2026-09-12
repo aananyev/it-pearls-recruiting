@@ -2,12 +2,14 @@ package com.company.hunttech.web.screens.skilltree;
 
 import com.company.hunttech.entity.SkillTree;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
+import com.company.hunttech.web.StandartPrioritySkills;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.FlowBoxLayout;
+import com.haulmont.cuba.gui.components.StreamResource;
 import com.haulmont.cuba.gui.components.ThemeResource;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -15,6 +17,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -89,7 +92,7 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
     }
 
     private void setupTableColumns() {
-        // Превью логотипа навыка в колонке «Лого» (по эталону CityReestrBrowse).
+        // Превью логотипа навыка в первой колонке «ЛОГО» (BLOB logoImage -> FileDescriptor -> Theme fallback).
         skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", event -> {
             SkillTree skill = event.getItem();
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
@@ -98,19 +101,74 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
             box.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
             Image image = uiComponents.create(Image.class);
-            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            image.setWidth("24px");
-            image.setHeight("24px");
-            image.setStyleName("icon-no-border-20px");
+            image.setScaleMode(Image.ScaleMode.CONTAIN);
+            image.setWidth("28px");
+            image.setHeight("28px");
+            image.setStyleName("skill-tree-cell-logo");
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (skill != null && skill.getFileImageLogo() != null) {
+            byte[] logoBytes = skill != null ? skill.getLogoImage() : null;
+            if (logoBytes != null && logoBytes.length > 0) {
+                image.setSource(StreamResource.class)
+                        .setStreamSupplier(() -> new ByteArrayInputStream(logoBytes));
+            } else if (skill != null && skill.getFileImageLogo() != null) {
                 image.setSource(FileDescriptorResource.class).setFileDescriptor(skill.getFileImageLogo());
             } else {
                 image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
             }
 
             box.add(image);
+            return box;
+        });
+
+        // Бейдж/чип приоритета компетенции
+        skillTreesTreeTable.addGeneratedColumn("prioritySkill", event -> {
+            SkillTree skill = event.getItem();
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (skill != null && skill.getPrioritySkill() != null) {
+                switch (skill.getPrioritySkill()) {
+                    case -1:
+                        label.setValue(StandartPrioritySkills.NOT_USED_SKILLS_STR);
+                        label.setStyleName("skill-priority-chip skill-priority-not-used");
+                        break;
+                    case 0:
+                        label.setValue(StandartPrioritySkills.DEFAULT_STR);
+                        label.setStyleName("skill-priority-chip skill-priority-default");
+                        break;
+                    case 1:
+                        label.setValue(StandartPrioritySkills.SUBJECT_AREA_STR);
+                        label.setStyleName("skill-priority-chip skill-priority-subject");
+                        break;
+                    case 2:
+                        label.setValue(StandartPrioritySkills.FRAMEWORKS_STR);
+                        label.setStyleName("skill-priority-chip skill-priority-framework");
+                        break;
+                    case 3:
+                        label.setValue(StandartPrioritySkills.METHODOLOGY_STR);
+                        label.setStyleName("skill-priority-chip skill-priority-methodology");
+                        break;
+                    case 4:
+                        label.setValue(StandartPrioritySkills.PROGRAMMING_LANGUAGE_STR);
+                        label.setStyleName("skill-priority-chip skill-priority-language");
+                        break;
+                    default:
+                        label.setValue(String.valueOf(skill.getPrioritySkill()));
+                        label.setStyleName("skill-priority-chip");
+                        break;
+                }
+            } else {
+                label.setValue("—");
+                label.setStyleName("skill-priority-chip");
+            }
+
+            box.add(label);
             return box;
         });
     }
@@ -194,7 +252,11 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
         createChildBtn.setEnabled(true);
 
         // Логотип навыка — в шапке профиля (аватар 120px)
-        if (skill.getFileImageLogo() != null) {
+        byte[] logoBytes = skill.getLogoImage();
+        if (logoBytes != null && logoBytes.length > 0) {
+            skillLogoPic.setSource(StreamResource.class)
+                    .setStreamSupplier(() -> new ByteArrayInputStream(logoBytes));
+        } else if (skill.getFileImageLogo() != null) {
             skillLogoPic.setSource(FileDescriptorResource.class).setFileDescriptor(skill.getFileImageLogo());
         } else {
             skillLogoPic.applyFallback();

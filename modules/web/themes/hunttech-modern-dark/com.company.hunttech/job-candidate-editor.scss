@@ -1268,6 +1268,94 @@
   }
 
   /* =========================================================================
+   * Реестр компетенций (SkillTreeReestrBrowse): стилизация дерева и колонок
+   * ========================================================================= */
+  .skill-tree-reestr-grid.v-treegrid {
+    border-radius: 8px !important;
+
+    .v-treegrid-row {
+      height: 42px !important;
+      transition: background-color 0.15s ease;
+    }
+
+    .v-treegrid-cell {
+      line-height: 40px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    /* Экспандер дерева (стрелка раскрытия узла) */
+    .v-treegrid-expander {
+      cursor: pointer !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      transition: transform 0.2s ease, color 0.15s ease !important;
+    }
+  }
+
+  /* Логотип навыка в первой колонке дерева */
+  .skill-tree-cell-logo {
+    object-fit: contain !important;
+    border-radius: 6px !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    padding: 2px !important;
+    box-sizing: border-box !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+
+  /* Бейджи приоритетов компетенции в таблице */
+  .skill-priority-chip {
+    display: inline-block !important;
+    padding: 2px 8px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 16px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+
+  .skill-priority-not-used {
+    background-color: rgba(148, 163, 184, 0.15) !important;
+    color: #94a3b8 !important;
+    border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  }
+
+  .skill-priority-default {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: #60a5fa !important;
+    border: 1px solid rgba(59, 130, 246, 0.25) !important;
+  }
+
+  .skill-priority-subject {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  }
+
+  .skill-priority-framework,
+  .skill-priority-frameworks {
+    background-color: rgba(168, 85, 247, 0.15) !important;
+    color: #c084fc !important;
+    border: 1px solid rgba(168, 85, 247, 0.25) !important;
+  }
+
+  .skill-priority-methodology {
+    background-color: rgba(20, 184, 166, 0.15) !important;
+    color: #2dd4bf !important;
+    border: 1px solid rgba(20, 184, 166, 0.25) !important;
+  }
+
+  .skill-priority-language {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+    color: #4ade80 !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+  }
+
+  /* =========================================================================
    * Реестр кандидатов (JobCandidateReestr): блок фильтров сверху экрана
    * ========================================================================= */
 

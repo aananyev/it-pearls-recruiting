@@ -1,0 +1,4 @@
+-- 260912-2-addSkillTreeLogoImage.sql
+-- Добавление BLOB поля логотипа компетенции в HUNTTECH_SKILL_TREE
+
+ALTER TABLE HUNTTECH_SKILL_TREE ADD COLUMN IF NOT EXISTS LOGO_IMAGE BYTEA;
