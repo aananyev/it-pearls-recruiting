@@ -19,3 +19,4 @@
 | Найти отчёты аудита | `docs/reports/` и `deployment/*/reports/` | [performance summary](../reports/performance/job-candidate-performance-audit-summary.md), [database migration reports](../../deployment/database-migration/reports/) |
 | Настроить или сопровождать AI-подключения | `docs/integrations/ai/` | [USER_AI_CONNECTION_GUIDE.md](../integrations/ai/USER_AI_CONNECTION_GUIDE.md), [USER_AI_SETTINGS_IMPLEMENTATION.md](../integrations/ai/USER_AI_SETTINGS_IMPLEMENTATION.md), [AI_INTEGRATION.md](../integrations/ai/AI_INTEGRATION.md) |
 | Журнал вызовов AI и аналитика | `docs/entities/ai/`, `docs/screens/ai/` | [AiCallLog.md](../entities/ai/AiCallLog.md), [AiCallLogBrowse.md](../screens/ai/AiCallLogBrowse.md), [AiDashboards_Spec.md](../screens/ai/AiDashboards_Spec.md) |
+| Подсистема LLM-чат и интеграции (Локальный чат, Hermes Agent) | `docs/ai/` | [LLM_CHAT_SPECIFICATION_AND_TZ.md](LLM_CHAT_SPECIFICATION_AND_TZ.md) |
