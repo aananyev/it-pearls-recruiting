@@ -26,11 +26,27 @@ public class MarkdownRenderer {
     private static final Pattern HORIZONTAL_RULE_PATTERN = Pattern.compile("^(?:---|_{3,}|\\*{3,})$");
     private static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     private static final Pattern INTERNAL_HASH_PATTERN = Pattern.compile("^#([a-zA-Z0-9_\\-\\./\\?=&]+)$");
+    private static final Pattern ACTION_PAYLOAD_PATTERN = Pattern.compile(
+            "^(create-interaction\\?(?:candidateId|candId|candidateName)=[0-9a-zA-Zа-яА-ЯёЁ\\-_\\s\\.%+]+" +
+            "|open-position\\?(?:number|num|id)=[0-9a-zA-Z\\-_\\^]+" +
+            "|open-vacancy\\?(?:number|num|id)=[0-9a-zA-Z\\-_\\^]+" +
+            "|open-cv\\?(?:id|candId|candidateName)=[0-9a-zA-Zа-яА-ЯёЁ\\-_\\s\\.%+]+" +
+            "|open-browse\\?(?:role|pos)=[a-zA-Z0-9а-яА-ЯёЁ\\s\\-\\.\\+_%]+" +
+            "|browse-vacancies\\?(?:role|pos)=[a-zA-Z0-9а-яА-ЯёЁ\\s\\-\\.\\+_%]+)$"
+    );
 
     /**
      * Renders complete chat history and optional live streaming text into a safe HTML container.
      */
     public static String renderChatHistory(List<LlmChatMessage> messages, String liveText) {
+        int count = messages != null ? messages.size() : 0;
+        return renderChatHistory(messages, liveText, count, count);
+    }
+
+    /**
+     * Renders chat history with pagination awareness (load earlier messages button).
+     */
+    public static String renderChatHistory(List<LlmChatMessage> messages, String liveText, int totalCount, int visibleCount) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"llm-chat-messages-container\">");
 
@@ -43,6 +59,14 @@ public class MarkdownRenderer {
               .append("</div>");
             sb.append("</div>");
             return sb.toString();
+        }
+
+        if (totalCount > visibleCount) {
+            int remaining = totalCount - visibleCount;
+            sb.append("<div class=\"llm-chat-load-earlier-container\" style=\"text-align: center; margin: 4px 0 10px 0;\">")
+              .append("<button type=\"button\" class=\"llm-chat-load-earlier-btn\" onclick=\"if(window.hunttechLoadEarlierMessages) window.hunttechLoadEarlierMessages();\" style=\"cursor: pointer; padding: 5px 14px; font-size: 12px; font-weight: 600; border-radius: 14px; border: 1px solid rgba(120, 140, 160, 0.35); background: rgba(120, 140, 160, 0.12); color: inherit;\">")
+              .append("↑ Загрузить предыдущие сообщения (ещё ").append(remaining).append(")")
+              .append("</button></div>");
         }
 
         if (hasMessages) {
@@ -84,6 +108,14 @@ public class MarkdownRenderer {
      * Renders Hermes chat history and optional live status text.
      */
     public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String emptyHint) {
+        int count = messages != null ? messages.size() : 0;
+        return renderHermesChatHistory(messages, liveText, emptyHint, count, count);
+    }
+
+    /**
+     * Renders Hermes chat history with pagination awareness.
+     */
+    public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String emptyHint, int totalCount, int visibleCount) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"llm-chat-messages-container\">");
 
@@ -99,6 +131,14 @@ public class MarkdownRenderer {
               .append("</div>");
             sb.append("</div>");
             return sb.toString();
+        }
+
+        if (totalCount > visibleCount) {
+            int remaining = totalCount - visibleCount;
+            sb.append("<div class=\"llm-chat-load-earlier-container\" style=\"text-align: center; margin: 4px 0 10px 0;\">")
+              .append("<button type=\"button\" class=\"llm-chat-load-earlier-btn\" onclick=\"if(window.hunttechLoadEarlierHermesMessages) window.hunttechLoadEarlierHermesMessages();\" style=\"cursor: pointer; padding: 5px 14px; font-size: 12px; font-weight: 600; border-radius: 14px; border: 1px solid rgba(120, 140, 160, 0.35); background: rgba(120, 140, 160, 0.12); color: inherit;\">")
+              .append("↑ Загрузить предыдущие сообщения (ещё ").append(remaining).append(")")
+              .append("</button></div>");
         }
 
         if (hasMessages) {
@@ -366,6 +406,24 @@ public class MarkdownRenderer {
                     String cubaUrl = "#main/0/hunttech_IteractionList.edit?id=" + safeId;
                     replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"interaction\" data-id=\"" + safeId + "\" title=\"Открыть карточку взаимодействия в HRM\">"
                             + "<span class=\"llm-entity-icon\">📋</span> " + label + "</a>";
+                } else {
+                    replacement = label;
+                }
+            } else if (url.startsWith("hrm://cv/")) {
+                String id = url.substring("hrm://cv/".length()).trim();
+                if (UUID_PATTERN.matcher(id).matches()) {
+                    String safeId = escapeHtml(id);
+                    String cubaUrl = "#main/0/hunttech_CandidateCV.edit?id=" + safeId;
+                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"cv\" data-id=\"" + safeId + "\" title=\"Открыть резюме кандидата в HRM\">"
+                            + "<span class=\"llm-entity-icon\">📄</span> " + label + "</a>";
+                } else {
+                    replacement = label;
+                }
+            } else if (url.startsWith("hrm://action/")) {
+                String actionData = url.substring("hrm://action/".length()).trim();
+                if (ACTION_PAYLOAD_PATTERN.matcher(actionData).matches()) {
+                    replacement = "<a href=\"#action\" class=\"llm-md-link llm-hrm-action-link\" data-action-url=\"" + escapeHtml(actionData) + "\" title=\"Выполнить действие в HRM\">"
+                            + "<span class=\"llm-entity-icon\">⚡</span> " + label + "</a>";
                 } else {
                     replacement = label;
                 }

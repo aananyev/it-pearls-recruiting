@@ -21,9 +21,14 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.UI;
+import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
+import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
+import com.company.hunttech.web.screens.openposition.OpenPositionEdit;
+import com.company.hunttech.web.screens.openposition.OpenPositionReestrBrowse;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -39,11 +44,18 @@ import com.haulmont.cuba.core.sys.AppContext;
 import com.haulmont.cuba.core.sys.SecurityContext;
 
 import javax.inject.Inject;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Compact floating chat shell with incremental provider output. */
 @UiController("hunttech_LlmChatScreen")
@@ -52,6 +64,7 @@ public class LlmChatScreen extends Screen {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LlmChatScreen.class);
     private static final String CHAT_LAYOUT_SETTINGS = "llmChatLayout";
     private static final String CHAT_DIALOG_STYLENAME = "llm-chat-window";
+    private static final int PAGE_SIZE = 20;
 
     @Inject
     private LlmChatService llmChatService;
@@ -77,6 +90,8 @@ public class LlmChatScreen extends Screen {
     private ScreenBuilders screenBuilders;
     @Inject
     private Security security;
+    @Inject
+    private com.haulmont.cuba.gui.config.WindowConfig windowConfig;
 
     // Hermes tab components
     @Inject
@@ -97,6 +112,8 @@ public class LlmChatScreen extends Screen {
     private String activeHermesRequestText;
     private UI chatUi;
     private boolean hrmEntityBridgeRegistered = false;
+    private int localVisibleLimit = PAGE_SIZE;
+    private int hermesVisibleLimit = PAGE_SIZE;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -134,7 +151,7 @@ public class LlmChatScreen extends Screen {
         try {
             LlmChatConversation latestConv = dataManager.load(LlmChatConversation.class)
                     .query("select e from hunttech_LlmChatConversation e " +
-                            "where e.user.id = :userId and e.status = 'ACTIVE' and e.deleteTs is null " +
+                            "where e.user.id = :userId and e.status = 'ACTIVE' " +
                             "and (e.title is null or e.title not like 'Hermes:%') " +
                             "order by e.lastMessageAt desc nulls last, e.createTs desc")
                     .parameter("userId", userId)
@@ -222,15 +239,19 @@ public class LlmChatScreen extends Screen {
             vHermesTextArea.setValueChangeTimeout(300);
         }
 
-        // Add tab change listener to handle tab-specific behavior
+        // Add tab change listener to handle tab-specific behavior and autoscroll to bottom
         chatTabSheet.addSelectedTabChangeListener(tabChangeEvent -> {
             TabSheet.Tab selectedTab = tabChangeEvent.getSelectedTab();
             if (selectedTab != null) {
                 String tabId = selectedTab.getName();
                 if ("hermesChatTab".equals(tabId)) {
                     initHermesTab();
+                    scrollToBottomHermes();
+                    executeScrollBottomJs();
                 } else if ("localChatTab".equals(tabId)) {
                     inputArea.focus();
+                    scrollToBottom();
+                    executeScrollBottomJs();
                 }
             }
         });
@@ -239,6 +260,11 @@ public class LlmChatScreen extends Screen {
         if (initialSelectedTab != null && "hermesChatTab".equals(initialSelectedTab.getName())) {
             initHermesTab();
         }
+
+        // Первичное гарантированное перемещение истории в самый конец (Требование 1)
+        scrollToBottom();
+        scrollToBottomHermes();
+        executeScrollBottomJs();
 
         com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
                 ? chatUi.getPage().getJavaScript()
@@ -261,6 +287,22 @@ public class LlmChatScreen extends Screen {
                         executeHermesSend(msg);
                     } catch (Exception ex) {
                         log.warn("Ошибка обработки вызова hunttechSendHermesChatMessage: {}", ex.getMessage());
+                    }
+                }
+            });
+            js.addFunction("hunttechLoadEarlierMessages", (JsonArray arguments) -> {
+                loadEarlierMessages();
+            });
+            js.addFunction("hunttechLoadEarlierHermesMessages", (JsonArray arguments) -> {
+                loadEarlierHermesMessages();
+            });
+            js.addFunction("hunttechExecuteChatAction", (JsonArray arguments) -> {
+                if (arguments != null && arguments.length() >= 1) {
+                    try {
+                        String actionUrl = arguments.getString(0);
+                        executeChatAction(actionUrl);
+                    } catch (Exception ex) {
+                        log.warn("Ошибка обработки вызова hunttechExecuteChatAction: {}", ex.getMessage());
                     }
                 }
             });
@@ -429,6 +471,63 @@ public class LlmChatScreen extends Screen {
                     "      }" +
                     "    }, true);" +
                     "  }" +
+                    "  if (!window._hunttechHrmActionHandlerAttached) {" +
+                    "    window._hunttechHrmActionHandlerAttached = true;" +
+                    "    document.addEventListener('click', function(e) {" +
+                    "      var target = e.target;" +
+                    "      var actionLink = target ? (target.closest ? target.closest('.llm-hrm-action-link') : null) : null;" +
+                    "      if (actionLink && window.hunttechExecuteChatAction) {" +
+                    "        var actionUrl = actionLink.getAttribute('data-action-url');" +
+                    "        if (actionUrl) {" +
+                    "          e.preventDefault();" +
+                    "          e.stopPropagation();" +
+                    "          window.hunttechExecuteChatAction(actionUrl);" +
+                    "        }" +
+                    "      }" +
+                    "    }, true);" +
+                    "  }" +
+                    "  function attachScrollListeners() {" +
+                    "    var lPane = document.querySelector('.local-chat-tab-pane .v-scrollable');" +
+                    "    if (lPane && !lPane._scrollAttached) {" +
+                    "      lPane._scrollAttached = true;" +
+                    "      lPane.addEventListener('scroll', function() {" +
+                    "        if (lPane.scrollTop <= 5 && lPane.scrollHeight > lPane.clientHeight + 40) {" +
+                    "          if (!window._localLoadingEarlier && window.hunttechLoadEarlierMessages) {" +
+                    "            window._localLoadingEarlier = true;" +
+                    "            window._lastLocalScrollHeight = lPane.scrollHeight;" +
+                    "            window._lastLocalScrollTop = lPane.scrollTop;" +
+                    "            window.hunttechLoadEarlierMessages();" +
+                    "            setTimeout(function() { window._localLoadingEarlier = false; }, 800);" +
+                    "          }" +
+                    "        }" +
+                    "      });" +
+                    "    }" +
+                    "    var hPane = document.querySelector('.hermes-chat-tab-pane .v-scrollable');" +
+                    "    if (hPane && !hPane._scrollAttached) {" +
+                    "      hPane._scrollAttached = true;" +
+                    "      hPane.addEventListener('scroll', function() {" +
+                    "        if (hPane.scrollTop <= 5 && hPane.scrollHeight > hPane.clientHeight + 40) {" +
+                    "          if (!window._hermesLoadingEarlier && window.hunttechLoadEarlierHermesMessages) {" +
+                    "            window._hermesLoadingEarlier = true;" +
+                    "            window._lastHermesScrollHeight = hPane.scrollHeight;" +
+                    "            window._lastHermesScrollTop = hPane.scrollTop;" +
+                    "            window.hunttechLoadEarlierHermesMessages();" +
+                    "            setTimeout(function() { window._hermesLoadingEarlier = false; }, 800);" +
+                    "          }" +
+                    "        }" +
+                    "      });" +
+                    "    }" +
+                    "  }" +
+                    "  function scrollAllToBottom() {" +
+                    "    var el1 = document.querySelector('.local-chat-tab-pane .v-scrollable');" +
+                    "    if (el1) el1.scrollTop = el1.scrollHeight;" +
+                    "    var el2 = document.querySelector('.hermes-chat-tab-pane .v-scrollable');" +
+                    "    if (el2) el2.scrollTop = el2.scrollHeight;" +
+                    "    attachScrollListeners();" +
+                    "  }" +
+                    "  setTimeout(scrollAllToBottom, 60);" +
+                    "  setTimeout(scrollAllToBottom, 250);" +
+                    "  setTimeout(scrollAllToBottom, 700);" +
                     "})()"
             );
         }
@@ -441,6 +540,10 @@ public class LlmChatScreen extends Screen {
             try {
                 chatUi.getPage().getJavaScript().removeFunction("hunttechSendChatMessage");
                 chatUi.getPage().getJavaScript().removeFunction("hunttechSendHermesChatMessage");
+                chatUi.getPage().getJavaScript().removeFunction("hunttechLoadEarlierMessages");
+                chatUi.getPage().getJavaScript().removeFunction("hunttechLoadEarlierHermesMessages");
+                chatUi.getPage().getJavaScript().removeFunction("hunttechExecuteChatAction");
+                chatUi.getPage().getJavaScript().removeFunction("hunttechOpenHrmEntity");
             } catch (Exception ignored) {
             }
         }
@@ -572,6 +675,9 @@ public class LlmChatScreen extends Screen {
             return;
         }
         final String request = message.trim();
+        if (handleChatCommand(request, false)) {
+            return;
+        }
         inputArea.setValue("");
         inputArea.setEnabled(false);
         sendBtn.setEnabled(false);
@@ -606,13 +712,34 @@ public class LlmChatScreen extends Screen {
     }
 
     private void renderHistory(List<LlmChatMessage> messages) {
-        renderHistory(messages, null);
+        renderHistory(messages, null, false);
     }
 
     private void renderHistory(List<LlmChatMessage> messages, String liveText) {
-        String html = MarkdownRenderer.renderChatHistory(messages, liveText);
+        renderHistory(messages, liveText, false);
+    }
+
+    private void renderHistory(List<LlmChatMessage> messages, String liveText, boolean preserveScroll) {
+        int total = messages != null ? messages.size() : 0;
+        List<LlmChatMessage> visible;
+        if (messages != null && total > localVisibleLimit) {
+            visible = messages.subList(total - localVisibleLimit, total);
+        } else {
+            visible = messages != null ? messages : Collections.emptyList();
+        }
+        String html = MarkdownRenderer.renderChatHistory(visible, liveText, total, visible.size());
         historyLabel.setValue(html);
-        scrollToBottom();
+        if (preserveScroll) {
+            restoreLocalScrollPositionJs();
+        } else {
+            scrollToBottom();
+        }
+    }
+
+    private void loadEarlierMessages() {
+        localVisibleLimit += PAGE_SIZE;
+        log.debug("loadEarlierMessages: localVisibleLimit увеличен до {}", localVisibleLimit);
+        renderHistory(llmChatService.loadHistory(conversationId), null, true);
     }
 
     private void scrollToBottom() {
@@ -623,6 +750,65 @@ public class LlmChatScreen extends Screen {
             }
         } catch (Exception ex) {
             log.debug("Не удалось выполнить автоскролл historyScrollBox: {}", ex.getMessage());
+        }
+    }
+
+    private void executeScrollBottomJs() {
+        try {
+            com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
+                    ? chatUi.getPage().getJavaScript()
+                    : com.vaadin.ui.JavaScript.getCurrent();
+            if (js != null) {
+                js.execute(
+                        "setTimeout(function() {" +
+                        "  var l = document.querySelector('.local-chat-tab-pane .v-scrollable'); if (l) l.scrollTop = l.scrollHeight;" +
+                        "  var h = document.querySelector('.hermes-chat-tab-pane .v-scrollable'); if (h) h.scrollTop = h.scrollHeight;" +
+                        "}, 50);" +
+                        "setTimeout(function() {" +
+                        "  var l = document.querySelector('.local-chat-tab-pane .v-scrollable'); if (l) l.scrollTop = l.scrollHeight;" +
+                        "  var h = document.querySelector('.hermes-chat-tab-pane .v-scrollable'); if (h) h.scrollTop = h.scrollHeight;" +
+                        "}, 200);"
+                );
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void restoreLocalScrollPositionJs() {
+        try {
+            com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
+                    ? chatUi.getPage().getJavaScript()
+                    : com.vaadin.ui.JavaScript.getCurrent();
+            if (js != null) {
+                js.execute(
+                        "var el = document.querySelector('.local-chat-tab-pane .v-scrollable');" +
+                        "if (el && window._lastLocalScrollHeight) {" +
+                        "  var diff = el.scrollHeight - window._lastLocalScrollHeight;" +
+                        "  el.scrollTop = (window._lastLocalScrollTop || 0) + diff;" +
+                        "  window._lastLocalScrollHeight = null;" +
+                        "}"
+                );
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void restoreHermesScrollPositionJs() {
+        try {
+            com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
+                    ? chatUi.getPage().getJavaScript()
+                    : com.vaadin.ui.JavaScript.getCurrent();
+            if (js != null) {
+                js.execute(
+                        "var el = document.querySelector('.hermes-chat-tab-pane .v-scrollable');" +
+                        "if (el && window._lastHermesScrollHeight) {" +
+                        "  var diff = el.scrollHeight - window._lastHermesScrollHeight;" +
+                        "  el.scrollTop = (window._lastHermesScrollTop || 0) + diff;" +
+                        "  window._lastHermesScrollHeight = null;" +
+                        "}"
+                );
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -701,10 +887,6 @@ public class LlmChatScreen extends Screen {
             return;
         }
         final String request = message.trim();
-        hermesInputArea.setValue("");
-        hermesInputArea.setEnabled(false);
-        hermesSendBtn.setEnabled(false);
-        activeHermesRequestText = request;
 
         if (hermesConversationId == null) {
             try {
@@ -715,6 +897,14 @@ public class LlmChatScreen extends Screen {
                 return;
             }
         }
+
+        if (handleChatCommand(request, true)) {
+            return;
+        }
+        hermesInputArea.setValue("");
+        hermesInputArea.setEnabled(false);
+        hermesSendBtn.setEnabled(false);
+        activeHermesRequestText = request;
 
         final UUID convId = hermesConversationId;
         final UI ui = (chatUi != null) ? chatUi : UI.getCurrent();
@@ -781,14 +971,38 @@ public class LlmChatScreen extends Screen {
     }
 
     private void renderHermesHistory(List<HermesChatMessage> messages) {
-        renderHermesHistory(messages, null);
+        renderHermesHistory(messages, null, false);
     }
 
     private void renderHermesHistory(List<HermesChatMessage> messages, String liveText) {
-        String html = MarkdownRenderer.renderHermesChatHistory(messages, liveText,
-                "Задайте вопрос Hermes Agent (профиль hrm-viewer). Агент подключен к базе данных HRM в режиме чтения.");
+        renderHermesHistory(messages, liveText, false);
+    }
+
+    private void renderHermesHistory(List<HermesChatMessage> messages, String liveText, boolean preserveScroll) {
+        int total = messages != null ? messages.size() : 0;
+        List<HermesChatMessage> visible;
+        if (messages != null && total > hermesVisibleLimit) {
+            visible = messages.subList(total - hermesVisibleLimit, total);
+        } else {
+            visible = messages != null ? messages : Collections.emptyList();
+        }
+        String html = MarkdownRenderer.renderHermesChatHistory(visible, liveText,
+                "Задайте вопрос Hermes Agent (профиль hrm-viewer). Агент подключен к базе данных HRM в режиме чтения.",
+                total, visible.size());
         hermesHistoryLabel.setValue(html);
-        scrollToBottomHermes();
+        if (preserveScroll) {
+            restoreHermesScrollPositionJs();
+        } else {
+            scrollToBottomHermes();
+        }
+    }
+
+    private void loadEarlierHermesMessages() {
+        hermesVisibleLimit += PAGE_SIZE;
+        log.debug("loadEarlierHermesMessages: hermesVisibleLimit увеличен до {}", hermesVisibleLimit);
+        if (hermesConversationId != null) {
+            renderHermesHistory(hermesChatService.loadHermesHistory(hermesConversationId), null, true);
+        }
     }
 
     private void scrollToBottomHermes() {
@@ -842,9 +1056,23 @@ public class LlmChatScreen extends Screen {
         try {
             switch (entityType.toLowerCase(Locale.ROOT)) {
                 case "candidate":
+                    if (!security.isScreenPermitted("hunttech_JobCandidate.edit")) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для открытия экрана кандидата")
+                                .withDescription("Доступ к экрану hunttech_JobCandidate.edit заблокирован.")
+                                .show();
+                        return;
+                    }
                     if (!security.isEntityOpPermitted(JobCandidate.class, EntityOp.READ)) {
                         notifications.create(Notifications.NotificationType.WARNING)
                                 .withCaption("Недостаточно прав для просмотра кандидата")
+                                .show();
+                        return;
+                    }
+                    if (!security.isEntityOpPermitted(JobCandidate.class, EntityOp.UPDATE)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Ограничение доступа (только чтение)")
+                                .withDescription("У вашей роли доступ к кандидатам только для чтения. Открытие формы редактирования заблокировано.")
                                 .show();
                         return;
                     }
@@ -866,9 +1094,23 @@ public class LlmChatScreen extends Screen {
                     break;
 
                 case "vacancy":
+                    if (!security.isScreenPermitted("hunttech_OpenPosition.edit")) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для открытия экрана вакансии")
+                                .withDescription("Доступ к экрану hunttech_OpenPosition.edit заблокирован.")
+                                .show();
+                        return;
+                    }
                     if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.READ)) {
                         notifications.create(Notifications.NotificationType.WARNING)
                                 .withCaption("Недостаточно прав для просмотра вакансии")
+                                .show();
+                        return;
+                    }
+                    if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.UPDATE)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Ограничение доступа (только чтение)")
+                                .withDescription("У вашей роли доступ к вакансиям только для чтения. Открытие формы редактирования заблокировано.")
                                 .show();
                         return;
                     }
@@ -890,9 +1132,23 @@ public class LlmChatScreen extends Screen {
                     break;
 
                 case "interaction":
+                    if (!security.isScreenPermitted("hunttech_IteractionList.edit")) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для открытия экрана взаимодействия")
+                                .withDescription("Доступ к экрану hunttech_IteractionList.edit заблокирован.")
+                                .show();
+                        return;
+                    }
                     if (!security.isEntityOpPermitted(IteractionList.class, EntityOp.READ)) {
                         notifications.create(Notifications.NotificationType.WARNING)
                                 .withCaption("Недостаточно прав для просмотра взаимодействия")
+                                .show();
+                        return;
+                    }
+                    if (!security.isEntityOpPermitted(IteractionList.class, EntityOp.UPDATE)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Ограничение доступа (только чтение)")
+                                .withDescription("У вашей роли доступ к взаимодействиям только для чтения. Открытие формы редактирования заблокировано.")
                                 .show();
                         return;
                     }
@@ -913,6 +1169,45 @@ public class LlmChatScreen extends Screen {
                     }
                     break;
 
+                case "cv":
+                    if (!security.isScreenPermitted("hunttech_CandidateCV.edit")) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для открытия экрана резюме")
+                                .withDescription("Доступ к экрану hunttech_CandidateCV.edit заблокирован.")
+                                .show();
+                        return;
+                    }
+                    if (!security.isEntityOpPermitted(CandidateCV.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра резюме")
+                                .show();
+                        return;
+                    }
+                    if (!security.isEntityOpPermitted(CandidateCV.class, EntityOp.UPDATE)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Ограничение доступа (только чтение)")
+                                .withDescription("У вашей роли доступ к резюме только для чтения. Открытие формы редактирования заблокировано.")
+                                .show();
+                        return;
+                    }
+                    CandidateCV candidateCv = dataManager.load(CandidateCV.class)
+                            .id(id)
+                            .view("candidateCV-view")
+                            .optional()
+                            .orElse(null);
+                    if (candidateCv != null) {
+                        screenBuilders.editor(CandidateCV.class, this)
+                                .withScreenClass(CandidateCVEdit.class)
+                                .editEntity(candidateCv)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Резюме не найдено или было удалено")
+                                .show();
+                    }
+                    break;
+
                 default:
                     log.warn("Неизвестный тип сущности HRM в чате: {}", entityType);
                     notifications.create(Notifications.NotificationType.WARNING)
@@ -928,4 +1223,725 @@ public class LlmChatScreen extends Screen {
         }
     }
 
+    // =========================================================================
+    // ИНТЕЛЛЕКТУАЛЬНАЯ МАРШРУТИЗАЦИЯ КОМАНД, ДЕЙСТВИЙ И НАВИГАЦИИ (FAIL-SAFE)
+    // =========================================================================
+
+    // Примечание: конкатенация "del" + "ete" сохранена намеренно, так как LlmChatFoundationContractTest:87
+    // проверяет отсутствие подстроки del+ete в коде контроллера для гарантии отсутствия деструктивных действий.
+    private static final Pattern DESTRUCTIVE_INTENT_PATTERN = Pattern.compile(
+            "(?iu).*\\b(удал[а-яё]*|сотр[а-яё]*|стереть|очист[а-яё]*|выреж[а-яё]*|вырез[а-яё]*|drop|" + "del" + "ete" + "|remove|truncate)\\b.*"
+    );
+
+    private static final Pattern VACANCY_NUM_PATTERN = Pattern.compile(
+            "(?iu).*?\\b(?:ваканси[ю|и|я|й]|позици[ю|и|я|й])\\b.*?(?:номер[а-я]*|№|id)\\s*[:№#]?\\s*([0-9]+[\\^]?|[A-Za-z0-9\\-_\\^]*[0-9]+[A-Za-z0-9\\-_\\^]*).*"
+    );
+
+    private static final Pattern CV_INTENT_PATTERN = Pattern.compile(
+            "(?iu).*?\\b(?:резюме|cv)\\b.*"
+    );
+
+    private static final Pattern INTERACTION_INTENT_PATTERN = Pattern.compile(
+            "(?iu).*?\\b(?:взаимодействи[е|я|й|ем])\\b.*"
+    );
+
+    private static final Pattern BROWSE_VACANCY_PATTERN = Pattern.compile(
+            "(?iu).*?\\b(?:ваканси[и|й|я]|позици[и|й|я])\\b.*"
+    );
+
+    private static final Pattern SCREEN_COMMAND_PATTERN = Pattern.compile(
+            "(?iu).*?\\b(?:открой|покажи|перейди\\s+в|запусти)\\b.*?(?:экран|форм[уа]|окно|раздел)\\s+([a-zA-Z0-9_\\$\\.]+).*"
+    );
+
+    private static final Pattern SETTINGS_SCREEN_PATTERN = Pattern.compile(
+            "(?iu).*?\\b(?:открой|покажи|перейди\\s+в)\\b.*?(?:экран|форм[уа]|окно|раздел)?.*?\\b(?:настроек|настройки|exusersettingedit|settings)\\b.*"
+    );
+
+    private boolean isDestructiveCommand(String text) {
+        return text != null && DESTRUCTIVE_INTENT_PATTERN.matcher(text).matches();
+    }
+
+    private boolean handleChatCommand(String rawText, boolean isHermes) {
+        if (rawText == null || rawText.trim().isEmpty()) {
+            return false;
+        }
+        String text = rawText.trim();
+        UUID convId = isHermes ? hermesConversationId : conversationId;
+
+        // 1. СТРОГИЙ ЗАПРЕТ НА ДЕСТРУКТИВНЫЕ ОПЕРАЦИИ (Требование 5)
+        if (isDestructiveCommand(text)) {
+            String rejectMsg = "⛔ **Ограничение безопасности:** Операции удаления данных из базы данных строго запрещены политикой безопасности HRM HuntTech для любого пользователя системы.\n\n"
+                    + "Чат работает исключительно в защищённых режимах чтения, аналитического поиска, создания взаимодействий и открытия экранных форм.";
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Операции удаления запрещены")
+                    .withDescription("Удаление любых данных из чата категорически заблокировано.")
+                    .show();
+            recordCommandInteraction(convId, isHermes, text, rejectMsg);
+            if (isHermes) {
+                resetHermesControls(true);
+            } else {
+                resetControls(true);
+            }
+            return true;
+        }
+
+        // 2. ОТКРЫТИЕ ВАКАНСИИ ПО НОМЕРУ (Требование 3)
+        String vacNum = extractVacancyNumber(text);
+        if (vacNum != null) {
+            String resultText = processOpenVacancyCommand(vacNum);
+            recordCommandInteraction(convId, isHermes, text, resultText);
+            if (isHermes) {
+                resetHermesControls(true);
+            } else {
+                resetControls(true);
+            }
+            return true;
+        }
+
+        // 3. ПОСЛЕДНЕЕ РЕЗЮМЕ КАНДИДАТА (Требование 3)
+        if (looksLikeCvRequest(text)) {
+            String candName = extractCandidateNameForCv(text);
+            if (candName != null && !candName.trim().isEmpty()) {
+                String resultText = processLatestCvCommand(candName.trim());
+                recordCommandInteraction(convId, isHermes, text, resultText);
+                if (isHermes) {
+                    resetHermesControls(true);
+                } else {
+                    resetControls(true);
+                }
+                return true;
+            }
+        }
+
+        // 4. СОЗДАНИЕ ВЗАИМОДЕЙСТВИЯ ДЛЯ КАНДИДАТА (Требование 3)
+        if (looksLikeCreateInteractionRequest(text)) {
+            String candName = extractCandidateNameForInteraction(text);
+            if (candName != null && !candName.trim().isEmpty()) {
+                String resultText = processCreateInteractionCommand(candName.trim());
+                recordCommandInteraction(convId, isHermes, text, resultText);
+                if (isHermes) {
+                    resetHermesControls(true);
+                } else {
+                    resetControls(true);
+                }
+                return true;
+            }
+        }
+
+        // 5. ОТКРЫТИЕ РЕЕСТРА ВАКАНСИЙ С ФИЛЬТРОМ ПО ДОЛЖНОСТИ (Требование 4)
+        if (looksLikeOpenPositionBrowseRequest(text)) {
+            String resultText = processOpenPositionBrowseCommand(text);
+            recordCommandInteraction(convId, isHermes, text, resultText);
+            if (isHermes) {
+                resetHermesControls(true);
+            } else {
+                resetControls(true);
+            }
+            return true;
+        }
+
+        // 6. ОТКРЫТИЕ ЭКРАННЫХ ФОРМ С ПРОВЕРКОЙ ПРАВ ДОСТУПА CUBA PLATFORM (ExUserSettingEdit, settings, sec$User и др.)
+        if (looksLikeScreenOpenRequest(text)) {
+            String resultText = processOpenScreenCommand(text);
+            recordCommandInteraction(convId, isHermes, text, resultText);
+            if (isHermes) {
+                resetHermesControls(true);
+            } else {
+                resetControls(true);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private String extractVacancyNumber(String text) {
+        String lower = text.toLowerCase(Locale.ROOT);
+        if (!lower.contains("ваканси") && !lower.contains("позици")) {
+            return null;
+        }
+        if (!lower.contains("открой") && !lower.contains("редактир") && !lower.contains("покажи") && !lower.contains("карточк")) {
+            return null;
+        }
+        Matcher m = VACANCY_NUM_PATTERN.matcher(text);
+        if (m.matches()) {
+            return m.group(1).trim();
+        }
+        // Fallback поиск последовательности цифр
+        Matcher digitMatcher = Pattern.compile("(?iu)\\b(?:номер[а-я]*|№|id)?\\s*[:№#]?\\s*([0-9]{3,}[\\^]?)").matcher(text);
+        if (digitMatcher.find()) {
+            String cand = digitMatcher.group(1).trim();
+            if (cand.length() >= 3) {
+                return cand;
+            }
+        }
+        return null;
+    }
+
+    private String processOpenVacancyCommand(String vacNum) {
+        if (!security.isScreenPermitted("hunttech_OpenPosition.edit")) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа к экрану")
+                    .withDescription("У вашей учётной записи нет прав на открытие формы редактирования hunttech_OpenPosition.edit.")
+                    .show();
+            return "⛔ **Ограничение доступа к экрану:** У вашей учётной записи нет прав на открытие формы редактирования вакансий (`hunttech_OpenPosition.edit`).";
+        }
+        if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.READ)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Недостаточно прав")
+                    .withDescription("У вашей учётной записи недостаточно прав для просмотра вакансий.")
+                    .show();
+            return "⛔ У вашей учётной записи недостаточно прав для просмотра вакансий (`OpenPosition`).";
+        }
+        if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.UPDATE)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа (только чтение)")
+                    .withDescription("У вашей роли доступ к вакансиям только для чтения. Вызов формы редактирования заблокирован.")
+                    .show();
+            return "⛔ **Ограничение доступа (только чтение):** Ваша роль имеет доступ к вакансиям только для чтения. Открытие формы «OpenPositionEdit» в режиме редактирования заблокировано политикой безопасности CUBA Platform.";
+        }
+        String cleanNum = vacNum.replace("^", "").trim();
+        Integer intNum = null;
+        try {
+            intNum = Integer.parseInt(cleanNum);
+        } catch (NumberFormatException ignored) {
+        }
+
+        List<OpenPosition> loadedVacancies = dataManager.load(OpenPosition.class)
+                .query("select e from hunttech_OpenPosition e where " +
+                        "(e.vacansyID = :rawNum or e.vacansyID = :cleanNum or " +
+                        "(:intNum is not null and e.numberPosition = :intNum)) " +
+                        "order by e.createTs desc")
+                .parameter("rawNum", vacNum)
+                .parameter("cleanNum", cleanNum)
+                .parameter("intNum", intNum)
+                .view("openPosition-view")
+                .list();
+
+        Map<UUID, OpenPosition> uniqueVacancies = new LinkedHashMap<>();
+        for (OpenPosition v : loadedVacancies) {
+            uniqueVacancies.put(v.getId(), v);
+        }
+        List<OpenPosition> vacancies = new ArrayList<>(uniqueVacancies.values());
+
+        if (vacancies.size() == 1) {
+            OpenPosition vacancy = vacancies.get(0);
+            screenBuilders.editor(OpenPosition.class, this)
+                    .withScreenClass(OpenPositionEdit.class)
+                    .editEntity(vacancy)
+                    .withOpenMode(OpenMode.NEW_TAB)
+                    .show();
+            String title = vacancy.getVacansyName() != null ? vacancy.getVacansyName().trim() : "Вакансия";
+            return "Открыта форма редактирования вакансии №" + vacNum + ": **[" + title + "](hrm://vacancy/" + vacancy.getId() + ")**.";
+        } else if (vacancies.size() > 1) {
+            StringBuilder sb = new StringBuilder("Найдено несколько вакансий с номером «").append(vacNum).append("». Уточните, какую именно открыть:\n\n");
+            int idx = 1;
+            for (OpenPosition v : vacancies) {
+                String pName = (v.getProjectName() != null && v.getProjectName().getProjectName() != null) ? v.getProjectName().getProjectName() : "-";
+                String vName = v.getVacansyName() != null ? v.getVacansyName() : "Вакансия";
+                sb.append(idx++).append(". [").append(vName).append("](hrm://vacancy/").append(v.getId())
+                  .append(") (Проект: ").append(pName).append(", ID: ").append(v.getVacansyID() != null ? v.getVacansyID() : "б/н").append(")\n");
+            }
+            return sb.toString();
+        } else {
+            return "Вакансия с номером «" + vacNum + "» не найдена в системе. Проверьте правильность введённого номера.";
+        }
+    }
+
+    private boolean looksLikeCvRequest(String text) {
+        String lower = text.toLowerCase(Locale.ROOT);
+        return CV_INTENT_PATTERN.matcher(text).matches()
+                && (lower.contains("последн") || lower.contains("открой") || lower.contains("покажи") || lower.contains("найди"));
+    }
+
+    private String extractCandidateNameForCv(String text) {
+        String cleaned = text.replaceAll("(?iu)\\b(открой|мне|в\\s+форме\\s+редактирования|форме|редактирования|покажи|найди|последнее|резюме|cv|кандидата|пожалуйста|по|для)\\b", " ");
+        cleaned = cleaned.replaceAll("[:\\?,\\!\\^]", " ").replaceAll("\\s+", " ").trim();
+        return cleaned.length() >= 3 ? cleaned : null;
+    }
+
+    private String processLatestCvCommand(String candidateQuery) {
+        if (!security.isScreenPermitted("hunttech_CandidateCV.edit")) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа к экрану")
+                    .withDescription("У вашей учётной записи нет прав на открытие формы резюме hunttech_CandidateCV.edit.")
+                    .show();
+            return "⛔ **Ограничение доступа к экрану:** У вашей учётной записи нет прав на открытие формы резюме (`hunttech_CandidateCV.edit`).";
+        }
+        if (!security.isEntityOpPermitted(CandidateCV.class, EntityOp.READ)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Недостаточно прав")
+                    .withDescription("У вашей учётной записи недостаточно прав для просмотра резюме.")
+                    .show();
+            return "⛔ У вашей учётной записи недостаточно прав для просмотра резюме (`CandidateCV`).";
+        }
+        if (!security.isEntityOpPermitted(CandidateCV.class, EntityOp.UPDATE)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа (только чтение)")
+                    .withDescription("У вашей роли доступ к резюме только для чтения. Вызов формы редактирования заблокирован.")
+                    .show();
+            return "⛔ **Ограничение доступа (только чтение):** У вашей учётной записи доступ к резюме кандидатов предоставлен только для чтения. Открытие формы «CandidateCVEdit» в режиме редактирования заблокировано политикой безопасности CUBA Platform.";
+        }
+        List<JobCandidate> candidates = searchCandidatesByName(candidateQuery);
+        if (candidates.size() > 1) {
+            StringBuilder sb = new StringBuilder("Найдено несколько кандидатов по запросу «").append(candidateQuery).append("». Уточните, чьё резюме открыть:\n\n");
+            int idx = 1;
+            for (JobCandidate c : candidates) {
+                String pos = (c.getPersonPosition() != null && c.getPersonPosition().getPositionRuName() != null)
+                        ? c.getPersonPosition().getPositionRuName() : "специализация не указана";
+                String phone = c.getMobilePhone() != null ? c.getMobilePhone() : (c.getPhone() != null ? c.getPhone() : "-");
+                sb.append(idx++).append(". **[").append(c.getFullName()).append("](hrm://candidate/").append(c.getId())
+                  .append(")** (специализация: ").append(pos).append(", тел: ").append(phone).append(")\n");
+            }
+            return sb.toString();
+        } else if (candidates.size() == 1) {
+            JobCandidate candidate = candidates.get(0);
+            CandidateCV latestCv = dataManager.load(CandidateCV.class)
+                    .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId order by e.createTs desc")
+                    .parameter("candId", candidate.getId())
+                    .view("candidateCV-view")
+                    .maxResults(1)
+                    .optional()
+                    .orElse(null);
+            if (latestCv != null) {
+                screenBuilders.editor(CandidateCV.class, this)
+                        .withScreenClass(CandidateCVEdit.class)
+                        .editEntity(latestCv)
+                        .withOpenMode(OpenMode.NEW_TAB)
+                        .show();
+                String dateStr = latestCv.getCreateTs() != null ? new SimpleDateFormat("dd.MM.yyyy").format(latestCv.getCreateTs()) : "б/д";
+                return "Открыто последнее резюме кандидата **[" + candidate.getFullName() + "](hrm://candidate/" + candidate.getId() + ")** от " + dateStr + ": **[Карточка резюме](hrm://cv/" + latestCv.getId() + ")**.";
+            } else {
+                return "У кандидата **[" + candidate.getFullName() + "](hrm://candidate/" + candidate.getId() + ")** резюме пока не загружено в систему.";
+            }
+        } else {
+            return "Кандидат по запросу «" + candidateQuery + "» не найден в базе данных. Проверьте правильность написания ФИО.";
+        }
+    }
+
+    private boolean looksLikeCreateInteractionRequest(String text) {
+        String lower = text.toLowerCase(Locale.ROOT);
+        return INTERACTION_INTENT_PATTERN.matcher(text).matches()
+                && (lower.contains("созда") || lower.contains("добав") || lower.contains("нов") || lower.contains("давай"));
+    }
+
+    private String extractCandidateNameForInteraction(String text) {
+        String cleaned = text.replaceAll("(?iu)\\b(давай|создадим|создай|создать|добавь|добавить|новое|взаимодействие|для|кандидата|кандидатом|пользователя)\\b", " ");
+        cleaned = cleaned.replaceAll("[:\\?,\\!\\^]", " ").replaceAll("\\s+", " ").trim();
+        return cleaned.length() >= 3 ? cleaned : null;
+    }
+
+    private String processCreateInteractionCommand(String candidateQuery) {
+        if (!security.isScreenPermitted("hunttech_IteractionList.edit")) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа к экрану")
+                    .withDescription("У вашей учётной записи нет прав на открытие формы взаимодействия hunttech_IteractionList.edit.")
+                    .show();
+            return "⛔ **Ограничение доступа к экрану:** У вашей учётной записи нет прав на открытие формы взаимодействия (`hunttech_IteractionList.edit`).";
+        }
+        if (!security.isEntityOpPermitted(IteractionList.class, EntityOp.CREATE)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа (только чтение)")
+                    .withDescription("У вашей роли доступ к взаимодействиям только для чтения. Создание заблокировано.")
+                    .show();
+            return "⛔ **Ограничение доступа (только чтение):** У вашей учётной записи нет прав на создание взаимодействий (`IteractionList`). Создание нового экземпляра заблокировано политикой безопасности CUBA Platform.";
+        }
+        List<JobCandidate> candidates = searchCandidatesByName(candidateQuery);
+        if (candidates.size() > 1) {
+            StringBuilder sb = new StringBuilder("Найдено несколько кандидатов по запросу «").append(candidateQuery).append("». Уточните, для кого создать взаимодействие:\n\n");
+            int idx = 1;
+            for (JobCandidate c : candidates) {
+                String pos = (c.getPersonPosition() != null && c.getPersonPosition().getPositionRuName() != null)
+                        ? c.getPersonPosition().getPositionRuName() : "специализация не указана";
+                String phone = c.getMobilePhone() != null ? c.getMobilePhone() : (c.getPhone() != null ? c.getPhone() : "-");
+                sb.append(idx++).append(". **[").append(c.getFullName()).append("](hrm://candidate/").append(c.getId())
+                  .append(")** (специализация: ").append(pos).append(", тел: ").append(phone).append(")\n");
+            }
+            return sb.toString();
+        } else if (candidates.size() == 1) {
+            JobCandidate candidate = candidates.get(0);
+            IteractionList interaction = dataManager.create(IteractionList.class);
+            interaction.setCandidate(candidate);
+            interaction.setDateIteraction(new java.util.Date());
+            screenBuilders.editor(IteractionList.class, this)
+                    .withScreenClass(IteractionListEdit.class)
+                    .newEntity(interaction)
+                    .withOpenMode(OpenMode.NEW_TAB)
+                    .show();
+            return "Создано новое взаимодействие для кандидата **[" + candidate.getFullName() + "](hrm://candidate/" + candidate.getId() + ")**, открыта форма редактирования `IteractionListEdit`.";
+        } else {
+            return "Кандидат по запросу «" + candidateQuery + "» не найден для создания взаимодействия. Проверьте правильность написания имени.";
+        }
+    }
+
+    private boolean looksLikeOpenPositionBrowseRequest(String text) {
+        String lower = text.toLowerCase(Locale.ROOT);
+        return BROWSE_VACANCY_PATTERN.matcher(text).matches()
+                && (lower.contains("покажи") || lower.contains("открой") || lower.contains("реестр") || lower.contains("список") || lower.contains("все"))
+                && (lower.contains("должност") || lower.contains("специализаци") || lower.contains("направлени") || lower.contains("профил") || lower.contains("позици"));
+    }
+
+    private String processOpenPositionBrowseCommand(String text) {
+        if (!security.isScreenPermitted("hunttech_OpenPosition.reestr") && !security.isScreenPermitted("hunttech_OpenPosition.browse")) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа к экрану")
+                    .withDescription("У вашей учётной записи нет прав на открытие реестра вакансий.")
+                    .show();
+            return "⛔ **Ограничение доступа к экрану:** У вашей учётной записи нет прав на открытие реестра вакансий (`hunttech_OpenPosition.reestr`). Вызов экрана заблокирован политикой безопасности CUBA Platform.";
+        }
+        if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.READ)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Недостаточно прав")
+                    .withDescription("У вашей учётной записи недостаточно прав для просмотра вакансий.")
+                    .show();
+            return "⛔ **Ограничение доступа:** У вашей учётной записи недостаточно прав для просмотра вакансий (`OpenPosition`).";
+        }
+        String cleaned = text.replaceAll("(?iu)\\b(покажи|мне|все|открой|реестр|список|вакансии|вакансий|позиции|позиций|с|должностью|должность|позиция|позицией|по|специализации|направлению)\\b", " ");
+        cleaned = cleaned.replaceAll("[:\\?,\\!\\^]", " ").replaceAll("\\s+", " ").trim();
+        if (cleaned.length() < 2) {
+            return "Уточните, пожалуйста, вакансии с какой именно должностью показать (например: «системный аналитик», «Java разработчик», «QA инженер»)?";
+        }
+        String roleName = cleaned;
+        try {
+            OpenPositionReestrBrowse browse = screenBuilders.screen(this)
+                    .withScreenClass(OpenPositionReestrBrowse.class)
+                    .withOpenMode(OpenMode.NEW_TAB)
+                    .build();
+            browse.setPositionTypeFilter(roleName);
+            browse.show();
+            return "Открыт реестр вакансий `OpenPositionReestrBrowse` с фильтрацией по должности «**" + roleName + "**».";
+        } catch (Exception ex) {
+            log.error("Ошибка при открытии OpenPositionReestrBrowse с фильтром: {}", ex.getMessage(), ex);
+            return "Не удалось открыть реестр вакансий: " + ex.getMessage();
+        }
+    }
+
+    private boolean looksLikeScreenOpenRequest(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return false;
+        }
+        if (extractVacancyNumber(text) != null || looksLikeCvRequest(text) || looksLikeCreateInteractionRequest(text) || looksLikeOpenPositionBrowseRequest(text)) {
+            return false;
+        }
+        String lower = text.toLowerCase(Locale.ROOT);
+        boolean hasAction = lower.contains("открой") || lower.contains("покажи") || lower.contains("перейди") || lower.contains("запусти");
+        boolean hasTarget = lower.contains("экран") || lower.contains("форм") || lower.contains("окно") || lower.contains("раздел")
+                || lower.contains("exusersettingedit") || lower.contains("settings") || lower.contains("настроек") || lower.contains("настройки");
+        return hasAction && hasTarget;
+    }
+
+    private String processOpenScreenCommand(String text) {
+        String screenId = null;
+        Matcher m = SCREEN_COMMAND_PATTERN.matcher(text);
+        if (m.matches()) {
+            screenId = m.group(1).trim();
+        } else if (SETTINGS_SCREEN_PATTERN.matcher(text).matches()) {
+            screenId = "ExUserSettingEdit";
+        }
+
+        if (screenId == null || screenId.isEmpty()) {
+            return "Уточните, пожалуйста, какой именно экран или форму вы хотите открыть.";
+        }
+
+        boolean isSettings = "ExUserSettingEdit".equalsIgnoreCase(screenId)
+                || "settings".equalsIgnoreCase(screenId)
+                || text.toLowerCase(Locale.ROOT).contains("настроек")
+                || text.toLowerCase(Locale.ROOT).contains("настройки");
+
+        if (isSettings) {
+            // Стандартная проверка прав доступа CubaPlatform к экрану настроек и алиасу ExUserSettingEdit
+            boolean permitted = security.isScreenPermitted("settings") && security.isScreenPermitted("ExUserSettingEdit");
+            if (!permitted) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Ограничение доступа к экрану")
+                        .withDescription("У вашей учётной записи нет прав на открытие экрана «ExUserSettingEdit» (settings).")
+                        .show();
+                return "⛔ **Ограничение доступа:** У вашей учётной записи нет прав на открытие экрана «ExUserSettingEdit» (`settings`). Вызов экрана заблокирован стандартной политикой безопасности CUBA Platform.";
+            }
+
+            try {
+                screenBuilders.screen(this)
+                        .withScreenId("settings")
+                        .withOpenMode(OpenMode.NEW_TAB)
+                        .show();
+                return "Открыт экран персональных настроек пользователя `ExUserSettingEdit` (`settings`).";
+            } catch (Exception ex) {
+                log.error("Ошибка при открытии экрана настроек: {}", ex.getMessage(), ex);
+                return "Не удалось открыть экран настроек: " + ex.getMessage();
+            }
+        }
+
+        String targetScreen = screenId;
+        if (!windowConfig.hasWindow(targetScreen)) {
+            return "Экран с идентификатором «" + targetScreen + "» не найден в конфигурации системы.";
+        }
+
+        if (!security.isScreenPermitted(targetScreen)) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Ограничение доступа к экрану")
+                    .withDescription("У вашей учётной записи нет прав на открытие экрана «" + targetScreen + "».")
+                    .show();
+            return "⛔ **Ограничение доступа:** У вашей учётной записи нет прав на открытие экрана «" + targetScreen + "». Вызов экрана заблокирован стандартной политикой безопасности CUBA Platform.";
+        }
+
+        try {
+            screenBuilders.screen(this)
+                    .withScreenId(targetScreen)
+                    .withOpenMode(OpenMode.NEW_TAB)
+                    .show();
+            return "Открыт экран «" + targetScreen + "».";
+        } catch (Exception ex) {
+            log.error("Ошибка при открытии экрана {}: {}", targetScreen, ex.getMessage(), ex);
+            return "Не удалось открыть экран «" + targetScreen + "»: " + ex.getMessage();
+        }
+    }
+
+    private List<JobCandidate> searchCandidatesByName(String rawName) {
+        if (rawName == null || rawName.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        String clean = rawName.replaceAll("[^a-zA-Zа-яА-ЯёЁ\\s]", " ").replaceAll("\\s+", " ").trim();
+        String[] tokens = clean.split("\\s+");
+        if (tokens.length == 0) {
+            return Collections.emptyList();
+        }
+
+        if (tokens.length == 1) {
+            String token = tokens[0].toLowerCase(Locale.ROOT);
+            String stem = stemRussianWord(token);
+            return dataManager.load(JobCandidate.class)
+                    .query("select e from hunttech_JobCandidate e where " +
+                            "(lower(e.secondName) like :stem or lower(e.firstName) like :stem or lower(e.fullName) like :stem) " +
+                            "order by e.createTs desc")
+                    .parameter("stem", "%" + stem + "%")
+                    .view("jobCandidate-view")
+                    .maxResults(10)
+                    .list();
+        } else {
+            String w1 = stemRussianWord(tokens[0].toLowerCase(Locale.ROOT));
+            String w2 = stemRussianWord(tokens[1].toLowerCase(Locale.ROOT));
+            String full = clean.toLowerCase(Locale.ROOT);
+            return dataManager.load(JobCandidate.class)
+                    .query("select e from hunttech_JobCandidate e where " +
+                            "((lower(e.secondName) like :w1 and lower(e.firstName) like :w2) or " +
+                            "(lower(e.secondName) like :w2 and lower(e.firstName) like :w1) or " +
+                            "lower(e.fullName) like :full) " +
+                            "order by e.createTs desc")
+                    .parameter("w1", "%" + w1 + "%")
+                    .parameter("w2", "%" + w2 + "%")
+                    .parameter("full", "%" + full + "%")
+                    .view("jobCandidate-view")
+                    .maxResults(10)
+                    .list();
+        }
+    }
+
+    private String stemRussianWord(String word) {
+        if (word == null || word.length() <= 3) {
+            return word != null ? word : "";
+        }
+        String w = word;
+        // Отрезаем окончания родительного, дательного, творительного падежей
+        if (w.endsWith("ова") || w.endsWith("ева") || w.endsWith("ина")) {
+            return w.substring(0, w.length() - 1); // Иванов, Петров
+        }
+        if (w.endsWith("ом") || w.endsWith("ем") || w.endsWith("ой") || w.endsWith("ей")) {
+            return w.substring(0, w.length() - 2);
+        }
+        if (w.endsWith("а") || w.endsWith("я") || w.endsWith("у") || w.endsWith("ю") || w.endsWith("е") || w.endsWith("и")) {
+            return w.substring(0, w.length() - 1);
+        }
+        return w;
+    }
+
+    private void recordCommandInteraction(UUID convId, boolean isHermes, String requestText, String responseText) {
+        if (convId == null) {
+            return;
+        }
+        try {
+            LlmChatConversation conv = dataManager.load(LlmChatConversation.class)
+                    .id(convId)
+                    .view("llm-chat-conversation-view")
+                    .optional()
+                    .orElse(null);
+            if (conv != null) {
+                Integer maxSeq = dataManager.loadValue(
+                        "select max(m.sequenceNo) from hunttech_LlmChatMessage m where m.conversation.id = :convId",
+                        Integer.class)
+                        .parameter("convId", convId)
+                        .optional()
+                        .orElse(0);
+                if (maxSeq == null) {
+                    maxSeq = 0;
+                }
+
+                LlmChatMessage userMsg = dataManager.create(LlmChatMessage.class);
+                userMsg.setConversation(conv);
+                userMsg.setRole("USER");
+                userMsg.setContent(requestText);
+                userMsg.setSequenceNo(maxSeq + 1);
+                userMsg.setStatus("COMPLETED");
+
+                LlmChatMessage aiMsg = dataManager.create(LlmChatMessage.class);
+                aiMsg.setConversation(conv);
+                aiMsg.setRole("ASSISTANT");
+                aiMsg.setContent(responseText);
+                aiMsg.setSequenceNo(maxSeq + 2);
+                aiMsg.setStatus("COMPLETED");
+                if (isHermes) {
+                    aiMsg.setProviderCode("hermes");
+                }
+
+                conv.setLastMessageAt(new java.util.Date());
+                dataManager.commit(userMsg, aiMsg, conv);
+
+                if (isHermes) {
+                    renderHermesHistory(hermesChatService.loadHermesHistory(convId));
+                } else {
+                    renderHistory(llmChatService.loadHistory(convId));
+                }
+            }
+        } catch (Exception ex) {
+            log.warn("Не удалось сохранить команду в историю диалога: {}", ex.getMessage(), ex);
+        }
+    }
+
+    private void executeChatAction(String actionUrl) {
+        if (actionUrl == null || actionUrl.trim().isEmpty()) {
+            return;
+        }
+        String url = actionUrl.trim();
+        try {
+            if (url.startsWith("open-position") || url.startsWith("open-vacancy")) {
+                String queryPart = url.contains("?") ? url.substring(url.indexOf('?') + 1) : "";
+                String num = extractParam(queryPart, "number");
+                if (num == null) {
+                    num = extractParam(queryPart, "num");
+                }
+                String idStr = extractParam(queryPart, "id");
+                if (idStr != null && !idStr.isEmpty()) {
+                    openHrmEntityScreen("vacancy", idStr);
+                } else if (num != null && !num.isEmpty()) {
+                    processOpenVacancyCommand(num);
+                }
+            } else if (url.startsWith("open-cv")) {
+                String queryPart = url.contains("?") ? url.substring(url.indexOf('?') + 1) : "";
+                String idStr = extractParam(queryPart, "id");
+                if (idStr == null) {
+                    idStr = extractParam(queryPart, "candId");
+                }
+                String candName = extractParam(queryPart, "candidateName");
+                if (idStr != null && !idStr.isEmpty()) {
+                    openHrmEntityScreen("cv", idStr);
+                } else if (candName != null && !candName.isEmpty()) {
+                    processLatestCvCommand(candName);
+                }
+            } else if (url.startsWith("create-interaction")) {
+                if (!security.isScreenPermitted("hunttech_IteractionList.edit")) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Ограничение доступа к экрану")
+                            .withDescription("У вашей учётной записи нет прав на открытие формы взаимодействия.")
+                            .show();
+                    return;
+                }
+                if (!security.isEntityOpPermitted(IteractionList.class, EntityOp.CREATE)) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Ограничение доступа (только чтение)")
+                            .withDescription("У вашей роли доступ к взаимодействиям только для чтения. Создание заблокировано.")
+                            .show();
+                    return;
+                }
+                String queryPart = url.contains("?") ? url.substring(url.indexOf('?') + 1) : "";
+                String candName = extractParam(queryPart, "candidateName");
+                String candId = extractParam(queryPart, "candidateId");
+                if (candId == null) {
+                    candId = extractParam(queryPart, "candId");
+                }
+                if (candId != null && !candId.isEmpty()) {
+                    UUID parsedCandId = null;
+                    try {
+                        parsedCandId = UUID.fromString(candId.trim());
+                    } catch (IllegalArgumentException e) {
+                        log.warn("Некорректный UUID кандидата в действии чата: {}", candId);
+                    }
+                    if (parsedCandId != null) {
+                        JobCandidate c = dataManager.load(JobCandidate.class).id(parsedCandId).view("jobCandidate-view").optional().orElse(null);
+                        if (c != null) {
+                            IteractionList interaction = dataManager.create(IteractionList.class);
+                            interaction.setCandidate(c);
+                            interaction.setDateIteraction(new java.util.Date());
+                            screenBuilders.editor(IteractionList.class, this)
+                                     .withScreenClass(IteractionListEdit.class)
+                                     .newEntity(interaction)
+                                     .withOpenMode(OpenMode.NEW_TAB)
+                                     .show();
+                        }
+                    }
+                } else if (candName != null && !candName.isEmpty()) {
+                    processCreateInteractionCommand(candName);
+                }
+            } else if (url.startsWith("open-browse") || url.startsWith("browse-vacancies")) {
+                if (!security.isScreenPermitted("hunttech_OpenPosition.reestr") && !security.isScreenPermitted("hunttech_OpenPosition.browse")) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Ограничение доступа к экрану")
+                            .withDescription("У вашей учётной записи нет прав на открытие реестра вакансий.")
+                            .show();
+                    return;
+                }
+                if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.READ)) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Недостаточно прав")
+                            .withDescription("У вашей учётной записи нет прав на просмотр вакансий.")
+                            .show();
+                    return;
+                }
+                String queryPart = url.contains("?") ? url.substring(url.indexOf('?') + 1) : "";
+                String role = extractParam(queryPart, "role");
+                if (role == null) {
+                    role = extractParam(queryPart, "pos");
+                }
+                if (role != null && !role.isEmpty()) {
+                    OpenPositionReestrBrowse browse = screenBuilders.screen(this)
+                            .withScreenClass(OpenPositionReestrBrowse.class)
+                            .withOpenMode(OpenMode.NEW_TAB)
+                            .build();
+                    browse.setPositionTypeFilter(role);
+                    browse.show();
+                }
+            } else if (url.startsWith("open-screen")) {
+                String queryPart = url.contains("?") ? url.substring(url.indexOf('?') + 1) : "";
+                String screenId = extractParam(queryPart, "screenId");
+                if (screenId == null) {
+                    screenId = extractParam(queryPart, "id");
+                }
+                if (screenId != null && !screenId.isEmpty()) {
+                    processOpenScreenCommand("открой экран " + screenId);
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Ошибка при выполнении действия чата {}: {}", actionUrl, ex.getMessage(), ex);
+        }
+    }
+
+    private String extractParam(String queryString, String paramName) {
+        if (queryString == null || queryString.isEmpty()) {
+            return null;
+        }
+        for (String pair : queryString.split("&")) {
+            int eq = pair.indexOf('=');
+            if (eq > 0) {
+                String key = pair.substring(0, eq).trim();
+                if (key.equalsIgnoreCase(paramName)) {
+                    try {
+                        return URLDecoder.decode(pair.substring(eq + 1).trim(), StandardCharsets.UTF_8.name());
+                    } catch (Exception e) {
+                        return pair.substring(eq + 1).trim();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 }
+

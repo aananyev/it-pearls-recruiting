@@ -129,4 +129,89 @@ class LlmChatScreenContractTest {
                     "В CSS темы " + theme + " селектор .llm-chat-input-area должен таргетировать сам textarea");
         }
     }
+
+    @Test
+    void testPaginationAndNavigationContracts() throws IOException {
+        File javaFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+        assertTrue(javaFile.exists(), "Контроллер LlmChatScreen.java должен существовать");
+        String content = new String(Files.readAllBytes(javaFile.toPath()), StandardCharsets.UTF_8);
+
+        // 1. Проверка лимита в 20 сообщений
+        assertTrue(content.contains("PAGE_SIZE = 20"), "Контроллер обязан задавать PAGE_SIZE = 20 для истории");
+
+        // 2. Проверка RPC-мостов динамической подгрузки более ранних сообщений
+        assertTrue(content.contains("hunttechLoadEarlierMessages"),
+                "Контроллер обязан регистрировать RPC-функцию hunttechLoadEarlierMessages");
+        assertTrue(content.contains("hunttechLoadEarlierHermesMessages"),
+                "Контроллер обязан регистрировать RPC-функцию hunttechLoadEarlierHermesMessages");
+
+        // 3. Проверка RPC-моста выполнения быстрых действий
+        assertTrue(content.contains("hunttechExecuteChatAction"),
+                "Контроллер обязан регистрировать RPC-функцию hunttechExecuteChatAction");
+
+        // 4. Проверка обработчиков открытия OpenPositionEdit, CandidateCVEdit, IteractionListEdit
+        assertTrue(content.contains("OpenPositionEdit.class"),
+                "Контроллер обязан поддерживать открытие OpenPositionEdit");
+        assertTrue(content.contains("CandidateCVEdit.class"),
+                "Контроллер обязан поддерживать открытие CandidateCVEdit");
+        assertTrue(content.contains("IteractionListEdit.class"),
+                "Контроллер обязан поддерживать создание и открытие IteractionListEdit");
+
+        // 5. Проверка открытия реестра OpenPositionReestrBrowse с параметризованным фильтром
+        assertTrue(content.contains("OpenPositionReestrBrowse.class"),
+                "Контроллер обязан поддерживать открытие реестра вакансий OpenPositionReestrBrowse");
+        assertTrue(content.contains("setPositionTypeFilter"),
+                "Контроллер обязан передавать фильтр по должности в OpenPositionReestrBrowse");
+
+        // 6. Проверка поддержки фильтрации в самом OpenPositionReestrBrowse
+        File reestrFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/openposition/OpenPositionReestrBrowse.java");
+        assertTrue(reestrFile.exists(), "OpenPositionReestrBrowse.java должен существовать");
+        String reestrContent = new String(Files.readAllBytes(reestrFile.toPath()), StandardCharsets.UTF_8);
+        assertTrue(reestrContent.contains("initialPositionTypeFilter"),
+                "OpenPositionReestrBrowse обязан содержать initialPositionTypeFilter");
+
+        File reestrXml = resolveFile("modules/web/src/com/company/hunttech/web/screens/openposition/open-position-reestr-browse.xml");
+        assertTrue(reestrXml.exists(), "open-position-reestr-browse.xml должен существовать");
+        String reestrXmlContent = new String(Files.readAllBytes(reestrXml.toPath()), StandardCharsets.UTF_8);
+        assertTrue(reestrXmlContent.contains("like :positionTypeName"),
+                "open-position-reestr-browse.xml обязан содержать условие фильтрации по должности");
+    }
+
+    @Test
+    void testStandardCubaSecurityAndPermissionContracts() throws IOException {
+        File javaFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+        assertTrue(javaFile.exists(), "Контроллер LlmChatScreen.java должен существовать");
+        String content = new String(Files.readAllBytes(javaFile.toPath()), StandardCharsets.UTF_8);
+
+        // 1. Проверка стандартных средств безопасности CUBA Platform
+        assertTrue(content.contains("security.isScreenPermitted"),
+                "Контроллер обязан использовать стандартный метод security.isScreenPermitted для проверки прав на экраны");
+        assertTrue(content.contains("security.isEntityOpPermitted"),
+                "Контроллер обязан использовать стандартный метод security.isEntityOpPermitted для проверки прав на операции с сущностями");
+
+        // 2. Проверка операций EntityOp (READ, CREATE, UPDATE)
+        assertTrue(content.contains("EntityOp.READ"),
+                "Контроллер обязан проверять право EntityOp.READ перед чтением данных");
+        assertTrue(content.contains("EntityOp.CREATE"),
+                "Контроллер обязан проверять право EntityOp.CREATE перед созданием экземпляров сущностей");
+        assertTrue(content.contains("EntityOp.UPDATE"),
+                "Контроллер обязан проверять право EntityOp.UPDATE для выявления режима 'только для чтения'");
+
+        // 3. Проверка предупреждения и блокировки для пользователей с доступом 'только для чтения'
+        assertTrue(content.contains("Ограничение доступа (только чтение)"),
+                "Чат обязан выводить предупреждение о доступе 'только для чтения' и блокировать вызов формы/создание");
+
+        // 4. Проверка проверки прав на экран настроек ExUserSettingEdit / settings
+        assertTrue(content.contains("ExUserSettingEdit") && content.contains("\"settings\""),
+                "Чат обязан поддерживать и проверять права на экран настроек ExUserSettingEdit (settings)");
+
+        // 5. Проверка наличия обработчика открытия экранов через WindowConfig и Security
+        assertTrue(content.contains("looksLikeScreenOpenRequest"),
+                "Контроллер обязан распознавать запросы на открытие экранных форм");
+        assertTrue(content.contains("processOpenScreenCommand"),
+                "Контроллер обязан обрабатывать команды открытия экранов с проверкой прав доступа");
+        assertTrue(content.contains("windowConfig.hasWindow"),
+                "Контроллер обязан проверять регистрацию экранов через WindowConfig");
+    }
 }
+

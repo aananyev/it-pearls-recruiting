@@ -481,8 +481,22 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         });
     }
 
+    private String initialPositionTypeFilter;
+
+    public void setPositionTypeFilter(String initialPositionTypeFilter) {
+        this.initialPositionTypeFilter = initialPositionTypeFilter;
+    }
+
+    public String getPositionTypeFilter() {
+        return initialPositionTypeFilter;
+    }
+
     @Subscribe
     public void onBeforeShow(Screen.BeforeShowEvent event) {
+        if (initialPositionTypeFilter != null && !initialPositionTypeFilter.trim().isEmpty()) {
+            String safeFilter = initialPositionTypeFilter.trim().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+            openPositionsDl.setParameter("positionTypeName", "%" + safeFilter.toLowerCase(Locale.ROOT) + "%");
+        }
         openPositionsDl.setParameter("openClosePos", false);
         openPositionsDl.load();
     }

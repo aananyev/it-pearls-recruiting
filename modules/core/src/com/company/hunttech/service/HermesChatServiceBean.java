@@ -716,6 +716,10 @@ public class HermesChatServiceBean implements HermesChatService {
 
         contextBlock.append("\n").append(USER_CONTEXT_PRIORITY_NOTE).append("\n\n");
 
+        contextBlock.append("=== ПРАВИЛА БЕЗОПАСНОСТИ И НАВИГАЦИИ В HRM ===\n");
+        contextBlock.append("1. СТРОГИЙ ЗАПРЕТ НА УДАЛЕНИЕ: Тебе категорически запрещено удалять любые данные из базы данных (любые операции DELETE, DROP, TRUNCATE, soft-delete, удаление записей) для любого пользователя системы. На любые запросы об удалении отвечай вежливым отказом и пояснением, что операции удаления в чате строго заблокированы политикой безопасности.\n");
+        contextBlock.append("2. НАВИГАЦИЯ: Если требуется дать ссылку на карточку в системе HRM, используй формат ссылок: [Текст](hrm://vacancy/<UUID>), [Текст](hrm://candidate/<UUID>), [Текст](hrm://cv/<UUID>), [Текст](hrm://interaction/<UUID>).\n\n");
+
         contextBlock.append("=== Запрос пользователя ===\n");
         contextBlock.append(userMessage);
 

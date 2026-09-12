@@ -169,13 +169,74 @@ class MarkdownRendererTest {
     }
 
     @Test
-    void testInvalidUuidInHrmLinkFallback() {
-        String raw = "Опасная ссылка [Взлом](hrm://candidate/javascript:alert(1)) и [Не UUID](hrm://candidate/not-a-uuid)";
+    void testHrmCvLink() {
+        String raw = "Последнее резюме: [Резюме Java Lead](hrm://cv/11111111-2222-3333-4444-555555555555)";
         String html = MarkdownRenderer.renderMarkdown(raw);
 
-        assertFalse(html.contains("href=\"#main/0/hunttech_JobCandidate.edit?id="));
-        assertFalse(html.contains("javascript:alert(1)"));
-        assertTrue(html.contains("Взлом"));
-        assertTrue(html.contains("Не UUID"));
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"cv\""));
+        assertTrue(html.contains("data-id=\"11111111-2222-3333-4444-555555555555\""));
+        assertTrue(html.contains("href=\"#main/0/hunttech_CandidateCV.edit?id=11111111-2222-3333-4444-555555555555\""));
+        assertTrue(html.contains("<span class=\"llm-entity-icon\">📄</span>"));
+        assertTrue(html.contains("Резюме Java Lead"));
+    }
+
+    @Test
+    void testHrmActionLink() {
+        String raw = "Выберите действие: [Создать взаимодействие](hrm://action/create-interaction?candId=11111111-2222-3333-4444-555555555555)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-action-link\""));
+        assertTrue(html.contains("data-action-url=\"create-interaction?candId=11111111-2222-3333-4444-555555555555\""));
+        assertTrue(html.contains("<span class=\"llm-entity-icon\">⚡</span>"));
+        assertTrue(html.contains("Создать взаимодействие"));
+    }
+
+    @Test
+    void testInvalidHrmActionLinkRejected() {
+        String raw = "Подозрительное действие: [Выполнить скрипт](hrm://action/evil-action?cmd=dropDatabase)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertFalse(html.contains("llm-hrm-action-link"));
+        assertFalse(html.contains("data-action-url"));
+        assertTrue(html.contains("Выполнить скрипт"));
+    }
+
+    @Test
+    void testChatHistoryPaginationBanner() {
+        List<LlmChatMessage> messages = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) {
+            LlmChatMessage msg = new LlmChatMessage();
+            msg.setRole(i % 2 == 0 ? "ASSISTANT" : "USER");
+            msg.setContent("Сообщение " + i);
+            messages.add(msg);
+        }
+
+        // totalCount = 45, visibleCount = 20 -> remaining = 25
+        String html = MarkdownRenderer.renderChatHistory(messages, null, 45, 20);
+
+        assertTrue(html.contains("llm-chat-load-earlier-container"));
+        assertTrue(html.contains("Загрузить предыдущие сообщения (ещё 25)"));
+        assertTrue(html.contains("hunttechLoadEarlierMessages"));
+        assertTrue(html.contains("Сообщение 1"));
+        assertTrue(html.contains("Сообщение 20"));
+    }
+
+    @Test
+    void testChatHistoryWithoutPaginationBannerWhenAllLoaded() {
+        List<LlmChatMessage> messages = new ArrayList<>();
+        for (int i = 1; i <= 15; i++) {
+            LlmChatMessage msg = new LlmChatMessage();
+            msg.setRole("USER");
+            msg.setContent("Вопрос " + i);
+            messages.add(msg);
+        }
+
+        // totalCount = 15, visibleCount = 20 -> no banner
+        String html = MarkdownRenderer.renderChatHistory(messages, null, 15, 20);
+
+        assertFalse(html.contains("llm-chat-load-earlier-container"));
+        assertTrue(html.contains("Вопрос 1"));
     }
 }
+

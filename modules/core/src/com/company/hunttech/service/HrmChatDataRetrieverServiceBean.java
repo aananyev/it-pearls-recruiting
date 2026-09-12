@@ -306,7 +306,8 @@ public class HrmChatDataRetrieverServiceBean implements HrmChatDataRetrieverServ
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
         StringBuilder sb = new StringBuilder();
         sb.append("=== Срез данных HRM HuntTech (Режим чтения) ===\n");
-        sb.append("Важно: используй эти реальные факты из базы HRM для составления точного, сжатого и полезного доклада.\n\n");
+        sb.append("Важно: используй эти реальные факты из базы HRM для составления точного, сжатого и полезного доклада.\n");
+        sb.append("СТРОГОЕ ПРАВИЛО БЕЗОПАСНОСТИ: Удаление любых данных из базы данных категорически запрещено для всех пользователей системы (любые операции DELETE, drop, truncate, soft-delete). На любые запросы об удалении данных отвечай вежливым отказом с пояснением, что операции удаления в чате заблокированы.\n\n");
 
         Map<UUID, String> funnelsByVacancy = loadFunnelsForVacancies(vacancies);
 
