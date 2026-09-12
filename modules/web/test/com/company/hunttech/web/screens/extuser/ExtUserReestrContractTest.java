@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -144,8 +145,8 @@ class ExtUserReestrContractTest {
         File screensFile = resolveFile("modules/web/src/com/company/hunttech/web-screens.xml");
         assertTrue(screensFile.exists());
         String screensXml = new String(Files.readAllBytes(screensFile.toPath()), StandardCharsets.UTF_8);
-        assertTrue(screensXml.contains("id=\"hunttech_ExtUser.reestr\" template=\"com/company/hunttech/web/screens/extuser/ext-user-reestr.xml\""),
-                "web-screens.xml обязан регистрировать hunttech_ExtUser.reestr на ext-user-reestr.xml");
+        assertFalse(screensXml.contains("id=\"hunttech_ExtUser.reestr\""),
+                "hunttech_ExtUser.reestr имеет @UiController и НЕ должен объявляться в legacy web-screens.xml (избегая ошибки Type.FRAGMENT в CUBA)");
         assertTrue(screensXml.contains("id=\"sec$User.browse\" template=\"com/company/hunttech/web/screens/extuser/ext-user-browse.xml\""),
                 "sec$User.browse должен сохранять стандартный ext-user-browse.xml для обратной совместимости");
 

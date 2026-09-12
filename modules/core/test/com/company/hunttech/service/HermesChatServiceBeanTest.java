@@ -41,6 +41,7 @@ public class HermesChatServiceBeanTest {
     private Configuration configuration;
     private HunttechHermesConfig hermesConfig;
     private AiSecretService aiSecretService;
+    private UserAiContextService userAiContextService;
 
     @Before
     public void setUp() {
@@ -51,6 +52,7 @@ public class HermesChatServiceBeanTest {
         configuration = mock(Configuration.class);
         hermesConfig = mock(HunttechHermesConfig.class);
         aiSecretService = mock(AiSecretService.class);
+        userAiContextService = mock(UserAiContextService.class);
 
         when(configuration.getConfig(HunttechHermesConfig.class)).thenReturn(hermesConfig);
         when(hermesConfig.getProfile()).thenReturn("hrm-viewer");
@@ -61,6 +63,7 @@ public class HermesChatServiceBeanTest {
         ReflectionTestUtils.setField(service, "userSessionSource", userSessionSource);
         ReflectionTestUtils.setField(service, "configuration", configuration);
         ReflectionTestUtils.setField(service, "aiSecretService", aiSecretService);
+        ReflectionTestUtils.setField(service, "userAiContextService", userAiContextService);
     }
 
     @Test
@@ -143,5 +146,80 @@ public class HermesChatServiceBeanTest {
         org.junit.Assert.assertFalse(service.isErrorResponse("В компании действует strict access denied by security policy регламент для защиты данных."));
         org.junit.Assert.assertFalse(service.isErrorResponse(null));
         org.junit.Assert.assertFalse(service.isErrorResponse(""));
+    }
+
+    @Test
+    public void testBuildHermesUserPrompt_withUserAiContextService() {
+        ExtUser user = new ExtUser();
+        user.setId(UUID.randomUUID());
+        user.setLogin("alan");
+        user.setName("Алексей Ананьев");
+        user.setEmail("alan@hunttech.ru");
+
+        com.company.hunttech.service.dto.AiUserContext userCtx = new com.company.hunttech.service.dto.AiUserContext();
+        userCtx.setActive(true);
+        userCtx.getProfileData().put("userName", "Алексей Ананьев");
+        userCtx.getProfileData().put("currentPosition", "Руководитель группы подбора");
+        userCtx.getProfileData().put("preferredLanguage", "RUSSIAN");
+        userCtx.getProfileData().put("communicationStyle", "BUSINESS");
+        userCtx.getProfileData().put("responseDetailLevel", "CONCISE");
+        userCtx.getCustomInstructions().add("Отвечай строго по делу без лишних вступлений");
+
+        when(userAiContextService.buildCurrentUserContext()).thenReturn(userCtx);
+
+        String prompt = service.buildHermesUserPrompt("Привет! Кто ты?", user);
+
+        assertNotNull(prompt);
+        org.junit.Assert.assertTrue(prompt.contains("Алексей Ананьев"));
+        org.junit.Assert.assertTrue(prompt.contains("Руководитель группы подбора"));
+        org.junit.Assert.assertTrue(prompt.contains("Предпочитаемый язык ответов: RUSSIAN"));
+        org.junit.Assert.assertTrue(prompt.contains("Стиль общения: BUSINESS"));
+        org.junit.Assert.assertTrue(prompt.contains("Уровень детализации ответов: CONCISE"));
+        org.junit.Assert.assertTrue(prompt.contains("Отвечай строго по делу без лишних вступлений"));
+        org.junit.Assert.assertTrue(prompt.contains("=== Сведения пользователя (не подтверждены HRM) ==="));
+        org.junit.Assert.assertTrue(prompt.contains("=== Предпочтения и инструкции пользователя ==="));
+        org.junit.Assert.assertTrue(prompt.contains("Приоритет: системный промпт функции имеет приоритет над сведениями пользователя."));
+        org.junit.Assert.assertTrue(prompt.contains("=== Запрос пользователя ===\nПривет! Кто ты?"));
+    }
+
+    @Test
+    public void testBuildHermesUserPrompt_noConsentOrDisabledProfileReturnsRawMessage() {
+        ExtUser user = new ExtUser();
+        user.setId(UUID.randomUUID());
+        user.setLogin("guest_user");
+        user.setName("Гостевой пользователь");
+
+        when(userAiContextService.buildCurrentUserContext()).thenReturn(null);
+
+        String prompt = service.buildHermesUserPrompt("Привет!", user);
+
+        // Без активного контекста персональные данные не передаются во внешний Hermes
+        assertEquals("Привет!", prompt);
+    }
+
+    @Test
+    public void testBuildHermesUserPrompt_emptyContextReturnsRawMessage() {
+        ExtUser user = new ExtUser();
+        user.setId(UUID.randomUUID());
+        user.setLogin("disabled_profile_user");
+
+        when(userAiContextService.buildCurrentUserContext()).thenReturn(new com.company.hunttech.service.dto.AiUserContext());
+
+        String prompt = service.buildHermesUserPrompt("Какая погода?", user);
+
+        assertEquals("Какая погода?", prompt);
+    }
+
+    @Test
+    public void testBuildHermesUserPrompt_serviceExceptionGracefullyReturnsRawMessage() {
+        ExtUser user = new ExtUser();
+        user.setId(UUID.randomUUID());
+        user.setLogin("err_user");
+
+        when(userAiContextService.buildCurrentUserContext()).thenThrow(new RuntimeException("Database timeout"));
+
+        String prompt = service.buildHermesUserPrompt("Тестовый запрос", user);
+
+        assertEquals("Тестовый запрос", prompt);
     }
 }
