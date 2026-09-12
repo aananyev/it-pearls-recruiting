@@ -61,7 +61,7 @@
                                scaleMode="SCALE_DOWN"
                                stylename="dictionary-logo-image">
                         <!-- Тематическая иконка справочника должностей. -->
-                        <theme path="icons/dictionaries/position.png"/>
+                        <theme path="icons/no-programmer.jpeg"/>
                     </ovalImage>
                     <!-- Загрузчик пиктограммы должности пользователем -->
                     <upload id="positionIconUpload"

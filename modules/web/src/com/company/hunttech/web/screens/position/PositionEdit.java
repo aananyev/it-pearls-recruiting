@@ -94,7 +94,7 @@ public class PositionEdit extends StandardEditor<Position> {
         }
         Position position = getEditedEntity();
         if (position == null) {
-            positionLogoImage.setSource(ThemeResource.class).setPath("icons/dictionaries/position.png");
+            positionLogoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
             return;
         }
         byte[] iconBytes = position.getIconImage();
@@ -104,7 +104,7 @@ public class PositionEdit extends StandardEditor<Position> {
         } else if (position.getFilePositionIcon() != null) {
             positionLogoImage.setSource(FileDescriptorResource.class).setFileDescriptor(position.getFilePositionIcon());
         } else {
-            positionLogoImage.setSource(ThemeResource.class).setPath("icons/dictionaries/position.png");
+            positionLogoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }
     }
 

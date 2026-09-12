@@ -17,6 +17,7 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.util.*;
 
 @UiController("hunttech_PositionReestr.browse")
@@ -123,6 +124,19 @@ public class PositionReestrBrowse extends StandardLookup<Position> {
         detailLocation.setAlignment(Component.Alignment.MIDDLE_CENTER);
     }
 
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        updateSidebar(positionsTable.getSingleSelected());
+    }
+
+    @Subscribe(id = "positionsDc", target = Target.DATA_CONTAINER)
+    public void onPositionsDcItemPropertyChange(CollectionContainer.ItemPropertyChangeEvent<Position> event) {
+        Position selected = positionsTable.getSingleSelected();
+        if (selected != null && selected.equals(event.getItem())) {
+            updateSidebar(selected);
+        }
+    }
+
     private void setupTableColumns() {
         positionsTable.addGeneratedColumn("positionPicColumn", position -> {
             HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
@@ -136,7 +150,16 @@ public class PositionReestrBrowse extends StandardLookup<Position> {
             image.setHeight("24px");
             image.setStyleName("circle-20px");
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            image.setSource(ThemeResource.class).setPath("icons/dictionaries/position.png");
+
+            byte[] iconBytes = position != null ? position.getIconImage() : null;
+            if (iconBytes != null && iconBytes.length > 0) {
+                image.setSource(StreamResource.class)
+                        .setStreamSupplier(() -> new ByteArrayInputStream(iconBytes));
+            } else if (position != null && position.getFilePositionIcon() != null) {
+                image.setSource(FileDescriptorResource.class).setFileDescriptor(position.getFilePositionIcon());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            }
 
             retBox.add(image);
             return retBox;
