@@ -76,14 +76,12 @@
     <menu id="application-hadbook" icon="BOOK" insertAfter="application-researching">
         <item screen="hunttech_Iteraction._tree.browse" icon="EXCHANGE"/>
         <item screen="hunttech_Specialisation.browse" icon="GRADUATION_CAP"/>
-        <item screen="hunttech_SkillTree.browse" icon="CODE_FORK"/>
-        <item screen="hunttech_SkillTreeReestr.browse" caption="Реестр компетенций" icon="CODE_FORK"/>
+        <item screen="hunttech_SkillTreeReestr.browse" caption="Дерево компетенций" icon="CODE_FORK"/>
         <item screen="hunttech_CountryReestr.browse" caption="Страны" icon="GLOBE"/>
         <item screen="hunttech_RegionReestr.browse" caption="Регионы" icon="MAP"/>
         <item screen="hunttech_CityReestr.browse" caption="Города" icon="MAP_MARKER"/>
         <item screen="hunttech_Ownershup.browse" icon="TAGS"/>
-        <item screen="hunttech_Position.browse" icon="ID_CARD_O"/>
-        <item screen="hunttech_PositionReestr.browse" caption="Реестр должностей" icon="ID_BADGE"/>
+        <item screen="hunttech_PositionReestr.browse" caption="Должность" icon="ID_BADGE"/>
         <item screen="hunttech_FileType.browse" icon="FILE_ARCHIVE_O"/>
         <item screen="hunttech_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="SHARE_ALT"/>

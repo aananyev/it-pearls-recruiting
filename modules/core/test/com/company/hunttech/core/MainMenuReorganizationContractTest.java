@@ -108,6 +108,43 @@ public class MainMenuReorganizationContractTest {
                 ru.contains("menu-config.hunttech_CompanyGroupReestr.browse=Группы компаний"));
         assertTrue("В messages.properties должен быть ключ menu-config.hunttech_CompanyGroupReestr.browse",
                 en.contains("menu-config.hunttech_CompanyGroupReestr.browse=Company Groups"));
+
+        assertTrue("В messages_ru.properties должен быть ключ menu-config.hunttech_PositionReestr.browse",
+                ru.contains("menu-config.hunttech_PositionReestr.browse=Должность"));
+        assertTrue("В messages.properties должен быть ключ menu-config.hunttech_PositionReestr.browse",
+                en.contains("menu-config.hunttech_PositionReestr.browse=Positions"));
+
+        assertTrue("В messages_ru.properties должен быть ключ menu-config.hunttech_SkillTreeReestr.browse",
+                ru.contains("menu-config.hunttech_SkillTreeReestr.browse=Дерево компетенций"));
+        assertTrue("В messages.properties должен быть ключ menu-config.hunttech_SkillTreeReestr.browse",
+                en.contains("menu-config.hunttech_SkillTreeReestr.browse=Skill Tree"));
+    }
+
+    @Test
+    public void testApplicationHadbookMenuStructure() throws IOException {
+        String xml = readProjectFile(MENU);
+
+        int menuStart = xml.indexOf("<menu id=\"application-hadbook\"");
+        assertTrue("Раздел меню application-hadbook должен существовать", menuStart >= 0);
+        int menuEnd = xml.indexOf("</menu>", menuStart);
+        assertTrue("Закрывающий тег раздела application-hadbook должен существовать", menuEnd > menuStart);
+
+        String hadbookMenuSection = xml.substring(menuStart, menuEnd);
+
+        // Устаревшие пункты должны быть скрыты из раздела меню
+        assertFalse("Пункт hunttech_Position.browse должен быть скрыт из меню application-hadbook",
+                hadbookMenuSection.contains("screen=\"hunttech_Position.browse\""));
+        assertFalse("Пункт hunttech_SkillTree.browse должен быть скрыт из меню application-hadbook",
+                hadbookMenuSection.contains("screen=\"hunttech_SkillTree.browse\""));
+
+        // Реестровые пункты с утвержденными названиями
+        assertTrue("hunttech_PositionReestr.browse должен присутствовать с caption 'Должность'",
+                hadbookMenuSection.contains("screen=\"hunttech_PositionReestr.browse\"")
+                        && hadbookMenuSection.contains("caption=\"Должность\""));
+
+        assertTrue("hunttech_SkillTreeReestr.browse должен присутствовать с caption 'Дерево компетенций'",
+                hadbookMenuSection.contains("screen=\"hunttech_SkillTreeReestr.browse\"")
+                        && hadbookMenuSection.contains("caption=\"Дерево компетенций\""));
     }
 
     private String readProjectFile(String relativePath) throws IOException {
