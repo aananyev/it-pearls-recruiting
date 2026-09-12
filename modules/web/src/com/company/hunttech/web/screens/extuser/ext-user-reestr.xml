@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Реестр пользователей: Split-View (Master-Detail) Browse в стандарте HuntTech Reestr -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://reestrCaption"
+        focusComponent="usersTable"
+        messagesPack="com.company.hunttech.web.screens.extuser"
+        icon="USERS">
+    <data readOnly="true">
+        <collection id="usersDc"
+                    class="com.company.hunttech.entity.ExtUser"
+                    view="extUser-view">
+            <loader id="usersDl">
+                <query><![CDATA[select e from hunttech_ExtUser e order by e.name asc]]></query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="720" width="1200"/>
+
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="tableBox" stylename="job-candidate-main-layout edit-screen-layout">
+
+            <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР 312px): Стандарт hunttech-reestr-screen -->
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+
+                        <!-- Шапка профиля пользователя: аватар 120x120px и 4-уровневая типографика -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="detailPic"
+                                              width="120px" height="120px"
+                                              ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              fallbackThemePath="icons/no-programmer.jpeg"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailFullName" value="msg://selectUserPrompt"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="false"/>
+                                <label id="detailLoginPosition" value=""
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="false"/>
+                                <label id="detailGroup" value=""
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="false"/>
+                                <label id="detailStatus" value=""
+                                       stylename="edit-help candidate-sidebar-city"
+                                       width="100%" align="MIDDLE_CENTER" htmlEnabled="false"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Панель быстрых действий -->
+                        <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="detailEditBtn" caption="msg://openProfile" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                            <button id="detailChangePasswordBtn" caption="msg://changePassword" icon="KEY" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция 1: Контакты и реквизиты -->
+                        <vbox id="contactsSection" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://sectionContacts" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="contactsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns>
+                                    <column flex="1"/>
+                                    <column flex="1"/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="msg://fieldEmail" stylename="bold"/>
+                                        <label id="detailEmail" value="-" htmlEnabled="false"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldTelegram" stylename="bold"/>
+                                        <label id="detailTelegram" value="-" htmlEnabled="false"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldTimeZone" stylename="bold"/>
+                                        <label id="detailTimeZone" value="-" htmlEnabled="false"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldLanguage" stylename="bold"/>
+                                        <label id="detailLanguage" value="-" htmlEnabled="false"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция 2: Роли и доступ -->
+                        <vbox id="accessSection" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://sectionAccess" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
+                            <grid id="accessGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns>
+                                    <column flex="1"/>
+                                    <column flex="1"/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="msg://fieldRoles" stylename="bold"/>
+                                        <label id="detailRoles" value="-" htmlEnabled="false"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldDashboards" stylename="bold"/>
+                                        <label id="detailDashboards" value="-" htmlEnabled="false"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://fieldStatistics" stylename="bold"/>
+                                        <label id="detailStatistics" value="-" htmlEnabled="false"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область таблицы -->
+            <vbox id="tableBox" height="100%" spacing="true" expand="tableCard" margin="true,true,true,false">
+
+                <!-- Командный тулбар -->
+                <hbox id="commandToolbar" spacing="true" stylename="edit-toolbar candidate-filter-bar" width="100%">
+                    <button id="createBtn" action="usersTable.create" caption="msg://create" icon="PLUS" stylename="primary"/>
+                    <button id="editBtn" action="usersTable.edit" caption="msg://edit" icon="EDIT_ACTION"/>
+                    <button id="removeBtn" action="usersTable.remove" caption="msg://remove" icon="TRASH"/>
+                    <button id="changePasswordBtn" caption="msg://changePassword" icon="KEY" enabled="false"/>
+                    <button id="excelBtn" action="usersTable.excel" caption="msg://excel" icon="FILE_EXCEL_O"/>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter" applyTo="usersTable" dataLoader="usersDl"
+                        collapsable="true" collapsed="true" width="100%">
+                    <properties include=".*"
+                                excludeProperties="id,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,smtpPassword,imapPassword,pop3Password"/>
+                </filter>
+
+                <!-- Карточка таблицы -->
+                <vbox id="tableCard" width="100%" height="100%" expand="usersTable" stylename="edit-card candidate-table-card">
+                    <groupTable id="usersTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="usersDc">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excel"/>
+                        </actions>
+                        <columns>
+                            <column id="avatar" caption="msg://columnAvatar" width="50px" alignment="CENTER" sortable="false"/>
+                            <column id="login" width="130px"/>
+                            <column id="name" minWidth="180px"/>
+                            <column id="position" width="160px"/>
+                            <column id="group" width="150px"/>
+                            <column id="email" width="170px"/>
+                            <column id="telegram" width="130px"/>
+                            <column id="timeZone" width="130px"/>
+                            <column id="active" width="80px" alignment="CENTER"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

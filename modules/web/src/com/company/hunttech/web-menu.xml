@@ -2,6 +2,8 @@
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <item screen="hunttech_ApplicationSetup.browse" caption="mainMsg://menu_config.hunttech_ApplicationSetup.browse"
           insertBefore="sec$User.browse" icon="COGS"/>
+    <item screen="hunttech_ExtUser.reestr" caption="mainMsg://menu_config.hunttech_ExtUser.reestr"
+          insertBefore="sec$User.browse" icon="USERS"/>
     <separator insertBefore="sec$User.browse"/>
     <menu id="application-calendars" icon="CALENDAR" insertBefore="application-hunting">
         <item screen="hunttech_Interviewcalendar" caption="Календарь интервью" icon="CALENDAR"/>
