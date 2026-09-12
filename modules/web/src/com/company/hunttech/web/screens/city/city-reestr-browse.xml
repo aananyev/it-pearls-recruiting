@@ -58,8 +58,8 @@ order by e.cityRuName]]>
                             </grid>
                         </vbox>
 
-                        <!-- Секция: Герб -->
-                        <vbox id="emblemCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                        <!-- Секция: Герб (скрыта по требованию интерфейса) -->
+                        <vbox id="emblemCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation" visible="false">
                             <label value="ГЕРБ ГОРОДА" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <vbox id="emblemContainer" width="100%" spacing="true" align="MIDDLE_CENTER">
                                 <ovaFallbackImage id="detailEmblemImage" width="140px" height="140px" ovalWidth="140px" ovalHeight="140px"

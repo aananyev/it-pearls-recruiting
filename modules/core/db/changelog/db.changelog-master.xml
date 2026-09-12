@@ -219,5 +219,7 @@
              relativeToChangelogFile="true"/>
     <include file="260910-2-add100kLlmTokensForAlan.xml"
              relativeToChangelogFile="true"/>
+    <include file="260912-1-addPositionIconFields.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

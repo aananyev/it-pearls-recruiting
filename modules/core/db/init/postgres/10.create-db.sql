@@ -311,6 +311,8 @@ create table HUNTTECH_POSITION (
     POSITION_EN_NAME varchar(80),
     STANDART_DECRIPTION text,
     WHO_IS_THIS_GUY text,
+    FILE_POSITION_ICON_ID uuid,
+    ICON_IMAGE bytea,
     JOB_CANDIDATE_ID uuid,
     --
     primary key (ID)

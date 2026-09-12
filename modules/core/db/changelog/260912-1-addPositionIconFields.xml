@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260912-1-addPositionIconFields" author="hunttech">
+        <sql splitStatements="true">
+            alter table HUNTTECH_POSITION add column if not exists FILE_POSITION_ICON_ID uuid;
+            alter table HUNTTECH_POSITION add column if not exists ICON_IMAGE bytea;
+
+            alter table HUNTTECH_POSITION drop constraint if exists FK_HUNTTECH_POSITION_ON_FILE_ICON;
+            alter table HUNTTECH_POSITION add constraint FK_HUNTTECH_POSITION_ON_FILE_ICON foreign key (FILE_POSITION_ICON_ID) references SYS_FILE(ID);
+
+            create index if not exists IDX_HUNTTECH_POSITION_ON_FILE_ICON on HUNTTECH_POSITION (FILE_POSITION_ICON_ID);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

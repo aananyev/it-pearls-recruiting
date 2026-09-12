@@ -3,7 +3,6 @@ package com.company.hunttech.web.screens.country;
 import com.company.hunttech.entity.Country;
 import com.company.hunttech.service.GeoBulkLoaderService;
 import com.hunttech.hrm.gui.components.FallbackImage;
-import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
@@ -52,7 +51,7 @@ public class CountryReestrBrowse extends StandardLookup<Country> {
     private ScreenBuilders screenBuilders;
 
     @Inject
-    private OvaFallbackImage logoPic;
+    private FallbackImage logoPic;
     @Inject
     private FallbackImage detailFlagImage;
     @Inject
@@ -121,7 +120,11 @@ public class CountryReestrBrowse extends StandardLookup<Country> {
             image.setStyleName("icon-no-border-20px");
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (country != null && country.getFileFlag() != null) {
+            byte[] flagBytes = country != null ? country.getFlagImage() : null;
+            if (flagBytes != null && flagBytes.length > 0) {
+                image.setSource(StreamResource.class)
+                        .setStreamSupplier(() -> new java.io.ByteArrayInputStream(flagBytes));
+            } else if (country != null && country.getFileFlag() != null) {
                 image.setSource(FileDescriptorResource.class).setFileDescriptor(country.getFileFlag());
             } else {
                 image.setSource(ThemeResource.class).setPath("icons/dictionaries/country.png");
@@ -297,18 +300,25 @@ public class CountryReestrBrowse extends StandardLookup<Country> {
         int citiesCount = country.getId() != null ? citiesCountCache.getOrDefault(country.getId(), 0) : 0;
         detailCitiesCount.setValue(String.valueOf(citiesCount));
 
-        // Флаг в секции «ФЛАГ СТРАНЫ»
-        if (country.getFileFlag() != null) {
-            detailFlagImage.setSource(FileDescriptorResource.class).setFileDescriptor(country.getFileFlag());
-        } else {
-            detailFlagImage.applyFallback();
+        // Флаг в секции «ФЛАГ СТРАНЫ» (если секция активна)
+        if (detailFlagImage != null) {
+            if (flagBytes != null && flagBytes.length > 0) {
+                detailFlagImage.setSource(StreamResource.class)
+                        .setStreamSupplier(() -> new java.io.ByteArrayInputStream(flagBytes));
+            } else if (country.getFileFlag() != null) {
+                detailFlagImage.setSource(FileDescriptorResource.class).setFileDescriptor(country.getFileFlag());
+            } else {
+                detailFlagImage.applyFallback();
+            }
         }
     }
 
     private void clearSidebarDetails() {
         openEditCardBtn.setEnabled(false);
         logoPic.applyFallback();
-        detailFlagImage.applyFallback();
+        if (detailFlagImage != null) {
+            detailFlagImage.applyFallback();
+        }
         detailTitle.setValue("Выберите страну");
         detailSubtitle.setValue("-");
         detailLocation.setValue("-");

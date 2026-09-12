@@ -7,8 +7,10 @@
         icon="ID_BADGE">
     <data readOnly="true">
         <collection id="positionsDc"
-                    class="com.company.hunttech.entity.Position"
-                    view="position-browse-view">
+                    class="com.company.hunttech.entity.Position">
+            <view extends="position-browse-view">
+                <property name="iconImage"/>
+            </view>
             <loader id="positionsDl">
                 <query><![CDATA[select e from hunttech_Position e order by e.positionRuName]]></query>
             </loader>

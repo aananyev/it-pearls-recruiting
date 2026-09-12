@@ -19,7 +19,7 @@ order by e.countryRuName]]>
 
     <dialogMode height="700" width="1100"/>
 
-    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout country-editor">
         <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
             <!-- ЛЕВЫЙ САЙДБАР (312px) -->
             <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
@@ -27,8 +27,9 @@ order by e.countryRuName]]>
                     <vbox width="100%" spacing="true">
                         <!-- Шапка профиля страны -->
                         <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
-                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
-                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/dictionaries/country.png" scaleMode="SCALE_DOWN"/>
+                            <fallbackImage id="logoPic" width="160px" height="100px"
+                                           align="TOP_CENTER" stylename="country-flag-rectangular-image"
+                                           fallbackThemePath="icons/dictionaries/country.png" scaleMode="CONTAIN"/>
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
                                 <label id="detailTitle" value="Выберите страну" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
                                 <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
@@ -70,8 +71,8 @@ order by e.countryRuName]]>
                             </grid>
                         </vbox>
 
-                        <!-- Секция: Флаг -->
-                        <vbox id="flagCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                        <!-- Секция: Флаг (скрыта по требованию интерфейса) -->
+                        <vbox id="flagCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation" visible="false">
                             <label value="ФЛАГ СТРАНЫ" width="100%" stylename="label-nav-title job-candidate-section-title" align="MIDDLE_CENTER"/>
                             <vbox id="flagContainer" width="100%" spacing="true" align="MIDDLE_CENTER">
                                 <fallbackImage id="detailFlagImage"

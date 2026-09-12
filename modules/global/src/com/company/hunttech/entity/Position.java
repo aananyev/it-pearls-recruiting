@@ -1,6 +1,7 @@
 package com.company.hunttech.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
@@ -33,6 +34,14 @@ public class Position extends StandardEntity {
     @Lob
     @Column(name = "WHO_IS_THIS_GUY")
     private String whoIsThisGuy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_POSITION_ICON_ID")
+    protected FileDescriptor filePositionIcon;
+
+    @Lob
+    @Column(name = "ICON_IMAGE")
+    protected byte[] iconImage;
 
     @OnDeleteInverse(DeletePolicy.UNLINK)
     @OnDelete(DeletePolicy.UNLINK)
@@ -78,6 +87,22 @@ public class Position extends StandardEntity {
 
     public String getPositionEnName() {
         return positionEnName;
+    }
+
+    public FileDescriptor getFilePositionIcon() {
+        return filePositionIcon;
+    }
+
+    public void setFilePositionIcon(FileDescriptor filePositionIcon) {
+        this.filePositionIcon = filePositionIcon;
+    }
+
+    public byte[] getIconImage() {
+        return iconImage;
+    }
+
+    public void setIconImage(byte[] iconImage) {
+        this.iconImage = iconImage;
     }
 
 }

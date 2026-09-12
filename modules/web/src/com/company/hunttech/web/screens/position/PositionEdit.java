@@ -1,20 +1,34 @@
 package com.company.hunttech.web.screens.position;
 
-import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.RichTextArea;
-import com.haulmont.cuba.gui.components.TextField;
-import com.haulmont.cuba.gui.components.TextInputField;
-import com.haulmont.cuba.gui.screen.*;
 import com.company.hunttech.entity.Position;
+import com.company.hunttech.gui.components.OvalImage;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.FileDescriptorResource;
+import com.haulmont.cuba.gui.components.StreamResource;
+import com.haulmont.cuba.gui.components.ThemeResource;
+import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.screen.*;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 @UiController("hunttech_Position.edit")
 @UiDescriptor("position-edit.xml")
 @EditedEntityContainer("positionDc")
 @LoadDataBeforeShow
 public class PositionEdit extends StandardEditor<Position> {
+    private static final Logger log = LoggerFactory.getLogger(PositionEdit.class);
+
+    @Inject
+    private OvalImage positionLogoImage;
+    @Inject
+    private FileLoader fileLoader;
     @Inject
     private Label<String> textPositionName;
     @Inject
@@ -31,6 +45,67 @@ public class PositionEdit extends StandardEditor<Position> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setLabel();
+    }
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        updatePositionLogoImage();
+    }
+
+    @Subscribe(id = "positionDc", target = Target.DATA_CONTAINER)
+    public void onPositionDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<Position> event) {
+        if ("filePositionIcon".equals(event.getProperty())) {
+            Position position = getEditedEntity();
+            if (position != null && event.getValue() == null) {
+                position.setIconImage(null);
+            }
+            updatePositionLogoImage();
+        } else if ("iconImage".equals(event.getProperty())) {
+            updatePositionLogoImage();
+        }
+    }
+
+    @Subscribe("positionIconUpload")
+    public void onPositionIconUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        Position position = getEditedEntity();
+        if (position == null) {
+            updatePositionLogoImage();
+            return;
+        }
+        FileDescriptor fd = position.getFilePositionIcon();
+        if (fd != null) {
+            try (InputStream is = fileLoader.openStream(fd)) {
+                if (is != null) {
+                    byte[] bytes = IOUtils.toByteArray(is);
+                    if (bytes != null && bytes.length > 0) {
+                        position.setIconImage(bytes);
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Не удалось синхронизировать файл пиктограммы в BLOB iconImage: {}", ex.getMessage());
+            }
+        }
+        updatePositionLogoImage();
+    }
+
+    private void updatePositionLogoImage() {
+        if (positionLogoImage == null) {
+            return;
+        }
+        Position position = getEditedEntity();
+        if (position == null) {
+            positionLogoImage.setSource(ThemeResource.class).setPath("icons/dictionaries/position.png");
+            return;
+        }
+        byte[] iconBytes = position.getIconImage();
+        if (iconBytes != null && iconBytes.length > 0) {
+            positionLogoImage.setSource(StreamResource.class)
+                    .setStreamSupplier(() -> new ByteArrayInputStream(iconBytes));
+        } else if (position.getFilePositionIcon() != null) {
+            positionLogoImage.setSource(FileDescriptorResource.class).setFileDescriptor(position.getFilePositionIcon());
+        } else {
+            positionLogoImage.setSource(ThemeResource.class).setPath("icons/dictionaries/position.png");
+        }
     }
 
     @Subscribe("positionEnNameField")

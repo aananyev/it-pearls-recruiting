@@ -135,8 +135,46 @@
     .v-verticallayout.edit-workspace-content {
       box-sizing: border-box !important;
       width: 100% !important;
-      height: auto !important;
+      height: 100% !important;
       min-height: min-content !important;
+    }
+
+    .position-icon-upload {
+      margin: 8px auto 0 !important;
+      text-align: center !important;
+    }
+
+    #descriptionSection > .v-expand,
+    #descriptionSection > .v-expand > .v-slot {
+      height: 100% !important;
+      min-height: 280px !important;
+    }
+
+    #textAreaBox,
+    .v-hbox#textAreaBox {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 280px !important;
+    }
+
+    #textAreaBox > .v-slot {
+      height: 100% !important;
+      min-height: 280px !important;
+    }
+
+    #textAreaBox .v-richtextarea {
+      height: 100% !important;
+      min-height: 280px !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    #textAreaBox .v-richtextarea .v-richtextarea-content,
+    #textAreaBox .v-richtextarea iframe {
+      flex: 1 1 auto !important;
+      height: 100% !important;
+      min-height: 200px !important;
     }
   }
 }

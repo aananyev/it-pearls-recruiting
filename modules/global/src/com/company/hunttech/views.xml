@@ -231,10 +231,12 @@
     <view entity="hunttech_Position" name="position-browse-view" extends="_minimal">
         <property name="positionRuName"/>
         <property name="positionEnName"/>
+        <property name="filePositionIcon"/>
     </view>
     <view entity="hunttech_Position" name="position-edit-view" extends="_minimal">
         <property name="positionRuName"/>
         <property name="positionEnName"/>
+        <property name="filePositionIcon"/>
     </view>
     <view entity="hunttech_Position" name="position-picker-view" extends="_minimal">
         <property name="positionRuName"/>

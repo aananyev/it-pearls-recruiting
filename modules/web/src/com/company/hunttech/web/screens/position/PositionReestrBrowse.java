@@ -1,12 +1,15 @@
 package com.company.hunttech.web.screens.position;
 
 import com.company.hunttech.entity.Position;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.FileDescriptorResource;
+import com.haulmont.cuba.gui.components.StreamResource;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -37,6 +40,8 @@ public class PositionReestrBrowse extends StandardLookup<Position> {
     @Inject
     private ScreenBuilders screenBuilders;
 
+    @Inject
+    private OvaFallbackImage logoPic;
     @Inject
     private Label<String> detailTitle;
     @Inject
@@ -216,6 +221,9 @@ public class PositionReestrBrowse extends StandardLookup<Position> {
 
     private void updateSidebar(Position position) {
         if (position == null) {
+            if (logoPic != null) {
+                logoPic.applyFallback();
+            }
             detailTitle.setValue(messages.getMessage(getClass(), "msgSelectPosition"));
             detailSubtitle.setValue("-");
             detailLocation.setValue(messages.getMessage(getClass(), "msgPositionHandbook"));
@@ -224,6 +232,18 @@ public class PositionReestrBrowse extends StandardLookup<Position> {
             detailDescription.setValue("-");
             detailWhoIsThisGuy.setValue("-");
             return;
+        }
+
+        if (logoPic != null) {
+            byte[] iconBytes = position.getIconImage();
+            if (iconBytes != null && iconBytes.length > 0) {
+                logoPic.setSource(StreamResource.class)
+                        .setStreamSupplier(() -> new java.io.ByteArrayInputStream(iconBytes));
+            } else if (position.getFilePositionIcon() != null) {
+                logoPic.setSource(FileDescriptorResource.class).setFileDescriptor(position.getFilePositionIcon());
+            } else {
+                logoPic.applyFallback();
+            }
         }
 
         String ruName = position.getPositionRuName() != null ? position.getPositionRuName() : messages.getMessage(getClass(), "msgNoName");

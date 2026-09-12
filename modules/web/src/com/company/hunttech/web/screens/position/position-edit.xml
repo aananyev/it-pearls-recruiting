@@ -17,6 +17,7 @@
             <view extends="position-edit-view">
                 <property name="standartDescription"/>
                 <property name="whoIsThisGuy"/>
+                <property name="iconImage"/>
             </view>
             <loader/>
         </instance>
@@ -62,6 +63,19 @@
                         <!-- Тематическая иконка справочника должностей. -->
                         <theme path="icons/dictionaries/position.png"/>
                     </ovalImage>
+                    <!-- Загрузчик пиктограммы должности пользователем -->
+                    <upload id="positionIconUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="positionDc"
+                            property="filePositionIcon"
+                            accept="image/png,image/jpeg,image/webp"
+                            permittedExtensions=".png,.jpg,.jpeg,.webp"
+                            fileSizeLimit="15728640"
+                            dropZone="positionLogoImage"
+                            showClearButton="true"
+                            showFileName="false"
+                            align="MIDDLE_CENTER"
+                            stylename="position-icon-upload"/>
                 </vbox>
                 <!-- Блок идентификации: русское наименование должности по центру. -->
                 <vbox id="identity"
@@ -138,8 +152,8 @@
                            stylename="edit-workspace-scroll"
                            width="100%"
                            height="100%">
-                    <!-- Поток карточек рабочей области. -->
-                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                    <!-- Поток карточек рабочей области. Растягивается на всю доступную ширину и высоту. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" height="100%" spacing="true" expand="descriptionSection">
                         <!-- Карточка «Наименование»: составное название и оба наименования должности. -->
                         <groupBox id="mainSection"
                                   caption="msg://msgNavMain"
@@ -167,27 +181,31 @@
                                 </column>
                             </form>
                         </groupBox>
-                        <!-- Карточка «Описание»: два редактора rich-текста (LOB-поля). -->
+                        <!-- Карточка «Описание»: два редактора rich-текста (LOB-поля). Адаптивно растягивается по высоте. -->
                         <groupBox id="descriptionSection"
                                   caption="msg://msgNavDescription"
                                   stylename="edit-card"
                                   showAsPanel="true"
                                   width="100%"
+                                  height="100%"
+                                  expand="textAreaBox"
                                   spacing="true">
-                            <hbox id="textAreaBox" width="100%" spacing="true">
+                            <hbox id="textAreaBox" width="100%" height="100%" spacing="true">
                                 <!-- Общее описание вакансии (LOB, загружается на этой вкладке). -->
                                 <richTextArea id="standartDescriptionTextArea"
                                               dataContainer="positionDc"
                                               property="standartDescription"
                                               width="100%"
-                                              height="220px"
+                                              height="100%"
+                                              minHeight="280px"
                                               caption="msg://msgStandartDescription"/>
                                 <!-- Пояснение «Кто это?» (LOB, загружается на этой вкладке). -->
                                 <richTextArea id="whoIsThisGuyTextArea"
                                               dataContainer="positionDc"
                                               property="whoIsThisGuy"
                                               width="100%"
-                                              height="220px"
+                                              height="100%"
+                                              minHeight="280px"
                                               caption="msg://msgWhoThisGuyDescription"/>
                             </hbox>
                         </groupBox>

@@ -171,18 +171,22 @@ public class CityReestrBrowse extends StandardLookup<City> {
         detailCoordinates.setValue(city.getLatitude() != null && city.getLongitude() != null
                 ? String.format("%.4f, %.4f", city.getLatitude(), city.getLongitude()) : "-");
 
-        // Герб в секции «ГЕРБ ГОРОДА»
-        if (city.getFileCityEmblem() != null) {
-            detailEmblemImage.setSource(FileDescriptorResource.class).setFileDescriptor(city.getFileCityEmblem());
-        } else {
-            detailEmblemImage.applyFallback();
+        // Герб в секции «ГЕРБ ГОРОДА» (если секция активна)
+        if (detailEmblemImage != null) {
+            if (city.getFileCityEmblem() != null) {
+                detailEmblemImage.setSource(FileDescriptorResource.class).setFileDescriptor(city.getFileCityEmblem());
+            } else {
+                detailEmblemImage.applyFallback();
+            }
         }
     }
 
     private void clearSidebarDetails() {
         openEditCardBtn.setEnabled(false);
         logoPic.applyFallback();
-        detailEmblemImage.applyFallback();
+        if (detailEmblemImage != null) {
+            detailEmblemImage.applyFallback();
+        }
         detailTitle.setValue("Выберите город");
         detailSubtitle.setValue("-");
         detailLocation.setValue("-");
