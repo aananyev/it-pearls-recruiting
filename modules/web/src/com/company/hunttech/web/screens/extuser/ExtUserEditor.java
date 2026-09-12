@@ -2,7 +2,9 @@ package com.company.hunttech.web.screens.extuser;
 
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.service.TelegramIntegrationService;
+import com.company.hunttech.service.UserAiQuotaService;
 import com.company.hunttech.service.UserAvatarManagementService;
+import com.company.hunttech.service.dto.ai.UserAiQuotaInfo;
 import com.company.hunttech.service.dto.avatar.AvatarApplyMode;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
@@ -11,6 +13,7 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.app.security.user.edit.UserEditor;
 import com.haulmont.cuba.gui.components.Button;
@@ -35,7 +38,7 @@ import java.util.List;
 
 /**
  * Расширяет штатный редактор пользователя CUBA presentation-навигацией по вкладкам
- * правой части экрана, интеграцией с Telegram для загрузки аватарок и запуском диалога смены пароля.
+ * правой части экрана, интеграцией с Telegram для загрузки аватарок, управлением квотами AI и запуском диалога смены пароля.
  */
 public class ExtUserEditor extends UserEditor {
 
@@ -107,6 +110,19 @@ public class ExtUserEditor extends UserEditor {
     @Inject
     private FieldGroup emailFieldGroupPasswords;
 
+    @Inject
+    private UserAiQuotaService userAiQuotaService;
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private FieldGroup adminAiQuotaFieldGroup;
+
+    private TextField<String> monthlyQuotaTokensField;
+    private TextField<String> consumedTokensField;
+    private TextField<String> remainingTokensField;
+    private Label<String> quotaStatusBadge;
+    private Integer initialQuotaTokens;
+
     @Override
     protected void postInit() {
         super.postInit();
@@ -114,6 +130,8 @@ public class ExtUserEditor extends UserEditor {
         // Для нового пользователя пароль задаётся штатными полями UserEditor при сохранении.
         // Отдельный диалог CUBA работает только с уже сохранённой учётной записью.
         changePasswordBtn.setVisible(!PersistenceHelper.isNew(getItem()));
+
+        initAdminAiQuotaFields();
 
         // UserEditor создаёт часть legacy-полей программно. После super.postInit()
         // общий edit-form-control назначается реальным компонентам без изменения binding.
@@ -125,7 +143,8 @@ public class ExtUserEditor extends UserEditor {
                 emailFieldGroupRight,
                 emailFieldPasswordRequired,
                 emailFieldGroupUser,
-                emailFieldGroupPasswords
+                emailFieldGroupPasswords,
+                adminAiQuotaFieldGroup
         );
 
         // Пункты label-навигации переключают вкладки правого tabsheet.
@@ -140,7 +159,10 @@ public class ExtUserEditor extends UserEditor {
 
         // Sidebar-лейблы профиля (ФИО, login, статус, Email, должность) заполняются из userDs;
         // при смене item (открытие другого пользователя, переcommit) значения обновляются повторно.
-        userDs.addItemChangeListener(e -> refreshProfileLabels());
+        userDs.addItemChangeListener(e -> {
+            refreshProfileLabels();
+            refreshAdminAiQuotaValues();
+        });
         updateLoadTelegramButtonState();
         if (telegramField != null) {
             telegramField.addValueChangeListener(e -> {
@@ -510,6 +532,139 @@ public class ExtUserEditor extends UserEditor {
             sb.append(user.getMiddleName());
         }
         return sb.length() > 0 ? sb.toString() : user.getLogin();
+    }
+
+    private void initAdminAiQuotaFields() {
+        if (adminAiQuotaFieldGroup == null) {
+            return;
+        }
+
+        monthlyQuotaTokensField = uiComponents.create(TextField.NAME);
+        monthlyQuotaTokensField.setWidth("100%");
+        monthlyQuotaTokensField.setInputPrompt(getMessage("fieldAllocatedTokensPrompt"));
+        adminAiQuotaFieldGroup.addCustomField("monthlyQuotaTokensField", (datasource, propertyId) -> monthlyQuotaTokensField);
+
+        consumedTokensField = uiComponents.create(TextField.NAME);
+        consumedTokensField.setWidth("100%");
+        consumedTokensField.setEditable(false);
+        adminAiQuotaFieldGroup.addCustomField("consumedTokensField", (datasource, propertyId) -> consumedTokensField);
+
+        remainingTokensField = uiComponents.create(TextField.NAME);
+        remainingTokensField.setWidth("100%");
+        remainingTokensField.setEditable(false);
+        adminAiQuotaFieldGroup.addCustomField("remainingTokensField", (datasource, propertyId) -> remainingTokensField);
+
+        quotaStatusBadge = uiComponents.create(Label.NAME);
+        quotaStatusBadge.setHtmlEnabled(true);
+        adminAiQuotaFieldGroup.addCustomField("quotaStatusBadge", (datasource, propertyId) -> quotaStatusBadge);
+
+        refreshAdminAiQuotaValues();
+    }
+
+    private void refreshAdminAiQuotaValues() {
+        User user = getItem();
+        if (!(user instanceof ExtUser) || PersistenceHelper.isNew(user)) {
+            if (monthlyQuotaTokensField != null) {
+                int defQuota = userAiQuotaService.loadDefaultMonthlyQuota();
+                monthlyQuotaTokensField.setValue(String.valueOf(defQuota));
+                initialQuotaTokens = defQuota;
+            }
+            if (consumedTokensField != null) {
+                consumedTokensField.setValue("0 " + getMessage("msgTokensCountSuffix"));
+            }
+            if (remainingTokensField != null) {
+                remainingTokensField.setValue("0 " + getMessage("msgTokensCountSuffix"));
+            }
+            if (quotaStatusBadge != null) {
+                quotaStatusBadge.setValue("<span style='color: #64748b; font-size: 11px;'>" + getMessage("msgTokensDefaultHint") + "</span>");
+            }
+            return;
+        }
+
+        ExtUser extUser = (ExtUser) user;
+        UserAiQuotaInfo quota = userAiQuotaService.getUserQuota(extUser.getId());
+
+        initialQuotaTokens = quota.isUnlimited() ? Integer.valueOf(-1) : quota.getAllocatedTokens();
+        if (monthlyQuotaTokensField != null) {
+            if (quota.isUnlimited()) {
+                monthlyQuotaTokensField.setValue("-1");
+            } else if (quota.getAllocatedTokens() != null) {
+                monthlyQuotaTokensField.setValue(String.valueOf(quota.getAllocatedTokens()));
+            } else {
+                monthlyQuotaTokensField.setValue("");
+            }
+        }
+
+        if (consumedTokensField != null) {
+            consumedTokensField.setValue(quota.formatConsumed() + " " + getMessage("msgTokensMonthConsumedNote"));
+        }
+        if (remainingTokensField != null) {
+            remainingTokensField.setValue(quota.formatRemaining() + " " + getMessage("msgTokensCountSuffix"));
+        }
+        if (quotaStatusBadge != null) {
+            String badge = quota.getStatusBadgeHtml();
+            String note = quota.isCustomOverride() ? " " + getMessage("msgTokensCustomNote") : " " + getMessage("msgTokensDefaultNote");
+            quotaStatusBadge.setValue(badge + " <span style='font-size: 11px; color: #64748b;'>" + note + "</span>");
+        }
+    }
+
+    @Override
+    protected boolean preCommit() {
+        if (monthlyQuotaTokensField != null) {
+            String val = monthlyQuotaTokensField.getValue();
+            if (val != null && !val.trim().isEmpty()) {
+                String clean = val.trim().replace(" ", "");
+                if (!"-1".equals(clean)) {
+                    try {
+                        int parsed = Integer.parseInt(clean);
+                        if (parsed < -1) {
+                            showNotification(getMessage("msgInvalidQuotaFormat"), NotificationType.WARNING);
+                            return false;
+                        }
+                    } catch (NumberFormatException e) {
+                        showNotification(getMessage("msgInvalidQuotaFormat"), NotificationType.WARNING);
+                        return false;
+                    }
+                }
+            }
+        }
+        return super.preCommit();
+    }
+
+    @Override
+    protected boolean postCommit(boolean committed, boolean close) {
+        boolean result = super.postCommit(committed, close);
+        if (committed) {
+            saveAdminAiQuotaOverride();
+        }
+        return result;
+    }
+
+    private void saveAdminAiQuotaOverride() {
+        User user = getItem();
+        if (!(user instanceof ExtUser) || monthlyQuotaTokensField == null) {
+            return;
+        }
+        ExtUser extUser = (ExtUser) user;
+        String val = monthlyQuotaTokensField.getValue();
+        if (val == null || val.trim().isEmpty()) {
+            if (initialQuotaTokens != null) {
+                userAiQuotaService.setMonthlyQuota(extUser.getId(), null, "Сброшено на системный дефолт");
+            }
+            return;
+        }
+        try {
+            Integer newQuota = "-1".equals(val.trim()) ? -1 : Integer.parseInt(val.trim().replace(" ", ""));
+            if (initialQuotaTokens != null && initialQuotaTokens.equals(newQuota)) {
+                return; // Значение не менялось
+            }
+            userAiQuotaService.setMonthlyQuota(extUser.getId(), newQuota, "Установлено администратором в карточке пользователя");
+            initialQuotaTokens = newQuota;
+        } catch (NumberFormatException ex) {
+            log.warn("Некорректный формат квоты токенов: {}", val);
+        } catch (Exception ex) {
+            log.error("Ошибка сохранения квоты токенов для пользователя {}: {}", extUser.getLogin(), ex.getMessage(), ex);
+        }
     }
 }
 

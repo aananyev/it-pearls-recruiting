@@ -363,42 +363,66 @@
                             </vbox>
                         </scrollBox>
                     </tab>
-                    <!-- AI-вкладка сохраняет существующую таблицу и CRUD-кнопки внутри общей карточки. -->
-                    <tab id="aiSettingsTab" caption="msg://msgAiSettings" margin="true" spacing="true" expand="aiConfigsCard">
-                        <!-- Карточка объединяет пояснение, действия и таблицу персональных AI-конфигураций. -->
-                        <vbox id="aiConfigsCard" width="100%" height="100%" spacing="true" expand="aiConfigsTable" stylename="edit-card">
-                            <!-- Пояснение предупреждает, что API-ключ не выводится в таблице. -->
-                            <label value="msg://msgAiSettingsHint" stylename="light edit-help"/>
-                            <!-- Панель сохраняет три существующие CRUD-кнопки AI-конфигураций. -->
-                            <buttonsPanel id="aiConfigsButtonsPanel">
-                                <!-- Create-кнопка сохраняет существующий component ID и caption. -->
-                                <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION"/>
-                                <!-- Edit-кнопка сохраняет существующий component ID и caption. -->
-                                <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT"/>
-                                <!-- Remove-кнопка сохраняет существующий component ID и caption. -->
-                                <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE"/>
-                            </buttonsPanel>
-                            <!-- Таблица показывает provider, model и active-state без API-ключа. -->
-                            <table id="aiConfigsTable" width="100%" height="100%" editable="false">
-                                <!-- Колонки сохраняют исходный набор безопасно отображаемых свойств. -->
-                                <columns>
-                                    <!-- Флаг основной конфигурации провайдера. -->
-                                    <column id="isPrimary" caption="msg://UserAiConfiguration.isPrimary"/>
-                                    <!-- Provider code идентифицирует AI-провайдера. -->
-                                    <column id="providerCode"/>
-                                    <!-- Default model name показывает выбранную модель провайдера. -->
-                                    <column id="defaultModelName"/>
-                                    <!-- Максимальное количество попыток повтора. -->
-                                    <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
-                                    <!-- Приоритет использования конфигурации. -->
-                                    <column id="priority" caption="msg://UserAiConfiguration.priority"/>
-                                    <!-- Active-state показывает доступность конфигурации. -->
-                                    <column id="isActive"/>
-                                </columns>
-                                <!-- Строки поступают из userAiConfigsDs текущего пользователя. -->
-                                <rows datasource="userAiConfigsDs"/>
-                            </table>
-                        </vbox>
+                    <!-- AI-вкладка содержит управление квотой корпоративных моделей AI и персональные AI-конфигурации. -->
+                    <tab id="aiSettingsTab" caption="msg://msgAiSettings" margin="true" spacing="true" expand="aiScrollBox">
+                        <!-- ScrollBox обеспечивает вертикальную прокрутку параметров квот и таблиц AI-настроек. -->
+                        <scrollBox id="aiScrollBox" width="100%" height="100%" spacing="true">
+                            <!-- Карточка управления лимитом токенов корпоративных моделей AI -->
+                            <groupBox id="adminAiQuotaCard" caption="msg://msgAdminAiQuotaTitle" flat="true" spacing="true" width="100%" showAsPanel="true" stylename="edit-card">
+                                <!-- Подсказка с описанием принципа квотирования корпоративных моделей AI. -->
+                                <label value="msg://msgAdminAiQuotaHint" stylename="light edit-help"/>
+                                <!-- Группа полей выделения, расхода и остатка токенов пользователя. -->
+                                <fieldGroup id="adminAiQuotaFieldGroup" width="100%" stylename="edit-form-control">
+                                    <!-- Колонка полей квоты токенов. -->
+                                    <column width="100%">
+                                        <!-- Поле выделенного администратором лимита токенов (-1 для безлимита). -->
+                                        <field id="monthlyQuotaTokensField" caption="msg://fieldAllocatedTokens" custom="true"/>
+                                        <!-- Информационное поле использованных токенов за текущий месяц. -->
+                                        <field id="consumedTokensField" caption="msg://fieldConsumedTokens" custom="true"/>
+                                        <!-- Информационное поле текущего остатка токенов. -->
+                                        <field id="remainingTokensField" caption="msg://fieldRemainingTokens" custom="true"/>
+                                        <!-- Бейдж текущего статуса квоты (в норме / исчерпан / безлимит). -->
+                                        <field id="quotaStatusBadge" caption="msg://fieldQuotaStatus" custom="true"/>
+                                    </column>
+                                </fieldGroup>
+                            </groupBox>
+                            <!-- Карточка персональных AI-конфигураций и API-ключей -->
+                            <vbox id="aiConfigsCard" width="100%" minHeight="320px" spacing="true" expand="aiConfigsTable" stylename="edit-card">
+                                <!-- Заголовок карточки персональных AI-конфигураций. -->
+                                <label value="msg://msgPersonalAiConfigsTitle" stylename="h3 edit-card-title"/>
+                                <!-- Подсказка по персональным конфигурациям. -->
+                                <label value="msg://msgAiSettingsHint" stylename="light edit-help"/>
+                                <!-- Панель кнопок управления персональными AI-конфигурациями. -->
+                                <buttonsPanel id="aiConfigsButtonsPanel">
+                                    <!-- Кнопка создания новой AI-конфигурации. -->
+                                    <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION"/>
+                                    <!-- Кнопка редактирования выбранной AI-конфигурации. -->
+                                    <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT"/>
+                                    <!-- Кнопка удаления выбранной AI-конфигурации. -->
+                                    <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE"/>
+                                </buttonsPanel>
+                                <!-- Таблица персональных AI-конфигураций пользователя. -->
+                                <table id="aiConfigsTable" width="100%" height="100%" editable="false">
+                                    <!-- Колонки таблицы персональных AI-конфигураций. -->
+                                    <columns>
+                                        <!-- Признак основной конфигурации. -->
+                                        <column id="isPrimary" caption="msg://UserAiConfiguration.isPrimary"/>
+                                        <!-- Код провайдера AI. -->
+                                        <column id="providerCode"/>
+                                        <!-- Имя модели по умолчанию. -->
+                                        <column id="defaultModelName"/>
+                                        <!-- Количество повторных попыток при ошибке. -->
+                                        <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
+                                        <!-- Приоритет применения конфигурации. -->
+                                        <column id="priority" caption="msg://UserAiConfiguration.priority"/>
+                                        <!-- Признак активности конфигурации. -->
+                                        <column id="isActive"/>
+                                    </columns>
+                                    <!-- Источник строк таблицы привязан к userAiConfigsDs. -->
+                                    <rows datasource="userAiConfigsDs"/>
+                                </table>
+                            </vbox>
+                        </scrollBox>
                     </tab>
                 </tabSheet>
                 <!-- Footer удерживает штатные save/cancel actions вне прокручиваемого содержимого вкладок и прижимает их к правому нижнему углу (структура эталона IteractionListEdit: expand-спейсер + группа действий AUTO); расположен внутри рабочей области, как в OpenPositionEdit, чтобы sidebar оставался на всю высоту окна. -->

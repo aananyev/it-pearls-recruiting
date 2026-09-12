@@ -1,6 +1,8 @@
 package com.company.hunttech.web.screens.aidashboard;
 
 import com.company.hunttech.entity.ai.AiCallLog;
+import com.company.hunttech.service.UserAiQuotaService;
+import com.company.hunttech.service.dto.ai.ActiveUserQuotaSummary;
 import com.haulmont.charts.gui.components.charts.PieChart;
 import com.haulmont.charts.gui.components.charts.SerialChart;
 import com.haulmont.charts.gui.data.ListDataProvider;
@@ -55,6 +57,8 @@ public class AdminAiDashboard extends Screen {
     private Metadata metadata;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private UserAiQuotaService userAiQuotaService;
 
     @Inject
     private LookupField<String> periodLookup;
@@ -204,6 +208,62 @@ public class AdminAiDashboard extends Screen {
     }
 
     private void initTableColumns() {
+        userSummaryTable.addGeneratedColumn("allocatedTokens", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            Boolean unlimited = kve.getValue("unlimited");
+            Long val = kve.getValue("allocatedTokens");
+            Boolean custom = kve.getValue("customOverride");
+            String note = Boolean.TRUE.equals(custom) ? " <span style='font-size:11px; color:#7c3aed; font-weight:700;' title='Индивидуальный лимит'>(override)</span>" : "";
+            if (Boolean.TRUE.equals(unlimited)) {
+                label.setValue("<span style='color: #0284c7; font-weight: 600;'>Безлимит</span>" + note);
+            } else if (val != null) {
+                label.setValue(String.format(Locale.ROOT, "%,d", val).replace(',', ' ') + note);
+            } else {
+                label.setValue("—");
+            }
+            return label;
+        });
+
+        userSummaryTable.addGeneratedColumn("consumedTokens", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            Long val = kve.getValue("consumedTokens");
+            long v = val != null ? val : 0L;
+            label.setValue(String.format(Locale.ROOT, "%,d", v).replace(',', ' '));
+            return label;
+        });
+
+        userSummaryTable.addGeneratedColumn("remainingTokens", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            Boolean unlimited = kve.getValue("unlimited");
+            Long rem = kve.getValue("remainingTokens");
+            if (Boolean.TRUE.equals(unlimited)) {
+                label.setValue("<span style='color: #0284c7; font-weight: 600;'>Безлимит</span>");
+            } else if (rem != null) {
+                String color = rem <= 0 ? "#dc2626; font-weight: 700;" : (rem < 10_000 ? "#d97706; font-weight: 600;" : "#059669; font-weight: 600;");
+                label.setValue("<span style='color: " + color + "'>" + String.format(Locale.ROOT, "%,d", rem).replace(',', ' ') + "</span>");
+            } else {
+                label.setValue("0");
+            }
+            return label;
+        });
+
+        userSummaryTable.addGeneratedColumn("quotaStatus", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            Boolean unlimited = kve.getValue("unlimited");
+            Long rem = kve.getValue("remainingTokens");
+            if (Boolean.TRUE.equals(unlimited)) {
+                label.setValue("<span style='background: rgba(14, 165, 233, 0.15); color: #0284c7; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>БЕЗЛИМИТ</span>");
+            } else if (rem != null && rem <= 0) {
+                label.setValue("<span style='background: rgba(239, 68, 68, 0.15); color: #dc2626; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>ИСЧЕРПАН</span>");
+            } else {
+                label.setValue("<span style='background: rgba(16, 185, 129, 0.15); color: #059669; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>В НОРМЕ</span>");
+            }
+            return label;
+        });
         userSummaryTable.addGeneratedColumn("promptTokens", kve -> {
             Label<String> label = uiComponents.create(Label.NAME);
             Long val = kve.getValue("promptTokens");
@@ -342,10 +402,14 @@ public class AdminAiDashboard extends Screen {
             activeUsers.add(uKey);
             userSpendMap.put(uKey, userSpendMap.getOrDefault(uKey, BigDecimal.ZERO).add(cost));
 
+            // Стабильный ключ группировки по userId или логину
+            String userKey = log.getUser() != null ? log.getUser().getId().toString()
+                    : (log.getUserLogin() != null ? log.getUserLogin() : "system");
+
             // User Summary KeyValueEntity
-            KeyValueEntity kve = userSummaries.computeIfAbsent(uKey, k -> {
+            KeyValueEntity kve = userSummaries.computeIfAbsent(userKey, k -> {
                 KeyValueEntity e = metadata.create(KeyValueEntity.class);
-                e.setValue("userName", k);
+                e.setValue("userName", uKey);
                 e.setValue("totalCalls", 0);
                 e.setValue("promptTokens", 0L);
                 e.setValue("completionTokens", 0L);
@@ -396,14 +460,34 @@ public class AdminAiDashboard extends Screen {
                 .map(e -> e.getKey() + " ($" + e.getValue().setScale(2, RoundingMode.HALF_UP).toPlainString() + ")")
                 .orElse("—");
 
+        // Загрузка сводной информации по всем активным пользователям через UserAiQuotaService
+        List<ActiveUserQuotaSummary> activeUsersQuota = userAiQuotaService.getActiveUsersQuotaSummary(from, toInclusive);
+
+        long totalAllocatedTokens = 0;
+        long totalConsumedMonthTokens = 0;
+        long totalRemainingTokens = 0;
+
+        for (ActiveUserQuotaSummary uq : activeUsersQuota) {
+            if (!uq.isUnlimited() && uq.getAllocatedTokens() != null) {
+                totalAllocatedTokens += uq.getAllocatedTokens();
+            }
+            totalConsumedMonthTokens += uq.getConsumedTokens();
+            if (!uq.isUnlimited() && uq.getRemainingTokens() != null) {
+                totalRemainingTokens += uq.getRemainingTokens();
+            }
+        }
+
         totalSpendLabel.setValue("$ " + totalSpend.setScale(2, RoundingMode.HALF_UP).toPlainString());
         spendSubLabel.setValue("Corp: $" + adminSpend.setScale(2, RoundingMode.HALF_UP) + " | User: $" + userSpend.setScale(2, RoundingMode.HALF_UP));
 
         activeUsersLabel.setValue(String.valueOf(activeUsers.size()));
         topSpenderLabel.setValue("Топ: " + topSpender);
 
-        totalCallsLabel.setValue(String.valueOf(totalCalls));
-        totalTokensLabel.setValue(formatTokenCount(totalTokens) + " токенов");
+        totalCallsLabel.setValue(totalCalls + " вызовов");
+        totalTokensLabel.setValue(String.format("Выделено: %s | Использовано: %s | Остаток: %s",
+                formatTokenCount(totalAllocatedTokens),
+                formatTokenCount(totalConsumedMonthTokens),
+                formatTokenCount(totalRemainingTokens)));
 
         errorRateLabel.setValue(String.format("%.1f%% ошибок", errorRate));
         avgLatencyLabel.setValue(String.format("Ср. задержка: %.2f с", avgLatency));
@@ -468,13 +552,78 @@ public class AdminAiDashboard extends Screen {
         }
         modelLatencyChart.setDataProvider(modelProvider);
 
-        // 6. User Summary Table
-        List<KeyValueEntity> summaryList = new ArrayList<>(userSummaries.values());
+        // 6. User Summary Table: объединение статистики логов и всех активных пользователей
+        Map<String, KeyValueEntity> finalUserSummaryMap = new LinkedHashMap<>();
+
+        // Сначала формируем записи по ВСЕМ активным пользователям
+        for (ActiveUserQuotaSummary uq : activeUsersQuota) {
+            String uName = uq.getUserName() != null ? uq.getUserName() : uq.getUserLogin();
+            String userKey = uq.getUserId() != null ? uq.getUserId().toString()
+                    : (uq.getUserLogin() != null ? uq.getUserLogin() : uName);
+
+            KeyValueEntity kve = metadata.create(KeyValueEntity.class);
+            kve.setValue("userName", uName);
+            kve.setValue("allocatedTokens", uq.getAllocatedTokens() != null ? uq.getAllocatedTokens().longValue() : 0L);
+            kve.setValue("unlimited", uq.isUnlimited());
+            kve.setValue("customOverride", uq.isCustomOverride());
+            kve.setValue("consumedTokens", (long) uq.getConsumedTokens());
+            kve.setValue("remainingTokens", uq.getRemainingTokens() != null ? uq.getRemainingTokens().longValue() : 0L);
+            kve.setValue("totalCalls", uq.getTotalCalls());
+            kve.setValue("promptTokens", 0L);
+            kve.setValue("completionTokens", 0L);
+            kve.setValue("totalTokens", 0L);
+            kve.setValue("estimatedCost", uq.getEstimatedCost());
+            kve.setValue("errorCount", uq.getErrorCount());
+            kve.setValue("lastCallTime", uq.getLastCallTime());
+
+            // Если по пользователю были логи за выбранный период
+            KeyValueEntity fromLogs = userSummaries.get(userKey);
+            if (fromLogs == null && uq.getUserLogin() != null) {
+                fromLogs = userSummaries.get(uq.getUserLogin());
+            }
+            if (fromLogs != null) {
+                kve.setValue("totalCalls", fromLogs.getValue("totalCalls"));
+                kve.setValue("promptTokens", fromLogs.getValue("promptTokens"));
+                kve.setValue("completionTokens", fromLogs.getValue("completionTokens"));
+                kve.setValue("totalTokens", fromLogs.getValue("totalTokens"));
+                kve.setValue("estimatedCost", fromLogs.getValue("estimatedCost"));
+                kve.setValue("errorCount", fromLogs.getValue("errorCount"));
+                if (fromLogs.getValue("lastCallTime") != null) {
+                    kve.setValue("lastCallTime", fromLogs.getValue("lastCallTime"));
+                }
+            }
+
+            finalUserSummaryMap.put(userKey, kve);
+        }
+
+        // Также добавляем пользователей из логов, если кто-то из них не попал в активные (например системные)
+        for (Map.Entry<String, KeyValueEntity> entry : userSummaries.entrySet()) {
+            if (!finalUserSummaryMap.containsKey(entry.getKey())) {
+                KeyValueEntity e = entry.getValue();
+                e.setValue("allocatedTokens", 0L);
+                e.setValue("unlimited", false);
+                e.setValue("customOverride", false);
+                e.setValue("consumedTokens", e.getValue("totalTokens") != null ? (Long) e.getValue("totalTokens") : 0L);
+                e.setValue("remainingTokens", 0L);
+                finalUserSummaryMap.put(entry.getKey(), e);
+            }
+        }
+
+        List<KeyValueEntity> summaryList = new ArrayList<>(finalUserSummaryMap.values());
         summaryList.sort((a, b) -> {
-            BigDecimal cA = a.getValue("estimatedCost");
-            BigDecimal cB = b.getValue("estimatedCost");
-            return cB.compareTo(cA);
+            Long cA = a.getValue("consumedTokens");
+            Long cB = b.getValue("consumedTokens");
+            if (cA == null) cA = 0L;
+            if (cB == null) cB = 0L;
+            int cmp = cB.compareTo(cA);
+            if (cmp != 0) return cmp;
+            String nA = a.getValue("userName");
+            String nB = b.getValue("userName");
+            if (nA == null) nA = "";
+            if (nB == null) nB = "";
+            return nA.compareToIgnoreCase(nB);
         });
+
         userSummaryDc.getMutableItems().clear();
         userSummaryDc.getMutableItems().addAll(summaryList);
     }

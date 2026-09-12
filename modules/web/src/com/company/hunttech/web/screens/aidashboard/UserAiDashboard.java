@@ -1,6 +1,8 @@
 package com.company.hunttech.web.screens.aidashboard;
 
 import com.company.hunttech.entity.ai.AiCallLog;
+import com.company.hunttech.service.UserAiQuotaService;
+import com.company.hunttech.service.dto.ai.UserAiQuotaInfo;
 import com.haulmont.charts.gui.components.charts.PieChart;
 import com.haulmont.charts.gui.components.charts.SerialChart;
 import com.haulmont.charts.gui.data.ListDataProvider;
@@ -42,6 +44,8 @@ public class UserAiDashboard extends Screen {
     private UserSessionSource userSessionSource;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private UserAiQuotaService userAiQuotaService;
 
     @Inject
     private LookupField<String> periodLookup;
@@ -276,8 +280,17 @@ public class UserAiDashboard extends Screen {
         totalCallsLabel.setValue(String.valueOf(totalCalls));
         totalCallsSubLabel.setValue(successCalls + " успешно / " + errorCalls + " сбоев");
 
-        tokensLabel.setValue(formatTokenCount(totalTokens));
-        tokensSubLabel.setValue(formatTokenCount(totalPromptTokens) + " in / " + formatTokenCount(totalCompletionTokens) + " out");
+        UserAiQuotaInfo quota = userAiQuotaService.getUserQuota(currentUser.getId());
+        if (quota.isUnlimited()) {
+            tokensLabel.setValue("Безлимит");
+            tokensSubLabel.setValue("Выделено: Безлимит | Использовано: " + formatTokenCount(quota.getConsumedTokens()));
+        } else {
+            String rem = quota.getRemainingTokens() != null ? formatTokenCount(quota.getRemainingTokens()) : "0";
+            String alloc = quota.getAllocatedTokens() != null ? formatTokenCount(quota.getAllocatedTokens()) : "0";
+            String used = formatTokenCount(quota.getConsumedTokens());
+            tokensLabel.setValue("Остаток: " + rem);
+            tokensSubLabel.setValue(String.format("Выделено: %s | Использовано: %s", alloc, used));
+        }
 
         costLabel.setValue("$ " + totalCost.setScale(4, RoundingMode.HALF_UP).toPlainString());
         costSubLabel.setValue(totalCost.compareTo(BigDecimal.ZERO) > 0 ? "~" + totalCost.multiply(BigDecimal.valueOf(92.0)).setScale(2, RoundingMode.HALF_UP) + " ₽" : "—");

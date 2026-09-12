@@ -48,7 +48,7 @@
                 </vbox>
                 <vbox id="tokensCard" width="100%" stylename="ai-kpi-card kpi-purple" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
-                        <label value="msg://totalTokens" stylename="kpi-title" width="100%"/>
+                        <label value="msg://tokensQuotaTitle" stylename="kpi-title" width="100%"/>
                         <label value="🪙" stylename="kpi-icon"/>
                     </hbox>
                     <label id="tokensLabel" value="0" stylename="kpi-value"/>

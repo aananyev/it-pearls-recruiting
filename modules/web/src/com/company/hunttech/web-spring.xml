@@ -76,6 +76,8 @@
                        value="com.company.hunttech.service.GeoBulkLoaderService"/>
                 <entry key="hunttech_UserAvatarManagementService"
                        value="com.company.hunttech.service.UserAvatarManagementService"/>
+                <entry key="hunttech_UserAiQuotaService"
+                       value="com.company.hunttech.service.UserAiQuotaService"/>
             </map>
         </property>
     </bean>

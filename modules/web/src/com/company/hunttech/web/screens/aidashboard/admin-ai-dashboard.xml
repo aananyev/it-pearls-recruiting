@@ -7,6 +7,12 @@
         <keyValueCollection id="userSummaryDc">
             <properties>
                 <property name="userName" datatype="string"/>
+                <property name="allocatedTokens" datatype="long"/>
+                <property name="consumedTokens" datatype="long"/>
+                <property name="remainingTokens" datatype="long"/>
+                <property name="quotaStatus" datatype="string"/>
+                <property name="unlimited" datatype="boolean"/>
+                <property name="customOverride" datatype="boolean"/>
                 <property name="totalCalls" datatype="int"/>
                 <property name="promptTokens" datatype="long"/>
                 <property name="completionTokens" datatype="long"/>
@@ -192,13 +198,15 @@
                         <table id="userSummaryTable" width="100%" height="440px" dataContainer="userSummaryDc" stylename="ai-dashboard-table">
                             <columns>
                                 <column id="userName" caption="msg://colUser" width="200px"/>
-                                <column id="totalCalls" caption="msg://colCalls" width="110px"/>
-                                <column id="promptTokens" caption="msg://colPromptTokens" width="140px"/>
-                                <column id="completionTokens" caption="msg://colCompletionTokens" width="150px"/>
-                                <column id="totalTokens" caption="msg://colTotalTokens" width="140px"/>
-                                <column id="estimatedCost" caption="msg://colCost" width="130px"/>
-                                <column id="errorCount" caption="msg://colErrors" width="100px"/>
-                                <column id="lastCallTime" caption="msg://colLastActive" width="160px"/>
+                                <column id="allocatedTokens" caption="msg://colAllocatedTokens" width="150px"/>
+                                <column id="consumedTokens" caption="msg://colConsumedTokens" width="150px"/>
+                                <column id="remainingTokens" caption="msg://colRemainingTokens" width="150px"/>
+                                <column id="quotaStatus" caption="msg://colQuotaStatus" width="130px"/>
+                                <column id="totalCalls" caption="msg://colCalls" width="90px"/>
+                                <column id="totalTokens" caption="msg://colTotalTokens" width="130px"/>
+                                <column id="estimatedCost" caption="msg://colCost" width="110px"/>
+                                <column id="errorCount" caption="msg://colErrors" width="80px"/>
+                                <column id="lastCallTime" caption="msg://colLastActive" width="150px"/>
                             </columns>
                             <rowsCount/>
                         </table>
