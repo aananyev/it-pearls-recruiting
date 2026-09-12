@@ -98,12 +98,14 @@ public class HermesChatServiceBean implements HermesChatService {
         ExtUser currentUser = getCurrentUser();
         UUID currentUserId = currentUser != null ? currentUser.getId() : null;
 
+        log.debug("loadHermesHistory: convId={}, userId={}", conversationId, currentUserId);
         List<LlmChatMessage> messages = dataManager.load(LlmChatMessage.class)
                 .query("select e from hunttech_LlmChatMessage e " +
                         "where e.conversation.id = :conversationId and e.conversation.user.id = :userId and e.deleteTs is null " +
                         "order by e.sequenceNo asc")
                 .parameter("conversationId", conversationId)
                 .parameter("userId", currentUserId)
+                .view("llm-chat-message-view")
                 .list();
 
         List<HermesChatMessage> dtoList = new ArrayList<>();
@@ -118,6 +120,7 @@ public class HermesChatServiceBean implements HermesChatService {
             dtoList.add(dto);
         }
 
+        log.debug("loadHermesHistory: загружено {} сообщений для convId={}", dtoList.size(), conversationId);
         return dtoList;
     }
 

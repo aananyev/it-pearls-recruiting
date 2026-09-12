@@ -117,6 +117,7 @@
         <property name="conversation" view="_minimal"/>
         <property name="requestId"/>
         <property name="providerRequestId"/>
+        <property name="createTs"/>
     </view>
     <view entity="hunttech_LlmChatQuotaPeriod" name="llm-chat-quota-period-view" extends="_local">
         <property name="user" view="_minimal"/>

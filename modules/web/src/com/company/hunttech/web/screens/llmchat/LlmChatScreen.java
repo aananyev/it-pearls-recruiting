@@ -1,6 +1,7 @@
 package com.company.hunttech.web.screens.llmchat;
 
 import com.company.hunttech.LlmChatStreamEvent;
+import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
 import com.company.hunttech.service.LlmChatService;
 import com.company.hunttech.service.LlmChatStreamState;
@@ -112,12 +113,44 @@ public class LlmChatScreen extends Screen {
         inputArea.setTrimming(false);
         ensureUserFallbackConsent();
         try {
-            conversationId = llmChatService.startConversation();
+            conversationId = resolveActiveConversationId();
             renderHistory(llmChatService.loadHistory(conversationId));
         } catch (RuntimeException ex) {
             sendBtn.setEnabled(false);
             showError(ex);
         }
+        try {
+            initHermesTab();
+        } catch (Exception ex) {
+            log.warn("Предварительная инициализация вкладки Hermes: {}", ex.getMessage());
+        }
+    }
+
+    private UUID resolveActiveConversationId() {
+        if (userSession == null || userSession.getUser() == null || dataManager == null) {
+            return llmChatService.startConversation();
+        }
+        UUID userId = userSession.getUser().getId();
+        try {
+            LlmChatConversation latestConv = dataManager.load(LlmChatConversation.class)
+                    .query("select e from hunttech_LlmChatConversation e " +
+                            "where e.user.id = :userId and e.status = 'ACTIVE' and e.deleteTs is null " +
+                            "and (e.title is null or e.title not like 'Hermes:%') " +
+                            "order by e.lastMessageAt desc nulls last, e.createTs desc")
+                    .parameter("userId", userId)
+                    .view("llm-chat-conversation-view")
+                    .maxResults(1)
+                    .optional()
+                    .orElse(null);
+            if (latestConv != null) {
+                log.info("Восстановлен предыдущий активный диалог LLM: convId={}, title={}",
+                        latestConv.getId(), latestConv.getTitle());
+                return latestConv.getId();
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить последний активный диалог: {}", e.getMessage());
+        }
+        return llmChatService.startConversation();
     }
 
     private void ensureUserFallbackConsent() {
@@ -688,7 +721,14 @@ public class LlmChatScreen extends Screen {
         final SecurityContext securityContext = AppContext.getSecurityContext();
 
         // Показываем сообщение пользователя сразу со статусом ожидания ответа
-        List<HermesChatMessage> currentHistory = hermesChatService.loadHermesHistory(convId);
+        List<HermesChatMessage> loadedHistory;
+        try {
+            loadedHistory = hermesChatService.loadHermesHistory(convId);
+        } catch (Exception ex) {
+            log.warn("Не удалось загрузить историю диалога перед отправкой в Hermes: {}", ex.getMessage(), ex);
+            loadedHistory = Collections.emptyList();
+        }
+        final List<HermesChatMessage> currentHistory = (loadedHistory != null) ? loadedHistory : Collections.emptyList();
         HermesChatMessage pendingUserMsg = new HermesChatMessage("user", request);
         List<HermesChatMessage> pendingList = new ArrayList<>(currentHistory);
         pendingList.add(pendingUserMsg);

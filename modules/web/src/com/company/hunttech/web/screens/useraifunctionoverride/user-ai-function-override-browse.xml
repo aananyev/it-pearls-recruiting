@@ -20,43 +20,49 @@
     <!-- Компактный browse персональных настроек. -->
     <dialogMode width="1000" height="650"/>
     <!-- Local visual namespace. -->
-    <layout stylename="user-ai-function-override-browse" expand="overridesTable" spacing="true">
+    <layout stylename="browse-screen-layout edit-screen-layout user-ai-function-override-browse" expand="tableCard" spacing="true">
         <!-- Toolbar стандартных действий. -->
-        <hbox id="browseActions" spacing="true">
+        <hbox id="browseActions" spacing="true" stylename="edit-toolbar">
             <!-- Создать override. -->
-            <button action="overridesTable.create"/>
+            <button id="createBtn" action="overridesTable.create" stylename="primary" icon="PLUS"/>
             <!-- Редактировать override. -->
-            <button action="overridesTable.edit"/>
+            <button id="editBtn" action="overridesTable.edit" icon="EDIT_ACTION"/>
             <!-- Удалить override и вернуться к corporate routing. -->
-            <button action="overridesTable.remove"/>
+            <button id="removeBtn" action="overridesTable.remove" icon="REMOVE"/>
+            <!-- Обновить список. -->
+            <button id="refreshBtn" action="overridesTable.refresh" icon="REFRESH"/>
         </hbox>
-        <!-- Safe table текущих override. -->
-        <dataGrid id="overridesTable" width="100%" dataContainer="overridesDc">
-            <!-- CRUD actions CUBA. -->
-            <actions>
-                <!-- Create opens UserAiFunctionOverride.edit. -->
-                <action id="create" type="create"/>
-                <!-- Edit selected mapping. -->
-                <action id="edit" type="edit"/>
-                <!-- Remove selected mapping. -->
-                <action id="remove" type="remove"/>
-            </actions>
-            <!-- Колонки показывают только функцию, provider/model и enabled. -->
-            <columns>
-                <!-- Stable function code. -->
-                <column property="aiFunction.code"/>
-                <!-- Human-readable function name. -->
-                <column property="aiFunction.name"/>
-                <!-- Personal provider code without API key. -->
-                <column property="userAiConfiguration.providerCode"/>
-                <!-- Personal default model. -->
-                <column property="userAiConfiguration.defaultModelName"/>
-                <!-- Optional model override. -->
-                <column property="modelName"/>
-                <!-- Whether mapping participates in resolver. -->
-                <column property="enabled"/>
-            </columns>
-        </dataGrid>
+        <!-- Safe table текущих override в карточке-контейнере. -->
+        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="overridesTable" stylename="edit-card candidate-table-card">
+            <dataGrid id="overridesTable" width="100%" height="100%" dataContainer="overridesDc">
+                <!-- CRUD actions CUBA. -->
+                <actions>
+                    <!-- Create opens UserAiFunctionOverride.edit. -->
+                    <action id="create" type="create"/>
+                    <!-- Edit selected mapping. -->
+                    <action id="edit" type="edit"/>
+                    <!-- Remove selected mapping. -->
+                    <action id="remove" type="remove"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <!-- Колонки показывают только функцию, provider/model и enabled. -->
+                <columns>
+                    <!-- Stable function code. -->
+                    <column property="aiFunction.code" width="180px"/>
+                    <!-- Human-readable function name. -->
+                    <column property="aiFunction.name" minimumWidth="200px"/>
+                    <!-- Personal provider code without API key. -->
+                    <column property="userAiConfiguration.providerCode" width="130px"/>
+                    <!-- Personal default model. -->
+                    <column property="userAiConfiguration.defaultModelName" width="200px"/>
+                    <!-- Optional model override. -->
+                    <column property="modelName" width="180px"/>
+                    <!-- Whether mapping participates in resolver. -->
+                    <column property="enabled" width="100px"/>
+                </columns>
+                <rowsCount/>
+            </dataGrid>
+        </vbox>
         <!-- StandardLookup compatibility. -->
         <hbox id="lookupActions" spacing="true" visible="false">
             <!-- Lookup select. -->

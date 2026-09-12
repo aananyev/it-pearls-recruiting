@@ -17,35 +17,43 @@
     </data>
     <dialogMode height="600"
                 width="1000"/>
-    <layout expand="userAiConfigurationsTable"
-            spacing="true">
+    <layout expand="tableCard"
+            spacing="true"
+            stylename="browse-screen-layout edit-screen-layout">
         <filter id="filter"
                 applyTo="userAiConfigurationsTable"
-                dataLoader="userAiConfigurationsDl">
+                dataLoader="userAiConfigurationsDl"
+                collapsable="true"
+                collapsed="true">
             <properties include=".*"/>
         </filter>
-        <hbox spacing="true">
-            <button action="userAiConfigurationsTable.create"/>
-            <button action="userAiConfigurationsTable.edit"/>
-            <button action="userAiConfigurationsTable.remove"/>
+        <hbox id="buttonsPanel" spacing="true" stylename="edit-toolbar">
+            <button id="createBtn" action="userAiConfigurationsTable.create" stylename="primary" icon="PLUS"/>
+            <button id="editBtn" action="userAiConfigurationsTable.edit" icon="EDIT_ACTION"/>
+            <button id="removeBtn" action="userAiConfigurationsTable.remove" icon="REMOVE"/>
+            <button id="refreshBtn" action="userAiConfigurationsTable.refresh" icon="REFRESH"/>
             <button id="testBtn" caption="Тест AI" invoke="onTestBtnClick" icon="CHECK"/>
         </hbox>
-        <table id="userAiConfigurationsTable"
-                    width="100%"
-                    dataContainer="userAiConfigurationsDc">
-            <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
-                <action id="remove" type="remove"/>
-            </actions>
-            <columns>
-                <column id="user.login"/>
-                <column id="providerCode"/>
-                <column id="isActive"/>
-                <column id="defaultModelName"/>
-            </columns>
-            <rowsCount/>
-        </table>
+        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="userAiConfigurationsTable" stylename="edit-card candidate-table-card">
+            <table id="userAiConfigurationsTable"
+                   width="100%"
+                   height="100%"
+                   dataContainer="userAiConfigurationsDc">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <columns>
+                    <column id="user.login" width="180px"/>
+                    <column id="providerCode" width="140px"/>
+                    <column id="isActive" width="100px"/>
+                    <column id="defaultModelName" minimumWidth="220px"/>
+                </columns>
+                <rowsCount/>
+            </table>
+        </vbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

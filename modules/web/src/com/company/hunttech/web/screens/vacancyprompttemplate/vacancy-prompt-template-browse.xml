@@ -17,34 +17,42 @@
     </data>
     <dialogMode height="600"
                 width="900"/>
-    <layout expand="vacancyPromptTemplatesTable"
-            spacing="true">
+    <layout expand="tableCard"
+            spacing="true"
+            stylename="browse-screen-layout edit-screen-layout">
         <filter id="filter"
                 applyTo="vacancyPromptTemplatesTable"
-                dataLoader="vacancyPromptTemplatesDl">
+                dataLoader="vacancyPromptTemplatesDl"
+                collapsable="true"
+                collapsed="true">
             <properties include=".*"/>
         </filter>
-        <groupTable id="vacancyPromptTemplatesTable"
-                    width="100%"
-                    dataContainer="vacancyPromptTemplatesDc">
-            <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
-                <action id="remove" type="remove"/>
-            </actions>
-            <columns>
-                <column id="code"/>
-                <column id="name"/>
-                <column id="temperature"/>
-            </columns>
-            <rowsCount/>
-            <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
-                <button id="createBtn" action="vacancyPromptTemplatesTable.create"/>
-                <button id="editBtn" action="vacancyPromptTemplatesTable.edit"/>
-                <button id="removeBtn" action="vacancyPromptTemplatesTable.remove"/>
-            </buttonsPanel>
-        </groupTable>
+        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="vacancyPromptTemplatesTable" stylename="edit-card candidate-table-card">
+            <groupTable id="vacancyPromptTemplatesTable"
+                        width="100%"
+                        height="100%"
+                        dataContainer="vacancyPromptTemplatesDc">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <columns>
+                    <column id="code" width="220px"/>
+                    <column id="name" minimumWidth="250px"/>
+                    <column id="temperature" width="120px"/>
+                </columns>
+                <rowsCount/>
+                <buttonsPanel id="buttonsPanel"
+                              alwaysVisible="true">
+                    <button id="createBtn" action="vacancyPromptTemplatesTable.create" stylename="primary" icon="PLUS"/>
+                    <button id="editBtn" action="vacancyPromptTemplatesTable.edit" icon="EDIT_ACTION"/>
+                    <button id="removeBtn" action="vacancyPromptTemplatesTable.remove" icon="REMOVE"/>
+                    <button id="refreshBtn" action="vacancyPromptTemplatesTable.refresh" icon="REFRESH"/>
+                </buttonsPanel>
+            </groupTable>
+        </vbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

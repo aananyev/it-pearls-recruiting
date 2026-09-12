@@ -20,52 +20,59 @@
     <!-- Административный диалог достаточной ширины для статусов. -->
     <dialogMode width="1100" height="700"/>
     <!-- Локальный browse namespace. -->
-    <layout stylename="admin-ai-configuration-browse" expand="adminConfigurationsTable" spacing="true">
+    <layout stylename="browse-screen-layout edit-screen-layout admin-ai-configuration-browse" expand="tableCard" spacing="true">
         <!-- Фильтр работает по safe view. -->
-        <filter id="filter" dataLoader="adminConfigurationsDl" applyTo="adminConfigurationsTable">
+        <filter id="filter" dataLoader="adminConfigurationsDl" applyTo="adminConfigurationsTable"
+                collapsable="true" collapsed="true">
             <!-- Стандартные фильтруемые свойства CUBA. -->
             <properties include=".*" exclude="apiKeyEncrypted"/>
         </filter>
         <!-- Toolbar: CRUD + middleware connection test. -->
-        <hbox id="browseActions" spacing="true">
+        <hbox id="browseActions" spacing="true" stylename="edit-toolbar">
             <!-- Создание корпоративного подключения. -->
-            <button action="adminConfigurationsTable.create"/>
+            <button id="createBtn" action="adminConfigurationsTable.create" stylename="primary" icon="PLUS"/>
             <!-- Редактирование выбранного подключения. -->
-            <button action="adminConfigurationsTable.edit"/>
+            <button id="editBtn" action="adminConfigurationsTable.edit" icon="EDIT_ACTION"/>
             <!-- Удаление только неиспользуемой записи. -->
-            <button action="adminConfigurationsTable.remove"/>
+            <button id="removeBtn" action="adminConfigurationsTable.remove" icon="REMOVE"/>
+            <!-- Обновление списка. -->
+            <button id="refreshBtn" action="adminConfigurationsTable.refresh" icon="REFRESH"/>
             <!-- Тест по id выполняется в core без передачи secret в Web Client. -->
             <button id="testBtn" caption="Проверить подключение" icon="CHECK" invoke="testSelectedConnection"/>
         </hbox>
-        <!-- Safe DataGrid корпоративных подключений. -->
-        <dataGrid id="adminConfigurationsTable" width="100%" dataContainer="adminConfigurationsDc">
-            <!-- Стандартные CRUD actions. -->
-            <actions>
-                <!-- Create открывает защищённый editor. -->
-                <action id="create" type="create"/>
-                <!-- Edit открывает защищённый editor. -->
-                <action id="edit" type="edit"/>
-                <!-- Remove учитывает FK от AI-функций. -->
-                <action id="remove" type="remove"/>
-            </actions>
-            <!-- Только безопасные операционные сведения. -->
-            <columns>
-                <!-- Имя подключения. -->
-                <column property="name"/>
-                <!-- Provider registry code. -->
-                <column property="providerCode"/>
-                <!-- Default model. -->
-                <column property="defaultModelName"/>
-                <!-- Active state. -->
-                <column property="active"/>
-                <!-- Routing priority metadata. -->
-                <column property="priority"/>
-                <!-- Последний test status. -->
-                <column property="lastTestStatus"/>
-                <!-- Время последнего теста. -->
-                <column property="lastTestAt"/>
-            </columns>
-        </dataGrid>
+        <!-- Safe DataGrid корпоративных подключений в карточке-контейнере. -->
+        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="adminConfigurationsTable" stylename="edit-card candidate-table-card">
+            <dataGrid id="adminConfigurationsTable" width="100%" height="100%" dataContainer="adminConfigurationsDc">
+                <!-- Стандартные CRUD actions. -->
+                <actions>
+                    <!-- Create открывает защищённый editor. -->
+                    <action id="create" type="create"/>
+                    <!-- Edit открывает защищённый editor. -->
+                    <action id="edit" type="edit"/>
+                    <!-- Remove учитывает FK от AI-функций. -->
+                    <action id="remove" type="remove"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <!-- Только безопасные операционные сведения. -->
+                <columns>
+                    <!-- Имя подключения. -->
+                    <column property="name" minimumWidth="200px"/>
+                    <!-- Provider registry code. -->
+                    <column property="providerCode" width="130px"/>
+                    <!-- Default model. -->
+                    <column property="defaultModelName" width="220px"/>
+                    <!-- Active state. -->
+                    <column property="active" width="100px"/>
+                    <!-- Routing priority metadata. -->
+                    <column property="priority" width="100px"/>
+                    <!-- Последний test status. -->
+                    <column property="lastTestStatus" width="140px"/>
+                    <!-- Время последнего теста. -->
+                    <column property="lastTestAt" width="160px"/>
+                </columns>
+                <rowsCount/>
+            </dataGrid>
+        </vbox>
         <!-- Скрытые lookup actions сохраняют StandardLookup contract. -->
         <hbox id="lookupActions" spacing="true" visible="false">
             <!-- Выбрать запись в lookup mode. -->

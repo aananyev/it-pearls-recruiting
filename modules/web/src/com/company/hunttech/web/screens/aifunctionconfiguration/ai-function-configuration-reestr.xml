@@ -20,7 +20,7 @@
     <dialogMode height="720" width="1200"/>
 
     <!-- Корневой контейнер с двухпанельной разметкой Split-View -->
-    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="edit-screen-layout">
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
         <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="tableBox" stylename="job-candidate-main-layout edit-screen-layout">
 
             <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР 312px): Стандарт hunttech-reestr-screen -->
