@@ -40,6 +40,9 @@ public class LlmChatConversation extends StandardEntity {
     @Column(name = "LAST_MESSAGE_AT")
     private Date lastMessageAt;
 
+    @Column(name = "CONTEXT_RESET_SEQUENCE_NO")
+    private Integer contextResetSequenceNo;
+
     public ExtUser getUser() { return user; }
     public void setUser(ExtUser user) { this.user = user; }
     public String getTitle() { return title; }
@@ -48,4 +51,6 @@ public class LlmChatConversation extends StandardEntity {
     public void setStatus(String status) { this.status = status; }
     public Date getLastMessageAt() { return lastMessageAt; }
     public void setLastMessageAt(Date lastMessageAt) { this.lastMessageAt = lastMessageAt; }
+    public Integer getContextResetSequenceNo() { return contextResetSequenceNo; }
+    public void setContextResetSequenceNo(Integer contextResetSequenceNo) { this.contextResetSequenceNo = contextResetSequenceNo; }
 }

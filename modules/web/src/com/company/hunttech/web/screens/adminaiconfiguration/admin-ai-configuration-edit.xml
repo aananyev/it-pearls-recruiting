@@ -89,8 +89,9 @@
                         </groupBox>
                         <!-- Карточка «Подключение»: default-модель и опциональная gateway metadata. -->
                         <groupBox id="connectionSection" caption="Подключение" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Default-модель применяется, если function-level модель не указана. -->
                             <textField id="defaultModelNameField" dataContainer="adminConfigurationDc" property="defaultModelName" width="100%" stylename="edit-form-control" caption="msg://adminDefaultModelName.caption"/>
+                            <!-- Размер контекста (токенов); максимум 10 000. -->
+                            <textField id="maxContextTokensField" dataContainer="adminConfigurationDc" property="maxContextTokens" width="100%" stylename="edit-form-control" caption="msg://adminMaxContextTokens.caption" description="msg://adminMaxContextTokens.description"/>
                             <!-- Опциональный base URL; vendor adapter может игнорировать его до отдельной поддержки. -->
                             <textField id="baseApiUrlField" dataContainer="adminConfigurationDc" property="baseApiUrl" width="100%" stylename="edit-form-control" caption="msg://adminBaseApiUrl.caption"/>
                             <!-- Read-only результат последней проверки подключения. -->

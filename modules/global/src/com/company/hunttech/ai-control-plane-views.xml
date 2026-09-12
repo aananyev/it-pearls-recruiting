@@ -11,6 +11,7 @@
         <property name="lastTestStatus"/>
         <property name="lastTestAt"/>
         <property name="lastError"/>
+        <property name="maxContextTokens"/>
     </view>
     <!-- Edit-view включает шифротекст только для сохранения существующего значения; UI его не отображает. -->
     <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-edit-view" extends="admin-ai-configuration-browse-view">
@@ -57,6 +58,7 @@
         <property name="isPrimary"/>
         <property name="maxRetries"/>
         <property name="priority"/>
+        <property name="maxContextTokens"/>
         <property name="createTs"/>
     </view>
     <!-- Core-only view добавляет ciphertext и transitional API_KEY для фактического вызова. -->

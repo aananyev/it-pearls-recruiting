@@ -42,6 +42,8 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
     @Inject
     private PasswordField apiKeyField;
     @Inject
+    private TextField<Integer> maxContextTokensField;
+    @Inject
     private AiCredentialService aiCredentialService;
     @Inject
     private DataManager dataManager;
@@ -89,6 +91,25 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        Integer maxContext = maxContextTokensField != null && maxContextTokensField.getValue() != null
+                ? maxContextTokensField.getValue()
+                : getEditedEntity().getMaxContextTokens();
+        if (maxContext == null) {
+            getEditedEntity().setMaxContextTokens(UserAiConfiguration.DEFAULT_MAX_CONTEXT_TOKENS);
+        } else if (maxContext > UserAiConfiguration.MAX_CONTEXT_TOKENS_LIMIT) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(String.format("Размер контекста не может превышать %,d токенов", UserAiConfiguration.MAX_CONTEXT_TOKENS_LIMIT).replace(',', ' '))
+                    .show();
+            event.preventCommit();
+            return;
+        } else if (maxContext < UserAiConfiguration.MIN_CONTEXT_TOKENS_LIMIT) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(String.format("Размер контекста должен быть не менее %d токенов", UserAiConfiguration.MIN_CONTEXT_TOKENS_LIMIT))
+                    .show();
+            event.preventCommit();
+            return;
+        }
+
         String newSecret = apiKeyField.getValue();
         if (isConfigured(newSecret)) {
             try {

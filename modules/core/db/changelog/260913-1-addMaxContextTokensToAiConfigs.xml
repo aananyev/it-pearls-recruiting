@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260913-1-addAdminAiConfig-maxContextTokens" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_ADMIN_AI_CONFIGURATION"/>
+            <not>
+                <columnExists tableName="HUNTTECH_ADMIN_AI_CONFIGURATION" columnName="MAX_CONTEXT_TOKENS"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_ADMIN_AI_CONFIGURATION">
+            <column name="MAX_CONTEXT_TOKENS" type="integer" defaultValueNumeric="10000"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_ADMIN_AI_CONFIGURATION" columnName="MAX_CONTEXT_TOKENS"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="260913-1-addUserAiConfig-maxContextTokens" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+            <not>
+                <columnExists tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="MAX_CONTEXT_TOKENS"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_AI_CONFIGURATION">
+            <column name="MAX_CONTEXT_TOKENS" type="integer" defaultValueNumeric="10000"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_USER_AI_CONFIGURATION" columnName="MAX_CONTEXT_TOKENS"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="260913-1-addLlmChatConv-contextResetSequenceNo" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_LLM_CHAT_CONVERSATION"/>
+            <not>
+                <columnExists tableName="HUNTTECH_LLM_CHAT_CONVERSATION" columnName="CONTEXT_RESET_SEQUENCE_NO"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_LLM_CHAT_CONVERSATION">
+            <column name="CONTEXT_RESET_SEQUENCE_NO" type="integer"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_LLM_CHAT_CONVERSATION" columnName="CONTEXT_RESET_SEQUENCE_NO"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="260913-1-applyMaxContextTokensDefaultsAndPrompt" author="hunttech">
+        <sqlFile path="../update/postgres/26/260913-1-addMaxContextTokensToAiConfigs.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"/>
+        <rollback>
+            <!-- Откат обновления промпта и значений контекста -->
+            <sql>SELECT 1;</sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

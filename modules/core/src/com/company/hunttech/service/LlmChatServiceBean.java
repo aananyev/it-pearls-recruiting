@@ -36,6 +36,12 @@ import java.util.Calendar;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.entity.ai.AdminAiConfiguration;
+import com.haulmont.cuba.core.global.FluentLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Middleware facade for the floating chat. It keeps synchronous compatibility
  * while exposing an owner-scoped polling snapshot for streaming. Provider
@@ -44,6 +50,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Service(LlmChatService.NAME)
 public class LlmChatServiceBean implements LlmChatService {
+    private static final Logger log = LoggerFactory.getLogger(LlmChatServiceBean.class);
     private static final String FUNCTION_CODE = "LLM_CHAT";
     private static final String QUERY_OWN_CONVERSATION =
             "select e from hunttech_LlmChatConversation e "
@@ -160,12 +167,13 @@ public class LlmChatServiceBean implements LlmChatService {
             throw new DevelopmentException("Запрос отменён до обращения к AI-провайдеру.");
         }
 
+        String messageWithHistory = buildMessageWithHistory(conversation, user, nextSequence, message.trim());
         HrmDataContextSnapshot snapshot = hrmChatDataRetrieverService.retrieveContextForMessage(message.trim());
 
         Map<String, Object> context = new HashMap<>();
-        context.put("message", message.trim());
+        context.put("message", messageWithHistory);
         if (!snapshot.isEmpty()) {
-            context.put("message", message.trim() + "\n\n" + snapshot.getFormattedContext());
+            context.put("message", messageWithHistory + "\n\n" + snapshot.getFormattedContext());
             context.put("hrmContext", snapshot.getFormattedContext());
         }
         context.put("callerSource", "LlmChatService");
@@ -298,12 +306,18 @@ public class LlmChatServiceBean implements LlmChatService {
     }
 
     private void executeStreaming(StreamingSession session) {
+        LlmChatConversation conversation = dataManager.load(LlmChatConversation.class)
+                .id(session.conversationId).view("llm-chat-conversation-view").optional().orElse(null);
+        ExtUser user = dataManager.load(ExtUser.class)
+                .id(session.userId).view("_minimal").optional().orElse(null);
+
+        String messageWithHistory = buildMessageWithHistory(conversation, user, session.nextSequence, session.userMessage.getContent());
         HrmDataContextSnapshot snapshot = hrmChatDataRetrieverService.retrieveContextForMessage(session.userMessage.getContent());
 
         Map<String, Object> context = new HashMap<>();
-        context.put("message", session.userMessage.getContent());
+        context.put("message", messageWithHistory);
         if (!snapshot.isEmpty()) {
-            context.put("message", session.userMessage.getContent() + "\n\n" + snapshot.getFormattedContext());
+            context.put("message", messageWithHistory + "\n\n" + snapshot.getFormattedContext());
             context.put("hrmContext", snapshot.getFormattedContext());
         }
         context.put("callerSource", "LlmChatService.streaming");
@@ -666,6 +680,117 @@ public class LlmChatServiceBean implements LlmChatService {
                 .view("llm-chat-message-view")
                 .list();
         return history.isEmpty() ? 1 : history.get(history.size() - 1).getSequenceNo() + 1;
+    }
+
+    String buildMessageWithHistory(LlmChatConversation conversation, ExtUser user,
+                                   int currentSequenceNo, String currentMessageText) {
+        if (conversation == null || currentMessageText == null) {
+            return currentMessageText;
+        }
+        int maxContextLimit = resolveEffectiveMaxContextTokens(user);
+
+        Integer resetSeq = conversation.getContextResetSequenceNo();
+        String query = "select m from hunttech_LlmChatMessage m " +
+                "where m.conversation.id = :convId " +
+                "and m.status = 'COMPLETED' " +
+                "and m.sequenceNo < :currentSeq " +
+                (resetSeq != null ? "and m.sequenceNo >= :resetSeq " : "") +
+                "order by m.sequenceNo desc";
+
+        FluentLoader.ByQuery<LlmChatMessage, UUID> loader = dataManager.load(LlmChatMessage.class)
+                .query(query)
+                .parameter("convId", conversation.getId())
+                .parameter("currentSeq", currentSequenceNo);
+        if (resetSeq != null) {
+            loader.parameter("resetSeq", resetSeq);
+        }
+        loader.maxResults(200);
+        List<LlmChatMessage> historyMessages = loader.view("llm-chat-message-view").list();
+
+        if (historyMessages.isEmpty()) {
+            return currentMessageText;
+        }
+
+        // Возвращаем сообщения в хронологический порядок после выборки последних N сообщений
+        java.util.Collections.reverse(historyMessages);
+
+        StringBuilder historyBuilder = new StringBuilder();
+        historyBuilder.append("[История диалога]\n");
+        for (LlmChatMessage msg : historyMessages) {
+            String roleCaption = "USER".equalsIgnoreCase(msg.getRole()) ? "Пользователь" : "Ассистент";
+            String content = msg.getContent() != null ? msg.getContent() : "";
+            historyBuilder.append(roleCaption).append(": ").append(content).append("\n");
+        }
+        String historyText = historyBuilder.toString();
+        int historyTokens = estimateTokens(historyText);
+        int currentMessageTokens = estimateTokens(currentMessageText);
+        int totalTokens = historyTokens + currentMessageTokens;
+
+        // Если суммарный размер контекста (история + текущий запрос) достигает или превышает лимит — он очищается / обнуляется
+        if (totalTokens >= maxContextLimit) {
+            log.info("Размер контекста диалога для convId={} (история: {} токенов, текущий запрос: {} токенов, всего: {} токенов) достиг лимита ({} токенов). Контекст очищен/обнулён.",
+                    conversation.getId(), historyTokens, currentMessageTokens, totalTokens, maxContextLimit);
+            conversation.setContextResetSequenceNo(currentSequenceNo);
+            dataManager.commit(conversation);
+            return currentMessageText;
+        }
+
+        // Контекст в пределах лимита: формируем комбинированный запрос с историей диалога
+        StringBuilder fullPayload = new StringBuilder();
+        fullPayload.append(historyText)
+                .append("\n[Текущий запрос пользователя]\n")
+                .append(currentMessageText);
+        return fullPayload.toString();
+    }
+
+    int resolveEffectiveMaxContextTokens(ExtUser user) {
+        int limit = UserAiConfiguration.DEFAULT_MAX_CONTEXT_TOKENS;
+        if (user != null && dataManager != null) {
+            try {
+                List<UserAiConfiguration> userConfigs = dataManager.load(UserAiConfiguration.class)
+                        .query("select e from hunttech_UserAiConfiguration e where e.user.id = :userId and e.isActive = true order by e.isPrimary desc, e.priority desc")
+                        .parameter("userId", user.getId())
+                        .view("userAiConfiguration-browse-view")
+                        .list();
+                if (!userConfigs.isEmpty()) {
+                    UserAiConfiguration userConfig = userConfigs.get(0);
+                    if (userConfig.getMaxContextTokens() != null) {
+                        return Math.min(UserAiConfiguration.MAX_CONTEXT_TOKENS_LIMIT,
+                                Math.max(UserAiConfiguration.MIN_CONTEXT_TOKENS_LIMIT, userConfig.getMaxContextTokens()));
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Не удалось загрузить лимит контекста UserAiConfiguration: {}", e.getMessage());
+            }
+        }
+        if (dataManager != null) {
+            try {
+                List<AdminAiConfiguration> adminConfigs = dataManager.load(AdminAiConfiguration.class)
+                        .query("select c from hunttech_AdminAiConfiguration c where c.active = true order by c.priority desc")
+                        .view("admin-ai-configuration-browse-view")
+                        .list();
+                if (!adminConfigs.isEmpty()) {
+                    AdminAiConfiguration adminConfig = adminConfigs.get(0);
+                    if (adminConfig.getMaxContextTokens() != null) {
+                        return Math.min(UserAiConfiguration.MAX_CONTEXT_TOKENS_LIMIT,
+                                Math.max(UserAiConfiguration.MIN_CONTEXT_TOKENS_LIMIT, adminConfig.getMaxContextTokens()));
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Не удалось загрузить лимит контекста AdminAiConfiguration: {}", e.getMessage());
+            }
+        }
+        return limit;
+    }
+
+    static int estimateTokens(String text) {
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+        // Консервативная оценка токенов: для кириллицы/мультиязычного текста.
+        // Формула (len * 3 + 4) / 5 дает ~0.6 токена на символ (~1.67 символа на токен), чтобы гарантированно не превысить лимит.
+        int len = text.codePointCount(0, text.length());
+        return Math.max(1, (len * 3 + 4) / 5);
     }
 
     private QuotaReservationContext reserveQuota(ExtUser user, LlmChatConversation conversation,

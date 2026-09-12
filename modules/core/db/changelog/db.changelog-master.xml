@@ -223,5 +223,7 @@
              relativeToChangelogFile="true"/>
     <include file="260912-2-addSkillTreeLogoImage.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-1-addMaxContextTokensToAiConfigs.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

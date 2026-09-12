@@ -7,6 +7,8 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Table(name = "HUNTTECH_USER_AI_CONFIGURATION", indexes = {
@@ -16,6 +18,10 @@ import javax.validation.constraints.NotNull;
 @NamePattern("%s %s|user,providerCode")
 public class UserAiConfiguration extends StandardEntity {
     private static final long serialVersionUID = 4829173645019283746L;
+
+    public static final int DEFAULT_MAX_CONTEXT_TOKENS = 10000;
+    public static final int MAX_CONTEXT_TOKENS_LIMIT = 10000;
+    public static final int MIN_CONTEXT_TOKENS_LIMIT = 100;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @NotNull
@@ -49,6 +55,11 @@ public class UserAiConfiguration extends StandardEntity {
 
     @Column(name = "PRIORITY_")
     private Integer priority = 10;
+
+    @Max(MAX_CONTEXT_TOKENS_LIMIT)
+    @Min(MIN_CONTEXT_TOKENS_LIMIT)
+    @Column(name = "MAX_CONTEXT_TOKENS")
+    private Integer maxContextTokens = DEFAULT_MAX_CONTEXT_TOKENS;
 
     public User getUser() {
         return user;
@@ -120,5 +131,13 @@ public class UserAiConfiguration extends StandardEntity {
 
     public void setPriority(Integer priority) {
         this.priority = priority;
+    }
+
+    public Integer getMaxContextTokens() {
+        return maxContextTokens;
+    }
+
+    public void setMaxContextTokens(Integer maxContextTokens) {
+        this.maxContextTokens = maxContextTokens;
     }
 }

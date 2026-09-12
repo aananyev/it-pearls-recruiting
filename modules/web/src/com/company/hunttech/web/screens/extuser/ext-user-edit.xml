@@ -415,6 +415,8 @@
                                         <column id="maxRetries" caption="msg://UserAiConfiguration.maxRetries"/>
                                         <!-- Приоритет применения конфигурации. -->
                                         <column id="priority" caption="msg://UserAiConfiguration.priority"/>
+                                        <!-- Размер контекста (токенов). -->
+                                        <column id="maxContextTokens" caption="msg://UserAiConfiguration.maxContextTokens"/>
                                         <!-- Признак активности конфигурации. -->
                                         <column id="isActive"/>
                                     </columns>

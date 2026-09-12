@@ -1,6 +1,7 @@
 package com.company.hunttech.web.screens.adminaiconfiguration;
 
 import com.company.hunttech.ai.AiProviderCatalog;
+import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.service.AiConnectionTestResult;
 import com.company.hunttech.service.AiCredentialService;
@@ -39,6 +40,8 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
     @Inject
     private PasswordField apiKeyInput;
     @Inject
+    private TextField<Integer> maxContextTokensField;
+    @Inject
     private AiCredentialService aiCredentialService;
     @Inject
     private Notifications notifications;
@@ -70,6 +73,25 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
      */
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        Integer maxContext = maxContextTokensField != null && maxContextTokensField.getValue() != null
+                ? maxContextTokensField.getValue()
+                : getEditedEntity().getMaxContextTokens();
+        if (maxContext == null) {
+            getEditedEntity().setMaxContextTokens(UserAiConfiguration.DEFAULT_MAX_CONTEXT_TOKENS);
+        } else if (maxContext > UserAiConfiguration.MAX_CONTEXT_TOKENS_LIMIT) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(String.format("Размер контекста не может превышать %,d токенов", UserAiConfiguration.MAX_CONTEXT_TOKENS_LIMIT).replace(',', ' '))
+                    .show();
+            event.preventCommit();
+            return;
+        } else if (maxContext < UserAiConfiguration.MIN_CONTEXT_TOKENS_LIMIT) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(String.format("Размер контекста должен быть не менее %d токенов", UserAiConfiguration.MIN_CONTEXT_TOKENS_LIMIT))
+                    .show();
+            event.preventCommit();
+            return;
+        }
+
         String newSecret = apiKeyInput.getValue();
         if (isConfigured(newSecret)) {
             try {

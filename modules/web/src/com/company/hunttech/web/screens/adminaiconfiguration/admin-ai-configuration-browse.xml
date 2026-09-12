@@ -65,6 +65,8 @@
                     <column property="active" width="100px"/>
                     <!-- Routing priority metadata. -->
                     <column property="priority" width="100px"/>
+                    <!-- Лимит контекста. -->
+                    <column property="maxContextTokens" width="140px"/>
                     <!-- Последний test status. -->
                     <column property="lastTestStatus" width="140px"/>
                     <!-- Время последнего теста. -->

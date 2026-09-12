@@ -1315,6 +1315,7 @@ create table HUNTTECH_USER_AI_CONFIGURATION (
     API_KEY varchar(512),
     DEFAULT_MODEL_NAME varchar(128),
     IS_ACTIVE boolean,
+    MAX_CONTEXT_TOKENS integer default 10000,
     --
     primary key (ID)
 )^

@@ -1,5 +1,6 @@
 package com.company.hunttech.entity.ai;
 
+import com.company.hunttech.entity.UserAiConfiguration;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
@@ -10,6 +11,8 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
@@ -62,6 +65,11 @@ public class AdminAiConfiguration extends StandardEntity {
 
     @Column(name = "LAST_ERROR", length = 1000)
     private String lastError;
+
+    @Max(UserAiConfiguration.MAX_CONTEXT_TOKENS_LIMIT)
+    @Min(UserAiConfiguration.MIN_CONTEXT_TOKENS_LIMIT)
+    @Column(name = "MAX_CONTEXT_TOKENS")
+    private Integer maxContextTokens = UserAiConfiguration.DEFAULT_MAX_CONTEXT_TOKENS;
 
     public String getName() {
         return name;
@@ -141,5 +149,13 @@ public class AdminAiConfiguration extends StandardEntity {
 
     public void setLastError(String lastError) {
         this.lastError = lastError;
+    }
+
+    public Integer getMaxContextTokens() {
+        return maxContextTokens;
+    }
+
+    public void setMaxContextTokens(Integer maxContextTokens) {
+        this.maxContextTokens = maxContextTokens;
     }
 }

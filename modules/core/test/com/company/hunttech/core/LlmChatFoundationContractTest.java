@@ -50,7 +50,7 @@ public class LlmChatFoundationContractTest {
     @Test
     public void chatServiceDoesNotResolveCandidateContext() throws IOException {
         String service = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
-        assertTrue(service.contains("context.put(\"message\", message.trim())"));
+        assertTrue(service.contains("context.put(\"message\", messageWithHistory)") || service.contains("context.put(\"message\", message.trim())"));
         assertFalse(service.contains("CandidateCV"));
         assertFalse(service.contains("JobCandidate"));
         assertTrue(service.contains("user.id = :userId"));

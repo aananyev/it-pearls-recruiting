@@ -124,6 +124,14 @@
                                        width="100%"
                                        stylename="edit-form-control"
                                        caption="msg://userPriority.caption"/>
+                            <!-- Размер контекста (токенов); максимум 10 000. -->
+                            <textField id="maxContextTokensField"
+                                       dataContainer="userAiConfigurationDc"
+                                       property="maxContextTokens"
+                                       width="100%"
+                                       stylename="edit-form-control"
+                                       caption="msg://userMaxContextTokens.caption"
+                                       description="msg://userMaxContextTokens.description"/>
                         </groupBox>
                         <!-- Карточка «Безопасность»: персональный API-ключ (secret-поле). -->
                         <groupBox id="securitySection" caption="Безопасность" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
