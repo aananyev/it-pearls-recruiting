@@ -124,4 +124,24 @@ public class HermesChatServiceBeanTest {
         // 3. Последняя — резервная конфигурация контейнера
         assertEquals("CONTAINER_DEFAULT", candidates.get(2).getSource());
     }
+
+    @Test
+    public void testIsErrorResponseDetection() {
+        // Ошибочные ответы должны быть распознаны
+        org.junit.Assert.assertTrue(service.isErrorResponse("HTTP 403: { \"success\": false, \"error\": \"Access denied by security policy.\" }"));
+        org.junit.Assert.assertTrue(service.isErrorResponse("HTTP 401: Unauthorized"));
+        org.junit.Assert.assertTrue(service.isErrorResponse("HTTP 429: Too Many Requests"));
+        org.junit.Assert.assertTrue(service.isErrorResponse("HTTP 500: Internal Server Error"));
+        org.junit.Assert.assertTrue(service.isErrorResponse("{ \"success\": false, \"error\": \"Model quota exceeded\" }"));
+        org.junit.Assert.assertTrue(service.isErrorResponse("{\"success\":false,\"error\":\"Model quota exceeded\"}"));
+        org.junit.Assert.assertTrue(service.isErrorResponse("AuthenticationError: Incorrect API key provided"));
+        org.junit.Assert.assertTrue(service.isErrorResponse("Error: No API key found for provider openrouter"));
+
+        // Корректные ответы ассистента НЕ должны быть помечены как ошибки
+        org.junit.Assert.assertFalse(service.isErrorResponse("Привет! Я готов помочь вам с HRM системой."));
+        org.junit.Assert.assertFalse(service.isErrorResponse("Сегодня назначено 3 собеседования."));
+        org.junit.Assert.assertFalse(service.isErrorResponse("В компании действует strict access denied by security policy регламент для защиты данных."));
+        org.junit.Assert.assertFalse(service.isErrorResponse(null));
+        org.junit.Assert.assertFalse(service.isErrorResponse(""));
+    }
 }

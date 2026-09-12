@@ -517,16 +517,27 @@ public class HermesChatServiceBean implements HermesChatService {
                     stderr.length() > 300 ? stderr.substring(0, 300) + "..." : stderr);
         }
 
-        if (exitCode != 0 && (stdout == null || stdout.trim().isEmpty())) {
+        if (exitCode != 0) {
+            String combinedErr = (stderr != null && !stderr.trim().isEmpty())
+                    ? stderr.trim()
+                    : (stdout != null && !stdout.trim().isEmpty() ? stdout.trim() : "нет вывода");
+            boolean sessionNotFound = (stderr != null && stderr.contains("Session not found"))
+                    || (stdout != null && stdout.contains("Session not found"));
             // Если сессия не найдена на сервере, повторяем запрос без флага --resume
-            if (stderr != null && stderr.contains("Session not found") && resumeSessionId != null) {
+            if (sessionNotFound && resumeSessionId != null) {
                 log.warn("Сессия Hermes {} не найдена на сервере, повторяем запрос без --resume", resumeSessionId);
                 return executeHermesCli(prompt, null, candidate);
             }
-            throw new RuntimeException("Hermes завершился с кодом " + exitCode + ": " + stderr);
+            log.warn("Hermes CLI завершился с ошибкой (exitCode={}): {}", exitCode, combinedErr);
+            throw new RuntimeException("Hermes CLI завершился с ошибкой (код " + exitCode + "): " + combinedErr);
         }
 
         HermesExecutionResult result = parseHermesOutput(stdout);
+        if (isErrorResponse(result.cleanedText)) {
+            log.warn("Ответ Hermes CLI содержит ошибку провайдера или безопасности: {}", result.cleanedText);
+            throw new RuntimeException("Провайдер модели вернул ошибку: " + result.cleanedText);
+        }
+
         log.info("Результат парсинга ответа Hermes: длина ответа={}, sessionId={}",
                 result.cleanedText != null ? result.cleanedText.length() : 0, result.sessionId);
         return result;
@@ -537,6 +548,28 @@ public class HermesChatServiceBean implements HermesChatService {
             return "''";
         }
         return "'" + value.replace("'", "'\\''") + "'";
+    }
+
+    boolean isErrorResponse(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return false;
+        }
+        String trimmed = text.trim();
+        String lower = trimmed.toLowerCase();
+        boolean hasJsonError = lower.startsWith("{")
+                && lower.contains("\"error\"")
+                && (lower.contains("\"success\":false") || lower.contains("\"success\": false") || lower.contains("\"status\":\"error\""));
+
+        return trimmed.startsWith("HTTP 403:")
+                || trimmed.startsWith("HTTP 401:")
+                || trimmed.startsWith("HTTP 429:")
+                || trimmed.startsWith("HTTP 500:")
+                || trimmed.startsWith("HTTP 502:")
+                || trimmed.startsWith("HTTP 503:")
+                || hasJsonError
+                || lower.startsWith("access denied by security policy")
+                || trimmed.startsWith("AuthenticationError:")
+                || trimmed.startsWith("Error: No API key found");
     }
 
     public static class HermesExecutionCandidate {
