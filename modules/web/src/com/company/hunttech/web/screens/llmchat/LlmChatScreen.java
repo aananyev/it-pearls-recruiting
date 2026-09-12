@@ -758,12 +758,12 @@ public class LlmChatScreen extends Screen {
 
     private void scrollToBottom() {
         try {
-            com.vaadin.ui.Panel panel = historyScrollBox.unwrap(com.vaadin.ui.Panel.class);
-            if (panel != null) {
-                panel.setScrollTop(Integer.MAX_VALUE / 2);
+            com.vaadin.ui.Component comp = historyScrollBox.unwrap(com.vaadin.ui.Component.class);
+            if (comp instanceof com.vaadin.ui.Panel) {
+                ((com.vaadin.ui.Panel) comp).setScrollTop(Integer.MAX_VALUE / 2);
             }
         } catch (Exception ex) {
-            log.debug("Не удалось выполнить автоскролл historyScrollBox: {}", ex.getMessage());
+            log.trace("Не удалось выполнить автоскролл historyScrollBox: {}", ex.getMessage());
         }
     }
 
@@ -1030,12 +1030,12 @@ public class LlmChatScreen extends Screen {
 
     private void scrollToBottomHermes() {
         try {
-            com.vaadin.ui.Panel panel = hermesHistoryScrollBox.unwrap(com.vaadin.ui.Panel.class);
-            if (panel != null) {
-                panel.setScrollTop(Integer.MAX_VALUE / 2);
+            com.vaadin.ui.Component comp = hermesHistoryScrollBox.unwrap(com.vaadin.ui.Component.class);
+            if (comp instanceof com.vaadin.ui.Panel) {
+                ((com.vaadin.ui.Panel) comp).setScrollTop(Integer.MAX_VALUE / 2);
             }
         } catch (Exception ex) {
-            log.debug("Не удалось выполнить автоскролл hermesHistoryScrollBox: {}", ex.getMessage());
+            log.trace("Не удалось выполнить автоскролл hermesHistoryScrollBox: {}", ex.getMessage());
         }
     }
 

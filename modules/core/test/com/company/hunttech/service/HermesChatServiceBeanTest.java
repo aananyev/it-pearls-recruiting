@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -264,5 +266,32 @@ public class HermesChatServiceBeanTest {
         assertEquals(Integer.valueOf(150), response.getTotalTokens());
         assertEquals(new java.math.BigDecimal("0.000028"), response.getEstimatedCost());
         assertEquals("USD", response.getCurrency());
+    }
+
+    @Test
+    public void testShouldUseSsh_decisions() {
+        HunttechHermesConfig config = mock(HunttechHermesConfig.class);
+
+        // When ssh disabled -> false
+        when(config.getSshEnabled()).thenReturn(false);
+        assertFalse(service.shouldUseSsh(config));
+
+        // When ssh enabled, but host is localhost or 127.0.0.1 -> false
+        when(config.getSshEnabled()).thenReturn(true);
+        when(config.getSshHost()).thenReturn("localhost");
+        assertFalse(service.shouldUseSsh(config));
+
+        when(config.getSshHost()).thenReturn("127.0.0.1");
+        assertFalse(service.shouldUseSsh(config));
+
+        when(config.getSshHost()).thenReturn("");
+        assertFalse(service.shouldUseSsh(config));
+
+        when(config.getSshHost()).thenReturn(null);
+        assertFalse(service.shouldUseSsh(config));
+
+        // When host is remote and not matching local docker.sock -> true
+        when(config.getSshHost()).thenReturn("remote-server.example.com");
+        assertTrue(service.shouldUseSsh(config));
     }
 }

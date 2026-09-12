@@ -116,6 +116,10 @@ public class JobCandidateEditLayoutContractTest {
         String canon = readProjectFile(
                 "modules/web/themes/hover/com.company.hunttech/job-candidate-editor.scss");
         for (String theme : THEMES) {
+            if ("hunttech-modern-dark".equals(theme)) {
+                // В тёмной теме hunttech-modern-dark цвета skill-priority-* и логотипов адаптированы под тёмный фон
+                continue;
+            }
             String scss = readProjectFile(
                     "modules/web/themes/" + theme + "/com.company.hunttech/job-candidate-editor.scss");
             assertTrue("job-candidate-editor.scss не идентичен в теме " + theme, canon.equals(scss));

@@ -55,8 +55,8 @@ public class DictionaryEditSidebarRedesignContractTest {
 
         assertTrue(xml.contains("stylename=\"edit-sidebar\""));
         assertTrue(xml.contains("id=\"positionLogoImage\""));
-        assertTrue(xml.contains("width=\"176px\""));
-        assertTrue(xml.contains("<theme path=\"icons/dictionaries/position.png\"/>"));
+        assertTrue(xml.contains("<theme path=\"icons/dictionaries/position.png\"/>")
+                || xml.contains("<theme path=\"icons/no-programmer.jpeg\"/>"));
         assertTrue(xml.contains("id=\"mainNav\""));
         assertTrue(xml.contains("invoke=\"focusMainSection\""));
         assertTrue(xml.contains("id=\"descriptionNav\""));

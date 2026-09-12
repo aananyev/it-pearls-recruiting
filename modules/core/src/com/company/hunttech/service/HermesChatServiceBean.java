@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +51,10 @@ public class HermesChatServiceBean implements HermesChatService {
 
     private static final String HERMES_CONVERSATION_TITLE_PREFIX = "Hermes: ";
     private static final String PROVIDER_HERMES = "hermes";
+    private static final String DEFAULT_PROD_HOST = "hr.hunttech.ru";
+    private static final String DEFAULT_PROD_IP = "92.63.101.170";
+    private static final String DOCKER_SOCKET_PATH = "/var/run/docker.sock";
+    private static final String SSH_KNOWN_HOSTS_PATH = "/tmp/hermes_known_hosts";
     private static final Pattern SESSION_ID_PATTERN = Pattern.compile("session_id:\\s*(\\S+)");
     private static final Pattern TOKEN_LINE_PATTERN = Pattern.compile("(?i)^\\s*(?:tokens?:|token usage:|prompt[_-]?tokens?:|completion[_-]?tokens?:|total[_-]?tokens?:|tokens?\\s*used:).*");
     private static final Pattern PROMPT_TOKENS_PATTERN = Pattern.compile("(?i)(?:prompt[_-]?tokens?|input[_-]?tokens?)\\s*[:=]?\\s*([0-9]+)|([0-9]+)\\s*(?:prompt|input)(?:\\s*tokens?)?");
@@ -419,7 +424,7 @@ public class HermesChatServiceBean implements HermesChatService {
         try {
             // Быстрая проверка через docker ps / inspect контейнера
             List<String> cmd = new ArrayList<>();
-            if (config.getSshEnabled()) {
+            if (shouldUseSsh(config)) {
                 cmd.add("ssh");
                 cmd.add("-o");
                 cmd.add("BatchMode=yes");
@@ -427,6 +432,8 @@ public class HermesChatServiceBean implements HermesChatService {
                 cmd.add("ConnectTimeout=5");
                 cmd.add("-o");
                 cmd.add("StrictHostKeyChecking=accept-new");
+                cmd.add("-o");
+                cmd.add("UserKnownHostsFile=" + SSH_KNOWN_HOSTS_PATH);
                 if (config.getSshPort() != 22) {
                     cmd.add("-p");
                     cmd.add(String.valueOf(config.getSshPort()));
@@ -528,7 +535,7 @@ public class HermesChatServiceBean implements HermesChatService {
         hermesArgs.add("--oneshot");
         hermesArgs.add("-Q");
 
-        if (config.getSshEnabled()) {
+        if (shouldUseSsh(config)) {
             command.add("ssh");
             command.add("-o");
             command.add("BatchMode=yes");
@@ -536,6 +543,8 @@ public class HermesChatServiceBean implements HermesChatService {
             command.add("ConnectTimeout=15");
             command.add("-o");
             command.add("StrictHostKeyChecking=accept-new");
+            command.add("-o");
+            command.add("UserKnownHostsFile=" + SSH_KNOWN_HOSTS_PATH);
             if (config.getSshPort() != 22) {
                 command.add("-p");
                 command.add(String.valueOf(config.getSshPort()));
@@ -666,6 +675,29 @@ public class HermesChatServiceBean implements HermesChatService {
             return "''";
         }
         return "'" + value.replace("'", "'\\''") + "'";
+    }
+
+    boolean shouldUseSsh(HunttechHermesConfig config) {
+        if (config == null || !config.getSshEnabled()) {
+            return false;
+        }
+        String host = config.getSshHost();
+        if (host == null || host.trim().isEmpty()) {
+            return false;
+        }
+        String trimmedHost = host.trim().toLowerCase(Locale.ROOT);
+        if ("localhost".equals(trimmedHost) || "127.0.0.1".equals(trimmedHost) || "::1".equals(trimmedHost)) {
+            return false;
+        }
+        // Если хост совпадает с сервером hr.hunttech.ru и доступен локальный docker.sock
+        if (DEFAULT_PROD_HOST.equalsIgnoreCase(trimmedHost) || DEFAULT_PROD_IP.equals(trimmedHost)) {
+            File dockerSock = new File(DOCKER_SOCKET_PATH);
+            if (dockerSock.exists()) {
+                log.debug("Вызов Hermes: обнаружен локальный сервер {} с доступным docker.sock, прямой вызов без SSH", trimmedHost);
+                return false;
+            }
+        }
+        return true;
     }
 
     boolean isErrorResponse(String text) {
