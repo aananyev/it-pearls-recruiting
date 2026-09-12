@@ -2,8 +2,12 @@ package com.company.hunttech.web.screens.llmchat;
 
 import com.company.hunttech.entity.ai.LlmChatMessage;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,6 +17,8 @@ import java.util.regex.Pattern;
  * Guarantees strict HTML escaping before rendering to prevent XSS.
  */
 public class MarkdownRenderer {
+
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     private static final Pattern CODE_BLOCK_PATTERN = Pattern.compile("(?s)```([a-zA-Z0-9_-]*)\\r?\\n(.*?)(?:```|$)");
     private static final Pattern INLINE_CODE_PATTERN = Pattern.compile("`([^`]+)`");
@@ -26,6 +32,12 @@ public class MarkdownRenderer {
     private static final Pattern HORIZONTAL_RULE_PATTERN = Pattern.compile("^(?:---|_{3,}|\\*{3,})$");
     private static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     private static final Pattern INTERNAL_HASH_PATTERN = Pattern.compile("^#([a-zA-Z0-9_\\-\\./\\?=&]+)$");
+    private static final Pattern CUBA_HASH_NAV_PATTERN = Pattern.compile(
+            "^(?:https?://[^/\\s]+/hrm/)?#main/[0-9]+/([a-zA-Z0-9_\\.]+)(?:\\?(?:[^#\\s]*&)?id=([0-9a-fA-F\\-]+))?$"
+    );
+    private static final Pattern BARE_CUBA_URL_PATTERN = Pattern.compile(
+            "(?<!\\()https?://[^/\\s]+/hrm/#main/[0-9]+/([a-zA-Z0-9_\\.]+)\\?id=([0-9a-fA-F\\-]+)(?!\\))"
+    );
     private static final Pattern ACTION_PAYLOAD_PATTERN = Pattern.compile(
             "^(create-interaction\\?(?:candidateId|candId|candidateName)=[0-9a-zA-Zа-яА-ЯёЁ\\-_\\s\\.%+]+" +
             "|open-position\\?(?:number|num|id)=[0-9a-zA-Z\\-_\\^]+" +
@@ -83,6 +95,11 @@ public class MarkdownRenderer {
                 sb.append("<div class=\"llm-chat-msg-body\">");
                 sb.append(renderMarkdown(content));
                 sb.append("</div>");
+                sb.append("<div class=\"llm-chat-msg-footer\">");
+                sb.append("<span class=\"llm-chat-msg-time\" title=\"Штамп даты и времени\">")
+                  .append(formatMessageTimestamp(message.getCreateTs()))
+                  .append("</span>");
+                sb.append("</div>");
                 sb.append("</div>");
             }
         }
@@ -96,6 +113,11 @@ public class MarkdownRenderer {
             sb.append("<div class=\"llm-chat-msg-body\">");
             sb.append(renderMarkdown(liveText));
             sb.append("<span class=\"llm-chat-cursor\"></span>");
+            sb.append("</div>");
+            sb.append("<div class=\"llm-chat-msg-footer\">");
+            sb.append("<span class=\"llm-chat-msg-time\">")
+              .append(formatMessageTimestamp(new Date()))
+              .append("</span>");
             sb.append("</div>");
             sb.append("</div>");
         }
@@ -155,6 +177,11 @@ public class MarkdownRenderer {
                 sb.append("<div class=\"llm-chat-msg-body\">");
                 sb.append(renderMarkdown(content));
                 sb.append("</div>");
+                sb.append("<div class=\"llm-chat-msg-footer\">");
+                sb.append("<span class=\"llm-chat-msg-time\" title=\"Штамп даты и времени\">")
+                  .append(formatMessageTimestamp(message.getCreateTs()))
+                  .append("</span>");
+                sb.append("</div>");
                 sb.append("</div>");
             }
         }
@@ -168,6 +195,11 @@ public class MarkdownRenderer {
             sb.append("<div class=\"llm-chat-msg-body\">");
             sb.append(renderMarkdown(liveText));
             sb.append("<span class=\"llm-chat-cursor\"></span>");
+            sb.append("</div>");
+            sb.append("<div class=\"llm-chat-msg-footer\">");
+            sb.append("<span class=\"llm-chat-msg-time\">")
+              .append(formatMessageTimestamp(new Date()))
+              .append("</span>");
             sb.append("</div>");
             sb.append("</div>");
         }
@@ -183,6 +215,18 @@ public class MarkdownRenderer {
         if (text == null || text.isEmpty()) {
             return "";
         }
+
+        // Auto-link bare CUBA navigation URLs so they become clickable interactive entity cards
+        Matcher bareUrlMatcher = BARE_CUBA_URL_PATTERN.matcher(text);
+        StringBuffer bareUrlBuf = new StringBuffer();
+        while (bareUrlMatcher.find()) {
+            String fullUrl = bareUrlMatcher.group(0);
+            String screen = bareUrlMatcher.group(1);
+            String friendlyName = formatFriendlyScreenName(screen);
+            bareUrlMatcher.appendReplacement(bareUrlBuf, Matcher.quoteReplacement("[" + friendlyName + "](" + fullUrl + ")"));
+        }
+        bareUrlMatcher.appendTail(bareUrlBuf);
+        text = bareUrlBuf.toString();
 
         // First, preserve and isolate fenced code blocks to avoid unwanted formatting inside them
         List<String> codeBlocks = new ArrayList<>();
@@ -379,7 +423,17 @@ public class MarkdownRenderer {
             String label = linkMatcher.group(1);
             String url = linkMatcher.group(2);
             String replacement;
-            if (url.startsWith("hrm://candidate/")) {
+            Matcher cubaNavMatcher = CUBA_HASH_NAV_PATTERN.matcher(url);
+            if (cubaNavMatcher.matches()) {
+                String screen = cubaNavMatcher.group(1);
+                String id = cubaNavMatcher.group(2);
+                String entityType = mapScreenToEntityType(screen);
+                String icon = getEntityIcon(entityType);
+                String safeId = id != null ? escapeHtml(id) : "";
+                String cubaUrl = "#main/0/" + escapeHtml(screen) + (id != null ? "?id=" + safeId : "");
+                replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"" + escapeHtml(entityType) + "\" data-screen=\"" + escapeHtml(screen) + "\" data-id=\"" + safeId + "\" title=\"Открыть карточку в HRM\">"
+                        + "<span class=\"llm-entity-icon\">" + icon + "</span> " + label + "</a>";
+            } else if (url.startsWith("hrm://candidate/")) {
                 String id = url.substring("hrm://candidate/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
                     String safeId = escapeHtml(id);
@@ -541,5 +595,48 @@ public class MarkdownRenderer {
             }
         }
         return out.toString();
+    }
+
+    public static String formatMessageTimestamp(Date date) {
+        if (date == null) {
+            date = new Date();
+        }
+        return date.toInstant().atZone(ZoneId.systemDefault()).format(TIME_FORMATTER);
+    }
+
+    public static String formatFriendlyScreenName(String screen) {
+        if (screen == null) return "Открыть карточку в HRM";
+        String s = screen.toLowerCase(Locale.ROOT);
+        if (s.contains("openposition")) return "Открыть карточку вакансии в HRM";
+        if (s.contains("jobcandidate")) return "Открыть карточку кандидата в HRM";
+        if (s.contains("candidatecv")) return "Открыть резюме кандидата в HRM";
+        if (s.contains("iteractionlist")) return "Открыть взаимодействие в HRM";
+        if (s.contains("company")) return "Открыть компанию в HRM";
+        return "Открыть карточку в HRM";
+    }
+
+    public static String mapScreenToEntityType(String screen) {
+        if (screen == null) return "entity";
+        String s = screen.toLowerCase(Locale.ROOT);
+        if (s.contains("openposition")) return "vacancy";
+        if (s.contains("jobcandidate")) return "candidate";
+        if (s.contains("candidatecv")) return "cv";
+        if (s.contains("iteractionlist")) return "interaction";
+        if (s.contains("company")) return "company";
+        if (s.contains("extuser")) return "user";
+        return screen;
+    }
+
+    public static String getEntityIcon(String entityType) {
+        if (entityType == null) return "🔗";
+        switch (entityType.toLowerCase(Locale.ROOT)) {
+            case "vacancy": return "💼";
+            case "candidate": return "👤";
+            case "cv": return "📄";
+            case "interaction": return "📋";
+            case "company": return "🏢";
+            case "user": return "⚙️";
+            default: return "🔗";
+        }
     }
 }

@@ -22,6 +22,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.UI;
 import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.Company;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
@@ -459,10 +460,20 @@ public class LlmChatScreen extends Screen {
                     "    window._hunttechHrmLinkHandlerAttached = true;" +
                     "    document.addEventListener('click', function(e) {" +
                     "      var target = e.target;" +
-                    "      var link = target ? (target.closest ? target.closest('.llm-hrm-entity-link') : null) : null;" +
+                    "      var link = target ? (target.closest ? target.closest('.llm-hrm-entity-link, a') : null) : null;" +
                     "      if (link && window.hunttechOpenHrmEntity) {" +
                     "        var entity = link.getAttribute('data-entity');" +
                     "        var id = link.getAttribute('data-id');" +
+                    "        if (!entity || !id) {" +
+                    "          var href = link.getAttribute('href');" +
+                    "          if (href) {" +
+                    "            var match = href.match(/(?:#main\\/[0-9]+\\/|hrm:\\/\\/)([a-zA-Z0-9_\\\\.]+)(?:\\?id=|\\/)([0-9a-fA-F\\-]+)/);" +
+                    "            if (match) {" +
+                    "              entity = match[1];" +
+                    "              id = match[2];" +
+                    "            }" +
+                    "          }" +
+                    "        }" +
                     "        if (entity && id) {" +
                     "          e.preventDefault();" +
                     "          e.stopPropagation();" +
@@ -519,15 +530,14 @@ public class LlmChatScreen extends Screen {
                     "    }" +
                     "  }" +
                     "  function scrollAllToBottom() {" +
-                    "    var el1 = document.querySelector('.local-chat-tab-pane .v-scrollable');" +
-                    "    if (el1) el1.scrollTop = el1.scrollHeight;" +
-                    "    var el2 = document.querySelector('.hermes-chat-tab-pane .v-scrollable');" +
-                    "    if (el2) el2.scrollTop = el2.scrollHeight;" +
+                    "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
+                    "    var nodes = document.querySelectorAll(sel);" +
+                    "    for (var i = 0; i < nodes.length; i++) {" +
+                    "      nodes[i].scrollTop = nodes[i].scrollHeight + 5000;" +
+                    "    }" +
                     "    attachScrollListeners();" +
                     "  }" +
-                    "  setTimeout(scrollAllToBottom, 60);" +
-                    "  setTimeout(scrollAllToBottom, 250);" +
-                    "  setTimeout(scrollAllToBottom, 700);" +
+                    "  [20, 80, 200, 450, 800, 1400].forEach(function(t) { setTimeout(scrollAllToBottom, t); });" +
                     "})()"
             );
         }
@@ -760,14 +770,16 @@ public class LlmChatScreen extends Screen {
                     : com.vaadin.ui.JavaScript.getCurrent();
             if (js != null) {
                 js.execute(
-                        "setTimeout(function() {" +
-                        "  var l = document.querySelector('.local-chat-tab-pane .v-scrollable'); if (l) l.scrollTop = l.scrollHeight;" +
-                        "  var h = document.querySelector('.hermes-chat-tab-pane .v-scrollable'); if (h) h.scrollTop = h.scrollHeight;" +
-                        "}, 50);" +
-                        "setTimeout(function() {" +
-                        "  var l = document.querySelector('.local-chat-tab-pane .v-scrollable'); if (l) l.scrollTop = l.scrollHeight;" +
-                        "  var h = document.querySelector('.hermes-chat-tab-pane .v-scrollable'); if (h) h.scrollTop = h.scrollHeight;" +
-                        "}, 200);"
+                        "(function() {" +
+                        "  var scrollFn = function() {" +
+                        "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
+                        "    var nodes = document.querySelectorAll(sel);" +
+                        "    for (var i = 0; i < nodes.length; i++) {" +
+                        "      nodes[i].scrollTop = nodes[i].scrollHeight + 5000;" +
+                        "    }" +
+                        "  };" +
+                        "  [20, 80, 200, 450, 800, 1400].forEach(function(t) { setTimeout(scrollFn, t); });" +
+                        "})()"
                 );
             }
         } catch (Exception ignored) {
@@ -1053,8 +1065,21 @@ public class LlmChatScreen extends Screen {
             return;
         }
 
+        String normalizedType = entityType.trim().toLowerCase(Locale.ROOT);
+        if (normalizedType.contains("openposition")) {
+            normalizedType = "vacancy";
+        } else if (normalizedType.contains("jobcandidate")) {
+            normalizedType = "candidate";
+        } else if (normalizedType.contains("candidatecv")) {
+            normalizedType = "cv";
+        } else if (normalizedType.contains("iteractionlist")) {
+            normalizedType = "interaction";
+        } else if (normalizedType.contains("company")) {
+            normalizedType = "company";
+        }
+
         try {
-            switch (entityType.toLowerCase(Locale.ROOT)) {
+            switch (normalizedType) {
                 case "candidate":
                     if (!security.isScreenPermitted("hunttech_JobCandidate.edit")) {
                         notifications.create(Notifications.NotificationType.WARNING)
@@ -1204,6 +1229,44 @@ public class LlmChatScreen extends Screen {
                     } else {
                         notifications.create(Notifications.NotificationType.HUMANIZED)
                                 .withCaption("Резюме не найдено или было удалено")
+                                .show();
+                    }
+                    break;
+
+                case "company":
+                    if (!security.isScreenPermitted("hunttech_Company.edit")) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для открытия экрана компании")
+                                .withDescription("Доступ к экрану hunttech_Company.edit заблокирован.")
+                                .show();
+                        return;
+                    }
+                    if (!security.isEntityOpPermitted(Company.class, EntityOp.READ)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Недостаточно прав для просмотра компании")
+                                .show();
+                        return;
+                    }
+                    if (!security.isEntityOpPermitted(Company.class, EntityOp.UPDATE)) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Ограничение доступа (только чтение)")
+                                .withDescription("У вашей роли доступ к компаниям только для чтения. Открытие формы редактирования заблокировано.")
+                                .show();
+                        return;
+                    }
+                    Company company = dataManager.load(Company.class)
+                            .id(id)
+                            .view("company-view")
+                            .optional()
+                            .orElse(null);
+                    if (company != null) {
+                        screenBuilders.editor(Company.class, this)
+                                .editEntity(company)
+                                .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                    } else {
+                        notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption("Компания не найдена")
                                 .show();
                     }
                     break;

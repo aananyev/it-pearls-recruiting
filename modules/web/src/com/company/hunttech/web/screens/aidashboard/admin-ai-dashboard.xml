@@ -57,7 +57,7 @@
             </vbox>
 
             <!-- Top KPI Cards Grid -->
-            <hbox id="kpiPanel" width="100%" spacing="true" stylename="ai-kpi-grid" expand="spendCard,activeUsersCard,totalVolumeCard,reliabilityCard">
+            <hbox id="kpiPanel" width="100%" spacing="true" stylename="ai-kpi-grid">
                 <vbox id="spendCard" width="100%" stylename="ai-kpi-card kpi-blue" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalSpend" stylename="kpi-title" width="100%"/>

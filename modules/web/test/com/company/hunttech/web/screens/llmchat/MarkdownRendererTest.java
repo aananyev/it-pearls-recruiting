@@ -238,5 +238,63 @@ class MarkdownRendererTest {
         assertFalse(html.contains("llm-chat-load-earlier-container"));
         assertTrue(html.contains("Вопрос 1"));
     }
+
+    @Test
+    void testCubaHashNavigationLink() {
+        String raw = "Найдена вакансия: [Открыть карточку в HRM](http://localhost:8080/hrm/#main/0/hunttech_OpenPosition.edit?id=0afb1695-1d41-7445-0ed9-ba7257ab59af)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"vacancy\""));
+        assertTrue(html.contains("data-id=\"0afb1695-1d41-7445-0ed9-ba7257ab59af\""));
+        assertTrue(html.contains("href=\"#main/0/hunttech_OpenPosition.edit?id=0afb1695-1d41-7445-0ed9-ba7257ab59af\""));
+        assertTrue(html.contains("<span class=\"llm-entity-icon\">💼</span>"));
+        assertTrue(html.contains("Открыть карточку в HRM"));
+    }
+
+    @Test
+    void testBareCubaUrlAutolink() {
+        String raw = "Карточка: http://localhost:8080/hrm/#main/0/hunttech_OpenPosition.edit?id=0afb1695-1d41-7445-0ed9-ba7257ab59af";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"vacancy\""));
+        assertTrue(html.contains("data-id=\"0afb1695-1d41-7445-0ed9-ba7257ab59af\""));
+        assertTrue(html.contains("<span class=\"llm-entity-icon\">💼</span>"));
+    }
+
+    @Test
+    void testMessageTimestampFooter() {
+        List<LlmChatMessage> messages = new ArrayList<>();
+        LlmChatMessage userMsg = new LlmChatMessage();
+        userMsg.setRole("USER");
+        userMsg.setContent("Привет");
+        messages.add(userMsg);
+
+        LlmChatMessage aiMsg = new LlmChatMessage();
+        aiMsg.setRole("ASSISTANT");
+        aiMsg.setContent("Здравствуйте!");
+        messages.add(aiMsg);
+
+        String html = MarkdownRenderer.renderChatHistory(messages, null);
+
+        assertTrue(html.contains("class=\"llm-chat-msg-footer\""));
+        assertTrue(html.contains("class=\"llm-chat-msg-time\""));
+        assertTrue(html.contains("title=\"Штамп даты и времени\""));
+    }
+
+    @Test
+    void testHermesChatHistoryTimestamps() {
+        List<com.company.hunttech.service.dto.HermesChatMessage> messages = new ArrayList<>();
+        messages.add(new com.company.hunttech.service.dto.HermesChatMessage("user", "Покажи вакансию"));
+        messages.add(new com.company.hunttech.service.dto.HermesChatMessage("assistant", "Вот ссылка: [Открыть карточку в HRM](http://localhost:8080/hrm/#main/0/hunttech_OpenPosition.edit?id=0afb1695-1d41-7445-0ed9-ba7257ab59af)"));
+
+        String html = MarkdownRenderer.renderHermesChatHistory(messages, null, null);
+
+        assertTrue(html.contains("class=\"llm-chat-msg-footer\""));
+        assertTrue(html.contains("class=\"llm-chat-msg-time\""));
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"vacancy\""));
+    }
 }
 

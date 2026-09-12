@@ -61,10 +61,13 @@ class AiDashboardContractTest {
         }
         assertNotNull(kpiPanel, "kpiPanel должен присутствовать в XML");
         assertEquals("true", kpiPanel.getAttribute("spacing"), "kpiPanel должен иметь spacing=true");
-        assertTrue(kpiPanel.getAttribute("expand").contains("spendCard"), "kpiPanel должен равномерно расширять карточки");
-        assertTrue(kpiPanel.getAttribute("expand").contains("activeUsersCard"), "kpiPanel должен расширять activeUsersCard");
-        assertTrue(kpiPanel.getAttribute("expand").contains("totalVolumeCard"), "kpiPanel должен расширять totalVolumeCard");
-        assertTrue(kpiPanel.getAttribute("expand").contains("reliabilityCard"), "kpiPanel должен расширять reliabilityCard");
+        assertTrue(kpiPanel.getAttribute("stylename").contains("ai-kpi-grid"), "kpiPanel должен иметь stylename=ai-kpi-grid для flex-распределения 4x25%");
+
+        NodeList vboxes = doc.getElementsByTagName("vbox");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "spendCard", "100%"), "spendCard должен иметь width=100%");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "activeUsersCard", "100%"), "activeUsersCard должен иметь width=100%");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "totalVolumeCard", "100%"), "totalVolumeCard должен иметь width=100%");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "reliabilityCard", "100%"), "reliabilityCard должен иметь width=100%");
 
         // Проверка userSummaryTable
         NodeList tables = doc.getElementsByTagName("table");
@@ -111,10 +114,13 @@ class AiDashboardContractTest {
         }
         assertNotNull(kpiPanel, "kpiPanel должен присутствовать в user-ai-dashboard.xml");
         assertEquals("true", kpiPanel.getAttribute("spacing"), "kpiPanel должен иметь spacing=true");
-        assertTrue(kpiPanel.getAttribute("expand").contains("totalCallsCard"), "kpiPanel должен расширять totalCallsCard");
-        assertTrue(kpiPanel.getAttribute("expand").contains("tokensCard"), "kpiPanel должен расширять tokensCard");
-        assertTrue(kpiPanel.getAttribute("expand").contains("costCard"), "kpiPanel должен расширять costCard");
-        assertTrue(kpiPanel.getAttribute("expand").contains("speedCard"), "kpiPanel должен расширять speedCard");
+        assertTrue(kpiPanel.getAttribute("stylename").contains("ai-kpi-grid"), "kpiPanel должен иметь stylename=ai-kpi-grid для flex-распределения 4x25%");
+
+        NodeList vboxes = doc.getElementsByTagName("vbox");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "totalCallsCard", "100%"), "totalCallsCard должен иметь width=100%");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "tokensCard", "100%"), "tokensCard должен иметь width=100%");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "costCard", "100%"), "costCard должен иметь width=100%");
+        assertTrue(hasComponentWithIdAndWidth(vboxes, "speedCard", "100%"), "speedCard должен иметь width=100%");
 
         // Проверка наличия колонки providerCode в recentCallsTable
         NodeList columns = doc.getElementsByTagName("column");
@@ -138,5 +144,15 @@ class AiDashboardContractTest {
         assertTrue(code.contains("@UiController(\"hunttech_UserAiDashboard\")"), "Контроллер должен иметь ID hunttech_UserAiDashboard");
         assertTrue(code.contains("recentCallsTable.addGeneratedColumn(\"providerCode\""), "Таблица должна иметь генератор колонки providerCode");
         assertTrue(code.contains("Hermes"), "Генератор providerCode должен поддерживать отображение бейджа Hermes");
+    }
+
+    private boolean hasComponentWithIdAndWidth(NodeList nodes, String id, String width) {
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Element el = (Element) nodes.item(i);
+            if (id.equals(el.getAttribute("id"))) {
+                return width == null || width.equals(el.getAttribute("width"));
+            }
+        }
+        return false;
     }
 }

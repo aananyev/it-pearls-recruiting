@@ -22,7 +22,7 @@
                 property="fileCV"
                 dataContainer="candidateCVDc"/>
         <buttonsPanel width="AUTO" align="BOTTOM_RIGHT">
-            <button id="buttonOk"
+            <button id="buttonOk" caption="msg:///actions.Ok"/>
         </buttonsPanel>
     </layout>
 </window>

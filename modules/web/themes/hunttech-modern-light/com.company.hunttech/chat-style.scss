@@ -331,6 +331,30 @@ body.llm-chat-launcher-dragging {
     50% { opacity: 0; }
 }
 
+.llm-chat-msg-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 4px;
+    padding-top: 2px;
+}
+
+.llm-chat-msg-time {
+    font-size: 10.5px;
+    color: #8a94a6;
+    font-weight: 500;
+    opacity: 0.85;
+    user-select: none;
+}
+
+.llm-chat-msg-user .llm-chat-msg-time {
+    color: #1976d2;
+}
+
+.llm-chat-msg-ai .llm-chat-msg-time {
+    color: #388e3c;
+}
+
 .llm-chat-empty-hint {
     text-align: center;
     color: #8a94a6;

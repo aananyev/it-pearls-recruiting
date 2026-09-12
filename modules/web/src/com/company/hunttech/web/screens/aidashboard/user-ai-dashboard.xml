@@ -36,8 +36,8 @@
                 </hbox>
             </vbox>
 
-            <!-- KPI Cards Grid -->
-            <hbox id="kpiPanel" width="100%" spacing="true" stylename="ai-kpi-grid" expand="totalCallsCard,tokensCard,costCard,speedCard">
+            <!-- Top KPI Cards Grid -->
+            <hbox id="kpiPanel" width="100%" spacing="true" stylename="ai-kpi-grid">
                 <vbox id="totalCallsCard" width="100%" stylename="ai-kpi-card kpi-blue" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalCalls" stylename="kpi-title" width="100%"/>
