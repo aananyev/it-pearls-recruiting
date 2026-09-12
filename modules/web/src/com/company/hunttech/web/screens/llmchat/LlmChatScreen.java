@@ -27,7 +27,9 @@ import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
+import com.company.hunttech.web.screens.company.CompanyEdit;
 import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
+import com.company.hunttech.web.screens.jobcandidate.JobCandidateEdit;
 import com.company.hunttech.web.screens.openposition.OpenPositionEdit;
 import com.company.hunttech.web.screens.openposition.OpenPositionReestrBrowse;
 import com.haulmont.cuba.core.global.DataManager;
@@ -456,31 +458,33 @@ public class LlmChatScreen extends Screen {
                     "      }" +
                     "    }, true);" +
                     "  }" +
-                    "  if (!window._hunttechHrmLinkHandlerAttached) {" +
-                    "    window._hunttechHrmLinkHandlerAttached = true;" +
-                    "    document.addEventListener('click', function(e) {" +
-                    "      var target = e.target;" +
-                    "      var link = target ? (target.closest ? target.closest('.llm-hrm-entity-link, a') : null) : null;" +
-                    "      if (link && window.hunttechOpenHrmEntity) {" +
-                    "        var entity = link.getAttribute('data-entity');" +
-                    "        var id = link.getAttribute('data-id');" +
-                    "        if (!entity || !id) {" +
-                    "          var href = link.getAttribute('href');" +
-                    "          if (href) {" +
-                    "            var match = href.match(/(?:#main\\/[0-9]+\\/|hrm:\\/\\/)([a-zA-Z0-9_\\\\.]+)(?:\\?id=|\\/)([0-9a-fA-F\\-]+)/);" +
-                    "            if (match) {" +
-                    "              entity = match[1];" +
-                    "              id = match[2];" +
-                    "            }" +
+                    "  window._hunttechHrmLinkHandler = function(e) {" +
+                    "    var target = e.target;" +
+                    "    var link = target ? (target.closest ? target.closest('.llm-hrm-entity-link, a') : null) : null;" +
+                    "    var fn = window.hunttechOpenHrmEntity || (window.parent ? window.parent.hunttechOpenHrmEntity : null);" +
+                    "    if (link && fn) {" +
+                    "      var entity = link.getAttribute('data-entity');" +
+                    "      var id = link.getAttribute('data-id');" +
+                    "      if (!entity || !id) {" +
+                    "        var href = link.getAttribute('href');" +
+                    "        if (href) {" +
+                    "          var match = href.match(/(?:#main\\/[0-9]+\\/|hrm:\\/\\/)([a-zA-Z0-9_\\\\.]+)(?:\\?id=|\\/)([0-9a-fA-F\\-]+)/);" +
+                    "          if (match) {" +
+                    "            entity = match[1];" +
+                    "            id = match[2];" +
                     "          }" +
                     "        }" +
-                    "        if (entity && id) {" +
-                    "          e.preventDefault();" +
-                    "          e.stopPropagation();" +
-                    "          window.hunttechOpenHrmEntity(entity, id);" +
-                    "        }" +
                     "      }" +
-                    "    }, true);" +
+                    "      if (entity && id) {" +
+                    "        e.preventDefault();" +
+                    "        e.stopPropagation();" +
+                    "        fn(entity, id);" +
+                    "      }" +
+                    "    }" +
+                    "  };" +
+                    "  if (!window._hunttechHrmLinkHandlerAttached) {" +
+                    "    window._hunttechHrmLinkHandlerAttached = true;" +
+                    "    document.addEventListener('click', window._hunttechHrmLinkHandler, true);" +
                     "  }" +
                     "  if (!window._hunttechHrmActionHandlerAttached) {" +
                     "    window._hunttechHrmActionHandlerAttached = true;" +
@@ -503,12 +507,10 @@ public class LlmChatScreen extends Screen {
                     "      lPane._scrollAttached = true;" +
                     "      lPane.addEventListener('scroll', function() {" +
                     "        if (lPane.scrollTop <= 5 && lPane.scrollHeight > lPane.clientHeight + 40) {" +
-                    "          if (!window._localLoadingEarlier && window.hunttechLoadEarlierMessages) {" +
-                    "            window._localLoadingEarlier = true;" +
+                    "          if (window.hunttechLoadEarlierMessages) {" +
                     "            window._lastLocalScrollHeight = lPane.scrollHeight;" +
                     "            window._lastLocalScrollTop = lPane.scrollTop;" +
                     "            window.hunttechLoadEarlierMessages();" +
-                    "            setTimeout(function() { window._localLoadingEarlier = false; }, 800);" +
                     "          }" +
                     "        }" +
                     "      });" +
@@ -518,22 +520,24 @@ public class LlmChatScreen extends Screen {
                     "      hPane._scrollAttached = true;" +
                     "      hPane.addEventListener('scroll', function() {" +
                     "        if (hPane.scrollTop <= 5 && hPane.scrollHeight > hPane.clientHeight + 40) {" +
-                    "          if (!window._hermesLoadingEarlier && window.hunttechLoadEarlierHermesMessages) {" +
-                    "            window._hermesLoadingEarlier = true;" +
+                    "          if (window.hunttechLoadEarlierHermesMessages) {" +
                     "            window._lastHermesScrollHeight = hPane.scrollHeight;" +
                     "            window._lastHermesScrollTop = hPane.scrollTop;" +
                     "            window.hunttechLoadEarlierHermesMessages();" +
-                    "            setTimeout(function() { window._hermesLoadingEarlier = false; }, 800);" +
                     "          }" +
                     "        }" +
                     "      });" +
                     "    }" +
                     "  }" +
                     "  function scrollAllToBottom() {" +
-                    "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
+                    "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
                     "    var nodes = document.querySelectorAll(sel);" +
                     "    for (var i = 0; i < nodes.length; i++) {" +
-                    "      nodes[i].scrollTop = nodes[i].scrollHeight + 5000;" +
+                    "      nodes[i].scrollTop = nodes[i].scrollHeight + 100000;" +
+                    "    }" +
+                    "    var lastMsgs = document.querySelectorAll('.llm-chat-messages-container > .llm-chat-msg:last-child');" +
+                    "    for (var j = 0; j < lastMsgs.length; j++) {" +
+                    "      try { lastMsgs[j].scrollIntoView(false); } catch(e) {}" +
                     "    }" +
                     "    attachScrollListeners();" +
                     "  }" +
@@ -772,13 +776,17 @@ public class LlmChatScreen extends Screen {
                 js.execute(
                         "(function() {" +
                         "  var scrollFn = function() {" +
-                        "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
+                        "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
                         "    var nodes = document.querySelectorAll(sel);" +
                         "    for (var i = 0; i < nodes.length; i++) {" +
-                        "      nodes[i].scrollTop = nodes[i].scrollHeight + 5000;" +
+                        "      nodes[i].scrollTop = nodes[i].scrollHeight + 100000;" +
+                        "    }" +
+                        "    var lastMsgs = document.querySelectorAll('.llm-chat-messages-container > .llm-chat-msg:last-child');" +
+                        "    for (var j = 0; j < lastMsgs.length; j++) {" +
+                        "      try { lastMsgs[j].scrollIntoView(false); } catch(e) {}" +
                         "    }" +
                         "  };" +
-                        "  [20, 80, 200, 450, 800, 1400].forEach(function(t) { setTimeout(scrollFn, t); });" +
+                        "  [10, 50, 150, 300, 600, 1000, 1500].forEach(function(t) { setTimeout(scrollFn, t); });" +
                         "})()"
                 );
             }
@@ -883,6 +891,8 @@ public class LlmChatScreen extends Screen {
             }
         }
         hermesInputArea.focus();
+        scrollToBottomHermes();
+        executeScrollBottomJs();
     }
 
     private void executeHermesSend(String rawText) {
@@ -1006,6 +1016,7 @@ public class LlmChatScreen extends Screen {
             restoreHermesScrollPositionJs();
         } else {
             scrollToBottomHermes();
+            executeScrollBottomJs();
         }
     }
 
@@ -1094,13 +1105,6 @@ public class LlmChatScreen extends Screen {
                                 .show();
                         return;
                     }
-                    if (!security.isEntityOpPermitted(JobCandidate.class, EntityOp.UPDATE)) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption("Ограничение доступа (только чтение)")
-                                .withDescription("У вашей роли доступ к кандидатам только для чтения. Открытие формы редактирования заблокировано.")
-                                .show();
-                        return;
-                    }
                     JobCandidate candidate = dataManager.load(JobCandidate.class)
                             .id(id)
                             .view("jobCandidate-view")
@@ -1108,12 +1112,17 @@ public class LlmChatScreen extends Screen {
                             .orElse(null);
                     if (candidate != null) {
                         screenBuilders.editor(JobCandidate.class, this)
+                                .withScreenClass(JobCandidateEdit.class)
                                 .editEntity(candidate)
                                 .withOpenMode(OpenMode.NEW_TAB)
                                 .show();
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Карточка кандидата открыта")
+                                .withDescription(candidate.getFullName() != null ? candidate.getFullName() : "")
+                                .show();
                     } else {
                         notifications.create(Notifications.NotificationType.HUMANIZED)
-                                .withCaption("Кандидат не найден или был удалён")
+                                .withCaption("Кандидат не найден в системе")
                                 .show();
                     }
                     break;
@@ -1132,13 +1141,6 @@ public class LlmChatScreen extends Screen {
                                 .show();
                         return;
                     }
-                    if (!security.isEntityOpPermitted(OpenPosition.class, EntityOp.UPDATE)) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption("Ограничение доступа (только чтение)")
-                                .withDescription("У вашей роли доступ к вакансиям только для чтения. Открытие формы редактирования заблокировано.")
-                                .show();
-                        return;
-                    }
                     OpenPosition vacancy = dataManager.load(OpenPosition.class)
                             .id(id)
                             .view("openPosition-view")
@@ -1146,12 +1148,17 @@ public class LlmChatScreen extends Screen {
                             .orElse(null);
                     if (vacancy != null) {
                         screenBuilders.editor(OpenPosition.class, this)
+                                .withScreenClass(OpenPositionEdit.class)
                                 .editEntity(vacancy)
                                 .withOpenMode(OpenMode.NEW_TAB)
                                 .show();
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Карточка вакансии открыта")
+                                .withDescription(vacancy.getVacansyName() != null ? vacancy.getVacansyName() : "")
+                                .show();
                     } else {
                         notifications.create(Notifications.NotificationType.HUMANIZED)
-                                .withCaption("Вакансия не найдена или была удалена")
+                                .withCaption("Вакансия не найдена в системе")
                                 .show();
                     }
                     break;
@@ -1170,13 +1177,6 @@ public class LlmChatScreen extends Screen {
                                 .show();
                         return;
                     }
-                    if (!security.isEntityOpPermitted(IteractionList.class, EntityOp.UPDATE)) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption("Ограничение доступа (только чтение)")
-                                .withDescription("У вашей роли доступ к взаимодействиям только для чтения. Открытие формы редактирования заблокировано.")
-                                .show();
-                        return;
-                    }
                     IteractionList interaction = dataManager.load(IteractionList.class)
                             .id(id)
                             .view("iteractionList-edit-view")
@@ -1184,12 +1184,16 @@ public class LlmChatScreen extends Screen {
                             .orElse(null);
                     if (interaction != null) {
                         screenBuilders.editor(IteractionList.class, this)
+                                .withScreenClass(IteractionListEdit.class)
                                 .editEntity(interaction)
                                 .withOpenMode(OpenMode.NEW_TAB)
                                 .show();
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Взаимодействие открыто")
+                                .show();
                     } else {
                         notifications.create(Notifications.NotificationType.HUMANIZED)
-                                .withCaption("Взаимодействие не найдено или было удалено")
+                                .withCaption("Взаимодействие не найдено в системе")
                                 .show();
                     }
                     break;
@@ -1208,13 +1212,6 @@ public class LlmChatScreen extends Screen {
                                 .show();
                         return;
                     }
-                    if (!security.isEntityOpPermitted(CandidateCV.class, EntityOp.UPDATE)) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption("Ограничение доступа (только чтение)")
-                                .withDescription("У вашей роли доступ к резюме только для чтения. Открытие формы редактирования заблокировано.")
-                                .show();
-                        return;
-                    }
                     CandidateCV candidateCv = dataManager.load(CandidateCV.class)
                             .id(id)
                             .view("candidateCV-view")
@@ -1226,9 +1223,12 @@ public class LlmChatScreen extends Screen {
                                 .editEntity(candidateCv)
                                 .withOpenMode(OpenMode.NEW_TAB)
                                 .show();
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Резюме кандидата открыто")
+                                .show();
                     } else {
                         notifications.create(Notifications.NotificationType.HUMANIZED)
-                                .withCaption("Резюме не найдено или было удалено")
+                                .withCaption("Резюме не найдено в системе")
                                 .show();
                     }
                     break;
@@ -1247,13 +1247,6 @@ public class LlmChatScreen extends Screen {
                                 .show();
                         return;
                     }
-                    if (!security.isEntityOpPermitted(Company.class, EntityOp.UPDATE)) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption("Ограничение доступа (только чтение)")
-                                .withDescription("У вашей роли доступ к компаниям только для чтения. Открытие формы редактирования заблокировано.")
-                                .show();
-                        return;
-                    }
                     Company company = dataManager.load(Company.class)
                             .id(id)
                             .view("company-view")
@@ -1261,8 +1254,13 @@ public class LlmChatScreen extends Screen {
                             .orElse(null);
                     if (company != null) {
                         screenBuilders.editor(Company.class, this)
+                                .withScreenClass(CompanyEdit.class)
                                 .editEntity(company)
                                 .withOpenMode(OpenMode.NEW_TAB)
+                                .show();
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Карточка компании открыта")
+                                .withDescription(company.getComanyName() != null ? company.getComanyName() : "")
                                 .show();
                     } else {
                         notifications.create(Notifications.NotificationType.HUMANIZED)

@@ -20,13 +20,13 @@ class MarkdownRendererTest {
 
     @Test
     void testHtmlEscapingPreventsXss() {
-        String raw = "<script>alert('xss')</script> <b>bold tag</b> & special";
+        String raw = "<script>alert('xss')</script> <iframe src=\"//evil.com\"></iframe> & special";
         String html = MarkdownRenderer.renderMarkdown(raw);
 
         assertFalse(html.contains("<script>"));
         assertTrue(html.contains("&lt;script&gt;"));
-        assertFalse(html.contains("<b>bold tag</b>"));
-        assertTrue(html.contains("&lt;b&gt;bold tag&lt;/b&gt;"));
+        assertFalse(html.contains("<iframe"));
+        assertTrue(html.contains("&lt;iframe"));
         assertTrue(html.contains("&amp;"));
     }
 
@@ -295,6 +295,41 @@ class MarkdownRendererTest {
         assertTrue(html.contains("class=\"llm-chat-msg-time\""));
         assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
         assertTrue(html.contains("data-entity=\"vacancy\""));
+    }
+
+    @Test
+    void testHtmlFormattingTagsAreRenderedFormatted() {
+        String raw = "<b>Вакансия:</b> 1С developer<br>Зарплата: <span style=\"color:#006400\">80 000 ₽ — 150 500 ₽</span> <code>0afb1695-1d41-7445-0ed9-ba7257ab59af</code>";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("<b>Вакансия:</b>"));
+        assertTrue(html.contains("<br/>") || html.contains("<br />") || html.contains("<br>"));
+        assertTrue(html.contains("<span style=\"color:#006400\">80 000 ₽ — 150 500 ₽</span>"));
+        assertTrue(html.contains("<code>0afb1695-1d41-7445-0ed9-ba7257ab59af</code>"));
+    }
+
+    @Test
+    void testHtmlTablesAreRenderedFormatted() {
+        String raw = "<table><tr><th>Колонка 1</th><th>Колонка 2</th></tr><tr><td>Значение 1</td><td>Значение 2</td></tr></table>";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("<table"));
+        assertTrue(html.contains("<th"));
+        assertTrue(html.contains("Колонка 1"));
+        assertTrue(html.contains("<td"));
+        assertTrue(html.contains("Значение 1"));
+    }
+
+    @Test
+    void testHtmlHrmEntityLinkWithDirectClick() {
+        String raw = "Открыть в системе: <a href=\"http://localhost:8080/hrm/#main/0/hunttech_OpenPosition.edit?id=0afb1695-1d41-7445-0ed9-ba7257ab59af\">Открыть карточку в HRM</a>";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"vacancy\""));
+        assertTrue(html.contains("data-id=\"0afb1695-1d41-7445-0ed9-ba7257ab59af\""));
+        assertTrue(html.contains("hunttechOpenHrmEntity"));
+        assertTrue(html.contains("Открыть карточку в HRM"));
     }
 }
 

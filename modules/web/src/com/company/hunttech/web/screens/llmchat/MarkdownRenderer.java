@@ -4,17 +4,15 @@ import com.company.hunttech.entity.ai.LlmChatMessage;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Pure-Java Markdown renderer that safely translates Markdown constructs into styled HTML
  * for display inside CUBA Platform / Vaadin labels with htmlEnabled="true".
- * Guarantees strict HTML escaping before rendering to prevent XSS.
+ * Guarantees safe HTML rendering: safe tags (formatting, tables, lists, links) are formatted,
+ * dangerous tags (scripts, iframes, on* handlers) are strictly sanitized/escaped to prevent XSS.
  */
 public class MarkdownRenderer {
 
@@ -36,7 +34,7 @@ public class MarkdownRenderer {
             "^(?:https?://[^/\\s]+/hrm/)?#main/[0-9]+/([a-zA-Z0-9_\\.]+)(?:\\?(?:[^#\\s]*&)?id=([0-9a-fA-F\\-]+))?$"
     );
     private static final Pattern BARE_CUBA_URL_PATTERN = Pattern.compile(
-            "(?<!\\()https?://[^/\\s]+/hrm/#main/[0-9]+/([a-zA-Z0-9_\\.]+)\\?id=([0-9a-fA-F\\-]+)(?!\\))"
+            "(?<![\\(\"'])https?://[^/\\s]+/hrm/#main/[0-9]+/([a-zA-Z0-9_\\.]+)\\?id=([0-9a-fA-F\\-]+)(?![\\)\"'])"
     );
     private static final Pattern ACTION_PAYLOAD_PATTERN = Pattern.compile(
             "^(create-interaction\\?(?:candidateId|candId|candidateName)=[0-9a-zA-Zа-яА-ЯёЁ\\-_\\s\\.%+]+" +
@@ -46,6 +44,28 @@ public class MarkdownRenderer {
             "|open-browse\\?(?:role|pos)=[a-zA-Z0-9а-яА-ЯёЁ\\s\\-\\.\\+_%]+" +
             "|browse-vacancies\\?(?:role|pos)=[a-zA-Z0-9а-яА-ЯёЁ\\s\\-\\.\\+_%]+)$"
     );
+
+    private static final Set<String> ALLOWED_HTML_TAGS = new HashSet<>(Arrays.asList(
+            "b", "strong", "i", "em", "u", "s", "strike", "del", "ins", "mark", "small", "sub", "sup", "span", "font",
+            "p", "br", "hr", "div", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6",
+            "ul", "ol", "li", "dl", "dt", "dd",
+            "table", "thead", "tbody", "tfoot", "tr", "th", "td",
+            "a", "code", "pre", "kbd", "samp"
+    ));
+
+    private static final Set<String> BLOCK_HTML_TAGS = new HashSet<>(Arrays.asList(
+            "p", "hr", "div", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6",
+            "ul", "ol", "li", "dl", "dt", "dd",
+            "table", "thead", "tbody", "tfoot", "tr", "th", "td", "pre"
+    ));
+
+    private static final Set<String> ALLOWED_HTML_ATTRS = new HashSet<>(Arrays.asList(
+            "href", "title", "target", "class", "style", "color", "align", "valign",
+            "border", "colspan", "rowspan", "width", "height", "data-entity", "data-id", "data-screen", "onclick"
+    ));
+
+    private static final Pattern HTML_TAG_PATTERN = Pattern.compile("(?i)<(/)?([a-zA-Z1-6]+)((?:\\s+[^<>]*)?)(\\s*/?)>");
+    private static final Pattern HTML_ATTR_PATTERN = Pattern.compile("([a-zA-Z0-9_-]+)(?:\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+)))?");
 
     /**
      * Renders complete chat history and optional live streaming text into a safe HTML container.
@@ -247,8 +267,29 @@ public class MarkdownRenderer {
         codeBlockMatcher.appendTail(placeholderBuffer);
         String textWithoutCodeBlocks = placeholderBuffer.toString();
 
+        // Second, extract and sanitize safe HTML tags (formatting, tables, lists, links, spans)
+        List<String> htmlTokens = new ArrayList<>();
+        Matcher htmlTagMatcher = HTML_TAG_PATTERN.matcher(textWithoutCodeBlocks);
+        StringBuffer htmlTokenBuf = new StringBuffer();
+        while (htmlTagMatcher.find()) {
+            boolean isClosing = "/".equals(htmlTagMatcher.group(1));
+            String tagName = htmlTagMatcher.group(2);
+            String rawAttrs = htmlTagMatcher.group(3);
+            boolean selfClosing = "/".equals(htmlTagMatcher.group(4).trim());
+
+            String sanitized = sanitizeHtmlTag(isClosing, tagName, rawAttrs, selfClosing);
+            if (sanitized != null) {
+                htmlTokens.add(sanitized);
+                htmlTagMatcher.appendReplacement(htmlTokenBuf, "@@@LLMHTMLTOKEN" + (htmlTokens.size() - 1) + "@@@");
+            } else {
+                htmlTagMatcher.appendReplacement(htmlTokenBuf, Matcher.quoteReplacement(htmlTagMatcher.group(0)));
+            }
+        }
+        htmlTagMatcher.appendTail(htmlTokenBuf);
+        String textWithHtmlTokens = htmlTokenBuf.toString();
+
         // Process lines
-        String[] lines = textWithoutCodeBlocks.split("\\r?\\n");
+        String[] lines = textWithHtmlTokens.split("\\r?\\n");
         StringBuilder out = new StringBuilder();
 
         boolean inUnorderedList = false;
@@ -361,6 +402,11 @@ public class MarkdownRenderer {
                 if (inUnorderedList) { out.append("</ul>\n"); inUnorderedList = false; }
                 if (inOrderedList) { out.append("</ol>\n"); inOrderedList = false; }
                 out.append("<div class=\"llm-md-p-spacer\"></div>\n");
+            } else if (isBlockHtmlLine(trimmed, htmlTokens)) {
+                if (inUnorderedList) { out.append("</ul>\n"); inUnorderedList = false; }
+                if (inOrderedList) { out.append("</ol>\n"); inOrderedList = false; }
+                if (inBlockquote) { out.append("</blockquote>\n"); inBlockquote = false; }
+                out.append(renderInline(trimmed)).append("\n");
             } else {
                 out.append("<p class=\"llm-md-p\">").append(renderInline(trimmed)).append("</p>\n");
             }
@@ -380,13 +426,139 @@ public class MarkdownRenderer {
             out.append("</blockquote>\n");
         }
 
-        // Restore code blocks
+        // Restore HTML tokens
         String result = out.toString();
+        for (int i = 0; i < htmlTokens.size(); i++) {
+            result = result.replace("@@@LLMHTMLTOKEN" + i + "@@@", htmlTokens.get(i));
+        }
+
+        // Restore code blocks
         for (int i = 0; i < codeBlocks.size(); i++) {
             result = result.replace("@@@LLMCODEBLOCK" + i + "@@@", codeBlocks.get(i));
         }
 
         return result;
+    }
+
+    private static boolean isBlockHtmlLine(String line, List<String> htmlTokens) {
+        if (line == null || line.isEmpty()) return false;
+        if (line.startsWith("@@@LLMHTMLTOKEN")) {
+            int endIdx = line.indexOf("@@@", 15);
+            if (endIdx > 15) {
+                try {
+                    int tokenIdx = Integer.parseInt(line.substring(15, endIdx));
+                    if (tokenIdx >= 0 && tokenIdx < htmlTokens.size()) {
+                        String rawToken = htmlTokens.get(tokenIdx).toLowerCase(Locale.ROOT);
+                        for (String blockTag : BLOCK_HTML_TAGS) {
+                            if (rawToken.startsWith("<" + blockTag) || rawToken.startsWith("</" + blockTag)) {
+                                return true;
+                            }
+                        }
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return false;
+    }
+
+    private static String sanitizeHtmlTag(boolean isClosing, String tagName, String rawAttrs, boolean selfClosing) {
+        String lowerTag = tagName.toLowerCase(Locale.ROOT);
+        if (!ALLOWED_HTML_TAGS.contains(lowerTag)) {
+            return null; // not in whitelist, will be safely escaped as raw text
+        }
+
+        if (isClosing) {
+            return "</" + lowerTag + ">";
+        }
+
+        Map<String, String> attrs = new LinkedHashMap<>();
+        if (rawAttrs != null && !rawAttrs.trim().isEmpty()) {
+            Matcher attrMatcher = HTML_ATTR_PATTERN.matcher(rawAttrs);
+            while (attrMatcher.find()) {
+                String attrName = attrMatcher.group(1).toLowerCase(Locale.ROOT);
+                String val = attrMatcher.group(2);
+                if (val == null) val = attrMatcher.group(3);
+                if (val == null) val = attrMatcher.group(4);
+                if (val == null) val = "";
+
+                if (attrName.startsWith("on")) {
+                    continue; // block inline event handlers from user/LLM input
+                }
+
+                if (ALLOWED_HTML_ATTRS.contains(attrName)) {
+                    if ("href".equals(attrName) || "src".equals(attrName)) {
+                        String lowerVal = val.trim().toLowerCase(Locale.ROOT);
+                        if (lowerVal.startsWith("javascript:") || lowerVal.startsWith("vbscript:") || lowerVal.startsWith("data:text/html")) {
+                            continue;
+                        }
+                    }
+                    if ("style".equals(attrName)) {
+                        String lowerVal = val.toLowerCase(Locale.ROOT);
+                        if (lowerVal.contains("expression(") || lowerVal.contains("javascript:") || lowerVal.contains("behavior:")) {
+                            continue;
+                        }
+                    }
+                    attrs.put(attrName, val);
+                }
+            }
+        }
+
+        // Auto-transform <a> tags pointing to HRM entities into interactive card links
+        if ("a".equals(lowerTag)) {
+            String href = attrs.get("href");
+            if (href != null) {
+                Matcher cubaNav = CUBA_HASH_NAV_PATTERN.matcher(href);
+                if (cubaNav.matches()) {
+                    String screen = cubaNav.group(1);
+                    String id = cubaNav.group(2);
+                    String entityType = mapScreenToEntityType(screen);
+                    String safeId = id != null ? escapeHtml(id) : "";
+                    attrs.put("class", "llm-md-link llm-hrm-entity-link");
+                    attrs.put("data-entity", entityType);
+                    attrs.put("data-id", safeId);
+                    attrs.put("data-screen", screen);
+                    attrs.put("title", "Открыть карточку в HRM");
+                    attrs.put("onclick", "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('" + escapeHtml(entityType) + "','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('" + escapeHtml(entityType) + "','" + safeId + "');return false;}");
+                } else if (href.startsWith("hrm://")) {
+                    String sub = href.substring("hrm://".length()).trim();
+                    int slashIdx = sub.indexOf('/');
+                    if (slashIdx > 0) {
+                        String entity = sub.substring(0, slashIdx);
+                        String id = sub.substring(slashIdx + 1).trim();
+                        if (UUID_PATTERN.matcher(id).matches()) {
+                            attrs.put("class", "llm-md-link llm-hrm-entity-link");
+                            attrs.put("data-entity", entity);
+                            attrs.put("data-id", id);
+                            attrs.put("title", "Открыть карточку в HRM");
+                            attrs.put("onclick", "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('" + escapeHtml(entity) + "','" + escapeHtml(id) + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('" + escapeHtml(entity) + "','" + escapeHtml(id) + "');return false;}");
+                        }
+                    }
+                }
+            }
+        }
+
+        if ("table".equals(lowerTag) && !attrs.containsKey("class")) {
+            attrs.put("class", "llm-md-table");
+        } else if ("th".equals(lowerTag) && !attrs.containsKey("class")) {
+            attrs.put("class", "llm-md-th");
+        } else if ("td".equals(lowerTag) && !attrs.containsKey("class")) {
+            attrs.put("class", "llm-md-td");
+        } else if ("blockquote".equals(lowerTag) && !attrs.containsKey("class")) {
+            attrs.put("class", "llm-md-quote");
+        }
+
+        StringBuilder out = new StringBuilder();
+        out.append("<").append(lowerTag);
+        for (Map.Entry<String, String> entry : attrs.entrySet()) {
+            out.append(" ").append(entry.getKey()).append("=\"").append(escapeHtml(entry.getValue())).append("\"");
+        }
+        if (selfClosing || "br".equals(lowerTag) || "hr".equals(lowerTag)) {
+            out.append("/>");
+        } else {
+            out.append(">");
+        }
+        return out.toString();
     }
 
     /**
@@ -431,14 +603,16 @@ public class MarkdownRenderer {
                 String icon = getEntityIcon(entityType);
                 String safeId = id != null ? escapeHtml(id) : "";
                 String cubaUrl = "#main/0/" + escapeHtml(screen) + (id != null ? "?id=" + safeId : "");
-                replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"" + escapeHtml(entityType) + "\" data-screen=\"" + escapeHtml(screen) + "\" data-id=\"" + safeId + "\" title=\"Открыть карточку в HRM\">"
+                String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('" + escapeHtml(entityType) + "','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('" + escapeHtml(entityType) + "','" + safeId + "');return false;}";
+                replacement = "<a href=\"" + cubaUrl + "\" onclick=\"" + clickJs + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"" + escapeHtml(entityType) + "\" data-screen=\"" + escapeHtml(screen) + "\" data-id=\"" + safeId + "\" title=\"Открыть карточку в HRM\">"
                         + "<span class=\"llm-entity-icon\">" + icon + "</span> " + label + "</a>";
             } else if (url.startsWith("hrm://candidate/")) {
                 String id = url.substring("hrm://candidate/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_JobCandidate.edit?id=" + safeId;
-                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"candidate\" data-id=\"" + safeId + "\" title=\"Открыть карточку кандидата в HRM\">"
+                    String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('candidate','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('candidate','" + safeId + "');return false;}";
+                    replacement = "<a href=\"" + cubaUrl + "\" onclick=\"" + clickJs + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"candidate\" data-id=\"" + safeId + "\" title=\"Открыть карточку кандидата в HRM\">"
                             + "<span class=\"llm-entity-icon\">👤</span> " + label + "</a>";
                 } else {
                     replacement = label;
@@ -448,7 +622,8 @@ public class MarkdownRenderer {
                 if (UUID_PATTERN.matcher(id).matches()) {
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_OpenPosition.edit?id=" + safeId;
-                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"vacancy\" data-id=\"" + safeId + "\" title=\"Открыть карточку вакансии в HRM\">"
+                    String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('vacancy','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('vacancy','" + safeId + "');return false;}";
+                    replacement = "<a href=\"" + cubaUrl + "\" onclick=\"" + clickJs + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"vacancy\" data-id=\"" + safeId + "\" title=\"Открыть карточку вакансии в HRM\">"
                             + "<span class=\"llm-entity-icon\">💼</span> " + label + "</a>";
                 } else {
                     replacement = label;
@@ -458,7 +633,8 @@ public class MarkdownRenderer {
                 if (UUID_PATTERN.matcher(id).matches()) {
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_IteractionList.edit?id=" + safeId;
-                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"interaction\" data-id=\"" + safeId + "\" title=\"Открыть карточку взаимодействия в HRM\">"
+                    String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('interaction','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('interaction','" + safeId + "');return false;}";
+                    replacement = "<a href=\"" + cubaUrl + "\" onclick=\"" + clickJs + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"interaction\" data-id=\"" + safeId + "\" title=\"Открыть карточку взаимодействия в HRM\">"
                             + "<span class=\"llm-entity-icon\">📋</span> " + label + "</a>";
                 } else {
                     replacement = label;
@@ -468,7 +644,8 @@ public class MarkdownRenderer {
                 if (UUID_PATTERN.matcher(id).matches()) {
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_CandidateCV.edit?id=" + safeId;
-                    replacement = "<a href=\"" + cubaUrl + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"cv\" data-id=\"" + safeId + "\" title=\"Открыть резюме кандидата в HRM\">"
+                    String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('cv','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('cv','" + safeId + "');return false;}";
+                    replacement = "<a href=\"" + cubaUrl + "\" onclick=\"" + clickJs + "\" class=\"llm-md-link llm-hrm-entity-link\" data-entity=\"cv\" data-id=\"" + safeId + "\" title=\"Открыть резюме кандидата в HRM\">"
                             + "<span class=\"llm-entity-icon\">📄</span> " + label + "</a>";
                 } else {
                     replacement = label;
