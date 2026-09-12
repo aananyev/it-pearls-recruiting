@@ -222,4 +222,47 @@ public class HermesChatServiceBeanTest {
 
         assertEquals("Тестовый запрос", prompt);
     }
+
+    @Test
+    public void testParseHermesOutput_withTokenPatterns() throws Exception {
+        Method parseMethod = HermesChatServiceBean.class.getDeclaredMethod("parseHermesOutput", String.class);
+        parseMethod.setAccessible(true);
+        String rawOutput = "session_id: hermes-sess-999\n" +
+                "Warning: test warning\n" +
+                "Tokens: 150 prompt, 40 completion, 190 total\n" +
+                "Привет! Чем я могу помочь?";
+        HermesChatServiceBean.HermesExecutionResult result =
+                (HermesChatServiceBean.HermesExecutionResult) parseMethod.invoke(service, rawOutput);
+
+        assertNotNull(result);
+        assertEquals("hermes-sess-999", result.sessionId);
+        assertEquals("Привет! Чем я могу помочь?", result.cleanedText);
+        assertEquals(Integer.valueOf(150), result.promptTokens);
+        assertEquals(Integer.valueOf(40), result.completionTokens);
+        assertEquals(Integer.valueOf(190), result.totalTokens);
+    }
+
+    @Test
+    public void testHermesChatResponseDto_fieldsIntegrity() {
+        UUID convId = UUID.randomUUID();
+        com.company.hunttech.service.dto.HermesChatResponse response =
+                new com.company.hunttech.service.dto.HermesChatResponse(convId, "Ответ", "sess-1", 1200L);
+        response.setModelName("deepseek-chat");
+        response.setProviderCode("deepseek");
+        response.setPromptTokens(100);
+        response.setCompletionTokens(50);
+        response.setTotalTokens(150);
+        response.setEstimatedCost(new java.math.BigDecimal("0.000028"));
+        response.setCurrency("USD");
+
+        assertEquals(convId, response.getConversationId());
+        assertEquals("Ответ", response.getAssistantText());
+        assertEquals("deepseek-chat", response.getModelName());
+        assertEquals("deepseek", response.getProviderCode());
+        assertEquals(Integer.valueOf(100), response.getPromptTokens());
+        assertEquals(Integer.valueOf(50), response.getCompletionTokens());
+        assertEquals(Integer.valueOf(150), response.getTotalTokens());
+        assertEquals(new java.math.BigDecimal("0.000028"), response.getEstimatedCost());
+        assertEquals("USD", response.getCurrency());
+    }
 }

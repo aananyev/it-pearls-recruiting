@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -137,6 +138,7 @@ public class AdminAiDashboard extends Screen {
         providerOptions.put("OpenAI", "openai");
         providerOptions.put("DeepSeek", "deepseek");
         providerOptions.put("Anthropic", "anthropic");
+        providerOptions.put("Hermes", "hermes");
         providerOptions.put("GigaChat", "gigachat");
         providerOptions.put("YandexGPT", "yandexgpt");
         providerLookup.setOptionsMap(providerOptions);
@@ -202,6 +204,32 @@ public class AdminAiDashboard extends Screen {
     }
 
     private void initTableColumns() {
+        userSummaryTable.addGeneratedColumn("promptTokens", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            Long val = kve.getValue("promptTokens");
+            label.setValue(val != null ? String.format(Locale.ROOT, "%,d", val).replace(',', ' ') : "0");
+            return label;
+        });
+
+        userSummaryTable.addGeneratedColumn("completionTokens", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            Long val = kve.getValue("completionTokens");
+            label.setValue(val != null ? String.format(Locale.ROOT, "%,d", val).replace(',', ' ') : "0");
+            return label;
+        });
+
+        userSummaryTable.addGeneratedColumn("totalTokens", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            Long val = kve.getValue("totalTokens");
+            if (val != null && val > 0) {
+                label.setValue("<span style='font-weight: 600;'>" + String.format(Locale.ROOT, "%,d", val).replace(',', ' ') + "</span>");
+            } else {
+                label.setValue("0");
+            }
+            return label;
+        });
+
         userSummaryTable.addGeneratedColumn("estimatedCost", kve -> {
             Label<String> label = uiComponents.create(Label.NAME);
             label.setHtmlEnabled(true);

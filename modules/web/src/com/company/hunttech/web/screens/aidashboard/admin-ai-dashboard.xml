@@ -57,8 +57,8 @@
             </vbox>
 
             <!-- Top KPI Cards Grid -->
-            <hbox id="kpiPanel" width="100%" stylename="ai-kpi-grid">
-                <vbox id="spendCard" stylename="ai-kpi-card kpi-blue" spacing="false">
+            <hbox id="kpiPanel" width="100%" spacing="true" stylename="ai-kpi-grid" expand="spendCard,activeUsersCard,totalVolumeCard,reliabilityCard">
+                <vbox id="spendCard" width="100%" stylename="ai-kpi-card kpi-blue" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalSpend" stylename="kpi-title" width="100%"/>
                         <label value="💰" stylename="kpi-icon"/>
@@ -66,7 +66,7 @@
                     <label id="totalSpendLabel" value="$ 0.00" stylename="kpi-value"/>
                     <label id="spendSubLabel" value="Corp: $0 | User: $0" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="activeUsersCard" stylename="ai-kpi-card kpi-purple" spacing="false">
+                <vbox id="activeUsersCard" width="100%" stylename="ai-kpi-card kpi-purple" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://activeUsers" stylename="kpi-title" width="100%"/>
                         <label value="👥" stylename="kpi-icon"/>
@@ -74,7 +74,7 @@
                     <label id="activeUsersLabel" value="0" stylename="kpi-value"/>
                     <label id="topSpenderLabel" value="—" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="totalVolumeCard" stylename="ai-kpi-card kpi-green" spacing="false">
+                <vbox id="totalVolumeCard" width="100%" stylename="ai-kpi-card kpi-green" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalCallsAndTokens" stylename="kpi-title" width="100%"/>
                         <label value="📊" stylename="kpi-icon"/>
@@ -82,7 +82,7 @@
                     <label id="totalCallsLabel" value="0" stylename="kpi-value"/>
                     <label id="totalTokensLabel" value="0 токенов" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="reliabilityCard" stylename="ai-kpi-card kpi-orange" spacing="false">
+                <vbox id="reliabilityCard" width="100%" stylename="ai-kpi-card kpi-orange" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://reliabilityAndSpeed" stylename="kpi-title" width="100%"/>
                         <label value="⚠️" stylename="kpi-icon"/>

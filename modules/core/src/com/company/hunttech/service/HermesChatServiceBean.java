@@ -1,12 +1,15 @@
 package com.company.hunttech.service;
 
 import com.company.hunttech.config.HunttechHermesConfig;
+import com.company.hunttech.core.ai.AiCostCalculator;
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
+import com.company.hunttech.entity.ai.AiCallLog;
 import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
+import com.company.hunttech.service.AiSecuritySanitizer;
 import com.company.hunttech.service.dto.AiUserContext;
 import com.company.hunttech.service.dto.HermesChatMessage;
 import com.company.hunttech.service.dto.HermesChatResponse;
@@ -48,6 +51,10 @@ public class HermesChatServiceBean implements HermesChatService {
     private static final String HERMES_CONVERSATION_TITLE_PREFIX = "Hermes: ";
     private static final String PROVIDER_HERMES = "hermes";
     private static final Pattern SESSION_ID_PATTERN = Pattern.compile("session_id:\\s*(\\S+)");
+    private static final Pattern TOKEN_LINE_PATTERN = Pattern.compile("(?i)^\\s*(?:tokens?:|token usage:|prompt[_-]?tokens?:|completion[_-]?tokens?:|total[_-]?tokens?:|tokens?\\s*used:).*");
+    private static final Pattern PROMPT_TOKENS_PATTERN = Pattern.compile("(?i)(?:prompt[_-]?tokens?|input[_-]?tokens?)\\s*[:=]?\\s*([0-9]+)|([0-9]+)\\s*(?:prompt|input)(?:\\s*tokens?)?");
+    private static final Pattern COMPLETION_TOKENS_PATTERN = Pattern.compile("(?i)(?:completion[_-]?tokens?|output[_-]?tokens?)\\s*[:=]?\\s*([0-9]+)|([0-9]+)\\s*(?:completion|output)(?:\\s*tokens?)?");
+    private static final Pattern TOTAL_TOKENS_PATTERN = Pattern.compile("(?i)(?:total[_-]?tokens?|tokens?\\s*used)\\s*[:=]?\\s*([0-9]+)|([0-9]+)\\s*total(?:\\s*tokens?)?");
 
     private static final String USER_CONTEXT_HEADER = "=== Сведения пользователя (не подтверждены HRM) ===";
     private static final String USER_INSTRUCTIONS_HEADER = "=== Предпочтения и инструкции пользователя ===";
@@ -184,6 +191,7 @@ public class HermesChatServiceBean implements HermesChatService {
         String assistantText = null;
         String newSessionId = lastHermesSessionId;
         HermesExecutionCandidate successfulCandidate = null;
+        HermesExecutionResult successfulResult = null;
         Exception lastException = null;
 
         for (int i = 0; i < candidates.size(); i++) {
@@ -198,6 +206,7 @@ public class HermesChatServiceBean implements HermesChatService {
                     newSessionId = execResult.sessionId;
                 }
                 successfulCandidate = candidate;
+                successfulResult = execResult;
                 log.info("Hermes успешно ответил через [{}] (provider={}, model={}, sessionId={}, responseLength={})",
                         candidate.getSource(), candidate.getProviderCode(), candidate.getModelName(),
                         newSessionId, assistantText != null ? assistantText.length() : 0);
@@ -214,14 +223,42 @@ public class HermesChatServiceBean implements HermesChatService {
             String errorDetail = lastException != null ? lastException.getMessage() : "нет ответа от моделей";
             log.error("Все варианты подключения к модели Hermes завершились ошибкой (всего {} вариантов): {}",
                     candidates.size(), errorDetail, lastException);
+
+            HermesExecutionCandidate lastCandidate = !candidates.isEmpty() ? candidates.get(candidates.size() - 1) : null;
+            String failProvider = (lastCandidate != null && lastCandidate.getProviderCode() != null)
+                    ? lastCandidate.getProviderCode() : PROVIDER_HERMES;
+            String failModel = (lastCandidate != null && lastCandidate.getModelName() != null)
+                    ? lastCandidate.getModelName() : getHermesConfig().getProfile();
+            String failOwner = (lastCandidate != null && "USER".equalsIgnoreCase(lastCandidate.getSource()))
+                    ? "USER" : "ADMIN";
+
+            int fallbackPromptTokens = estimateTokens(message);
+            AiCostCalculator.CostResult costResult = AiCostCalculator.calculateCost(
+                    failProvider, failModel, fallbackPromptTokens, 0);
+            logAiCall(currentUser, conversationId, duration, failProvider, failModel, failOwner,
+                    fallbackPromptTokens, 0, fallbackPromptTokens, costResult.getCost(), costResult.getCurrency(),
+                    "ERROR", errorDetail);
+
             return HermesChatResponse.error(conversationId, "Ошибка Hermes Agent: " + errorDetail, duration);
         }
 
-        // 2. Атомарно сохраняем сообщение пользователя, ответ ассистента и состояние диалога в едином CommitContext
+        // 2. Сохраняем сообщение пользователя, ответ ассистента и состояние диалога в основном CommitContext
         String effectiveProvider = (successfulCandidate != null && successfulCandidate.getProviderCode() != null)
                 ? successfulCandidate.getProviderCode() : PROVIDER_HERMES;
         String effectiveModel = (successfulCandidate != null && successfulCandidate.getModelName() != null)
                 ? successfulCandidate.getModelName() : getHermesConfig().getProfile();
+        String credentialOwner = (successfulCandidate != null && "USER".equalsIgnoreCase(successfulCandidate.getSource()))
+                ? "USER" : "ADMIN";
+
+        int promptTokens = (successfulResult != null && successfulResult.promptTokens != null)
+                ? successfulResult.promptTokens : estimateTokens(message);
+        int completionTokens = (successfulResult != null && successfulResult.completionTokens != null)
+                ? successfulResult.completionTokens : estimateTokens(assistantText);
+        int totalTokens = (successfulResult != null && successfulResult.totalTokens != null)
+                ? successfulResult.totalTokens : (promptTokens + completionTokens);
+
+        AiCostCalculator.CostResult costResult = AiCostCalculator.calculateCost(
+                effectiveProvider, effectiveModel, promptTokens, completionTokens);
 
         LlmChatMessage userMsg = metadata.create(LlmChatMessage.class);
         userMsg.setConversation(conversation);
@@ -251,7 +288,62 @@ public class HermesChatServiceBean implements HermesChatService {
         dataManager.commit(commitContext);
 
         long duration = System.currentTimeMillis() - startTime;
-        return new HermesChatResponse(conversationId, assistantText, newSessionId, duration);
+
+        // Отдельно и безопасно фиксируем технический аудит вызовов AI (AiCallLog), чтобы сбой аудита не отменял диалог
+        logAiCall(currentUser, conversationId, duration, effectiveProvider, effectiveModel, credentialOwner,
+                promptTokens, completionTokens, totalTokens, costResult.getCost(), costResult.getCurrency(),
+                "SUCCESS", null);
+
+        HermesChatResponse response = new HermesChatResponse(conversationId, assistantText, newSessionId, duration);
+        response.setModelName(effectiveModel);
+        response.setProviderCode(effectiveProvider);
+        response.setPromptTokens(promptTokens);
+        response.setCompletionTokens(completionTokens);
+        response.setTotalTokens(totalTokens);
+        response.setEstimatedCost(costResult.getCost());
+        response.setCurrency(costResult.getCurrency());
+        return response;
+    }
+
+    private void logAiCall(ExtUser user, UUID conversationId, long durationMs,
+                           String providerCode, String modelName, String credentialOwner,
+                           Integer promptTokens, Integer completionTokens, Integer totalTokens,
+                           java.math.BigDecimal estimatedCost, String currency,
+                           String status, String errorMessage) {
+        try {
+            AiCallLog callLog = metadata.create(AiCallLog.class);
+            callLog.setUser(user);
+            if (user != null) {
+                callLog.setUserLogin(user.getLogin());
+                callLog.setUserName(user.getName());
+            }
+            callLog.setCallTime(new Date());
+            callLog.setDurationMs(durationMs);
+            callLog.setFunctionCode("HERMES_CHAT");
+            callLog.setFunctionName("Чат с Hermes");
+            callLog.setCapability("TEXT_GENERATION");
+            callLog.setProviderCode(providerCode);
+            callLog.setModelName(modelName);
+            callLog.setCredentialOwner(credentialOwner);
+            callLog.setPromptTokens(promptTokens);
+            callLog.setCompletionTokens(completionTokens);
+            callLog.setTotalTokens(totalTokens);
+            callLog.setEstimatedCost(estimatedCost);
+            callLog.setCurrency(currency);
+            callLog.setCallerSource(conversationId != null ? "HermesChat:" + conversationId : "HermesChat");
+            callLog.setStatus(status);
+            callLog.setErrorMessage(AiSecuritySanitizer.sanitizeError(errorMessage));
+            dataManager.commit(new CommitContext(callLog));
+        } catch (Exception e) {
+            log.error("Не удалось сохранить запись AiCallLog для Hermes: {}", e.getMessage(), e);
+        }
+    }
+
+    static int estimateTokens(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return 0;
+        }
+        return Math.max(1, (int) Math.ceil(text.length() / 4.0));
     }
 
     private List<HermesExecutionCandidate> resolveExecutionCandidates(ExtUser currentUser) {
@@ -545,13 +637,27 @@ public class HermesChatServiceBean implements HermesChatService {
         }
 
         HermesExecutionResult result = parseHermesOutput(stdout);
+        if (stderr != null) {
+            parseTokensFromText(stderr, result);
+        }
+        if (result.promptTokens == null || result.promptTokens <= 0) {
+            result.promptTokens = estimateTokens(prompt);
+        }
+        if (result.completionTokens == null || result.completionTokens <= 0) {
+            result.completionTokens = estimateTokens(result.cleanedText);
+        }
+        if (result.totalTokens == null || result.totalTokens <= 0) {
+            result.totalTokens = result.promptTokens + result.completionTokens;
+        }
+
         if (isErrorResponse(result.cleanedText)) {
             log.warn("Ответ Hermes CLI содержит ошибку провайдера или безопасности: {}", result.cleanedText);
             throw new RuntimeException("Провайдер модели вернул ошибку: " + result.cleanedText);
         }
 
-        log.info("Результат парсинга ответа Hermes: длина ответа={}, sessionId={}",
-                result.cleanedText != null ? result.cleanedText.length() : 0, result.sessionId);
+        log.info("Результат парсинга ответа Hermes: длина ответа={}, sessionId={}, tokens={}/{}",
+                result.cleanedText != null ? result.cleanedText.length() : 0, result.sessionId,
+                result.promptTokens, result.completionTokens);
         return result;
     }
 
@@ -638,11 +744,73 @@ public class HermesChatServiceBean implements HermesChatService {
                 continue;
             }
 
+            // Парсинг информации о токенах и фильтрация строк служебной статистики токенов
+            boolean isTokenLine = parseTokensFromLine(line, result);
+            if (isTokenLine || trimmed.toLowerCase().startsWith("tokens:") || trimmed.toLowerCase().startsWith("token usage:")) {
+                continue;
+            }
+
             sb.append(line).append("\n");
         }
 
         result.cleanedText = sb.toString().trim();
         return result;
+    }
+
+    private boolean parseTokensFromLine(String line, HermesExecutionResult result) {
+        if (line == null || line.trim().isEmpty()) {
+            return false;
+        }
+        String trimmed = line.trim();
+        boolean isExplicitTokenLine = TOKEN_LINE_PATTERN.matcher(trimmed).matches();
+
+        boolean matched = false;
+        Matcher mPrompt = PROMPT_TOKENS_PATTERN.matcher(line);
+        if (mPrompt.find()) {
+            matched = true;
+            if (result.promptTokens == null) {
+                try {
+                    String val = mPrompt.group(1) != null ? mPrompt.group(1) : mPrompt.group(2);
+                    if (val != null) {
+                        result.promptTokens = Integer.parseInt(val.trim());
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        Matcher mComp = COMPLETION_TOKENS_PATTERN.matcher(line);
+        if (mComp.find()) {
+            matched = true;
+            if (result.completionTokens == null) {
+                try {
+                    String val = mComp.group(1) != null ? mComp.group(1) : mComp.group(2);
+                    if (val != null) {
+                        result.completionTokens = Integer.parseInt(val.trim());
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        Matcher mTotal = TOTAL_TOKENS_PATTERN.matcher(line);
+        if (mTotal.find()) {
+            matched = true;
+            if (result.totalTokens == null) {
+                try {
+                    String val = mTotal.group(1) != null ? mTotal.group(1) : mTotal.group(2);
+                    if (val != null) {
+                        result.totalTokens = Integer.parseInt(val.trim());
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return isExplicitTokenLine || (matched && trimmed.toLowerCase().contains("token"));
+    }
+
+    private void parseTokensFromText(String text, HermesExecutionResult result) {
+        if (text == null || text.trim().isEmpty()) {
+            return;
+        }
+        for (String line : text.split("\r?\n")) {
+            parseTokensFromLine(line, result);
+        }
     }
 
     private String readStream(java.io.InputStream is) throws Exception {
@@ -762,8 +930,11 @@ public class HermesChatServiceBean implements HermesChatService {
         }
     }
 
-    private static class HermesExecutionResult {
+    static class HermesExecutionResult {
         String cleanedText = "";
         String sessionId = null;
+        Integer promptTokens;
+        Integer completionTokens;
+        Integer totalTokens;
     }
 }

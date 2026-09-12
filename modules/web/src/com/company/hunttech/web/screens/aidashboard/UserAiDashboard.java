@@ -152,6 +152,26 @@ public class UserAiDashboard extends Screen {
     }
 
     private void initTableColumns() {
+        recentCallsTable.addGeneratedColumn("providerCode", log -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            String provider = log.getProviderCode();
+            if (provider == null || provider.trim().isEmpty()) {
+                label.setValue("—");
+            } else if ("hermes".equalsIgnoreCase(provider)) {
+                label.setValue("<span style='background: rgba(139, 92, 246, 0.15); color: #7c3aed; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>Hermes</span>");
+            } else if ("deepseek".equalsIgnoreCase(provider)) {
+                label.setValue("<span style='background: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>DeepSeek</span>");
+            } else if ("openai".equalsIgnoreCase(provider)) {
+                label.setValue("<span style='background: rgba(16, 185, 129, 0.15); color: #059669; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>OpenAI</span>");
+            } else if ("anthropic".equalsIgnoreCase(provider)) {
+                label.setValue("<span style='background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>Anthropic</span>");
+            } else {
+                label.setValue("<span style='background: rgba(100, 116, 139, 0.15); color: #475569; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;'>" + escapeHtml(provider) + "</span>");
+            }
+            return label;
+        });
+
         recentCallsTable.addGeneratedColumn("tokensDisplay", log -> {
             Label<String> label = uiComponents.create(Label.NAME);
             label.setHtmlEnabled(true);
@@ -172,8 +192,11 @@ public class UserAiDashboard extends Screen {
             BigDecimal cost = log.getEstimatedCost();
             String curr = log.getCurrency() != null ? log.getCurrency() : "USD";
             if (cost != null && cost.compareTo(BigDecimal.ZERO) > 0) {
+                String formatted = cost.compareTo(BigDecimal.valueOf(0.01)) < 0
+                        ? cost.setScale(6, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString()
+                        : cost.setScale(4, RoundingMode.HALF_UP).toPlainString();
                 label.setValue("<span style='color: #27ae60; font-weight: 600; font-size: 11px;'>"
-                        + cost.toPlainString() + " " + curr + "</span>");
+                        + formatted + " " + curr + "</span>");
             } else {
                 label.setValue("—");
             }
@@ -183,7 +206,7 @@ public class UserAiDashboard extends Screen {
         recentCallsTable.addGeneratedColumn("durationDisplay", log -> {
             Label<String> label = uiComponents.create(Label.NAME);
             Long ms = log.getDurationMs();
-            label.setValue(ms != null ? String.format("%.2f с", ms / 1000.0) : "—");
+            label.setValue(ms != null ? String.format(Locale.ROOT, "%.2f с", ms / 1000.0) : "—");
             return label;
         });
 
@@ -322,5 +345,16 @@ public class UserAiDashboard extends Screen {
             return String.format("%.1fk", count / 1000.0);
         }
         return String.valueOf(count);
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#x27;");
     }
 }

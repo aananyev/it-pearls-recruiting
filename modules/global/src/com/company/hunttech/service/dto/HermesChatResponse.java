@@ -1,6 +1,7 @@
 package com.company.hunttech.service.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -15,6 +16,14 @@ public class HermesChatResponse implements Serializable {
     private String errorMessage;
     private String hermesSessionId;
     private long executionTimeMs;
+
+    private String modelName;
+    private String providerCode;
+    private Integer promptTokens;
+    private Integer completionTokens;
+    private Integer totalTokens;
+    private BigDecimal estimatedCost;
+    private String currency;
 
     public HermesChatResponse() {
     }
@@ -53,4 +62,25 @@ public class HermesChatResponse implements Serializable {
 
     public long getExecutionTimeMs() { return executionTimeMs; }
     public void setExecutionTimeMs(long executionTimeMs) { this.executionTimeMs = executionTimeMs; }
+
+    public String getModelName() { return modelName; }
+    public void setModelName(String modelName) { this.modelName = modelName; }
+
+    public String getProviderCode() { return providerCode; }
+    public void setProviderCode(String providerCode) { this.providerCode = providerCode; }
+
+    public Integer getPromptTokens() { return promptTokens; }
+    public void setPromptTokens(Integer promptTokens) { this.promptTokens = promptTokens; }
+
+    public Integer getCompletionTokens() { return completionTokens; }
+    public void setCompletionTokens(Integer completionTokens) { this.completionTokens = completionTokens; }
+
+    public Integer getTotalTokens() { return totalTokens; }
+    public void setTotalTokens(Integer totalTokens) { this.totalTokens = totalTokens; }
+
+    public BigDecimal getEstimatedCost() { return estimatedCost; }
+    public void setEstimatedCost(BigDecimal estimatedCost) { this.estimatedCost = estimatedCost; }
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
 }
