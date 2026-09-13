@@ -219,6 +219,76 @@ public class HrmEntityNameResolver {
             }
         }
 
+        // 6. Должность / Позиция
+        if (typeHint == null || "position".equalsIgnoreCase(typeHint) || "hunttech_Position".equalsIgnoreCase(typeHint)) {
+            try {
+                String name = dm.loadValue("select e.positionRuName from hunttech_Position e where e.id = :id and e.deleteTs is null", String.class)
+                        .parameter("id", id)
+                        .optional().orElse(null);
+                if (name != null && !name.trim().isEmpty()) {
+                    return new EntityInfo(id, "position", "Должность " + name.trim(), "hunttech_Position.edit", "🏷️");
+                }
+            } catch (Exception e) {
+                log.debug("Ошибка запроса hunttech_Position для id={}: {}", id, e.getMessage());
+            }
+        }
+
+        // 7. Компетенция / Навык
+        if (typeHint == null || "skill".equalsIgnoreCase(typeHint) || "hunttech_SkillTree".equalsIgnoreCase(typeHint)) {
+            try {
+                String name = dm.loadValue("select e.skillName from hunttech_SkillTree e where e.id = :id and e.deleteTs is null", String.class)
+                        .parameter("id", id)
+                        .optional().orElse(null);
+                if (name != null && !name.trim().isEmpty()) {
+                    return new EntityInfo(id, "skill", "Навык " + name.trim(), "hunttech_SkillTree.edit", "💡");
+                }
+            } catch (Exception e) {
+                log.debug("Ошибка запроса hunttech_SkillTree для id={}: {}", id, e.getMessage());
+            }
+        }
+
+        // 8. Проект
+        if (typeHint == null || "project".equalsIgnoreCase(typeHint) || "hunttech_Project".equalsIgnoreCase(typeHint)) {
+            try {
+                String name = dm.loadValue("select e.projectName from hunttech_Project e where e.id = :id and e.deleteTs is null", String.class)
+                        .parameter("id", id)
+                        .optional().orElse(null);
+                if (name != null && !name.trim().isEmpty()) {
+                    return new EntityInfo(id, "project", "Проект " + name.trim(), "hunttech_Project.edit", "📁");
+                }
+            } catch (Exception e) {
+                log.debug("Ошибка запроса hunttech_Project для id={}: {}", id, e.getMessage());
+            }
+        }
+
+        // 9. Пользователь
+        if (typeHint == null || "user".equalsIgnoreCase(typeHint) || "hunttech_ExtUser".equalsIgnoreCase(typeHint) || "sec$User".equalsIgnoreCase(typeHint)) {
+            try {
+                String name = dm.loadValue("select e.name from hunttech_ExtUser e where e.id = :id and e.deleteTs is null", String.class)
+                        .parameter("id", id)
+                        .optional().orElse(null);
+                if (name != null && !name.trim().isEmpty()) {
+                    return new EntityInfo(id, "user", "Пользователь " + name.trim(), "hunttech_ExtUser.edit", "👤");
+                }
+            } catch (Exception e) {
+                log.debug("Ошибка запроса hunttech_ExtUser для id={}: {}", id, e.getMessage());
+            }
+        }
+
+        // 10. Город
+        if (typeHint == null || "city".equalsIgnoreCase(typeHint) || "hunttech_City".equalsIgnoreCase(typeHint)) {
+            try {
+                String name = dm.loadValue("select e.cityName from hunttech_City e where e.id = :id and e.deleteTs is null", String.class)
+                        .parameter("id", id)
+                        .optional().orElse(null);
+                if (name != null && !name.trim().isEmpty()) {
+                    return new EntityInfo(id, "city", "Город " + name.trim(), "hunttech_City.edit", "📍");
+                }
+            } catch (Exception e) {
+                log.debug("Ошибка запроса hunttech_City для id={}: {}", id, e.getMessage());
+            }
+        }
+
         return null;
     }
 

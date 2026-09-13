@@ -437,6 +437,27 @@ class MarkdownRendererTest {
 
         assertTrue(html.contains("<code>99999999-9999-9999-9999-999999999999</code>"));
     }
+
+    @Test
+    void testRemoveHermesRawEntityIds() {
+        // 1. Сырой ID в кавычках из вывода Hermes
+        String raw1 = "Найдена вакансия \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\" в отделе разработки.";
+        String html1 = MarkdownRenderer.renderMarkdown(raw1);
+        assertFalse(html1.contains("8a0f5f9c-6a32-4e6a-a2c9-672870000001"));
+
+        // 2. ID в скобках
+        String raw2 = "Кандидат Петров (ID: \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\") успешно прошел собеседование.";
+        String html2 = MarkdownRenderer.renderMarkdown(raw2);
+        assertFalse(html2.contains("8a0f5f9c-6a32-4e6a-a2c9-672870000001"));
+        assertFalse(html2.contains("ID:"));
+        assertTrue(html2.contains("Кандидат Петров успешно прошел"));
+
+        // 3. Префикс в списке
+        String raw3 = "- \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\" — Вакансия Middle Java Developer";
+        String html3 = MarkdownRenderer.renderMarkdown(raw3);
+        assertFalse(html3.contains("8a0f5f9c-6a32-4e6a-a2c9-672870000001"));
+        assertTrue(html3.contains("Вакансия Middle Java Developer"));
+    }
 }
 
 

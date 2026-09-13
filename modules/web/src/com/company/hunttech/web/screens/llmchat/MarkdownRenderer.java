@@ -284,10 +284,7 @@ public class MarkdownRenderer {
         codeBlockMatcher.appendTail(placeholderBuffer);
         String textWithoutCodeBlocks = placeholderBuffer.toString();
 
-        // 2. Normalize entity UUIDs: remove prefix UUIDs, resolve standalone UUIDs and UUID-labels into entity names
-        textWithoutCodeBlocks = normalizeEntityUuids(textWithoutCodeBlocks);
-
-        // 3. Auto-link bare CUBA navigation URLs so they become clickable interactive entity cards
+        // 2. Auto-link bare CUBA navigation URLs so they become clickable interactive entity cards
         Matcher bareUrlMatcher = BARE_CUBA_URL_PATTERN.matcher(textWithoutCodeBlocks);
         StringBuffer bareUrlBuf = new StringBuffer();
         while (bareUrlMatcher.find()) {
@@ -302,6 +299,9 @@ public class MarkdownRenderer {
         }
         bareUrlMatcher.appendTail(bareUrlBuf);
         textWithoutCodeBlocks = bareUrlBuf.toString();
+
+        // 3. Normalize entity UUIDs: remove prefix UUIDs, resolve standalone UUIDs and UUID-labels into entity names
+        textWithoutCodeBlocks = normalizeEntityUuids(textWithoutCodeBlocks);
 
         // Second, extract and sanitize safe HTML tags (formatting, tables, lists, links, spans)
         List<String> htmlTokens = new ArrayList<>();
@@ -481,10 +481,11 @@ public class MarkdownRenderer {
             return text;
         }
 
-        // 1. Remove redundant UUID prefixes placed right before an entity link with the same UUID
-        // e.g. `<span style="color:#8B7355"><code>05532e90-1b43-5a2f-47ad-8dca3dcb665a</code></span> — `
+        // 1. Remove redundant UUID prefixes placed right before an entity link or at the start of list items
         Matcher prefixMatcher = PREFIX_ENTITY_UUID_PATTERN.matcher(text);
         text = prefixMatcher.replaceAll("");
+        // Remove list item UUID prefixes e.g. "- 8a0f5f9c-6a32-4e6a-a2c9-672870000001 — " or "• \"8a0f5f9c...\" — "
+        text = text.replaceAll("(?m)^(\\s*[-*•]\\s*)(?:\"|'|«|“|<code>|`)*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?:\"|'|»|”|</code>|`)*\\s*[—–\\-:]\\s*", "$1");
 
         // 2. Normalize HTML <a> tags where the body is just an entity UUID
         Matcher htmlLinkMatcher = HTML_LINK_UUID_BODY_PATTERN.matcher(text);
@@ -545,7 +546,13 @@ public class MarkdownRenderer {
         preserveTagMatcher.appendTail(isolateTagBuf);
         String safeText = isolateTagBuf.toString();
 
-        // 5. Replace standalone entity UUIDs (e.g. ""05532e90-1b43-5a2f-47ad-8dca3dcb665a"") with interactive links
+        // Clean bracketed IDs e.g. (ID: "8a0f5f9c-6a32-4e6a-a2c9-672870000001") or (UUID: 8a0f...) in plain text
+        safeText = safeText.replaceAll("(?i)\\s*\\(\\s*(?:id|uuid)?\\s*[:=]?\\s*[\"«“'`]?[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}[\"»”'`]?\\s*\\)", "");
+        // Clean explicit ID prefixes in plain text (not matching ?id= or &id= in URLs)
+        safeText = safeText.replaceAll("(?i)(?<![?&/])\\b(?:id|uuid)\\s*[:=]?\\s*[\"«“'`][0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}[\"»”'`]", "");
+        safeText = safeText.replaceAll("(?i)(?<![?&/])\\b(?:id|uuid)\\s*[:=]\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", "");
+
+        // 5. Replace standalone entity UUIDs (e.g. ""05532e90-1b43-5a2f-47ad-8dca3dcb665a"") with interactive links or filter out raw IDs
         Matcher standaloneMatcher = STANDALONE_UUID_TOKEN_PATTERN.matcher(safeText);
         StringBuffer standaloneBuf = new StringBuffer();
         while (standaloneMatcher.find()) {
@@ -556,7 +563,15 @@ public class MarkdownRenderer {
                 String replacement = "[" + safeLabel + "](" + info.getCubaUrl() + ")";
                 standaloneMatcher.appendReplacement(standaloneBuf, Matcher.quoteReplacement(replacement));
             } else {
-                standaloneMatcher.appendReplacement(standaloneBuf, Matcher.quoteReplacement(standaloneMatcher.group(0)));
+                // Если сущность не найдена, но токен стоял в кавычках (например "8a0f5f9c-6a32-4e6a-a2c9-672870000001"),
+                // удаляем сырой ID, чтобы не показывать пользователю кракозябры
+                String matchedToken = standaloneMatcher.group(0);
+                if (matchedToken.contains("\"") || matchedToken.contains("«") || matchedToken.contains("“")
+                        || matchedToken.contains("'") || matchedToken.contains("&quot;")) {
+                    standaloneMatcher.appendReplacement(standaloneBuf, "");
+                } else {
+                    standaloneMatcher.appendReplacement(standaloneBuf, Matcher.quoteReplacement(matchedToken));
+                }
             }
         }
         standaloneMatcher.appendTail(standaloneBuf);

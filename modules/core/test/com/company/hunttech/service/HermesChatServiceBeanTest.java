@@ -294,4 +294,21 @@ public class HermesChatServiceBeanTest {
         when(config.getSshHost()).thenReturn("remote-server.example.com");
         assertTrue(service.shouldUseSsh(config));
     }
+
+    @Test
+    public void testCleanHermesOutput_removesRawIdsAndBrackets() {
+        String raw = "Результаты поиска:\n" +
+                "- \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\" — Вакансия Java Lead\n" +
+                "- Кандидат Сидоров (ID: \"8a0f5f9c-6a32-4e6a-a2c9-672870000002\") подходит на позицию\n" +
+                "- ID: \"8a0f5f9c-6a32-4e6a-a2c9-672870000003\"\n" +
+                "Всего найдено 3 записи.";
+
+        String cleaned = HermesChatServiceBean.cleanHermesOutput(raw);
+
+        assertFalse(cleaned.contains("8a0f5f9c-6a32-4e6a-a2c9-672870000001"));
+        assertFalse(cleaned.contains("8a0f5f9c-6a32-4e6a-a2c9-672870000002"));
+        assertFalse(cleaned.contains("8a0f5f9c-6a32-4e6a-a2c9-672870000003"));
+        assertTrue(cleaned.contains("- Вакансия Java Lead"));
+        assertTrue(cleaned.contains("Кандидат Сидоров подходит на позицию"));
+    }
 }

@@ -785,8 +785,41 @@ public class HermesChatServiceBean implements HermesChatService {
             sb.append(line).append("\n");
         }
 
-        result.cleanedText = sb.toString().trim();
+        result.cleanedText = cleanHermesOutput(sb.toString().trim());
         return result;
+    }
+
+    /**
+     * Очистка вывода Hermes от технических идентификаторов и кракозябр (UUID видов "8a0f5f9c-6a32-4e6a-a2c9-672870000001",
+     * префиксов ID:, конструкций в скобках (ID: ...)).
+     */
+    public static String cleanHermesOutput(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return "";
+        }
+
+        String cleaned = text;
+
+        // 1. Удаление префиксов UUID в строках списков:
+        // например: "- 8a0f5f9c-6a32-4e6a-a2c9-672870000001 — " или "• \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\" — "
+        cleaned = cleaned.replaceAll("(?m)^(\\s*[-*•]\\s*)(?:\"|'|«|“|<code>|`)*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?:\"|'|»|”|</code>|`)*\\s*[—–\\-:]\\s*", "$1");
+
+        // 2. Удаление конструкций в скобках: (ID: "8a0f5f9c-6a32-4e6a-a2c9-672870000001"), (ID: 8a0f...), (UUID: 8a0f...)
+        cleaned = cleaned.replaceAll("(?i)\\s*\\(\\s*(?:id|uuid)?\\s*[:=]?\\s*[\"«“'`]?[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}[\"»”'`]?\\s*\\)", "");
+
+        // 3. Удаление префиксов ID: "8a0f...", UUID: 8a0f... (не трогая ?id= или &id= в URL)
+        cleaned = cleaned.replaceAll("(?i)(?<![?&/])\\b(?:id|uuid)\\s*[:=]?\\s*[\"«“'`][0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}[\"»”'`]", "");
+        cleaned = cleaned.replaceAll("(?i)(?<![?&/])\\b(?:id|uuid)\\s*[:=]\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", "");
+
+        // 4. Удаление сырых UUID в двойных или одинарных кавычках: "8a0f5f9c-6a32-4e6a-a2c9-672870000001", ""8a0f...""
+        cleaned = cleaned.replaceAll("(?i)(?<![a-zA-Z0-9_\\-/=?.])(?:\"\"|\"|«|“|')(?:<code>|`)?[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?:</code>|`)?(?:\"\"|\"|»|”|')(?![a-zA-Z0-9_\\-/=?.])", "");
+
+        // 5. Очистка оставшихся пробельных артефактов
+        cleaned = cleaned.replaceAll("(?m)[ \\t]+", " ");
+        cleaned = cleaned.replaceAll("(?m)[ \\t]+$", "");
+        cleaned = cleaned.replaceAll(" \\(\\)", "");
+
+        return cleaned.trim();
     }
 
     private boolean parseTokensFromLine(String line, HermesExecutionResult result) {
@@ -918,7 +951,8 @@ public class HermesChatServiceBean implements HermesChatService {
 
         contextBlock.append("=== ПРАВИЛА БЕЗОПАСНОСТИ И НАВИГАЦИИ В HRM ===\n");
         contextBlock.append("1. СТРОГИЙ ЗАПРЕТ НА УДАЛЕНИЕ: Тебе категорически запрещено удалять любые данные из базы данных (любые операции DELETE, DROP, TRUNCATE, soft-delete, удаление записей) для любого пользователя системы. На любые запросы об удалении отвечай вежливым отказом и пояснением, что операции удаления в чате строго заблокированы политикой безопасности.\n");
-        contextBlock.append("2. НАВИГАЦИЯ: Если требуется дать ссылку на карточку в системе HRM, используй формат ссылок: [Текст](hrm://vacancy/<UUID>), [Текст](hrm://candidate/<UUID>), [Текст](hrm://cv/<UUID>), [Текст](hrm://interaction/<UUID>).\n\n");
+        contextBlock.append("2. НАВИГАЦИЯ: Если требуется дать ссылку на карточку в системе HRM, используй формат ссылок: [Текст](hrm://vacancy/<UUID>), [Текст](hrm://candidate/<UUID>), [Текст](hrm://cv/<UUID>), [Текст](hrm://interaction/<UUID>).\n");
+        contextBlock.append("3. СТРОГИЙ ЗАПРЕТ ВЫВОДА ТЕХНИЧЕСКИХ ID: Категорически запрещено выводить пользователю технические идентификаторы (UUID / ID вида \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\"). Пользователь никогда не должен видеть сырые UUID! Вместо ID всегда используй только человекочитаемые наименования (название вакансии, ФИО кандидата, название компании, должность) и при необходимости оформляй их ссылками: [Название Вакансии](hrm://vacancy/<UUID>) или [ФИО Кандидата](hrm://candidate/<UUID>).\n\n");
 
         contextBlock.append("=== Запрос пользователя ===\n");
         contextBlock.append(userMessage);
