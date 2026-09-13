@@ -268,7 +268,7 @@ public class HrmEntityNameResolver {
                         .parameter("id", id)
                         .optional().orElse(null);
                 if (name != null && !name.trim().isEmpty()) {
-                    return new EntityInfo(id, "user", "Пользователь " + name.trim(), "hunttech_ExtUser.edit", "👤");
+                    return new EntityInfo(id, "user", "Пользователь " + name.trim(), "hunttech_ExtUserEdit", "👤");
                 }
             } catch (Exception e) {
                 log.debug("Ошибка запроса hunttech_ExtUser для id={}: {}", id, e.getMessage());
@@ -278,7 +278,7 @@ public class HrmEntityNameResolver {
         // 10. Город
         if (typeHint == null || "city".equalsIgnoreCase(typeHint) || "hunttech_City".equalsIgnoreCase(typeHint)) {
             try {
-                String name = dm.loadValue("select e.cityName from hunttech_City e where e.id = :id and e.deleteTs is null", String.class)
+                String name = dm.loadValue("select e.cityRuName from hunttech_City e where e.id = :id and e.deleteTs is null", String.class)
                         .parameter("id", id)
                         .optional().orElse(null);
                 if (name != null && !name.trim().isEmpty()) {
