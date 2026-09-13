@@ -382,15 +382,25 @@ public class SmartCvIngestComprehensiveTest {
         Method m = SmartCvIngestServiceBean.class.getDeclaredMethod("cleanCompanyName", String.class);
         m.setAccessible(true);
 
-        // Латинские правовые формы успешно удаляются:
+        // Латинские правовые формы:
         assertEquals("Google", m.invoke(service, "Google LLC"));
         assertEquals("Apple", m.invoke(service, "Apple Inc"));
 
-        // Анализ дефекта регулярного выражения для кириллицы:
-        // В regex `(?i)(ооо|зао|...)\b` отсутствует флаг (?U), поэтому \b не срабатывает для кириллицы
-        String res = (String) m.invoke(service, "ООО \"Яндекс\"");
-        assertNotNull(res);
-        assertTrue("Результат содержит название компании", res.contains("Яндекс"));
+        // Кириллические правовые формы теперь корректно удаляются благодаря (?iU)\b:
+        assertEquals("Яндекс", m.invoke(service, "ООО \"Яндекс\""));
+        assertEquals("Сбербанк", m.invoke(service, "ПАО «Сбербанк»"));
+        assertEquals("Крок", m.invoke(service, "ЗАО \"Крок\""));
+    }
+
+    @Test
+    public void testNormalizeDigits() throws Exception {
+        Method m = SmartCvIngestServiceBean.class.getDeclaredMethod("normalizeDigits", String.class);
+        m.setAccessible(true);
+
+        assertEquals("79991112233", m.invoke(service, "+7 (999) 111-22-33"));
+        assertEquals("89991112233", m.invoke(service, "8-999-111-22-33"));
+        assertEquals("79991112233", m.invoke(service, "+7 999 111 22 33"));
+        assertEquals("", m.invoke(service, (String) null));
     }
 
     @Test
@@ -435,5 +445,88 @@ public class SmartCvIngestComprehensiveTest {
         assertTrue("Должна требоваться должность", missing.contains("Должность"));
         assertTrue("Должен требоваться город", missing.contains("Город проживания"));
         assertTrue("Должны требоваться контакты", missing.contains("Контакты (телефон/email/telegram)"));
+    }
+
+    // =========================================================================
+    // БЛОК 5: ТЕСТИРОВАНИЕ НА РЕАЛЬНЫХ РЕЗЮМЕ ИЗ ПАПКИ /CV
+    // =========================================================================
+
+    @Test
+    public void testRealResumesFromLocalDirectory() throws Exception {
+        java.io.File dir = new java.io.File("/Users/alekseyananyev/StudioProjects/CV");
+        if (!dir.exists() || !dir.isDirectory()) {
+            return;
+        }
+
+        String[] testFileNames = {
+                "Резюме_Владислав_Агабекян.pdf",
+                "Резюме_Владислав_Агабекян.docx",
+                "Резюме_QA_Курицын_С.А.doc",
+                "Шуршенов Алибек.pages",
+                "Ткаченко Алексей (резюме).doc",
+                "Резюме_QA_Engineer_Никита_Андреевич_Веретенов_от_06_02_2024_08_07.pdf"
+        };
+
+        for (String fileName : testFileNames) {
+            java.io.File file = new java.io.File(dir, fileName);
+            if (!file.exists()) continue;
+
+            byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+            String ext = "";
+            int dotIdx = fileName.lastIndexOf('.');
+            if (dotIdx > 0) ext = fileName.substring(dotIdx + 1).toLowerCase();
+
+            FileDescriptor fd = new FileDescriptor();
+            fd.setName(fileName);
+            fd.setExtension(ext);
+
+            String extracted = service.extractTextFromFile(fd, bytes);
+            assertNotNull("Извлеченный текст не должен быть null для " + fileName, extracted);
+            assertTrue("Извлеченный текст должен быть непустым для " + fileName, extracted.trim().length() > 50);
+            System.out.println("УСПЕХ: Извлечен текст из реального файла [" + fileName + "], размер текста: " + extracted.length() + " символов");
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testDuplicateDetectionWithMasksAndFallbacks() {
+        JobCandidate existing = new JobCandidate();
+        existing.setFirstName("Владислав");
+        existing.setSecondName("Агабекян");
+        existing.setPhone("+7 (999) 111-22-33");
+        existing.setEmail("vladislav@example.com");
+        existing.setTelegramName("@vagabekyan");
+
+        FluentLoader deepLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(mockDataManager.load(JobCandidate.class)).thenReturn(deepLoader);
+        when(deepLoader.query(anyString()).parameter(anyString(), any()).view(anyString()).list())
+                .thenReturn(Collections.singletonList(existing));
+
+        // 1. Поиск по телефону в другом формате
+        SmartCvParsedData dataPhone = new SmartCvParsedData();
+        dataPhone.setPhone("8-999-111-22-33");
+        JobCandidate dupPhone = service.findDuplicate(dataPhone);
+        assertNotNull("Дубликат по телефону с маской должен быть найден", dupPhone);
+        assertEquals("Владислав", dupPhone.getFirstName());
+
+        // 2. Поиск по fallback на mobilePhone при некорректном phone
+        SmartCvParsedData dataMobile = new SmartCvParsedData();
+        dataMobile.setPhone("123");
+        dataMobile.setMobilePhone("+7 999 111 22 33");
+        JobCandidate dupMobile = service.findDuplicate(dataMobile);
+        assertNotNull("Дубликат по fallback на mobilePhone должен быть найден", dupMobile);
+
+        // 3. Поиск по Telegram без @
+        SmartCvParsedData dataTg = new SmartCvParsedData();
+        dataTg.setTelegram("vagabekyan");
+        JobCandidate dupTg = service.findDuplicate(dataTg);
+        assertNotNull("Дубликат по Telegram без @ должен быть найден", dupTg);
+
+        // 4. Поиск по переставленным имени и фамилии
+        SmartCvParsedData dataName = new SmartCvParsedData();
+        dataName.setFirstName("Агабекян");
+        dataName.setLastName("Владислав");
+        JobCandidate dupName = service.findDuplicate(dataName);
+        assertNotNull("Дубликат по переставленным ФИО должен быть найден", dupName);
     }
 }

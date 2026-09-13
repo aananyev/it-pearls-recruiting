@@ -225,5 +225,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-1-addMaxContextTokensToAiConfigs.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-2-updateSmartCvParsePromptV3.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

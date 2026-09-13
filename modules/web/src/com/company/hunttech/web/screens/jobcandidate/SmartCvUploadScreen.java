@@ -26,6 +26,9 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.components.Action;
+import com.haulmont.cuba.gui.components.DialogAction;
 import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +122,8 @@ public class SmartCvUploadScreen extends Screen {
     private UserSession userSession;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private Dialogs dialogs;
 
     private FileDescriptor currentFileDescriptor;
     private byte[] currentFileBytes;
@@ -384,18 +389,24 @@ public class SmartCvUploadScreen extends Screen {
             String dupRecruiter = escapeHtml(currentDuplicateCandidate.getCreatedBy() != null ? currentDuplicateCandidate.getCreatedBy() : "-");
 
             duplicateInfoLabel.setValue(String.format(
-                    "В базе уже есть кандидат с похожими данными: <b>%s</b> (Тел: %s, Email: %s). Создан пользователем: <b>%s</b>.<br/>" +
-                    "Вы можете добавить это резюме как новую версию существующего кандидата или создать новую запись.",
+                    "⚠️ <b>ВНИМАНИЕ: В базе данных обнаружен кандидат с совпадающими данными!</b><br/>" +
+                    "👤 Кандидат: <b>%s</b> &nbsp;|&nbsp; 📞 Телефон: <b>%s</b> &nbsp;|&nbsp; ✉️ Email: <b>%s</b> &nbsp;|&nbsp; 🧑‍💼 Создал: <b>%s</b><br/><br/>" +
+                    "<b>В системе запрещено создание необоснованных дубликатов кандидатов.</b><br/>" +
+                    "• Нажмите <b>«Не дублировать (привязать резюме к кандидату)»</b>, чтобы сохранить это резюме как новую версию CandidateCV и дополнить контакты без создания дубликата.<br/>" +
+                    "• Нажмите <b>«Дублировать (создать новую запись)»</b>, только если вы уверены, что это другой человек.",
                     dupName, dupPhone, dupEmail, dupRecruiter));
 
             attachDuplicateBtn.setVisible(true);
+            attachDuplicateBtn.setCaption("Не дублировать (привязать резюме к кандидату)");
             createNewAnywayBtn.setVisible(true);
+            createNewAnywayBtn.setCaption("Дублировать (создать новую запись)");
             saveNewCandidateBtn.setVisible(false);
         } else {
             duplicateBox.setVisible(false);
             attachDuplicateBtn.setVisible(false);
             createNewAnywayBtn.setVisible(false);
             saveNewCandidateBtn.setVisible(true);
+            saveNewCandidateBtn.setCaption("Создать карточку кандидата");
         }
 
         // Проверка недостающих полей
@@ -438,6 +449,10 @@ public class SmartCvUploadScreen extends Screen {
 
     @Subscribe("saveNewCandidateBtn")
     public void onSaveNewCandidateBtnClick(Button.ClickEvent event) {
+        doSaveNewCandidate();
+    }
+
+    private void doSaveNewCandidate() {
         if (currentParsedData == null) return;
         ExtUser currentUser = (ExtUser) userSession.getUser();
         SmartCvIngestResult res = smartCvIngestService.createNewCandidate(currentParsedData, currentFileDescriptor, null, currentUser);
@@ -499,7 +514,22 @@ public class SmartCvUploadScreen extends Screen {
 
     @Subscribe("createNewAnywayBtn")
     public void onCreateNewAnywayBtnClick(Button.ClickEvent event) {
-        onSaveNewCandidateBtnClick(event);
+        String dupName = currentDuplicateCandidate != null && currentDuplicateCandidate.getFullName() != null
+                ? currentDuplicateCandidate.getFullName() : "найденным в базе";
+        dialogs.createOptionDialog()
+                .withCaption("Подтверждение дублирования кандидата")
+                .withMessage("В системе уже зарегистрирован кандидат с совпадающими данными: " + dupName + ".\n\n" +
+                        "Внимание: по правилам HRM дублирование карточек кандидатов запрещено, если это один и тот же человек.\n\n" +
+                        "Вы действительно хотите принудительно создать новую дублирующую карточку кандидата?")
+                .withActions(
+                        new DialogAction(DialogAction.Type.YES)
+                                .withCaption("Да, создать дубликат")
+                                .withHandler(e -> doSaveNewCandidate()),
+                        new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
+                                .withCaption("Не дублировать (прикрепить резюме)")
+                                .withHandler(e -> onAttachDuplicateBtnClick(null))
+                )
+                .show();
     }
 
     @Subscribe("cancelBtn")

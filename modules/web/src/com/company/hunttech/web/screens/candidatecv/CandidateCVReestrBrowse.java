@@ -284,7 +284,8 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
                 candidateCVsDl.load();
                 if (screen.getCreatedCv() != null) {
                     try {
-                        candidateCVsTable.setSelected(screen.getCreatedCv());
+                        CandidateCV toSelect = candidateCVsDc.getItemOrNull(screen.getCreatedCv().getId());
+                        candidateCVsTable.setSelected(toSelect != null ? toSelect : screen.getCreatedCv());
                     } catch (Exception ignored) {
                     }
                 }

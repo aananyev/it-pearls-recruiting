@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import javax.inject.Inject;
 import javax.swing.text.rtf.RTFEditorKit;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -97,19 +98,23 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                      XWPFDocument doc = new XWPFDocument(is);
                      XWPFWordExtractor extractor = new XWPFWordExtractor(doc)) {
                     return extractor.getText();
+                } catch (Exception | LinkageError t) {
+                    log.warn("Не удалось прочитать DOCX через POI XWPF, используем zip fallback: " + t.getMessage());
+                    return extractTextFromDocxZip(fileBytes);
                 }
             } else if ("doc".equals(ext)) {
+                if (isRtf(fileBytes)) {
+                    return extractRtfText(fileBytes);
+                }
                 try (InputStream is = new ByteArrayInputStream(fileBytes);
                      WordExtractor extractor = new WordExtractor(is)) {
                     return extractor.getText();
+                } catch (Exception | LinkageError t) {
+                    log.warn("WordExtractor не смог прочитать .doc, пробуем RTF fallback: " + t.getMessage());
+                    return extractRtfText(fileBytes);
                 }
-            } else if ("rtf".equals(ext)) {
-                RTFEditorKit rtfKit = new RTFEditorKit();
-                javax.swing.text.Document rtfDoc = rtfKit.createDefaultDocument();
-                try (Reader reader = new InputStreamReader(new ByteArrayInputStream(fileBytes), StandardCharsets.UTF_8)) {
-                    rtfKit.read(reader, rtfDoc, 0);
-                    return rtfDoc.getText(0, rtfDoc.getLength());
-                }
+            } else if ("rtf".equals(ext) || isRtf(fileBytes)) {
+                return extractRtfText(fileBytes);
             } else if ("pages".equals(ext)) {
                 // Apple Pages - zip-пакет с Preview.pdf или QuickLook
                 try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(fileBytes))) {
@@ -132,6 +137,64 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
             log.error("Ошибка извлечения текста из файла резюме (" + ext + "): " + e.getMessage(), e);
             return "";
         }
+    }
+
+    private String extractTextFromDocxZip(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) return "";
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if ("word/document.xml".equals(entry.getName())) {
+                    // Ограничение размера записи до 20 МБ для защиты от zip bomb
+                    byte[] buf = new byte[4096];
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    int read;
+                    int total = 0;
+                    while ((read = zis.read(buf)) != -1) {
+                        total += read;
+                        if (total > 20 * 1024 * 1024) break;
+                        out.write(buf, 0, read);
+                    }
+                    String xml = new String(out.toByteArray(), StandardCharsets.UTF_8);
+                    xml = xml.replaceAll("</w:p>", "\n");
+                    return xml.replaceAll("<[^>]+>", " ")
+                            .replaceAll("&lt;", "<")
+                            .replaceAll("&gt;", ">")
+                            .replaceAll("&quot;", "\"")
+                            .replaceAll("&apos;", "'")
+                            .replaceAll("&amp;", "&")
+                            .replaceAll("[ \\t]+", " ")
+                            .trim();
+                }
+            }
+        } catch (Exception e) {
+            log.error("Ошибка извлечения текста из word/document.xml: " + e.getMessage());
+        }
+        return "";
+    }
+
+    private boolean isRtf(byte[] bytes) {
+        if (bytes == null || bytes.length < 5) return false;
+        return bytes[0] == '{' && bytes[1] == '\\' && bytes[2] == 'r' && bytes[3] == 't' && bytes[4] == 'f';
+    }
+
+    private String extractRtfText(byte[] fileBytes) {
+        if (fileBytes == null || fileBytes.length == 0) return "";
+        RTFEditorKit rtfKit = new RTFEditorKit();
+        String[] charsets = {"UTF-8", "windows-1251", "ISO-8859-1"};
+        for (String cs : charsets) {
+            try (Reader reader = new InputStreamReader(new ByteArrayInputStream(fileBytes), cs)) {
+                javax.swing.text.Document rtfDoc = rtfKit.createDefaultDocument();
+                rtfKit.read(reader, rtfDoc, 0);
+                String text = rtfDoc.getText(0, rtfDoc.getLength());
+                if (text != null && !text.trim().isEmpty()) {
+                    return text;
+                }
+            } catch (Exception e) {
+                log.debug("Не удалось разобрать RTF в кодировке {}: {}", cs, e.getMessage());
+            }
+        }
+        return "";
     }
 
     @Override
@@ -247,8 +310,12 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
 
         // 1. Поиск по нормализованному телефону (последние 10 цифр)
         String phoneDigits = normalizeDigits(data.getPhone());
+        if (phoneDigits.length() < 10) {
+            phoneDigits = normalizeDigits(data.getMobilePhone());
+        }
         if (phoneDigits.length() >= 10) {
             String last10 = phoneDigits.substring(phoneDigits.length() - 10);
+            // 1.1 Прямой поиск по непрерывным цифрам
             List<JobCandidate> list = dataManager.load(JobCandidate.class)
                     .query("select e from hunttech_JobCandidate e where e.phone like :digits or e.mobilePhone like :digits")
                     .parameter("digits", "%" + last10 + "%")
@@ -257,13 +324,33 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
             if (!list.isEmpty()) {
                 return list.get(0);
             }
+
+            // 1.2 Поиск по маскированным телефонам (например: +7 (999) 111-22-33 -> %999%111%22%33%)
+            String p1 = last10.substring(0, 3);
+            String p2 = last10.substring(3, 6);
+            String p3 = last10.substring(6, 8);
+            String p4 = last10.substring(8, 10);
+            String pattern = "%" + p1 + "%" + p2 + "%" + p3 + "%" + p4 + "%";
+
+            List<JobCandidate> maskedList = dataManager.load(JobCandidate.class)
+                    .query("select e from hunttech_JobCandidate e where e.phone like :pattern or e.mobilePhone like :pattern")
+                    .parameter("pattern", pattern)
+                    .view("jobCandidate-view")
+                    .list();
+            for (JobCandidate cand : maskedList) {
+                if (normalizeDigits(cand.getPhone()).endsWith(last10)
+                        || normalizeDigits(cand.getMobilePhone()).endsWith(last10)) {
+                    return cand;
+                }
+            }
         }
 
-        // 2. Поиск по Email
+        // 2. Поиск по Email (без учета регистра)
         if (data.getEmail() != null && !data.getEmail().trim().isEmpty()) {
+            String cleanEmail = data.getEmail().trim().toLowerCase();
             List<JobCandidate> list = dataManager.load(JobCandidate.class)
-                    .query("select e from hunttech_JobCandidate e where lower(e.email) = :email")
-                    .parameter("email", data.getEmail().trim().toLowerCase())
+                    .query("select e from hunttech_JobCandidate e where lower(trim(e.email)) = :email")
+                    .parameter("email", cleanEmail)
                     .view("jobCandidate-view")
                     .list();
             if (!list.isEmpty()) {
@@ -271,11 +358,13 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
             }
         }
 
-        // 3. Поиск по Telegram
+        // 3. Поиск по Telegram (с @ и без него)
         if (data.getTelegram() != null && !data.getTelegram().trim().isEmpty()) {
+            String cleanTg = cleanTelegram(data.getTelegram()).toLowerCase();
             List<JobCandidate> list = dataManager.load(JobCandidate.class)
-                    .query("select e from hunttech_JobCandidate e where lower(e.telegramName) = :tg")
-                    .parameter("tg", data.getTelegram().trim().toLowerCase())
+                    .query("select e from hunttech_JobCandidate e where lower(e.telegramName) = :tg or lower(e.telegramName) = :atTg")
+                    .parameter("tg", cleanTg)
+                    .parameter("atTg", "@" + cleanTg)
                     .view("jobCandidate-view")
                     .list();
             if (!list.isEmpty()) {
@@ -283,13 +372,16 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
             }
         }
 
-        // 4. Поиск по ФИО
+        // 4. Поиск по ФИО (с учетом возможной перестановки фамилии и имени)
         if (data.getFirstName() != null && !data.getFirstName().trim().isEmpty()
                 && data.getLastName() != null && !data.getLastName().trim().isEmpty()) {
+            String fn = data.getFirstName().trim().toLowerCase();
+            String sn = data.getLastName().trim().toLowerCase();
             List<JobCandidate> list = dataManager.load(JobCandidate.class)
-                    .query("select e from hunttech_JobCandidate e where lower(e.firstName) = :fn and lower(e.secondName) = :sn")
-                    .parameter("fn", data.getFirstName().trim().toLowerCase())
-                    .parameter("sn", data.getLastName().trim().toLowerCase())
+                    .query("select e from hunttech_JobCandidate e where (lower(trim(e.firstName)) = :fn and lower(trim(e.secondName)) = :sn) " +
+                           "or (lower(trim(e.firstName)) = :sn and lower(trim(e.secondName)) = :fn)")
+                    .parameter("fn", fn)
+                    .parameter("sn", sn)
                     .view("jobCandidate-view")
                     .list();
             if (!list.isEmpty()) {
@@ -812,7 +904,7 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
 
     private String cleanCompanyName(String raw) {
         if (raw == null) return "";
-        return raw.replaceAll("(?i)(ооо|зао|пао|ао|ип|нко|ltd|llc|inc|gmbh|corp)\\b", "")
+        return raw.replaceAll("(?iU)\\b(ооо|зао|пао|ао|ип|нко|ltd|llc|inc|gmbh|corp)\\b", "")
                 .replaceAll("[\"«»'„“]", "")
                 .trim();
     }

@@ -165,9 +165,9 @@
 
         <!-- Нижняя панель действий -->
         <hbox id="footerToolbar" width="100%" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar">
-            <button id="attachDuplicateBtn" caption="Добавить новую версию резюме в существующую карточку"
-                    icon="PLUS" stylename="primary" visible="false"/>
-            <button id="createNewAnywayBtn" caption="Создать нового кандидата"
+            <button id="attachDuplicateBtn" caption="Не дублировать (привязать резюме к кандидату)"
+                    icon="LINK" stylename="primary" visible="false"/>
+            <button id="createNewAnywayBtn" caption="Дублировать (создать новую запись)"
                     icon="CREATE_ACTION" stylename="secondary" visible="false"/>
             <button id="saveNewCandidateBtn" caption="Создать карточку кандидата"
                     icon="CREATE_ACTION" stylename="primary" visible="false"/>

@@ -92,8 +92,12 @@ public class SmartCvIngestServiceContractTest {
         File promptMigration = new File("db/changelog/260821-4-updateSmartCvParseAiFunction.xml");
         assertTrue("Миграция 260821-4-updateSmartCvParseAiFunction.xml должна существовать", promptMigration.exists());
 
+        File promptV3Migration = new File("db/changelog/260913-2-updateSmartCvParsePromptV3.xml");
+        assertTrue("Миграция 260913-2-updateSmartCvParsePromptV3.xml должна существовать", promptV3Migration.exists());
+
         String masterContent = Files.readString(Paths.get("db/changelog/db.changelog-master.xml"));
         assertTrue(masterContent.contains("260821-3-addJobHistoryFields.xml"));
         assertTrue(masterContent.contains("260821-4-updateSmartCvParseAiFunction.xml"));
+        assertTrue(masterContent.contains("260913-2-updateSmartCvParsePromptV3.xml"));
     }
 }

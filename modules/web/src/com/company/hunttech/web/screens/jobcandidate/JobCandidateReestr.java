@@ -101,6 +101,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private CollectionLoader<JobCandidate> jobCandidatesDl;
 
     @Inject
+    private CollectionContainer<JobCandidate> jobCandidatesDc;
+
+    @Inject
     private CollectionContainer<SignIcons> signIconsDc;
 
     @Inject
@@ -926,7 +929,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 setCandidateScopeFilter("ALL", "Все кандидаты", "USERS");
                 if (screen.getCreatedCandidate() != null) {
                     try {
-                        candidatesTable.setSelected(screen.getCreatedCandidate());
+                        JobCandidate toSelect = jobCandidatesDc != null
+                                ? jobCandidatesDc.getItemOrNull(screen.getCreatedCandidate().getId()) : null;
+                        candidatesTable.setSelected(toSelect != null ? toSelect : screen.getCreatedCandidate());
                     } catch (Exception ignored) {
                     }
                 }

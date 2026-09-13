@@ -2,87 +2,116 @@
 
 ## 1. Назначение и бизнес-требования
 
-Модуль **«Умная загрузка резюме»** в HRM HuntTech обеспечивает сквозной автоматизированный процесс приёма, извлечения текста, AI-парсинга, проверки дубликатов и сохранения кандидатов и их резюме в систему.
+Модуль **«Умная загрузка резюме»** в HRM HuntTech обеспечивает сквозной автоматизированный процесс приёма, извлечения текста, AI-парсинга, строгой проверки уникальности кандидатов, предотвращения дубликатов и сохранения кандидатов и их резюме в систему.
 
 ### Ключевые требования:
 1. **Поддержка источников резюме:**
-   * **Файлы:** форматы `PDF`, `DOC`, `DOCX`, `RTF`, `PAGES`, `TXT` (до 20 МБ);
-   * **Текст / RichText:** прямая вставка неструктурированного текста или форматированного резюме;
-   * **Интернет / URL:** импорт и парсинг резюме по прямой web-ссылке (HeadHunter, Habr Career, LinkedIn и др.).
+   * **Файлы:** форматы `PDF` (Apache PDFBox), `DOCX` (Apache POI XWPF), `DOC` (Apache POI HWPF), `RTF` (RTFEditorKit), `PAGES` (Apple Pages zip / Preview.pdf), `TXT` (UTF-8);
+   * **Текст / RichText:** прямая вставка текста резюме через визуальный редактор (вкладка «Вставить текст»);
+   * **Интернет / URL:** импорт и парсинг резюме по прямой web-ссылке через Jsoup (вкладка «Загрузить по ссылке»).
 2. **Единая кодовая база (Single Source of Truth):**
-   * Вся логика извлечения текста, AI-структурирования, поиска дубликатов и создания сущностей (`JobCandidate`, `CandidateCV`, `PersonContact`, `CandidateSkill`) вынесена в единый сервисный слой `SmartCvIngestService` (core) и универсальный мастер `SmartCvUploadScreen` (web).
-   * Исключено дублирование логики между экранами: форма «Реестр кандидатов» (`JobCandidateReestr`) и «Реестр резюме» (`CandidateCVReestrBrowse`) вызывают один и тот же переиспользуемый компонент.
-3. **Безопасность и целостность данных:**
-   * Недеструктивная обработка текста;
-   * Поиск дубликатов по Email, Телеграм, телефону и ФИО с выбором стратегии (создать нового кандидата или прикрепить резюме к существующему);
-   * Защита от N+1 и строгий контроль транзакций базы данных.
+   * Вся логика извлечения текста, AI-структурирования, поиска дубликатов и создания сущностей (`JobCandidate`, `CandidateCV`, `JobHistory`, `CandidateSkill`, `Company`, `IteractionList`) вынесена в единый сервисный слой `SmartCvIngestService` (модуль `core`) и универсальный мастер `SmartCvUploadScreen` (модуль `web`).
+   * Исключено дублирование логики: форма «Реестр кандидатов» (`JobCandidateReestr`) и форма «Реестр резюме» (`CandidateCVReestrBrowse`) вызывают один и тот же диалоговый мастер по единому контракту.
+3. **Строгая политика предотвращения дублирования карточек кандидатов:**
+   * **В системе запрещено создание необоснованных дубликатов кандидатов**.
+   * Многоуровневый алгоритм поиска дубликатов в БД:
+     1. Нормализованный номер телефона (последние 10 цифр) с поддержкой масок форматирования (`+7 (999) 111-22-33`, `8-999-111-2233`, `9991112233`);
+     2. Адрес электронной почты (Email) без учёта регистра;
+     3. Никнейм Telegram (с префиксом `@` и без него);
+     4. ФИО кандидата с проверкой перестановки имени и фамилии.
+   * Если найден существующий кандидат:
+     - Интерфейс выводит предупреждающий блок `duplicateBox` с подробной информацией о существующей записи (ФИО, телефон, email, автор записи) и явным вопросом рекрутеру.
+     - Основное приоритетное действие: **«Не дублировать (привязать резюме к кандидату)»** (`attachDuplicateBtn`). В этом случае новая карточка кандидата **НЕ создаётся**, а создаётся новая версия резюме (`CandidateCV`), дополняются недостающие контакты и сохраняются места работы `JobHistory`.
+     - При попытке принудительного дублирования (`createNewAnywayBtn`) отображается модальный диалог подтверждения с предупреждением о запрете дублирования в системе, где по умолчанию фокус установлен на отказ от дублирования.
+4. **Безопасность и отказоустойчивость:**
+   * Повреждённые, пустые (0 байт) и битые файлы не приводят к падению JVM или ошибкам приложения;
+   * Очистка ответов LLM от Markdown-тегов ````json ... ````;
+   * Безопасное аварийное восстановление при обрыве токенов генерации.
 
 ---
 
-## 2. Архитектурная схема
+## 2. Архитектурная схема взаимодействия
 
 ```mermaid
 graph TD
-    A[Пользователь / Рекрутер] -->|Клик 'Умная загрузка'| B[SmartCvUploadScreen]
+    A[Пользователь / Рекрутер] -->|Клик 'Умная загрузка'| B[SmartCvUploadScreen (DIALOG)]
     
     subgraph UI Layer (modules/web)
-        B --> B1[Вкладка 1: Загрузка файлов\nPDF, DOCX, DOC, RTF, PAGES]
-        B --> B2[Вкладка 2: Вставка текста\nRichTextArea / PlainText]
-        B --> B3[Вкладка 3: Ссылка из интернета\nHTTP / Web Ingest]
-        B --> B4[Превью, проверка дубликатов & форма валидации]
+        B --> B1[Вкладка 1: Загрузить файл\nPDF, DOCX, DOC, RTF, PAGES, TXT]
+        B --> B2[Вкладка 2: Вставить текст\nRichTextArea]
+        B --> B3[Вкладка 3: Загрузить по ссылке\nJsoup Web-Scraper]
+        B --> B4[Превью распознанных данных\nФИО, Опыт, Навыки, Саммари]
+        B --> B5[Блок проверки уникальности duplicateBox]
     end
     
     subgraph Core Layer (modules/core)
-        B1 & B2 & B3 -->|Вызов| C[SmartCvIngestService]
-        C --> D[TextProcessingService / Apache Tika\nИзвлечение чистого текста]
-        C --> E[AI Function / LLM Parser\nСтруктурирование в JSON]
-        C --> F[Duplicate Detection Engine\nEmail, Telegram, Phone, FIO]
-        C --> G[Transactional Data Commit\nJobCandidate, CandidateCV]
+        B1 & B2 & B3 -->|extractTextFromFile & parseCvText| C[SmartCvIngestServiceBean]
+        C --> D[AiExecutionService\nФункция CV_SMART_PARSE_JSON v3]
+        C --> E[Движок дедупликации findDuplicate\nТелефоны с масками, Email, TG, ФИО]
+        C --> F[Транзакционный коммит\ncreateNewCandidate / attachCvToExistingCandidate]
     end
     
     subgraph Database Layer
-        G --> H[(PostgreSQL)]
+        F --> G[(PostgreSQL / JPA)]
+        G --> G1[HUNTTECH_JOB_CANDIDATE]
+        G --> G2[HUNTTECH_CANDIDATE_C_V]
+        G --> G3[HUNTTECH_JOB_HISTORY]
+        G --> G4[HUNTTECH_CANDIDATE_SKILL]
+        G --> G5[HUNTTECH_ITERACTION_LIST]
     end
     
-    B4 -->|Фокус и открытие| I[CandidateCVEdit / JobCandidateEdit]
+    B5 -->|COMMIT| H[Обновление реестра и подсветка строки в таблице]
 ```
 
 ---
 
 ## 3. Сервисный интерфейс (`SmartCvIngestService`)
 
-Интерфейс сервиса объявлен в глобальном модуле:
+Фактический интерфейс сервиса (`modules/global/src/com/company/hunttech/service/SmartCvIngestService.java`):
 
 ```java
 package com.company.hunttech.service;
 
 import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.JobCandidate;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import java.util.List;
+import java.util.UUID;
 
 public interface SmartCvIngestService {
     String NAME = "hunttech_SmartCvIngestService";
 
     /**
-     * Извлечение чистого текста из файла любого поддерживаемого формата.
+     * Извлечение чистого текста из файла (PDF, DOCX, DOC, RTF, Pages, TXT).
      */
-    String extractTextFromFile(FileDescriptor fileDescriptor);
+    String extractTextFromFile(FileDescriptor fileDescriptor, byte[] fileBytes);
 
     /**
-     * AI-парсинг текста резюме в структурированную DTO-модель SmartCvParsedData.
+     * AI-парсинг текста резюме в структурированный DTO SmartCvParsedData.
      */
     SmartCvParsedData parseCvText(String rawText);
 
     /**
-     * Проверка на дубликаты кандидатов в БД по контактам и ФИО.
+     * Проверка уникальности кандидата в БД (по телефону, email, telegram, ФИО).
      */
-    List<JobCandidate> findDuplicates(SmartCvParsedData parsedData);
+    JobCandidate findDuplicate(SmartCvParsedData data);
 
     /**
-     * Сохранение кандидата и резюме (создание нового или прикрепление к существующему).
+     * Создание новой уникальной карточки кандидата и версии резюме.
      */
-    CandidateCV saveCandidateAndCv(SmartCvParsedData data, FileDescriptor rawFile, JobCandidate existingCandidate);
+    SmartCvIngestResult createNewCandidate(SmartCvParsedData data, FileDescriptor fileDescriptor, 
+                                           FileDescriptor faceImage, ExtUser recruiter);
+
+    /**
+     * Прикрепление резюме к найденному существующему кандидату (без дублирования).
+     */
+    SmartCvIngestResult attachCvToExistingCandidate(UUID existingCandidateId, SmartCvParsedData data, 
+                                                    FileDescriptor fileDescriptor, FileDescriptor faceImage, ExtUser recruiter);
+
+    /**
+     * Применение распознанных данных к существующей карточке резюме.
+     */
+    SmartCvIngestResult applyParsedDataToCandidateCv(CandidateCV candidateCv, SmartCvParsedData data, ExtUser recruiter);
 }
 ```
 
@@ -90,79 +119,86 @@ public interface SmartCvIngestService {
 
 ## 4. DTO-модель распознанных данных (`SmartCvParsedData`)
 
-```java
-public class SmartCvParsedData implements Serializable {
-    private String fullName;
-    private String firstName;
-    private String lastName;
-    private String middleName;
-    private String targetPosition;
-    private String email;
-    private String phone;
-    private String telegram;
-    private String city;
-    private BigDecimal salaryExpected;
-    private String currency;
-    private String skillsSummary;
-    private List<String> extractedSkills;
-    private String formattedCvHtml;
-    private String rawCvText;
-    
-    // Геттеры, сеттеры и вспомогательные методы
-}
-```
+Объявлена в `com.company.hunttech.service.SmartCvParsedData`:
+- `lastName`, `firstName`, `middleName` (разделение ФИО);
+- `birthDate` (дата рождения в формате `YYYY-MM-DD`);
+- `phone`, `mobilePhone` (нормализованные телефонные номера);
+- `email` (нижний регистр);
+- `telegram` (очищенный логин без `@` и без URL);
+- `skype`, `whatsapp`;
+- `position` (желаемая/текущая должность);
+- `city` (город проживания с автопоиском в справочнике `City`);
+- `currentCompany` (текущая компания с очисткой форм ООО/ЗАО/ПАО через `(?iU)\b`);
+- `salary` (зарплатные ожидания);
+- `skills` (список атомарных hard skills);
+- `experienceYears` (общий стаж в годах);
+- `summary` (профессиональное саммари);
+- `workExperience` (список `SmartCvWorkExperienceDto`: компания, должность, даты, обязанности, достижения, признак текущего места работы);
+- `education` (список `SmartCvEducationDto`: вуз, факультет, специальность, год окончания, академическая степень);
+- `missingPositions` (список должностей, отсутствующих в справочнике `Position`, для нотификации рекрутера).
 
 ---
 
 ## 5. Универсальный UI-мастер (`SmartCvUploadScreen`)
 
-Контроллер экрана `SmartCvUploadScreen` (`com.company.hunttech.web.screens.jobcandidate.SmartCvUploadScreen`) зарегистрирован с id `hunttech_SmartCvUploadScreen` и открывается в модальном диалоговом режиме (`OpenMode.DIALOG`).
+Контроллер экрана `SmartCvUploadScreen` (`com.company.hunttech.web.screens.jobcandidate.SmartCvUploadScreen`, XML: `smart-cv-upload-screen.xml`) открывается в модальном диалоговом режиме (`OpenMode.DIALOG`).
 
-### Экранные события и возврат созданного резюме:
-1. Контроллер сохраняет ссылку на созданное резюме в поле `createdCv` и предоставляет геттер `getCreatedCv()`.
-2. После успешного сохранения и закрытия с `WINDOW_COMMIT_AND_CLOSE_ACTION`:
-   * Вызывающий экран (например, `CandidateCVReestrBrowse` или `JobCandidateReestr`) перезагружает свой data loader.
-   * Выполняется автоматическая фокусировка и выбор созданной строки в таблице.
+### Поведение при обнаружении дубликата:
+1. Если `currentDuplicateCandidate != null`:
+   - Отображается блок `duplicateBox` с подробными сведениями о существующем кандидате;
+   - Кнопка «Создать карточку кандидата» скрывается;
+   - Кнопка **«Не дублировать (привязать резюме к кандидату)»** активируется как основное действие (`primary`);
+   - Кнопка **«Дублировать (создать новую запись)»** запрашивает явное подтверждение через `dialogs.createOptionDialog()` с предупреждением о нарушении правил системы.
+2. Если кандидат уникален (`currentDuplicateCandidate == null`):
+   - Блок `duplicateBox` скрыт;
+   - Отображается кнопка **«Создать карточку кандидата»** (`saveNewCandidateBtn`).
 
-### Использование из экранов реестров:
+### Вызов из реестров и сохранение фокуса таблицы:
 ```java
-@Subscribe("smartUploadBtn")
-public void onSmartUploadBtnClick(Button.ClickEvent event) {
-    SmartCvUploadScreen screen = screenBuilders.screen(this)
-            .withScreenClass(SmartCvUploadScreen.class)
-            .withOpenMode(OpenMode.DIALOG)
-            .build();
-    screen.addAfterCloseListener(afterCloseEvent -> {
-        if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
-            candidateCvsDl.load();
-            CandidateCV created = screen.getCreatedCv();
-            if (created != null) {
-                candidateCvsTable.setSelected(created);
+// Реестр кандидатов (JobCandidateReestr.java)
+screen.addAfterCloseListener(closeEvent -> {
+    if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+        setCandidateScopeFilter("ALL", "Все кандидаты", "USERS");
+        if (screen.getCreatedCandidate() != null) {
+            try {
+                JobCandidate toSelect = jobCandidatesDc != null
+                        ? jobCandidatesDc.getItemOrNull(screen.getCreatedCandidate().getId()) : null;
+                candidatesTable.setSelected(toSelect != null ? toSelect : screen.getCreatedCandidate());
+            } catch (Exception ignored) {
             }
         }
-    });
-    screen.show();
-}
+    }
+});
+
+// Реестр резюме кандидатов (CandidateCVReestrBrowse.java)
+screen.addAfterCloseListener(closeEvent -> {
+    if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+        candidateCVsDl.load();
+        if (screen.getCreatedCv() != null) {
+            try {
+                CandidateCV toSelect = candidateCVsDc != null
+                        ? candidateCVsDc.getItemOrNull(screen.getCreatedCv().getId()) : null;
+                candidateCVsTable.setSelected(toSelect != null ? toSelect : screen.getCreatedCv());
+            } catch (Exception ignored) {
+            }
+        }
+    }
+});
 ```
 
 ---
 
-## 6. Визуальные стандарты и адаптация под темы
+## 6. Системный промпт AI-функции `CV_SMART_PARSE_JSON` (Версия v3)
 
-1. **Таблицы реестров (`.candidate-browse-grid`):**
-   * Увеличение высоты строк на 20% (`min-height: 38px`, `padding: 6px 8px`).
-   * Полная поддержка многострочного переноса текста по словам (`white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;`) в колонках ФИО, должности, рекрутера, вакансии и компании во всех 7 SCSS-темах (`halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-dark`, `hunttech-modern-light`).
-2. **Кнопка «Умная загрузка» (`#smartUploadBtn`):**
-   * Иконка `font-icon:MAGIC`, основной визуальный акцент (`stylename="primary candidate-btn candidate-smartload-btn"`).
-   * Располагается первой в командном тулбаре рядом с кнопкой создания.
+Конфигурация промпта зафиксирована в миграции `modules/core/db/changelog/260913-2-updateSmartCvParsePromptV3.xml` (`CONFIGURATION_VERSION = 3`):
+- **Правило NULL**: при отсутствии данных возвращается строго `null` (запрещены слова «Не указано», «Нет», «N/A»);
+- **Атомарность навыков**: только технологические hard skills, каждый навык отдельным элементом массива (исключены общие фразы «коммуникабельность»);
+- **Нормализация контактов**: приведение телефонов к стандарту `+7...` и Telegram без `@` и без URL;
+- **Защита от галлюцинаций**: запрет выдумывания дня и месяца рождения при указании только возраста.
 
 ---
 
-## 7. План тестирования и контроля целостности
+## 7. Набор автоматизированных тестов
 
-1. **Контрактные тесты тем и верстки:**
-   * `JobCandidateEditLayoutContractTest` — проверка 100% идентичности SCSS во всех 7 темах;
-   * `GeolocationEditFormsContractTest` & `ProjectEditLayoutContractTest` — валидация общих правил `edit-screen-shared-styles.scss`.
-2. **Бизнес-тесты сервисов:**
-   * `TextProcessingServiceBeanTest` — корректность извлечения и HTML/Plain форматирования;
-   * `SmartCvIngestServiceTest` — тестирование парсинга, дедупликации и сохранения.
+- `SmartCvIngestComprehensiveTest.java` — 13 комплексных тестов на парсинг PDF, DOCX, RTF, TXT, Apple Pages, устойчивость к битым файлам, парсинг JSON с markdown-обертками, нормализацию кириллических компаний и телефонов;
+- `SmartCvIngestServiceContractTest.java` — контрактные тесты DTO, сервисов и регистрации миграций в `db.changelog-master.xml`.
