@@ -35,6 +35,11 @@ public interface SmartOpenPositionIngestService {
     String generateCanonicalVacancyName(Grade grade, Position positionType, Project project, City city, Collection<City> additionalCities);
 
     /**
+     * Загрузка и структурированное извлечение текста вакансии по интернет-ссылке (URL).
+     */
+    String fetchTextFromUrl(String urlString);
+
+    /**
      * Создание и сохранение новой открытой вакансии, привязка проекта, грейда, навыков и города.
      */
     SmartOpenPositionIngestResult createOpenPosition(SmartOpenPositionParsedData data, ExtUser recruiter);

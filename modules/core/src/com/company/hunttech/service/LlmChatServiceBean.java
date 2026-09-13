@@ -3,6 +3,7 @@ package com.company.hunttech.service;
 import com.company.hunttech.LlmChatStreamEvent;
 import com.company.hunttech.dto.HrmDataContextSnapshot;
 import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
 import com.company.hunttech.entity.ai.AiFunctionConfiguration;
@@ -33,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -106,6 +109,8 @@ public class LlmChatServiceBean implements LlmChatService {
     private HrmChatDataRetrieverService hrmChatDataRetrieverService;
     @Inject
     private AiYandexOrchestrationService aiYandexOrchestrationService;
+    @Inject
+    private SmartOpenPositionIngestService smartOpenPositionIngestService;
     @Resource(name = "scheduler")
     private TaskScheduler scheduler;
 
@@ -193,6 +198,23 @@ public class LlmChatServiceBean implements LlmChatService {
                     return new LlmChatResponse(conversation.getId(), booking.getMessage(), "yandex", "caldav-telemost", null);
                 }
             }
+        }
+
+        if (isVacancyOpeningIntent(message.trim())) {
+            String vacancyResponse = handleVacancyOpeningIntent(user, message.trim());
+            settleObservedUsage(quota, 100, "smart-vacancy-ingest");
+            LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+            assistantMessage.setConversation(conversation);
+            assistantMessage.setRole("ASSISTANT");
+            assistantMessage.setContent(vacancyResponse);
+            assistantMessage.setSequenceNo(nextSequence + 1);
+            assistantMessage.setRequestId(requestId.trim());
+            assistantMessage.setStatus("COMPLETED");
+            assistantMessage.setProviderCode("hrm-system");
+            assistantMessage.setModelName("smart-vacancy-ingest");
+            conversation.setLastMessageAt(new Date());
+            dataManager.commit(new CommitContext(conversation, assistantMessage));
+            return new LlmChatResponse(conversation.getId(), vacancyResponse, "hrm-system", "smart-vacancy-ingest", null);
         }
 
         String messageWithHistory = buildMessageWithHistory(conversation, user, nextSequence, message.trim());
@@ -342,6 +364,26 @@ public class LlmChatServiceBean implements LlmChatService {
                 .id(session.conversationId).view("llm-chat-conversation-view").optional().orElse(null);
         ExtUser user = dataManager.load(ExtUser.class)
                 .id(session.userId).view("_minimal").optional().orElse(null);
+
+        if (isVacancyOpeningIntent(session.userMessage.getContent())) {
+            String vacancyResponse = handleVacancyOpeningIntent(user, session.userMessage.getContent());
+            session.append(vacancyResponse);
+            settleObservedUsage(session.quota, 100, "smart-vacancy-ingest");
+            LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+            assistantMessage.setConversation(conversation);
+            assistantMessage.setRole("ASSISTANT");
+            assistantMessage.setContent(vacancyResponse);
+            assistantMessage.setSequenceNo(session.nextSequence + 1);
+            assistantMessage.setRequestId(session.requestId);
+            assistantMessage.setStatus("COMPLETED");
+            assistantMessage.setProviderCode("hrm-system");
+            assistantMessage.setModelName("smart-vacancy-ingest");
+            conversation.setLastMessageAt(new Date());
+            dataManager.commit(new CommitContext(conversation, assistantMessage));
+            session.complete("COMPLETED", null);
+            publishStreamEvent(session, true);
+            return;
+        }
 
         String messageWithHistory = buildMessageWithHistory(conversation, user, session.nextSequence, session.userMessage.getContent());
         HrmDataContextSnapshot snapshot = hrmChatDataRetrieverService.retrieveContextForMessage(session.userMessage.getContent());
@@ -1090,5 +1132,112 @@ public class LlmChatServiceBean implements LlmChatService {
             throw new DevelopmentException("Требуется авторизация администратора.");
         }
         return sessionUser.getLogin();
+    }
+
+    private boolean isVacancyOpeningIntent(String message) {
+        if (message == null || message.trim().isEmpty()) return false;
+        String lower = message.trim().toLowerCase();
+        boolean hasVacancyKeyword = lower.contains("ваканси") || lower.contains("позици") || lower.contains("openposition");
+        boolean hasActionKeyword = lower.contains("открой") || lower.contains("создай") || lower.contains("добавь")
+                || lower.contains("загрузи") || lower.contains("открыть") || lower.contains("создать") || lower.contains("загрузить");
+        boolean hasVacancyUrl = (lower.contains("need.ssp-soft.com") || lower.contains("hh.ru/vacancy") || lower.contains("career.habr.com"))
+                && (hasVacancyKeyword || hasActionKeyword || lower.contains("http"));
+        return (hasVacancyKeyword && hasActionKeyword) || hasVacancyUrl;
+    }
+
+    private boolean isManagerOrDirector(ExtUser user) {
+        if (user == null) return false;
+        String login = user.getLogin() != null ? user.getLogin().toLowerCase() : "";
+        if ("admin".equals(login) || "alan".equals(login)) {
+            return true;
+        }
+        // Проверка группы пользователя
+        if (user.getGroup() != null && user.getGroup().getName() != null) {
+            String grp = user.getGroup().getName().toLowerCase();
+            if (grp.contains("менедж") || grp.contains("директор") || grp.contains("руковод") || grp.contains("управлен") || grp.contains("admin")) {
+                return true;
+            }
+        }
+        // Проверка ролей пользователя
+        if (user.getUserRoles() != null) {
+            for (com.haulmont.cuba.security.entity.UserRole ur : user.getUserRoles()) {
+                if (ur.getRole() != null && ur.getRole().getName() != null) {
+                    String r = ur.getRole().getName().toLowerCase();
+                    if (r.contains("manager") || r.contains("менедж") || r.contains("director") || r.contains("директор") || r.contains("admin")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private String handleVacancyOpeningIntent(ExtUser user, String message) {
+        if (!isManagerOrDirector(user)) {
+            log.warn("[LLM_CHAT_VACANCY] Отказ в доступе: пользователь '{}' не входит в группу Менеджеры/Директор",
+                    user != null ? user.getLogin() : "null");
+            return "⚠️ **Ограничение доступа**\n\nФункция открытия вакансий через LLM-чат доступна исключительно пользователям из групп **«Менеджеры»** и **«Директор»**.\nУ вашей учетной записи недостаточно полномочий для выполнения этого действия.";
+        }
+
+        log.info("[LLM_CHAT_VACANCY] Инициировано открытие вакансии из чата пользователем '{}'", user != null ? user.getLogin() : "null");
+        try {
+            // Извлекаем URL, если есть
+            Pattern urlPattern = Pattern.compile("(?i)(https?://[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]+)");
+            Matcher urlMatcher = urlPattern.matcher(message);
+            String targetInput = message;
+            if (urlMatcher.find()) {
+                targetInput = urlMatcher.group(1).trim();
+                log.info("[LLM_CHAT_VACANCY] Извлечен URL вакансии из сообщения: {}", targetInput);
+            } else {
+                // Если ссылки нет, очищаем команду из текста сообщения
+                targetInput = message.replaceAll("(?i)^(?:открой|создай|добавь|загрузи)(?:\\s+пожалуйста)?\\s+вакансию[:\\s]*", "").trim();
+            }
+
+            if (smartOpenPositionIngestService == null) {
+                return "❌ Сервис умного открытия вакансий недоступен.";
+            }
+
+            SmartOpenPositionParsedData parsedData = smartOpenPositionIngestService.parseVacancyText(targetInput);
+            if (parsedData == null || parsedData.getVacansyName() == null || parsedData.getVacansyName().trim().isEmpty()) {
+                return "⚠️ Не удалось распознать данные вакансии из предоставленного текста или ссылки. Пожалуйста, проверьте ссылку или описание.";
+            }
+
+            // Проверка дубликатов
+            OpenPosition duplicate = smartOpenPositionIngestService.findDuplicate(parsedData);
+            if (duplicate != null) {
+                return "⚠️ **Вакансия уже существует в базе (дубликат)**\n\n" +
+                        "В системе уже есть открытая позиция с аналогичными параметрами:\n" +
+                        "• **Наименование:** `" + duplicate.getVacansyName() + "` (ID: " + (duplicate.getVacansyID() != null ? duplicate.getVacansyID() : duplicate.getId()) + ")\n" +
+                        "• **Проект:** " + (duplicate.getProjectName() != null ? duplicate.getProjectName().getProjectName() : "-") + "\n\n" +
+                        "Создание повторного дубликата отменено согласно правилам системы.";
+            }
+
+            SmartOpenPositionIngestResult result = smartOpenPositionIngestService.createOpenPosition(parsedData, user);
+            if (!result.isSuccess() || result.getOpenPosition() == null) {
+                return "❌ Не удалось сохранить вакансию: " + result.getMessage();
+            }
+
+            OpenPosition op = result.getOpenPosition();
+            StringBuilder sb = new StringBuilder();
+            sb.append("✅ **Вакансия успешно открыта в HRM (Черновик)**\n\n");
+            sb.append("• **Наименование:** `").append(op.getVacansyName()).append("`\n");
+            sb.append("• **Проект:** ").append(op.getProjectName() != null ? op.getProjectName().getProjectName() : "Не указан").append("\n");
+            sb.append("• **Специализация:** ").append(op.getPositionType() != null ? op.getPositionType().getPositionRuName() : "Не указана").append("\n");
+            sb.append("• **Грейд:** ").append(op.getGrade() != null ? op.getGrade().getGradeName() : "Не указан").append("\n");
+            sb.append("• **Формат:** ").append(op.getRemoteWork() != null && op.getRemoteWork() == 1 ? "Удаленно" : (op.getRemoteWork() != null && op.getRemoteWork() == 2 ? "Гибрид" : "В офисе")).append("\n");
+            if (parsedData.getRequiredSkills() != null && !parsedData.getRequiredSkills().isEmpty()) {
+                sb.append("• **Ключевой стек:** ").append(String.join(", ", parsedData.getRequiredSkills())).append("\n");
+            }
+            sb.append("\n📋 **Сформированные артефакты:**\n");
+            sb.append("1. **Стандартизированное описание:** 14 обязательных разделов (коммерческая ставка скрыта).\n");
+            sb.append("2. **Чек-лист скрининга:** Must-have требования и маркеры поиска в резюме.\n");
+            sb.append("3. **Карта поиска:** Сформированы Boolean-запросы и компании-доноры.\n");
+            sb.append("4. **План интервью:** 6 структурированных блоков скрипта рекрутера.\n\n");
+            sb.append("Вакансия создана со статусом **«На проверку»** и доступна в форме **«Реестр открытых вакансий»**.");
+            return sb.toString();
+        } catch (Exception e) {
+            log.error("[LLM_CHAT_VACANCY] Ошибка при открытии вакансии из чата: " + e.getMessage(), e);
+            return "❌ Произошла ошибка при открытии вакансии: " + e.getMessage();
+        }
     }
 }

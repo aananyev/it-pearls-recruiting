@@ -102,6 +102,91 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
     }
 
     @Override
+    public String fetchTextFromUrl(String urlString) {
+        if (urlString == null || urlString.trim().isEmpty()) return "";
+        String cleanUrl = urlString.trim();
+        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+            cleanUrl = "https://" + cleanUrl;
+        }
+
+        log.info("[SMART_VACANCY_OPENING] HTTP GET запрос к странице вакансии: {}", cleanUrl);
+        try {
+            java.net.URL url = new java.net.URL(cleanUrl);
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(20000);
+            conn.setInstanceFollowRedirects(true);
+
+            int code = conn.getResponseCode();
+            log.info("[SMART_VACANCY_OPENING] HTTP статус ответа для {}: {}", cleanUrl, code);
+            if (code >= 400) {
+                log.warn("[SMART_VACANCY_OPENING] HTTP ошибка {} при загрузке страницы: {}", code, cleanUrl);
+                return "";
+            }
+
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                String structuredText = convertHtmlToStructuredText(sb.toString());
+                log.info("[SMART_VACANCY_OPENING] Извлечен структурированный текст со страницы (длина: {} символов)", structuredText.length());
+                return structuredText;
+            }
+        } catch (Exception e) {
+            log.error("[SMART_VACANCY_OPENING] Ошибка при загрузке контента по ссылке " + cleanUrl + ": " + e.getMessage(), e);
+            return "";
+        }
+    }
+
+    public static String convertHtmlToStructuredText(String html) {
+        if (html == null || html.trim().isEmpty()) return "";
+        String s = html;
+
+        // Извлекаем заголовок title, если есть
+        String titlePrefix = "";
+        Pattern titlePat = Pattern.compile("(?is)<title>(.*?)</title>");
+        Matcher titleMat = titlePat.matcher(s);
+        if (titleMat.find()) {
+            titlePrefix = titleMat.group(1).trim() + "\n\n";
+        }
+
+        s = s.replaceAll("(?is)<script.*?</script>", " ")
+                .replaceAll("(?is)<style.*?</style>", " ")
+                .replaceAll("(?is)<!--.*?-->", " ");
+
+        // Превращаем заголовки, параграфы и переносы в структурированные строки
+        s = s.replaceAll("(?i)<br\\s*/?>", "\n")
+                .replaceAll("(?i)</?(?:div|p|h[1-6]|tr|thead|tbody)[^>]*>", "\n")
+                .replaceAll("(?i)<li[^>]*>", "\n• ")
+                .replaceAll("(?i)</?li>", "\n")
+                .replaceAll("(?i)<td[^>]*>", " ")
+                .replaceAll("(?i)</td>", "  ")
+                .replaceAll("(?i)<b[^>]*>#", "\n\n#")
+                .replaceAll("<[^>]+>", " ")
+                .replaceAll("&nbsp;", " ")
+                .replaceAll("&quot;", "\"")
+                .replaceAll("&amp;", "&")
+                .replaceAll("&lt;", "<")
+                .replaceAll("&gt;", ">")
+                .replaceAll("&apos;", "'")
+                .replaceAll("&#39;", "'")
+                .replaceAll("&#937[0-9];", " ");
+
+        String result = (titlePrefix + s).replaceAll("\\r", "").replaceAll("[ \\t]+", " ").replaceAll("\\n{3,}", "\n\n").trim();
+        return result;
+    }
+
+    private static boolean isUrl(String text) {
+        if (text == null) return false;
+        String trimmed = text.trim();
+        return (trimmed.startsWith("http://") || trimmed.startsWith("https://")) && !trimmed.contains("\n") && trimmed.length() < 500;
+    }
+
+    @Override
     public SmartOpenPositionParsedData parseVacancyText(String rawText) {
         if (rawText == null || rawText.trim().isEmpty()) {
             log.warn("[SMART_VACANCY_OPENING] Запрос на парсинг с пустым текстом вакансии");
@@ -110,12 +195,22 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             return emptyData;
         }
 
+        // Если передана интернет-ссылка (например, https://need.ssp-soft.com/details?id=62630) — сначала скачиваем страницу
+        String actualSourceText = rawText.trim();
+        if (isUrl(actualSourceText)) {
+            log.info("[SMART_VACANCY_OPENING] Обнаружена интернет-ссылка в качестве входных данных: '{}'. Загрузка содержимого по HTTP...", actualSourceText);
+            String fetchedFromUrl = fetchTextFromUrl(actualSourceText);
+            if (!fetchedFromUrl.isEmpty()) {
+                actualSourceText = fetchedFromUrl + "\n\n[Источник: " + actualSourceText + "]";
+            }
+        }
+
         // Предотвращение HTML-разметки от RichTextArea: очищаем до форматированного plain text
-        String cleanedPlainText = cleanHtmlToPlainText(rawText);
-        String textForAi = !cleanedPlainText.isEmpty() ? cleanedPlainText : rawText.trim();
+        String cleanedPlainText = cleanHtmlToPlainText(actualSourceText);
+        String textForAi = !cleanedPlainText.isEmpty() ? cleanedPlainText : actualSourceText;
 
         log.info("[SMART_VACANCY_OPENING] >>> Начало парсинга текста вакансии (длина исходного: {}, очищенного: {} символов). Превью: [{}]",
-                rawText.length(), textForAi.length(), preview(textForAi, 150));
+                actualSourceText.length(), textForAi.length(), preview(textForAi, 150));
 
         SmartOpenPositionParsedData data = new SmartOpenPositionParsedData();
         data.setRawText(textForAi);
@@ -337,6 +432,9 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             log.info("[SMART_VACANCY_OPENING] Проект не указан в описании вакансии");
         }
 
+        // 4. Гарантированное формирование 4 ключевых артефактов стандарта HuntTech
+        ensureFourArtifacts(data, textForAi);
+
         log.info("[SMART_VACANCY_OPENING] <<< Итоговая структура ParsedData: name='{}', project='{}', salary={}-{}, skillsCount={}, missingFields={}",
                 data.getVacansyName(), data.getProjectName(), data.getSalaryMin(), data.getSalaryMax(),
                 data.getRequiredSkills() != null ? data.getRequiredSkills().size() : 0, data.getMissingFields());
@@ -416,24 +514,101 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
     private void fallbackHeuristicParse(String text, SmartOpenPositionParsedData data) {
         String cleanText = cleanHtmlToPlainText(text);
         String[] lines = cleanText.split("\\r?\\n");
+        String currentSection = "";
+        List<String> obligatories = new ArrayList<>();
+        List<String> desirables = new ArrayList<>();
+        List<String> taskLines = new ArrayList<>();
+
         for (String line : lines) {
             String trimmed = line.trim();
             if (trimmed.isEmpty()) continue;
 
-            // Пропускаем служебные строки с ID
-            if (trimmed.matches("(?i)^(?:[🆔\\s]*ID|🆔|запрос|номер).*?\\d+.*")) {
+            String lower = trimmed.toLowerCase();
+            if (lower.startsWith("#проект") || lower.equals("проект")) {
+                currentSection = "PROJECT";
+                continue;
+            } else if (lower.startsWith("#условия") || lower.equals("условия")) {
+                currentSection = "CONDITIONS";
+                continue;
+            } else if (lower.startsWith("#позиция") || lower.equals("позиция")) {
+                currentSection = "POSITION";
+                continue;
+            } else if (lower.startsWith("#обязательно") || lower.startsWith("#требования")) {
+                currentSection = "OBLIGATORY";
+                continue;
+            } else if (lower.startsWith("#желательно")) {
+                currentSection = "DESIRABLE";
+                continue;
+            } else if (lower.startsWith("#задачи") || lower.startsWith("#обязанности")) {
+                currentSection = "TASKS";
                 continue;
             }
 
+            // Формат работы (проверяется для любой строки текста)
+            if (lower.contains("гибрид") || lower.contains("hybrid")) {
+                data.setRemoteWork(2);
+            } else if (lower.contains("офис") || lower.contains("office") || lower.contains("onsite")) {
+                data.setRemoteWork(0);
+            } else if (lower.contains("удален") || lower.contains("remote")) {
+                data.setRemoteWork(1);
+            }
+
+            // Грейд (проверяется для любой строки текста)
+            if (data.getGradeName() == null) {
+                if (lower.contains("middle+")) data.setGradeName("Middle+");
+                else if (lower.contains("senior") || lower.contains("сеньор")) data.setGradeName("Senior");
+                else if (lower.contains("middle") || lower.contains("мидл")) data.setGradeName("Middle");
+                else if (lower.contains("lead") || lower.contains("тимлид") || lower.contains("лид")) data.setGradeName("Lead");
+                else if (lower.contains("junior") || lower.contains("джуниор")) data.setGradeName("Junior");
+            }
+
+            // Позиция / вакансия из префиксов
             if (data.getVacansyName() == null) {
-                if (trimmed.toLowerCase().startsWith("вакансия:") || trimmed.toLowerCase().startsWith("позиция:") || trimmed.toLowerCase().startsWith("должность:")) {
+                if (lower.startsWith("вакансия:") || lower.startsWith("позиция:") || lower.startsWith("должность:")) {
                     data.setVacansyName(cleanTitle(trimmed.substring(trimmed.indexOf(":") + 1).trim()));
-                } else if (trimmed.length() < 80 && (trimmed.toLowerCase().contains("developer") || trimmed.toLowerCase().contains("engineer") || trimmed.toLowerCase().contains("разработчик") || trimmed.toLowerCase().contains("аналитик") || trimmed.toLowerCase().contains("тестировщик") || trimmed.toLowerCase().contains("дизайнер") || trimmed.toLowerCase().contains("менеджер") || trimmed.toLowerCase().contains("lead") || trimmed.toLowerCase().contains("devops") || trimmed.toLowerCase().contains("architect"))) {
-                    data.setVacansyName(cleanTitle(trimmed));
+                } else if (trimmed.length() < 80 && (lower.contains("developer") || lower.contains("engineer") || lower.contains("разработчик") || lower.contains("аналитик") || lower.contains("тестировщик") || lower.contains("дизайнер") || lower.contains("менеджер") || lower.contains("lead") || lower.contains("devops") || lower.contains("architect"))) {
+                    if (!lower.startsWith("опыт") && !lower.startsWith("требован") && !lower.startsWith("стек") && !lower.startsWith("компания")) {
+                        data.setVacansyName(cleanTitle(trimmed));
+                    }
                 }
             }
 
-            // Зарплата / ставка
+            // Парсинг секций формата SSP Soft и типовых заявок
+            if ("PROJECT".equals(currentSection)) {
+                String prjCandidate = cleanTitle(trimmed.replaceAll("^[-*•—\\s]+", ""));
+                if (data.getProjectName() == null && !prjCandidate.isEmpty() && prjCandidate.length() > 2) {
+                    data.setProjectName(prjCandidate);
+                    data.setProjectFullDescription(trimmed);
+                }
+            } else if ("POSITION".equals(currentSection)) {
+                String posCandidate = trimmed.replaceAll("^[-*•—\\s]+", "").replaceAll("(?i)^(?:роль|позиция|должность)[:\\s]*", "").trim();
+                if (!posCandidate.isEmpty() && data.getVacansyName() == null) {
+                    data.setVacansyName(cleanTitle(posCandidate));
+                }
+            } else if ("CONDITIONS".equals(currentSection)) {
+                if (lower.contains("москва") || lower.contains("мск") || lower.contains("рф")) {
+                    if (data.getCityName() == null) {
+                        data.setCityName(lower.contains("москва") ? "Москва" : "РФ");
+                    }
+                }
+            } else if ("OBLIGATORY".equals(currentSection)) {
+                String item = cleanTitle(trimmed.replaceAll("^[-*•—\\s]+", ""));
+                if (!item.isEmpty() && item.length() > 2) {
+                    obligatories.add(item);
+                }
+            } else if ("DESIRABLE".equals(currentSection)) {
+                String item = cleanTitle(trimmed.replaceAll("^[-*•—\\s]+", ""));
+                if (!item.isEmpty() && item.length() > 2) {
+                    desirables.add(item);
+                }
+            } else if ("TASKS".equals(currentSection)) {
+                String item = cleanTitle(trimmed.replaceAll("^[-*•—\\s]+", ""));
+                if (!item.isEmpty() && item.length() > 2) {
+                    taskLines.add(item);
+                }
+            }
+
+            // Поиск зарплаты / ставки
             Pattern salaryPattern = Pattern.compile("(?:ставка|зп|оплата|доход)?[:\\s]*(\\d[\\d\\s]{2,})\\s*(?:-|до|—|–)\\s*(\\d[\\d\\s]{2,})\\s*(?:руб|р|rub|usd|\\$|€|рд|\\/час)?", Pattern.CASE_INSENSITIVE);
             Matcher salaryMatcher = salaryPattern.matcher(trimmed);
             if (salaryMatcher.find()) {
@@ -454,16 +629,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 }
             }
 
-            // Формат работы
-            if (trimmed.toLowerCase().contains("удален") || trimmed.toLowerCase().contains("remote")) {
-                data.setRemoteWork(1);
-            } else if (trimmed.toLowerCase().contains("гибрид") || trimmed.toLowerCase().contains("hybrid")) {
-                data.setRemoteWork(2);
-            } else if (trimmed.toLowerCase().contains("офис") || trimmed.toLowerCase().contains("office")) {
-                data.setRemoteWork(0);
-            }
-
-            // Опыт
+            // Опыт работы
             Pattern expPattern = Pattern.compile("(?:опыт|стаж).*?(\\d+)\\s*(?:лет|года|год)", Pattern.CASE_INSENSITIVE);
             Matcher expMatcher = expPattern.matcher(trimmed);
             if (expMatcher.find()) {
@@ -471,22 +637,19 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     data.setWorkExperience(Integer.parseInt(expMatcher.group(1)));
                 } catch (Exception ignored) {}
             }
-
-            // Грейд
-            if (trimmed.toLowerCase().contains("senior") || trimmed.toLowerCase().contains("сеньор")) {
-                data.setGradeName("Senior");
-            } else if (trimmed.toLowerCase().contains("middle") || trimmed.toLowerCase().contains("мидл")) {
-                data.setGradeName("Middle");
-            } else if (trimmed.toLowerCase().contains("junior") || trimmed.toLowerCase().contains("джуниор")) {
-                data.setGradeName("Junior");
-            } else if (trimmed.toLowerCase().contains("lead") || trimmed.toLowerCase().contains("тимлид") || trimmed.toLowerCase().contains("лид")) {
-                data.setGradeName("Lead");
-            }
         }
 
+        // Если заголовок не был найден в явных секциях
         if (data.getVacansyName() == null) {
             for (String l : lines) {
                 String cleanL = cleanTitle(l);
+                if (cleanL.toLowerCase().startsWith("запрос") || cleanL.toLowerCase().startsWith("id")) {
+                    String afterId = cleanL.replaceAll("(?i)^(?:запрос|id|🆔)[\\s:]*\\d+[:\\s-]*", "").trim();
+                    if (!afterId.isEmpty() && afterId.length() <= 100) {
+                        data.setVacansyName(afterId);
+                        break;
+                    }
+                }
                 if (!cleanL.isEmpty() && cleanL.length() <= 80 && !cleanL.matches("(?i)^(?:[🆔\\s]*ID|🆔|запрос|номер).*")) {
                     data.setVacansyName(cleanL);
                     break;
@@ -494,12 +657,25 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             }
         }
 
-        // Поиск навыков по ключевым словам
-        String[] popularSkills = {"Java", "Spring", "Kotlin", "Python", "PostgreSQL", "Docker", "Kubernetes", "React", "TypeScript", "JavaScript", "Go", "C#", "Kafka", "Redis", "Git", "CI/CD", "Linux", "SQL", "BPMN", "Бизнес-анализ", "Честный знак"};
+        if (data.getChecklist() == null || data.getChecklist().isEmpty()) {
+            data.setChecklist(obligatories);
+        }
+
+        // Поиск навыков по ключевым словам и из обязательных секций
         List<String> foundSkills = new ArrayList<>();
+        if (!obligatories.isEmpty()) {
+            for (String ob : obligatories) {
+                if (ob.length() <= 40 && !ob.contains(" ")) {
+                    foundSkills.add(ob);
+                }
+            }
+        }
+        String[] popularSkills = {"Java", "Spring", "Spring Boot", "Kotlin", "Python", "1C", "1С", "1С ERP", "PostgreSQL", "Docker", "Kubernetes", "React", "TypeScript", "JavaScript", "Go", "C#", "Kafka", "Redis", "Git", "CI/CD", "Linux", "SQL", "BPMN", "REST API", "Jira", "AI-Workflow"};
         for (String skill : popularSkills) {
             if (Pattern.compile("\\b" + Pattern.quote(skill) + "\\b", Pattern.CASE_INSENSITIVE).matcher(cleanText).find()) {
-                foundSkills.add(skill);
+                if (!foundSkills.contains(skill)) {
+                    foundSkills.add(skill);
+                }
             }
         }
         if (data.getRequiredSkills() == null || data.getRequiredSkills().isEmpty()) {
@@ -507,25 +683,215 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         }
     }
 
+    private void ensureFourArtifacts(SmartOpenPositionParsedData data, String sourceText) {
+        if (data == null) return;
+
+        // 1. Стандартизированное описание вакансии (14 обязательных разделов стандарта HuntTech)
+        if (data.getComment() == null || data.getComment().trim().isEmpty() || !data.getComment().contains("1. Роль") || data.getComment().length() < 200) {
+            data.setComment(buildStandardizedDescription(data, sourceText));
+        }
+
+        // 2. Чек-лист первичного скрининга кандидата (must-have)
+        if (data.getInterviewChecklist() == null || data.getInterviewChecklist().trim().isEmpty() || data.getInterviewChecklist().length() < 100) {
+            data.setInterviewChecklist(buildInterviewChecklist(data));
+        }
+
+        // 3. Карта поиска / инструкция сорсеру
+        if (data.getSearchMap() == null || data.getSearchMap().trim().isEmpty() || data.getSearchMap().length() < 100) {
+            data.setSearchMap(buildSearchMap(data));
+        }
+
+        // 4. План продающего собеседования (6 блоков)
+        if (data.getInterviewPlan() == null || data.getInterviewPlan().trim().isEmpty() || data.getInterviewPlan().length() < 100) {
+            data.setInterviewPlan(buildInterviewPlan(data));
+        }
+    }
+
+    private String buildStandardizedDescription(SmartOpenPositionParsedData data, String sourceText) {
+        String role = data.getPositionTypeName() != null ? data.getPositionTypeName() : (data.getVacansyName() != null ? data.getVacansyName() : "НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.");
+        String grade = (data.getGradeName() != null ? data.getGradeName() : "Middle+") + ", опыт от " + (data.getWorkExperience() != null ? data.getWorkExperience() : 3) + " лет";
+        String proj = data.getProjectFullDescription() != null ? data.getProjectFullDescription() : (data.getProjectName() != null ? data.getProjectName() : "НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<b>1. Роль, название должности</b>\n").append(role).append("\n\n");
+        sb.append("<b>2. Грейд, опыт работы</b>\n").append(grade).append("\n\n");
+        sb.append("<b>3. Описание проекта</b>\n").append(proj).append("\n\n");
+        sb.append("<b>4. Обязанности</b>\n");
+        if (data.getChecklist() != null && !data.getChecklist().isEmpty()) {
+            for (String ch : data.getChecklist()) {
+                sb.append("• ").append(ch).append("\n");
+            }
+        } else {
+            sb.append("НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.\n");
+        }
+        sb.append("\n<b>5. Описание требований к вакансии (Хард-скиллы) обязательные</b>\n");
+        if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
+            for (String s : data.getRequiredSkills()) {
+                sb.append("• ").append(s).append("\n");
+            }
+        } else {
+            sb.append("НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.\n");
+        }
+        sb.append("\n<b>6. Описание требований к вакансии (Хард-скиллы) желательные</b>\n");
+        sb.append("• Опыт работы в кросс-функциональных командах\n• Понимание CI/CD и современных процессов разработки\n\n");
+        sb.append("<b>7. Требования к софт-скиллам</b>\n");
+        sb.append("• Высокие коммуникативные навыки, ответственность, системность мышления\n• Умение работать в распределенной команде и договариваться с заказчиками\n\n");
+        sb.append("<b>8. Дополнительная информация</b>\n");
+        String loc = data.getCityName() != null ? ("Локация: " + data.getCityName() + ". ") : "";
+        sb.append(loc).append("Оформление по ТК РФ или ИП/ГПХ. Долгосрочное сотрудничество.\n\n");
+        sb.append("<b>9. Условия работы</b>\n");
+        String rw = (data.getRemoteWork() != null && data.getRemoteWork() == 1) ? "Удаленный формат работы" : ((data.getRemoteWork() != null && data.getRemoteWork() == 2) ? "Гибридный формат" : "Работа в офисе");
+        sb.append("• ").append(rw).append("\n• График: полная занятость (МСК ± 2 часа)\n• Ставка обсуждается индивидуально с успешным кандидатом\n\n");
+        sb.append("<b>10. Список обязательных знаний технологий</b>\n");
+        sb.append(!data.getRequiredSkills().isEmpty() ? String.join(", ", data.getRequiredSkills()) : "НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.").append("\n\n");
+        sb.append("<b>11. Список желательных знаний технологий</b>\n");
+        sb.append("Git, Docker, Jira, Confluence, Linux\n\n");
+        sb.append("<b>12. Требования к резюме</b>\n");
+        sb.append("Резюме с подробным описанием коммерческого опыта, используемого стека и выполненных задач на проектах.\n\n");
+        sb.append("<b>13. Собеседование</b>\n");
+        sb.append("1. Первичное скрининг-интервью с рекрутером (30 мин).\n2. Техническое интервью с лидом проекта (60 мин).\n\n");
+        sb.append("<b>14. Рекомендации рекрутеру</b>\n");
+        sb.append("Сфокусироваться на подтвержденном практическом опыте решения производственных задач и соответствии must-have стеку проекта.");
+        return sb.toString();
+    }
+
+    private String buildInterviewChecklist(SmartOpenPositionParsedData data) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("### Чек-лист первичного скрининга кандидата (Must-Have критерии)\n\n");
+        sb.append("| Группа навыков | Конкретный навык / Вопрос для проверки | Ключевой навык? | Отметка / Примечания рекрутера | Где искать в резюме? |\n");
+        sb.append("| --- | --- | --- | --- | --- |\n");
+
+        String expYears = (data.getWorkExperience() != null ? data.getWorkExperience() : 3) + "+ лет";
+        sb.append("| Опыт и домен | Коммерческий опыт разработки/анализа от ").append(expYears).append(" | Да | | Раздел «Опыт работы» |\n");
+
+        if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
+            for (String skill : data.getRequiredSkills()) {
+                sb.append("| Ключевые технологии | Уверенное практическое владение ").append(skill).append(" (какие задачи решались?) | Да | | Стек проектов, навыки |\n");
+            }
+        } else {
+            sb.append("| Ключевые технологии | Соответствие заявленному технологическому профилю | Да | | Опыт работы, ключевые навыки |\n");
+        }
+
+        sb.append("| Формат и условия | Готовность работать в графике МСК, гражданство/локация | Да | | Шапка резюме, локация |\n");
+        return sb.toString();
+    }
+
+    private String buildSearchMap(SmartOpenPositionParsedData data) {
+        String role = data.getPositionTypeName() != null ? data.getPositionTypeName() : (data.getVacansyName() != null ? data.getVacansyName() : "IT Specialist");
+        String skillsStr = (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty())
+                ? String.join("\" AND \"", data.getRequiredSkills()) : "Java";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("### Карта поиска / Инструкция сорсеру и рекрутеру\n\n");
+        sb.append("**Целевая роль:** ").append(role).append("\n");
+        sb.append("**Целевой грейд:** ").append(data.getGradeName() != null ? data.getGradeName() : "Middle / Senior").append("\n");
+        sb.append("**Локация:** ").append(data.getCityName() != null ? data.getCityName() : "РФ (Удаленно)").append("\n\n");
+        sb.append("#### 1. Ключевые слова для поиска (Boolean Search)\n");
+        sb.append("```\n");
+        sb.append("(\"").append(role).append("\") AND (\"").append(skillsStr).append("\")\n");
+        sb.append("site:hh.ru/resume (\"").append(role).append("\") AND (\"").append(skillsStr).append("\")\n");
+        sb.append("site:linkedin.com/in (\"").append(role).append("\") AND (\"").append(skillsStr).append("\")\n");
+        sb.append("```\n\n");
+        sb.append("#### 2. Компании-доноры кандидатов\n");
+        sb.append("• Ведущие системные интеграторы и IT-аутстаффинговые компании (КРОК, ЛАНИТ, Bell Integrator, IBS, EPAM)\n");
+        sb.append("• Крупные продуктовые и финтех-компании с релевантным технологическим стеком\n\n");
+        sb.append("#### 3. Стоп-факторы при первичном отборе\n");
+        sb.append("• Отсутствие подтвержденного коммерческого опыта по ключевому стеку\n");
+        sb.append("• Несовпадение по часовому поясу (требуется рабочий день по МСК)\n");
+        sb.append("• Частая смена мест работы (менее 6 месяцев на проекте)");
+        return sb.toString();
+    }
+
+    private String buildInterviewPlan(SmartOpenPositionParsedData data) {
+        String projName = data.getProjectName() != null ? data.getProjectName() : "Корпоративный проект";
+        String vacName = data.getVacansyName() != null ? data.getVacansyName() : "Позиция в проектную команду";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("### План продающего собеседования с кандидатом\n\n");
+        sb.append("#### 1. Введение и презентация компании HuntTech (5–7 минут)\n");
+        sb.append("• Приветствие кандидата, установление контакта, снятие барьера «просто агентство».\n");
+        sb.append("• Презентация экспертизы: HuntTech — аккредитованная IT-компания, системный партнер крупных заказчиков, развивающая собственные продукты и проектные команды.\n\n");
+        sb.append("#### 2. Презентация проекта и его уникальности (8–10 минут)\n");
+        sb.append("• Проект: ").append(projName).append(". Вакансия: ").append(vacName).append(".\n");
+        sb.append("• Масштаб задач: стабильный долгосрочный проект, современный стек, сильная инженерная культура и возможность профессионального роста.\n\n");
+        sb.append("#### 3. Проверка по чек-листу ключевых требований (15–20 минут)\n");
+        sb.append("• Вопросы по практическому коммерческому опыту кандидата.\n");
+        sb.append("• Валидация владения ключевыми технологиями и архитектурными подходами.\n");
+        sb.append("• Выявление реализованных кейсов и зоны ответственности кандидата на прошлых проектах.\n\n");
+        sb.append("#### 4. Продажа условий работы (5–7 минут)\n");
+        sb.append("• Комфортный формат сотрудничества (удаленная работа, современная техника, гибкие условия).\n");
+        sb.append("• Прозрачные процессы оформления и своевременные выплаты.\n\n");
+        sb.append("#### 5. Ответы на вопросы кандидата (5–7 минут)\n");
+        sb.append("• Ответы на вопросы о команде, этапах отбора, процессах релиза и коммуникациях.\n\n");
+        sb.append("#### 6. Следующие шаги и фиксация договоренностей (3–5 минут)\n");
+        sb.append("• Озвучивание дедлайна по обратной связи (в течение 1-2 рабочих дней).\n");
+        sb.append("• Подготовка кандидата к техническому интервью с лидом проекта.");
+        return sb.toString();
+    }
+
     @Override
     public OpenPosition findDuplicate(SmartOpenPositionParsedData data) {
-        if (data == null || data.getVacansyName() == null) return null;
-        String cleanName = cleanTitle(data.getVacansyName());
-        if (cleanName.isEmpty()) return null;
+        if (data == null) return null;
+        String cleanName = data.getVacansyName() != null ? cleanTitle(data.getVacansyName()) : "";
 
-        log.info("[SMART_VACANCY_OPENING] Поиск дубликата для вакансии: '{}'", cleanName);
-        List<OpenPosition> list = dataManager.load(OpenPosition.class)
-                .query("select e from hunttech_OpenPosition e where lower(e.vacansyName) = lower(:name) and e.openClose = false")
-                .parameter("name", cleanName)
-                .view("openPosition-browse-view")
-                .maxResults(1)
-                .list();
-        if (!list.isEmpty()) {
-            OpenPosition duplicate = list.get(0);
-            log.info("[SMART_VACANCY_OPENING] Найдена существующая открытая вакансия (дубликат): ID={}, vacansyID={}, name='{}'",
-                    duplicate.getId(), duplicate.getVacansyID(), duplicate.getVacansyName());
-            return duplicate;
+        log.info("[SMART_VACANCY_OPENING] Поиск дубликата для вакансии: '{}', проект: '{}'", cleanName, data.getProjectName());
+
+        // 1. Поиск по точному наименованию вакансии
+        if (!cleanName.isEmpty()) {
+            List<OpenPosition> list = dataManager.load(OpenPosition.class)
+                    .query("select e from hunttech_OpenPosition e where lower(e.vacansyName) = lower(:name) and e.openClose = false")
+                    .parameter("name", cleanName)
+                    .view("openPosition-browse-view")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) {
+                OpenPosition duplicate = list.get(0);
+                log.info("[SMART_VACANCY_OPENING] Найдена существующая открытая вакансия (дубликат по имени): ID={}, vacansyID={}, name='{}'",
+                        duplicate.getId(), duplicate.getVacansyID(), duplicate.getVacansyName());
+                return duplicate;
+            }
         }
+
+        // 2. Поиск по проекту и названию должности / специализации
+        if (data.getProjectName() != null && !data.getProjectName().trim().isEmpty() &&
+                data.getPositionTypeName() != null && !data.getPositionTypeName().trim().isEmpty()) {
+            String cleanProj = cleanTitle(data.getProjectName());
+            String cleanPos = cleanTitle(data.getPositionTypeName());
+            List<OpenPosition> projList = dataManager.load(OpenPosition.class)
+                    .query("select e from hunttech_OpenPosition e where lower(e.projectName.projectName) like lower(:proj) and (lower(e.positionType.positionRuName) like lower(:pos) or lower(e.positionType.positionEnName) like lower(:pos)) and e.openClose = false")
+                    .parameter("proj", "%" + cleanProj + "%")
+                    .parameter("pos", "%" + cleanPos + "%")
+                    .view("openPosition-browse-view")
+                    .maxResults(1)
+                    .list();
+            if (!projList.isEmpty()) {
+                OpenPosition duplicate = projList.get(0);
+                log.info("[SMART_VACANCY_OPENING] Найдена существующая открытая вакансия (дубликат по проекту и должности): ID={}, vacansyID={}, name='{}'",
+                        duplicate.getId(), duplicate.getVacansyID(), duplicate.getVacansyName());
+                return duplicate;
+            }
+        }
+
+        // 3. Поиск по ID запроса в исходном тексте или названии (например, 62630 или 67451)
+        String raw = data.getRawText() != null ? data.getRawText() : "";
+        Pattern idPat = Pattern.compile("(?i)(?:ID|запрос|id=)\\s*(\\d{4,7})");
+        Matcher idMat = idPat.matcher(raw);
+        if (idMat.find()) {
+            String reqId = idMat.group(1);
+            List<OpenPosition> idList = dataManager.load(OpenPosition.class)
+                    .query("select e from hunttech_OpenPosition e where (lower(e.vacansyName) like :reqId or lower(e.rawDescription) like :reqId or lower(e.comment) like :reqId) and e.openClose = false")
+                    .parameter("reqId", "%" + reqId + "%")
+                    .view("openPosition-browse-view")
+                    .maxResults(1)
+                    .list();
+            if (!idList.isEmpty()) {
+                OpenPosition duplicate = idList.get(0);
+                log.info("[SMART_VACANCY_OPENING] Найдена существующая открытая вакансия (дубликат по ID запроса {}): ID={}, vacansyID={}, name='{}'",
+                        reqId, duplicate.getId(), duplicate.getVacansyID(), duplicate.getVacansyName());
+                return duplicate;
+            }
+        }
+
         log.info("[SMART_VACANCY_OPENING] Дубликатов для вакансии '{}' не обнаружено", cleanName);
         return null;
     }

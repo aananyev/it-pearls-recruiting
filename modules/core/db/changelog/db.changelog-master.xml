@@ -229,5 +229,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-3-add-user-yandex-configuration.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-addEnhancedSmartVacancyParseAiFunction.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

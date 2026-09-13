@@ -190,4 +190,110 @@ public class SmartOpenPosition10VacanciesIngestTest {
         assertEquals(Integer.valueOf(-2), OpenPositionPriority.UNDER_REVIEW.getId());
         assertEquals(OpenPositionPriority.UNDER_REVIEW, OpenPositionPriority.fromId(-2));
     }
+
+    @Test
+    public void testVacancySSP_62630_Analyst1C() {
+        String htmlOrText = "ID 62630 Аналитик 1С\n" +
+                "#Проект\n" +
+                "Сбытовая и сервисная компания немецкого концерна в России, отвечающая за продажу, маркетинг и техническое обслуживание сельхозтехники.\n" +
+                "#Условия\n" +
+                "* Длительность: от 3 месяцев\n" +
+                "* Занятость: полная\n" +
+                "* Локация: РФ\n" +
+                "* Гражданство: РФ\n" +
+                "* Рабочий график: по МСК ±2 часа\n" +
+                "* Формат: удаленная работа\n" +
+                "#Позиция\n" +
+                "* Аналитик 1С\n" +
+                "* Middle+; Senior\n" +
+                "#Обязательно\n" +
+                "* Конфигурация 1С ERP Управление предприятием\n" +
+                "* Предметная область Регламентированный бухгалтерский и налоговый учет (РСБУНУ)\n" +
+                "* Разработка технических заданий (ТЗ)\n" +
+                "#Желательно\n" +
+                "* Запросы SQL\n" +
+                "#Задачи\n" +
+                "* Первая линия поддержки пользователей конфигурации 1С ERP Управление предприятием";
+
+        SmartOpenPositionParsedData data = service.parseVacancyText(htmlOrText);
+        assertNotNull(data);
+        assertNotNull(data.getVacansyName());
+        assertTrue(data.getVacansyName().contains("Аналитик 1С"));
+        assertNotNull(data.getProjectName());
+        assertTrue(data.getProjectName().contains("Сбытовая и сервисная"));
+        assertEquals(Integer.valueOf(1), data.getRemoteWork());
+        assertEquals("Middle+", data.getGradeName());
+
+        // Проверка обязательного наличия 4 ключевых артефактов стандарта HuntTech
+        assertNotNull("Стандартизированное описание должно быть сформировано", data.getComment());
+        assertTrue(data.getComment().contains("1. Роль, название должности"));
+        assertTrue(data.getComment().contains("9. Условия работы"));
+        assertFalse("Ставки заказчика не должны быть разглашены в описании", data.getComment().contains("2200"));
+
+        assertNotNull("Чек-лист первичного скрининга должен быть сформирован", data.getInterviewChecklist());
+        assertTrue(data.getInterviewChecklist().contains("Чек-лист"));
+        assertTrue(data.getInterviewChecklist().contains("Ключевой навык?"));
+
+        assertNotNull("Карта поиска сорсера должна быть сформирована", data.getSearchMap());
+        assertTrue(data.getSearchMap().contains("Boolean Search"));
+
+        assertNotNull("План собеседования должен быть сформирован", data.getInterviewPlan());
+        assertTrue(data.getInterviewPlan().contains("Введение и презентация компании HuntTech"));
+        assertTrue(data.getInterviewPlan().contains("Проверка по чек-листу"));
+    }
+
+    @Test
+    public void testVacancySSP_67451_JavaVibeCoding() {
+        String text = "ID 67451 Java Разработчик (AI-first vibe-coding)\n" +
+                "#Проект\n" +
+                "- МБ ЦК ITG (МБ. ЦК ITGovernance)\n" +
+                "#Условия\n" +
+                "- Длительность: долгосрочный\n" +
+                "- Занятость: полная\n" +
+                "- Локация: РФ, РБ\n" +
+                "- Рабочий график: МСК ±2 часа\n" +
+                "- Формат: Удаленно\n" +
+                "#Позиция\n" +
+                "- Роль: Vibe-кодинг трекинговой системы (Java)\n" +
+                "- Уровень: Middle\n" +
+                "- Количество: 1\n" +
+                "#Обязательно\n" +
+                "- AI-Workflow и процесс разработки: ежедневная работа с AI-код-агентами от 6+ месяцев\n" +
+                "- Опыт работы с REST API интеграциями (в т.ч. с JIRA API)\n" +
+                "- Инженерная база: опыт промышленной backend-разработки от 3-х лет, понимание CI/CD и Git flow\n" +
+                "#Задачи\n" +
+                "- Участие в пилотном проекте по запуску таск-трекинговой системы на собственной платформе с применением vibe-coding";
+
+        SmartOpenPositionParsedData data = service.parseVacancyText(text);
+        assertNotNull(data);
+        assertNotNull(data.getVacansyName());
+        assertTrue(data.getVacansyName().contains("Java"));
+        assertNotNull(data.getProjectName());
+        assertTrue(data.getProjectName().contains("МБ ЦК ITG"));
+        assertEquals("Middle", data.getGradeName());
+        assertEquals(Integer.valueOf(1), data.getRemoteWork());
+
+        assertNotNull(data.getComment());
+        assertTrue(data.getComment().contains("1. Роль, название должности"));
+        assertNotNull(data.getInterviewChecklist());
+        assertNotNull(data.getSearchMap());
+        assertNotNull(data.getInterviewPlan());
+    }
+
+    @Test
+    public void testConvertHtmlToStructuredText() {
+        String sampleHtml = "<!DOCTYPE html><html><head><title>Запрос 62630 Аналитик 1С</title></head><body>" +
+                "<table class=\"table\"><tr><th>ID 62630 Аналитик 1С</th></tr>" +
+                "<tr><td><b>#Проект</b><br/>Сбытовая компания немецкого концерна</td></tr>" +
+                "<tr><td><b>#Условия</b><br/>* Локация: РФ<br/>* Формат: удаленная работа</td></tr>" +
+                "</table></body></html>";
+
+        String converted = SmartOpenPositionIngestServiceBean.convertHtmlToStructuredText(sampleHtml);
+        assertNotNull(converted);
+        assertTrue(converted.contains("Запрос 62630"));
+        assertTrue(converted.contains("#Проект"));
+        assertTrue(converted.contains("Сбытовая компания"));
+        assertFalse(converted.contains("<table"));
+        assertFalse(converted.contains("</td>"));
+    }
 }

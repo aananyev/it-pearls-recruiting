@@ -202,7 +202,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
         BackgroundTask<Integer, SmartOpenPositionParsedData> task = new BackgroundTask<Integer, SmartOpenPositionParsedData>(120, this) {
             @Override
             public SmartOpenPositionParsedData run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                String rawText = fetchTextFromUrl(urlString);
+                String rawText = smartOpenPositionIngestService.fetchTextFromUrl(urlString);
                 if (rawText == null || rawText.trim().isEmpty()) {
                     throw new IllegalStateException("Не удалось извлечь текст по указанной ссылке: " + urlString);
                 }
@@ -231,48 +231,6 @@ public class SmartOpenPositionUploadScreen extends Screen {
         };
 
         backgroundWorker.handle(task).execute();
-    }
-
-    private String fetchTextFromUrl(String urlString) throws Exception {
-        if (urlString == null || urlString.trim().isEmpty()) return null;
-        String cleanUrl = urlString.trim();
-        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
-            cleanUrl = "https://" + cleanUrl;
-        }
-
-        log.info("[SMART_VACANCY_OPENING_UI] HTTP GET запрос к странице вакансии: {}", cleanUrl);
-        java.net.URL url = new java.net.URL(cleanUrl);
-        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-        conn.setConnectTimeout(15000);
-        conn.setReadTimeout(20000);
-
-        int code = conn.getResponseCode();
-        log.info("[SMART_VACANCY_OPENING_UI] HTTP статус ответа для {}: {}", cleanUrl, code);
-        if (code >= 400) {
-            throw new IllegalStateException("HTTP ошибка " + code + " при открытии страницы");
-        }
-
-        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-            String html = sb.toString();
-            // Простое извлечение видимого текста
-            String text = html.replaceAll("(?is)<script.*?</script>", " ")
-                    .replaceAll("(?is)<style.*?</style>", " ")
-                    .replaceAll("<[^>]+>", " ")
-                    .replaceAll("&nbsp;", " ")
-                    .replaceAll("&quot;", "\"")
-                    .replaceAll("&amp;", "&")
-                    .replaceAll("\\s+", " ")
-                    .trim();
-            log.info("[SMART_VACANCY_OPENING_UI] Извлечен видимый текст со страницы (длина: {} символов)", text.length());
-            return text;
-        }
     }
 
     private void runAsyncFileAnalysis(File file) {

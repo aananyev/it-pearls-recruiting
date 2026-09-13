@@ -42,7 +42,7 @@ configurations.all {
 cuba {
     artifact {
               group = 'com.company.hunttech'
-              version = '0.579'
+              version = '0.580'
               isSnapshot = true
           }
     tomcat {
