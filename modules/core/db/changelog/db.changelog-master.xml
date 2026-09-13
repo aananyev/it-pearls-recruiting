@@ -231,5 +231,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-addEnhancedSmartVacancyParseAiFunction.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-updateStandardizeVacancyPrompt.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

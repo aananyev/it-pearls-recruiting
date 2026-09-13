@@ -715,7 +715,14 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         StringBuilder sb = new StringBuilder();
         sb.append("<b>1. Роль, название должности</b>\n").append(role).append("\n\n");
         sb.append("<b>2. Грейд, опыт работы</b>\n").append(grade).append("\n\n");
-        sb.append("<b>3. Описание проекта</b>\n").append(proj).append("\n\n");
+        sb.append("<b>3. Описание проекта</b>\n");
+        if (data.getProjectFullDescription() != null && !data.getProjectFullDescription().trim().isEmpty()) {
+            sb.append(data.getProjectFullDescription()).append("\n\n");
+        } else if (data.getProjectShortDescription() != null && !data.getProjectShortDescription().trim().isEmpty()) {
+            sb.append(data.getProjectShortDescription()).append("\n\n");
+        } else {
+            sb.append(proj).append("\n\n");
+        }
         sb.append("<b>4. Обязанности</b>\n");
         if (data.getChecklist() != null && !data.getChecklist().isEmpty()) {
             for (String ch : data.getChecklist()) {
@@ -737,8 +744,10 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         sb.append("<b>7. Требования к софт-скиллам</b>\n");
         sb.append("• Высокие коммуникативные навыки, ответственность, системность мышления\n• Умение работать в распределенной команде и договариваться с заказчиками\n\n");
         sb.append("<b>8. Дополнительная информация</b>\n");
-        String loc = data.getCityName() != null ? ("Локация: " + data.getCityName() + ". ") : "";
-        sb.append(loc).append("Оформление по ТК РФ или ИП/ГПХ. Долгосрочное сотрудничество.\n\n");
+        String loc = data.getCityName() != null ? ("Локация / география: " + data.getCityName() + " (РФ, РБ). ") : "Локация: РФ, РБ. ";
+        sb.append("• ").append(loc).append("Часовой пояс: МСК ± 2 часа.\n");
+        sb.append("• Формат оформления: по ТК РФ или ИП/ГПХ. Долгосрочное сотрудничество.\n");
+        sb.append("• Проверки: прохождение внутренней проверки службы безопасности заказчика.\n\n");
         sb.append("<b>9. Условия работы</b>\n");
         String rw = (data.getRemoteWork() != null && data.getRemoteWork() == 1) ? "Удаленный формат работы" : ((data.getRemoteWork() != null && data.getRemoteWork() == 2) ? "Гибридный формат" : "Работа в офисе");
         sb.append("• ").append(rw).append("\n• График: полная занятость (МСК ± 2 часа)\n• Ставка обсуждается индивидуально с успешным кандидатом\n\n");
@@ -747,11 +756,17 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         sb.append("<b>11. Список желательных знаний технологий</b>\n");
         sb.append("Git, Docker, Jira, Confluence, Linux\n\n");
         sb.append("<b>12. Требования к резюме</b>\n");
-        sb.append("Резюме с подробным описанием коммерческого опыта, используемого стека и выполненных задач на проектах.\n\n");
+        sb.append("• Экспресс-скрининг (30 секунд): в опыте за последние 1-2 года должен быть явно подтвержден Core-стек (").append(!data.getRequiredSkills().isEmpty() ? String.join(", ", data.getRequiredSkills()) : "ключевые технологии роли").append(").\n");
+        sb.append("• Описание коммерческих проектов с указанием решаемых задач, архитектурных подходов и личного вклада кандидата.\n");
+        sb.append("• В резюме обязательно должны быть указаны текущая локация, гражданство и готовность к полной занятости.\n\n");
         sb.append("<b>13. Собеседование</b>\n");
         sb.append("1. Первичное скрининг-интервью с рекрутером (30 мин).\n2. Техническое интервью с лидом проекта (60 мин).\n\n");
         sb.append("<b>14. Рекомендации рекрутеру</b>\n");
-        sb.append("Сфокусироваться на подтвержденном практическом опыте решения производственных задач и соответствии must-have стеку проекта.");
+        sb.append("• Elevator Pitch: «Ищем опытного ").append(role).append(" в проект ").append(data.getProjectName() != null ? data.getProjectName() : "заказчика").append(" на полный удаленный формат без лишней бюрократии с современным стеком задач».\n");
+        sb.append("• Selling Points: полная стабильная удаленка, масштабный продукт, быстрое согласование кандидатов, прозрачные выплаты.\n");
+        sb.append("• Красные флаги отсева: отсутствие подтвержденного практического опыта с Core-стеком, частая смена мест (менее 6 мес.), опыт только в саппорте при требовании разработки с нуля.\n");
+        String topSkill = !data.getRequiredSkills().isEmpty() ? data.getRequiredSkills().get(0) : "ключевой технологии";
+        sb.append("• Контрольный вопрос для скрининга: «Расскажите о самом сложном кейсе использования ").append(topSkill).append(" на ваших последних проектах: какую проблему решали и каков был результат?»");
         return sb.toString();
     }
 
