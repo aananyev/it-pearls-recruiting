@@ -130,6 +130,8 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private Button navTabAi;
     @Inject
     private Button navTabGeo;
+    @Inject
+    private Button navTabYandex;
 
     @Inject
     private VBoxLayout geoSettingsNavigation;
@@ -175,6 +177,7 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         bindTabNavButton(navTabMail, "mailAccessTab");
         bindTabNavButton(navTabAi, "aiAccessTab");
         bindTabNavButton(navTabGeo, "geoApiAccessTab");
+        bindTabNavButton(navTabYandex, "yandexServicesTab");
     }
 
     private void bindTabNavButton(Button btn, String tabName) {
@@ -222,6 +225,7 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         setTabNavButtonActive(navTabMail, "mailAccessTab".equals(tabName));
         setTabNavButtonActive(navTabAi, "aiAccessTab".equals(tabName));
         setTabNavButtonActive(navTabGeo, "geoApiAccessTab".equals(tabName));
+        setTabNavButtonActive(navTabYandex, "yandexServicesTab".equals(tabName));
     }
 
     private void setTabNavButtonActive(Button btn, boolean active) {

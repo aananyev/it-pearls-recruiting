@@ -25,6 +25,11 @@
                               view="userAiConfiguration-view">
             <query><![CDATA[select e from hunttech_UserAiConfiguration e where e.user = :ds$extUserDs]]></query>
         </collectionDatasource>
+        <!-- Настройки сервисов Yandex 360 (CalDAV, Телемост, Wiki, Почта) -->
+        <datasource id="userYandexConfigDs"
+                    class="com.company.hunttech.entity.UserYandexConfiguration"
+                    view="userYandexConfiguration-view"
+                    allowCommit="true"/>
     </dsContext>
 
     <!-- Полновысотный Split-View: фиксированный сайдбар слева на всю высоту экрана, TabSheet и рабочая область справа -->
@@ -95,6 +100,7 @@
                             <button id="navTabMail" caption="msg://msgEmailSettings" icon="ENVELOPE" width="100%" stylename="borderless label-nav-item"/>
                             <button id="navTabAi" caption="msg://msgAiSettings" icon="SLIDERS" width="100%" stylename="borderless label-nav-item"/>
                             <button id="navTabGeo" caption="msg://msgGeoApiSettings" icon="GLOBE" width="100%" stylename="borderless label-nav-item"/>
+                            <button id="navTabYandex" caption="msg://msgYandexSettings" icon="CLOUD" width="100%" stylename="borderless label-nav-item"/>
                         </vbox>
 
                         <!-- Сводка и статус: секция с заголовком по стандарту edit-screen-design -->
@@ -608,6 +614,89 @@
                                                   stylename="ai-settings-preference-checkbox bold"/>
                                         <label value="msg://msgGeoAutoFetchFlagsHint" width="100%" stylename="ai-settings-help edit-help"/>
                                     </vbox>
+                                </vbox>
+                            </vbox>
+                        </scrollBox>
+                    </tab>
+
+                    <!-- ВКЛАДКА 6: СЕРВИСЫ YANDEX 360 -->
+                    <tab id="yandexServicesTab" caption="msg://msgYandexSettings" margin="false" spacing="true">
+                        <scrollBox id="yandexSettingsScrollBox"
+                                   width="100%"
+                                   height="100%"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   stylename="edit-workspace-scroll">
+                            <vbox id="yandexSettingsContent" width="100%" spacing="true" stylename="edit-workspace-content">
+                                <hbox id="yandexSettingsToolbar" width="100%" spacing="true" expand="yandexSettingsTitleBox" stylename="edit-toolbar">
+                                    <vbox id="yandexSettingsTitleBox" width="100%" spacing="false">
+                                        <label value="msg://yandexSettingsPageTitle" stylename="h1 edit-toolbar-title"/>
+                                        <label value="msg://yandexSettingsPageDescription" width="100%" stylename="settings-section-help edit-toolbar-description edit-help"/>
+                                    </vbox>
+                                    <buttonsPanel id="yandexToolbarButtons" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
+                                        <button id="testYandexAuthBtn" caption="msg://msgTestYandexAuth" icon="KEY" stylename="friendly" invoke="onTestYandexAuthClick"/>
+                                    </buttonsPanel>
+                                </hbox>
+
+                                <!-- Карточка 1: Авторизация и аккаунт -->
+                                <vbox id="yandexAccountCard" width="100%" spacing="true" stylename="edit-card">
+                                    <label value="msg://yandexAccountCardTitle" stylename="h3 edit-card-title"/>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <textField id="yandexAccountEmailField" datasource="userYandexConfigDs" property="accountEmail" caption="msg://msgYandexAccountEmail" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <passwordField id="yandexOauthTokenField" caption="msg://msgYandexOauthToken" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <passwordField id="yandexRefreshTokenField" caption="msg://msgYandexRefreshToken" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <label id="yandexStatusLabel" width="100%" box.expandRatio="1" align="MIDDLE_LEFT" stylename="bold edit-help"/>
+                                    </hbox>
+                                </vbox>
+
+                                <!-- Карточка 2: Календарь CalDAV -->
+                                <vbox id="yandexCalendarCard" width="100%" spacing="true" stylename="edit-card">
+                                    <hbox width="100%" spacing="true" expand="yandexCalendarTitle">
+                                        <label id="yandexCalendarTitle" value="msg://yandexCalendarCardTitle" stylename="h3 edit-card-title"/>
+                                        <button id="discoverCalendarsBtn" caption="msg://msgDiscoverCalendars" icon="REFRESH" stylename="secondary" invoke="onDiscoverCalendarsClick"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <textField id="personalCalendarNameField" datasource="userYandexConfigDs" property="personalCalendarName" caption="msg://msgYandexPersonalCalendar" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <textField id="clientInterviewCalendarNameField" datasource="userYandexConfigDs" property="clientInterviewCalendarName" caption="msg://msgYandexClientCalendar" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <lookupField id="defaultTimeZoneField" datasource="userYandexConfigDs" property="defaultTimeZone" caption="msg://msgYandexTimeZone" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <textField id="calendarBaseUrlField" datasource="userYandexConfigDs" property="calendarBaseUrl" caption="msg://UserYandexConfiguration.calendarBaseUrl" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
+                                </vbox>
+
+                                <!-- Карточка 3: Телемост -->
+                                <vbox id="yandexTelemostCard" width="100%" spacing="true" stylename="edit-card">
+                                    <hbox width="100%" spacing="true" expand="yandexTelemostTitle">
+                                        <label id="yandexTelemostTitle" value="msg://yandexTelemostCardTitle" stylename="h3 edit-card-title"/>
+                                        <button id="testTelemostBtn" caption="msg://msgTestTelemost" icon="PLAY" stylename="secondary" invoke="onTestTelemostClick"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <vbox width="100%" box.expandRatio="1" spacing="true">
+                                            <checkBox id="telemostAutoRecordField" datasource="userYandexConfigDs" property="telemostAutoRecord" caption="msg://msgYandexTelemostAutoRecord" stylename="bold"/>
+                                        </vbox>
+                                        <vbox width="100%" box.expandRatio="1" spacing="true">
+                                            <checkBox id="telemostAiSummaryField" datasource="userYandexConfigDs" property="telemostAiSummary" caption="msg://msgYandexTelemostAiSummary" stylename="bold"/>
+                                        </vbox>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <lookupField id="telemostDefaultAccessLevelField" datasource="userYandexConfigDs" property="telemostDefaultAccessLevel" caption="msg://msgYandexTelemostAccessLevel" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <textField id="telemostBaseUrlField" datasource="userYandexConfigDs" property="telemostBaseUrl" caption="msg://UserYandexConfiguration.telemostBaseUrl" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
+                                </vbox>
+
+                                <!-- Карточка 4: Корпоративная Wiki -->
+                                <vbox id="yandexWikiCard" width="100%" spacing="true" stylename="edit-card">
+                                    <hbox width="100%" spacing="true" expand="yandexWikiTitle">
+                                        <label id="yandexWikiTitle" value="msg://yandexWikiCardTitle" stylename="h3 edit-card-title"/>
+                                        <button id="testWikiBtn" caption="msg://msgTestWiki" icon="FILE_TEXT_O" stylename="secondary" invoke="onTestWikiClick"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <textField id="wikiOrgIdField" datasource="userYandexConfigDs" property="wikiOrgId" caption="msg://msgYandexWikiOrgId" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <textField id="wikiCollabIdField" datasource="userYandexConfigDs" property="wikiCollabId" caption="msg://msgYandexWikiCollabId" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
                                 </vbox>
                             </vbox>
                         </scrollBox>

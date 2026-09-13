@@ -227,5 +227,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-2-updateSmartCvParsePromptV3.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-3-add-user-yandex-configuration.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

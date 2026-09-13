@@ -41,6 +41,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.company.hunttech.dto.yandex.AiMeetingParseResult;
+import com.company.hunttech.dto.yandex.YandexMeetingResult;
 
 /**
  * Реализация сервиса взаимодействия с Hermes Agent (профиль hrm-viewer в Docker).
@@ -80,6 +82,8 @@ public class HermesChatServiceBean implements HermesChatService {
     private AiSecretService aiSecretService;
     @Inject
     private UserAiContextService userAiContextService;
+    @Inject
+    private AiYandexOrchestrationService aiYandexOrchestrationService;
 
     @Override
     public UUID startHermesConversation() {
@@ -184,6 +188,40 @@ public class HermesChatServiceBean implements HermesChatService {
 
         log.info("sendHermesMessage: convId={}, пользователь={}, длина сообщения={}",
                 conversationId, currentUser.getLogin(), message.length());
+
+        // Перехват прямого запроса на создание встречи в календаре / Телемосте
+        if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(message.trim())) {
+            AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(message.trim(), currentUser.getId());
+            String lower = message.trim().toLowerCase();
+            if (parseResult.isIntentDetected() && (lower.contains("создай") || lower.contains("запланируй") || lower.contains("поставь") || lower.contains("назначь"))) {
+                YandexMeetingResult booking = aiYandexOrchestrationService.executeMeetingBooking(currentUser.getId(), parseResult);
+                if (booking.isSuccess()) {
+                    long duration = System.currentTimeMillis() - startTime;
+                    LlmChatMessage userMsg = metadata.create(LlmChatMessage.class);
+                    userMsg.setConversation(conversation);
+                    userMsg.setRole("USER");
+                    userMsg.setContent(message.trim());
+                    userMsg.setSequenceNo(maxSeq + 1);
+                    userMsg.setStatus("COMPLETED");
+
+                    LlmChatMessage assistantMsg = metadata.create(LlmChatMessage.class);
+                    assistantMsg.setConversation(conversation);
+                    assistantMsg.setRole("ASSISTANT");
+                    assistantMsg.setContent(booking.getMessage());
+                    assistantMsg.setSequenceNo(maxSeq + 2);
+                    assistantMsg.setStatus("COMPLETED");
+                    assistantMsg.setProviderCode("yandex");
+                    assistantMsg.setModelName("caldav-telemost");
+
+                    conversation.setLastMessageAt(new Date());
+                    dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
+                    HermesChatResponse hermesResp = new HermesChatResponse(conversationId, booking.getMessage(), null, duration);
+                    hermesResp.setProviderCode("yandex");
+                    hermesResp.setModelName("caldav-telemost");
+                    return hermesResp;
+                }
+            }
+        }
 
         // 1. Выполняем запрос к Hermes Agent с перебором моделей по утвержденному сценарию:
         //    Сначала подключается модель из пользовательских настроек (UserAiConfiguration).
@@ -952,7 +990,13 @@ public class HermesChatServiceBean implements HermesChatService {
         contextBlock.append("=== ПРАВИЛА БЕЗОПАСНОСТИ И НАВИГАЦИИ В HRM ===\n");
         contextBlock.append("1. СТРОГИЙ ЗАПРЕТ НА УДАЛЕНИЕ: Тебе категорически запрещено удалять любые данные из базы данных (любые операции DELETE, DROP, TRUNCATE, soft-delete, удаление записей) для любого пользователя системы. На любые запросы об удалении отвечай вежливым отказом и пояснением, что операции удаления в чате строго заблокированы политикой безопасности.\n");
         contextBlock.append("2. НАВИГАЦИЯ: Если требуется дать ссылку на карточку в системе HRM, используй формат ссылок: [Текст](hrm://vacancy/<UUID>), [Текст](hrm://candidate/<UUID>), [Текст](hrm://cv/<UUID>), [Текст](hrm://interaction/<UUID>).\n");
-        contextBlock.append("3. СТРОГИЙ ЗАПРЕТ ВЫВОДА ТЕХНИЧЕСКИХ ID: Категорически запрещено выводить пользователю технические идентификаторы (UUID / ID вида \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\"). Пользователь никогда не должен видеть сырые UUID! Вместо ID всегда используй только человекочитаемые наименования (название вакансии, ФИО кандидата, название компании, должность) и при необходимости оформляй их ссылками: [Название Вакансии](hrm://vacancy/<UUID>) или [ФИО Кандидата](hrm://candidate/<UUID>).\n\n");
+        contextBlock.append("3. СТРОГИЙ ЗАПРЕТ ВЫВОДА ТЕХНИЧЕСКИХ ID: Категорически запрещено выводить пользователю технические идентификаторы (UUID / ID вида \"8a0f5f9c-6a32-4e6a-a2c9-672870000001\"). Пользователь никогда не должен видеть сырые UUID! Вместо ID всегда используй только человекочитаемые наименования (название вакансии, ФИО кандидата, название компании, должность) и при необходимости оформляй их ссылками: [Название Вакансии](hrm://vacancy/<UUID>) или [ФИО Кандидата](hrm://candidate/<UUID>).\n");
+        contextBlock.append("4. ИНТЕГРАЦИЯ С ЯНДЕКС.КАЛЕНДАРЕМ И ТЕЛЕМОСТОМ (YANDEX 360):\n");
+        contextBlock.append("   - Четко различай личный календарь и календарь собеседований с заказчиком:\n");
+        contextBlock.append("     * Фразы «в моем календаре», «в личном календаре», «мне» -> Личный календарь пользователя.\n");
+        contextBlock.append("     * Фразы «в календаре собеседования с заказчиком», «собеседование у заказчика», «в календаре с заказчиком» -> Корпоративный календарь «Hunttech у заказчика».\n");
+        contextBlock.append("   - Для любых видеовстреч создавай ссылку на Яндекс Телемост, информируй о записи и AI-конспекте встречи.\n");
+        contextBlock.append("   - Часовой пояс по умолчанию: Europe/Saratov (UTC+4, на 1 час вперед относительно Москвы).\n\n");
 
         contextBlock.append("=== Запрос пользователя ===\n");
         contextBlock.append(userMessage);

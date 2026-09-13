@@ -6,6 +6,9 @@ import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.UserSettings;
 import com.company.hunttech.service.UserAvatarManagementService;
+import com.company.hunttech.service.YandexIntegrationService;
+import com.company.hunttech.dto.yandex.*;
+import com.company.hunttech.entity.UserYandexConfiguration;
 import com.company.hunttech.service.dto.avatar.AvatarApplyMode;
 import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
 import com.company.hunttech.web.util.AvatarImageUploadHelper;
@@ -29,8 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.screen.StandardOutcome;
 
 @UiController("hunttech_ExtUserEdit")
 @UiDescriptor("ext-user-edit.xml")
@@ -74,19 +81,47 @@ public class ExtUserEdit extends Screen {
     private HunttechImageConfig hunttechImageConfig;
     @Inject
     private UserAvatarManagementService userAvatarManagementService;
+    @Inject
+    private YandexIntegrationService yandexIntegrationService;
+    @Inject
+    private Datasource<UserYandexConfiguration> userYandexConfigDs;
+    @Inject
+    private TabSheet settingsTabSheet;
+    @Inject
+    private Button generalTabNav;
+    @Inject
+    private Button emailTabNav;
+    @Inject
+    private Button aiTabNav;
+    @Inject
+    private Button yandexTabNav;
+    @Inject
+    private PasswordField adminYandexTokenField;
+    @Inject
+    private PasswordField adminYandexRefreshField;
+    @Inject
+    private Label<String> adminYandexStatusLabel;
+    @Inject
+    private LookupField<String> adminTimeZoneField;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onInit(InitEvent event) {
         userDs.addItemChangeListener(e -> {
             refreshProfileLabels();
             refreshAiConfigs();
+            refreshYandexConfig();
         });
+        initNavigationButtons();
+        initAdminTimeZoneOptions();
     }
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         refreshProfileLabels();
         refreshAiConfigs();
+        refreshYandexConfig();
         User user = userDs.getItem();
         if (user != null && PersistenceHelper.isNew(user)) {
             passwordBox.setVisible(true);
@@ -331,5 +366,125 @@ public class ExtUserEdit extends Screen {
             sb.append(user.getMiddleName());
         }
         return sb.length() > 0 ? sb.toString() : user.getLogin();
+    }
+
+    private void initNavigationButtons() {
+        if (generalTabNav != null) generalTabNav.addClickListener(e -> selectTab("generalSettingsTab", generalTabNav));
+        if (emailTabNav != null) emailTabNav.addClickListener(e -> selectTab("emailSettingsTab", emailTabNav));
+        if (aiTabNav != null) aiTabNav.addClickListener(e -> selectTab("aiSettingsTab", aiTabNav));
+        if (yandexTabNav != null) yandexTabNav.addClickListener(e -> selectTab("yandexTab", yandexTabNav));
+    }
+
+    private void selectTab(String tabId, Button activeBtn) {
+        if (settingsTabSheet != null) {
+            settingsTabSheet.setSelectedTab(tabId);
+        }
+        String defaultStyle = "borderless label-nav-item";
+        String activeStyle = "borderless label-nav-item label-nav-item-active";
+        if (generalTabNav != null) generalTabNav.setStyleName(generalTabNav == activeBtn ? activeStyle : defaultStyle);
+        if (emailTabNav != null) emailTabNav.setStyleName(emailTabNav == activeBtn ? activeStyle : defaultStyle);
+        if (aiTabNav != null) aiTabNav.setStyleName(aiTabNav == activeBtn ? activeStyle : defaultStyle);
+        if (yandexTabNav != null) yandexTabNav.setStyleName(yandexTabNav == activeBtn ? activeStyle : defaultStyle);
+    }
+
+    private void initAdminTimeZoneOptions() {
+        if (adminTimeZoneField != null) {
+            Map<String, String> timeZones = new LinkedHashMap<>();
+            timeZones.put("Europe/Saratov (UTC+4)", "Europe/Saratov");
+            timeZones.put("Europe/Moscow (UTC+3)", "Europe/Moscow");
+            timeZones.put("UTC", "UTC");
+            adminTimeZoneField.setOptionsMap(timeZones);
+        }
+    }
+
+    private void refreshYandexConfig() {
+        User user = userDs.getItem();
+        if (user != null && yandexIntegrationService != null) {
+            try {
+                UserYandexConfiguration c = yandexIntegrationService.getOrCreateConfiguration(user.getId());
+                userYandexConfigDs.setItem(c);
+                refreshAdminYandexStatus();
+            } catch (Exception e) {
+                log.warn("Не удалось загрузить настройки Yandex для пользователя {}: {}", user.getLogin(), e.getMessage());
+            }
+        }
+    }
+
+    private void refreshAdminYandexStatus() {
+        if (adminYandexStatusLabel == null || userYandexConfigDs == null) return;
+        UserYandexConfiguration c = userYandexConfigDs.getItem();
+        if (c == null) {
+            adminYandexStatusLabel.setValue("Не настроено");
+            return;
+        }
+        boolean cal = Boolean.TRUE.equals(c.getCalendarConnected());
+        boolean tel = Boolean.TRUE.equals(c.getTelemostConnected());
+        if (cal || tel) {
+            adminYandexStatusLabel.setValue("Подключено: " + (cal ? "Календарь ✓ " : "") + (tel ? "Телемост ✓" : ""));
+            adminYandexStatusLabel.setStyleName("bold friendly");
+        } else {
+            adminYandexStatusLabel.setValue("Требуется проверка доступа");
+        }
+    }
+
+    public void onTestYandexAuthClick() {
+        saveAdminYandexTokens();
+        User u = userDs.getItem();
+        if (u != null && yandexIntegrationService != null) {
+            YandexDiagnosticResult res = yandexIntegrationService.testConnection(u.getId(), "AUTH");
+            showDiagnosticNotification("Авторизация Яндекс 360", res);
+            refreshAdminYandexStatus();
+        }
+    }
+
+    public void onDiscoverCalendarsClick() {
+        saveAdminYandexTokens();
+        User u = userDs.getItem();
+        if (u != null && yandexIntegrationService != null) {
+            YandexDiagnosticResult res = yandexIntegrationService.testConnection(u.getId(), "CALENDAR");
+            showDiagnosticNotification("Яндекс.Календарь", res);
+            refreshAdminYandexStatus();
+        }
+    }
+
+    public void onTestTelemostClick() {
+        saveAdminYandexTokens();
+        User u = userDs.getItem();
+        if (u != null && yandexIntegrationService != null) {
+            YandexDiagnosticResult res = yandexIntegrationService.testConnection(u.getId(), "TELEMOST");
+            showDiagnosticNotification("Яндекс.Телемост", res);
+            refreshAdminYandexStatus();
+        }
+    }
+
+    private void saveAdminYandexTokens() {
+        UserYandexConfiguration c = userYandexConfigDs.getItem();
+        if (c != null && yandexIntegrationService != null) {
+            String token = adminYandexTokenField != null ? adminYandexTokenField.getValue() : null;
+            String refresh = adminYandexRefreshField != null ? adminYandexRefreshField.getValue() : null;
+            yandexIntegrationService.saveConfiguration(c, token, refresh);
+        }
+    }
+
+    private void showDiagnosticNotification(String caption, YandexDiagnosticResult res) {
+        if (notifications == null) return;
+        if (res.isSuccess()) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(caption + ": Успешно")
+                    .withDescription(res.getMessage())
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(caption + ": Ошибка")
+                    .withDescription(res.getMessage() + (res.getDetails() != null ? " (" + res.getDetails() + ")" : ""))
+                    .show();
+        }
+    }
+
+    @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+        if (event.closedWith(StandardOutcome.COMMIT)) {
+            saveAdminYandexTokens();
+        }
     }
 }

@@ -1519,6 +1519,9 @@
         <property name="maxContextTokens"/>
         <property name="user" view="_minimal"/>
     </view>
+    <view entity="hunttech_UserYandexConfiguration" name="userYandexConfiguration-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
     <view entity="hunttech_UserAiConfiguration" name="userAiConfiguration-edit-view" extends="_minimal">
         <property name="user" view="_minimal"/>
         <property name="providerCode"/>

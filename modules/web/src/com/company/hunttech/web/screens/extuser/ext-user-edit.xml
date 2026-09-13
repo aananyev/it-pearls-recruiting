@@ -22,6 +22,9 @@
                 <![CDATA[select e from hunttech_UserAiConfiguration e where e.user = :ds$userDs]]>
             </query>
         </collectionDatasource>
+        <datasource id="userYandexConfigDs"
+                    class="com.company.hunttech.entity.UserYandexConfiguration"
+                    view="userYandexConfiguration-view"/>
     </dsContext>
     <!-- Диалог остаётся крупным и изменяемым по размеру для таблиц ролей и замещений. -->
     <dialogMode height="850" width="theme://cuba.gui.dialogSize.width.xlarge" resizable="true"/>
@@ -55,6 +58,8 @@
                     <button id="emailTabNav" caption="msg://msgEmailSettings" icon="font-icon:ENVELOPE_O" width="100%" stylename="borderless label-nav-item"/>
                     <!-- Пункт открывает вкладку «Персональный ИИ» правой части экрана. -->
                     <button id="aiTabNav" caption="msg://msgAiSettings" icon="font-icon:MAGIC" width="100%" stylename="borderless label-nav-item"/>
+                    <!-- Пункт открывает вкладку «Сервисы Яндекс» правой части экрана. -->
+                    <button id="yandexTabNav" caption="msg://msgYandexSettings" icon="font-icon:CLOUD" width="100%" stylename="borderless label-nav-item"/>
                 </vbox>
                 <!-- Сводка «Профиль» располагается после navigation и показывает статус учётной записи и реквизиты (Email, Telegram, Должность). -->
                 <vbox id="profileSummaryBox" width="100%" spacing="false" stylename="edit-sidebar-summary job-candidate-navigation">
@@ -423,6 +428,67 @@
                                     <!-- Источник строк таблицы привязан к userAiConfigsDs. -->
                                     <rows datasource="userAiConfigsDs"/>
                                 </table>
+                            </vbox>
+                        </scrollBox>
+                    </tab>
+
+                    <!-- ВКЛАДКА 4: СЕРВИСЫ ЯНДЕКС 360 -->
+                    <tab id="yandexTab" caption="msg://msgYandexSettings" margin="false" spacing="true">
+                        <scrollBox id="yandexTabScrollBox" width="100%" height="100%" orientation="vertical" scrollBars="vertical" stylename="edit-workspace-scroll">
+                            <vbox id="yandexTabContent" width="100%" spacing="true" stylename="edit-workspace-content">
+                                <hbox id="yandexToolbar" width="100%" spacing="true" expand="yandexToolbarTitleBox" stylename="edit-toolbar">
+                                    <vbox id="yandexToolbarTitleBox" width="100%" spacing="false">
+                                        <label value="msg://msgYandexSettings" width="100%" stylename="edit-toolbar-title"/>
+                                        <label value="msg://msgYandexSettingsHint" width="100%" stylename="edit-toolbar-description"/>
+                                    </vbox>
+                                    <buttonsPanel id="yandexToolbarButtons" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
+                                        <button id="testYandexAuthAdminBtn" caption="Проверить доступ" icon="KEY" stylename="friendly" invoke="onTestYandexAuthClick"/>
+                                    </buttonsPanel>
+                                </hbox>
+
+                                <!-- Аккаунт и токен -->
+                                <groupBox id="yandexAccountGroup" caption="Авторизация Яндекс 360" width="100%" spacing="true" showAsPanel="true" stylename="edit-card">
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <textField id="adminYandexEmailField" datasource="userYandexConfigDs" property="accountEmail" caption="Email / Логин Яндекс" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <passwordField id="adminYandexTokenField" caption="OAuth токен (будет зашифрован)" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <passwordField id="adminYandexRefreshField" caption="Refresh токен" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <label id="adminYandexStatusLabel" width="100%" box.expandRatio="1" align="MIDDLE_LEFT" stylename="bold edit-help"/>
+                                    </hbox>
+                                </groupBox>
+
+                                <!-- Календарь -->
+                                <groupBox id="yandexCalendarGroup" caption="Яндекс.Календарь (CalDAV)" width="100%" spacing="true" showAsPanel="true" stylename="edit-card">
+                                    <hbox width="100%" spacing="true" expand="yandexCalTitleBox">
+                                        <vbox id="yandexCalTitleBox" width="100%" spacing="false">
+                                            <label value="Настройки путей календарей для пользователя" width="100%" stylename="edit-help"/>
+                                        </vbox>
+                                        <button id="adminDiscoverCalendarsBtn" caption="Найти календари" icon="REFRESH" stylename="secondary" invoke="onDiscoverCalendarsClick"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <textField id="adminPersonalCalField" datasource="userYandexConfigDs" property="personalCalendarName" caption="Личный календарь" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <textField id="adminClientCalField" datasource="userYandexConfigDs" property="clientInterviewCalendarName" caption="Календарь с заказчиком" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <lookupField id="adminTimeZoneField" datasource="userYandexConfigDs" property="defaultTimeZone" caption="Часовой пояс" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                        <textField id="adminCalBaseUrlField" datasource="userYandexConfigDs" property="calendarBaseUrl" caption="URL CalDAV" width="100%" box.expandRatio="1" stylename="edit-form-control"/>
+                                    </hbox>
+                                </groupBox>
+
+                                <!-- Телемост -->
+                                <groupBox id="yandexTelemostGroup" caption="Яндекс.Телемост" width="100%" spacing="true" showAsPanel="true" stylename="edit-card">
+                                    <hbox width="100%" spacing="true" expand="yandexTelTitleBox">
+                                        <vbox id="yandexTelTitleBox" width="100%" spacing="false">
+                                            <label value="Параметры создания видеоконференций" width="100%" stylename="edit-help"/>
+                                        </vbox>
+                                        <button id="adminTestTelemostBtn" caption="Тестовый звонок" icon="PLAY" stylename="secondary" invoke="onTestTelemostClick"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" stylename="edit-field-row edit-row-half">
+                                        <checkBox id="adminTelemostAutoRecordField" datasource="userYandexConfigDs" property="telemostAutoRecord" caption="Включать автозапись встречи" stylename="bold"/>
+                                        <checkBox id="adminTelemostAiSummaryField" datasource="userYandexConfigDs" property="telemostAiSummary" caption="Включать AI-транскрибацию и конспект" stylename="bold"/>
+                                    </hbox>
+                                </groupBox>
                             </vbox>
                         </scrollBox>
                     </tab>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260913-3-createUserYandexConfigurationTable" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="HUNTTECH_USER_YANDEX_CONFIG"/>
+            </not>
+        </preConditions>
+        <createTable tableName="HUNTTECH_USER_YANDEX_CONFIG">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="USER_ID" type="uuid"><constraints nullable="false" unique="true"/></column>
+            <column name="ACCOUNT_EMAIL" type="varchar(255)"/>
+            <column name="OAUTH_TOKEN_ENCRYPTED" type="varchar(4096)"/>
+            <column name="REFRESH_TOKEN_ENCRYPTED" type="varchar(4096)"/>
+            <column name="CALENDAR_BASE_URL" type="varchar(512)" defaultValue="https://caldav.yandex.ru"/>
+            <column name="PERSONAL_CALENDAR_NAME" type="varchar(255)"/>
+            <column name="PERSONAL_CALENDAR_PATH" type="varchar(512)"/>
+            <column name="CLIENT_CALENDAR_NAME" type="varchar(255)" defaultValue="Hunttech у заказчика"/>
+            <column name="CLIENT_CALENDAR_PATH" type="varchar(512)"/>
+            <column name="DEFAULT_TIME_ZONE" type="varchar(64)" defaultValue="Europe/Saratov"/>
+            <column name="TELEMOST_BASE_URL" type="varchar(512)" defaultValue="https://cloud-api.yandex.net/v1/telemost-api"/>
+            <column name="TELEMOST_AUTO_RECORD" type="boolean" defaultValueBoolean="true"/>
+            <column name="TELEMOST_AI_SUMMARY" type="boolean" defaultValueBoolean="true"/>
+            <column name="TELEMOST_DEFAULT_ACCESS_LEVEL" type="varchar(64)" defaultValue="anyone"/>
+            <column name="WIKI_BASE_URL" type="varchar(512)" defaultValue="https://wiki.yandex.ru"/>
+            <column name="WIKI_API_URL" type="varchar(512)" defaultValue="https://api.wiki.yandex.net/v1"/>
+            <column name="WIKI_ORG_ID" type="varchar(64)" defaultValue="8178808"/>
+            <column name="WIKI_COLLAB_ID" type="varchar(255)"/>
+            <column name="CALENDAR_CONNECTED" type="boolean" defaultValueBoolean="false"/>
+            <column name="TELEMOST_CONNECTED" type="boolean" defaultValueBoolean="false"/>
+            <column name="WIKI_CONNECTED" type="boolean" defaultValueBoolean="false"/>
+            <column name="LAST_VERIFIED_AT" type="timestamp"/>
+            <column name="LAST_VERIFICATION_MESSAGE" type="varchar(1024)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="260913-3-addUserYandexConfigurationUserFk" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_YANDEX_CONFIG"/>
+                <not>
+                    <foreignKeyConstraintExists
+                            foreignKeyName="FK_HUNTTECH_USER_YANDEX_CONFIG_ON_USER"
+                            foreignKeyTableName="HUNTTECH_USER_YANDEX_CONFIG"/>
+                </not>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="HUNTTECH_USER_YANDEX_CONFIG"
+                baseColumnNames="USER_ID"
+                constraintName="FK_HUNTTECH_USER_YANDEX_CONFIG_ON_USER"
+                referencedTableName="SEC_USER"
+                referencedColumnNames="ID"/>
+    </changeSet>
+
+</databaseChangeLog>

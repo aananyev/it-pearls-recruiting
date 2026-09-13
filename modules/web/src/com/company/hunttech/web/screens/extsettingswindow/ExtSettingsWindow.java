@@ -9,6 +9,8 @@ import com.company.hunttech.service.GeoDataEnrichmentService;
 import com.company.hunttech.service.HrmAiService;
 import com.company.hunttech.service.UserAiContextService;
 import com.company.hunttech.service.UserAvatarManagementService;
+import com.company.hunttech.service.YandexIntegrationService;
+import com.company.hunttech.dto.yandex.*;
 import com.company.hunttech.service.dto.avatar.ResolvedAvatarInfo;
 import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
 import com.company.hunttech.web.util.AiOperationNotifier;
@@ -80,6 +82,14 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Inject private Datasource<ExtUser> extUserDs;
     @Inject private Datasource<UserSettings> userSettingsDs;
     @Inject private Datasource<UserAiProfile> userAiProfileDs;
+    @Inject private Datasource<UserYandexConfiguration> userYandexConfigDs;
+    @Inject private YandexIntegrationService yandexIntegrationService;
+
+    @Inject private PasswordField yandexOauthTokenField;
+    @Inject private PasswordField yandexRefreshTokenField;
+    @Inject private Label<String> yandexStatusLabel;
+    @Inject private LookupField<String> defaultTimeZoneField;
+    @Inject private LookupField<String> telemostDefaultAccessLevelField;
 
     @Inject private Label<String> userProfileNameLabel;
     @Inject private Label<String> currentPositionSidebarLabel;
@@ -130,8 +140,11 @@ public class ExtSettingsWindow extends SettingsWindow {
         initAiProfileOptions();
         refreshAiConfigs();
         initAiTableActions();
+        loadOrCreateUserYandexConfig();
+        initYandexOptions();
         refreshProfilePhoto();
         refreshProfileSummary();
+        refreshYandexStatus();
         super.init(params);
 
         userAvatarUpload.addFileUploadSucceedListener(event -> onUserAvatarUploaded());
@@ -666,6 +679,14 @@ public class ExtSettingsWindow extends SettingsWindow {
         if (extUserDs.getItem() != null) context.addInstanceToCommit(extUserDs.getItem());
         if (profile != null) context.addInstanceToCommit(profile);
         dataManager.commit(context);
+
+        UserYandexConfiguration yConfig = userYandexConfigDs.getItem();
+        if (yConfig != null && yandexIntegrationService != null) {
+            String token = yandexOauthTokenField != null ? yandexOauthTokenField.getValue() : null;
+            String refresh = yandexRefreshTokenField != null ? yandexRefreshTokenField.getValue() : null;
+            yandexIntegrationService.saveConfiguration(yConfig, token, refresh);
+        }
+
         super.commit();
     }
 
@@ -795,6 +816,112 @@ public class ExtSettingsWindow extends SettingsWindow {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption(getMessage("msgGeoConnectionFailed"))
                     .withDescription(getMessage("msgGeoConnectionFailedDesc"))
+                    .show();
+        }
+    }
+
+    private void loadOrCreateUserYandexConfig() {
+        if (yandexIntegrationService != null && currentUser != null) {
+            try {
+                UserYandexConfiguration config = yandexIntegrationService.getOrCreateConfiguration(currentUser.getId());
+                userYandexConfigDs.setItem(config);
+            } catch (Exception e) {
+                log.warn("Не удалось загрузить UserYandexConfiguration: {}", e.getMessage());
+            }
+        }
+    }
+
+    private void initYandexOptions() {
+        if (defaultTimeZoneField != null) {
+            Map<String, String> timeZones = new LinkedHashMap<>();
+            timeZones.put("Europe/Saratov (UTC+4)", "Europe/Saratov");
+            timeZones.put("Europe/Moscow (UTC+3)", "Europe/Moscow");
+            timeZones.put("UTC", "UTC");
+            defaultTimeZoneField.setOptionsMap(timeZones);
+        }
+        if (telemostDefaultAccessLevelField != null) {
+            Map<String, String> accessLevels = new LinkedHashMap<>();
+            accessLevels.put("Для всех (anyone)", "anyone");
+            accessLevels.put("Только организация (organization)", "organization");
+            telemostDefaultAccessLevelField.setOptionsMap(accessLevels);
+        }
+    }
+
+    private void refreshYandexStatus() {
+        if (yandexStatusLabel == null || userYandexConfigDs == null) return;
+        UserYandexConfiguration c = userYandexConfigDs.getItem();
+        if (c == null) {
+            yandexStatusLabel.setValue("Статус: не настроено");
+            yandexStatusLabel.setStyleName("bold edit-help");
+            return;
+        }
+        boolean cal = Boolean.TRUE.equals(c.getCalendarConnected());
+        boolean tel = Boolean.TRUE.equals(c.getTelemostConnected());
+        boolean wiki = Boolean.TRUE.equals(c.getWikiConnected());
+        if (cal || tel || wiki) {
+            StringBuilder sb = new StringBuilder("Подключено: ");
+            if (cal) sb.append("Календарь ✓ ");
+            if (tel) sb.append("Телемост ✓ ");
+            if (wiki) sb.append("Wiki ✓ ");
+            yandexStatusLabel.setValue(sb.toString());
+            yandexStatusLabel.setStyleName("bold friendly");
+        } else {
+            yandexStatusLabel.setValue("Статус: требуется проверка подключения");
+            yandexStatusLabel.setStyleName("bold edit-help");
+        }
+    }
+
+    public void onTestYandexAuthClick() {
+        saveCurrentYandexTokens();
+        YandexDiagnosticResult res = yandexIntegrationService.testConnection(currentUser.getId(), "AUTH");
+        showYandexDiagnosticNotification("Авторизация Яндекс 360", res);
+        loadOrCreateUserYandexConfig();
+        refreshYandexStatus();
+    }
+
+    public void onDiscoverCalendarsClick() {
+        saveCurrentYandexTokens();
+        YandexDiagnosticResult res = yandexIntegrationService.testConnection(currentUser.getId(), "CALENDAR");
+        showYandexDiagnosticNotification("Яндекс.Календарь", res);
+        loadOrCreateUserYandexConfig();
+        refreshYandexStatus();
+    }
+
+    public void onTestTelemostClick() {
+        saveCurrentYandexTokens();
+        YandexDiagnosticResult res = yandexIntegrationService.testConnection(currentUser.getId(), "TELEMOST");
+        showYandexDiagnosticNotification("Яндекс.Телемост", res);
+        loadOrCreateUserYandexConfig();
+        refreshYandexStatus();
+    }
+
+    public void onTestWikiClick() {
+        saveCurrentYandexTokens();
+        YandexDiagnosticResult res = yandexIntegrationService.testConnection(currentUser.getId(), "WIKI");
+        showYandexDiagnosticNotification("Яндекс.Вики", res);
+        loadOrCreateUserYandexConfig();
+        refreshYandexStatus();
+    }
+
+    private void saveCurrentYandexTokens() {
+        UserYandexConfiguration c = userYandexConfigDs.getItem();
+        if (c != null && yandexIntegrationService != null) {
+            String token = yandexOauthTokenField != null ? yandexOauthTokenField.getValue() : null;
+            String refresh = yandexRefreshTokenField != null ? yandexRefreshTokenField.getValue() : null;
+            yandexIntegrationService.saveConfiguration(c, token, refresh);
+        }
+    }
+
+    private void showYandexDiagnosticNotification(String caption, YandexDiagnosticResult res) {
+        if (res.isSuccess()) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(caption + ": Успешно")
+                    .withDescription(res.getMessage())
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(caption + ": Ошибка")
+                    .withDescription(res.getMessage() + (res.getDetails() != null ? " (" + res.getDetails() + ")" : ""))
                     .show();
         }
     }

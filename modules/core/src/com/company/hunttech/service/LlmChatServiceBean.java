@@ -38,6 +38,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
+import com.company.hunttech.dto.yandex.AiMeetingParseResult;
+import com.company.hunttech.dto.yandex.YandexMeetingResult;
 import com.haulmont.cuba.core.global.FluentLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +104,8 @@ public class LlmChatServiceBean implements LlmChatService {
     private Security security;
     @Inject
     private HrmChatDataRetrieverService hrmChatDataRetrieverService;
+    @Inject
+    private AiYandexOrchestrationService aiYandexOrchestrationService;
     @Resource(name = "scheduler")
     private TaskScheduler scheduler;
 
@@ -167,6 +171,28 @@ public class LlmChatServiceBean implements LlmChatService {
         if (isCancellationRequested(quota)) {
             settleCancelledBeforeProvider(quota, userMessage);
             throw new DevelopmentException("Запрос отменён до обращения к AI-провайдеру.");
+        }
+
+        if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(message.trim())) {
+            AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(message.trim(), user.getId());
+            String lower = message.trim().toLowerCase();
+            if (parseResult.isIntentDetected() && (lower.contains("создай") || lower.contains("запланируй") || lower.contains("поставь") || lower.contains("назначь"))) {
+                YandexMeetingResult booking = aiYandexOrchestrationService.executeMeetingBooking(user.getId(), parseResult);
+                if (booking.isSuccess()) {
+                    LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+                    assistantMessage.setConversation(conversation);
+                    assistantMessage.setRole("ASSISTANT");
+                    assistantMessage.setContent(booking.getMessage());
+                    assistantMessage.setSequenceNo(nextSequence + 1);
+                    assistantMessage.setRequestId(requestId.trim());
+                    assistantMessage.setStatus("COMPLETED");
+                    assistantMessage.setProviderCode("yandex");
+                    assistantMessage.setModelName("caldav-telemost");
+                    conversation.setLastMessageAt(new Date());
+                    dataManager.commit(new CommitContext(conversation, assistantMessage));
+                    return new LlmChatResponse(conversation.getId(), booking.getMessage(), "yandex", "caldav-telemost", null);
+                }
+            }
         }
 
         String messageWithHistory = buildMessageWithHistory(conversation, user, nextSequence, message.trim());
