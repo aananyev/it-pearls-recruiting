@@ -243,5 +243,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-updateLlmChatPromptWithCalendarReading.xml"
              relativeToChangelogFile="true"/>
+    <include file="260914-1-addExtraTokensToQuotaPeriod.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -1069,8 +1069,10 @@ public class LlmChatServiceBean implements LlmChatService {
                 + Math.max(1, function.getMaxTokens() == null ? 1200 : function.getMaxTokens()));
         int used = safeInt(period.getConsumedTokens()) + safeInt(period.getReservedTokens())
                 + safeInt(period.getPendingTokens());
-        if (!isUnlimited && safeInt(period.getQuotaTokens()) != -1 && safeInt(period.getQuotaTokens()) != Integer.MAX_VALUE
-                && (used + estimatedTokens > safeInt(period.getQuotaTokens()))) {
+        int extraTokens = safeInt(period.getExtraTokens());
+        long totalAllowed = isUnlimited ? -1L : ((long) safeInt(period.getQuotaTokens()) + extraTokens);
+        if (!isUnlimited && totalAllowed != -1L
+                && ((long) used + estimatedTokens > totalAllowed)) {
             throw new DevelopmentException("Месячная квота чата исчерпана или занята текущими запросами.");
         }
         period.setReservedTokens(safeInt(period.getReservedTokens()) + estimatedTokens);
@@ -1092,6 +1094,7 @@ public class LlmChatServiceBean implements LlmChatService {
         period.setReservedTokens(0);
         period.setConsumedTokens(0);
         period.setPendingTokens(0);
+        period.setExtraTokens(0);
         return period;
     }
 

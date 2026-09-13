@@ -45,6 +45,10 @@ public class LlmChatQuotaPeriod extends StandardEntity {
     @Column(name = "PENDING_TOKENS", nullable = false)
     private Integer pendingTokens = 0;
 
+    @NotNull
+    @Column(name = "EXTRA_TOKENS", nullable = false)
+    private Integer extraTokens = 0;
+
     public ExtUser getUser() { return user; }
     public void setUser(ExtUser user) { this.user = user; }
     public Date getPeriodStart() { return periodStart; }
@@ -57,4 +61,6 @@ public class LlmChatQuotaPeriod extends StandardEntity {
     public void setConsumedTokens(Integer consumedTokens) { this.consumedTokens = consumedTokens; }
     public Integer getPendingTokens() { return pendingTokens; }
     public void setPendingTokens(Integer pendingTokens) { this.pendingTokens = pendingTokens; }
+    public Integer getExtraTokens() { return extraTokens; }
+    public void setExtraTokens(Integer extraTokens) { this.extraTokens = extraTokens; }
 }

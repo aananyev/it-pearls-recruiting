@@ -7,6 +7,10 @@ import com.company.hunttech.entity.ai.LlmChatQuotaPeriod;
 import com.company.hunttech.entity.ai.LlmUserQuotaOverride;
 import com.company.hunttech.service.dto.ai.ActiveUserQuotaSummary;
 import com.company.hunttech.service.dto.ai.UserAiQuotaInfo;
+import com.haulmont.cuba.core.EntityManager;
+import com.haulmont.cuba.core.Persistence;
+import com.haulmont.cuba.core.Transaction;
+import com.haulmont.cuba.core.TypedQuery;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
@@ -15,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import javax.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -29,6 +34,8 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
     private DataManager dataManager;
     @Inject
     private Metadata metadata;
+    @Inject
+    private Persistence persistence;
 
     @Override
     public UserAiQuotaInfo getUserQuota(UUID userId) {
@@ -73,12 +80,14 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
         int consumed = 0;
         int reserved = 0;
         int pending = 0;
+        int extra = 0;
 
         if (!periods.isEmpty()) {
             LlmChatQuotaPeriod period = periods.get(0);
             consumed = period.getConsumedTokens() != null ? period.getConsumedTokens() : 0;
             reserved = period.getReservedTokens() != null ? period.getReservedTokens() : 0;
             pending = period.getPendingTokens() != null ? period.getPendingTokens() : 0;
+            extra = period.getExtraTokens() != null ? period.getExtraTokens() : 0;
         } else {
             // Если период еще не заведен, проверим вызовы за месяц из AiCallLog через агрегатный запрос
             Date nextMonth = nextMonthStart(periodStart);
@@ -93,7 +102,84 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
             consumed = sumTokens != null ? sumTokens.intValue() : 0;
         }
 
-        return new UserAiQuotaInfo(allocatedTokens, consumed, reserved, pending, customOverride);
+        return new UserAiQuotaInfo(allocatedTokens, extra, consumed, reserved, pending, customOverride);
+    }
+
+    @Override
+    public void addMonthlyBonusTokens(UUID userId, int amount, String reason) {
+        if (userId == null) {
+            throw new IllegalArgumentException("Не указан идентификатор пользователя");
+        }
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Количество добавляемых токенов должно быть больше нуля");
+        }
+
+        ExtUser user = dataManager.load(ExtUser.class)
+                .id(userId)
+                .view("extUser-view")
+                .optional()
+                .orElse(null);
+        if (user == null) {
+            log.warn("Не удалось найти пользователя ID: {} для начисления бонусных токенов", userId);
+            throw new IllegalStateException("Пользователь не найден");
+        }
+
+        Date today = truncateToDate(new Date());
+        Date periodStart = monthStart(today);
+
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+            TypedQuery<LlmChatQuotaPeriod> query = em.createQuery(
+                    "select e from hunttech_LlmChatQuotaPeriod e " +
+                            "where e.user.id = :userId and e.periodStart = :periodStart and e.deleteTs is null",
+                    LlmChatQuotaPeriod.class);
+            query.setParameter("userId", userId);
+            query.setParameter("periodStart", periodStart);
+            query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+            query.setViewName("llm-chat-quota-period-view");
+
+            List<LlmChatQuotaPeriod> periods = query.getResultList();
+            LlmChatQuotaPeriod period;
+            if (!periods.isEmpty()) {
+                period = periods.get(0);
+                int currentExtra = period.getExtraTokens() != null ? period.getExtraTokens() : 0;
+                long newExtra = (long) currentExtra + amount;
+                period.setExtraTokens((int) Math.min((long) Integer.MAX_VALUE, newExtra));
+                em.merge(period);
+            } else {
+                int baseQuota = resolveEffectiveQuotaTokens(userId, today);
+                period = metadata.create(LlmChatQuotaPeriod.class);
+                period.setUser(user);
+                period.setPeriodStart(periodStart);
+                period.setQuotaTokens(baseQuota);
+                period.setReservedTokens(0);
+                period.setConsumedTokens(0);
+                period.setPendingTokens(0);
+                period.setExtraTokens(amount);
+                em.persist(period);
+            }
+            tx.commit();
+        }
+
+        log.info("Успешно начислено {} бонусных токенов на период {} для пользователя {}. Причина: {}",
+                amount, periodStart, user.getLogin(), reason);
+    }
+
+    private int resolveEffectiveQuotaTokens(UUID userId, Date today) {
+        List<LlmUserQuotaOverride> overrides = dataManager.load(LlmUserQuotaOverride.class)
+                .query("select e from hunttech_LlmUserQuotaOverride e " +
+                        "where e.user.id = :userId and e.effectiveFrom <= :today " +
+                        "and (e.effectiveTo is null or e.effectiveTo >= :today) " +
+                        "and e.deleteTs is null " +
+                        "order by e.effectiveFrom desc")
+                .parameter("userId", userId)
+                .parameter("today", today)
+                .view("llm-user-quota-override-view")
+                .list();
+        if (!overrides.isEmpty() && overrides.get(0).getMonthlyQuotaTokens() != null) {
+            return overrides.get(0).getMonthlyQuotaTokens();
+        }
+        return loadDefaultMonthlyQuota();
     }
 
     @Override
@@ -162,7 +248,7 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
         // Обновляем текущий период квоты
         List<LlmChatQuotaPeriod> periods = dataManager.load(LlmChatQuotaPeriod.class)
                 .query("select e from hunttech_LlmChatQuotaPeriod e " +
-                        "where e.user.id = :userId and e.periodStart = :periodStart")
+                        "where e.user.id = :userId and e.periodStart = :periodStart and e.deleteTs is null")
                 .parameter("userId", userId)
                 .parameter("periodStart", periodStart)
                 .view("llm-chat-quota-period-view")
@@ -172,6 +258,16 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
         if (!periods.isEmpty()) {
             LlmChatQuotaPeriod period = periods.get(0);
             period.setQuotaTokens(effectiveQuota);
+            commitContext.addInstanceToCommit(period);
+        } else {
+            LlmChatQuotaPeriod period = metadata.create(LlmChatQuotaPeriod.class);
+            period.setUser(user);
+            period.setPeriodStart(periodStart);
+            period.setQuotaTokens(effectiveQuota);
+            period.setReservedTokens(0);
+            period.setConsumedTokens(0);
+            period.setPendingTokens(0);
+            period.setExtraTokens(0);
             commitContext.addInstanceToCommit(period);
         }
 
@@ -230,7 +326,8 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
             int consumed = p != null && p.getConsumedTokens() != null ? p.getConsumedTokens() : 0;
             int reserved = p != null && p.getReservedTokens() != null ? p.getReservedTokens() : 0;
             int pending = p != null && p.getPendingTokens() != null ? p.getPendingTokens() : 0;
-            result.put(uid, new UserAiQuotaInfo(allocated, consumed, reserved, pending, custom));
+            int extra = p != null && p.getExtraTokens() != null ? p.getExtraTokens() : 0;
+            result.put(uid, new UserAiQuotaInfo(allocated, extra, consumed, reserved, pending, custom));
         }
 
         return result;
@@ -276,13 +373,16 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
                 .list();
         Map<UUID, Integer> periodConsumedMap = new HashMap<>();
         Map<UUID, Integer> periodTotalUsedMap = new HashMap<>();
+        Map<UUID, Integer> periodExtraMap = new HashMap<>();
         for (LlmChatQuotaPeriod p : allPeriods) {
             if (p.getUser() != null) {
                 int consumed = p.getConsumedTokens() != null ? p.getConsumedTokens() : 0;
                 int reserved = p.getReservedTokens() != null ? p.getReservedTokens() : 0;
                 int pending = p.getPendingTokens() != null ? p.getPendingTokens() : 0;
+                int extra = p.getExtraTokens() != null ? p.getExtraTokens() : 0;
                 periodConsumedMap.put(p.getUser().getId(), consumed);
                 periodTotalUsedMap.put(p.getUser().getId(), consumed + reserved + pending);
+                periodExtraMap.put(p.getUser().getId(), extra);
             }
         }
 
@@ -328,14 +428,15 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
 
             int monthConsumed = periodConsumedMap.getOrDefault(u.getId(), 0);
             int monthTotalUsed = periodTotalUsedMap.getOrDefault(u.getId(), 0);
+            int monthExtra = periodExtraMap.getOrDefault(u.getId(), 0);
             summary.setConsumedTokens(monthConsumed);
+            summary.setExtraTokens(monthExtra);
 
             if (isUnlimited) {
                 summary.setRemainingTokens(null);
-            } else if (summary.getAllocatedTokens() == null) {
-                summary.setRemainingTokens(0);
             } else {
-                summary.setRemainingTokens(Math.max(0, summary.getAllocatedTokens() - monthTotalUsed));
+                int effectiveLimit = (summary.getAllocatedTokens() != null ? summary.getAllocatedTokens() : 0) + monthExtra;
+                summary.setRemainingTokens(Math.max(0, effectiveLimit - monthTotalUsed));
             }
 
             // Статистика логов за фильтрованный период

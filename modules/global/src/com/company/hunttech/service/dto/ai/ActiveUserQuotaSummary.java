@@ -13,6 +13,7 @@ public class ActiveUserQuotaSummary implements Serializable {
     private String userName;
     private boolean active;
     private Integer allocatedTokens;
+    private int extraTokens;
     private boolean unlimited;
     private boolean customOverride;
     private int consumedTokens;
@@ -64,6 +65,14 @@ public class ActiveUserQuotaSummary implements Serializable {
 
     public void setAllocatedTokens(Integer allocatedTokens) {
         this.allocatedTokens = allocatedTokens;
+    }
+
+    public int getExtraTokens() {
+        return extraTokens;
+    }
+
+    public void setExtraTokens(int extraTokens) {
+        this.extraTokens = Math.max(0, extraTokens);
     }
 
     public boolean isUnlimited() {

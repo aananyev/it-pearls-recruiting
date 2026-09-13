@@ -15,6 +15,9 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WindowManager;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.app.security.user.edit.UserEditor;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;
@@ -22,9 +25,11 @@ import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.FieldGroup;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.FileUploadField;
+import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.ValidationErrors;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.security.entity.User;
@@ -122,6 +127,8 @@ public class ExtUserEditor extends UserEditor {
     private TextField<String> remainingTokensField;
     private Label<String> quotaStatusBadge;
     private Integer initialQuotaTokens;
+    private Integer pendingQuotaToSave;
+    private boolean pendingQuotaChanged;
 
     @Override
     protected void postInit() {
@@ -161,7 +168,9 @@ public class ExtUserEditor extends UserEditor {
         // при смене item (открытие другого пользователя, переcommit) значения обновляются повторно.
         userDs.addItemChangeListener(e -> {
             refreshProfileLabels();
-            refreshAdminAiQuotaValues();
+            if (!pendingQuotaChanged) {
+                refreshAdminAiQuotaValues();
+            }
         });
         updateLoadTelegramButtonState();
         if (telegramField != null) {
@@ -539,10 +548,25 @@ public class ExtUserEditor extends UserEditor {
             return;
         }
 
+        HBoxLayout quotaBox = uiComponents.create(HBoxLayout.NAME);
+        quotaBox.setWidth("100%");
+        quotaBox.setSpacing(true);
+
         monthlyQuotaTokensField = uiComponents.create(TextField.NAME);
         monthlyQuotaTokensField.setWidth("100%");
         monthlyQuotaTokensField.setInputPrompt(getMessage("fieldAllocatedTokensPrompt"));
-        adminAiQuotaFieldGroup.addCustomField("monthlyQuotaTokensField", (datasource, propertyId) -> monthlyQuotaTokensField);
+
+        Button addBonusTokensBtn = uiComponents.create(Button.NAME);
+        addBonusTokensBtn.setCaption(getMessage("btnAddBonusTokens"));
+        addBonusTokensBtn.setIcon("font-icon:PLUS_CIRCLE");
+        addBonusTokensBtn.setStyleName("secondary");
+        addBonusTokensBtn.addClickListener(e -> openAddBonusTokensDialog());
+
+        quotaBox.add(monthlyQuotaTokensField);
+        quotaBox.add(addBonusTokensBtn);
+        quotaBox.expand(monthlyQuotaTokensField);
+
+        adminAiQuotaFieldGroup.addCustomField("monthlyQuotaTokensField", (datasource, propertyId) -> quotaBox);
 
         consumedTokensField = uiComponents.create(TextField.NAME);
         consumedTokensField.setWidth("100%");
@@ -559,6 +583,60 @@ public class ExtUserEditor extends UserEditor {
         adminAiQuotaFieldGroup.addCustomField("quotaStatusBadge", (datasource, propertyId) -> quotaStatusBadge);
 
         refreshAdminAiQuotaValues();
+    }
+
+    private void openAddBonusTokensDialog() {
+        User user = getItem();
+        if (!(user instanceof ExtUser)) {
+            return;
+        }
+        if (PersistenceHelper.isNew(user)) {
+            showNotification(getMessage("msgSaveUserFirstForBonus"), NotificationType.WARNING);
+            return;
+        }
+        ExtUser extUser = (ExtUser) user;
+
+        dialogs.createInputDialog(this)
+                .withCaption(getMessage("msgAddBonusTokensTitle"))
+                .withParameter(
+                        InputParameter.intParameter("tokenAmount")
+                                .withCaption(getMessage("msgAddBonusTokensPrompt"))
+                                .withRequired(true)
+                )
+                .withValidator(context -> {
+                    Integer val = context.getValue("tokenAmount");
+                    if (val == null || val <= 0) {
+                        return ValidationErrors.of(getMessage("msgPositiveTokenAmountRequired"));
+                    }
+                    return ValidationErrors.none();
+                })
+                .withActions(DialogActions.OK_CANCEL)
+                .withCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(DialogOutcome.OK)) {
+                        Integer amount = closeEvent.getValue("tokenAmount");
+                        if (amount != null && amount > 0) {
+                            try {
+                                userAiQuotaService.addMonthlyBonusTokens(
+                                        extUser.getId(),
+                                        amount,
+                                        getMessage("msgBonusTokensReasonManualAdd")
+                                );
+                                showNotification(
+                                        formatMessage("msgBonusTokensAddedSuccess", amount),
+                                        NotificationType.HUMANIZED
+                                );
+                                refreshAdminAiQuotaValues();
+                            } catch (Exception ex) {
+                                log.error("Ошибка при начислении бонусных токенов: {}", ex.getMessage(), ex);
+                                showNotification(
+                                        getMessage("msgBonusTokensAddError") + ": " + ex.getMessage(),
+                                        NotificationType.ERROR
+                                );
+                            }
+                        }
+                    }
+                })
+                .show();
     }
 
     private void refreshAdminAiQuotaValues() {
@@ -599,7 +677,11 @@ public class ExtUserEditor extends UserEditor {
             consumedTokensField.setValue(quota.formatConsumed() + " " + getMessage("msgTokensMonthConsumedNote"));
         }
         if (remainingTokensField != null) {
-            remainingTokensField.setValue(quota.formatRemaining() + " " + getMessage("msgTokensCountSuffix"));
+            String remFormatted = quota.formatRemaining() + " " + getMessage("msgTokensCountSuffix");
+            if (quota.getExtraTokens() > 0 && !quota.isUnlimited()) {
+                remFormatted += " " + formatMessage("msgExtraTokensActiveNote", quota.formatExtra());
+            }
+            remainingTokensField.setValue(remFormatted);
         }
         if (quotaStatusBadge != null) {
             String badge = quota.getStatusBadgeHtml();
@@ -621,12 +703,18 @@ public class ExtUserEditor extends UserEditor {
                             showNotification(getMessage("msgInvalidQuotaFormat"), NotificationType.WARNING);
                             return false;
                         }
+                        pendingQuotaToSave = parsed;
                     } catch (NumberFormatException e) {
                         showNotification(getMessage("msgInvalidQuotaFormat"), NotificationType.WARNING);
                         return false;
                     }
+                } else {
+                    pendingQuotaToSave = -1;
                 }
+            } else {
+                pendingQuotaToSave = null;
             }
+            pendingQuotaChanged = true;
         }
         return super.preCommit();
     }
@@ -642,28 +730,29 @@ public class ExtUserEditor extends UserEditor {
 
     private void saveAdminAiQuotaOverride() {
         User user = getItem();
-        if (!(user instanceof ExtUser) || monthlyQuotaTokensField == null) {
+        if (!(user instanceof ExtUser) || !pendingQuotaChanged) {
+            pendingQuotaChanged = false;
+            pendingQuotaToSave = null;
             return;
         }
         ExtUser extUser = (ExtUser) user;
-        String val = monthlyQuotaTokensField.getValue();
-        if (val == null || val.trim().isEmpty()) {
-            if (initialQuotaTokens != null) {
-                userAiQuotaService.setMonthlyQuota(extUser.getId(), null, "Сброшено на системный дефолт");
-            }
-            return;
-        }
         try {
-            Integer newQuota = "-1".equals(val.trim()) ? -1 : Integer.parseInt(val.trim().replace(" ", ""));
-            if (initialQuotaTokens != null && initialQuotaTokens.equals(newQuota)) {
-                return; // Значение не менялось
+            if (pendingQuotaToSave == null) {
+                if (initialQuotaTokens != null) {
+                    userAiQuotaService.setMonthlyQuota(extUser.getId(), null, getMessage("msgTokensResetToDefaultReason"));
+                    initialQuotaTokens = null;
+                }
+            } else {
+                if (initialQuotaTokens == null || !initialQuotaTokens.equals(pendingQuotaToSave)) {
+                    userAiQuotaService.setMonthlyQuota(extUser.getId(), pendingQuotaToSave, getMessage("msgTokensAdminCardSetReason"));
+                    initialQuotaTokens = pendingQuotaToSave;
+                }
             }
-            userAiQuotaService.setMonthlyQuota(extUser.getId(), newQuota, "Установлено администратором в карточке пользователя");
-            initialQuotaTokens = newQuota;
-        } catch (NumberFormatException ex) {
-            log.warn("Некорректный формат квоты токенов: {}", val);
         } catch (Exception ex) {
             log.error("Ошибка сохранения квоты токенов для пользователя {}: {}", extUser.getLogin(), ex.getMessage(), ex);
+        } finally {
+            pendingQuotaChanged = false;
+            pendingQuotaToSave = null;
         }
     }
 }
