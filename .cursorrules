@@ -300,6 +300,7 @@ Strictly follow this **numbered** structure when creating or updating documentat
 - Автогенерация сообщений коммита: `.cursor/rules/git-commit-conventions.mdc`
 - Проектирование промптов и AI-функций (субагент «Промпт-инженер»): `.agents/rules/prompt-engineering.md`
 - Актуализация документации по факту реализации (субагент «Технический писатель»): `.agents/rules/technical-writing.md`
+- Ведущий агент — «Руководитель проектов» (оркестрация субагентов для улучшения, ускорения и удешевления): `.agents/rules/project-management.md`
 - Язык агента (рассуждения, отчёты, ответы — русский): `.cursor/rules/russian-agent-output.mdc`
 - **Не коммитить**, пока пользователь явно не попросит.
 
