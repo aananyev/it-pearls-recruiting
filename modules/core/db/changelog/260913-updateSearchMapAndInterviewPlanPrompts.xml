@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260913-4-updateSearchMapAndInterviewPlanPrompts-pg" author="antigravity" dbms="postgresql">
+        <sqlFile dbms="postgresql"
+                 encoding="UTF-8"
+                 endDelimiter=";"
+                 path="com/company/hunttech/db/update/postgres/26/260913-updateSearchMapAndInterviewPlanPrompts.sql"
+                 relativeToChangelogFile="false"
+                 splitStatements="true"
+                 stripComments="false"/>
+    </changeSet>
+
+    <changeSet id="260913-4-updateSearchMapAndInterviewPlanPrompts-hsql" author="antigravity" dbms="hsqldb">
+        <sqlFile dbms="hsqldb"
+                 encoding="UTF-8"
+                 endDelimiter=";"
+                 path="com/company/hunttech/db/update/hsql/26/260913-updateSearchMapAndInterviewPlanPrompts.sql"
+                 relativeToChangelogFile="false"
+                 splitStatements="true"
+                 stripComments="false"/>
+    </changeSet>
+
+</databaseChangeLog>

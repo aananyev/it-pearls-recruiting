@@ -235,5 +235,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-updateVacancyChecklistPrompt.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-updateSearchMapAndInterviewPlanPrompts.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
