@@ -9,7 +9,7 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 ## UI Context & Navigation
 
 - `ExtMainScreen` открывает modeless `LlmChatScreen` через постоянный launcher.
-- `LlmChatScreen` создаёт один диалог пользователя, показывает бессрочную историю и получает live-ответ через Vaadin push; polling timer 3 секунды остаётся резервом при временной недоступности push.
+- `LlmChatScreen` создаёт один диалог пользователя, показывает бессрочную историю и получает live-ответ через Vaadin push; polling timer 1.2 секунды (`streamPollTimer`, delay 1200ms) обеспечивает динамическое оповещение о фазах действия нейросети до прихода первого токена и остаётся быстрым recovery-механизмом при временной недоступности push.
 - Геометрия плавающего окна (позиция и размер) сохраняется в штатных пользовательских screen settings CUBA; новая таблица для этого не нужна.
 - На экране до 640 px диалог превращается в полноэкранный mobile sheet, а сохранённые desktop-координаты не применяются.
 - Удаление истории пользователю не предоставляется.
@@ -55,4 +55,4 @@ Middleware-фасад плавающего LLM-чата HRM HuntTech. Серви
 
 ## Ограничения и следующие шаги
 
-Vaadin push включён как основной transport live-обновлений; polling 3 секунды сохранён как recovery-механизм. Событие push не содержит partial AI text и не отменяет owner-scoped проверку в `pollStreaming()`. Lookup usage по одному provider request ID остаётся TODO до появления подтверждённых provider-specific API. Геометрия desktop-диалога сохраняется через CUBA settings, mobile sheet реализован CSS-режимом без изменения схемы.
+Vaadin push включён как основной transport live-обновлений; polling 1.2 секунды сохранён как recovery-механизм и динамический таймер фаз обработки запроса. Событие push не содержит partial AI text и не отменяет owner-scoped проверку в `pollStreaming()`. Lookup usage по одному provider request ID остаётся TODO до появления подтверждённых provider-specific API. Геометрия desktop-диалога сохраняется через CUBA settings, mobile sheet реализован CSS-режимом без изменения схемы.

@@ -72,13 +72,20 @@ public class MarkdownRenderer {
      */
     public static String renderChatHistory(List<LlmChatMessage> messages, String liveText) {
         int count = messages != null ? messages.size() : 0;
-        return renderChatHistory(messages, liveText, count, count);
+        return renderChatHistory(messages, liveText, null, count, count);
     }
 
     /**
      * Renders chat history with pagination awareness (load earlier messages button).
      */
     public static String renderChatHistory(List<LlmChatMessage> messages, String liveText, int totalCount, int visibleCount) {
+        return renderChatHistory(messages, liveText, null, totalCount, visibleCount);
+    }
+
+    /**
+     * Renders chat history with custom live badge and pagination awareness.
+     */
+    public static String renderChatHistory(List<LlmChatMessage> messages, String liveText, String liveBadgeText, int totalCount, int visibleCount) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"llm-chat-messages-container\">");
 
@@ -125,10 +132,13 @@ public class MarkdownRenderer {
         }
 
         if (hasLiveText) {
+            String badge = (liveBadgeText != null && !liveBadgeText.trim().isEmpty())
+                    ? liveBadgeText.trim()
+                    : "Генерация...";
             sb.append("<div class=\"llm-chat-msg llm-chat-msg-ai llm-chat-msg-live\">");
             sb.append("<div class=\"llm-chat-msg-header\">");
             sb.append("<span class=\"llm-chat-msg-author\">ИИ</span>");
-            sb.append("<span class=\"llm-chat-live-badge\">Генерация...</span>");
+            sb.append("<span class=\"llm-chat-live-badge\">").append(escapeHtml(badge)).append("</span>");
             sb.append("</div>");
             sb.append("<div class=\"llm-chat-msg-body\">");
             sb.append(renderMarkdown(liveText));
@@ -151,13 +161,20 @@ public class MarkdownRenderer {
      */
     public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String emptyHint) {
         int count = messages != null ? messages.size() : 0;
-        return renderHermesChatHistory(messages, liveText, emptyHint, count, count);
+        return renderHermesChatHistory(messages, liveText, null, emptyHint, count, count);
     }
 
     /**
      * Renders Hermes chat history with pagination awareness.
      */
     public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String emptyHint, int totalCount, int visibleCount) {
+        return renderHermesChatHistory(messages, liveText, null, emptyHint, totalCount, visibleCount);
+    }
+
+    /**
+     * Renders Hermes chat history with custom live badge and pagination awareness.
+     */
+    public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String liveBadgeText, String emptyHint, int totalCount, int visibleCount) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"llm-chat-messages-container\">");
 
@@ -207,10 +224,13 @@ public class MarkdownRenderer {
         }
 
         if (hasLiveText) {
+            String badge = (liveBadgeText != null && !liveBadgeText.trim().isEmpty())
+                    ? liveBadgeText.trim()
+                    : "Выполняется запрос...";
             sb.append("<div class=\"llm-chat-msg llm-chat-msg-ai llm-chat-msg-live\">");
             sb.append("<div class=\"llm-chat-msg-header\">");
             sb.append("<span class=\"llm-chat-msg-author\">Hermes Agent (hrm-viewer)</span>");
-            sb.append("<span class=\"llm-chat-live-badge\">Выполняется запрос...</span>");
+            sb.append("<span class=\"llm-chat-live-badge\">").append(escapeHtml(badge)).append("</span>");
             sb.append("</div>");
             sb.append("<div class=\"llm-chat-msg-body\">");
             sb.append(renderMarkdown(liveText));

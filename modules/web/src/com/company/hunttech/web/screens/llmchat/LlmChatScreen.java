@@ -111,6 +111,9 @@ public class LlmChatScreen extends Screen {
     private UUID conversationId;
     private String activeRequestId;
     private String activeRequestText;
+    private long activeRequestStartTime;
+    private List<LlmChatMessage> currentStreamingHistory;
+    private List<LlmChatMessage> lastRenderedHistory;
     private UUID hermesConversationId;
     private String activeHermesRequestText;
     private UI chatUi;
@@ -695,18 +698,48 @@ public class LlmChatScreen extends Screen {
         inputArea.setValue("");
         inputArea.setEnabled(false);
         sendBtn.setEnabled(false);
+        activeRequestStartTime = System.currentTimeMillis();
         if (activeRequestId == null || !request.equals(activeRequestText)) {
             activeRequestId = UUID.randomUUID().toString();
             activeRequestText = request;
         }
         final String requestId = activeRequestId;
+
+        // Показываем сообщение пользователя сразу со статусом ожидания ответа (по аналогии с чатом Hermes)
+        List<LlmChatMessage> loadedHistory = null;
+        try {
+            loadedHistory = llmChatService.loadHistory(conversationId);
+        } catch (Exception ex) {
+            log.warn("Не удалось загрузить историю диалога перед отправкой: {}", ex.getMessage());
+            if (lastRenderedHistory != null && !lastRenderedHistory.isEmpty()) {
+                loadedHistory = new ArrayList<>(lastRenderedHistory);
+            }
+        }
+        List<LlmChatMessage> pendingList = new ArrayList<>(loadedHistory != null ? loadedHistory : Collections.emptyList());
+        LlmChatMessage pendingUserMsg = dataManager.create(LlmChatMessage.class);
+        pendingUserMsg.setRole("USER");
+        pendingUserMsg.setContent(request);
+        pendingUserMsg.setCreateTs(new java.util.Date());
+        pendingList.add(pendingUserMsg);
+        currentStreamingHistory = pendingList;
+
+        renderHistory(pendingList, "ИИ обрабатывает запрос и подготавливает контекст...", "Подготовка...");
+        executeScrollBottomJs();
+
         try {
             LlmChatStreamState state = llmChatService.startStreaming(conversationId, request, requestId);
             streamPollTimer.start();
             applyStreamState(state);
         } catch (RuntimeException ex) {
+            activeRequestStartTime = 0L;
+            currentStreamingHistory = null;
             resetControls(false);
             showError(ex);
+            if (loadedHistory != null) {
+                renderHistory(loadedHistory);
+            } else if (lastRenderedHistory != null && !lastRenderedHistory.isEmpty()) {
+                renderHistory(lastRenderedHistory);
+            }
         }
     }
 
@@ -714,26 +747,46 @@ public class LlmChatScreen extends Screen {
     public void onStreamPoll(Timer.TimerActionEvent event) {
         if (conversationId == null || activeRequestId == null) {
             streamPollTimer.stop();
+            activeRequestStartTime = 0L;
+            currentStreamingHistory = null;
             return;
         }
         try {
             applyStreamState(llmChatService.pollStreaming(conversationId, activeRequestId));
         } catch (RuntimeException ex) {
             streamPollTimer.stop();
+            activeRequestStartTime = 0L;
+            currentStreamingHistory = null;
             resetControls(false);
             showError(ex);
+            try {
+                renderHistory(llmChatService.loadHistory(conversationId));
+            } catch (Exception historyEx) {
+                log.warn("Не удалось перезагрузить историю диалога после ошибки стриминга: {}", historyEx.getMessage());
+                if (lastRenderedHistory != null) {
+                    renderHistory(lastRenderedHistory);
+                }
+            }
         }
     }
 
     private void renderHistory(List<LlmChatMessage> messages) {
-        renderHistory(messages, null, false);
+        renderHistory(messages, null, null, false);
     }
 
     private void renderHistory(List<LlmChatMessage> messages, String liveText) {
-        renderHistory(messages, liveText, false);
+        renderHistory(messages, liveText, null, false);
     }
 
     private void renderHistory(List<LlmChatMessage> messages, String liveText, boolean preserveScroll) {
+        renderHistory(messages, liveText, null, preserveScroll);
+    }
+
+    private void renderHistory(List<LlmChatMessage> messages, String liveText, String liveBadgeText) {
+        renderHistory(messages, liveText, liveBadgeText, false);
+    }
+
+    private void renderHistory(List<LlmChatMessage> messages, String liveText, String liveBadgeText, boolean preserveScroll) {
         int total = messages != null ? messages.size() : 0;
         List<LlmChatMessage> visible;
         if (messages != null && total > localVisibleLimit) {
@@ -741,7 +794,8 @@ public class LlmChatScreen extends Screen {
         } else {
             visible = messages != null ? messages : Collections.emptyList();
         }
-        String html = MarkdownRenderer.renderChatHistory(visible, liveText, total, visible.size());
+        lastRenderedHistory = (messages != null) ? new ArrayList<>(messages) : Collections.emptyList();
+        String html = MarkdownRenderer.renderChatHistory(visible, liveText, liveBadgeText, total, visible.size());
         historyLabel.setValue(html);
         if (preserveScroll) {
             restoreLocalScrollPositionJs();
@@ -837,10 +891,38 @@ public class LlmChatScreen extends Screen {
             return;
         }
         if (!state.isCompleted()) {
-            renderHistory(llmChatService.loadHistory(conversationId), state.getText());
+            List<LlmChatMessage> history = (currentStreamingHistory != null)
+                    ? currentStreamingHistory
+                    : llmChatService.loadHistory(conversationId);
+            String text = state.getText();
+            if (text != null && !text.trim().isEmpty()) {
+                renderHistory(history, text, "Генерация ответа...");
+            } else {
+                long elapsed = (activeRequestStartTime > 0)
+                        ? (System.currentTimeMillis() - activeRequestStartTime)
+                        : 0;
+                String statusText;
+                String badgeText;
+                if (elapsed < 2500) {
+                    statusText = "ИИ обрабатывает запрос и подготавливает контекст...";
+                    badgeText = "Подготовка...";
+                } else if (elapsed < 6000) {
+                    statusText = "Анализ контекста диалога и данных HRM...";
+                    badgeText = "Анализ контекста...";
+                } else if (elapsed < 12000) {
+                    statusText = "Нейросеть формулирует ответ...";
+                    badgeText = "Обращение к модели...";
+                } else {
+                    statusText = "Ожидание завершения ответа модели...";
+                    badgeText = "Генерация...";
+                }
+                renderHistory(history, statusText, badgeText);
+            }
             return;
         }
         streamPollTimer.stop();
+        activeRequestStartTime = 0L;
+        currentStreamingHistory = null;
         boolean success = "COMPLETED".equals(state.getStatus());
         resetControls(success);
         activeRequestId = null;

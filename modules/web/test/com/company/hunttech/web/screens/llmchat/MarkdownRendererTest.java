@@ -331,5 +331,39 @@ class MarkdownRendererTest {
         assertTrue(html.contains("hunttechOpenHrmEntity"));
         assertTrue(html.contains("Открыть карточку в HRM"));
     }
+
+    @Test
+    void testRenderChatHistoryWithCustomLiveBadge() {
+        List<LlmChatMessage> messages = new ArrayList<>();
+        LlmChatMessage userMsg = new LlmChatMessage();
+        userMsg.setRole("USER");
+        userMsg.setContent("Покажи статистику открытых позиций");
+        messages.add(userMsg);
+
+        String html = MarkdownRenderer.renderChatHistory(messages, "Анализ контекста диалога и данных HRM...", "Анализ контекста...", 1, 1);
+
+        assertTrue(html.contains("llm-chat-msg-user"));
+        assertTrue(html.contains("Покажи статистику открытых позиций"));
+        assertTrue(html.contains("llm-chat-msg-live"));
+        assertTrue(html.contains("Анализ контекста..."));
+        assertTrue(html.contains("Анализ контекста диалога и данных HRM..."));
+        assertTrue(html.contains("llm-chat-cursor"));
+    }
+
+    @Test
+    void testRenderHermesChatHistoryWithCustomLiveBadge() {
+        List<com.company.hunttech.service.dto.HermesChatMessage> messages = new ArrayList<>();
+        com.company.hunttech.service.dto.HermesChatMessage userMsg = new com.company.hunttech.service.dto.HermesChatMessage("user", "Запрос к Hermes");
+        messages.add(userMsg);
+
+        String html = MarkdownRenderer.renderHermesChatHistory(messages, "Hermes обрабатывает запрос...", "Выполняется запрос...", null, 1, 1);
+
+        assertTrue(html.contains("llm-chat-msg-user"));
+        assertTrue(html.contains("Запрос к Hermes"));
+        assertTrue(html.contains("llm-chat-msg-live"));
+        assertTrue(html.contains("Выполняется запрос..."));
+        assertTrue(html.contains("Hermes обрабатывает запрос..."));
+    }
 }
+
 
