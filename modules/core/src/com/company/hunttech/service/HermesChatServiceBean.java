@@ -192,34 +192,42 @@ public class HermesChatServiceBean implements HermesChatService {
         // Перехват прямого запроса на создание встречи в календаре / Телемосте
         if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(message.trim())) {
             AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(message.trim(), currentUser.getId());
-            String lower = message.trim().toLowerCase();
-            if (parseResult.isIntentDetected() && (lower.contains("создай") || lower.contains("запланируй") || lower.contains("поставь") || lower.contains("назначь"))) {
-                YandexMeetingResult booking = aiYandexOrchestrationService.executeMeetingBooking(currentUser.getId(), parseResult);
-                if (booking.isSuccess()) {
-                    long duration = System.currentTimeMillis() - startTime;
-                    LlmChatMessage userMsg = metadata.create(LlmChatMessage.class);
-                    userMsg.setConversation(conversation);
-                    userMsg.setRole("USER");
-                    userMsg.setContent(message.trim());
-                    userMsg.setSequenceNo(maxSeq + 1);
-                    userMsg.setStatus("COMPLETED");
-
-                    LlmChatMessage assistantMsg = metadata.create(LlmChatMessage.class);
-                    assistantMsg.setConversation(conversation);
-                    assistantMsg.setRole("ASSISTANT");
-                    assistantMsg.setContent(booking.getMessage());
-                    assistantMsg.setSequenceNo(maxSeq + 2);
-                    assistantMsg.setStatus("COMPLETED");
-                    assistantMsg.setProviderCode("yandex");
-                    assistantMsg.setModelName("caldav-telemost");
-
-                    conversation.setLastMessageAt(new Date());
-                    dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
-                    HermesChatResponse hermesResp = new HermesChatResponse(conversationId, booking.getMessage(), null, duration);
-                    hermesResp.setProviderCode("yandex");
-                    hermesResp.setModelName("caldav-telemost");
-                    return hermesResp;
+            if (parseResult.isIntentDetected() && AiYandexOrchestrationService.containsBookingVerb(message)) {
+                String responseText;
+                try {
+                    YandexMeetingResult booking = aiYandexOrchestrationService.executeMeetingBooking(currentUser.getId(), parseResult);
+                    if (booking.isSuccess()) {
+                        responseText = booking.getMessage();
+                    } else {
+                        responseText = AiYandexOrchestrationService.formatCalDavFailureMessage(booking.getMessage());
+                    }
+                } catch (Exception e) {
+                    log.error("Сбой бронирования встречи в Hermes Chat: {}", e.getMessage(), e);
+                    responseText = AiYandexOrchestrationService.formatCalDavFailureMessage(e.getMessage());
                 }
+                long duration = System.currentTimeMillis() - startTime;
+                LlmChatMessage userMsg = metadata.create(LlmChatMessage.class);
+                userMsg.setConversation(conversation);
+                userMsg.setRole("USER");
+                userMsg.setContent(message.trim());
+                userMsg.setSequenceNo(maxSeq + 1);
+                userMsg.setStatus("COMPLETED");
+
+                LlmChatMessage assistantMsg = metadata.create(LlmChatMessage.class);
+                assistantMsg.setConversation(conversation);
+                assistantMsg.setRole("ASSISTANT");
+                assistantMsg.setContent(responseText);
+                assistantMsg.setSequenceNo(maxSeq + 2);
+                assistantMsg.setStatus("COMPLETED");
+                assistantMsg.setProviderCode("yandex");
+                assistantMsg.setModelName("caldav-telemost");
+
+                conversation.setLastMessageAt(new Date());
+                dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
+                HermesChatResponse hermesResp = new HermesChatResponse(conversationId, responseText, null, duration);
+                hermesResp.setProviderCode("yandex");
+                hermesResp.setModelName("caldav-telemost");
+                return hermesResp;
             }
         }
 

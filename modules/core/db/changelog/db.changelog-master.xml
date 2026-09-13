@@ -237,5 +237,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-updateSearchMapAndInterviewPlanPrompts.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-updateLlmChatPromptWithYandex360.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

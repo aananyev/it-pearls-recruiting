@@ -122,5 +122,93 @@ public class YandexIntegrationContractTest {
         // 3. Нерелевантное сообщение
         String irrelevantMsg = "покажи список открытых вакансий";
         assertFalse(orchestrationBean.isMeetingBookingIntent(irrelevantMsg));
+
+        // 4. Проверка точного запроса пользователя: личное событие с темой в кавычках, временем 12-00 и таймзоной Саратова
+        String userRequest = "сделай в моем личном яндекс-календаре событие на завтра на 12-00 по саратовскому времени длительностью 1 час: \"Заняться медицинской страховкой\"";
+        assertTrue("Должен распознаваться интент создания события", orchestrationBean.isMeetingBookingIntent(userRequest));
+        AiMeetingParseResult userResult = orchestrationBean.parseMeetingIntent(userRequest, null);
+        assertTrue("Интент должен быть определен", userResult.isIntentDetected());
+        assertEquals(YandexCalendarType.PERSONAL, userResult.getCalendarType());
+        assertEquals("Заняться медицинской страховкой", userResult.getTitle());
+        assertEquals("Europe/Saratov", userResult.getTimeZone());
+        assertFalse("Для личного события без кандидата Телемост не требуется", userResult.isTelemostRequired());
+
+        java.util.Calendar cal = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("Europe/Saratov"));
+        cal.setTime(userResult.getStartTime());
+        assertEquals(12, cal.get(java.util.Calendar.HOUR_OF_DAY));
+        assertEquals(0, cal.get(java.util.Calendar.MINUTE));
+
+        long durationMillis = userResult.getEndTime().getTime() - userResult.getStartTime().getTime();
+        assertEquals("Длительность должна составлять ровно 1 час (60 минут)", 60 * 60 * 1000L, durationMillis);
+        assertTrue(userResult.getDescription().contains("Заняться медицинской страховкой"));
+        assertTrue(userResult.getDescription().contains("Создано через HRM HuntTech (Яндекс 360)"));
+
+        // 5. Проверка точки во времени (12.00) и темы через ключевое слово
+        String dotTimeMsg = "поставь в моем календаре на завтра 12.00 тему: Встреча с тимлидом";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(dotTimeMsg));
+        AiMeetingParseResult dotTimeResult = orchestrationBean.parseMeetingIntent(dotTimeMsg, null);
+        assertTrue(dotTimeResult.isIntentDetected());
+        assertEquals("Встреча с тимлидом", dotTimeResult.getTitle());
+
+        // 6. Проверка "длительностью 2 часа" (120 минут)
+        String duration2HoursMsg = "запланируй в моем календаре встречу на завтра длительностью 2 часа: \"Стратегическая сессия\"";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(duration2HoursMsg));
+        AiMeetingParseResult durationResult = orchestrationBean.parseMeetingIntent(duration2HoursMsg, null);
+        assertTrue(durationResult.isIntentDetected());
+        assertEquals("Стратегическая сессия", durationResult.getTitle());
+        long duration2HMillis = durationResult.getEndTime().getTime() - durationResult.getStartTime().getTime();
+        assertEquals("Длительность должна быть 2 часа (120 минут)", 120 * 60 * 1000L, duration2HMillis);
+
+        // 7. Проверка даты формата dd.MM.yyyy (например 13.09.2026), чтобы 09.20 не матчилась как время старта
+        String dateNoTimeMsg = "поставь в моем календаре событие 13.09.2026: \"Планирование спринта\"";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(dateNoTimeMsg));
+        AiMeetingParseResult dateNoTimeResult = orchestrationBean.parseMeetingIntent(dateNoTimeMsg, null);
+        assertTrue(dateNoTimeResult.isIntentDetected());
+        java.util.Calendar calDate = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone(dateNoTimeResult.getTimeZone()));
+        calDate.setTime(dateNoTimeResult.getStartTime());
+        assertEquals("При отсутствии времени должен оставаться дефолтный час 15:00, а не 09:20", 15, calDate.get(java.util.Calendar.HOUR_OF_DAY));
+
+        // 8. Проверка ISO-даты 2026-09-13, чтобы 09-13 не матчилась как время 09:13
+        String isoDateMsg = "создай в моем календаре встречу 2026-09-13: \"Ретроспектива\"";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(isoDateMsg));
+        AiMeetingParseResult isoDateResult = orchestrationBean.parseMeetingIntent(isoDateMsg, null);
+        assertTrue(isoDateResult.isIntentDetected());
+        java.util.Calendar calIso = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone(isoDateResult.getTimeZone()));
+        calIso.setTime(isoDateResult.getStartTime());
+        assertEquals("ISO-дата не должна давать время 09:13, должен оставаться дефолтный час 15:00", 15, calIso.get(java.util.Calendar.HOUR_OF_DAY));
+
+        // 9. Проверка темы без кавычек со стоп-словами предлогов
+        String unquotedTopicMsg = "создай в моем календаре встречу на тему обсуждение бюджета на завтра в 16:00 с кандидатом Ивановым Иваном";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(unquotedTopicMsg));
+        AiMeetingParseResult unquotedResult = orchestrationBean.parseMeetingIntent(unquotedTopicMsg, null);
+        assertTrue(unquotedResult.isIntentDetected());
+        assertTrue("Тема без кавычек должна отсекать дату/время", unquotedResult.getTitle().contains("обсуждение бюджета"));
+        assertEquals("Ивановым Иваном", unquotedResult.getCandidateFio());
+
+        // 10. Проверка сохранения номеров версий с точкой (например 'релиз версия 1.5')
+        String versionTopicMsg = "поставь в моем календаре на завтра в 11:00 тему: релиз версия 1.5";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(versionTopicMsg));
+        AiMeetingParseResult versionResult = orchestrationBean.parseMeetingIntent(versionTopicMsg, null);
+        assertTrue(versionResult.isIntentDetected());
+        assertTrue("Номер версии с точкой 1.5 не должен удаляться", versionResult.getTitle().contains("релиз версия 1.5"));
+
+        // 11. Проверка "на 30 минут" как длительности
+        String durationMinutesMsg = "создай в моем календаре встречу на завтра в 10:00 на 30 минут: \"Короткий синк\"";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(durationMinutesMsg));
+        AiMeetingParseResult durationMinutesResult = orchestrationBean.parseMeetingIntent(durationMinutesMsg, null);
+        assertTrue(durationMinutesResult.isIntentDetected());
+        long duration30MinMillis = durationMinutesResult.getEndTime().getTime() - durationMinutesResult.getStartTime().getTime();
+        assertEquals("Длительность должна быть 30 минут", 30 * 60 * 1000L, duration30MinMillis);
+
+        // 12. Проверка, что 'на 5 человек' не парсится как 5 часов, а 'на 15 часов' парсится как время старта
+        String timeOfDayMsg = "поставь в моем календаре встречу на завтра на 15 часов на 5 человек: \"Ревью\"";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(timeOfDayMsg));
+        AiMeetingParseResult timeOfDayResult = orchestrationBean.parseMeetingIntent(timeOfDayMsg, null);
+        assertTrue(timeOfDayResult.isIntentDetected());
+        java.util.Calendar cal15H = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone(timeOfDayResult.getTimeZone()));
+        cal15H.setTime(timeOfDayResult.getStartTime());
+        assertEquals("Время старта должно быть 15:00", 15, cal15H.get(java.util.Calendar.HOUR_OF_DAY));
+        long defaultDurMillis = timeOfDayResult.getEndTime().getTime() - timeOfDayResult.getStartTime().getTime();
+        assertEquals("Длительность должна остаться стандартной (60 минут), а не 300 минут", 60 * 60 * 1000L, defaultDurMillis);
     }
 }

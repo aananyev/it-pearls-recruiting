@@ -180,23 +180,38 @@ public class LlmChatServiceBean implements LlmChatService {
 
         if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(message.trim())) {
             AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(message.trim(), user.getId());
-            String lower = message.trim().toLowerCase();
-            if (parseResult.isIntentDetected() && (lower.contains("создай") || lower.contains("запланируй") || lower.contains("поставь") || lower.contains("назначь"))) {
-                YandexMeetingResult booking = aiYandexOrchestrationService.executeMeetingBooking(user.getId(), parseResult);
-                if (booking.isSuccess()) {
-                    LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
-                    assistantMessage.setConversation(conversation);
-                    assistantMessage.setRole("ASSISTANT");
-                    assistantMessage.setContent(booking.getMessage());
-                    assistantMessage.setSequenceNo(nextSequence + 1);
-                    assistantMessage.setRequestId(requestId.trim());
-                    assistantMessage.setStatus("COMPLETED");
-                    assistantMessage.setProviderCode("yandex");
-                    assistantMessage.setModelName("caldav-telemost");
-                    conversation.setLastMessageAt(new Date());
-                    dataManager.commit(new CommitContext(conversation, assistantMessage));
-                    return new LlmChatResponse(conversation.getId(), booking.getMessage(), "yandex", "caldav-telemost", null);
+            if (parseResult.isIntentDetected() && AiYandexOrchestrationService.containsBookingVerb(message)) {
+                String responseText;
+                boolean success = false;
+                try {
+                    YandexMeetingResult booking = aiYandexOrchestrationService.executeMeetingBooking(user.getId(), parseResult);
+                    if (booking.isSuccess()) {
+                        responseText = booking.getMessage();
+                        success = true;
+                    } else {
+                        responseText = AiYandexOrchestrationService.formatCalDavFailureMessage(booking.getMessage());
+                    }
+                } catch (Exception e) {
+                    log.error("Сбой бронирования встречи CalDAV: {}", e.getMessage(), e);
+                    responseText = AiYandexOrchestrationService.formatCalDavFailureMessage(e.getMessage());
                 }
+                LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+                assistantMessage.setConversation(conversation);
+                assistantMessage.setRole("ASSISTANT");
+                assistantMessage.setContent(responseText);
+                assistantMessage.setSequenceNo(nextSequence + 1);
+                assistantMessage.setRequestId(requestId.trim());
+                assistantMessage.setStatus("COMPLETED");
+                assistantMessage.setProviderCode("yandex");
+                assistantMessage.setModelName("caldav-telemost");
+                conversation.setLastMessageAt(new Date());
+                dataManager.commit(new CommitContext(conversation, assistantMessage));
+                if (success) {
+                    settleObservedUsage(quota, 50, "yandex-caldav");
+                } else {
+                    releaseFailedReservation(quota, "yandex-caldav");
+                }
+                return new LlmChatResponse(conversation.getId(), responseText, "yandex", "caldav-telemost", null);
             }
         }
 
@@ -364,6 +379,49 @@ public class LlmChatServiceBean implements LlmChatService {
                 .id(session.conversationId).view("llm-chat-conversation-view").optional().orElse(null);
         ExtUser user = dataManager.load(ExtUser.class)
                 .id(session.userId).view("_minimal").optional().orElse(null);
+
+        String rawContent = session.userMessage != null && session.userMessage.getContent() != null
+                ? session.userMessage.getContent().trim() : "";
+
+        if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(rawContent)) {
+            AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(rawContent, user != null ? user.getId() : null);
+            if (parseResult.isIntentDetected() && AiYandexOrchestrationService.containsBookingVerb(rawContent)) {
+                String responseText;
+                boolean success = false;
+                try {
+                    YandexMeetingResult booking = aiYandexOrchestrationService.executeMeetingBooking(user != null ? user.getId() : null, parseResult);
+                    if (booking.isSuccess()) {
+                        responseText = booking.getMessage();
+                        success = true;
+                    } else {
+                        responseText = AiYandexOrchestrationService.formatCalDavFailureMessage(booking.getMessage());
+                    }
+                } catch (Exception e) {
+                    log.error("Сбой стриминга бронирования встречи CalDAV: {}", e.getMessage(), e);
+                    responseText = AiYandexOrchestrationService.formatCalDavFailureMessage(e.getMessage());
+                }
+                session.append(responseText);
+                LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+                assistantMessage.setConversation(conversation);
+                assistantMessage.setRole("ASSISTANT");
+                assistantMessage.setContent(responseText);
+                assistantMessage.setSequenceNo(session.nextSequence + 1);
+                assistantMessage.setRequestId(session.requestId);
+                assistantMessage.setStatus("COMPLETED");
+                assistantMessage.setProviderCode("yandex");
+                assistantMessage.setModelName("caldav-telemost");
+                conversation.setLastMessageAt(new Date());
+                dataManager.commit(new CommitContext(conversation, assistantMessage));
+                if (success) {
+                    settleObservedUsage(session.quota, 50, "yandex-caldav");
+                } else {
+                    releaseFailedReservation(session.quota, "yandex-caldav");
+                }
+                session.complete("COMPLETED", null);
+                publishStreamEvent(session, true);
+                return;
+            }
+        }
 
         if (isVacancyOpeningIntent(session.userMessage.getContent())) {
             String vacancyResponse = handleVacancyOpeningIntent(user, session.userMessage.getContent());

@@ -202,7 +202,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             String targetCalendarPath = resolveTargetCalendarPath(config, token, request.getCalendarType(), request.getCustomCalendarPath());
             String calendarDisplayName = request.getCalendarType() == YandexCalendarType.CLIENT_INTERVIEW
                     ? config.getClientInterviewCalendarName()
-                    : StringUtils.defaultIfBlank(config.getPersonalCalendarName(), "Основной календарь");
+                    : StringUtils.defaultIfBlank(config.getPersonalCalendarName(), DEFAULT_PERSONAL_CALENDAR_NAME);
 
             // 3. Формируем UID и iCalendar
             String eventUid = UUID.randomUUID().toString();
@@ -375,7 +375,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             log.warn("Ошибка CalDAV discovery: {}", ex.getMessage());
             // Фолбэк
             String defaultPath = "/calendars/" + account + "/events/";
-            result.add(new YandexCalendarInfoDto("default", "Основной календарь", defaultPath, true, false));
+            result.add(new YandexCalendarInfoDto("default", DEFAULT_PERSONAL_CALENDAR_NAME, defaultPath, true, false));
         }
 
         return result;

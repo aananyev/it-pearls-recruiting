@@ -8,6 +8,28 @@ import java.util.UUID;
 public interface AiYandexOrchestrationService {
     String NAME = "hunttech_AiYandexOrchestrationService";
 
+    String CALDAV_NOT_CONFIGURED_OR_FAILED_MESSAGE =
+            "Не удалось создать событие в Яндекс-Календаре. Проверьте настройки подключения к Яндекс 360 в окне Настроек (вкладка «Яндекс-360») и корректность учетных данных.";
+
+    static String formatCalDavFailureMessage(String details) {
+        return "⚠️ **Не удалось создать событие в Яндекс-Календаре:**\n\n" +
+                (details != null && !details.isEmpty() ? details : CALDAV_NOT_CONFIGURED_OR_FAILED_MESSAGE) + "\n\n" +
+                "Пожалуйста, проверьте подключение и токен доступа в окне Настроек (вкладка **«Яндекс 360»**).";
+    }
+
+    String BOOKING_VERBS_REGEX = "(?<![\\p{L}])(?:создай|сделай|запланируй|добавь|внеси|запиши|поставь|назначь|забронируй|организуй)(?![\\p{L}])";
+    java.util.regex.Pattern BOOKING_VERBS_PATTERN = java.util.regex.Pattern.compile(
+            BOOKING_VERBS_REGEX,
+            java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.UNICODE_CASE
+    );
+
+    static boolean containsBookingVerb(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            return false;
+        }
+        return BOOKING_VERBS_PATTERN.matcher(message.trim()).find();
+    }
+
     /**
      * Быстрая проверка, содержит ли пользовательское сообщение намерение управления календарем/созвонами.
      */

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface YandexIntegrationService {
     String NAME = "hunttech_YandexIntegrationService";
+    String DEFAULT_PERSONAL_CALENDAR_NAME = "Основной календарь";
 
     /**
      * Диагностика подключения к выбранному сервису Yandex (AUTH, CALENDAR, TELEMOST, WIKI).
