@@ -81,6 +81,13 @@ public class YandexIntegrationContractTest {
     }
 
     @Test
+    public void testPersistenceXmlRegistration() throws Exception {
+        String persistenceXml = readProjectFile("modules/global/src/com/company/hunttech/persistence.xml");
+        assertTrue("persistence.xml должен содержать регистрацию класса UserYandexConfiguration",
+                persistenceXml.contains("<class>com.company.hunttech.entity.UserYandexConfiguration</class>"));
+    }
+
+    @Test
     public void testWebSpringServiceRegistration() throws Exception {
         String webSpring = readProjectFile("modules/web/src/com/company/hunttech/web-spring.xml");
         assertTrue("web-spring.xml должен регистрировать remoteProxy hunttech_YandexIntegrationService",
