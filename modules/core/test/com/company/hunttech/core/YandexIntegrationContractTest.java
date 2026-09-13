@@ -297,4 +297,66 @@ public class YandexIntegrationContractTest {
 
         assertEquals("16:30 – 17:30", ev.getFormattedTimeRange(tz));
     }
+
+    @Test
+    public void testAllWorkdaysTimeRangeAndMultipleSlotsParsing() {
+        AiYandexOrchestrationServiceBean orchestrationBean = new AiYandexOrchestrationServiceBean();
+
+        // 1. Каждый рабочий день на следующей неделе с 15 до 16
+        String msg1 = "сделай в моем личном календаре на следующей неделе каждый рабочий день по саратовскому времени с 15 до 16 событие \"Забрать Аглаю из школы\"";
+        assertTrue(orchestrationBean.isMeetingBookingIntent(msg1));
+
+        AiMeetingParseResult result1 = orchestrationBean.parseMeetingIntent(msg1, null);
+        assertTrue(result1.isIntentDetected());
+        assertEquals("Забрать Аглаю из школы", result1.getTitle());
+        assertEquals("Europe/Saratov", result1.getTimeZone());
+        assertEquals(YandexCalendarType.PERSONAL, result1.getCalendarType());
+        assertTrue("Для множественных слотов должен быть выставлен checkDuplicates", result1.isCheckDuplicates());
+        assertNotNull(result1.getTimeSlots());
+        assertEquals("Должно быть создано 5 слотов (пн-пт)", 5, result1.getTimeSlots().size());
+
+        java.util.TimeZone tz = java.util.TimeZone.getTimeZone("Europe/Saratov");
+        java.util.Calendar cal = java.util.Calendar.getInstance(tz);
+
+        for (AiMeetingParseResult.TimeSlot slot : result1.getTimeSlots()) {
+            cal.setTime(slot.getStartTime());
+            assertEquals("Время начала должно быть 15:00", 15, cal.get(java.util.Calendar.HOUR_OF_DAY));
+            assertEquals("Минуты начала должны быть 0", 0, cal.get(java.util.Calendar.MINUTE));
+
+            cal.setTime(slot.getEndTime());
+            assertEquals("Время окончания должно быть 16:00", 16, cal.get(java.util.Calendar.HOUR_OF_DAY));
+            assertEquals("Минуты окончания должны быть 0", 0, cal.get(java.util.Calendar.MINUTE));
+
+            long duration = slot.getEndTime().getTime() - slot.getStartTime().getTime();
+            assertEquals("Длительность слота должна быть 1 час", 3600000L, duration);
+        }
+
+        // 2. Дни недели списком: в понедельник, среду, четверг и пятницу
+        String msg2 = "сделай аналогичное событие в понедельник, среду, четверг и пятницу с 15 до 16";
+        AiMeetingParseResult result2 = orchestrationBean.parseMeetingIntent(msg2, null);
+        assertTrue(result2.isIntentDetected());
+        assertEquals("Событие в календаре", result2.getTitle());
+        assertEquals(4, result2.getTimeSlots().size());
+
+        // 3. 18 числа с 15 до 16: число месяца не должно сбивать время на 18:00
+        String msg3 = "поставь в моем календаре 18 числа с 15 до 16 Забрать Аглаю из школы";
+        AiMeetingParseResult result3 = orchestrationBean.parseMeetingIntent(msg3, null);
+        assertTrue(result3.isIntentDetected());
+        assertEquals(1, result3.getTimeSlots().size());
+        cal.setTime(result3.getTimeSlots().get(0).getStartTime());
+        assertEquals("День месяца должен быть 18", 18, cal.get(java.util.Calendar.DAY_OF_MONTH));
+        assertEquals("Время начала должно быть 15:00, а не 18:00!", 15, cal.get(java.util.Calendar.HOUR_OF_DAY));
+        assertEquals(0, cal.get(java.util.Calendar.MINUTE));
+        cal.setTime(result3.getTimeSlots().get(0).getEndTime());
+        assertEquals(16, cal.get(java.util.Calendar.HOUR_OF_DAY));
+
+        // 4. в четверг с 15 до 16
+        String msg4 = "создай в личном календаре в четверг с 15 до 16 событие \"Забрать Аглаю из школы\"";
+        AiMeetingParseResult result4 = orchestrationBean.parseMeetingIntent(msg4, null);
+        assertTrue(result4.isIntentDetected());
+        assertEquals(1, result4.getTimeSlots().size());
+        cal.setTime(result4.getTimeSlots().get(0).getStartTime());
+        assertEquals("День недели должен быть четверг", java.util.Calendar.THURSDAY, cal.get(java.util.Calendar.DAY_OF_WEEK));
+        assertEquals(15, cal.get(java.util.Calendar.HOUR_OF_DAY));
+    }
 }

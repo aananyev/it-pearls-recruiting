@@ -47,6 +47,11 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
     );
 
+    private static final Pattern TIME_RANGE_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])(?:с|от)\\s+([01]?\\d|2[0-3])(?::([0-5]\\d)|[.\\-]([0-5]\\d))?\\s+(?:до|по)\\s+([01]?\\d|2[0-3])(?::([0-5]\\d)|[.\\-]([0-5]\\d))?(?:\\s*(?:час(?:а|ов)?|ч(?![\\p{L}])))?(?![\\p{L}\\p{N}])(?!\\s*(?:январ|феврал|март|апрел|ма[яе]|июн|июл|август|сентябр|октябр|ноябр|декабр|человек|штук|дней|дня))",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
     private static final Pattern TIME_PATTERN = Pattern.compile(
             "(?:(?:в|на)\\s+)?(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])|" +
             "(?:(?:в|на)\\s+)?(?<![\\d.\\-])([01]?\\d|2[0-3])[.\\-]([0-5]\\d)(?![:.\\-]?\\d)",
@@ -54,8 +59,48 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
     );
 
     private static final Pattern HOUR_ONLY_PATTERN = Pattern.compile(
-            "(?:в)?\\s*([01]?\\d|2[0-3])\\s*(?:час(?:а|ов)?|ч|:00)",
+            "(?:в\\s*)?([01]?\\d|2[0-3])\\s*(?:час(?:а|ов)?|ч(?![\\p{L}])|:00)",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern DAY_OF_MONTH_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])([012]?\\d|3[01])\\s*(?:-?го\\s+)?(?:числа|число|(январ|феврал|март|апрел|ма[яе]|июн|июл|август|сентябр|октябр|ноябр|декабр)[а-яё]*)(?![\\p{L}\\p{N}])",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern ALL_WORKDAYS_PATTERN = Pattern.compile(
+            "(?:кажд(?:ый|ую|ое|ые)?\\s+)?(?:рабоч(?:ий|ие|их)?\\s+д(?:ень|ня|ней)|будн(?:и|ям|ях)|будничн(?:ый|ые))",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern DAY_OF_WEEK_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])(понедельник(?:ам)?|вторник(?:ам)?|сред(?:а|у|ам)|четверг(?:ам)?|пятниц(?:а|у|ам)|суббот(?:а|у|ам)|воскресень(?:е|я|ям))(?![\\p{L}\\p{N}])",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern NEXT_WEEK_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])на\\s+следующ(?:ей|ую)\\s+недел[ею](?![\\p{L}\\p{N}])",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern THIS_WEEK_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])на\\s+(?:этой|текущей)\\s+недел[ею](?![\\p{L}\\p{N}])",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern DEDUPLICATE_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])(?:если\\s+(?:такого|такой|таких)?\\s*(?:ещ[её])?\\s*нет|без\\s+дубликат[а-яё]*)(?![\\p{L}\\p{N}])",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern ANALOGOUS_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])аналогичн[а-яё]*\\s+(?:событи[ея]|встреч[уа]|слот)(?![\\p{L}\\p{N}])",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern EVENT_TOPIC_FALLBACK_PATTERN = Pattern.compile(
+            "(?<![\\p{L}\\p{N}])(?:[Сс]обыти[ея]|[Вв]стреч[уа])\\s+([А-ЯЁ][\\p{L}\\p{N}\\s]{3,50}?)(?=\\s+(?:в|на|с|по|длительностью|каждый|если|$)|[,;\n]|$)",
+            Pattern.UNICODE_CASE
     );
 
     private static final Pattern DURATION_PATTERN = Pattern.compile(
@@ -423,7 +468,7 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
         resolveMeetingDateTime(userMessage, result, userYandexConfig);
 
         // 4. Определение темы (Summary/Title) и описания
-        String customTopic = extractCustomTopic(userMessage);
+        String customTopic = extractCustomTopic(userMessage, currentUserId, userYandexConfig);
         boolean isCandidateFound = result.getCandidateFio() != null;
         if (isCandidateFound) {
             String candidatePart = result.getCandidateFio();
@@ -470,7 +515,7 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
         return result;
     }
 
-    private String extractCustomTopic(String msg) {
+    private String extractCustomTopic(String msg, UUID currentUserId, UserYandexConfiguration userYandexConfig) {
         Matcher qm = QUOTED_TOPIC_PATTERN.matcher(msg);
         if (qm.find()) {
             String val = qm.group(1).trim();
@@ -490,6 +535,49 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
                 }
             }
         }
+        Matcher em = EVENT_TOPIC_FALLBACK_PATTERN.matcher(msg);
+        if (em.find()) {
+            String rawVal = em.group(1).trim();
+            rawVal = INLINE_DATE_TIME_PATTERN.matcher(rawVal).replaceAll(" ").trim().replaceAll("\\s+", " ");
+            if (rawVal.length() >= 3 && !rawVal.equalsIgnoreCase("в календаре") && !rawVal.equalsIgnoreCase("в яндекс")) {
+                return rawVal;
+            }
+        }
+        if (ANALOGOUS_PATTERN.matcher(msg).find() || msg.toLowerCase().contains("аналогичн")) {
+            if (currentUserId != null && yandexIntegrationService != null) {
+                try {
+                    String tzStr = (userYandexConfig != null && StringUtils.isNotBlank(userYandexConfig.getDefaultTimeZone()))
+                            ? userYandexConfig.getDefaultTimeZone() : UserYandexConfiguration.DEFAULT_TIME_ZONE;
+                    Calendar pastCal = Calendar.getInstance(TimeZone.getTimeZone(tzStr));
+                    pastCal.add(Calendar.DAY_OF_YEAR, -7);
+                    Calendar futureCal = Calendar.getInstance(TimeZone.getTimeZone(tzStr));
+                    futureCal.add(Calendar.DAY_OF_YEAR, 14);
+                    List<YandexCalendarEventDto> events = yandexIntegrationService.getAllUpcomingCalendarEvents(
+                            currentUserId, pastCal.getTime(), futureCal.getTime());
+                    if (events != null && !events.isEmpty()) {
+                        Date now = new Date();
+                        for (int i = events.size() - 1; i >= 0; i--) {
+                            YandexCalendarEventDto ev = events.get(i);
+                            if (ev.getStartTime() != null && ev.getStartTime().before(now)) {
+                                String s = ev.getSummary();
+                                if (StringUtils.isNotBlank(s) && !s.equalsIgnoreCase("Без названия") && !s.startsWith("Обед")) {
+                                    return s;
+                                }
+                            }
+                        }
+                        for (YandexCalendarEventDto ev : events) {
+                            String s = ev.getSummary();
+                            if (StringUtils.isNotBlank(s) && !s.equalsIgnoreCase("Без названия") && !s.startsWith("Обед")) {
+                                return s;
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    log.debug("Не удалось получить предыдущее событие для аналогичной темы: {}", ex.getMessage());
+                }
+            }
+            return null;
+        }
         return null;
     }
 
@@ -500,87 +588,161 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
         }
         ExtUser currentUser = dataManager.load(ExtUser.class).id(currentUserId).view("extUser-view").one();
 
-        // 1. Формируем запрос к YandexIntegrationService
-        YandexMeetingRequest req = new YandexMeetingRequest();
-        req.setCalendarType(parsedIntent.getCalendarType());
-        req.setTitle(parsedIntent.getTitle());
-        req.setDescription(parsedIntent.getDescription());
-        req.setStartTime(parsedIntent.getStartTime());
-        req.setEndTime(parsedIntent.getEndTime());
-        req.setTimeZone(parsedIntent.getTimeZone());
-
-        req.setCandidateId(parsedIntent.getCandidateId());
-        req.setCandidateName(parsedIntent.getCandidateFio());
-        req.setCandidateEmail(parsedIntent.getCandidateEmail());
-
-        req.setCreateTelemostMeeting(parsedIntent.isTelemostRequired());
-        req.setTelemostAutoRecord(parsedIntent.isTelemostAutoRecord());
-        req.setTelemostAiSummary(parsedIntent.isTelemostAiSummary());
-
-        if (StringUtils.isNotBlank(currentUser.getEmail())) {
-            req.getAttendeeEmails().add(currentUser.getEmail());
+        List<AiMeetingParseResult.TimeSlot> slots = parsedIntent.getTimeSlots();
+        if (slots == null || slots.isEmpty()) {
+            Date start = parsedIntent.getStartTime() != null ? parsedIntent.getStartTime() : new Date();
+            Date end = parsedIntent.getEndTime() != null ? parsedIntent.getEndTime() : new Date(start.getTime() + 3600000L);
+            slots = Collections.singletonList(new AiMeetingParseResult.TimeSlot(start, end, "Событие"));
         }
 
-        // 2. Создаем событие в календаре через YandexIntegrationService
-        YandexMeetingResult result = yandexIntegrationService.scheduleCalendarEvent(currentUserId, req);
-        if (!result.isSuccess()) {
-            log.warn("Не удалось создать событие в календаре: {}", result.getMessage());
-            return result;
-        }
-
-        // 3. Если встреча создана успешно — сохраняем запись в IteractionList
-        if (parsedIntent.getCandidateId() != null) {
+        // Проверка существующих событий на дубликаты
+        List<YandexCalendarEventDto> existingEvents = Collections.emptyList();
+        if (parsedIntent.isCheckDuplicates() || slots.size() > 1) {
             try {
-                JobCandidate candidate = dataManager.load(JobCandidate.class)
-                        .id(parsedIntent.getCandidateId())
-                        .view("_minimal")
-                        .optional()
-                        .orElse(null);
-
-                if (candidate != null) {
-                    IteractionList interaction = metadata.create(IteractionList.class);
-                    interaction.setCandidate(candidate);
-                    interaction.setRecrutier(currentUser);
-                    interaction.setDateIteraction(parsedIntent.getStartTime());
-                    interaction.setCommunicationMethod("Яндекс Телемост");
-
-                    StringBuilder comment = new StringBuilder();
-                    comment.append("Запланировано собеседование в Яндекс.Календаре (")
-                            .append(result.getCalendarName()).append(").\n");
-                    if (StringUtils.isNotBlank(result.getTelemostJoinUrl())) {
-                        comment.append("Ссылка на видеовстречу Телемост: ").append(result.getTelemostJoinUrl()).append("\n");
-                    }
-                    comment.append("UID события: ").append(result.getEventUid()).append("\n");
-                    interaction.setComment(comment.toString());
-
-                    // Пытаемся назначить тип взаимодействия «Интервью» / «Собеседование»
-                    Iteraction itType = dataManager.load(Iteraction.class)
-                            .query("select e from hunttech_Iteraction e where lower(e.name) like '%собеседован%' or lower(e.name) like '%интервью%'")
-                            .optional()
-                            .orElse(null);
-                    if (itType != null) {
-                        interaction.setIteractionType(itType);
-                    }
-
-                    interaction = dataManager.commit(interaction);
-                    result.setIteractionListId(interaction.getId());
-                    log.info("Создана запись взаимодействия IteractionList id={}", interaction.getId());
+                Date minStart = slots.get(0).getStartTime();
+                Date maxEnd = slots.get(slots.size() - 1).getEndTime();
+                for (AiMeetingParseResult.TimeSlot sl : slots) {
+                    if (sl.getStartTime().before(minStart)) minStart = sl.getStartTime();
+                    if (sl.getEndTime().after(maxEnd)) maxEnd = sl.getEndTime();
                 }
+                existingEvents = yandexIntegrationService.getAllUpcomingCalendarEvents(
+                        currentUserId,
+                        new Date(minStart.getTime() - 1800000L),
+                        new Date(maxEnd.getTime() + 1800000L)
+                );
             } catch (Exception ex) {
-                log.warn("Не удалось создать IteractionList: {}", ex.getMessage());
+                log.warn("Не удалось загрузить существующие события для дедупликации: {}", ex.getMessage());
             }
         }
 
-        // 4. Формируем подробный отчет
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-        sdf.setTimeZone(TimeZone.getTimeZone(parsedIntent.getTimeZone()));
+        List<YandexMeetingResult> createdResults = new ArrayList<>();
+        List<String> createdLabels = new ArrayList<>();
+        List<String> skippedLabels = new ArrayList<>();
 
-        String formattedDate = sdf.format(parsedIntent.getStartTime());
+        SimpleDateFormat timeDf = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat dateDf = new SimpleDateFormat("dd.MM.yyyy (EEEE)", new Locale("ru", "RU"));
+        TimeZone tz = TimeZone.getTimeZone(parsedIntent.getTimeZone());
+        timeDf.setTimeZone(tz);
+        dateDf.setTimeZone(tz);
+
+        String targetTitle = parsedIntent.getTitle() != null ? parsedIntent.getTitle().trim().toLowerCase() : "";
+        boolean hasTitle = !targetTitle.isEmpty();
+
+        for (AiMeetingParseResult.TimeSlot slot : slots) {
+            boolean isDuplicate = false;
+            String dupSummary = null;
+            if (existingEvents != null && !existingEvents.isEmpty()) {
+                long slotStartMs = slot.getStartTime().getTime();
+                for (YandexCalendarEventDto ev : existingEvents) {
+                    if (ev.getStartTime() != null) {
+                        long evStartMs = ev.getStartTime().getTime();
+                        if (Math.abs(evStartMs - slotStartMs) < 15 * 60 * 1000L) {
+                            String evSum = ev.getSummary() != null ? ev.getSummary().trim().toLowerCase() : "";
+                            if (hasTitle && StringUtils.isNotBlank(evSum) && evSum.equals(targetTitle)) {
+                                isDuplicate = true;
+                                dupSummary = ev.getSummary();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            String slotTimeStr = capitalize(dateDf.format(slot.getStartTime())) + ": " + timeDf.format(slot.getStartTime()) + " — " + timeDf.format(slot.getEndTime());
+
+            if (isDuplicate) {
+                skippedLabels.add(slotTimeStr + " (уже есть: \"" + dupSummary + "\")");
+                continue;
+            }
+
+            YandexMeetingRequest req = new YandexMeetingRequest();
+            req.setCalendarType(parsedIntent.getCalendarType());
+            req.setTitle(parsedIntent.getTitle());
+            req.setDescription(parsedIntent.getDescription());
+            req.setStartTime(slot.getStartTime());
+            req.setEndTime(slot.getEndTime());
+            req.setTimeZone(parsedIntent.getTimeZone());
+
+            req.setCandidateId(parsedIntent.getCandidateId());
+            req.setCandidateName(parsedIntent.getCandidateFio());
+            req.setCandidateEmail(parsedIntent.getCandidateEmail());
+
+            req.setCreateTelemostMeeting(parsedIntent.isTelemostRequired());
+            req.setTelemostAutoRecord(parsedIntent.isTelemostAutoRecord());
+            req.setTelemostAiSummary(parsedIntent.isTelemostAiSummary());
+
+            if (StringUtils.isNotBlank(currentUser.getEmail())) {
+                req.getAttendeeEmails().add(currentUser.getEmail());
+            }
+
+            YandexMeetingResult res = yandexIntegrationService.scheduleCalendarEvent(currentUserId, req);
+            if (res.isSuccess()) {
+                createdResults.add(res);
+                createdLabels.add(slotTimeStr);
+
+                if (createdResults.size() == 1 && parsedIntent.getCandidateId() != null) {
+                    saveCandidateInteraction(currentUser, parsedIntent, res, slot.getStartTime());
+                }
+            } else {
+                log.warn("Не удалось создать событие для слота {}: {}", slotTimeStr, res.getMessage());
+            }
+        }
+
+        if (createdResults.isEmpty()) {
+            if (!skippedLabels.isEmpty()) {
+                YandexMeetingResult result = new YandexMeetingResult();
+                result.setSuccess(true);
+                StringBuilder sb = new StringBuilder();
+                sb.append("⚠️ **События уже присутствуют в календаре (дубликаты пропущены):**\n\n");
+                for (String sk : skippedLabels) {
+                    sb.append("- ⏰ ").append(sk).append("\n");
+                }
+                result.setMessage(sb.toString().trim());
+                return result;
+            }
+            return YandexMeetingResult.error("Не удалось создать ни одного события в Яндекс-Календаре.");
+        }
+
+        YandexMeetingResult firstResult = createdResults.get(0);
+        YandexMeetingResult finalResult = new YandexMeetingResult();
+        finalResult.setSuccess(true);
+        finalResult.setCalendarName(firstResult.getCalendarName());
+        finalResult.setEventUid(firstResult.getEventUid());
+        finalResult.setTelemostJoinUrl(firstResult.getTelemostJoinUrl());
+        finalResult.setInvitedEmails(firstResult.getInvitedEmails());
+        finalResult.setIteractionListId(firstResult.getIteractionListId());
+
         StringBuilder userReport = new StringBuilder();
-        userReport.append("✅ **Событие успешно создано в Яндекс-Календаре!**\n\n");
-        userReport.append("- **Календарь:** ").append(result.getCalendarName()).append("\n");
-        userReport.append("- **Тема:** ").append(parsedIntent.getTitle()).append("\n");
-        userReport.append("- **Дата и время:** ").append(formattedDate).append(" (часовой пояс ").append(parsedIntent.getTimeZone()).append(")\n");
+        if (createdResults.size() == 1 && skippedLabels.isEmpty()) {
+            userReport.append("✅ **Событие успешно создано в Яндекс-Календаре!**\n\n");
+            userReport.append("- **Календарь:** ").append(finalResult.getCalendarName()).append("\n");
+            userReport.append("- **Тема:** ").append(parsedIntent.getTitle()).append("\n");
+            userReport.append("- **Дата и время:** ").append(createdLabels.get(0)).append(" (").append(parsedIntent.getTimeZone()).append(")\n");
+        } else {
+            userReport.append("✅ **События успешно созданы в Яндекс-Календаре!**\n\n");
+            userReport.append("- **Календарь:** ").append(finalResult.getCalendarName()).append("\n");
+            userReport.append("- **Тема:** ").append(parsedIntent.getTitle()).append("\n");
+            userReport.append("- **Часовой пояс:** ").append(parsedIntent.getTimeZone()).append("\n\n");
+            userReport.append("**Создано событий (").append(createdLabels.size()).append("):**\n");
+            for (int i = 0; i < createdLabels.size(); i++) {
+                String cl = createdLabels.get(i);
+                userReport.append("- 🗓️ **").append(cl).append("**");
+                if (i < createdResults.size()) {
+                    YandexMeetingResult slotRes = createdResults.get(i);
+                    if (StringUtils.isNotBlank(slotRes.getTelemostJoinUrl())) {
+                        userReport.append(" — [📹 Видеовстреча Телемост](").append(slotRes.getTelemostJoinUrl()).append(")");
+                    }
+                }
+                userReport.append("\n");
+            }
+            if (!skippedLabels.isEmpty()) {
+                userReport.append("\n**Пропущено дубликатов (").append(skippedLabels.size()).append("):**\n");
+                for (String sl : skippedLabels) {
+                    userReport.append("- ⚠️ ").append(sl).append("\n");
+                }
+            }
+        }
+
         if (parsedIntent.getCandidateFio() != null) {
             userReport.append("- **Кандидат:** ").append(parsedIntent.getCandidateFio());
             if (parsedIntent.getCandidateEmail() != null) {
@@ -588,16 +750,58 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
             }
             userReport.append("\n");
         }
-        if (StringUtils.isNotBlank(result.getTelemostJoinUrl())) {
-            userReport.append("- **Яндекс Телемост:** [Присоединиться к встрече](").append(result.getTelemostJoinUrl()).append(")\n");
+        if (StringUtils.isNotBlank(finalResult.getTelemostJoinUrl())) {
+            userReport.append("- **Яндекс Телемост:** [Присоединиться к встрече](").append(finalResult.getTelemostJoinUrl()).append(")\n");
             userReport.append("- **Опции:** Включена автоматическая запись встречи и подготовка AI-конспекта.\n");
         }
-        if (result.getInvitedEmails() != null && !result.getInvitedEmails().isEmpty()) {
-            userReport.append("- **Приглашения:** Отправлены участникам (").append(String.join(", ", result.getInvitedEmails())).append(").\n");
+        if (finalResult.getInvitedEmails() != null && !finalResult.getInvitedEmails().isEmpty()) {
+            userReport.append("- **Приглашения:** Отправлены участникам (").append(String.join(", ", finalResult.getInvitedEmails())).append(").\n");
         }
 
-        result.setMessage(userReport.toString());
-        return result;
+        finalResult.setMessage(userReport.toString().trim());
+        return finalResult;
+    }
+
+    private void saveCandidateInteraction(ExtUser currentUser, AiMeetingParseResult parsedIntent, YandexMeetingResult result, Date slotStartTime) {
+        try {
+            JobCandidate candidate = dataManager.load(JobCandidate.class)
+                    .id(parsedIntent.getCandidateId())
+                    .view("_minimal")
+                    .optional()
+                    .orElse(null);
+
+            if (candidate != null) {
+                IteractionList interaction = metadata.create(IteractionList.class);
+                interaction.setCandidate(candidate);
+                interaction.setRecrutier(currentUser);
+                Date actualDate = slotStartTime != null ? slotStartTime : parsedIntent.getStartTime();
+                interaction.setDateIteraction(actualDate);
+                interaction.setCommunicationMethod("Яндекс Телемост");
+
+                StringBuilder comment = new StringBuilder();
+                comment.append("Запланировано собеседование в Яндекс.Календаре (")
+                        .append(result.getCalendarName()).append(").\n");
+                if (StringUtils.isNotBlank(result.getTelemostJoinUrl())) {
+                    comment.append("Ссылка на видеовстречу Телемост: ").append(result.getTelemostJoinUrl()).append("\n");
+                }
+                comment.append("UID события: ").append(result.getEventUid()).append("\n");
+                interaction.setComment(comment.toString());
+
+                Iteraction itType = dataManager.load(Iteraction.class)
+                        .query("select e from hunttech_Iteraction e where lower(e.name) like '%собеседован%' or lower(e.name) like '%интервью%'")
+                        .optional()
+                        .orElse(null);
+                if (itType != null) {
+                    interaction.setIteractionType(itType);
+                }
+
+                interaction = dataManager.commit(interaction);
+                result.setIteractionListId(interaction.getId());
+                log.info("Создана запись взаимодействия IteractionList id={}", interaction.getId());
+            }
+        } catch (Exception ex) {
+            log.warn("Не удалось создать IteractionList: {}", ex.getMessage());
+        }
     }
 
     private void findCandidateInMessage(String msg, AiMeetingParseResult result) {
@@ -663,74 +867,247 @@ public class AiYandexOrchestrationServiceBean implements AiYandexOrchestrationSe
             tz = "Europe/Saratov";
         }
 
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(tz));
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        TimeZone timeZone = TimeZone.getTimeZone(tz);
+        Calendar now = Calendar.getInstance(timeZone);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
 
-        String lower = msg.toLowerCase(java.util.Locale.ROOT);
-        if (lower.contains("послезавтра")) {
-            cal.add(Calendar.DAY_OF_YEAR, 2);
-        } else if (lower.contains("завтра")) {
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-        } else if (lower.contains("сегодня")) {
-            // сегодня
-        } else {
-            // по умолчанию назначаем на следующий рабочий день
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-        }
-
-        // 1. Сначала вычисляем длительность встречи/события и исключаем ее фрагмент из поиска времени
-        int durationMinutes = 60;
         String timeParseText = msg;
-        Matcher dm = DURATION_PATTERN.matcher(msg);
-        if (dm.find()) {
-            try {
-                String amountStr = dm.group(1) != null ? dm.group(1) : dm.group(3);
-                String unit = (dm.group(2) != null ? dm.group(2) : dm.group(4)).toLowerCase(java.util.Locale.ROOT);
-                int amount = Integer.parseInt(amountStr);
-                if (amount > 0) {
-                    amount = Math.min(amount, 1440);
-                    if (unit.startsWith("час") || unit.equals("ч")) {
-                        durationMinutes = Math.min(amount * 60, 1440);
-                    } else if (unit.startsWith("мин")) {
-                        durationMinutes = amount;
-                    }
-                }
-            } catch (NumberFormatException ignored) {
-            }
-            timeParseText = msg.substring(0, dm.start()) + " " + msg.substring(dm.end());
-        }
 
-        // 2. Определение времени старта по очищенному тексту
-        int hour = 15;
-        int minute = 0;
+        // 1. Определение времени начала и длительности
+        int startHour = 15;
+        int startMinute = 0;
+        int durationMinutes = 60;
 
-        Matcher tm = TIME_PATTERN.matcher(timeParseText);
-        if (tm.find()) {
-            if (tm.group(1) != null) {
-                hour = Integer.parseInt(tm.group(1));
-                minute = Integer.parseInt(tm.group(2));
-            } else if (tm.group(3) != null) {
-                hour = Integer.parseInt(tm.group(3));
-                minute = Integer.parseInt(tm.group(4));
+        Matcher trm = TIME_RANGE_PATTERN.matcher(timeParseText);
+        if (trm.find()) {
+            startHour = Integer.parseInt(trm.group(1));
+            startMinute = trm.group(2) != null ? Integer.parseInt(trm.group(2)) : (trm.group(3) != null ? Integer.parseInt(trm.group(3)) : 0);
+            int endHour = Integer.parseInt(trm.group(4));
+            int endMinute = trm.group(5) != null ? Integer.parseInt(trm.group(5)) : (trm.group(6) != null ? Integer.parseInt(trm.group(6)) : 0);
+            int diffMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+            if (diffMinutes > 0) {
+                durationMinutes = diffMinutes;
+            } else if (diffMinutes < 0) {
+                durationMinutes = diffMinutes + 24 * 60;
             }
         } else {
-            Matcher hm = HOUR_ONLY_PATTERN.matcher(timeParseText);
-            if (hm.find()) {
-                hour = Integer.parseInt(hm.group(1));
+            Matcher dm = DURATION_PATTERN.matcher(timeParseText);
+            if (dm.find()) {
+                try {
+                    String amountStr = dm.group(1) != null ? dm.group(1) : dm.group(3);
+                    String unit = (dm.group(2) != null ? dm.group(2) : dm.group(4)).toLowerCase(java.util.Locale.ROOT);
+                    int amount = Integer.parseInt(amountStr);
+                    if (amount > 0) {
+                        amount = Math.min(amount, 1440);
+                        if (unit.startsWith("час") || unit.equals("ч")) {
+                            durationMinutes = Math.min(amount * 60, 1440);
+                        } else if (unit.startsWith("мин")) {
+                            durationMinutes = amount;
+                        }
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+                timeParseText = timeParseText.substring(0, dm.start()) + " " + timeParseText.substring(dm.end());
+            }
+
+            // Вырезаем упоминание дня месяца перед парсингом времени старта, чтобы '18 числа' не парсилось как 18:00
+            String cleanTimeText = DAY_OF_MONTH_PATTERN.matcher(timeParseText).replaceAll(" ");
+
+            Matcher tm = TIME_PATTERN.matcher(cleanTimeText);
+            if (tm.find()) {
+                if (tm.group(1) != null) {
+                    startHour = Integer.parseInt(tm.group(1));
+                    startMinute = Integer.parseInt(tm.group(2));
+                } else if (tm.group(3) != null) {
+                    startHour = Integer.parseInt(tm.group(3));
+                    startMinute = Integer.parseInt(tm.group(4));
+                }
+            } else {
+                Matcher hm = HOUR_ONLY_PATTERN.matcher(cleanTimeText);
+                if (hm.find()) {
+                    startHour = Integer.parseInt(hm.group(1));
+                    startMinute = 0;
+                }
             }
         }
 
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, minute);
+        if (DEDUPLICATE_PATTERN.matcher(msg).find()) {
+            result.setCheckDuplicates(true);
+        }
 
-        Date start = cal.getTime();
+        // 2. Разрешение целевой недели и дат
+        boolean isNextWeek = NEXT_WEEK_PATTERN.matcher(msg).find();
+        boolean isThisWeek = THIS_WEEK_PATTERN.matcher(msg).find();
 
-        cal.add(Calendar.MINUTE, durationMinutes);
-        Date end = cal.getTime();
+        Calendar baseMon = (Calendar) now.clone();
+        int curDow = baseMon.get(Calendar.DAY_OF_WEEK);
+        int daysSinceMonday = (curDow == Calendar.SUNDAY) ? 6 : (curDow - Calendar.MONDAY);
+        baseMon.add(Calendar.DAY_OF_YEAR, -daysSinceMonday);
+        if (isNextWeek) {
+            baseMon.add(Calendar.DAY_OF_YEAR, 7);
+        }
 
-        result.setStartTime(start);
-        result.setEndTime(end);
+        SimpleDateFormat dayDf = new SimpleDateFormat("EEEE (dd.MM.yyyy)", new Locale("ru", "RU"));
+        dayDf.setTimeZone(timeZone);
+
+        // Сценарий А: «каждый рабочий день» / «будни»
+        if (ALL_WORKDAYS_PATTERN.matcher(msg).find()) {
+            result.setCheckDuplicates(true);
+            for (int i = 0; i < 5; i++) {
+                Calendar slotCal = (Calendar) baseMon.clone();
+                slotCal.add(Calendar.DAY_OF_YEAR, i);
+                slotCal.set(Calendar.HOUR_OF_DAY, startHour);
+                slotCal.set(Calendar.MINUTE, startMinute);
+
+                // Если указано "на этой неделе" и день уже прошел, пропускаем его
+                if (isThisWeek && slotCal.before(now)) {
+                    continue;
+                }
+                // Если целевая неделя не зафиксирована и день уже прошел, переносим на следующую неделю
+                if (!isNextWeek && !isThisWeek && slotCal.before(now)) {
+                    slotCal.add(Calendar.DAY_OF_YEAR, 7);
+                }
+
+                Date start = slotCal.getTime();
+                slotCal.add(Calendar.MINUTE, durationMinutes);
+                Date end = slotCal.getTime();
+
+                String label = capitalize(dayDf.format(start));
+                result.addTimeSlot(start, end, label);
+            }
+        } else {
+            // Сценарий Б: Дни недели («понедельник», «вторник», «среду», «четверг», «пятницу», перечисления)
+            Matcher dowMatcher = DAY_OF_WEEK_PATTERN.matcher(msg);
+            Set<Integer> targetDayOffsets = new LinkedHashSet<>();
+            while (dowMatcher.find()) {
+                String token = dowMatcher.group(1).toLowerCase(new Locale("ru", "RU"));
+                int offset = mapDayTokenToOffset(token);
+                if (offset >= 0) {
+                    targetDayOffsets.add(offset);
+                }
+            }
+
+            if (!targetDayOffsets.isEmpty()) {
+                if (targetDayOffsets.size() > 1) {
+                    result.setCheckDuplicates(true);
+                }
+                for (Integer offset : targetDayOffsets) {
+                    Calendar slotCal = (Calendar) baseMon.clone();
+                    slotCal.add(Calendar.DAY_OF_YEAR, offset);
+                    slotCal.set(Calendar.HOUR_OF_DAY, startHour);
+                    slotCal.set(Calendar.MINUTE, startMinute);
+
+                    if (!isNextWeek && slotCal.before(now)) {
+                        slotCal.add(Calendar.DAY_OF_YEAR, 7);
+                    }
+
+                    Date start = slotCal.getTime();
+                    slotCal.add(Calendar.MINUTE, durationMinutes);
+                    Date end = slotCal.getTime();
+
+                    String label = capitalize(dayDf.format(start));
+                    result.addTimeSlot(start, end, label);
+                }
+            } else {
+                // Сценарий В: Число месяца («18 числа», «18 сентября»)
+                Matcher domMatcher = DAY_OF_MONTH_PATTERN.matcher(msg);
+                if (domMatcher.find()) {
+                    int dayOfMonth = Integer.parseInt(domMatcher.group(1));
+                    String monthToken = domMatcher.group(2);
+                    Calendar slotCal = (Calendar) now.clone();
+                    slotCal.set(Calendar.DAY_OF_MONTH, 1);
+                    if (monthToken != null) {
+                        int mIndex = parseMonthToken(monthToken);
+                        if (mIndex >= 0) {
+                            slotCal.set(Calendar.MONTH, mIndex);
+                        }
+                    } else if (dayOfMonth < now.get(Calendar.DAY_OF_MONTH)) {
+                        slotCal.add(Calendar.MONTH, 1);
+                    }
+                    int maxDaysInMonth = slotCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    slotCal.set(Calendar.DAY_OF_MONTH, Math.min(dayOfMonth, maxDaysInMonth));
+                    slotCal.set(Calendar.HOUR_OF_DAY, startHour);
+                    slotCal.set(Calendar.MINUTE, startMinute);
+                    if (monthToken != null && slotCal.before(now)) {
+                        slotCal.add(Calendar.YEAR, 1);
+                    }
+
+                    Date start = slotCal.getTime();
+                    slotCal.add(Calendar.MINUTE, durationMinutes);
+                    Date end = slotCal.getTime();
+
+                    String label = capitalize(dayDf.format(start));
+                    result.addTimeSlot(start, end, label);
+                } else {
+                    // Сценарий Г: «сегодня» / «завтра» / «послезавтра» / дефолт
+                    Calendar slotCal = (Calendar) now.clone();
+                    String lower = msg.toLowerCase(java.util.Locale.ROOT);
+                    if (lower.contains("послезавтра")) {
+                        slotCal.add(Calendar.DAY_OF_YEAR, 2);
+                    } else if (lower.contains("завтра")) {
+                        slotCal.add(Calendar.DAY_OF_YEAR, 1);
+                    } else if (lower.contains("сегодня")) {
+                        // сегодня
+                    } else {
+                        int dow = slotCal.get(Calendar.DAY_OF_WEEK);
+                        if (dow == Calendar.SATURDAY) {
+                            slotCal.add(Calendar.DAY_OF_YEAR, 2);
+                        } else {
+                            slotCal.add(Calendar.DAY_OF_YEAR, 1);
+                        }
+                    }
+
+                    slotCal.set(Calendar.HOUR_OF_DAY, startHour);
+                    slotCal.set(Calendar.MINUTE, startMinute);
+                    Date start = slotCal.getTime();
+                    slotCal.add(Calendar.MINUTE, durationMinutes);
+                    Date end = slotCal.getTime();
+
+                    String label = capitalize(dayDf.format(start));
+                    result.addTimeSlot(start, end, label);
+                }
+            }
+        }
+
+        if (!result.getTimeSlots().isEmpty()) {
+            AiMeetingParseResult.TimeSlot first = result.getTimeSlots().get(0);
+            result.setStartTime(first.getStartTime());
+            result.setEndTime(first.getEndTime());
+        }
         result.setTimeZone(tz);
+    }
+
+    private static int mapDayTokenToOffset(String token) {
+        if (token.startsWith("понедельник")) return 0;
+        if (token.startsWith("вторник")) return 1;
+        if (token.startsWith("сред")) return 2;
+        if (token.startsWith("четверг")) return 3;
+        if (token.startsWith("пятниц")) return 4;
+        if (token.startsWith("суббот")) return 5;
+        if (token.startsWith("воскресень")) return 6;
+        return -1;
+    }
+
+    private static int parseMonthToken(String token) {
+        String t = token.toLowerCase(new Locale("ru", "RU"));
+        if (t.startsWith("январ")) return Calendar.JANUARY;
+        if (t.startsWith("феврал")) return Calendar.FEBRUARY;
+        if (t.startsWith("март")) return Calendar.MARCH;
+        if (t.startsWith("апрел")) return Calendar.APRIL;
+        if (t.startsWith("ма")) return Calendar.MAY;
+        if (t.startsWith("июн")) return Calendar.JUNE;
+        if (t.startsWith("июл")) return Calendar.JULY;
+        if (t.startsWith("август")) return Calendar.AUGUST;
+        if (t.startsWith("сентябр")) return Calendar.SEPTEMBER;
+        if (t.startsWith("октябр")) return Calendar.OCTOBER;
+        if (t.startsWith("ноябр")) return Calendar.NOVEMBER;
+        if (t.startsWith("декабр")) return Calendar.DECEMBER;
+        return -1;
+    }
+
+    private static String capitalize(String str) {
+        if (StringUtils.isBlank(str)) return str;
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 }

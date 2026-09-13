@@ -18,6 +18,49 @@ public class AiMeetingParseResult implements Serializable {
     private Date endTime;
     private String timeZone = "Europe/Saratov";
 
+    private List<TimeSlot> timeSlots = new ArrayList<>();
+    private boolean checkDuplicates = false;
+
+    public static class TimeSlot implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private Date startTime;
+        private Date endTime;
+        private String dayLabel;
+
+        public TimeSlot() {
+        }
+
+        public TimeSlot(Date startTime, Date endTime, String dayLabel) {
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.dayLabel = dayLabel;
+        }
+
+        public Date getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(Date startTime) {
+            this.startTime = startTime;
+        }
+
+        public Date getEndTime() {
+            return endTime;
+        }
+
+        public void setEndTime(Date endTime) {
+            this.endTime = endTime;
+        }
+
+        public String getDayLabel() {
+            return dayLabel;
+        }
+
+        public void setDayLabel(String dayLabel) {
+            this.dayLabel = dayLabel;
+        }
+    }
+
     private UUID candidateId;
     private String candidateFio;
     private String candidateEmail;
@@ -71,7 +114,17 @@ public class AiMeetingParseResult implements Serializable {
     }
 
     public Date getStartTime() {
-        return startTime;
+        if (startTime != null) {
+            return startTime;
+        }
+        if (timeSlots != null) {
+            for (TimeSlot slot : timeSlots) {
+                if (slot != null && slot.getStartTime() != null) {
+                    return slot.getStartTime();
+                }
+            }
+        }
+        return null;
     }
 
     public void setStartTime(Date startTime) {
@@ -79,11 +132,44 @@ public class AiMeetingParseResult implements Serializable {
     }
 
     public Date getEndTime() {
-        return endTime;
+        if (endTime != null) {
+            return endTime;
+        }
+        if (timeSlots != null) {
+            for (TimeSlot slot : timeSlots) {
+                if (slot != null && slot.getEndTime() != null) {
+                    return slot.getEndTime();
+                }
+            }
+        }
+        return null;
     }
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public List<TimeSlot> getTimeSlots() {
+        return timeSlots;
+    }
+
+    public void setTimeSlots(List<TimeSlot> timeSlots) {
+        this.timeSlots = timeSlots != null ? timeSlots : new ArrayList<>();
+    }
+
+    public void addTimeSlot(Date start, Date end, String dayLabel) {
+        if (this.timeSlots == null) {
+            this.timeSlots = new ArrayList<>();
+        }
+        this.timeSlots.add(new TimeSlot(start, end, dayLabel));
+    }
+
+    public boolean isCheckDuplicates() {
+        return checkDuplicates;
+    }
+
+    public void setCheckDuplicates(boolean checkDuplicates) {
+        this.checkDuplicates = checkDuplicates;
     }
 
     public String getTimeZone() {
