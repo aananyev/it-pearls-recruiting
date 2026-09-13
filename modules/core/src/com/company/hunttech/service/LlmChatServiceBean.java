@@ -31,7 +31,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.Calendar;
 import java.util.regex.Matcher;
@@ -232,10 +234,15 @@ public class LlmChatServiceBean implements LlmChatService {
             return new LlmChatResponse(conversation.getId(), vacancyResponse, "hrm-system", "smart-vacancy-ingest", null);
         }
 
-        String messageWithHistory = buildMessageWithHistory(conversation, user, nextSequence, message.trim());
+        TimeZone timeZone = resolveEffectiveTimeZone(user);
+        Locale locale = resolveEffectiveLocale(user);
+        String runtimeContext = LlmChatContextBuilder.buildRuntimeContext(new Date(), timeZone, locale);
+
+        String messageWithHistory = buildMessageWithHistory(conversation, user, nextSequence, message.trim(), runtimeContext);
         HrmDataContextSnapshot snapshot = hrmChatDataRetrieverService.retrieveContextForMessage(message.trim());
 
         Map<String, Object> context = new HashMap<>();
+        context.put("runtimeContext", runtimeContext);
         context.put("message", messageWithHistory);
         if (!snapshot.isEmpty()) {
             context.put("message", messageWithHistory + "\n\n" + snapshot.getFormattedContext());
@@ -443,10 +450,15 @@ public class LlmChatServiceBean implements LlmChatService {
             return;
         }
 
-        String messageWithHistory = buildMessageWithHistory(conversation, user, session.nextSequence, session.userMessage.getContent());
+        TimeZone timeZone = resolveEffectiveTimeZone(user);
+        Locale locale = resolveEffectiveLocale(user);
+        String runtimeContext = LlmChatContextBuilder.buildRuntimeContext(new Date(), timeZone, locale);
+
+        String messageWithHistory = buildMessageWithHistory(conversation, user, session.nextSequence, session.userMessage.getContent(), runtimeContext);
         HrmDataContextSnapshot snapshot = hrmChatDataRetrieverService.retrieveContextForMessage(session.userMessage.getContent());
 
         Map<String, Object> context = new HashMap<>();
+        context.put("runtimeContext", runtimeContext);
         context.put("message", messageWithHistory);
         if (!snapshot.isEmpty()) {
             context.put("message", messageWithHistory + "\n\n" + snapshot.getFormattedContext());
@@ -818,8 +830,51 @@ public class LlmChatServiceBean implements LlmChatService {
         return history.isEmpty() ? 1 : history.get(history.size() - 1).getSequenceNo() + 1;
     }
 
+    TimeZone resolveEffectiveTimeZone(User user) {
+        if (userSessionSource != null && userSessionSource.checkCurrentUserSession()) {
+            try {
+                TimeZone tz = userSessionSource.getUserSession().getTimeZone();
+                if (tz != null) {
+                    return tz;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        if (user != null && user.getTimeZone() != null && !user.getTimeZone().trim().isEmpty()) {
+            try {
+                return TimeZone.getTimeZone(user.getTimeZone().trim());
+            } catch (Exception ignored) {
+            }
+        }
+        return TimeZone.getTimeZone("Europe/Moscow");
+    }
+
+    Locale resolveEffectiveLocale(User user) {
+        if (userSessionSource != null && userSessionSource.checkCurrentUserSession()) {
+            try {
+                Locale loc = userSessionSource.getUserSession().getLocale();
+                if (loc != null) {
+                    return loc;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        if (user != null && user.getLanguage() != null && !user.getLanguage().trim().isEmpty()) {
+            try {
+                return new Locale(user.getLanguage().trim());
+            } catch (Exception ignored) {
+            }
+        }
+        return new Locale("ru", "RU");
+    }
+
     String buildMessageWithHistory(LlmChatConversation conversation, ExtUser user,
                                    int currentSequenceNo, String currentMessageText) {
+        return buildMessageWithHistory(conversation, user, currentSequenceNo, currentMessageText, null);
+    }
+
+    String buildMessageWithHistory(LlmChatConversation conversation, ExtUser user,
+                                   int currentSequenceNo, String currentMessageText, String runtimeContext) {
         if (conversation == null || currentMessageText == null) {
             return currentMessageText;
         }
@@ -850,33 +905,19 @@ public class LlmChatServiceBean implements LlmChatService {
         // Возвращаем сообщения в хронологический порядок после выборки последних N сообщений
         java.util.Collections.reverse(historyMessages);
 
-        StringBuilder historyBuilder = new StringBuilder();
-        historyBuilder.append("[История диалога]\n");
-        for (LlmChatMessage msg : historyMessages) {
-            String roleCaption = "USER".equalsIgnoreCase(msg.getRole()) ? "Пользователь" : "Ассистент";
-            String content = msg.getContent() != null ? msg.getContent() : "";
-            historyBuilder.append(roleCaption).append(": ").append(content).append("\n");
-        }
-        String historyText = historyBuilder.toString();
-        int historyTokens = estimateTokens(historyText);
-        int currentMessageTokens = estimateTokens(currentMessageText);
-        int totalTokens = historyTokens + currentMessageTokens;
+        // Формируем историю со скользящим окном (sliding window)
+        String slidingHistory = LlmChatContextBuilder.buildSlidingHistory(
+                historyMessages, maxContextLimit, currentMessageText, runtimeContext);
 
-        // Если суммарный размер контекста (история + текущий запрос) достигает или превышает лимит — он очищается / обнуляется
-        if (totalTokens >= maxContextLimit) {
-            log.info("Размер контекста диалога для convId={} (история: {} токенов, текущий запрос: {} токенов, всего: {} токенов) достиг лимита ({} токенов). Контекст очищен/обнулён.",
-                    conversation.getId(), historyTokens, currentMessageTokens, totalTokens, maxContextLimit);
+        if (slidingHistory == null || slidingHistory.isEmpty()) {
+            log.info("Размер контекста диалога для convId={} достиг лимита ({} токенов). Контекст сокращен/обнулён до текущего сообщения.",
+                    conversation.getId(), maxContextLimit);
             conversation.setContextResetSequenceNo(currentSequenceNo);
             dataManager.commit(conversation);
             return currentMessageText;
         }
 
-        // Контекст в пределах лимита: формируем комбинированный запрос с историей диалога
-        StringBuilder fullPayload = new StringBuilder();
-        fullPayload.append(historyText)
-                .append("\n[Текущий запрос пользователя]\n")
-                .append(currentMessageText);
-        return fullPayload.toString();
+        return LlmChatContextBuilder.combinePayload(slidingHistory, currentMessageText);
     }
 
     int resolveEffectiveMaxContextTokens(ExtUser user) {
@@ -920,13 +961,7 @@ public class LlmChatServiceBean implements LlmChatService {
     }
 
     static int estimateTokens(String text) {
-        if (text == null || text.isEmpty()) {
-            return 0;
-        }
-        // Консервативная оценка токенов: для кириллицы/мультиязычного текста.
-        // Формула (len * 3 + 4) / 5 дает ~0.6 токена на символ (~1.67 символа на токен), чтобы гарантированно не превысить лимит.
-        int len = text.codePointCount(0, text.length());
-        return Math.max(1, (len * 3 + 4) / 5);
+        return LlmChatContextBuilder.estimateTokens(text);
     }
 
     private QuotaReservationContext reserveQuota(ExtUser user, LlmChatConversation conversation,

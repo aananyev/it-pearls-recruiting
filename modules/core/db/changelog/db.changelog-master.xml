@@ -239,5 +239,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-updateLlmChatPromptWithYandex360.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-updateLlmChatPromptGroundingAndTemporal.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

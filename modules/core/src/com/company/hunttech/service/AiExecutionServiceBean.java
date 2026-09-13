@@ -110,7 +110,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
 
         UserContextAttachment userContext = resolveUserContext(function, currentUser);
-        String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
+        String effectiveSystemPrompt = appendRuntimeContext(userContext.effectiveSystemPrompt, context);
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
@@ -171,7 +171,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
 
         UserContextAttachment userContext = resolveUserContext(function, currentUser);
-        String effectiveSystemPrompt = userContext.effectiveSystemPrompt;
+        String effectiveSystemPrompt = appendRuntimeContext(userContext.effectiveSystemPrompt, context);
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
         AtomicBoolean emitted = new AtomicBoolean(false);
@@ -879,6 +879,15 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
         block.append('\n').append(USER_CONTEXT_PRIORITY_NOTE).append('\n');
         return block.toString();
+    }
+
+    private String appendRuntimeContext(String effectiveSystemPrompt, Map<String, Object> context) {
+        String runtimeContext = context != null && context.get("runtimeContext") != null
+                ? String.valueOf(context.get("runtimeContext")) : null;
+        if (runtimeContext != null && !runtimeContext.trim().isEmpty()) {
+            return appendBlock(effectiveSystemPrompt, "\n\n" + runtimeContext.trim());
+        }
+        return effectiveSystemPrompt;
     }
 
     /** Промпт функции идёт первым, блок пользователя после (порядок фиксирует приоритет, §7.1). */
