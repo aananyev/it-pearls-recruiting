@@ -36,6 +36,15 @@ public class MarkdownRenderer {
     private static final Pattern BARE_CUBA_URL_PATTERN = Pattern.compile(
             "(?<![\\(\"'])https?://[^/\\s]+/hrm/#main/[0-9]+/([a-zA-Z0-9_\\.]+)\\?id=([0-9a-fA-F\\-]+)(?![\\)\"'])"
     );
+    private static final Pattern PREFIX_ENTITY_UUID_PATTERN = Pattern.compile(
+            "(?i)(?:<span[^>]*>\\s*)?(?:<code>|`|\"|«|\\b)\\s*([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\\s*(?:</code>|`|\"|»)?(?:\\s*</span>)?\\s*(?:[—–\\-:]\\s*)(?=(?:№\\s*[^·\\n\\r]+·\\s*)?(?:\\[\\*?[^\\]]*?\\*?\\]\\((?:(?:https?://[^/\\s]+/hrm/)?#main/[0-9]+/[^?#\\s]+\\?(?:[^#\\s]*&)?id=|hrm://(?:vacancy|candidate|cv|interaction)/)\\1[\\)\"]))"
+    );
+    private static final Pattern HTML_LINK_UUID_BODY_PATTERN = Pattern.compile(
+            "(?i)(<a\\s+[^>]*href=[\"']([^\"']+)[\"'][^>]*>)\\s*(?:<code>)?([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:</code>)?\\s*(</a>)"
+    );
+    private static final Pattern STANDALONE_UUID_TOKEN_PATTERN = Pattern.compile(
+            "(?i)(?<![a-zA-Z0-9_\\-/=?.])(?:(?:<code>|`|\"|«|“|'|&quot;)\\s*)*([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:\\s*(?:</code>|`|\"|»|”|'|&quot;))*(?![a-zA-Z0-9_\\-/=?.])"
+    );
     private static final Pattern ACTION_PAYLOAD_PATTERN = Pattern.compile(
             "^(create-interaction\\?(?:candidateId|candId|candidateName)=[0-9a-zA-Zа-яА-ЯёЁ\\-_\\s\\.%+]+" +
             "|open-position\\?(?:number|num|id)=[0-9a-zA-Z\\-_\\^]+" +
@@ -256,19 +265,7 @@ public class MarkdownRenderer {
             return "";
         }
 
-        // Auto-link bare CUBA navigation URLs so they become clickable interactive entity cards
-        Matcher bareUrlMatcher = BARE_CUBA_URL_PATTERN.matcher(text);
-        StringBuffer bareUrlBuf = new StringBuffer();
-        while (bareUrlMatcher.find()) {
-            String fullUrl = bareUrlMatcher.group(0);
-            String screen = bareUrlMatcher.group(1);
-            String friendlyName = formatFriendlyScreenName(screen);
-            bareUrlMatcher.appendReplacement(bareUrlBuf, Matcher.quoteReplacement("[" + friendlyName + "](" + fullUrl + ")"));
-        }
-        bareUrlMatcher.appendTail(bareUrlBuf);
-        text = bareUrlBuf.toString();
-
-        // First, preserve and isolate fenced code blocks to avoid unwanted formatting inside them
+        // 1. Preserve and isolate fenced code blocks to avoid unwanted formatting/resolving inside them
         List<String> codeBlocks = new ArrayList<>();
         Matcher codeBlockMatcher = CODE_BLOCK_PATTERN.matcher(text);
         StringBuffer placeholderBuffer = new StringBuffer();
@@ -286,6 +283,25 @@ public class MarkdownRenderer {
         }
         codeBlockMatcher.appendTail(placeholderBuffer);
         String textWithoutCodeBlocks = placeholderBuffer.toString();
+
+        // 2. Normalize entity UUIDs: remove prefix UUIDs, resolve standalone UUIDs and UUID-labels into entity names
+        textWithoutCodeBlocks = normalizeEntityUuids(textWithoutCodeBlocks);
+
+        // 3. Auto-link bare CUBA navigation URLs so they become clickable interactive entity cards
+        Matcher bareUrlMatcher = BARE_CUBA_URL_PATTERN.matcher(textWithoutCodeBlocks);
+        StringBuffer bareUrlBuf = new StringBuffer();
+        while (bareUrlMatcher.find()) {
+            String fullUrl = bareUrlMatcher.group(0);
+            String screen = bareUrlMatcher.group(1);
+            String id = bareUrlMatcher.group(2);
+            HrmEntityNameResolver.EntityInfo info = HrmEntityNameResolver.resolve(mapScreenToEntityType(screen), id);
+            String friendlyName = (info != null && info.getDisplayName() != null && !info.getDisplayName().isEmpty())
+                    ? escapeMarkdownLabel(info.getDisplayName())
+                    : formatFriendlyScreenName(screen);
+            bareUrlMatcher.appendReplacement(bareUrlBuf, Matcher.quoteReplacement("[" + friendlyName + "](" + fullUrl + ")"));
+        }
+        bareUrlMatcher.appendTail(bareUrlBuf);
+        textWithoutCodeBlocks = bareUrlBuf.toString();
 
         // Second, extract and sanitize safe HTML tags (formatting, tables, lists, links, spans)
         List<String> htmlTokens = new ArrayList<>();
@@ -460,6 +476,124 @@ public class MarkdownRenderer {
         return result;
     }
 
+    private static String normalizeEntityUuids(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        // 1. Remove redundant UUID prefixes placed right before an entity link with the same UUID
+        // e.g. `<span style="color:#8B7355"><code>05532e90-1b43-5a2f-47ad-8dca3dcb665a</code></span> — `
+        Matcher prefixMatcher = PREFIX_ENTITY_UUID_PATTERN.matcher(text);
+        text = prefixMatcher.replaceAll("");
+
+        // 2. Normalize HTML <a> tags where the body is just an entity UUID
+        Matcher htmlLinkMatcher = HTML_LINK_UUID_BODY_PATTERN.matcher(text);
+        StringBuffer htmlLinkBuf = new StringBuffer();
+        while (htmlLinkMatcher.find()) {
+            String openTag = htmlLinkMatcher.group(1);
+            String uuidStr = htmlLinkMatcher.group(3);
+            String closeTag = htmlLinkMatcher.group(4);
+
+            HrmEntityNameResolver.EntityInfo info = HrmEntityNameResolver.resolve(uuidStr);
+            if (info != null && info.getDisplayName() != null && !info.getDisplayName().isEmpty()) {
+                htmlLinkMatcher.appendReplacement(htmlLinkBuf, Matcher.quoteReplacement(openTag + escapeHtml(info.getDisplayName()) + closeTag));
+            } else {
+                htmlLinkMatcher.appendReplacement(htmlLinkBuf, Matcher.quoteReplacement(htmlLinkMatcher.group(0)));
+            }
+        }
+        htmlLinkMatcher.appendTail(htmlLinkBuf);
+        text = htmlLinkBuf.toString();
+
+        // 3. Normalize markdown links where the label is just an entity UUID
+        // e.g. [05532e90-1b43-5a2f-47ad-8dca3dcb665a](hrm://vacancy/05532e90-1b43-5a2f-47ad-8dca3dcb665a)
+        Matcher mdLinkMatcher = LINK_PATTERN.matcher(text);
+        StringBuffer mdLinkBuf = new StringBuffer();
+        while (mdLinkMatcher.find()) {
+            String rawLabel = mdLinkMatcher.group(1);
+            String url = mdLinkMatcher.group(2);
+            String cleanLabel = rawLabel.replaceAll("<[^>]*>", "").replaceAll("[`*\"'«»“”]", "").trim();
+            if (UUID_PATTERN.matcher(cleanLabel).matches()) {
+                HrmEntityNameResolver.EntityInfo info = HrmEntityNameResolver.resolve(cleanLabel);
+                if (info != null && info.getDisplayName() != null && !info.getDisplayName().isEmpty()) {
+                    String safeLabel = escapeMarkdownLabel(info.getDisplayName());
+                    mdLinkMatcher.appendReplacement(mdLinkBuf, Matcher.quoteReplacement("[" + safeLabel + "](" + url + ")"));
+                    continue;
+                }
+            }
+            mdLinkMatcher.appendReplacement(mdLinkBuf, Matcher.quoteReplacement(mdLinkMatcher.group(0)));
+        }
+        mdLinkMatcher.appendTail(mdLinkBuf);
+        text = mdLinkBuf.toString();
+
+        // 4. Temporarily preserve all markdown links and HTML tags so attributes like data-id="UUID" are not corrupted
+        List<String> preservedTokens = new ArrayList<>();
+        Matcher preserveLinkMatcher = LINK_PATTERN.matcher(text);
+        StringBuffer isolateBuf = new StringBuffer();
+        while (preserveLinkMatcher.find()) {
+            preservedTokens.add(preserveLinkMatcher.group(0));
+            preserveLinkMatcher.appendReplacement(isolateBuf, "@@@LLMPRESERVEDTOKEN" + (preservedTokens.size() - 1) + "@@@");
+        }
+        preserveLinkMatcher.appendTail(isolateBuf);
+        String textWithoutLinks = isolateBuf.toString();
+
+        Matcher preserveTagMatcher = Pattern.compile("<[^>]+>").matcher(textWithoutLinks);
+        StringBuffer isolateTagBuf = new StringBuffer();
+        while (preserveTagMatcher.find()) {
+            preservedTokens.add(preserveTagMatcher.group(0));
+            preserveTagMatcher.appendReplacement(isolateTagBuf, "@@@LLMPRESERVEDTOKEN" + (preservedTokens.size() - 1) + "@@@");
+        }
+        preserveTagMatcher.appendTail(isolateTagBuf);
+        String safeText = isolateTagBuf.toString();
+
+        // 5. Replace standalone entity UUIDs (e.g. ""05532e90-1b43-5a2f-47ad-8dca3dcb665a"") with interactive links
+        Matcher standaloneMatcher = STANDALONE_UUID_TOKEN_PATTERN.matcher(safeText);
+        StringBuffer standaloneBuf = new StringBuffer();
+        while (standaloneMatcher.find()) {
+            String uuidStr = standaloneMatcher.group(1);
+            HrmEntityNameResolver.EntityInfo info = HrmEntityNameResolver.resolve(uuidStr);
+            if (info != null && info.getDisplayName() != null && !info.getDisplayName().isEmpty()) {
+                String safeLabel = escapeMarkdownLabel(info.getDisplayName());
+                String replacement = "[" + safeLabel + "](" + info.getCubaUrl() + ")";
+                standaloneMatcher.appendReplacement(standaloneBuf, Matcher.quoteReplacement(replacement));
+            } else {
+                standaloneMatcher.appendReplacement(standaloneBuf, Matcher.quoteReplacement(standaloneMatcher.group(0)));
+            }
+        }
+        standaloneMatcher.appendTail(standaloneBuf);
+        String textWithResolvedStandalone = standaloneBuf.toString();
+
+        // 6. Restore preserved links and HTML tags
+        for (int i = 0; i < preservedTokens.size(); i++) {
+            textWithResolvedStandalone = textWithResolvedStandalone.replace("@@@LLMPRESERVEDTOKEN" + i + "@@@", preservedTokens.get(i));
+        }
+
+        return textWithResolvedStandalone;
+    }
+
+    private static String escapeMarkdownLabel(String label) {
+        if (label == null) {
+            return "";
+        }
+        return label.replace('[', '(').replace(']', ')');
+    }
+
+    private static String resolveEntityLabel(String rawLabel, String entityTypeHint, String entityIdStr) {
+        if (rawLabel == null) {
+            return null;
+        }
+        String cleanLabel = rawLabel.replaceAll("<[^>]*>", "").replaceAll("[`*\"'«»“”]", "").trim();
+        if (cleanLabel.isEmpty() || UUID_PATTERN.matcher(cleanLabel).matches()) {
+            String idToResolve = UUID_PATTERN.matcher(cleanLabel).matches() ? cleanLabel : entityIdStr;
+            if (idToResolve != null && UUID_PATTERN.matcher(idToResolve).matches()) {
+                HrmEntityNameResolver.EntityInfo info = HrmEntityNameResolver.resolve(entityTypeHint, idToResolve);
+                if (info != null && info.getDisplayName() != null && !info.getDisplayName().isEmpty()) {
+                    return info.getDisplayName();
+                }
+            }
+        }
+        return null;
+    }
+
     private static boolean isBlockHtmlLine(String line, List<String> htmlTokens) {
         if (line == null || line.isEmpty()) return false;
         if (line.startsWith("@@@LLMHTMLTOKEN")) {
@@ -620,6 +754,10 @@ public class MarkdownRenderer {
                 String screen = cubaNavMatcher.group(1);
                 String id = cubaNavMatcher.group(2);
                 String entityType = mapScreenToEntityType(screen);
+                String resolved = resolveEntityLabel(label, entityType, id);
+                if (resolved != null) {
+                    label = escapeHtml(resolved);
+                }
                 String icon = getEntityIcon(entityType);
                 String safeId = id != null ? escapeHtml(id) : "";
                 String cubaUrl = "#main/0/" + escapeHtml(screen) + (id != null ? "?id=" + safeId : "");
@@ -629,6 +767,10 @@ public class MarkdownRenderer {
             } else if (url.startsWith("hrm://candidate/")) {
                 String id = url.substring("hrm://candidate/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
+                    String resolved = resolveEntityLabel(label, "candidate", id);
+                    if (resolved != null) {
+                        label = escapeHtml(resolved);
+                    }
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_JobCandidate.edit?id=" + safeId;
                     String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('candidate','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('candidate','" + safeId + "');return false;}";
@@ -640,6 +782,10 @@ public class MarkdownRenderer {
             } else if (url.startsWith("hrm://vacancy/")) {
                 String id = url.substring("hrm://vacancy/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
+                    String resolved = resolveEntityLabel(label, "vacancy", id);
+                    if (resolved != null) {
+                        label = escapeHtml(resolved);
+                    }
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_OpenPosition.edit?id=" + safeId;
                     String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('vacancy','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('vacancy','" + safeId + "');return false;}";
@@ -651,6 +797,10 @@ public class MarkdownRenderer {
             } else if (url.startsWith("hrm://interaction/")) {
                 String id = url.substring("hrm://interaction/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
+                    String resolved = resolveEntityLabel(label, "interaction", id);
+                    if (resolved != null) {
+                        label = escapeHtml(resolved);
+                    }
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_IteractionList.edit?id=" + safeId;
                     String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('interaction','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('interaction','" + safeId + "');return false;}";
@@ -662,6 +812,10 @@ public class MarkdownRenderer {
             } else if (url.startsWith("hrm://cv/")) {
                 String id = url.substring("hrm://cv/".length()).trim();
                 if (UUID_PATTERN.matcher(id).matches()) {
+                    String resolved = resolveEntityLabel(label, "cv", id);
+                    if (resolved != null) {
+                        label = escapeHtml(resolved);
+                    }
                     String safeId = escapeHtml(id);
                     String cubaUrl = "#main/0/hunttech_CandidateCV.edit?id=" + safeId;
                     String clickJs = "if(window.hunttechOpenHrmEntity){window.hunttechOpenHrmEntity('cv','" + safeId + "');return false;}else if(window.parent&&window.parent.hunttechOpenHrmEntity){window.parent.hunttechOpenHrmEntity('cv','" + safeId + "');return false;}";

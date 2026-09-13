@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -363,6 +364,78 @@ class MarkdownRendererTest {
         assertTrue(html.contains("llm-chat-msg-live"));
         assertTrue(html.contains("Выполняется запрос..."));
         assertTrue(html.contains("Hermes обрабатывает запрос..."));
+    }
+
+    @Test
+    void testResolveEntityUuidInQuotesReplacesWithNamedEntityLink() {
+        UUID vacancyId = UUID.fromString("05532e90-1b43-5a2f-47ad-8dca3dcb665a");
+        HrmEntityNameResolver.registerEntity(
+                vacancyId,
+                "vacancy",
+                "Вакансия Middle System Analyst / Системный аналитик",
+                "hunttech_OpenPosition.edit",
+                "💼"
+        );
+
+        String raw = "Найдена вакансия: \"\"05532e90-1b43-5a2f-47ad-8dca3dcb665a\". Позиция открыта.";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        // Сырой UUID в кавычках не должен отображаться как кракозябра в тексте
+        assertFalse(html.contains("\"\"05532e90-1b43-5a2f-47ad-8dca3dcb665a\""));
+        assertTrue(html.contains("Вакансия Middle System Analyst / Системный аналитик"));
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"vacancy\""));
+        assertTrue(html.contains("hunttechOpenHrmEntity"));
+    }
+
+    @Test
+    void testRemoveRedundantPrefixUuidBeforeEntityLink() {
+        UUID vacancyId = UUID.fromString("05532e90-1b43-5a2f-47ad-8dca3dcb665a");
+        HrmEntityNameResolver.registerEntity(
+                vacancyId,
+                "vacancy",
+                "Вакансия Middle Data Analyst / Аналитик данных",
+                "hunttech_OpenPosition.edit",
+                "💼"
+        );
+
+        String raw = "- <span style=\"color:#8B7355\"><code>05532e90-1b43-5a2f-47ad-8dca3dcb665a</code></span> — № 14806 · [*Middle Data Analyst / Аналитик данных*](hrm://vacancy/05532e90-1b43-5a2f-47ad-8dca3dcb665a)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        // Префиксная кракозябра UUID должна быть полностью вырезана
+        assertFalse(html.contains("<code>05532e90-1b43-5a2f-47ad-8dca3dcb665a</code>"));
+        assertFalse(html.contains("<span style=\"color:#8B7355\">"));
+        assertTrue(html.contains("№ 14806 ·"));
+        assertTrue(html.contains("class=\"llm-md-link llm-hrm-entity-link\""));
+        assertTrue(html.contains("data-entity=\"vacancy\""));
+        assertTrue(html.contains("hunttechOpenHrmEntity"));
+    }
+
+    @Test
+    void testResolveMarkdownLinkWithUuidAsLabel() {
+        UUID candId = UUID.fromString("11111111-2222-3333-4444-555555555555");
+        HrmEntityNameResolver.registerEntity(
+                candId,
+                "candidate",
+                "Кандидат Иванов Иван Иванович",
+                "hunttech_JobCandidate.edit",
+                "👤"
+        );
+
+        String raw = "Подходящий специалист: [11111111-2222-3333-4444-555555555555](hrm://candidate/11111111-2222-3333-4444-555555555555)";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertFalse(html.contains(">11111111-2222-3333-4444-555555555555<"));
+        assertTrue(html.contains("Кандидат Иванов Иван Иванович"));
+        assertTrue(html.contains("data-entity=\"candidate\""));
+    }
+
+    @Test
+    void testUnknownUuidIsNotReplaced() {
+        String raw = "Идентификатор транзакции: <code>99999999-9999-9999-9999-999999999999</code>";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("<code>99999999-9999-9999-9999-999999999999</code>"));
     }
 }
 
