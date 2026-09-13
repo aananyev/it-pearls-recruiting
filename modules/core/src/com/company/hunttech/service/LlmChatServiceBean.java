@@ -112,7 +112,9 @@ public class LlmChatServiceBean implements LlmChatService {
         conversation.setUser(user);
         conversation.setStatus("ACTIVE");
         conversation.setTitle("Новый диалог");
-        return dataManager.commit(conversation).getId();
+        UUID id = dataManager.commit(conversation).getId();
+        log.info("startConversation: создан диалог id={} для пользователя {}", id, user != null ? user.getLogin() : null);
+        return id;
     }
 
     @Override
@@ -182,6 +184,8 @@ public class LlmChatServiceBean implements LlmChatService {
         try {
             result = aiExecutionService.executeText(FUNCTION_CODE, context);
         } catch (RuntimeException failure) {
+            log.error("sendMessage: ошибка вызова AI для convId={}, requestId={}: {}",
+                    conversationId, requestId, failure.getMessage(), failure);
             markQuotaPending(quota);
             String safeMessage = AiSecuritySanitizer.sanitizeError(failure);
             throw new DevelopmentException(safeMessage == null
@@ -260,6 +264,8 @@ public class LlmChatServiceBean implements LlmChatService {
             return session.snapshot();
         }
 
+        log.info("startStreaming: запуск стриминга AI для convId={}, user={}, requestId={}, messageLen={}",
+                conversationId, user != null ? user.getLogin() : null, normalizedRequestId, message.trim().length());
         scheduler.schedule(new SecurityContextAwareRunnable(() -> executeStreaming(session)), new Date());
         return session.snapshot();
     }
@@ -372,9 +378,13 @@ public class LlmChatServiceBean implements LlmChatService {
             assistantMessage.setCredentialOwner(result.getCredentialOwner() == null
                     ? null : result.getCredentialOwner().name());
             dataManager.commit(assistantMessage);
+            log.info("executeStreaming: успешно завершён ответ AI для convId={}, requestId={}, tokens={}",
+                    session.conversationId, session.requestId, result.getTotalTokens());
             session.complete("COMPLETED", null);
             publishStreamEvent(session, true);
         } catch (RuntimeException failure) {
+            log.error("executeStreaming: сбой выполнения AI стриминга для convId={}, requestId={}: {}",
+                    session.conversationId, session.requestId, failure.getMessage(), failure);
             if (!quotaSettled) {
                 try {
                     settleFailedQuota(session, failure);

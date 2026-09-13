@@ -557,6 +557,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                     response.getProviderRequestId());
         } catch (Exception e) {
+            log.error("executeWithUserConfig: сбой вызова модели {} (провайдер {}) для функции {}: {}",
+                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
                     userContext);
@@ -588,6 +590,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                     response.getProviderRequestId());
         } catch (Exception e) {
+            log.error("executeWithAdmin: сбой вызова модели {} (провайдер {}) для функции {}: {}",
+                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
                     userContext);
@@ -619,6 +623,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                     response.getProviderRequestId());
         } catch (Exception e) {
+            log.error("executeWithUserConfigStreaming: сбой стриминга модели {} (провайдер {}) для функции {}: {}",
+                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource,
                     "ERROR", e.getMessage(), userContext);
@@ -651,6 +657,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                     response.getProviderRequestId());
         } catch (Exception e) {
+            log.error("executeWithAdminStreaming: сбой стриминга модели {} (провайдер {}) для функции {}: {}",
+                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
             saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                     prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource,
                     "ERROR", e.getMessage(), userContext);
@@ -675,6 +683,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             throw new DevelopmentException("Провайдер AI «" + providerCode + "» не подключён в приложении.", e);
         }
         aiProviderRegistry.registerRequest(requestId, provider);
+        log.info("executeProvider: вызов {} (модель {}), requestId={}", providerCode, model, requestId);
         try {
             return provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model,
                     buildOptions(function, requestId));
@@ -697,6 +706,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
             throw new DevelopmentException("Провайдер AI «" + providerCode + "» не подключён в приложении.", e);
         }
         aiProviderRegistry.registerRequest(requestId, provider);
+        log.info("executeProviderStreaming: запуск стриминга {} (модель {}), requestId={}", providerCode, model, requestId);
         try {
             if (provider.supportsStreaming()) {
                 return provider.executeTextStreaming(prompt, effectiveSystemPrompt, apiKey, model,

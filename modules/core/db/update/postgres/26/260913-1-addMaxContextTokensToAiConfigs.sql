@@ -1,6 +1,16 @@
 -- 260913-1-addMaxContextTokensToAiConfigs.sql
--- Установка лимита контекста 10000 токенов для всех существующих записей
+-- Добавление колонок max_context_tokens и context_reset_sequence_no,
+-- установка лимита контекста 10000 токенов для всех существующих записей
 -- и актуализация системного промпта LLM_CHAT для учёта контекста диалога
+
+ALTER TABLE HUNTTECH_ADMIN_AI_CONFIGURATION
+    ADD COLUMN IF NOT EXISTS MAX_CONTEXT_TOKENS integer DEFAULT 10000;
+
+ALTER TABLE HUNTTECH_USER_AI_CONFIGURATION
+    ADD COLUMN IF NOT EXISTS MAX_CONTEXT_TOKENS integer DEFAULT 10000;
+
+ALTER TABLE HUNTTECH_LLM_CHAT_CONVERSATION
+    ADD COLUMN IF NOT EXISTS CONTEXT_RESET_SEQUENCE_NO integer;
 
 UPDATE hunttech_admin_ai_configuration
 SET max_context_tokens = 10000
