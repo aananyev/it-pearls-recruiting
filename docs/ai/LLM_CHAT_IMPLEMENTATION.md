@@ -19,6 +19,14 @@
 - `startStreaming()` запускает запрос через middleware scheduler, а `pollStreaming()` возвращает owner-scoped накопленный snapshot; floating screen получает push-событие и использует polling с интервалом 3 секунды как recovery.
 - OpenAI-compatible provider adapters поддерживают provider request ID, SSE streaming и прерывание активного HTTP-вызова по HRM `requestId`; legacy adapters автоматически отдают полный ответ одной дельтой.
 - Streaming-задача переносит CUBA security context, не сохраняет partial assistant message и пишет итог в историю только после подтверждённого завершения.
+- Динамические бейджи и live-статусы: рендеринг истории сообщений (`renderChatHistory` и `renderHermesChatHistory`) поддерживает кастомные текстовые бейджи текущего этапа («Анализ контекста...», «Выполняется запрос...»), пульсирующий курсор и форматированные штампы времени сообщений (`dd.MM.yyyy HH:mm:ss`).
+- Интеллектуальный резолвинг сущностей HRM (`HrmEntityNameResolver`): сервис сопоставляет технические UUID из ответов LLM с реальными сущностями системы (`hunttech_OpenPosition`, `hunttech_JobCandidate`, `hunttech_CandidateCV`, `hunttech_IteractionList`, `hunttech_Company`). Названия вакансий автоматически очищаются от проектных суффиксов в скобках и дополняются префиксом `Вакансия `; кэширование реализовано через потокобезопасный `ConcurrentHashMap` с атомарным `computeIfAbsent` и 60-секундным TTL для отрицательного кэша.
+- Автоматическая очистка кракозябр технических UUID (`MarkdownRenderer`):
+  - Удаление префиксного мусора перед ссылками на сущности: `<span style="..."><code>UUID</code></span> — [Название](...)` и `<code>UUID</code> — `.
+  - Замена ссылок с техническим UUID в качестве текста (`[UUID](...)` и `<a ...>UUID</a>`) на человекочитаемое наименование сущности.
+  - Преобразование одиночных UUID сущностей в тексте (включая кавычки `""UUID"` и `<code>UUID</code>`) в интерактивные кликабельные карточки `💼 [Вакансия ...](#main/0/...)`.
+  - Автоматическое преобразование голых CUBA navigation URL (`#main/0/...`) в именованные ссылки на карточки.
+  - Изоляция HTML-тегов и атрибутов (`data-id="UUID"`) от ложных замен и экранирование скобок в наименованиях.
 - Floating UI сохраняет позицию и размер через штатные пользовательские screen settings CUBA; при ширине до 640 px диалог становится полноэкранным mobile sheet. Новых сущностей и changeSet для UI-настроек нет.
 - Для live-ответа включён Vaadin push: core публикует UI-событие только с идентификаторами пользователя, диалога и запроса, а web-клиент получает актуальный owner-scoped snapshot. Polling с интервалом 3 секунды оставлен для восстановления при временной недоступности push.
 - Lookup usage по одному `providerRequestId` отложен до подтверждения provider-specific API; решение и обязательные условия зафиксированы в `LLM_CHAT_PROVIDER_USAGE_LOOKUP_DECISION.md`.

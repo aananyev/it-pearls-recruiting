@@ -28,6 +28,7 @@
 - Secure personal credentials с transitional legacy `API_KEY`.
 - Admin-only legacy migration и server-side master-key rotation с временным previous key.
 - Floating UI, geometry settings, mobile sheet, streaming, Vaadin push и polling recovery 1.2 секунды (с динамической сменой статуса действия ИИ).
+- Интеллектуальный резолвинг сущностей HRM (`HrmEntityNameResolver`) и устранение кракозябр технических UUID (`MarkdownRenderer`): замена UUID на интерактивные наименования («Вакансия ...», «Кандидат ...»), удаление префиксного мусора `<code>UUID</code> — `, потокобезопасный in-memory кэш с 60-сек TTL, модульные тесты `MarkdownRendererTest`.
 - Permission-gated admin history и manual quota reconciliation.
 - Mock routing tests, security-contract tests, migration/rollback plan и read-only staging transport smoke.
 
