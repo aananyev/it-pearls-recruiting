@@ -10,7 +10,6 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.FlowBoxLayout;
 import com.haulmont.cuba.gui.components.StreamResource;
-import com.haulmont.cuba.gui.components.ThemeResource;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -89,36 +88,40 @@ public class SkillTreeReestrBrowse extends StandardLookup<SkillTree> {
         setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+
+        // Открытие карточки редактирования по двойному клику
+        Action editAction = skillTreesTreeTable.getAction("edit");
+        if (editAction != null) {
+            skillTreesTreeTable.setItemClickAction(editAction);
+        }
     }
 
     private void setupTableColumns() {
-        // Превью логотипа навыка в первой колонке «ЛОГО» (BLOB logoImage -> FileDescriptor -> Theme fallback).
-        skillTreesTreeTable.addGeneratedColumn("skillLogoColumn", event -> {
+        // Колонка ссылки на Wiki-описание (по аналогии со SkillTreeBrowse)
+        skillTreesTreeTable.addGeneratedColumn("wikiPage", event -> {
             SkillTree skill = event.getItem();
-            HBoxLayout box = uiComponents.create(HBoxLayout.class);
-            box.setWidthFull();
-            box.setHeightFull();
-            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-            Image image = uiComponents.create(Image.class);
-            image.setScaleMode(Image.ScaleMode.CONTAIN);
-            image.setWidth("28px");
-            image.setHeight("28px");
-            image.setStyleName("skill-tree-cell-logo");
-            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-            byte[] logoBytes = skill != null ? skill.getLogoImage() : null;
-            if (logoBytes != null && logoBytes.length > 0) {
-                image.setSource(StreamResource.class)
-                        .setStreamSupplier(() -> new ByteArrayInputStream(logoBytes));
-            } else if (skill != null && skill.getFileImageLogo() != null) {
-                image.setSource(FileDescriptorResource.class).setFileDescriptor(skill.getFileImageLogo());
-            } else {
-                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            if (skill == null || skill.getWikiPage() == null || skill.getWikiPage().trim().isEmpty()) {
+                Label<String> empty = uiComponents.create(Label.TYPE_STRING);
+                empty.setValue("—");
+                empty.setStyleName("text-muted");
+                return empty;
             }
-
-            box.add(image);
-            return box;
+            String url = skill.getWikiPage().trim();
+            String lower = url.toLowerCase();
+            // Защита от javascript: XSS — разрешены только безопасные сетевые протоколы http:// и https://
+            if (!(lower.startsWith("http://") || lower.startsWith("https://"))) {
+                Label<String> plainText = uiComponents.create(Label.TYPE_STRING);
+                plainText.setValue(url);
+                plainText.setStyleName("text-muted");
+                return plainText;
+            }
+            Link link = uiComponents.create(Link.class);
+            link.setUrl(url);
+            link.setCaption(url);
+            link.setTarget("_blank");
+            link.setIcon("icons/chain.png");
+            link.setStyleName("skill-tree-wiki-link");
+            return link;
         });
 
         // Бейдж/чип приоритета компетенции

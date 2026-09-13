@@ -21,7 +21,7 @@
             <loader id="skillTreesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_SkillTree e
-                    order by e.skillTree.skillName nulls first, e.skillName]]>
+                    order by e.skillName]]>
                 </query>
             </loader>
         </collection>
@@ -196,17 +196,17 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <!-- Превью логотипа навыка (генерируется контроллером) -->
-                            <column id="skillLogoColumn" caption="ЛОГО" width="60px" resizable="false" sortable="false"/>
-                            <!-- Иерархическая колонка: название навыка (раскрытие узлов дерева) -->
+                            <!-- Иерархическая колонка: название навыка (раскрытие узлов дерева от левого края) -->
                             <column id="skillName" property="skillName"
-                                    caption="msg://msgSkill" expandRatio="1" minWidth="240px"/>
+                                    caption="msg://msgSkill" expandRatio="2" minWidth="260px"/>
                             <!-- Специализация -->
                             <column id="specialisation" property="specialisation.specRuName"
-                                    caption="msg://msgSpecialisation" width="200px"/>
+                                    caption="msg://msgSpecialisation" width="220px"/>
+                            <!-- Ссылка на описание Wiki -->
+                            <column id="wikiPage" caption="msg://msgWikiPage" width="180px" sortable="false"/>
                             <!-- Приоритет навыка -->
                             <column id="prioritySkill"
-                                    caption="msg://msgPrioritySkill" width="160px" align="CENTER"/>
+                                    caption="msg://msgPrioritySkill" width="170px" align="CENTER"/>
                         </columns>
                         <rowsCount/>
                     </treeDataGrid>

@@ -1293,6 +1293,30 @@
     }
   }
 
+  /* Ссылка на Wiki в колонке дерева компетенций */
+  .skill-tree-wiki-link,
+  .v-link.skill-tree-wiki-link {
+    display: inline-block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    vertical-align: middle !important;
+    text-decoration: none !important;
+
+    .v-link-text {
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    &:hover {
+      text-decoration: underline !important;
+    }
+  }
+
   /* Логотип навыка в первой колонке дерева */
   .skill-tree-cell-logo {
     object-fit: contain !important;
