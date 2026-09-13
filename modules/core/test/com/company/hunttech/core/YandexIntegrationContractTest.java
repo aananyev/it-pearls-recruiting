@@ -211,4 +211,90 @@ public class YandexIntegrationContractTest {
         long defaultDurMillis = timeOfDayResult.getEndTime().getTime() - timeOfDayResult.getStartTime().getTime();
         assertEquals("Длительность должна остаться стандартной (60 минут), а не 300 минут", 60 * 60 * 1000L, defaultDurMillis);
     }
+
+    @Test
+    public void testCalendarQueryIntentRecognition() {
+        AiYandexOrchestrationServiceBean orchestrationBean = new AiYandexOrchestrationServiceBean();
+
+        // 1. Точная фраза пользователя из запроса (с опечатками: "янлекс календаь")
+        String typoUserRequest = "посмотреть янлекс календаь";
+        assertTrue("Должен распознаваться интент чтения календаря даже с опечатками",
+                orchestrationBean.isCalendarQueryIntent(typoUserRequest));
+
+        // 2. Стандартные запросы на просмотр
+        assertTrue(orchestrationBean.isCalendarQueryIntent("посмотри яндекс календарь"));
+        assertTrue(orchestrationBean.isCalendarQueryIntent("что у меня в календаре на сегодня"));
+        assertTrue(orchestrationBean.isCalendarQueryIntent("какие встречи на следующей неделе"));
+        assertTrue(orchestrationBean.isCalendarQueryIntent("покажи расписание на завтра"));
+        assertTrue(orchestrationBean.isCalendarQueryIntent("проверь календарь на этой неделе"));
+        assertTrue(orchestrationBean.isCalendarQueryIntent("глянь календарь"));
+        assertTrue(orchestrationBean.isCalendarQueryIntent("какие события в календаре у заказчика"));
+        assertTrue(orchestrationBean.isCalendarQueryIntent("что запланировано на понедельник"));
+
+        // 3. Запросы на бронирование/создание НЕ должны классифицироваться как просмотр
+        assertFalse(orchestrationBean.isCalendarQueryIntent("создай в календаре встречу с Ивановым завтра в 15:00"));
+        assertFalse(orchestrationBean.isCalendarQueryIntent("запланируй в моем личном яндекс-календаре событие на 12-00"));
+        assertFalse(orchestrationBean.isCalendarQueryIntent("поставь встречу с кандидатом"));
+
+        // 4. Нерелевантные запросы
+        assertFalse(orchestrationBean.isCalendarQueryIntent("покажи список открытых вакансий"));
+        assertFalse(orchestrationBean.isCalendarQueryIntent("найди резюме Java разработчика"));
+    }
+
+    @Test
+    public void testCaldavXmlAndIcsParsing() {
+        String testXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<d:multistatus xmlns:d=\"DAV:\" xmlns:c=\"urn:ietf:params:xml:ns:caldav\">\n" +
+                "  <d:response>\n" +
+                "    <d:href>/calendars/alan%40hunttech.ru/events-34179601/event-123.ics</d:href>\n" +
+                "    <d:propstat>\n" +
+                "      <d:prop>\n" +
+                "        <c:calendar-data>BEGIN:VCALENDAR\r\n" +
+                "VERSION:2.0\r\n" +
+                "PRODID:-//HUNTTECH//Recruiting HRM 1.0//RU\r\n" +
+                "BEGIN:VEVENT\r\n" +
+                "UID:event-123-abc\r\n" +
+                "DTSTART;TZID=Europe/Saratov:20260914T163000\r\n" +
+                "DTEND;TZID=Europe/Saratov:20260914T173000\r\n" +
+                "SUMMARY:Собеседование: Иванов Иван\r\n" +
+                "DESCRIPTION:Техническое интервью на вакансию Senior Java Developer\\n\\n" +
+                " Ссылка на видеовстречу Яндекс Телемост: https://telemost.yandex.ru/j/8899001122\r\n" +
+                "LOCATION:https://telemost.yandex.ru/j/8899001122\r\n" +
+                "ATTENDEE;CN=Иванов Иван:mailto:ivan@example.com\r\n" +
+                "ATTENDEE;CN=Рекрутер:mailto:alan@hunttech.ru\r\n" +
+                "STATUS:CONFIRMED\r\n" +
+                "END:VEVENT\r\n" +
+                "END:VCALENDAR</c:calendar-data>\n" +
+                "      </d:prop>\n" +
+                "      <d:status>HTTP/1.1 200 OK</d:status>\n" +
+                "    </d:propstat>\n" +
+                "  </d:response>\n" +
+                "</d:multistatus>";
+
+        java.util.TimeZone tz = java.util.TimeZone.getTimeZone("Europe/Saratov");
+        java.util.List<YandexCalendarEventDto> events = com.company.hunttech.service.YandexIntegrationServiceBean
+                .parseCaldavResponseXml(testXml, "Hunttech у заказчика", "/calendars/alan%40hunttech.ru/events-34179601/", tz);
+
+        assertNotNull("Список событий не должен быть null", events);
+        assertEquals("Должно распарситься ровно 1 событие", 1, events.size());
+
+        YandexCalendarEventDto ev = events.get(0);
+        assertEquals("event-123-abc", ev.getUid());
+        assertEquals("Собеседование: Иванов Иван", ev.getSummary());
+        assertEquals("Hunttech у заказчика", ev.getCalendarName());
+        assertEquals("https://telemost.yandex.ru/j/8899001122", ev.getTelemostUrl());
+        assertEquals("CONFIRMED", ev.getStatus());
+        assertTrue(ev.getAttendees().contains("ivan@example.com"));
+        assertTrue(ev.getAttendees().contains("alan@hunttech.ru"));
+
+        java.util.Calendar cal = java.util.Calendar.getInstance(tz);
+        cal.setTime(ev.getStartTime());
+        assertEquals(2026, cal.get(java.util.Calendar.YEAR));
+        assertEquals(java.util.Calendar.SEPTEMBER, cal.get(java.util.Calendar.MONTH));
+        assertEquals(14, cal.get(java.util.Calendar.DAY_OF_MONTH));
+        assertEquals(16, cal.get(java.util.Calendar.HOUR_OF_DAY));
+        assertEquals(30, cal.get(java.util.Calendar.MINUTE));
+
+        assertEquals("16:30 – 17:30", ev.getFormattedTimeRange(tz));
+    }
 }

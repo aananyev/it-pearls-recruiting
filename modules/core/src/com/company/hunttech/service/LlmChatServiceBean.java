@@ -180,6 +180,7 @@ public class LlmChatServiceBean implements LlmChatService {
             throw new DevelopmentException("Запрос отменён до обращения к AI-провайдеру.");
         }
 
+        // 1. Попытка бронирования встречи в календаре CalDAV
         if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(message.trim())) {
             AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(message.trim(), user.getId());
             if (parseResult.isIntentDetected() && AiYandexOrchestrationService.containsBookingVerb(message)) {
@@ -215,6 +216,37 @@ public class LlmChatServiceBean implements LlmChatService {
                 }
                 return new LlmChatResponse(conversation.getId(), responseText, "yandex", "caldav-telemost", null);
             }
+        }
+
+        // 2. Чтение / поиск событий в Яндекс-Календаре через CalDAV
+        if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isCalendarQueryIntent(message.trim())) {
+            String responseText;
+            boolean success = false;
+            try {
+                responseText = aiYandexOrchestrationService.getCalendarScheduleSummary(user != null ? user.getId() : null, message.trim());
+                success = true;
+            } catch (Exception e) {
+                log.error("Сбой чтения событий Яндекс-Календаря: {}", e.getMessage(), e);
+                responseText = "⚠️ **Не удалось прочитать события Яндекс-Календаря.**\n\n" +
+                        "Пожалуйста, проверьте подключение и токен доступа в окне Настроек (вкладка **«Яндекс 360»**).";
+            }
+            LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+            assistantMessage.setConversation(conversation);
+            assistantMessage.setRole("ASSISTANT");
+            assistantMessage.setContent(responseText);
+            assistantMessage.setSequenceNo(nextSequence + 1);
+            assistantMessage.setRequestId(requestId.trim());
+            assistantMessage.setStatus("COMPLETED");
+            assistantMessage.setProviderCode("yandex");
+            assistantMessage.setModelName("caldav-calendar");
+            conversation.setLastMessageAt(new Date());
+            dataManager.commit(new CommitContext(conversation, assistantMessage));
+            if (success) {
+                settleObservedUsage(quota, 25, "yandex-caldav-query");
+            } else {
+                releaseFailedReservation(quota, "yandex-caldav-query");
+            }
+            return new LlmChatResponse(conversation.getId(), responseText, "yandex", "caldav-calendar", null);
         }
 
         if (isVacancyOpeningIntent(message.trim())) {
@@ -390,6 +422,7 @@ public class LlmChatServiceBean implements LlmChatService {
         String rawContent = session.userMessage != null && session.userMessage.getContent() != null
                 ? session.userMessage.getContent().trim() : "";
 
+        // 1. Попытка бронирования встречи в календаре CalDAV
         if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(rawContent)) {
             AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(rawContent, user != null ? user.getId() : null);
             if (parseResult.isIntentDetected() && AiYandexOrchestrationService.containsBookingVerb(rawContent)) {
@@ -428,6 +461,40 @@ public class LlmChatServiceBean implements LlmChatService {
                 publishStreamEvent(session, true);
                 return;
             }
+        }
+
+        // 2. Чтение / поиск событий в Яндекс-Календаре через CalDAV
+        if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isCalendarQueryIntent(rawContent)) {
+            String responseText;
+            boolean success = false;
+            try {
+                responseText = aiYandexOrchestrationService.getCalendarScheduleSummary(user != null ? user.getId() : null, rawContent);
+                success = true;
+            } catch (Exception e) {
+                log.error("Сбой стриминга чтения событий Яндекс-Календаря: {}", e.getMessage(), e);
+                responseText = "⚠️ **Не удалось прочитать события Яндекс-Календаря.**\n\n" +
+                        "Пожалуйста, проверьте подключение и токен доступа в окне Настроек (вкладка **«Яндекс 360»**).";
+            }
+            session.append(responseText);
+            LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+            assistantMessage.setConversation(conversation);
+            assistantMessage.setRole("ASSISTANT");
+            assistantMessage.setContent(responseText);
+            assistantMessage.setSequenceNo(session.nextSequence + 1);
+            assistantMessage.setRequestId(session.requestId);
+            assistantMessage.setStatus("COMPLETED");
+            assistantMessage.setProviderCode("yandex");
+            assistantMessage.setModelName("caldav-calendar");
+            conversation.setLastMessageAt(new Date());
+            dataManager.commit(new CommitContext(conversation, assistantMessage));
+            if (success) {
+                settleObservedUsage(session.quota, 25, "yandex-caldav-query");
+            } else {
+                releaseFailedReservation(session.quota, "yandex-caldav-query");
+            }
+            session.complete("COMPLETED", null);
+            publishStreamEvent(session, true);
+            return;
         }
 
         if (isVacancyOpeningIntent(session.userMessage.getContent())) {

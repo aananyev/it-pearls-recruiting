@@ -3,6 +3,7 @@ package com.company.hunttech.service;
 import com.company.hunttech.dto.yandex.*;
 import com.company.hunttech.entity.UserYandexConfiguration;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,16 @@ public interface YandexIntegrationService {
      * Отмена / удаление события из календаря.
      */
     boolean cancelCalendarEvent(UUID userId, String calendarPath, String eventUid);
+
+    /**
+     * Получить список событий из указанного календаря за период времени.
+     */
+    List<YandexCalendarEventDto> getCalendarEvents(UUID userId, String calendarPath, Date from, Date to);
+
+    /**
+     * Получить список событий из всех настроенных календарей (личного и корпоративного) за период времени.
+     */
+    List<YandexCalendarEventDto> getAllUpcomingCalendarEvents(UUID userId, Date from, Date to);
 
     /**
      * Получить или создать запись конфигурации Yandex для указанного пользователя.

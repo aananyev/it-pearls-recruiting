@@ -241,5 +241,7 @@
              relativeToChangelogFile="true"/>
     <include file="260913-updateLlmChatPromptGroundingAndTemporal.xml"
              relativeToChangelogFile="true"/>
+    <include file="260913-updateLlmChatPromptWithCalendarReading.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -281,6 +281,369 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         }
     }
 
+    @Override
+    public List<YandexCalendarEventDto> getCalendarEvents(UUID userId, String calendarPath, Date from, Date to) {
+        UserYandexConfiguration config = getOrCreateConfiguration(userId);
+        String token = resolveToken(config);
+        if (StringUtils.isBlank(token)) {
+            log.warn("OAuth-токен Яндекс не настроен для пользователя {}", userId);
+            return Collections.emptyList();
+        }
+
+        if (StringUtils.isBlank(calendarPath)) {
+            calendarPath = resolveTargetCalendarPath(config, token, YandexCalendarType.PERSONAL, null);
+        }
+
+        String tzStr = StringUtils.defaultIfBlank(config.getDefaultTimeZone(), DEFAULT_TIME_ZONE_SARATOV);
+        TimeZone timeZone = TimeZone.getTimeZone(tzStr);
+
+        Date effectiveFrom = from != null ? from : new Date(System.currentTimeMillis() - 3600000L);
+        Date effectiveTo = to != null ? to : new Date(System.currentTimeMillis() + 14L * 24 * 3600 * 1000);
+
+        String calendarDisplayName = resolveCalendarDisplayName(config, calendarPath);
+        return fetchEventsFromCaldav(config, token, calendarPath, calendarDisplayName, effectiveFrom, effectiveTo, timeZone);
+    }
+
+    @Override
+    public List<YandexCalendarEventDto> getAllUpcomingCalendarEvents(UUID userId, Date from, Date to) {
+        UserYandexConfiguration config = getOrCreateConfiguration(userId);
+        String token = resolveToken(config);
+        if (StringUtils.isBlank(token)) {
+            return Collections.emptyList();
+        }
+
+        String tzStr = StringUtils.defaultIfBlank(config.getDefaultTimeZone(), DEFAULT_TIME_ZONE_SARATOV);
+        TimeZone timeZone = TimeZone.getTimeZone(tzStr);
+
+        Date effectiveFrom = from != null ? from : new Date(System.currentTimeMillis() - 3600000L);
+        Date effectiveTo = to != null ? to : new Date(System.currentTimeMillis() + 14L * 24 * 3600 * 1000);
+
+        List<YandexCalendarEventDto> allEvents = new ArrayList<>();
+        Set<String> seenUids = new HashSet<>();
+
+        // 1. Личный календарь
+        String personalPath = StringUtils.isNotBlank(config.getPersonalCalendarPath())
+                ? config.getPersonalCalendarPath()
+                : resolveTargetCalendarPath(config, token, YandexCalendarType.PERSONAL, null);
+        String personalName = StringUtils.defaultIfBlank(config.getPersonalCalendarName(), DEFAULT_PERSONAL_CALENDAR_NAME);
+        if (StringUtils.isNotBlank(personalPath)) {
+            List<YandexCalendarEventDto> personalEvents = fetchEventsFromCaldav(config, token, personalPath, personalName, effectiveFrom, effectiveTo, timeZone);
+            for (YandexCalendarEventDto ev : personalEvents) {
+                if (ev.getUid() == null || seenUids.add(ev.getUid())) {
+                    ev.setCalendarName(personalName);
+                    allEvents.add(ev);
+                }
+            }
+        }
+
+        // 2. Календарь собеседований с заказчиком («Hunttech у заказчика»)
+        String clientPath = StringUtils.isNotBlank(config.getClientInterviewCalendarPath())
+                ? config.getClientInterviewCalendarPath()
+                : resolveTargetCalendarPath(config, token, YandexCalendarType.CLIENT_INTERVIEW, null);
+        String clientName = StringUtils.defaultIfBlank(config.getClientInterviewCalendarName(), UserYandexConfiguration.DEFAULT_CLIENT_CALENDAR_NAME);
+        if (StringUtils.isNotBlank(clientPath) && !clientPath.equalsIgnoreCase(personalPath)) {
+            List<YandexCalendarEventDto> clientEvents = fetchEventsFromCaldav(config, token, clientPath, clientName, effectiveFrom, effectiveTo, timeZone);
+            for (YandexCalendarEventDto ev : clientEvents) {
+                if (ev.getUid() == null || seenUids.add(ev.getUid())) {
+                    ev.setCalendarName(clientName);
+                    allEvents.add(ev);
+                }
+            }
+        }
+
+        Collections.sort(allEvents);
+        return allEvents;
+    }
+
+    private List<YandexCalendarEventDto> fetchEventsFromCaldav(UserYandexConfiguration config, String token,
+                                                               String calendarPath, String calendarDisplayName,
+                                                               Date from, Date to, TimeZone timeZone) {
+        List<YandexCalendarEventDto> events = new ArrayList<>();
+        String baseUrl = StringUtils.defaultIfBlank(config.getCalendarBaseUrl(), UserYandexConfiguration.DEFAULT_CALENDAR_BASE_URL);
+        String url = normalizeUrl(baseUrl, calendarPath);
+
+        SimpleDateFormat utcFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+        utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String startUtc = utcFormat.format(from);
+        String endUtc = utcFormat.format(to);
+
+        // 1. CalDAV REPORT с calendar-query time-range
+        String reportXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" +
+                "<c:calendar-query xmlns:d=\"DAV:\" xmlns:c=\"urn:ietf:params:xml:ns:caldav\">\n" +
+                "  <d:prop>\n" +
+                "    <d:getetag />\n" +
+                "    <c:calendar-data />\n" +
+                "  </d:prop>\n" +
+                "  <c:filter>\n" +
+                "    <c:comp-filter name=\"VCALENDAR\">\n" +
+                "      <c:comp-filter name=\"VEVENT\">\n" +
+                "        <c:time-range start=\"" + startUtc + "\" end=\"" + endUtc + "\"/>\n" +
+                "      </c:comp-filter>\n" +
+                "    </c:comp-filter>\n" +
+                "  </c:filter>\n" +
+                "</c:calendar-query>";
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Depth", "1");
+        headers.put("Prefer", "return-minimal");
+
+        try {
+            HttpResult res = sendHttp("REPORT", url, token, reportXml, "application/xml; charset=utf-8", headers);
+            if (res.statusCode == 207 || res.statusCode == 200) {
+                events = parseCaldavResponseXml(res.body, calendarDisplayName, calendarPath, timeZone);
+            } else {
+                log.warn("CalDAV REPORT для {} вернул HTTP {}, переключаемся на PROPFIND", url, res.statusCode);
+                // Фолбэк: PROPFIND с запросом calendar-data
+                String propfindXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" +
+                        "<d:propfind xmlns:d=\"DAV:\" xmlns:c=\"urn:ietf:params:xml:ns:caldav\">\n" +
+                        "  <d:prop>\n" +
+                        "    <d:displayname />\n" +
+                        "    <c:calendar-data />\n" +
+                        "  </d:prop>\n" +
+                        "</d:propfind>";
+                HttpResult propRes = sendHttp("PROPFIND", url, token, propfindXml, "application/xml; charset=utf-8", Collections.singletonMap("Depth", "1"));
+                if (propRes.statusCode == 207 || propRes.statusCode == 200) {
+                    events = parseCaldavResponseXml(propRes.body, calendarDisplayName, calendarPath, timeZone);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Ошибка запроса событий CalDAV из {}: {}", url, e.getMessage(), e);
+        }
+
+        // Фильтруем события по пересечению с [from, to]
+        List<YandexCalendarEventDto> filtered = new ArrayList<>();
+        for (YandexCalendarEventDto ev : events) {
+            if (ev.getStartTime() != null) {
+                Date evEnd = ev.getEndTime() != null ? ev.getEndTime() : new Date(ev.getStartTime().getTime() + 3600000L);
+                if (evEnd.compareTo(from) >= 0 && ev.getStartTime().compareTo(to) <= 0) {
+                    filtered.add(ev);
+                }
+            }
+        }
+        Collections.sort(filtered);
+        return filtered;
+    }
+
+    public static List<YandexCalendarEventDto> parseCaldavResponseXml(String xmlBody, String calendarDisplayName, String calendarPath, TimeZone defaultTz) {
+        List<YandexCalendarEventDto> result = new ArrayList<>();
+        if (StringUtils.isBlank(xmlBody)) {
+            return result;
+        }
+
+        Pattern calDataPattern = Pattern.compile("<(?:\\w+:)?calendar-data[^>]*>(.*?)</(?:\\w+:)?calendar-data>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Matcher matcher = calDataPattern.matcher(xmlBody);
+
+        while (matcher.find()) {
+            String icsRaw = matcher.group(1);
+            icsRaw = unescapeXmlEntities(icsRaw);
+            List<YandexCalendarEventDto> parsedEvents = parseIcsEvents(icsRaw, calendarDisplayName, calendarPath, defaultTz);
+            result.addAll(parsedEvents);
+        }
+
+        return result;
+    }
+
+    private static String unescapeXmlEntities(String text) {
+        if (text == null) return "";
+        return text.replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'");
+    }
+
+    public static List<YandexCalendarEventDto> parseIcsEvents(String icsContent, String calendarDisplayName, String calendarPath, TimeZone defaultTz) {
+        List<YandexCalendarEventDto> events = new ArrayList<>();
+        if (StringUtils.isBlank(icsContent)) {
+            return events;
+        }
+
+        // Unfolding по стандарту RFC 5545
+        String unfolded = icsContent.replaceAll("\r?\n[ \t]", "");
+
+        Pattern eventPattern = Pattern.compile("BEGIN:VEVENT(.*?)END:VEVENT", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Matcher matcher = eventPattern.matcher(unfolded);
+
+        while (matcher.find()) {
+            String eventBlock = matcher.group(1);
+            YandexCalendarEventDto dto = parseSingleVEvent(eventBlock, calendarDisplayName, calendarPath, defaultTz);
+            if (dto != null && dto.getStartTime() != null) {
+                events.add(dto);
+            }
+        }
+        return events;
+    }
+
+    private static YandexCalendarEventDto parseSingleVEvent(String block, String calendarName, String calendarPath, TimeZone defaultTz) {
+        YandexCalendarEventDto dto = new YandexCalendarEventDto();
+        dto.setCalendarName(calendarName);
+        dto.setCalendarPath(calendarPath);
+        dto.setTimeZone(defaultTz != null ? defaultTz.getID() : DEFAULT_TIME_ZONE_SARATOV);
+        dto.setRawIcs(block);
+
+        String[] lines = block.split("\r?\n");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            int colonIdx = line.indexOf(':');
+            if (colonIdx <= 0) continue;
+
+            String propPart = line.substring(0, colonIdx);
+            String valPart = line.substring(colonIdx + 1);
+
+            String propName = propPart.split(";")[0].toUpperCase();
+
+            switch (propName) {
+                case "UID":
+                    dto.setUid(valPart.trim());
+                    break;
+                case "SUMMARY":
+                    dto.setSummary(unescapeIcsValue(valPart));
+                    break;
+                case "DESCRIPTION":
+                    dto.setDescription(unescapeIcsValue(valPart));
+                    break;
+                case "LOCATION":
+                    dto.setLocation(unescapeIcsValue(valPart));
+                    break;
+                case "STATUS":
+                    dto.setStatus(valPart.trim());
+                    break;
+                case "DTSTART":
+                    parseEventDate(propPart, valPart, defaultTz, dto, true);
+                    break;
+                case "DTEND":
+                    parseEventDate(propPart, valPart, defaultTz, dto, false);
+                    break;
+                case "ATTENDEE":
+                    String email = extractEmailFromAttendee(valPart);
+                    if (StringUtils.isNotBlank(email)) {
+                        dto.getAttendees().add(email);
+                    }
+                    break;
+                case "ORGANIZER":
+                    dto.setOrganizer(extractEmailFromAttendee(valPart));
+                    break;
+                case "URL":
+                case "X-TELEMOST-URL":
+                    if (valPart.contains("telemost.yandex.ru")) {
+                        dto.setTelemostUrl(valPart.trim());
+                    }
+                    break;
+            }
+        }
+
+        // Если telemostUrl не найден в свойстве, проверяем location и description
+        if (StringUtils.isBlank(dto.getTelemostUrl())) {
+            String telemostRegex = "https://telemost\\.yandex\\.ru/j/[a-zA-Z0-9_-]+";
+            Pattern tp = Pattern.compile(telemostRegex);
+            if (StringUtils.isNotBlank(dto.getLocation())) {
+                Matcher tm = tp.matcher(dto.getLocation());
+                if (tm.find()) dto.setTelemostUrl(tm.group(0));
+            }
+            if (StringUtils.isBlank(dto.getTelemostUrl()) && StringUtils.isNotBlank(dto.getDescription())) {
+                Matcher tm = tp.matcher(dto.getDescription());
+                if (tm.find()) dto.setTelemostUrl(tm.group(0));
+            }
+        }
+
+        if (dto.getEndTime() == null && dto.getStartTime() != null) {
+            dto.setEndTime(new Date(dto.getStartTime().getTime() + (dto.isAllDay() ? 24 * 3600 * 1000L : 3600000L)));
+        }
+
+        return dto;
+    }
+
+    private static void parseEventDate(String propPart, String valPart, TimeZone defaultTz, YandexCalendarEventDto dto, boolean isStart) {
+        valPart = valPart.trim();
+        TimeZone tz = defaultTz;
+
+        if (propPart.contains("TZID=")) {
+            int tzidIdx = propPart.indexOf("TZID=");
+            String tzid = propPart.substring(tzidIdx + 5).split(";")[0].replace("\"", "").trim();
+            tz = TimeZone.getTimeZone(tzid);
+        }
+
+        try {
+            if (valPart.endsWith("Z")) {
+                // UTC формат
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+                fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date d = fmt.parse(valPart);
+                if (isStart) dto.setStartTime(d); else dto.setEndTime(d);
+            } else if (valPart.contains("T")) {
+                // Локальное время с часами
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+                fmt.setTimeZone(tz != null ? tz : TimeZone.getDefault());
+                Date d = fmt.parse(valPart);
+                if (isStart) dto.setStartTime(d); else dto.setEndTime(d);
+            } else if (valPart.length() == 8) {
+                // Весь день: yyyyMMdd
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+                fmt.setTimeZone(tz != null ? tz : TimeZone.getDefault());
+                Date d = fmt.parse(valPart);
+                if (isStart) {
+                    dto.setStartTime(d);
+                    dto.setAllDay(true);
+                } else {
+                    dto.setEndTime(d);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось распарсить дату iCal: {} ({})", valPart, propPart);
+        }
+    }
+
+    private static String extractEmailFromAttendee(String val) {
+        if (StringUtils.isBlank(val)) return null;
+        if (val.toLowerCase().startsWith("mailto:")) {
+            return val.substring(7).trim();
+        }
+        int mailtoIdx = val.toLowerCase().indexOf("mailto:");
+        if (mailtoIdx >= 0) {
+            return val.substring(mailtoIdx + 7).trim();
+        }
+        if (val.contains("@")) {
+            return val.trim();
+        }
+        return null;
+    }
+
+    private static String unescapeIcsValue(String text) {
+        if (text == null) return "";
+        StringBuilder sb = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '\\' && i + 1 < text.length()) {
+                char next = text.charAt(i + 1);
+                if (next == 'n' || next == 'N') {
+                    sb.append('\n');
+                    i++;
+                } else if (next == ',' || next == ';' || next == '\\') {
+                    sb.append(next);
+                    i++;
+                } else {
+                    sb.append(c);
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString().trim();
+    }
+
+    private String resolveCalendarDisplayName(UserYandexConfiguration config, String calendarPath) {
+        if (calendarPath == null) return "Календарь";
+        if (calendarPath.equalsIgnoreCase(config.getClientInterviewCalendarPath())) {
+            return StringUtils.defaultIfBlank(config.getClientInterviewCalendarName(), UserYandexConfiguration.DEFAULT_CLIENT_CALENDAR_NAME);
+        }
+        if (calendarPath.equalsIgnoreCase(config.getPersonalCalendarPath())) {
+            return StringUtils.defaultIfBlank(config.getPersonalCalendarName(), DEFAULT_PERSONAL_CALENDAR_NAME);
+        }
+        return "Яндекс-Календарь";
+    }
+
     // --- Внутренние вспомогательные методы ---
 
     private String resolveToken(UserYandexConfiguration config) {
@@ -566,7 +929,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             }
         }
 
-        if (body != null && ("POST".equals(method) || "PUT".equals(method) || "PROPFIND".equals(method))) {
+        if (body != null && ("POST".equals(method) || "PUT".equals(method) || "PROPFIND".equals(method) || "REPORT".equals(method))) {
             conn.setDoOutput(true);
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(body.getBytes(StandardCharsets.UTF_8));
