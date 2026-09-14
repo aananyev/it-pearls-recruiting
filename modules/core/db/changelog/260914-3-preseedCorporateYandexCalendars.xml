@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Pre-seed корпоративных календарей для PostgreSQL -->
+    <changeSet id="260914-3-preseedCorporateYandexCalendars-pg" author="hunttech" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_CORP_YANDEX_CAL"/>
+        </preConditions>
+        <sqlFile dbms="postgresql"
+                 encoding="UTF-8"
+                 endDelimiter=";"
+                 path="com/company/hunttech/db/update/postgres/26/260914-3-preseedCorporateYandexCalendars.sql"
+                 relativeToChangelogFile="false"
+                 splitStatements="true"
+                 stripComments="false"/>
+        <rollback>
+            DELETE FROM HUNTTECH_CORP_YANDEX_CAL WHERE ID IN (
+                '26091400-0000-4000-a000-000000000001'::uuid,
+                '26091400-0000-4000-a000-000000000002'::uuid
+            );
+        </rollback>
+    </changeSet>
+
+    <!-- Pre-seed корпоративных календарей для HSQLDB (тестовая база) -->
+    <changeSet id="260914-3-preseedCorporateYandexCalendars-hsql" author="hunttech" dbms="hsqldb">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_CORP_YANDEX_CAL"/>
+        </preConditions>
+        <sqlFile dbms="hsqldb"
+                 encoding="UTF-8"
+                 endDelimiter=";"
+                 path="com/company/hunttech/db/update/hsql/26/260914-3-preseedCorporateYandexCalendars.sql"
+                 relativeToChangelogFile="false"
+                 splitStatements="true"
+                 stripComments="false"/>
+        <rollback>
+            DELETE FROM HUNTTECH_CORP_YANDEX_CAL WHERE ID IN (
+                '26091400-0000-4000-a000-000000000001',
+                '26091400-0000-4000-a000-000000000002'
+            );
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

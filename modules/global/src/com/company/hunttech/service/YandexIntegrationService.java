@@ -58,6 +58,15 @@ public interface YandexIntegrationService {
     UserYandexConfiguration saveConfiguration(UserYandexConfiguration config, String plainOauthToken, String plainRefreshToken);
 
     /**
+     * Шифрование OAuth токена через AiSecretService без сохранения в БД.
+     *
+     * @param plainOauthToken открытый OAuth токен (если null или пустой, возвращается null)
+     * @return зашифрованная строка токена для безопасного сохранения в БД
+     * @throws RuntimeException при возникновении ошибки алгоритма шифрования
+     */
+    String encryptOauthToken(String plainOauthToken);
+
+    /**
      * Получить список всех доступных пользователю календарей (персональный + активные корпоративные)
      * с расчетом календаря по умолчанию по строгому приоритету:
      * 1) персональный календарь пользователя (если настроен и задан как default);

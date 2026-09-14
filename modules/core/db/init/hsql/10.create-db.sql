@@ -562,3 +562,27 @@ create table HUNTTECH_OPEN_POSITION_RECRUTIES_TASKS_LINK (
     primary key (OPEN_POSITION_ID, RECRUTIES_TASKS_ID)
 )^
 -- end HUNTTECH_OPEN_POSITION_RECRUTIES_TASKS_LINK
+-- begin HUNTTECH_CORP_YANDEX_CAL
+create table HUNTTECH_CORP_YANDEX_CAL (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME varchar(255) not null,
+    CALENDAR_PATH varchar(512) not null,
+    ACCOUNT_EMAIL varchar(255),
+    CALENDAR_BASE_URL varchar(512) default 'https://caldav.yandex.ru',
+    IS_DEFAULT boolean default false,
+    ACTIVE boolean default true,
+    DESCRIPTION varchar(1024),
+    OAUTH_TOKEN_ENCRYPTED varchar(4096),
+    --
+    primary key (ID)
+)^
+-- end HUNTTECH_CORP_YANDEX_CAL
+

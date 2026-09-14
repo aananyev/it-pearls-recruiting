@@ -91,6 +91,14 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
     }
 
     @Override
+    public String encryptOauthToken(String plainOauthToken) {
+        if (StringUtils.isBlank(plainOauthToken)) {
+            return null;
+        }
+        return aiSecretService.encrypt(plainOauthToken.trim());
+    }
+
+    @Override
     public YandexDiagnosticResult testConnection(UUID userId, String serviceType) {
         UserYandexConfiguration config = getOrCreateConfiguration(userId);
         String token = resolveToken(config);
@@ -180,6 +188,36 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
     public YandexMeetingResult scheduleCalendarEvent(UUID userId, YandexMeetingRequest request) {
         UserYandexConfiguration config = getOrCreateConfiguration(userId);
         String token = resolveToken(config);
+        String effectiveAccountEmail = null;
+        CorporateYandexCalendar matchingCorpCal = null;
+
+        String customPath = request.getCustomCalendarPath();
+        if (StringUtils.isNotBlank(customPath)) {
+            matchingCorpCal = resolveCorporateCalendarForPath(customPath);
+        } else if (request.getCalendarType() == YandexCalendarType.CLIENT_INTERVIEW && StringUtils.isBlank(config.getClientInterviewCalendarPath())) {
+            // Для собеседований с заказчиками при отсутствии личного пути разрешаем дефолтный корпоративный календарь
+            matchingCorpCal = resolveCorporateCalendarForPath(null);
+        }
+
+        // Если календарь корпоративный — используем его токен и учетные данные
+        if (matchingCorpCal != null) {
+            if (StringUtils.isNotBlank(matchingCorpCal.getOauthTokenEncrypted())) {
+                try {
+                    token = aiSecretService.decrypt(matchingCorpCal.getOauthTokenEncrypted());
+                    effectiveAccountEmail = StringUtils.trimToNull(matchingCorpCal.getAccountEmail());
+                    if (StringUtils.isBlank(effectiveAccountEmail)) {
+                        effectiveAccountEmail = fetchAccountEmailForToken(token);
+                    }
+                } catch (Exception e) {
+                    log.error("Не удалось расшифровать токен корпоративного календаря {}: {}", matchingCorpCal.getName(), e.getMessage(), e);
+                    return YandexMeetingResult.error("Не удалось расшифровать ключ корпоративного календаря '" + matchingCorpCal.getName() + "': " + e.getMessage());
+                }
+            } else if (StringUtils.isNotBlank(token)) {
+                log.warn("У корпоративного календаря '{}' нет собственного токена, используется токен пользователя", matchingCorpCal.getName());
+            } else {
+                return YandexMeetingResult.error("OAuth токен для корпоративного календаря '" + matchingCorpCal.getName() + "' не настроен");
+            }
+        }
         if (StringUtils.isBlank(token)) {
             return YandexMeetingResult.error("OAuth токен Яндекс не настроен");
         }
@@ -201,10 +239,15 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             }
 
             // 2. Определяем целевой календарь
-            String targetCalendarPath = resolveTargetCalendarPath(config, token, request.getCalendarType(), request.getCustomCalendarPath());
+            String targetCalendarPath = matchingCorpCal != null
+                    ? matchingCorpCal.getCalendarPath()
+                    : resolveTargetCalendarPath(config, token, request.getCalendarType(), request.getCustomCalendarPath());
             String calendarDisplayName = request.getCalendarType() == YandexCalendarType.CLIENT_INTERVIEW
                     ? config.getClientInterviewCalendarName()
                     : StringUtils.defaultIfBlank(config.getPersonalCalendarName(), DEFAULT_PERSONAL_CALENDAR_NAME);
+            if (matchingCorpCal != null) {
+                calendarDisplayName = matchingCorpCal.getName();
+            }
 
             // 3. Формируем UID и iCalendar
             String eventUid = StringUtils.isNotBlank(request.getEventUid())
@@ -213,10 +256,10 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             String timeZone = StringUtils.defaultIfBlank(request.getTimeZone(),
                     StringUtils.defaultIfBlank(config.getDefaultTimeZone(), DEFAULT_TIME_ZONE_SARATOV));
 
-            String icsBody = buildIcsContent(eventUid, request, config, telemostJoinUrl, timeZone);
+            String icsBody = buildIcsContent(eventUid, request, config, effectiveAccountEmail, telemostJoinUrl, timeZone);
 
             // 4. Запись события в CalDAV через PUT
-            String baseUrl = StringUtils.defaultIfBlank(config.getCalendarBaseUrl(), UserYandexConfiguration.DEFAULT_CALENDAR_BASE_URL);
+            String baseUrl = resolveBaseUrl(matchingCorpCal, config);
             String eventUrl = normalizeUrl(baseUrl, targetCalendarPath) + "/" + eventUid + ".ics";
 
             log.info("Отправка CalDAV PUT: eventUrl={}", eventUrl);
@@ -232,15 +275,23 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             }
 
             if (!invited.isEmpty()) {
-                String account = resolveAccountEmail(config, token);
-                String outboxUrl = normalizeUrl(baseUrl, "/calendars/" + URLEncoder.encode(account, StandardCharsets.UTF_8.name()) + "/outbox/");
-                Map<String, String> outboxHeaders = new HashMap<>();
-                outboxHeaders.put("Origin", "https://calendar.yandex.ru");
-                try {
-                    HttpResult outboxResult = sendHttp("POST", outboxUrl, token, icsBody, "text/calendar; charset=utf-8", outboxHeaders);
-                    log.info("CalDAV outbox результат: HTTP {}", outboxResult.statusCode);
-                } catch (Exception ex) {
-                    log.warn("Ошибка отправки инвайтов в outbox: {}", ex.getMessage());
+                String account = StringUtils.isNotBlank(effectiveAccountEmail)
+                        ? effectiveAccountEmail
+                        : (matchingCorpCal != null
+                                ? resolveCorporateAccountEmail(matchingCorpCal, token)
+                                : resolveAccountEmail(config, token));
+                if (StringUtils.isNotBlank(account) && !"user@yandex.ru".equalsIgnoreCase(account)) {
+                    String outboxUrl = normalizeUrl(baseUrl, "/calendars/" + URLEncoder.encode(account, StandardCharsets.UTF_8.name()) + "/outbox/");
+                    Map<String, String> outboxHeaders = new HashMap<>();
+                    outboxHeaders.put("Origin", "https://calendar.yandex.ru");
+                    try {
+                        HttpResult outboxResult = sendHttp("POST", outboxUrl, token, icsBody, "text/calendar; charset=utf-8", outboxHeaders);
+                        log.info("CalDAV outbox результат: HTTP {}", outboxResult.statusCode);
+                    } catch (Exception ex) {
+                        log.warn("Ошибка отправки инвайтов в outbox: {}", ex.getMessage());
+                    }
+                } else {
+                    log.warn("Email учетной записи не определен, пропуск отправки через CalDAV outbox");
                 }
             }
 
@@ -269,13 +320,25 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
 
     @Override
     public boolean cancelCalendarEvent(UUID userId, String calendarPath, String eventUid) {
+        if (StringUtils.isBlank(calendarPath) || StringUtils.isBlank(eventUid)) {
+            return false;
+        }
         UserYandexConfiguration config = getOrCreateConfiguration(userId);
         String token = resolveToken(config);
-        if (StringUtils.isBlank(token) || StringUtils.isBlank(calendarPath) || StringUtils.isBlank(eventUid)) {
+        CorporateYandexCalendar matchingCorpCal = resolveCorporateCalendarForPath(calendarPath);
+        if (matchingCorpCal != null && StringUtils.isNotBlank(matchingCorpCal.getOauthTokenEncrypted())) {
+            try {
+                token = aiSecretService.decrypt(matchingCorpCal.getOauthTokenEncrypted());
+            } catch (Exception e) {
+                log.error("Не удалось расшифровать токен корпоративного календаря {}: {}", matchingCorpCal.getName(), e.getMessage(), e);
+                return false;
+            }
+        }
+        if (StringUtils.isBlank(token)) {
             return false;
         }
         try {
-            String baseUrl = StringUtils.defaultIfBlank(config.getCalendarBaseUrl(), UserYandexConfiguration.DEFAULT_CALENDAR_BASE_URL);
+            String baseUrl = resolveBaseUrl(matchingCorpCal, config);
             String eventUrl = normalizeUrl(baseUrl, calendarPath) + "/" + eventUid + ".ics";
             HttpResult res = sendHttp("DELETE", eventUrl, token, null, null, null);
             return res.statusCode == 200 || res.statusCode == 204;
@@ -283,6 +346,15 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             log.error("Ошибка удаления события {}: {}", eventUid, ex.getMessage(), ex);
             return false;
         }
+    }
+
+    private String resolveBaseUrl(CorporateYandexCalendar corpCal, UserYandexConfiguration config) {
+        if (corpCal != null && StringUtils.isNotBlank(corpCal.getCalendarBaseUrl())) {
+            return corpCal.getCalendarBaseUrl().trim();
+        }
+        return config != null && StringUtils.isNotBlank(config.getCalendarBaseUrl())
+                ? config.getCalendarBaseUrl().trim()
+                : UserYandexConfiguration.DEFAULT_CALENDAR_BASE_URL;
     }
 
     @Override
@@ -662,21 +734,47 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         }
     }
 
-    private String resolveAccountEmail(UserYandexConfiguration config, String token) {
-        if (StringUtils.isNotBlank(config.getAccountEmail())) {
-            return config.getAccountEmail().trim();
+    private String fetchAccountEmailForToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            return null;
         }
         try {
             HttpResult res = sendHttp("GET", "https://login.yandex.ru/info?format=json", token, null, "application/json", null);
             if (res.statusCode == 200) {
                 JSONObject json = new JSONObject(res.body);
-                String email = json.optString("default_email", json.optString("login", "user"));
-                config.setAccountEmail(email);
-                dataManager.commit(config);
-                return email;
+                String email = json.optString("default_email", json.optString("login", null));
+                if (StringUtils.isNotBlank(email)) {
+                    return email.trim();
+                }
             }
         } catch (Exception ignored) {}
-        return "user@yandex.ru";
+        return null;
+    }
+
+    private String resolveCorporateAccountEmail(CorporateYandexCalendar corpCal, String token) {
+        if (corpCal != null && StringUtils.isNotBlank(corpCal.getAccountEmail())) {
+            return corpCal.getAccountEmail().trim();
+        }
+        String fetched = fetchAccountEmailForToken(token);
+        if (corpCal != null && StringUtils.isNotBlank(fetched)) {
+            corpCal.setAccountEmail(fetched);
+            dataManager.commit(corpCal);
+            return fetched;
+        }
+        return StringUtils.isNotBlank(fetched) ? fetched : "user@yandex.ru";
+    }
+
+    private String resolveAccountEmail(UserYandexConfiguration config, String token) {
+        if (config != null && StringUtils.isNotBlank(config.getAccountEmail())) {
+            return config.getAccountEmail().trim();
+        }
+        String fetched = fetchAccountEmailForToken(token);
+        if (config != null && StringUtils.isNotBlank(fetched)) {
+            config.setAccountEmail(fetched);
+            dataManager.commit(config);
+            return fetched;
+        }
+        return StringUtils.isNotBlank(fetched) ? fetched : "user@yandex.ru";
     }
 
     private List<YandexCalendarInfoDto> discoverCalendarsInternal(UserYandexConfiguration config, String token) {
@@ -809,7 +907,26 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         }
     }
 
-    private String buildIcsContent(String uid, YandexMeetingRequest req, UserYandexConfiguration config, String telemostUrl, String timeZone) {
+    private CorporateYandexCalendar resolveCorporateCalendarForPath(String calendarPath) {
+        if (StringUtils.isNotBlank(calendarPath)) {
+            List<CorporateYandexCalendar> list = dataManager.load(CorporateYandexCalendar.class)
+                    .query("select e from hunttech_CorporateYandexCalendar e where e.calendarPath = :path and e.active = true")
+                    .parameter("path", calendarPath.trim())
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) {
+                return list.get(0);
+            }
+            return null;
+        }
+        List<CorporateYandexCalendar> defaultList = dataManager.load(CorporateYandexCalendar.class)
+                .query("select e from hunttech_CorporateYandexCalendar e where e.isDefault = true and e.active = true")
+                .maxResults(1)
+                .list();
+        return defaultList.isEmpty() ? null : defaultList.get(0);
+    }
+
+    private String buildIcsContent(String uid, YandexMeetingRequest req, UserYandexConfiguration config, String effectiveAccountEmail, String telemostUrl, String timeZone) {
         SimpleDateFormat utcFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -820,7 +937,9 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         String startStr = localFormat.format(req.getStartTime() != null ? req.getStartTime() : new Date());
         String endStr = localFormat.format(req.getEndTime() != null ? req.getEndTime() : new Date(System.currentTimeMillis() + 3600000));
 
-        String organizerEmail = resolveAccountEmail(config, "");
+        String organizerEmail = StringUtils.isNotBlank(effectiveAccountEmail)
+                ? effectiveAccountEmail
+                : resolveAccountEmail(config, "");
         String candidateFio = StringUtils.defaultIfBlank(req.getCandidateName(), "Кандидат");
         String title = StringUtils.defaultIfBlank(req.getTitle(), "Собеседование: " + candidateFio);
 

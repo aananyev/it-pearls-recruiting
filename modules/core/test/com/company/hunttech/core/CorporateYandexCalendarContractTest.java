@@ -228,4 +228,46 @@ public class CorporateYandexCalendarContractTest {
         // 3. Первый попавшийся
         return list.get(0).getPath();
     }
+
+    @Test
+    public void testPreseedChangelogRegistration() throws Exception {
+        File changelog = resolveFile("modules/core/db/changelog/260914-3-preseedCorporateYandexCalendars.xml");
+        assertTrue("Файл миграции 260914-3-preseedCorporateYandexCalendars.xml должен существовать", changelog.exists());
+
+        String content = readProjectFile("modules/core/db/changelog/260914-3-preseedCorporateYandexCalendars.xml");
+        assertTrue("Changelog должен ссылаться на 260914-3-preseedCorporateYandexCalendars.sql",
+                content.contains("260914-3-preseedCorporateYandexCalendars.sql"));
+
+        String sqlContent = readProjectFile("modules/core/db/update/postgres/26/260914-3-preseedCorporateYandexCalendars.sql");
+        assertTrue("Должен содержать календарь 'Hunttech у заказчика'", sqlContent.contains("Hunttech у заказчика"));
+        assertTrue("Должен содержать путь /calendars/alan%40hunttech.ru/events-34179601/", sqlContent.contains("/calendars/alan%40hunttech.ru/events-34179601/"));
+        assertTrue("Должен содержать календарь 'Мои события (alan@hunttech.ru)'", sqlContent.contains("Мои события (alan@hunttech.ru)"));
+        assertTrue("Должен содержать путь /calendars/alan%40hunttech.ru/events-32367521/", sqlContent.contains("/calendars/alan%40hunttech.ru/events-32367521/"));
+        assertTrue("Должен копировать зашифрованный токен пользователя alan", sqlContent.contains("lower(u.LOGIN) = 'alan'"));
+        assertTrue("Должен проверять soft delete пользователя и конфига", sqlContent.contains("c.DELETE_TS IS NULL AND u.DELETE_TS IS NULL"));
+
+        String master = readProjectFile("modules/core/db/changelog/db.changelog-master.xml");
+        assertTrue("db.changelog-master.xml должен содержать 260914-3-preseedCorporateYandexCalendars.xml",
+                master.contains("260914-3-preseedCorporateYandexCalendars.xml"));
+    }
+
+    @Test
+    public void testCorporateCalendarEditDescriptorContainsAuthCard() throws Exception {
+        String editXml = readProjectFile("modules/web/src/com/company/hunttech/web/screens/corporateyandexcalendar/corporate-yandex-calendar-edit.xml");
+        assertTrue("Дескриптор должен содержать карточку авторизации authCard", editXml.contains("id=\"authCard\""));
+        assertTrue("Дескриптор должен содержать поле oauthTokenField", editXml.contains("id=\"oauthTokenField\""));
+        assertTrue("Дескриптор должен содержать метку tokenStatusLabel", editXml.contains("id=\"tokenStatusLabel\""));
+    }
+
+    @Test
+    public void testProdMigrationPlanDocument() throws Exception {
+        File planDoc = resolveFile("docs/database/migrations/prod-migration-plan-yandex-calendars-2026-09-14.md");
+        assertTrue("Документ плана миграции для Production должен существовать", planDoc.exists());
+
+        String planContent = readProjectFile("docs/database/migrations/prod-migration-plan-yandex-calendars-2026-09-14.md");
+        assertTrue("План миграции должен содержать мандаторный раздел бэкапа pg_dump", planContent.contains("pg_dump -Fc hunttech"));
+        assertTrue("План миграции должен содержать создание HUNTTECH_CORP_YANDEX_CAL", planContent.contains("HUNTTECH_CORP_YANDEX_CAL"));
+        assertTrue("План миграции должен содержать проверку post-migration verification", planContent.contains("Post-Migration Verification"));
+        assertTrue("План миграции должен содержать план отката Rollback", planContent.contains("Rollback Plan"));
+    }
 }

@@ -11,6 +11,10 @@ import com.haulmont.cuba.gui.screen.*;
 import javax.inject.Inject;
 import java.util.List;
 
+import com.company.hunttech.service.YandexIntegrationService;
+import com.haulmont.cuba.gui.components.PasswordField;
+import org.apache.commons.lang3.StringUtils;
+
 @UiController("hunttech_CorporateYandexCalendar.edit")
 @UiDescriptor("corporate-yandex-calendar-edit.xml")
 @EditedEntityContainer("corporateCalendarDc")
@@ -22,6 +26,10 @@ public class CorporateYandexCalendarEdit extends StandardEditor<CorporateYandexC
     @Inject
     private Label<String> sidebarDefaultVal;
     @Inject
+    private Label<String> tokenStatusLabel;
+    @Inject
+    private PasswordField oauthTokenField;
+    @Inject
     private CheckBox activeField;
     @Inject
     private CheckBox isDefaultField;
@@ -29,9 +37,32 @@ public class CorporateYandexCalendarEdit extends StandardEditor<CorporateYandexC
     private Messages messages;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private YandexIntegrationService yandexIntegrationService;
+    @Inject
+    private com.haulmont.cuba.gui.Notifications notifications;
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        String plainToken = oauthTokenField != null ? oauthTokenField.getValue() : null;
+        if (StringUtils.isNotBlank(plainToken) && yandexIntegrationService != null) {
+            try {
+                String encrypted = yandexIntegrationService.encryptOauthToken(plainToken);
+                getEditedEntity().setOauthTokenEncrypted(encrypted);
+                oauthTokenField.setValue(null);
+                updateTokenStatus();
+            } catch (Exception e) {
+                if (notifications != null) {
+                    notifications.create(com.haulmont.cuba.gui.Notifications.NotificationType.ERROR)
+                            .withCaption(messages.getMessage(getClass(), "msgTokenEncryptError"))
+                            .withDescription(e.getMessage())
+                            .show();
+                }
+                event.preventCommit();
+                return;
+            }
+        }
+
         if (Boolean.TRUE.equals(getEditedEntity().getIsDefault())) {
             List<CorporateYandexCalendar> otherDefaults = dataManager.load(CorporateYandexCalendar.class)
                     .query("select e from hunttech_CorporateYandexCalendar e where e.isDefault = true and e.id <> :id")
@@ -47,6 +78,15 @@ public class CorporateYandexCalendarEdit extends StandardEditor<CorporateYandexC
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         updateSidebarSummary();
+        updateTokenStatus();
+    }
+
+    private void updateTokenStatus() {
+        if (tokenStatusLabel != null) {
+            boolean hasToken = StringUtils.isNotBlank(getEditedEntity().getOauthTokenEncrypted());
+            tokenStatusLabel.setValue(hasToken ? messages.getMessage(getClass(), "msgTokenSaved") : messages.getMessage(getClass(), "msgTokenNotSet"));
+            tokenStatusLabel.setStyleName(hasToken ? "bold friendly" : "bold edit-help");
+        }
     }
 
     @Subscribe("activeField")

@@ -247,5 +247,7 @@
              relativeToChangelogFile="true"/>
     <include file="260914-2-addCorporateYandexCalendarAndInteractionEventColumns.xml"
              relativeToChangelogFile="true"/>
+    <include file="260914-3-preseedCorporateYandexCalendars.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

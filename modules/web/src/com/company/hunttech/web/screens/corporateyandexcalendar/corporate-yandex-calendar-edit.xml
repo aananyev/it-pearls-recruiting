@@ -109,6 +109,23 @@
                                        stylename="edit-form-control"/>
                         </groupBox>
 
+                        <!-- Авторизация и защищенный доступ -->
+                        <groupBox id="authCard" caption="msg://msgAuthCard" stylename="edit-card" spacing="true" width="100%" showAsPanel="true">
+                            <hbox spacing="true" width="100%" stylename="edit-field-row edit-row-half">
+                                <passwordField id="oauthTokenField"
+                                               caption="msg://msgOauthToken"
+                                               description="msg://msgOauthTokenHint"
+                                               width="100%"
+                                               box.expandRatio="1"
+                                               stylename="edit-form-control"/>
+                                <label id="tokenStatusLabel"
+                                       width="100%"
+                                       box.expandRatio="1"
+                                       align="MIDDLE_LEFT"
+                                       stylename="bold edit-help"/>
+                            </hbox>
+                        </groupBox>
+
                         <!-- Настройки поведения и доступности -->
                         <groupBox id="settingsCard" caption="msg://msgSettingsAndAvailability" stylename="edit-card" spacing="true" width="100%" showAsPanel="true">
                             <hbox spacing="true" width="100%">
