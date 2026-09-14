@@ -761,8 +761,8 @@ stop_remote_tomcat() {
 }
 
 clear_remote_tomcat_cache() {
-    info_n "Очистка распакованных каталогов CUBA ... "
-    local dirs rm_cmd="true"
+    info_n "Очистка распакованных каталогов CUBA и кэшей ... "
+    local dirs rm_cmd="rm -rf /var/lib/tomcat9/work/Catalina/localhost/* /var/lib/tomcat9/temp/*"
     for d in $TOMCAT_UNPACK_DIRS; do
         rm_cmd="${rm_cmd} && rm -rf '${TOMCAT_WARS_DIR}/${d}'"
     done
@@ -802,6 +802,7 @@ upload_and_deploy_wars() {
         fi
     done
 
+    ssh_cmd "chown tomcat:tomcat '${TOMCAT_WARS_DIR}'/*.war 2>/dev/null && chmod 644 '${TOMCAT_WARS_DIR}'/*.war 2>/dev/null" >>"$LOG" 2>&1 || true
     ok
     log_action "SUCCESS" "WAR загружены в ${TOMCAT_WARS_DIR}"
 }
