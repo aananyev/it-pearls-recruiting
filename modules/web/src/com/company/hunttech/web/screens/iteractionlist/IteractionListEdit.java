@@ -19,6 +19,9 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import com.company.hunttech.dto.yandex.YandexCalendarInfoDto;
+import com.company.hunttech.dto.yandex.YandexMeetingResult;
+import com.company.hunttech.service.YandexIntegrationService;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -152,6 +155,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> closingDateVacancyLabel;
     @Inject
     private InteractionService interactionService;
+    @Inject
+    private YandexIntegrationService yandexIntegrationService;
+    @Inject
+    private CheckBox addToCalendarCheckBox;
+    @Inject
+    private LookupField<String> calendarLookupField;
+    @Inject
+    private VBoxLayout calendarBox;
+
+    private String defaultCalendarPath;
+    private boolean calendarsLoaded = false;
+    private boolean calendarInitSuccess = false;
 
     private static final int POPULAR_INTERACTION_BUTTONS = 5;
     private static final String EMPTY_POPULAR_CAPTION = "Нет данных";
@@ -307,6 +322,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 buttonCallAction.setVisible(false);
             }
         }
+        updateCalendarVisibility();
     }
 
     private void vacancyFieldValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
@@ -816,6 +832,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onAfterCommitChanges1(AfterCommitChangesEvent event) {
+        syncCalendarEventAfterCommit();
         if (deleteTwiceEvent) {
             setSubscribe();
             openPositionService.setOpenPositionNewsAutomatedMessage(vacancyFiels.getValue(),
@@ -1164,6 +1181,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             recrutierField.setValue((ExtUser) userSession.getUser());
         }
         loadCommentIfNeeded();
+        updateCalendarVisibility();
     }
 
     private void loadCommentIfNeeded() {
@@ -1366,7 +1384,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         addDate.setVisible(false);
         addString.setVisible(false);
         addInteger.setVisible(false);
-        addDate.setVisible(false);
+        updateCalendarVisibility();
 
         askFlag = false;
         askFlag2 = false;
@@ -1905,6 +1923,123 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         } else {
             return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+    }
+
+    private void initCalendarControls() {
+        try {
+            UUID currentUserId = userSession.getUser() != null ? userSession.getUser().getId() : null;
+            List<YandexCalendarInfoDto> availableCalendars = yandexIntegrationService.getAvailableCalendars(currentUserId);
+            Map<String, String> optionsMap = new LinkedHashMap<>();
+            defaultCalendarPath = null;
+
+            for (YandexCalendarInfoDto cal : availableCalendars) {
+                optionsMap.put(cal.getDisplayName(), cal.getPath());
+                if (cal.isDefault() && defaultCalendarPath == null) {
+                    defaultCalendarPath = cal.getPath();
+                }
+            }
+            if (defaultCalendarPath == null && !availableCalendars.isEmpty()) {
+                defaultCalendarPath = availableCalendars.get(0).getPath();
+            }
+
+            calendarLookupField.setOptionsMap(optionsMap);
+
+            if (availableCalendars.isEmpty()) {
+                addToCalendarCheckBox.setValue(false);
+                addToCalendarCheckBox.setEnabled(false);
+                addToCalendarCheckBox.setDescription(messageBundle.getMessage("msgNoCalendarsAvailable"));
+                calendarLookupField.setEnabled(false);
+                calendarInitSuccess = false;
+            } else {
+                calendarInitSuccess = true;
+                IteractionList entity = getEditedEntity();
+                if (entity.getAddToCalendar() == null) {
+                    addToCalendarCheckBox.setValue(true);
+                    calendarLookupField.setValue(defaultCalendarPath);
+                } else {
+                    addToCalendarCheckBox.setValue(entity.getAddToCalendar());
+                    if (entity.getCalendarId() != null) {
+                        calendarLookupField.setValue(entity.getCalendarId());
+                    } else if (Boolean.TRUE.equals(entity.getAddToCalendar())) {
+                        calendarLookupField.setValue(defaultCalendarPath);
+                    }
+                }
+                calendarLookupField.setEnabled(Boolean.TRUE.equals(addToCalendarCheckBox.getValue()));
+            }
+            calendarsLoaded = true;
+        } catch (Exception e) {
+            log.error("Ошибка инициализации контролов Яндекс Календаря: {}", e.getMessage(), e);
+            calendarsLoaded = true;
+            calendarInitSuccess = false;
+            addToCalendarCheckBox.setValue(false);
+            addToCalendarCheckBox.setEnabled(false);
+            calendarLookupField.setEnabled(false);
+            if (calendarBox != null) {
+                calendarBox.setVisible(false);
+            }
+        }
+    }
+
+    private void updateCalendarVisibility() {
+        if (calendarBox != null && addDate != null) {
+            boolean visible = addDate.isVisible();
+            if (visible && !calendarsLoaded) {
+                initCalendarControls();
+            }
+            calendarBox.setVisible(visible && calendarInitSuccess);
+        }
+    }
+
+    @Subscribe("addToCalendarCheckBox")
+    public void onAddToCalendarCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        boolean isChecked = Boolean.TRUE.equals(event.getValue());
+        calendarLookupField.setEnabled(isChecked);
+        if (isChecked && calendarLookupField.getValue() == null && defaultCalendarPath != null) {
+            calendarLookupField.setValue(defaultCalendarPath);
+        }
+    }
+
+    private void syncCalendarEventAfterCommit() {
+        try {
+            boolean isCalendarScenario = addDate != null && addDate.isVisible();
+            if (!isCalendarScenario) {
+                return;
+            }
+
+            boolean shouldSync = Boolean.TRUE.equals(addToCalendarCheckBox.getValue())
+                    && addDate.getValue() != null;
+
+            String selectedCalendar = calendarLookupField.getValue();
+            String userTz = userSession.getTimeZone() != null ? userSession.getTimeZone().getID() : null;
+            UUID userId = userSession.getUser() != null ? userSession.getUser().getId() : null;
+
+            YandexMeetingResult result = yandexIntegrationService.syncInteractionCalendarEvent(
+                    userId,
+                    getEditedEntity().getId(),
+                    shouldSync,
+                    selectedCalendar,
+                    userTz
+            );
+
+            if (result.isSuccess()) {
+                if (result.getEventUid() != null) {
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messageBundle.getMessage("msgCalendarSyncSuccess"))
+                            .show();
+                }
+            } else if (shouldSync) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(messageBundle.getMessage("msgCalendarSyncError"))
+                        .show();
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при синхронизации события в Яндекс Календарь: {}", e.getMessage(), e);
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgCalendarSyncError"))
+                    .show();
         }
     }
 }

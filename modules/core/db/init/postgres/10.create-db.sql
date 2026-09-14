@@ -105,6 +105,10 @@ create table HUNTTECH_ITERACTION_LIST (
     CURRENT_PRIORITY integer,
     CURRENT_OPEN_CLOSE boolean,
     CHAIN_INTERACTION_ID uuid,
+    CALENDAR_EVENT_ID varchar(255),
+    CALENDAR_ID varchar(512),
+    CALENDAR_SYNC_STATE varchar(50),
+    ADD_TO_CALENDAR boolean default false,
     --
     primary key (ID)
 )^
@@ -1340,3 +1344,27 @@ create table HUNTTECH_VACANCY_PROMPT_TEMPLATE (
     primary key (ID)
 )^
 -- end HUNTTECH_VACANCY_PROMPT_TEMPLATE
+-- begin HUNTTECH_CORP_YANDEX_CAL
+create table HUNTTECH_CORP_YANDEX_CAL (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME varchar(255) not null,
+    CALENDAR_PATH varchar(512) not null,
+    ACCOUNT_EMAIL varchar(255),
+    CALENDAR_BASE_URL varchar(512) default 'https://caldav.yandex.ru',
+    IS_DEFAULT boolean default false,
+    ACTIVE boolean default true,
+    DESCRIPTION varchar(1024),
+    OAUTH_TOKEN_ENCRYPTED varchar(4096),
+    --
+    primary key (ID)
+)^
+-- end HUNTTECH_CORP_YANDEX_CAL
+

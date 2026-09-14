@@ -62,6 +62,7 @@
         <class>com.company.hunttech.entity.ApplicationSetup</class>
         <class>com.company.hunttech.entity.UserAiConfiguration</class>
         <class>com.company.hunttech.entity.UserYandexConfiguration</class>
+        <class>com.company.hunttech.entity.CorporateYandexCalendar</class>
         <class>com.company.hunttech.entity.VacancyPromptTemplate</class>
         <class>com.company.hunttech.entity.UserAiProfile</class>
         <class>com.company.hunttech.entity.ai.AdminAiConfiguration</class>

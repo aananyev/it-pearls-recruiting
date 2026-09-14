@@ -2,6 +2,8 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.dto.yandex.*;
+import com.company.hunttech.entity.CorporateYandexCalendar;
+import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.UserYandexConfiguration;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
@@ -205,7 +207,9 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                     : StringUtils.defaultIfBlank(config.getPersonalCalendarName(), DEFAULT_PERSONAL_CALENDAR_NAME);
 
             // 3. Формируем UID и iCalendar
-            String eventUid = UUID.randomUUID().toString();
+            String eventUid = StringUtils.isNotBlank(request.getEventUid())
+                    ? request.getEventUid().trim()
+                    : UUID.randomUUID().toString();
             String timeZone = StringUtils.defaultIfBlank(request.getTimeZone(),
                     StringUtils.defaultIfBlank(config.getDefaultTimeZone(), DEFAULT_TIME_ZONE_SARATOV));
 
@@ -951,6 +955,233 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             }
         }
         return new HttpResult(code, responseBody);
+    }
+
+    @Override
+    public List<YandexCalendarInfoDto> getAvailableCalendars(UUID userId) {
+        if (userId == null) {
+            userId = userSessionSource.getUserSession().getUser().getId();
+        }
+
+        List<YandexCalendarInfoDto> result = new ArrayList<>();
+        UserYandexConfiguration userConfig = getOrCreateConfiguration(userId);
+
+        // 1. Личный календарь пользователя
+        boolean hasPersonalDefault = false;
+        String personalPath = userConfig.getPersonalCalendarPath();
+        String personalName = StringUtils.defaultIfBlank(userConfig.getPersonalCalendarName(), "Личный календарь");
+        String resolvedToken = resolveToken(userConfig);
+        if (StringUtils.isNotBlank(personalPath) || Boolean.TRUE.equals(userConfig.getCalendarConnected()) || StringUtils.isNotBlank(resolvedToken)) {
+            String path = StringUtils.isNotBlank(personalPath) ? personalPath : "/calendars/" + resolveAccountEmail(userConfig, resolvedToken) + "/events/";
+            hasPersonalDefault = StringUtils.isNotBlank(personalPath);
+            result.add(new YandexCalendarInfoDto("personal", personalName, path, hasPersonalDefault, false, true));
+        }
+
+        // 2. Активные корпоративные календари
+        List<CorporateYandexCalendar> corpList = dataManager.load(CorporateYandexCalendar.class)
+                .query("select e from hunttech_CorporateYandexCalendar e where e.active = true order by e.isDefault desc, e.name asc")
+                .view("corporateYandexCalendar-view")
+                .list();
+
+        for (CorporateYandexCalendar c : corpList) {
+            String name = c.getName() + " (Корпоративный)";
+            result.add(new YandexCalendarInfoDto(c.getId().toString(), name, c.getCalendarPath(), Boolean.TRUE.equals(c.getIsDefault()), false, false));
+        }
+
+        if (result.isEmpty()) {
+            return result;
+        }
+
+        // 3. Вычисление календаря по умолчанию по строгому приоритету:
+        // 1) персональный календарь, если он явно настроен как default (personalCalendarPath не пустой)
+        // 2) иначе корпоративный календарь с isDefault = true
+        // 3) иначе первый доступный активный календарь
+        YandexCalendarInfoDto defaultCal = null;
+        if (hasPersonalDefault && !result.isEmpty() && result.get(0).isPersonal()) {
+            defaultCal = result.get(0);
+        } else {
+            for (YandexCalendarInfoDto dto : result) {
+                if (!dto.isPersonal() && dto.isDefault()) {
+                    defaultCal = dto;
+                    break;
+                }
+            }
+        }
+        if (defaultCal == null && !result.isEmpty()) {
+            defaultCal = result.get(0);
+        }
+
+        for (YandexCalendarInfoDto dto : result) {
+            dto.setDefault(dto == defaultCal);
+        }
+
+        return result;
+    }
+
+    @Override
+    public YandexMeetingResult syncInteractionCalendarEvent(UUID userId, UUID iteractionListId, boolean addToCalendar, String selectedCalendarPath, String userTimeZoneId) {
+        if (userId == null) {
+            userId = userSessionSource.getUserSession().getUser().getId();
+        }
+        if (iteractionListId == null) {
+            return YandexMeetingResult.error("Идентификатор взаимодействия не указан");
+        }
+
+        IteractionList iteraction = dataManager.load(IteractionList.class)
+                .id(iteractionListId)
+                .view(com.haulmont.cuba.core.global.ViewBuilder.of(IteractionList.class)
+                        .addView("iteractionList-edit-view")
+                        .add("comment")
+                        .build())
+                .optional()
+                .orElse(null);
+
+        if (iteraction == null) {
+            return YandexMeetingResult.error("Взаимодействие не найдено в базе данных: " + iteractionListId);
+        }
+
+        // Сценарий 1: Календарная синхронизация отключена (addToCalendar == false)
+        if (!addToCalendar) {
+            boolean hasCalendarData = StringUtils.isNotBlank(iteraction.getCalendarEventId())
+                    || StringUtils.isNotBlank(iteraction.getCalendarId())
+                    || Boolean.TRUE.equals(iteraction.getAddToCalendar());
+            if (hasCalendarData) {
+                if (StringUtils.isNotBlank(iteraction.getCalendarEventId()) && StringUtils.isNotBlank(iteraction.getCalendarId())) {
+                    try {
+                        cancelCalendarEvent(userId, iteraction.getCalendarId(), iteraction.getCalendarEventId());
+                    } catch (Exception e) {
+                        log.warn("Не удалось удалить событие {} из CalDAV: {}", iteraction.getCalendarEventId(), e.getMessage());
+                    }
+                }
+                iteraction.setCalendarEventId(null);
+                iteraction.setCalendarId(null);
+                iteraction.setCalendarSyncState(null);
+                iteraction.setAddToCalendar(false);
+                dataManager.commit(iteraction);
+            }
+            return YandexMeetingResult.success(null, null, null, "Событие отключено от календаря");
+        }
+
+        // Сценарий 2: Синхронизация включена (addToCalendar == true)
+        Date startTime = iteraction.getAddDate();
+        if (startTime == null) {
+            return YandexMeetingResult.error("Дата и время взаимодействия не указаны");
+        }
+
+        String targetCalendarPath = selectedCalendarPath;
+        if (StringUtils.isBlank(targetCalendarPath)) {
+            targetCalendarPath = iteraction.getCalendarId();
+        }
+        if (StringUtils.isBlank(targetCalendarPath)) {
+            List<YandexCalendarInfoDto> available = getAvailableCalendars(userId);
+            for (YandexCalendarInfoDto c : available) {
+                if (c.isDefault()) {
+                    targetCalendarPath = c.getPath();
+                    break;
+                }
+            }
+            if (StringUtils.isBlank(targetCalendarPath) && !available.isEmpty()) {
+                targetCalendarPath = available.get(0).getPath();
+            }
+        }
+
+        if (StringUtils.isBlank(targetCalendarPath)) {
+            return YandexMeetingResult.error("Нет доступных календарей для добавления события");
+        }
+
+        // Если сменился календарь — удаляем событие из старого календаря и сбрасываем UID для создания в новом
+        String previousCalendarPath = iteraction.getCalendarId();
+        String previousEventUid = iteraction.getCalendarEventId();
+        if (StringUtils.isNotBlank(previousEventUid)
+                && (StringUtils.isBlank(previousCalendarPath) || !previousCalendarPath.equalsIgnoreCase(targetCalendarPath))) {
+            if (StringUtils.isNotBlank(previousCalendarPath)) {
+                cancelCalendarEvent(userId, previousCalendarPath, previousEventUid);
+            }
+            previousEventUid = null;
+        }
+
+        // Формирование названия события по стандарту ТЗ:
+        // <Имя кандидата> — <Должность кандидата> — <Название взаимодействия>
+        String candidateName = null;
+        String candidatePosition = null;
+        String candidateEmail = null;
+        UUID candidateId = null;
+
+        if (iteraction.getCandidate() != null) {
+            candidateId = iteraction.getCandidate().getId();
+            candidateName = StringUtils.trimToNull(iteraction.getCandidate().getFullName());
+            candidateEmail = StringUtils.trimToNull(iteraction.getCandidate().getEmail());
+            if (iteraction.getCandidate().getPersonPosition() != null) {
+                candidatePosition = StringUtils.trimToNull(iteraction.getCandidate().getPersonPosition().getPositionRuName());
+                if (candidatePosition == null) {
+                    candidatePosition = StringUtils.trimToNull(iteraction.getCandidate().getPersonPosition().getPositionEnName());
+                }
+            }
+        }
+        if (candidatePosition == null && iteraction.getVacancy() != null) {
+            candidatePosition = StringUtils.trimToNull(iteraction.getVacancy().getVacansyName());
+        }
+
+        String interactionName = null;
+        if (iteraction.getIteractionType() != null) {
+            interactionName = StringUtils.trimToNull(iteraction.getIteractionType().getIterationName());
+        }
+
+        List<String> titleParts = new ArrayList<>();
+        if (candidateName != null) titleParts.add(candidateName);
+        if (candidatePosition != null) titleParts.add(candidatePosition);
+        if (interactionName != null) titleParts.add(interactionName);
+
+        String eventTitle = titleParts.isEmpty() ? "Взаимодействие с кандидатом" : String.join(" — ", titleParts);
+
+        // Расчет времени (1 час длительности по умолчанию)
+        Date endTime = new Date(startTime.getTime() + 60 * 60 * 1000L);
+
+        // TimeZone
+        UserYandexConfiguration userConfig = getOrCreateConfiguration(userId);
+        String timeZone = StringUtils.defaultIfBlank(userTimeZoneId,
+                StringUtils.defaultIfBlank(userConfig.getDefaultTimeZone(), DEFAULT_TIME_ZONE_SARATOV));
+
+        YandexMeetingRequest request = new YandexMeetingRequest();
+        request.setEventUid(previousEventUid);
+        request.setCustomCalendarPath(targetCalendarPath);
+        request.setTitle(eventTitle);
+        request.setDescription(iteraction.getComment());
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        request.setTimeZone(timeZone);
+        request.setCandidateId(candidateId);
+        request.setCandidateName(candidateName);
+        request.setCandidateEmail(candidateEmail);
+        request.setCreateTelemostMeeting(true);
+        if (iteraction.getVacancy() != null) {
+            request.setOpenPositionId(iteraction.getVacancy().getId());
+        }
+
+        try {
+            YandexMeetingResult result = scheduleCalendarEvent(userId, request);
+            if (result.isSuccess()) {
+                iteraction.setCalendarEventId(result.getEventUid());
+                iteraction.setCalendarId(targetCalendarPath);
+                iteraction.setCalendarSyncState("SYNCED");
+                iteraction.setAddToCalendar(true);
+                dataManager.commit(iteraction);
+                return result;
+            } else {
+                iteraction.setCalendarSyncState("FAILED");
+                iteraction.setAddToCalendar(true);
+                dataManager.commit(iteraction);
+                return result;
+            }
+        } catch (Exception ex) {
+            log.error("Сбой синхронизации с Яндекс Календарём для взаимодействия {}: {}", iteractionListId, ex.getMessage(), ex);
+            try {
+                iteraction.setCalendarSyncState("FAILED");
+                iteraction.setAddToCalendar(true);
+                dataManager.commit(iteraction);
+            } catch (Exception ignore) {}
+            return YandexMeetingResult.error("Взаимодействие сохранено, но событие не удалось добавить в Яндекс Календарь: " + ex.getMessage());
+        }
     }
 
     private void setRequestMethodSafely(HttpURLConnection conn, String method) throws Exception {

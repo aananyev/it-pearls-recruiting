@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260914-2-createCorporateYandexCalendarTable" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="HUNTTECH_CORP_YANDEX_CAL"/>
+            </not>
+        </preConditions>
+        <createTable tableName="HUNTTECH_CORP_YANDEX_CAL">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="NAME" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="CALENDAR_PATH" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="ACCOUNT_EMAIL" type="varchar(255)"/>
+            <column name="CALENDAR_BASE_URL" type="varchar(512)" defaultValue="https://caldav.yandex.ru"/>
+            <column name="IS_DEFAULT" type="boolean" defaultValueBoolean="false"/>
+            <column name="ACTIVE" type="boolean" defaultValueBoolean="true"/>
+            <column name="DESCRIPTION" type="varchar(1024)"/>
+            <column name="OAUTH_TOKEN_ENCRYPTED" type="varchar(4096)"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="HUNTTECH_CORP_YANDEX_CAL"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="260914-2-addCalendarColumnsToIteractionList" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="HUNTTECH_ITERACTION_LIST"/>
+            <not>
+                <columnExists tableName="HUNTTECH_ITERACTION_LIST" columnName="CALENDAR_EVENT_ID"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_ITERACTION_LIST">
+            <column name="CALENDAR_EVENT_ID" type="varchar(255)"/>
+            <column name="CALENDAR_ID" type="varchar(512)"/>
+            <column name="CALENDAR_SYNC_STATE" type="varchar(50)"/>
+            <column name="ADD_TO_CALENDAR" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="HUNTTECH_ITERACTION_LIST" columnName="CALENDAR_EVENT_ID"/>
+            <dropColumn tableName="HUNTTECH_ITERACTION_LIST" columnName="CALENDAR_ID"/>
+            <dropColumn tableName="HUNTTECH_ITERACTION_LIST" columnName="CALENDAR_SYNC_STATE"/>
+            <dropColumn tableName="HUNTTECH_ITERACTION_LIST" columnName="ADD_TO_CALENDAR"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -8,6 +8,7 @@
     <menu id="application-calendars" icon="CALENDAR" insertBefore="application-hunting">
         <item screen="hunttech_Interviewcalendar" caption="Календарь интервью" icon="CALENDAR"/>
         <item screen="hunttech_WeekInterviewCalendar" caption="Интервью на неделю" icon="CALENDAR_CHECK_O"/>
+        <item screen="hunttech_CorporateYandexCalendar.browse" caption="Корпоративные Яндекс Календари" icon="CALENDAR"/>
     </menu>
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="hunttech_OpenPositionMaster.browse"

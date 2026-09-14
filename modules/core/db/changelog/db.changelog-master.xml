@@ -245,5 +245,7 @@
              relativeToChangelogFile="true"/>
     <include file="260914-1-addExtraTokensToQuotaPeriod.xml"
              relativeToChangelogFile="true"/>
+    <include file="260914-2-addCorporateYandexCalendarAndInteractionEventColumns.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

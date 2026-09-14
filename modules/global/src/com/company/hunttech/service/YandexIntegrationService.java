@@ -56,4 +56,22 @@ public interface YandexIntegrationService {
      * Сохранение конфигурации с прозрачным шифрованием токенов через AiSecretService.
      */
     UserYandexConfiguration saveConfiguration(UserYandexConfiguration config, String plainOauthToken, String plainRefreshToken);
+
+    /**
+     * Получить список всех доступных пользователю календарей (персональный + активные корпоративные)
+     * с расчетом календаря по умолчанию по строгому приоритету:
+     * 1) персональный календарь пользователя (если настроен и задан как default);
+     * 2) корпоративный календарь по умолчанию (isDefault = true);
+     * 3) первый доступный активный календарь;
+     * 4) пустой список, если календарей нет.
+     */
+    List<YandexCalendarInfoDto> getAvailableCalendars(UUID userId);
+
+    /**
+     * Идемпотентная синхронизация события взаимодействия с кандидатом в Яндекс Календаре.
+     * При addToCalendar=false — удаляет ранее созданное событие (если было).
+     * При addToCalendar=true — создает или обновляет событие CalDAV с инвайтом кандидату и ссылкой на Телемост.
+     * Не бросает исключение при сетевых/API сбоях, возвращая результат со статусом и предупреждением.
+     */
+    YandexMeetingResult syncInteractionCalendarEvent(UUID userId, UUID iteractionListId, boolean addToCalendar, String selectedCalendarPath, String userTimeZoneId);
 }

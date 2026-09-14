@@ -97,6 +97,18 @@ public class IteractionList extends StandardEntity {
     @JoinColumn(name = "CHAIN_INTERACTION_ID")
     private IteractionList chainInteraction;
 
+    @Column(name = "CALENDAR_EVENT_ID", length = 255)
+    protected String calendarEventId;
+
+    @Column(name = "CALENDAR_ID", length = 512)
+    protected String calendarId;
+
+    @Column(name = "CALENDAR_SYNC_STATE", length = 50)
+    protected String calendarSyncState;
+
+    @Column(name = "ADD_TO_CALENDAR")
+    protected Boolean addToCalendar;
+
     public void setRecrutier(ExtUser recrutier) {
         this.recrutier = recrutier;
     }
@@ -239,5 +251,37 @@ public class IteractionList extends StandardEntity {
 
     public Integer getRating() {
         return rating;
+    }
+
+    public String getCalendarEventId() {
+        return calendarEventId;
+    }
+
+    public void setCalendarEventId(String calendarEventId) {
+        this.calendarEventId = calendarEventId;
+    }
+
+    public String getCalendarId() {
+        return calendarId;
+    }
+
+    public void setCalendarId(String calendarId) {
+        this.calendarId = calendarId;
+    }
+
+    public String getCalendarSyncState() {
+        return calendarSyncState;
+    }
+
+    public void setCalendarSyncState(String calendarSyncState) {
+        this.calendarSyncState = calendarSyncState;
+    }
+
+    public Boolean getAddToCalendar() {
+        return addToCalendar;
+    }
+
+    public void setAddToCalendar(Boolean addToCalendar) {
+        this.addToCalendar = addToCalendar;
     }
 }

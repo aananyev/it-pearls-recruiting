@@ -605,6 +605,22 @@
                                                    dataContainer="iteractionListDc"
                                                    property="addDate"
                                                    width="100%"/>
+                                        <vbox id="calendarBox"
+                                              width="100%"
+                                              spacing="true"
+                                              visible="false"
+                                              stylename="iteraction-calendar-box">
+                                            <checkBox id="addToCalendarCheckBox"
+                                                      caption="msg://msgAddToCalendar"
+                                                      dataContainer="iteractionListDc"
+                                                      property="addToCalendar"/>
+                                            <lookupField id="calendarLookupField"
+                                                         caption="msg://msgCalendarLookup"
+                                                         dataContainer="iteractionListDc"
+                                                         property="calendarId"
+                                                         width="100%"
+                                                         stylename="edit-form-control"/>
+                                        </vbox>
                                         <textField id="addInteger"
                                                    dataContainer="iteractionListDc"
                                                    property="addInteger"

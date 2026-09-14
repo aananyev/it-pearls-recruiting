@@ -360,9 +360,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     }
 
     private void addRadioButtonAddType() {
-        mapAddType.put("Data", 1);
-        mapAddType.put("String", 2);
-        mapAddType.put("Integer", 3);
+        mapAddType.put("Дата и время (для встреч и Яндекс Календаря)", 1);
+        mapAddType.put("Текстовая строка", 2);
+        mapAddType.put("Числовое значение", 3);
 
         radioButtonAddType.setOptionsMap(mapAddType);
     }

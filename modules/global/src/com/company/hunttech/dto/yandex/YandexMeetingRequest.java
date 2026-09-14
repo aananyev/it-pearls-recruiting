@@ -17,6 +17,7 @@ public class YandexMeetingRequest implements Serializable {
     private Date endTime;
     private String timeZone;
 
+    private String eventUid;
     private UUID candidateId;
     private String candidateName;
     private String candidateEmail;
@@ -156,5 +157,13 @@ public class YandexMeetingRequest implements Serializable {
 
     public void setOpenPositionId(UUID openPositionId) {
         this.openPositionId = openPositionId;
+    }
+
+    public String getEventUid() {
+        return eventUid;
+    }
+
+    public void setEventUid(String eventUid) {
+        this.eventUid = eventUid;
     }
 }

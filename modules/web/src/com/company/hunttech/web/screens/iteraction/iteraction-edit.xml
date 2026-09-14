@@ -76,7 +76,7 @@ order by e.number]]>
             <!-- Sidebar удерживает контекст типа взаимодействия, навигацию и служебные сведения при прокрутке формы. -->
             <vbox id="iteractionSidebar"
                   stylename="iteraction-sidebar edit-sidebar"
-                  width="270px"
+                  width="312px"
                   height="100%"
                   spacing="true"
                   expand="iteractionSidebarSpacer">
@@ -663,6 +663,10 @@ order by e.number]]>
                                               caption="msg://msgAdd"
                                               dataContainer="iteractionDc"
                                               property="addFlag"/>
+                                    <label id="additionalFieldHintLabel"
+                                           value="msg://msgAdditionalFieldHint"
+                                           stylename="edit-sidebar-hint"
+                                           width="100%"/>
                                     <!-- HBox располагает тип действия и флаг установки даты по умолчанию. -->
                                     <hbox spacing="true" width="100%">
                                         <!-- RadioButtonGroup выбирает тип дополнительного значения (Data/String/Integer). -->

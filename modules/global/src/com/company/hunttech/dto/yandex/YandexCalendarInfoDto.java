@@ -10,16 +10,22 @@ public class YandexCalendarInfoDto implements Serializable {
     private String path;
     private boolean isDefault;
     private boolean isClientInterviewCalendar;
+    private boolean isPersonal;
 
     public YandexCalendarInfoDto() {
     }
 
     public YandexCalendarInfoDto(String id, String displayName, String path, boolean isDefault, boolean isClientInterviewCalendar) {
+        this(id, displayName, path, isDefault, isClientInterviewCalendar, false);
+    }
+
+    public YandexCalendarInfoDto(String id, String displayName, String path, boolean isDefault, boolean isClientInterviewCalendar, boolean isPersonal) {
         this.id = id;
         this.displayName = displayName;
         this.path = path;
         this.isDefault = isDefault;
         this.isClientInterviewCalendar = isClientInterviewCalendar;
+        this.isPersonal = isPersonal;
     }
 
     public String getId() {
@@ -60,6 +66,14 @@ public class YandexCalendarInfoDto implements Serializable {
 
     public void setClientInterviewCalendar(boolean clientInterviewCalendar) {
         isClientInterviewCalendar = clientInterviewCalendar;
+    }
+
+    public boolean isPersonal() {
+        return isPersonal;
+    }
+
+    public void setPersonal(boolean personal) {
+        isPersonal = personal;
     }
 
     @Override

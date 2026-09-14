@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="nameField"
+        messagesPack="com.company.hunttech.web.screens.corporateyandexcalendar"
+        icon="CALENDAR">
+    <data>
+        <instance id="corporateCalendarDc"
+                  class="com.company.hunttech.entity.CorporateYandexCalendar"
+                  view="corporateYandexCalendar-view">
+            <loader id="corporateCalendarDl"/>
+        </instance>
+    </data>
+    <dialogMode width="1050" height="720" modal="true"/>
+    <layout stylename="edit-screen-layout corporate-calendar-edit"
+            expand="mainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <hbox id="mainLayout"
+              stylename="edit-screen-layout"
+              width="100%"
+              height="100%"
+              spacing="false"
+              expand="workspace">
+            <!-- Сайдбар 312px строго по стандарту проекта -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar"
+                  width="312px"
+                  height="100%"
+                  spacing="false">
+                <scrollBox id="sidebarScroll" width="100%" height="100%" orientation="vertical">
+                    <vbox width="100%" spacing="true">
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="edit-sidebar-visual">
+                            <label id="calendarIcon" icon="CALENDAR" stylename="h1" align="TOP_CENTER"/>
+                            <label id="calendarTitleLabel"
+                                   dataContainer="corporateCalendarDc"
+                                   property="name"
+                                   stylename="edit-sidebar-title h2 bold"
+                                   align="TOP_CENTER"
+                                   width="100%"/>
+                            <label value="msg://msgCorporateCalendar"
+                                   stylename="edit-sidebar-subtitle h4"
+                                   align="TOP_CENTER"
+                                   width="100%"/>
+                        </vbox>
+                        <vbox id="sidebarInfoCard" width="100%" spacing="true" stylename="edit-sidebar-summary edit-card">
+                            <label value="msg://msgSummaryTitle" stylename="label-nav-title"/>
+                            <grid id="sidebarSummaryGrid" width="100%" spacing="true">
+                                <columns>
+                                    <column width="110px"/>
+                                    <column/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="msg://msgStatus" stylename="bold"/>
+                                        <label id="sidebarStatusVal" value="msg://msgActive"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://msgDefault" stylename="bold"/>
+                                        <label id="sidebarDefaultVal" value="msg://msgNo"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+                        <vbox id="sidebarSpacer" width="100%" height="16px" stylename="edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- Правая рабочая область -->
+            <vbox id="workspace"
+                  stylename="edit-workspace"
+                  width="100%"
+                  height="100%"
+                  spacing="false"
+                  expand="contentScrollBox">
+                <hbox id="editorToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" expand="toolbarTitleBox" stylename="edit-toolbar">
+                    <vbox id="toolbarTitleBox" width="100%" spacing="false">
+                        <label value="msg://editorCaption" stylename="edit-toolbar-title"/>
+                        <label value="msg://editorDescription" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+
+                <scrollBox id="contentScrollBox" orientation="vertical" width="100%" height="100%" stylename="edit-workspace-scroll">
+                    <vbox id="contentBox" width="100%" spacing="true" margin="true" stylename="edit-workspace-content">
+                        <!-- Основные параметры -->
+                        <groupBox id="mainParamsCard" caption="msg://msgMainParams" stylename="edit-card" spacing="true" width="100%" showAsPanel="true">
+                            <textField id="nameField"
+                                       dataContainer="corporateCalendarDc"
+                                       property="name"
+                                       caption="msg://CorporateYandexCalendar.name"
+                                       required="true"
+                                       width="100%"
+                                       stylename="edit-form-control"/>
+                            <textField id="calendarPathField"
+                                       dataContainer="corporateCalendarDc"
+                                       property="calendarPath"
+                                       caption="msg://CorporateYandexCalendar.calendarPath"
+                                       description="msg://msgCalendarPathHelp"
+                                       required="true"
+                                       width="100%"
+                                       stylename="edit-form-control"/>
+                            <textField id="accountEmailField"
+                                       dataContainer="corporateCalendarDc"
+                                       property="accountEmail"
+                                       caption="msg://CorporateYandexCalendar.accountEmail"
+                                       width="100%"
+                                       stylename="edit-form-control"/>
+                        </groupBox>
+
+                        <!-- Настройки поведения и доступности -->
+                        <groupBox id="settingsCard" caption="msg://msgSettingsAndAvailability" stylename="edit-card" spacing="true" width="100%" showAsPanel="true">
+                            <hbox spacing="true" width="100%">
+                                <checkBox id="isDefaultField"
+                                          dataContainer="corporateCalendarDc"
+                                          property="isDefault"
+                                          caption="msg://CorporateYandexCalendar.isDefault"
+                                          box.expandRatio="1"/>
+                                <checkBox id="activeField"
+                                          dataContainer="corporateCalendarDc"
+                                          property="active"
+                                          caption="msg://CorporateYandexCalendar.active"
+                                          box.expandRatio="1"/>
+                            </hbox>
+                            <textField id="calendarBaseUrlField"
+                                       dataContainer="corporateCalendarDc"
+                                       property="calendarBaseUrl"
+                                       caption="msg://CorporateYandexCalendar.calendarBaseUrl"
+                                       width="100%"
+                                       stylename="edit-form-control"/>
+                            <textArea id="descriptionField"
+                                      dataContainer="corporateCalendarDc"
+                                      property="description"
+                                      caption="msg://CorporateYandexCalendar.description"
+                                      width="100%"
+                                      rows="3"
+                                      stylename="edit-form-control"/>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+
+                <!-- Постоянный подвал действий -->
+                <hbox id="editorFooterActions" width="100%" spacing="true" align="MIDDLE_RIGHT" stylename="edit-footer-actions">
+                    <button id="windowCommitAndCloseButton" caption="mainMsg://actions.Ok" icon="CHECK" stylename="primary" action="windowCommitAndClose"/>
+                    <button id="windowCloseButton" caption="mainMsg://actions.Cancel" icon="BAN" stylename="secondary" action="windowClose"/>
+                </hbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

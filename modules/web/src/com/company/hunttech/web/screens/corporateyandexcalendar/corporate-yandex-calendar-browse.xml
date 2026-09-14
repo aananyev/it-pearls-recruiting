@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="calendarsTable"
+        messagesPack="com.company.hunttech.web.screens.corporateyandexcalendar">
+    <data>
+        <collection id="corporateCalendarsDc"
+                    class="com.company.hunttech.entity.CorporateYandexCalendar"
+                    view="corporateYandexCalendar-view">
+            <loader id="corporateCalendarsDl">
+                <query><![CDATA[select e from hunttech_CorporateYandexCalendar e order by e.isDefault desc, e.active desc, e.name]]></query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode width="1100" height="700"/>
+    <layout stylename="browse-screen-layout edit-screen-layout corporate-calendar-browse" expand="tableCard" spacing="true">
+        <filter id="filter" dataLoader="corporateCalendarsDl" applyTo="calendarsTable"
+                collapsable="true" collapsed="true">
+            <properties include="(name|active|isDefault|accountEmail)"/>
+        </filter>
+        <hbox id="browseActions" spacing="true" stylename="edit-toolbar">
+            <button id="createBtn" action="calendarsTable.create" stylename="primary" icon="PLUS"/>
+            <button id="editBtn" action="calendarsTable.edit" icon="EDIT_ACTION"/>
+            <button id="removeBtn" action="calendarsTable.remove" icon="REMOVE"/>
+            <button id="refreshBtn" action="calendarsTable.refresh" icon="REFRESH"/>
+        </hbox>
+        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="calendarsTable" stylename="edit-card">
+            <dataGrid id="calendarsTable" width="100%" height="100%" dataContainer="corporateCalendarsDc">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                    <action id="refresh" type="refresh"/>
+                </actions>
+                <columns>
+                    <column property="name" minimumWidth="220px"/>
+                    <column property="calendarPath" minimumWidth="250px"/>
+                    <column property="accountEmail" width="200px"/>
+                    <column property="isDefault" width="130px"/>
+                    <column property="active" width="110px"/>
+                    <column property="calendarBaseUrl" width="220px"/>
+                    <column property="description" minimumWidth="200px"/>
+                </columns>
+                <rowsCount/>
+            </dataGrid>
+        </vbox>
+    </layout>
+</window>

@@ -1024,6 +1024,10 @@
         <property name="vacancy" view="openPosition-iteraction-list-picker-view"/>
         <property name="recrutier" view="_minimal"/>
         <property name="chainInteraction" view="_minimal"/>
+        <property name="calendarEventId"/>
+        <property name="calendarId"/>
+        <property name="calendarSyncState"/>
+        <property name="addToCalendar"/>
     </view>
     <view entity="hunttech_IteractionList" name="iteractionList-simple-browse-view" extends="_minimal">
         <property name="numberIteraction"/>
@@ -1522,6 +1526,7 @@
     <view entity="hunttech_UserYandexConfiguration" name="userYandexConfiguration-view" extends="_local">
         <property name="user" view="_minimal"/>
     </view>
+    <view entity="hunttech_CorporateYandexCalendar" name="corporateYandexCalendar-view" extends="_local"/>
     <view entity="hunttech_UserAiConfiguration" name="userAiConfiguration-edit-view" extends="_minimal">
         <property name="user" view="_minimal"/>
         <property name="providerCode"/>
