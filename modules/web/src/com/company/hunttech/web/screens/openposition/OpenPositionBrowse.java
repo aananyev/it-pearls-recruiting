@@ -19,6 +19,8 @@ import com.hunttech.hrm.gui.components.FallbackImage;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.sys.AppContext;
+import com.haulmont.cuba.core.sys.SecurityContext;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
@@ -36,12 +38,19 @@ import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @UiController("hunttech_OpenPosition.browse")
@@ -73,6 +82,19 @@ import java.util.concurrent.atomic.AtomicReference;
  * @see OpenPositionServiceBean
  */
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
+
+    private static final Logger log = LoggerFactory.getLogger(OpenPositionBrowse.class);
+
+    private static final ExecutorService asyncNotifierExecutor = new ThreadPoolExecutor(
+            1, 2, 60L, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(100),
+            r -> {
+                Thread t = new Thread(r, "HRM-AsyncNotifier");
+                t.setDaemon(true);
+                return t;
+            },
+            new ThreadPoolExecutor.DiscardOldestPolicy()
+    );
 
     @Inject
     private MessageBundle messageBundle;
@@ -989,8 +1011,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             = "select e from sec$User e where e.active = true";
     static final String QUERY_GET_SUBSCRIBER =
             "select e from hunttech_RecrutiesTasks e where e.openPosition = :openPosition and e.reacrutier = :reacrutier and :current_date between e.startDate and e.endDate";
-    final static String QUERY_CANDIDATES_FROM_CONSIDERATION = "select e from hunttech_JobCandidate e " +
-            "where e.iteractionList in (select f from hunttech_IteractionList f where f.candidate = e and f.iteractionType.signSendToClient = true and f.vacancy = :vacancy)";
+    final static String QUERY_CANDIDATES_FROM_CONSIDERATION = "select distinct e from hunttech_JobCandidate e " +
+            "where exists (select f from hunttech_IteractionList f where f.candidate = e and f.iteractionType.signSendToClient = true and f.vacancy = :vacancy " +
+            "and not exists (select g from hunttech_IteractionList g where g.candidate = e and g.vacancy = :vacancy and g.iteractionType.signEndCase = true and g.dateIteraction >= f.dateIteraction))";
 
     private final static String font_icon_PLUS_CIRCLE = "font-icon:PLUS_CIRCLE";
     private final static String font_icon_MINUS_CIRCLE = "font-icon:MINUS_CIRCLE";
@@ -1981,6 +2004,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Асинхронная отправка Telegram-уведомления через выделенный пул с передачей SecurityContext. */
+    private void sendTelegramAsync(String message) {
+        String tgChat = applicationSetupService.getTelegramChatOpenPosition();
+        final SecurityContext securityContext = AppContext.getSecurityContext();
+        asyncNotifierExecutor.submit(() -> {
+            AppContext.setSecurityContext(securityContext);
+            try {
+                telegramService.sendMessageToChat(tgChat, message);
+            } catch (Exception ex) {
+                log.error("Ошибка асинхронной отправки Telegram-уведомления по вакансии", ex);
+            } finally {
+                AppContext.setSecurityContext(null);
+            }
+        });
+    }
+
     /** Закрытие/открытие позиции: проверка дочерних, комментарий, уведомления подписчиков. */
     private void openCloseVacancy(OpenPosition entity) {
         if (entity.getOpenClose() || entity.getOpenClose() == null) {
@@ -1995,14 +2034,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    openPositionService.getOpenPositionCloseLongMessage(entity, userSession.getUser()));
+            sendTelegramAsync(openPositionService.getOpenPositionCloseLongMessage(entity, userSession.getUser()));
 
             entity.setOwner(null);
             entity.setLastOpenDate(null);
 
             openPositionsTable.setDetailsVisible(entity, false);
-            openPositionsDl.load();
 
         } else {
 
@@ -2015,10 +2052,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(applicationSetupService
-                            .getTelegramChatOpenPosition(),
-                    openPositionService
-                                    .getOpenPositionOpenLongMessage(entity, userSession.getUser()));
+            sendTelegramAsync(openPositionService.getOpenPositionOpenLongMessage(entity, userSession.getUser()));
 
             entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
@@ -2038,8 +2072,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
 
             openPositionsTable.setDetailsVisible(entity, false);
-            openPositionsDl.load();
-
             openPositionsTable.repaint();
 
             if (entity.getOpenClose() != null) {
@@ -2056,7 +2088,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         dataManager.commit(entity);
 
         if (!entity.getOpenClose()) {
-            entity.getProjectName().setProjectIsClosed(false);
+            if (entity.getProjectName() != null) {
+                entity.getProjectName().setProjectIsClosed(false);
+            }
         }
 
         openPositionsDl.load();
@@ -2073,7 +2107,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     ? messageBundle.getMessage("msgCloseVacamcy") :
                     messageBundle.getMessage("msgOpenVacancy"));
 
-            openCloseChildVacancy(entity);
+            openCloseVacancy(entity);
         } else {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withDescription(
@@ -2088,46 +2122,47 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)
                 .parameter("parentOpenPosition", event)
-                .view("openPosition-view")
+                .view(View.LOCAL)
                 .list();
 
-        String magPos = "";
-        StringBuilder sb = new StringBuilder();
-
-        AtomicReference<Boolean> flagDialog = new AtomicReference<>(false);
-
-        if (openPositions.size() != 0) {
-            for (OpenPosition a : openPositions) {
-                sb.append("<li><i>")
-                        .append(a.getVacansyName())
-                        .append("</i></li>");
-            }
-
-            sb.insert(0, (event.getOpenClose()
-                    ? messageBundle.getMessage("msgOpen")
-                    : messageBundle.getMessage("msgClose")));
-            sb.insert((event.getOpenClose()
-                            ? messageBundle.getMessage("msgOpen")
-                            : messageBundle.getMessage("msgClose")).length(),
-                    " вакансии группы?<br><ul>");
-            sb.append("</ul>");
-
-            dialogs.createOptionDialog()
-                    .withType(Dialogs.MessageType.WARNING)
-                    .withContentMode(ContentMode.HTML)
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withMessage(sb.toString())
-                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                        for (OpenPosition a : openPositions) {
-                            a.setOpenClose(event.getOpenClose());
-                        }
-
-                        flagDialog.set(true);
-                    }), new DialogAction(DialogAction.Type.NO))
-                    .show();
+        if (openPositions.isEmpty()) {
+            return false;
         }
 
-        return flagDialog.get();
+        StringBuilder sb = new StringBuilder();
+        for (OpenPosition a : openPositions) {
+            sb.append("<li><i>")
+                    .append(a.getVacansyName())
+                    .append("</i></li>");
+        }
+
+        boolean nextOpenCloseState = !Boolean.TRUE.equals(event.getOpenClose());
+        String actionCaption = nextOpenCloseState
+                ? messageBundle.getMessage("msgClose")
+                : messageBundle.getMessage("msgOpen");
+
+        sb.insert(0, actionCaption);
+        sb.insert(actionCaption.length(), " вакансии группы?<br><ul>");
+        sb.append("</ul>");
+
+        dialogs.createOptionDialog()
+                .withType(Dialogs.MessageType.WARNING)
+                .withContentMode(ContentMode.HTML)
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withMessage(sb.toString())
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                    CommitContext commitContext = new CommitContext();
+                    for (OpenPosition a : openPositions) {
+                        a.setOpenClose(nextOpenCloseState);
+                        commitContext.addInstanceToCommit(a);
+                    }
+                    dataManager.commit(commitContext);
+                    event.setOpenClose(nextOpenCloseState);
+                    openCloseVacancy(event);
+                }), new DialogAction(DialogAction.Type.NO))
+                .show();
+
+        return true;
     }
 
     @Install(to = "openPositionsTable.salaryMinMax", subject = "columnGenerator")
@@ -3898,7 +3933,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             OpenPosition openPosition = openPositionsTable.getSingleSelected();
             openCloseButtonClickListener(openPosition, openCloseButton);
-            openPositionsDl.load();
             openPositionsTable.repaint();
             openCloseButton.setEnabled(false);
             buttonSubscribe.setEnabled(false);
@@ -3922,133 +3956,113 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     /** Снятие кандидатов из рассмотрения при закрытии позиции. */
     private void removeCandidatesWithConsideration() {
         OpenPosition closeVacancy = openPositionsTable.getSingleSelected();
+        if (closeVacancy == null || Boolean.TRUE.equals(closeVacancy.getOpenClose())) {
+            return;
+        }
 
-        if (!closeVacancy.getOpenClose()) {
+        List<JobCandidate> jobCandidatesNotEnded = dataManager.load(JobCandidate.class)
+                .query(QUERY_CANDIDATES_FROM_CONSIDERATION)
+                .parameter("vacancy", closeVacancy)
+                .view(View.LOCAL)
+                .list();
 
-            List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
-                    .query(QUERY_CANDIDATES_FROM_CONSIDERATION)
-                    .parameter("vacancy", closeVacancy)
-                    .view("jobCandidate-view")
-                    .list();
+        if (jobCandidatesNotEnded.isEmpty()) {
+            return;
+        }
 
-            List<JobCandidate> jobCandidatesNotEnded = new ArrayList<>();
+        StringBuilder dialogMessage = new StringBuilder(
+                messageBundle.getMessage("msgDialogMessageCandidateConsideration")).append(" ");
 
-            for (JobCandidate jc : jobCandidates) {
-                Boolean sendCV = false;
-                Boolean endCase = false;
+        for (JobCandidate jc : jobCandidatesNotEnded) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(messageBundle.getMessage("msgInConsideration"))
+                    .append(" ")
+                    .append(closeVacancy.getVacansyName());
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.TRAY)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withCaption(jc.getFullName())
+                    .withHideDelayMs(15000)
+                    .withDescription(sb.toString())
+                    .show();
+            dialogMessage.append(jc.getFullName()).append(", ");
+        }
 
-                for (IteractionList il : jc.getIteractionList()) {
-                    if (il.getVacancy() != null) {
-                        if (il.getVacancy().equals(closeVacancy)) {
-                            if (!sendCV) {
-                                if (il.getIteractionType() != null) {
-                                    if (il.getIteractionType().getSignSendToClient() != null) {
-                                        if (il.getIteractionType().getSignSendToClient()) {
-                                            sendCV = true;
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (!endCase) {
-                                    if (il.getIteractionType().getSignEndCase() != null) {
-                                        if (il.getIteractionType().getSignEndCase()) {
-                                            endCase = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        dialogMessage.delete(dialogMessage.length() - 2, dialogMessage.length());
+        dialogMessage.append(". ");
+        dialogMessage.append(messageBundle.getMessage("msgDeleteFromConsideration"));
 
-                if (sendCV && !endCase) {
-                    jobCandidatesNotEnded.add(jc);
-                }
-            }
+        final String finalDialogMessage = dialogMessage.toString();
 
-            StringBuffer dialogMessage = new StringBuffer(
-                    messageBundle.getMessage("msgDialogMessageCandidateConsideration"));
-            dialogMessage.append(" ");
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withMessage(finalDialogMessage)
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withType(Dialogs.MessageType.CONFIRMATION)
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                .withHandler(e -> {
+                                    try {
+                                        Iteraction iteractionSignEndProcessVacancyClosed = null;
 
-            if (jobCandidatesNotEnded.size() > 0) {
-                for (JobCandidate jc : jobCandidatesNotEnded) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(messageBundle.getMessage("msgInConsideration"))
-                            .append(" ")
-                            .append(closeVacancy.getVacansyName());
-                    notifications.create(Notifications.NotificationType.WARNING)
-                            .withType(Notifications.NotificationType.TRAY)
-                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                            .withCaption(jc.getFullName())
-                            .withHideDelayMs(15000)
-                            .withDescription(sb.toString())
-                            .show();
-                    dialogMessage.append(jc.getFullName());
-                    dialogMessage.append(", ");
-                }
+                                        BigDecimal iteractionMaxNumber = dataManager
+                                                .loadValue("select max(e.numberIteraction) from hunttech_IteractionList e", BigDecimal.class)
+                                                .one();
 
-                dialogMessage.delete(dialogMessage.length() - 2, dialogMessage.length());
-                dialogMessage.append(". ");
-                dialogMessage.append(messageBundle.getMessage("msgDeleteFromConsideration"));
-
-                dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
-                        .withMessage(dialogMessage.toString())
-                        .withCaption(messageBundle.getMessage("msgWarning"))
-                        .withType(Dialogs.MessageType.CONFIRMATION)
-                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                        .withHandler(e -> {
-                                            Iteraction iteractionSignEndProcessVacancyClosed = null;
-
-                                            BigDecimal iteractionMaxNumber = dataManager
-                                                    .loadValue("select max(e.numberIteraction) from hunttech_IteractionList e", BigDecimal.class)
+                                        try {
+                                            iteractionSignEndProcessVacancyClosed = dataManager.load(Iteraction.class)
+                                                    .query("select e from hunttech_Iteraction e where e.signEndProcessVacancyClosed = true")
                                                     .one();
+                                        } catch (IllegalStateException exception) {
+                                            notifications.create(Notifications.NotificationType.ERROR)
+                                                    .withCaption(messageBundle.getMessage("msgError"))
+                                                    .withDescription(messageBundle.getMessage("msgDoNotSignEndProcessVacancyClosed"))
+                                                    .withType(Notifications.NotificationType.ERROR)
+                                                    .show();
+
+                                            log.error("Не найден тип взаимодействия с signEndProcessVacancyClosed=true", exception);
+                                        }
+
+                                        if (iteractionSignEndProcessVacancyClosed != null) {
+                                            CommitContext commitContext = new CommitContext();
+
+                                            for (JobCandidate jc : jobCandidatesNotEnded) {
+                                                IteractionList iteractionList = metadata.create(IteractionList.class);
+
+                                                iteractionList.setVacancy(closeVacancy);
+                                                iteractionList.setCandidate(jc);
+                                                iteractionList.setDateIteraction(new Date());
+                                                iteractionList.setRating(4);
+                                                iteractionList.setComment(messageBundle.getMessage("msgVacancyCloded"));
+                                                iteractionList.setRecrutierName(userSession.getUser().getName());
+                                                iteractionList.setRecrutier((ExtUser) userSession.getUser());
+                                                iteractionMaxNumber = (iteractionMaxNumber != null)
+                                                        ? iteractionMaxNumber.add(BigDecimal.ONE)
+                                                        : BigDecimal.ONE;
+                                                iteractionList.setNumberIteraction(iteractionMaxNumber);
+                                                iteractionList.setIteractionType(iteractionSignEndProcessVacancyClosed);
+
+                                                commitContext.addInstanceToCommit(iteractionList);
+                                            }
+
+                                            dataManager.commit(commitContext);
 
                                             try {
-                                                iteractionSignEndProcessVacancyClosed = dataManager.load(Iteraction.class)
-                                                        .query("select e from hunttech_Iteraction e where e.signEndProcessVacancyClosed = true")
-                                                        .one();
-                                            } catch (IllegalStateException exception) {
-                                                notifications.create(Notifications.NotificationType.ERROR)
-                                                        .withCaption(messageBundle.getMessage("msgError"))
-                                                        .withDescription(messageBundle.getMessage("msgDoNotSignEndProcessVacancyClosed"))
-                                                        .withType(Notifications.NotificationType.ERROR)
-                                                        .show();
-
-                                                exception.printStackTrace();
-                                            }
-
-                                            if (iteractionSignEndProcessVacancyClosed != null) {
-                                                CommitContext commitContext = new CommitContext();
-
-                                                for (JobCandidate jc : jobCandidatesNotEnded) {
-                                                    IteractionList iteractionList = metadata.create(IteractionList.class);
-
-                                                    iteractionList.setVacancy(closeVacancy);
-                                                    iteractionList.setCandidate(jc);
-                                                    iteractionList.setDateIteraction(new Date());
-                                                    iteractionList.setRating(4);
-                                                    iteractionList.setComment(messageBundle.getMessage("msgVacancyCloded"));
-                                                    iteractionList.setRecrutierName(userSession.getUser().getName());
-                                                    iteractionList.setRecrutier((ExtUser) userSession.getUser());
-                                                    iteractionMaxNumber.add(BigDecimal.ONE);
-                                                    iteractionList.setNumberIteraction(iteractionMaxNumber);
-                                                    iteractionList.setIteractionType(iteractionSignEndProcessVacancyClosed);
-
-                                                    commitContext.addInstanceToCommit(iteractionList);
-                                                }
-
-                                                dataManager.commit(commitContext);
-
                                                 sendNotificationsService.SendEmail(
                                                         messageBundle.getMessage("msgEmailSubjCloseOfVacancy"),
-                                                        dialogMessage.toString());
+                                                        finalDialogMessage);
+                                            } catch (Exception ex) {
+                                                log.error("Ошибка отправки Email при закрытии вакансии", ex);
                                             }
-                                        }),
-                                new DialogAction(DialogAction.Type.NO))
-                        .show();
-            }
-        }
+                                        }
+                                    } catch (Exception ex) {
+                                        log.error("Ошибка при снятии кандидатов с рассмотрения при закрытии позиции", ex);
+                                        notifications.create(Notifications.NotificationType.ERROR)
+                                                .withCaption(messageBundle.getMessage("msgError"))
+                                                .withDescription("Не удалось завершить снятие кандидатов с рассмотрения")
+                                                .show();
+                                    }
+                                }),
+                        new DialogAction(DialogAction.Type.NO))
+                .show();
     }
 
     @Install(to = "openPositionsTable.lastCVSend", subject = "columnGenerator")
