@@ -82,7 +82,7 @@ Legacy component ID с суффиксом `Accordion` сохранены рад�
 | ID блока | Заголовок | Основные компоненты | Focus target |
 |---|---|---|---|
 | `participantsAccordion` | Кандидат и вакансия | `candidateField`, `vacancyFiels`, `onlyMySubscribeCheckBox` | `candidateField` |
-| `interactionAccordion` | Тип и действие | `iteractionTypeField`, `buttonCallAction`, `addString`, `addDate`, `addInteger` | `iteractionTypeField` |
+| `interactionAccordion` | Тип и действие | `iteractionTypeField`, `buttonCallAction`, `addString`, `actionDateCalendarRow` (`addDate` + `calendarBox`), `addInteger` | `iteractionTypeField` |
 | `resultAccordion` | Оценка и коммуникация | `ratingField`, `recrutierField`, `communicationMethodField` | `ratingField` |
 | `commentAccordion` | Комментарий | `commentField` | `commentField` |
 
@@ -95,17 +95,20 @@ Legacy component ID с суффиксом `Accordion` сохранены рад�
 - имеют статический title и отдельный body;
 - используют локальный класс `iteraction-list-flat-section`.
 
-### 2.3.1. Единый визуальный контракт полей
+### 2.3.1. Единый визуальный контракт и компактность полей
 
-Основные поля ввода в правой рабочей области используют общий stylename `edit-form-control`:
+Основные поля ввода в правой рабочей области используют общий stylename `edit-form-control` (ровно 7 контролов по контракту тестов: `iteractionTypeField`, `addString`, `addDate`, `addInteger`, `ratingField`, `recrutierField`, `commentField`):
 
-- `iteractionTypeField`;
-- `ratingField`;
-- `recrutierField`;
-- `communicationMethodField`;
-- `commentField`.
-
-`candidateField` и `vacancyFiels` сохраняют специализированный `iteraction-list-primary-picker`, но итоговая SCSS-геометрия совпадает с `edit-form-control`: высота `38px`, единая рамка, фон, focus-state и фиксированная ширина action-кнопок. Это устраняет расхождения между `SuggestionPickerField`, `LookupPickerField`, `LookupField`, `TextField` и `TextArea` без изменения bindings, actions и validators.
+- `candidateField` и `vacancyFiels` сохраняют специализированный `iteraction-list-primary-picker`, но итоговая SCSS-геометрия совпадает с `edit-form-control`: высота `38px`, единая рамка, фон, focus-state и фиксированная ширина action-кнопок.
+- **Короткие поля ввода не растягиваются на всю ширину экрана**:
+  - `addDate`: ширина `260px`, сгруппирована в единый ряд `actionDateCalendarRow` вместе с плашкой календаря `calendarBox`.
+  - `calendarBox` / `calendarInlineBox`: компактная плашка (`padding: 6px 12px`, border-radius 6px) с чекбоксом `addToCalendarCheckBox` и выпадающим списком календарей `calendarLookupField` (`width="320px"` со стилем `iteraction-calendar-lookup`).
+  - `buttonCallAction`: `width="AUTO"`, ограничена `max-width: 340px` (стиль `iteraction-call-action-btn`), выровнена по левому краю (`MIDDLE_LEFT`).
+  - `addInteger`: ширина `220px`.
+  - `addString`: максимальная ширина `640px`.
+  - `ratingField`: ширина `260px`.
+  - `communicationMethodField`: ширина `340px`.
+  Это обеспечивает комфортное визуальное восприятие формы, устраняя пустоты и неестественно растянутые элементы ввода дат, чисел и списков выбора.
 
 ### 2.4. Label-navigation
 

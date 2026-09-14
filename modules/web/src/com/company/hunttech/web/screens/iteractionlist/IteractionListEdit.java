@@ -163,6 +163,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private LookupField<String> calendarLookupField;
     @Inject
     private VBoxLayout calendarBox;
+    @Inject
+    private HBoxLayout actionDateCalendarRow;
 
     private String defaultCalendarPath;
     private boolean calendarsLoaded = false;
@@ -1988,6 +1990,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 initCalendarControls();
             }
             calendarBox.setVisible(visible && calendarInitSuccess);
+            if (actionDateCalendarRow != null) {
+                actionDateCalendarRow.setVisible(visible);
+            }
         }
     }
 

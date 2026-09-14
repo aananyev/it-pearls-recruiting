@@ -595,36 +595,51 @@
                                     <vbox id="dynamicActionFieldsBox" width="100%" height="AUTO" spacing="true">
                                         <button id="buttonCallAction"
                                                 invoke="callActionEntity"
-                                                width="100%"
-                                                align="BOTTOM_LEFT"/>
+                                                width="AUTO"
+                                                align="MIDDLE_LEFT"
+                                                stylename="iteraction-call-action-btn"/>
                                         <textField id="addString"
                                                    dataContainer="iteractionListDc"
                                                    property="addString"
-                                                   width="100%"/>
-                                        <dateField id="addDate"
-                                                   dataContainer="iteractionListDc"
-                                                   property="addDate"
-                                                   width="100%"/>
-                                        <vbox id="calendarBox"
+                                                   width="100%"
+                                                   maxWidth="640px"/>
+                                        <hbox id="actionDateCalendarRow"
                                               width="100%"
-                                              spacing="true"
+                                              spacing="false"
                                               visible="false"
-                                              stylename="iteraction-calendar-box">
-                                            <checkBox id="addToCalendarCheckBox"
-                                                      caption="msg://msgAddToCalendar"
-                                                      dataContainer="iteractionListDc"
-                                                      property="addToCalendar"/>
-                                            <lookupField id="calendarLookupField"
-                                                         caption="msg://msgCalendarLookup"
-                                                         dataContainer="iteractionListDc"
-                                                         property="calendarId"
-                                                         width="100%"
-                                                         stylename="edit-form-control"/>
-                                        </vbox>
+                                              align="MIDDLE_LEFT"
+                                              stylename="iteraction-date-calendar-row">
+                                            <dateField id="addDate"
+                                                       dataContainer="iteractionListDc"
+                                                       property="addDate"
+                                                       width="260px"/>
+                                            <vbox id="calendarBox"
+                                                  width="AUTO"
+                                                  spacing="false"
+                                                  visible="false"
+                                                  stylename="iteraction-calendar-box">
+                                                <hbox id="calendarInlineBox"
+                                                      spacing="false"
+                                                      align="MIDDLE_LEFT"
+                                                      stylename="iteraction-calendar-inline-box">
+                                                    <checkBox id="addToCalendarCheckBox"
+                                                              caption="msg://msgAddToCalendar"
+                                                              dataContainer="iteractionListDc"
+                                                              property="addToCalendar"
+                                                              align="MIDDLE_LEFT"/>
+                                                    <lookupField id="calendarLookupField"
+                                                                 caption="msg://msgCalendarLookup"
+                                                                 dataContainer="iteractionListDc"
+                                                                 property="calendarId"
+                                                                 width="320px"
+                                                                 stylename="iteraction-calendar-lookup"/>
+                                                </hbox>
+                                            </vbox>
+                                        </hbox>
                                         <textField id="addInteger"
                                                    dataContainer="iteractionListDc"
                                                    property="addInteger"
-                                                   width="100%"/>
+                                                   width="220px"/>
                                     </vbox>
                                 </buttonsPanel>
 
@@ -648,7 +663,7 @@
                                                          property="rating"
                                                          description="msg://msgRatingDecription"
                                                          stylename="edit-form-control"
-                                                         width="100%"/>
+                                                         width="260px"/>
                                             <lookupPickerField id="recrutierField"
                                                                caption="msg://msgRecrutier"
                                                                width="100%"
@@ -663,7 +678,7 @@
                                         </row>
                                         <row>
                                             <textField id="communicationMethodField"
-                                                       width="100%"
+                                                       width="340px"
                                                        caption="msg://msgCommunicationMethod"
                                                        dataContainer="iteractionListDc"
                                                        property="communicationMethod"

@@ -683,12 +683,68 @@
     }
 
     .iteraction-list-dynamic-panel,
-    .iteraction-list-dynamic-panel > .v-slot,
-    .iteraction-list-dynamic-panel .v-button {
+    .iteraction-list-dynamic-panel > .v-slot {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
+    }
+
+    .iteraction-call-action-btn,
+    .iteraction-list-dynamic-panel .iteraction-call-action-btn.v-button {
+      box-sizing: border-box;
+      width: auto !important;
+      min-width: 200px !important;
+      max-width: 340px !important;
+      display: inline-block !important;
+    }
+
+    .iteraction-date-calendar-row {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 12px;
+
+      > .v-slot {
+        width: auto !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+
+    .iteraction-calendar-box {
+      box-sizing: border-box;
+      max-width: 100% !important;
+      margin-top: 0 !important;
+      padding: 6px 12px !important;
+      background: rgba(30, 136, 229, 0.05);
+      border: 1px solid rgba(30, 136, 229, 0.2);
+      border-radius: 6px;
+
+      .iteraction-calendar-inline-box {
+        box-sizing: border-box;
+        max-width: 100% !important;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .v-checkbox {
+        margin-right: 12px;
+        margin-bottom: 0;
+        white-space: nowrap;
+      }
+
+      .iteraction-calendar-lookup {
+        width: 320px;
+        max-width: 100%;
+        min-width: 180px;
+        flex: 1 1 320px;
+      }
     }
 
     @media (max-width: 1440px) {

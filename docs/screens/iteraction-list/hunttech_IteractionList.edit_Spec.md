@@ -91,14 +91,14 @@ InteractionService.getMostPolularIteraction(userSession.getUser(), 5)
 В текущем runtime placeholders `Нет данных` не создаются, потому что helper с `normalizePopularButtons()` не зарегистрирован.
 
 ## 6. Основные поля
-
-| Раздел | Компоненты |
-|---|---|
-| Кандидат и вакансия | `candidateField`, `vacancyFiels`, `onlyMySubscribeCheckBox` |
-| Тип | `iteractionTypeField`, `buttonCallAction`, `addString`, `addDate`, `addInteger` |
-| Результат | `ratingField`, `recrutierField`, `communicationMethodField` |
-| Комментарий | `commentField` |
-| Footer | `subscribeButton`, `windowCommitAndClose`, `windowClose` |
+ 
+ | Раздел | Компоненты |
+ |---|---|
+ | Кандидат и вакансия | `candidateField`, `vacancyFiels`, `onlyMySubscribeCheckBox` |
+ | Тип | `iteractionTypeField`, `buttonCallAction` (auto/компактная), `addString` (до 640px), `actionDateCalendarRow` (`addDate` 260px + `calendarBox`), `addInteger` (220px) |
+ | Результат | `ratingField` (260px), `recrutierField`, `communicationMethodField` (340px) |
+ | Комментарий | `commentField` |
+ | Footer | `subscribeButton`, `windowCommitAndClose`, `windowClose` |
 
 ## 7. Кандидат и вакансия
 
