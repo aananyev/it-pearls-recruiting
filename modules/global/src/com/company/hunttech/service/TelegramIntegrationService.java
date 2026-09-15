@@ -3,6 +3,8 @@ package com.company.hunttech.service;
 import com.company.hunttech.service.dto.telegram.*;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 
+import java.util.List;
+
 /**
  * Сервис интеграции с Telegram Bot API:
  * - Получение профилей пользователей, метаданных и информации о чатах/каналах
@@ -88,6 +90,66 @@ public interface TelegramIntegrationService {
      * @return созданный FileDescriptor или null
      */
     FileDescriptor saveUserProfilePhotoToFileStorage(String telegramIdOrUsername, String customFileName);
+
+    /**
+     * Получение метаданных списка фотографий профиля пользователя по его числовому ID.
+     *
+     * @param telegramUserId числовой ID пользователя Telegram
+     * @param resolution желаемый размер/разрешение фотографии
+     * @param limit максимальное количество запрашиваемых фотографий
+     * @return список DTO фотографий профиля (до limit элементов)
+     */
+    List<TelegramPhotoDto> getUserProfilePhotos(Long telegramUserId, PhotoResolution resolution, int limit);
+
+    /**
+     * Получение метаданных списка фотографий профиля по строковому ID или username.
+     *
+     * @param telegramIdOrUsername строковый Telegram ID или username
+     * @param resolution желаемый размер/разрешение фотографии
+     * @param limit максимальное количество запрашиваемых фотографий
+     * @return список DTO фотографий профиля
+     */
+    List<TelegramPhotoDto> getUserProfilePhotos(String telegramIdOrUsername, PhotoResolution resolution, int limit);
+
+    /**
+     * Скачивание бинарного содержимого нескольких фотографий профиля пользователя.
+     *
+     * @param telegramUserId числовой ID пользователя Telegram
+     * @param resolution желаемый размер/разрешение фотографии
+     * @param limit максимальное количество фотографий
+     * @return список массивов байтов изображений
+     */
+    List<byte[]> downloadUserProfilePhotosBytes(Long telegramUserId, PhotoResolution resolution, int limit);
+
+    /**
+     * Скачивание бинарного содержимого нескольких фотографий профиля по строковому ID или username.
+     *
+     * @param telegramIdOrUsername строковый Telegram ID или username
+     * @param resolution желаемый размер/разрешение фотографии
+     * @param limit максимальное количество фотографий
+     * @return список массивов байтов изображений
+     */
+    List<byte[]> downloadUserProfilePhotosBytes(String telegramIdOrUsername, PhotoResolution resolution, int limit);
+
+    /**
+     * Скачивание нескольких фотографий профиля пользователя и сохранение их в CUBA FileStorage.
+     *
+     * @param telegramUserId числовой ID пользователя Telegram
+     * @param customFileNamePrefix префикс пользовательского имени файла
+     * @param limit максимальное количество фотографий
+     * @return список созданных FileDescriptor
+     */
+    List<FileDescriptor> saveUserProfilePhotosToFileStorage(Long telegramUserId, String customFileNamePrefix, int limit);
+
+    /**
+     * Скачивание нескольких фотографий профиля по строковому ID или username и сохранение в CUBA FileStorage.
+     *
+     * @param telegramIdOrUsername строковый Telegram ID или username
+     * @param customFileNamePrefix префикс пользовательского имени файла
+     * @param limit максимальное количество фотографий
+     * @return список созданных FileDescriptor
+     */
+    List<FileDescriptor> saveUserProfilePhotosToFileStorage(String telegramIdOrUsername, String customFileNamePrefix, int limit);
 
     /**
      * Получение информации о чате, канале или группе по числовому ID или username (например, "@my_channel").

@@ -27,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -315,6 +316,167 @@ public class TelegramIntegrationServiceBean implements TelegramIntegrationServic
                 : "tg_avatar_" + clean + "_" + System.currentTimeMillis();
 
         return saveImageBytesToFileStorage(imageBytes, fileName, "identifier='" + telegramIdOrUsername + "'");
+    }
+
+    @Override
+    public List<TelegramPhotoDto> getUserProfilePhotos(Long telegramUserId, PhotoResolution resolution, int limit) {
+        if (telegramUserId == null) {
+            log.warn("getUserProfilePhotos: telegramUserId is null");
+            return Collections.emptyList();
+        }
+        int effectiveLimit = limit > 0 ? limit : 10;
+        PhotoResolution targetResolution = resolution != null ? resolution : PhotoResolution.LARGEST_AVAILABLE;
+        log.info("Getting Telegram profile photos list for userId={}, resolution={}, limit={}", telegramUserId, targetResolution, effectiveLimit);
+
+        try {
+            UserProfilePhotos userPhotos = null;
+            try {
+                userPhotos = telegramClientProvider.getUserProfilePhotos(telegramUserId, 0, effectiveLimit);
+            } catch (TelegramApiException e) {
+                log.debug("getUserProfilePhotos failed for userId={}: {}", telegramUserId, e.getMessage());
+            }
+
+            List<TelegramPhotoDto> results = new ArrayList<>();
+            if (userPhotos != null && userPhotos.getPhotos() != null && !userPhotos.getPhotos().isEmpty()) {
+                for (List<PhotoSize> availableSizes : userPhotos.getPhotos()) {
+                    if (availableSizes != null && !availableSizes.isEmpty()) {
+                        PhotoSize selectedSize = selectPhotoSize(availableSizes, targetResolution);
+                        if (selectedSize != null) {
+                            org.telegram.telegrambots.meta.api.objects.File tgFile = null;
+                            try {
+                                tgFile = telegramClientProvider.getFile(selectedSize.getFileId());
+                            } catch (TelegramApiException e) {
+                                log.debug("getFile failed for fileId={}: {}", selectedSize.getFileId(), e.getMessage());
+                            }
+                            TelegramPhotoDto dto = TelegramPhotoDto.builder()
+                                    .fileId(selectedSize.getFileId())
+                                    .fileUniqueId(selectedSize.getFileUniqueId())
+                                    .width(selectedSize.getWidth())
+                                    .height(selectedSize.getHeight())
+                                    .fileSize(selectedSize.getFileSize())
+                                    .filePath(tgFile != null ? tgFile.getFilePath() : selectedSize.getFilePath())
+                                    .resolution(targetResolution)
+                                    .build();
+                            results.add(dto);
+                        }
+                    }
+                }
+            }
+
+            if (!results.isEmpty()) {
+                log.info("Retrieved {} profile photos for Telegram userId={}", results.size(), telegramUserId);
+            }
+            return results;
+        } catch (Exception e) {
+            log.warn("Failed to retrieve Telegram profile photos list for userId={}: {}", telegramUserId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<TelegramPhotoDto> getUserProfilePhotos(String telegramIdOrUsername, PhotoResolution resolution, int limit) {
+        Long userId = resolveNumericUserId(telegramIdOrUsername);
+        if (userId != null) {
+            return getUserProfilePhotos(userId, resolution, limit);
+        }
+        log.warn("Could not resolve numeric Telegram userId from identifier '{}' for getUserProfilePhotos", telegramIdOrUsername);
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<byte[]> downloadUserProfilePhotosBytes(Long telegramUserId, PhotoResolution resolution, int limit) {
+        List<TelegramPhotoDto> photos = getUserProfilePhotos(telegramUserId, resolution, limit);
+        if (photos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<byte[]> result = new ArrayList<>();
+        for (TelegramPhotoDto photoDto : photos) {
+            if (photoDto != null && photoDto.getFilePath() != null && !photoDto.getFilePath().trim().isEmpty()) {
+                try {
+                    byte[] bytes = telegramClientProvider.downloadFileBytes(photoDto.getFilePath());
+                    if (bytes != null && bytes.length > 0) {
+                        result.add(bytes);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to download photo bytes for filePath='{}': {}", photoDto.getFilePath(), e.getMessage());
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<byte[]> downloadUserProfilePhotosBytes(String telegramIdOrUsername, PhotoResolution resolution, int limit) {
+        if (telegramIdOrUsername == null || telegramIdOrUsername.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        Long userId = resolveNumericUserId(telegramIdOrUsername);
+        if (userId != null) {
+            List<byte[]> bytesList = downloadUserProfilePhotosBytes(userId, resolution, limit);
+            if (!bytesList.isEmpty()) {
+                return bytesList;
+            }
+        }
+
+        // Fallback to single avatar fetch
+        byte[] singleBytes = downloadUserProfilePhotoBytes(telegramIdOrUsername, resolution);
+        if (singleBytes != null && singleBytes.length > 0) {
+            return Collections.singletonList(singleBytes);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<FileDescriptor> saveUserProfilePhotosToFileStorage(Long telegramUserId, String customFileNamePrefix, int limit) {
+        List<byte[]> photoBytesList = downloadUserProfilePhotosBytes(telegramUserId, PhotoResolution.LARGEST_AVAILABLE, limit);
+        if (photoBytesList.isEmpty()) {
+            log.info("No photo bytes found to save for Telegram userId={}", telegramUserId);
+            return Collections.emptyList();
+        }
+
+        String basePrefix = (customFileNamePrefix != null && !customFileNamePrefix.trim().isEmpty())
+                ? customFileNamePrefix.trim()
+                : "tg_avatar_" + telegramUserId;
+
+        List<FileDescriptor> descriptors = new ArrayList<>();
+        int index = 1;
+        long timestamp = System.currentTimeMillis();
+        for (byte[] photoBytes : photoBytesList) {
+            if (photoBytes != null && photoBytes.length > 0) {
+                String fileName = basePrefix + "_" + index + "_" + timestamp;
+                FileDescriptor fd = saveImageBytesToFileStorage(photoBytes, fileName, String.valueOf(telegramUserId));
+                if (fd != null) {
+                    descriptors.add(fd);
+                    index++;
+                }
+            }
+        }
+        log.info("Saved {} Telegram photos to FileStorage for userId={}", descriptors.size(), telegramUserId);
+        return descriptors;
+    }
+
+    @Override
+    public List<FileDescriptor> saveUserProfilePhotosToFileStorage(String telegramIdOrUsername, String customFileNamePrefix, int limit) {
+        if (telegramIdOrUsername == null || telegramIdOrUsername.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        Long userId = resolveNumericUserId(telegramIdOrUsername);
+        if (userId != null) {
+            List<FileDescriptor> descriptors = saveUserProfilePhotosToFileStorage(userId, customFileNamePrefix, limit);
+            if (!descriptors.isEmpty()) {
+                return descriptors;
+            }
+        }
+
+        // Fallback to single avatar fetch if numeric userId returned nothing
+        String singlePrefix = (customFileNamePrefix != null && !customFileNamePrefix.trim().isEmpty())
+                ? customFileNamePrefix.trim() + "_single"
+                : "tg_avatar_single";
+        FileDescriptor singleFd = saveUserProfilePhotoToFileStorage(telegramIdOrUsername, singlePrefix);
+        if (singleFd != null) {
+            return Collections.singletonList(singleFd);
+        }
+        return Collections.emptyList();
     }
 
     private FileDescriptor saveImageBytesToFileStorage(byte[] imageBytes, String baseName, String identifierLog) {

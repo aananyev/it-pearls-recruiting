@@ -33,6 +33,10 @@ import com.haulmont.cuba.gui.components.ValidationErrors;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.security.entity.User;
+import com.company.hunttech.web.screens.telegram.TelegramPhotoSelectDialog;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.screen.OpenMode;
+import com.haulmont.cuba.gui.screen.StandardOutcome;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +58,7 @@ public class ExtUserEditor extends UserEditor {
     private static final String GENERAL_TAB = "generalSettingsTab";
     private static final String EMAIL_TAB = "emailSettingsTab";
     private static final String AI_TAB = "aiSettingsTab";
+    private static final int TELEGRAM_PHOTOS_LIMIT = 10;
 
     @Inject
     private TelegramIntegrationService telegramIntegrationService;
@@ -61,6 +66,8 @@ public class ExtUserEditor extends UserEditor {
     private UserAvatarManagementService userAvatarManagementService;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private ScreenBuilders screenBuilders;
     @Inject
     private FileUploadField officialPhotoUpload;
     @Inject
@@ -291,8 +298,9 @@ public class ExtUserEditor extends UserEditor {
     }
 
     /**
-     * Загружает фотографию пользователя из Telegram по указанному Telegram ID или @username
-     * и сохраняет её в профиль пользователя (officialPhoto / userAvatar).
+     * Загружает фотографию пользователя из Telegram по указанному Telegram ID или @username.
+     * Если в профиле Telegram несколько фотографий, открывает диалог выбора изображения.
+     * Выбранное фото сохраняется в профиль пользователя (officialPhoto / userAvatar).
      */
     public void fetchTelegramPhoto() {
         User user = getItem();
@@ -320,45 +328,119 @@ public class ExtUserEditor extends UserEditor {
         log.info("fetchTelegramPhoto: requesting photo for Telegram identifier '{}' (user '{}')",
                 telegramIdentifier, userLogin);
 
+        List<FileDescriptor> photos = null;
+        FileDescriptor appliedPhoto = null;
         try {
             String safeLogin = extUser.getLogin() != null
                     ? extUser.getLogin().replaceAll("[^a-zA-Z0-9_.-]", "_")
                     : "user";
-            String fileName = "user_avatar_" + safeLogin + "_" + System.currentTimeMillis() + ".jpg";
-            log.info("Calling TelegramIntegrationService.saveUserProfilePhotoToFileStorage('{}', '{}')",
-                    telegramIdentifier, fileName);
+            String filePrefix = "user_avatar_" + safeLogin + "_" + System.currentTimeMillis();
+            log.info("Calling TelegramIntegrationService.saveUserProfilePhotosToFileStorage('{}', '{}', {})",
+                    telegramIdentifier, filePrefix, TELEGRAM_PHOTOS_LIMIT);
 
-            FileDescriptor photoFd = telegramIntegrationService.saveUserProfilePhotoToFileStorage(telegramIdentifier, fileName);
+            photos = telegramIntegrationService.saveUserProfilePhotosToFileStorage(
+                    telegramIdentifier, filePrefix, TELEGRAM_PHOTOS_LIMIT);
 
-            if (photoFd != null) {
-                log.info("Telegram profile photo successfully saved: FileDescriptor ID={}, name='{}', size={} bytes",
-                        photoFd.getId(), photoFd.getName(), photoFd.getSize());
-
-                FileDescriptor personalAvatar = extUser.getUserAvatar();
-                boolean hasPersonalAvatar = personalAvatar != null && FileDescriptorImageHelper.fileExists(fileLoader, personalAvatar);
-
-                if (hasPersonalAvatar) {
-                    showAdminPhotoChoiceDialog(extUser, photoFd, personalAvatar);
-                } else {
-                    if (userAvatarManagementService != null) {
-                        userAvatarManagementService.applyAdminOfficialPhoto(extUser, photoFd, AvatarApplyMode.SMART_DEFAULT);
-                    } else {
-                        extUser.setOfficialPhoto(photoFd);
-                        extUser.setUserAvatar(photoFd);
-                    }
-                    if (officialPhotoUpload != null) {
-                        officialPhotoUpload.setValue(photoFd);
-                    }
-                    refreshProfileLabels();
-                    showNotification(getMessage("msgTelegramPhotoSuccess"), NotificationType.HUMANIZED);
-                }
-            } else {
+            if (photos == null || photos.isEmpty()) {
                 log.warn("Telegram photo not found or failed to download for identifier '{}'", telegramIdentifier);
                 showNotification(getMessage("msgTelegramPhotoNotFound"), NotificationType.WARNING);
+                return;
+            }
+
+            if (photos.size() == 1) {
+                log.info("Single Telegram photo found for user '{}', applying directly", userLogin);
+                appliedPhoto = photos.get(0);
+                applyLoadedTelegramPhoto(extUser, appliedPhoto);
+            } else {
+                log.info("Multiple Telegram photos ({}) found for user '{}', opening selection dialog",
+                        photos.size(), userLogin);
+                TelegramPhotoSelectDialog dialog = screenBuilders.screen(this)
+                        .withScreenClass(TelegramPhotoSelectDialog.class)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                dialog.setPhotos(photos);
+                List<FileDescriptor> dialogPhotos = photos;
+                dialog.addAfterCloseListener(closeEvent -> {
+                    FileDescriptor selected = null;
+                    try {
+                        if (closeEvent.closedWith(StandardOutcome.SELECT)) {
+                            selected = dialog.getSelectedPhoto();
+                            if (selected != null) {
+                                log.info("User selected photo ID={} from Telegram dialog", selected.getId());
+                                applyLoadedTelegramPhoto(extUser, selected);
+                            }
+                        } else {
+                            log.info("Telegram photo selection dialog cancelled/closed without selection");
+                        }
+                    } catch (Exception e) {
+                        log.error("Exception applying selected Telegram photo: {}", e.getMessage(), e);
+                        showNotification(String.format(getMessage("msgTelegramPhotoError"), e.getMessage()), NotificationType.ERROR);
+                    } finally {
+                        cleanupUnusedTelegramPhotos(dialogPhotos, selected, extUser);
+                    }
+                });
+                dialog.show();
             }
         } catch (Exception e) {
+            cleanupUnusedTelegramPhotos(photos, appliedPhoto, extUser);
             log.error("Exception during fetchTelegramPhoto for identifier '{}': {}", telegramIdentifier, e.getMessage(), e);
             showNotification(String.format(getMessage("msgTelegramPhotoError"), e.getMessage()), NotificationType.ERROR);
+        }
+    }
+
+    /**
+     * Применяет загруженное/выбранное фото из Telegram к профилю пользователя:
+     * если у пользователя уже есть персональный аватар, открывает диалог выбора (только официальное / перезаписать всё),
+     * иначе применяет через UserAvatarManagementService либо напрямую.
+     */
+    private void applyLoadedTelegramPhoto(ExtUser extUser, FileDescriptor photoFd) {
+        if (photoFd == null) {
+            return;
+        }
+        log.info("Telegram profile photo applying: FileDescriptor ID={}, name='{}', size={} bytes",
+                photoFd.getId(), photoFd.getName(), photoFd.getSize());
+
+        FileDescriptor personalAvatar = extUser.getUserAvatar();
+        boolean hasPersonalAvatar = personalAvatar != null && FileDescriptorImageHelper.fileExists(fileLoader, personalAvatar);
+
+        if (hasPersonalAvatar) {
+            showAdminPhotoChoiceDialog(extUser, photoFd, personalAvatar);
+        } else {
+            if (userAvatarManagementService != null) {
+                userAvatarManagementService.applyAdminOfficialPhoto(extUser, photoFd, AvatarApplyMode.SMART_DEFAULT);
+            } else {
+                extUser.setOfficialPhoto(photoFd);
+                extUser.setUserAvatar(photoFd);
+            }
+            if (officialPhotoUpload != null) {
+                officialPhotoUpload.setValue(photoFd);
+            }
+            refreshProfileLabels();
+            showNotification(getMessage("msgTelegramPhotoSuccess"), NotificationType.HUMANIZED);
+        }
+    }
+
+    /**
+     * Удаляет неиспользованные или отмененные фотографии из файлового хранилища,
+     * чтобы исключить накопление осиротевших файлов в FileStorage,
+     * защищая активные ссылки профиля пользователя.
+     */
+    private void cleanupUnusedTelegramPhotos(List<FileDescriptor> photos, FileDescriptor chosenPhoto, ExtUser extUser) {
+        if (photos == null || photos.isEmpty()) {
+            return;
+        }
+        FileDescriptor currentOfficial = extUser != null ? extUser.getOfficialPhoto() : null;
+        FileDescriptor currentAvatar = extUser != null ? extUser.getUserAvatar() : null;
+        for (FileDescriptor fd : photos) {
+            if (fd != null && (chosenPhoto == null || !fd.equals(chosenPhoto))) {
+                if (userAvatarManagementService != null) {
+                    try {
+                        userAvatarManagementService.cleanupUnreferencedFile(fd, currentOfficial, currentAvatar, chosenPhoto);
+                    } catch (Exception e) {
+                        log.warn("Failed to cleanup unused Telegram photo fdId={}: {}", fd.getId(), e.getMessage());
+                    }
+                }
+            }
         }
     }
 

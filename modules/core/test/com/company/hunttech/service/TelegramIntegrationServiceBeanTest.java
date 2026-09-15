@@ -213,6 +213,60 @@ public class TelegramIntegrationServiceBeanTest {
     }
 
     @Test
+    public void testGetUserProfilePhotos_MultiplePhotos() {
+        Long userId = 12345L;
+        PhotoSize p1 = createPhotoSize("file_1", "uniq_1", 640, 640, 100);
+        PhotoSize p2 = createPhotoSize("file_2", "uniq_2", 640, 640, 200);
+        PhotoSize p3 = createPhotoSize("file_3", "uniq_3", 640, 640, 300);
+
+        UserProfilePhotos photos = new UserProfilePhotos();
+        photos.setTotalCount(3);
+        photos.setPhotos(Arrays.asList(
+                Collections.singletonList(p1),
+                Collections.singletonList(p2),
+                Collections.singletonList(p3)
+        ));
+
+        mockClientProvider.userProfilePhotos = photos;
+
+        List<TelegramPhotoDto> list = service.getUserProfilePhotos(userId, PhotoResolution.LARGEST_AVAILABLE, 10);
+        assertNotNull(list);
+        assertEquals(3, list.size());
+        assertEquals("file_1", list.get(0).getFileId());
+        assertEquals("file_2", list.get(1).getFileId());
+        assertEquals("file_3", list.get(2).getFileId());
+    }
+
+    @Test
+    public void testSaveUserProfilePhotosToFileStorage_MultiplePhotos() {
+        Long userId = 888L;
+        PhotoSize p1 = createPhotoSize("f_1", "u_1", 640, 640, 50);
+        PhotoSize p2 = createPhotoSize("f_2", "u_2", 640, 640, 60);
+
+        UserProfilePhotos photos = new UserProfilePhotos();
+        photos.setTotalCount(2);
+        photos.setPhotos(Arrays.asList(
+                Collections.singletonList(p1),
+                Collections.singletonList(p2)
+        ));
+
+        mockClientProvider.userProfilePhotos = photos;
+        mockClientProvider.file = createFile("f_1", "photos/f_1.jpg");
+        mockClientProvider.downloadedBytes = new byte[]{10, 20, 30};
+
+        Chat chat = new Chat();
+        chat.setId(userId);
+        chat.setUserName("multi_photo_user");
+        mockClientProvider.chat = chat;
+
+        List<FileDescriptor> savedList = service.saveUserProfilePhotosToFileStorage("@multi_photo_user", "prefix", 10);
+        assertNotNull(savedList);
+        assertEquals(2, savedList.size());
+        assertTrue(fileSaved.get());
+        assertTrue(dataCommitted.get());
+    }
+
+    @Test
     public void testSendMessage_SuccessAndValidation() {
         // Validation failure
         TelegramSendResult failRes = service.sendMessage("", "Hello");

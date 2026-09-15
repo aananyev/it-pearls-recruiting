@@ -71,6 +71,10 @@ graph TD
 | `downloadUserProfilePhotoBytes` | `String telegramIdOrUsername, PhotoResolution resolution` | `byte[]` | Скачивает бинарные данные по строковому ID или `@username`. |
 | `saveUserProfilePhotoToFileStorage`| `Long telegramUserId, String customFileName` | `FileDescriptor` | **Приоритетное действие:** скачивает фото в максимальном качестве, сохраняет в `FileStorage` и регистрирует `FileDescriptor`. |
 | `saveUserProfilePhotoToFileStorage`| `String telegramIdOrUsername, String customFileName` | `FileDescriptor` | Перегрузка для сохранения по строковому ID или `@username`. |
+| `getUserProfilePhotos` | `Long telegramUserId, PhotoResolution resolution, int limit` | `List<TelegramPhotoDto>` | Возвращает список метаданных до `limit` последних фотографий профиля Telegram. |
+| `getUserProfilePhotos` | `String telegramIdOrUsername, PhotoResolution resolution, int limit` | `List<TelegramPhotoDto>` | Перегрузка получения списка фото по `@username` или ID. |
+| `downloadUserProfilePhotosBytes` | `Long/String, PhotoResolution resolution, int limit` | `List<byte[]>` | Скачивает бинарные данные до `limit` фотографий профиля. |
+| `saveUserProfilePhotosToFileStorage` | `Long/String, String customFileNamePrefix, int limit` | `List<FileDescriptor>` | Скачивает до `limit` фотографий профиля, сохраняет их в `FileStorage` и регистрирует список `FileDescriptor`. |
 | `getChatInfo` | `String chatIdOrUsername` | `TelegramChatInfoDto` | Получает данные о приватном чате, группе или канале. |
 | `sendMessage` | `TelegramSendMessageRequest request` | `TelegramSendResult` | Отправляет текстовое сообщение с форматированием и кнопками. |
 | `sendMessage` | `String targetChatId, String text` | `TelegramSendResult` | Упрощенная отправка HTML-текста в чат/канал. |
@@ -187,6 +191,8 @@ sequenceDiagram
 @Inject
 private TelegramIntegrationService telegramIntegrationService;
 @Inject
+private ScreenBuilders screenBuilders;
+@Inject
 private TextField<String> telegramField;
 
 public void fetchTelegramPhoto() {
@@ -195,29 +201,48 @@ public void fetchTelegramPhoto() {
         return;
     }
     ExtUser extUser = (ExtUser) user;
-    String rawTelegram = telegramField != null ? telegramField.getValue() : extUser.getTelegram();
+    String rawTelegram = telegramField != null && StringUtils.isNotBlank(telegramField.getValue())
+            ? telegramField.getValue()
+            : extUser.getTelegram();
 
     if (StringUtils.isBlank(rawTelegram)) {
-        showNotification(getMessage("msgTelegramPhotoEmpty"), NotificationType.WARNING);
+        showNotification(getMessage("msgTelegramNameRequired"), NotificationType.WARNING);
         return;
     }
 
-    if (!telegramIntegrationService.isConfigured()) {
-        showNotification(getMessage("msgTelegramNotConfigured"), NotificationType.ERROR);
-        return;
-    }
+    String safeLogin = extUser.getLogin() != null ? extUser.getLogin().replaceAll("[^a-zA-Z0-9_.-]", "_") : "user";
+    String filePrefix = "user_avatar_" + safeLogin + "_" + System.currentTimeMillis();
 
-    String fileName = "user_avatar_" + extUser.getLogin() + "_" + System.currentTimeMillis() + ".jpg";
-    FileDescriptor photoFd = telegramIntegrationService.saveUserProfilePhotoToFileStorage(rawTelegram.trim(), fileName);
+    // Запрашиваем до 10 последних фотографий профиля Telegram
+    List<FileDescriptor> photos = telegramIntegrationService.saveUserProfilePhotosToFileStorage(
+            rawTelegram.trim(), filePrefix, 10);
 
-    if (photoFd != null) {
-        extUser.setOfficialPhoto(photoFd);
-        extUser.setUserAvatar(photoFd);
-        userDs.getItem().setValue("officialPhoto", photoFd);
-        userDs.getItem().setValue("userAvatar", photoFd);
-        showNotification(getMessage("msgTelegramPhotoSuccess"), NotificationType.HUMANIZED);
-    } else {
+    if (photos == null || photos.isEmpty()) {
         showNotification(getMessage("msgTelegramPhotoNotFound"), NotificationType.WARNING);
+        return;
+    }
+
+    // Если фото ровно одно — применяем сразу без лишнего диалога
+    if (photos.size() == 1) {
+        applyLoadedTelegramPhoto(extUser, photos.get(0));
+    } else {
+        // Если фотографий несколько — открываем модальный диалог выбора фото
+        TelegramPhotoSelectDialog dialog = screenBuilders.screen(this)
+                .withScreenClass(TelegramPhotoSelectDialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        dialog.setPhotos(photos);
+        dialog.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.SELECT)
+                    || (closeEvent.getCloseAction() instanceof StandardCloseAction
+                    && "selected".equals(((StandardCloseAction) closeEvent.getCloseAction()).getActionId()))) {
+                FileDescriptor selected = dialog.getSelectedPhoto();
+                if (selected != null) {
+                    applyLoadedTelegramPhoto(extUser, selected);
+                }
+            }
+        });
+        dialog.show();
     }
 }
 ```

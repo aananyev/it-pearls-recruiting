@@ -1090,4 +1090,79 @@
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Диалог выбора фотографий профиля Telegram (TelegramPhotoSelectDialog)
+  // ═══════════════════════════════════════════════════════════════════════════
+  .telegram-photo-dialog-layout {
+    padding: 12px 16px 8px 16px;
+  }
+
+  .telegram-photo-dialog-header {
+    margin-bottom: 8px;
+  }
+
+  .telegram-photo-dialog-hint {
+    color: rgba($v-font-color, 0.7);
+    font-size: 13px;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .telegram-photos-scrollbox {
+    border: 1px solid rgba($v-font-color, 0.12);
+    border-radius: 6px;
+    padding: 8px;
+    background: rgba($v-font-color, 0.02);
+  }
+
+  .telegram-photos-flowbox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .telegram-photo-choice-card {
+    border: 2px solid rgba($v-font-color, 0.15);
+    border-radius: 8px;
+    padding: 4px;
+    cursor: pointer;
+    background: $v-panel-background-color;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+    text-align: center;
+    box-sizing: border-box;
+
+    &:hover {
+      border-color: $v-selection-color;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+  }
+
+  .telegram-photo-choice-img {
+    cursor: pointer;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .telegram-photo-card-label {
+    font-size: 11px;
+    color: rgba($v-font-color, 0.6);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .telegram-photo-empty-label {
+    color: rgba($v-font-color, 0.6);
+    font-size: 14px;
+    padding: 24px 16px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .telegram-photo-dialog-footer {
+    padding-top: 12px;
+    border-top: 1px solid rgba($v-font-color, 0.1);
+    margin-top: 8px;
+  }
+
 }
