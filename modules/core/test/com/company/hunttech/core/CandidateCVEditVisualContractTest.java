@@ -480,6 +480,24 @@ public class CandidateCVEditVisualContractTest {
                 readProjectFile("modules/web/themes/hunttech-modern-dark/com.company.hunttech/candidate-cv-editor.scss"));
     }
 
+    @Test
+    public void jobHistoriesLoaderGuardsAgainstNullCandidateAndStaleParameters() throws IOException {
+        String xml = readProjectFile(SCREEN_XML);
+        assertTrue("jobHistoriesDl должен содержать условный фильтр по :candidate",
+                xml.contains("<loader id=\"jobHistoriesDl\">") &&
+                xml.contains("<c:where>e.candidate = :candidate</c:where>"));
+
+        String controller = readProjectFile(CONTROLLER);
+        assertTrue("jobHistoriesDl должен иметь PreLoadListener для защиты от Query argument candidate not found",
+                controller.contains("jobHistoriesDl.addPreLoadListener"));
+        assertTrue("PreLoadListener должен очищать stale-параметр candidate при отсутствии кандидата",
+                controller.contains("e.getSource().removeParameter(\"candidate\")"));
+        assertTrue("PreLoadListener должен блокировать нежелательную загрузку",
+                controller.contains("e.preventLoad()"));
+        assertTrue("refreshJobHistories должен очищать stale-параметр при пустом кандидате",
+                controller.contains("jobHistoriesDl.removeParameter(\"candidate\")"));
+    }
+
     private String section(String text, String startMarker, String endMarker) {
         int start = text.indexOf(startMarker);
         assertTrue("Не найден начальный маркер: " + startMarker, start >= 0);

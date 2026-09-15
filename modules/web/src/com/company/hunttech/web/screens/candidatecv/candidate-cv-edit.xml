@@ -83,7 +83,12 @@
             <view extends="jobHistory-view"/>
             <loader id="jobHistoriesDl">
                 <query>
-                    <![CDATA[select e from hunttech_JobHistory e where e.candidate = :candidate order by e.startDate desc, e.createTs desc]]>
+                    <![CDATA[select e from hunttech_JobHistory e order by e.startDate desc, e.createTs desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>

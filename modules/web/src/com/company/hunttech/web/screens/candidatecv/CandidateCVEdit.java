@@ -235,6 +235,20 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
         });
 
+        // Блокируем загрузку истории работы до установки параметра candidate во избежание ошибки
+        // "Query argument candidate not found" и непреднамеренной выборки чужих записей.
+        jobHistoriesDl.addPreLoadListener(e -> {
+            JobCandidate candidate = resolveCandidate();
+            if (candidate != null) {
+                e.getSource().setParameter("candidate", candidate);
+            } else {
+                // Кандидат не определён: не допускаем загрузку со stale-параметром,
+                // иначе вернутся записи ранее выбранного кандидата.
+                e.getSource().removeParameter("candidate");
+                e.preventLoad();
+            }
+        });
+
         tabSheet.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             initCvTextTab();
             initSkillTreeTab();
@@ -373,16 +387,26 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    public void refreshJobHistories() {
-        JobCandidate candidate = getEditedEntity().getCandidate();
+    private JobCandidate resolveCandidate() {
+        JobCandidate candidate = getEditedEntity() != null ? getEditedEntity().getCandidate() : null;
         if (candidate == null && candidateField != null && candidateField.getValue() != null) {
             candidate = (JobCandidate) candidateField.getValue();
         }
+        return candidate;
+    }
+
+    public void refreshJobHistories() {
+        JobCandidate candidate = resolveCandidate();
         if (candidate != null && jobHistoriesDl != null) {
             jobHistoriesDl.setParameter("candidate", candidate);
             jobHistoriesDl.load();
-        } else if (jobHistoriesDc != null) {
-            jobHistoriesDc.getMutableItems().clear();
+        } else {
+            if (jobHistoriesDl != null) {
+                jobHistoriesDl.removeParameter("candidate");
+            }
+            if (jobHistoriesDc != null) {
+                jobHistoriesDc.getMutableItems().clear();
+            }
         }
     }
 
@@ -393,11 +417,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Install(to = "jobHistoriesTable.create", subject = "initializer")
     private void jobHistoriesTableCreateInitializer(JobHistory jobHistory) {
-        JobCandidate candidate = getEditedEntity().getCandidate();
-        if (candidate == null && candidateField != null && candidateField.getValue() != null) {
-            candidate = (JobCandidate) candidateField.getValue();
-        }
-        jobHistory.setCandidate(candidate);
+        jobHistory.setCandidate(resolveCandidate());
     }
 
     @Install(to = "jobHistoriesTable.period", subject = "columnGenerator")
@@ -439,10 +459,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void smartExtractWorkExperience() {
-        JobCandidate candidate = getEditedEntity().getCandidate();
-        if (candidate == null && candidateField != null && candidateField.getValue() != null) {
-            candidate = (JobCandidate) candidateField.getValue();
-        }
+        JobCandidate candidate = resolveCandidate();
         if (candidate == null) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("Кандидат не выбран")
@@ -1580,10 +1597,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        JobCandidate candidate = getEditedEntity().getCandidate();
-        if (candidate == null && candidateField != null && candidateField.getValue() != null) {
-            candidate = (JobCandidate) candidateField.getValue();
-        }
+        JobCandidate candidate = resolveCandidate();
 
         if (candidate == null || PersistenceHelper.isNew(candidate)) {
             candidateSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
