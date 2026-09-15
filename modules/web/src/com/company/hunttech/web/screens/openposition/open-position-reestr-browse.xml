@@ -268,7 +268,7 @@
                                      stylename="secondary">
                             <actions>
                                 <action id="priorityAll" caption="Все приоритеты" icon="LIST"/>
-                                <action id="priorityUnderReview" caption="На проверку" icon="CLOCK"/>
+                                <action id="priorityUnderReview" caption="На проверку" icon="CLOCK_O"/>
                                 <action id="priorityHigh" caption="Высокий приоритет" icon="CIRCLE" stylename="priority-high-action"/>
                                 <action id="priorityNormal" caption="Обычный приоритет" icon="CIRCLE-O"/>
                                 <action id="priorityPaused" caption="Приостановленные" icon="PAUSE"/>

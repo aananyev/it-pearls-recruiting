@@ -46,6 +46,8 @@ public class OpenPositionReestrBrowseFilterContractTest {
                 "XML обязан содержать popupButton priorityFilterPopupButton");
         assertTrue(content.contains("id=\"priorityUnderReview\""),
                 "priorityFilterPopupButton обязан содержать action priorityUnderReview");
+        assertTrue(content.contains("icon=\"CLOCK_O\""),
+                "priorityUnderReview обязан использовать валидный CubaIcon CLOCK_O (не CLOCK)");
     }
 
     @Test
@@ -59,6 +61,8 @@ public class OpenPositionReestrBrowseFilterContractTest {
         // 1. Обработка действия priorityUnderReview
         assertTrue(content.contains("priorityUnderReview"),
                 "Контроллер обязан регистрировать действие priorityUnderReview");
+        assertTrue(content.contains(".withIcon(\"CLOCK_O\")"),
+                "Действие priorityUnderReview обязано использовать иконку CLOCK_O");
         assertTrue(content.contains("openPositionsDl.setParameter(\"underReviewOrDraft\", true)"),
                 "Действие priorityUnderReview обязано устанавливать underReviewOrDraft = true");
 

@@ -1174,7 +1174,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
             priorityFilterPopupButton.addAction(new BaseAction("priorityUnderReview")
                     .withCaption("На проверку")
-                    .withIcon("CLOCK")
+                    .withIcon("CLOCK_O")
                     .withHandler(e -> {
                         openPositionsDl.removeParameter("priority");
                         openPositionsDl.removeParameter("excludeDrafts");
