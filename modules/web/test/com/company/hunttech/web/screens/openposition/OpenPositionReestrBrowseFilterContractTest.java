@@ -73,5 +73,36 @@ public class OpenPositionReestrBrowseFilterContractTest {
         // 4. Отображение статуса в сайдбаре
         assertTrue(content.contains("На проверку"),
                 "Сайдбар обязан отображать статус «На проверку» для вакансий с priority = -2");
+
+        // 5. Логика кнопки переключения статуса вакансии (toggleOpenCloseBtn)
+        assertTrue(content.contains("toggleOpenCloseBtn"),
+                "Контроллер обязан инжектить и использовать toggleOpenCloseBtn");
+        assertTrue(content.contains("toggleSelectedPositionOpenClose()"),
+                "Контроллер обязан содержать метод toggleSelectedPositionOpenClose()");
+        assertTrue(content.contains("updateToggleOpenCloseButton"),
+                "Контроллер обязан содержать метод updateToggleOpenCloseButton");
+        assertTrue(content.contains("🔒 Закрыть"),
+                "Кнопка обязана поддерживать эмодзи и надпись 🔒 Закрыть для открытой вакансии");
+        assertTrue(content.contains("🔓 Открыть"),
+                "Кнопка обязана поддерживать эмодзи и надпись 🔓 Открыть для закрытой вакансии");
+    }
+
+    @Test
+    @DisplayName("Проверка кнопки toggleOpenCloseBtn в разметке сайдбара open-position-reestr-browse.xml")
+    void testSidebarToggleOpenCloseButton() throws Exception {
+        File xmlFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/openposition/open-position-reestr-browse.xml");
+        assertTrue(xmlFile.exists(), "Файл open-position-reestr-browse.xml должен существовать");
+
+        String content = new String(Files.readAllBytes(xmlFile.toPath()), StandardCharsets.UTF_8);
+
+        assertTrue(content.contains("id=\"toggleOpenCloseBtn\""),
+                "XML обязан содержать кнопку toggleOpenCloseBtn");
+        assertTrue(content.contains("enabled=\"false\""),
+                "Кнопка toggleOpenCloseBtn обязана быть по умолчанию задисаблена");
+
+        int toggleIdx = content.indexOf("id=\"toggleOpenCloseBtn\"");
+        int editCardIdx = content.indexOf("id=\"openEditCardBtn\"");
+        assertTrue(toggleIdx > 0 && editCardIdx > 0 && toggleIdx < editCardIdx,
+                "Кнопка toggleOpenCloseBtn обязана располагаться первой перед openEditCardBtn");
     }
 }

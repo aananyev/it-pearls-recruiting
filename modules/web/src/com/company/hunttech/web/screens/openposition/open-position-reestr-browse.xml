@@ -124,10 +124,15 @@
 
                         <!-- Панель быстрых действий по вакансии -->
                         <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="toggleOpenCloseBtn"
+                                    caption="🔒 Закрыть"
+                                    stylename="primary"
+                                    enabled="false"
+                                    width="100%"/>
                             <button id="openEditCardBtn"
                                     caption="Открыть карточку"
                                     icon="EDIT_ACTION"
-                                    stylename="primary"
+                                    stylename="secondary"
                                     enabled="false"
                                     width="100%"/>
                             <button id="suggestCandidatesBtn"

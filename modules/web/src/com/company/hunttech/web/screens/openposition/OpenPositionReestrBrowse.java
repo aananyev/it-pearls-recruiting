@@ -37,6 +37,7 @@ import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -106,6 +107,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private GroupTable<OpenPosition> openPositionsTable;
     @Inject
+    private CollectionContainer<OpenPosition> openPositionsDc;
+    @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
 
     // Кнопки тулбара и быстрых действий реестра
@@ -172,6 +175,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private Label<String> detailProjectShortDescription;
     @Inject
     private Label<String> detailProjectDescription;
+    @Inject
+    private Button toggleOpenCloseBtn;
     @Inject
     private Button openEditCardBtn;
     @Inject
@@ -515,6 +520,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     public void onAfterShow(Screen.AfterShowEvent event) {
         initTableSelectionListener();
         updateSidebarWithPosition(null);
+        updateToggleOpenCloseButton(null);
     }
 
     private void initTableSelectionListener() {
@@ -524,11 +530,15 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 OpenPosition position = selected.isEmpty() ? null : selected.iterator().next();
                 updateSidebarWithPosition(position);
                 updateToolbarButtonsState(position != null);
+                updateToggleOpenCloseButton(position);
             });
         }
     }
 
     private void updateToolbarButtonsState(boolean hasSelection) {
+        if (toggleOpenCloseBtn != null) {
+            toggleOpenCloseBtn.setEnabled(hasSelection);
+        }
         if (editPositionToolbarBtn != null) {
             editPositionToolbarBtn.setEnabled(hasSelection);
         }
@@ -547,6 +557,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void initSidebarButtons() {
+        if (toggleOpenCloseBtn != null) {
+            toggleOpenCloseBtn.addClickListener(e -> toggleSelectedPositionOpenClose());
+        }
         if (openEditCardBtn != null) {
             openEditCardBtn.addClickListener(e -> openSelectedForEdit());
         }
@@ -572,6 +585,68 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                             .show();
                 }
             });
+        }
+    }
+
+    private void updateToggleOpenCloseButton(OpenPosition position) {
+        if (toggleOpenCloseBtn == null) return;
+        if (position == null) {
+            toggleOpenCloseBtn.setEnabled(false);
+            toggleOpenCloseBtn.setCaption("🔒 Закрыть");
+            toggleOpenCloseBtn.setDescription("Выберите вакансию для смены статуса");
+            return;
+        }
+
+        toggleOpenCloseBtn.setEnabled(true);
+        boolean isClosed = Boolean.TRUE.equals(position.getOpenClose());
+        if (isClosed) {
+            toggleOpenCloseBtn.setCaption("🔓 Открыть");
+            toggleOpenCloseBtn.setDescription("Открыть выбранную вакансию");
+        } else {
+            toggleOpenCloseBtn.setCaption("🔒 Закрыть");
+            toggleOpenCloseBtn.setDescription("Закрыть выбранную вакансию");
+        }
+    }
+
+    private void toggleSelectedPositionOpenClose() {
+        OpenPosition selected = openPositionsTable.getSingleSelected();
+        if (selected == null) return;
+
+        boolean currentlyClosed = Boolean.TRUE.equals(selected.getOpenClose());
+        boolean targetClosed = !currentlyClosed;
+
+        try {
+            selected.setOpenClose(targetClosed);
+            OpenPosition saved = dataManager.commit(selected);
+
+            // Намеренно обновляем элемент в контейнере данных без полного перезапуска loader'а,
+            // чтобы рекрутер сразу увидел изменившийся статус в строке и надпись на кнопке («🔓 Открыть» / «🔒 Закрыть»)
+            // без внезапного исчезновения выбранной строки из-под курсора.
+            if (openPositionsDc != null) {
+                openPositionsDc.replaceItem(saved);
+            }
+            openPositionsTable.setSelected(saved);
+
+            updateSidebarWithPosition(saved);
+            updateToggleOpenCloseButton(saved);
+
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(targetClosed ? "🔒 Вакансия закрыта" : "🔓 Вакансия открыта")
+                    .withDescription(saved.getVacansyName() != null ? saved.getVacansyName() : "")
+                    .show();
+
+            log.info("[OPEN_POSITION_REESTR] Статус вакансии '{}' (id={}) изменен: openClose={}",
+                    saved.getVacansyName(), saved.getId(), targetClosed);
+        } catch (Exception ex) {
+            log.error("[OPEN_POSITION_REESTR] Ошибка при смене статуса вакансии '{}': {}",
+                    selected.getVacansyName(), ex.getMessage(), ex);
+            selected.setOpenClose(currentlyClosed);
+            updateSidebarWithPosition(selected);
+            updateToggleOpenCloseButton(selected);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка при изменении статуса вакансии")
+                    .withDescription(ex.getMessage() != null ? ex.getMessage() : "Не удалось сохранить изменения в базе данных.")
+                    .show();
         }
     }
 
