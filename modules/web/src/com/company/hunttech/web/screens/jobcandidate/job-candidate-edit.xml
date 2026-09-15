@@ -79,6 +79,14 @@
                             <property name="projectDepartment" view="_minimal"/>
                         </property>
                     </property>
+                    <property name="originalFileCV" view="_local"/>
+                    <property name="fileCV" view="_local"/>
+                    <property name="textCV"/>
+                    <property name="datePost"/>
+                    <property name="resumePosition" view="_minimal"/>
+                    <property name="createdBy"/>
+                    <property name="linkOriginalCv"/>
+                    <property name="linkHuntTechCV"/>
                 </property>
             </view>
             <!-- Загрузчик кандидата: мягкое удаление включено (показываем и удалённые при явном запросе),
@@ -1490,6 +1498,12 @@
                                       expand="jobCandidateCandidateCvTable">
                                     <!-- Панель действий над резюме кандидата. -->
                                     <hbox id="resumeActionsToolbar" spacing="true" width="100%" align="MIDDLE_RIGHT">
+                                        <button id="smartScanCvBtn"
+                                                caption="msg://msgSmartScanCv"
+                                                icon="font-icon:MAGIC"
+                                                stylename="primary candidate-btn candidate-smartload-btn"
+                                                description="msg://msgSmartScanCvTooltip"
+                                                enable="false"/>
                                         <popupButton id="skillActionsPopupButton"
                                                      caption="msg://msgAdditional"
                                                      icon="font-icon:BARS"

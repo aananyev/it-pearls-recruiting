@@ -832,6 +832,11 @@
         <property name="candidate" view="_minimal">
         </property>
     </view>
+    <view entity="hunttech_CandidateCV" name="candidateCV-scan-view" extends="candidateCV-view">
+        <property name="textCV"/>
+        <property name="linkOriginalCv"/>
+        <property name="linkHuntTechCV"/>
+    </view>
     <!-- CandidateCV browse grids use this narrow view to avoid loading TEXT_CV/LETTER/COMMENT_LETTER LOB fields per row. -->
     <view entity="hunttech_CandidateCV" name="candidateCV-browse-view" extends="_minimal">
         <property name="datePost"/>

@@ -6,6 +6,7 @@ import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.GetRoleService;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.service.SmartCvParsedData;
 import com.company.hunttech.service.TelegramIntegrationService;
 import com.company.hunttech.web.StandartPrioritySkills;
 import com.company.hunttech.web.StandartRoles;
@@ -168,6 +169,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
     private Button copyCVButton;
     private Button scanContactsFromCVButton;
+    private Button smartScanCvBtn;
     private PopupButton skillActionsPopupButton;
     private Button checkSkillFromJD;
     private TextField<String> emailField;
@@ -2262,6 +2264,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             scanContactsFromCVButton = (Button) getWindow().getComponentNN("scanContactsFromCVButton");
             copyCVButton = (Button) getWindow().getComponentNN("copyCVButton");
             skillActionsPopupButton = (PopupButton) getWindow().getComponent("skillActionsPopupButton");
+            smartScanCvBtn = (Button) getWindow().getComponent("smartScanCvBtn");
+            if (smartScanCvBtn != null) {
+                smartScanCvBtn.addClickListener(e -> onSmartScanCvBtnClick());
+            }
 
             jobCandidateCandidateCvTable.getColumn("toVacancy")
                     .setDescriptionProvider(this::jobCandidateCandidateCvTableToVacancyDescriptionProvider);
@@ -2275,12 +2281,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             copyCVButton.addClickListener(e -> copyCVJobCandidate());
             setCopyCVButton();
 
+            jobCandidateCandidateCvTable.addSelectionListener(e -> updateSmartScanButtonState());
+            updateSmartScanButtonState();
+
             jobCandidateCandidateCvTable.addItemClickListener(e -> {
                 if (e.getItem() != null) {
                     copyCVButton.setEnabled(true);
                 } else {
                     copyCVButton.setEnabled(false);
                 }
+                updateSmartScanButtonState();
             });
 
             jobCandidateCandidateCvTable.getColumn("letter")
@@ -2846,7 +2856,177 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe(id = "jobCandidateCandidateCvsDc", target = Target.DATA_CONTAINER)
     public void onJobCandidateCandidateCvsDcItemChange(InstanceContainer.ItemChangeEvent<CandidateCV> event) {
         scanContactsFromCVs();
+        updateSmartScanButtonState();
     }
+
+    /* =========================================================================
+     * Умное сканирование резюме кандидата (Smart CV Scan)
+     * ========================================================================= */
+
+    private void updateSmartScanButtonState() {
+        if (smartScanCvBtn != null) {
+            boolean singleSelected = false;
+            if (jobCandidateCandidateCvTable != null) {
+                Set<CandidateCV> selected = jobCandidateCandidateCvTable.getSelected();
+                singleSelected = selected != null && selected.size() == 1;
+            }
+            smartScanCvBtn.setEnabled(singleSelected);
+        }
+    }
+
+    public void onSmartScanCvBtnClick() {
+        if (jobCandidateCandidateCvTable == null) return;
+        Set<CandidateCV> selected = jobCandidateCandidateCvTable.getSelected();
+        if (selected == null || selected.size() != 1) {
+            return;
+        }
+        CandidateCV cv = selected.iterator().next();
+        openSmartCvScanDialog(cv);
+    }
+
+    private void openSmartCvScanDialog(CandidateCV cv) {
+        SmartCvScanDialog dialog = screenBuilders.screen(this)
+                .withScreenClass(SmartCvScanDialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        dialog.initScan(cv, getEditedEntity());
+        dialog.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                applySmartScanResults(dialog.getSelectedUpdates(), dialog.getParsedData());
+            }
+        });
+        dialog.show();
+    }
+
+    private void applySmartScanResults(List<CvScanFieldComparison> updates, SmartCvParsedData parsedData) {
+        if (updates == null || updates.isEmpty()) {
+            return;
+        }
+
+        JobCandidate candidate = getEditedEntity();
+        boolean changed = false;
+
+        for (CvScanFieldComparison update : updates) {
+            String val = update.getFoundValue();
+            if (val == null || val.trim().isEmpty() || "—".equals(val.trim())) {
+                continue;
+            }
+            val = val.trim();
+
+            switch (update.getFieldId()) {
+                case "secondName":
+                    if (secondNameField != null) {
+                        secondNameField.setValue(val);
+                    } else {
+                        candidate.setSecondName(val);
+                    }
+                    changed = true;
+                    break;
+                case "firstName":
+                    if (firstNameField != null) {
+                        firstNameField.setValue(val);
+                    } else {
+                        candidate.setFirstName(val);
+                    }
+                    changed = true;
+                    break;
+                case "middleName":
+                    if (middleNameField != null) {
+                        middleNameField.setValue(val);
+                    } else {
+                        candidate.setMiddleName(val);
+                    }
+                    changed = true;
+                    break;
+                case "phone":
+                    setCandidatePhoneValue(val);
+                    changed = true;
+                    break;
+                case "mobilePhone":
+                    if (mobilePhoneField != null) {
+                        mobilePhoneField.setValue(val);
+                    } else {
+                        candidate.setMobilePhone(val);
+                    }
+                    changed = true;
+                    break;
+                case "email":
+                    setCandidateEmailValue(val);
+                    changed = true;
+                    break;
+                case "telegramName":
+                    String tg = SmartCvScanHelper.normalizeTelegram(val);
+                    if (telegramNameField != null) {
+                        telegramNameField.setValue(tg);
+                    } else {
+                        candidate.setTelegramName(tg);
+                    }
+                    changed = true;
+                    break;
+                case "whatsupName":
+                    if (whatsupNameField != null) {
+                        whatsupNameField.setValue(val);
+                    } else {
+                        candidate.setWhatsupName(val);
+                    }
+                    changed = true;
+                    break;
+                case "skypeName":
+                    if (skypeNameField != null) {
+                        skypeNameField.setValue(val);
+                    } else {
+                        candidate.setSkypeName(val);
+                    }
+                    changed = true;
+                    break;
+                case "cityOfResidence":
+                    City resolvedCity = resolveCityForCandidate(val);
+                    if (resolvedCity != null) {
+                        if (jobCityCandidateField != null) {
+                            jobCityCandidateField.setValue(resolvedCity);
+                        } else {
+                            candidate.setCityOfResidence(resolvedCity);
+                        }
+                        changed = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (changed) {
+            updateFullNameField();
+            updateCandidateProfileLabels(candidate);
+            if (labelQualityPercent != null) {
+                labelQualityPercent.setValue(calculateCardCompletionPercentage(candidate) + "%");
+            }
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(messageBundle.getMessage("msgSmartScanSuccessCaption"))
+                    .withDescription(messageBundle.getMessage("msgSmartScanSuccessDesc"))
+                    .show();
+        }
+    }
+
+    private City resolveCityForCandidate(String cityName) {
+        if (cityName == null || cityName.trim().isEmpty()) return null;
+        String clean = cityName.trim();
+        if (clean.length() > 50) {
+            clean = clean.substring(0, 50).trim();
+        }
+        List<City> list = dataManager.load(City.class)
+                .query("select e from hunttech_City e where lower(e.cityRuName) = :name")
+                .parameter("name", clean.toLowerCase())
+                .list();
+        if (!list.isEmpty()) {
+            return list.get(0);
+        }
+        DataContext dataContext = getScreenData().getDataContext();
+        City newCity = metadata.create(City.class);
+        newCity.setCityRuName(clean);
+        return dataContext != null ? dataContext.merge(newCity) : dataManager.commit(newCity);
+    }
+
 
     public void checkSkillFromJD() {
         List<SkillTree> skillTrees = rescanResume();
