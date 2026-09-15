@@ -23,6 +23,7 @@ sql/sql/HuntTech.sql
 *Secret*
 .DS_Store
 *.log
+*.iso
 *.class
 __pycache__/
 *.py[cod]

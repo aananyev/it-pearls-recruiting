@@ -53,6 +53,8 @@ public class SmartOpenPositionUploadScreen extends Screen {
     @Inject
     private Label<String> previewVacancyName;
     @Inject
+    private Label<String> previewVacansyId;
+    @Inject
     private Label<String> previewProject;
     @Inject
     private Label<String> previewPositionType;
@@ -315,6 +317,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
 
         // 1. Заполнение карточки превью
         previewVacancyName.setValue(data.getVacansyName() != null ? data.getVacansyName() : "-");
+        previewVacansyId.setValue(data.getVacansyID() != null && !data.getVacansyID().isEmpty() ? data.getVacansyID() : "Будет сгенерирован автоматически");
         previewProject.setValue((data.getProjectName() != null ? data.getProjectName() : "Основной проект") +
                 (data.getCompanyName() != null ? " (" + data.getCompanyName() + ")" : ""));
         previewPositionType.setValue(data.getPositionTypeName() != null ? data.getPositionTypeName() : "-");
@@ -389,6 +392,7 @@ public class SmartOpenPositionUploadScreen extends Screen {
 
     private void resetPreview() {
         previewCard.setVisible(false);
+        previewVacansyId.setValue("-");
         duplicateBox.setVisible(false);
         missingFieldsBox.setVisible(false);
         saveNewPositionBtn.setVisible(false);

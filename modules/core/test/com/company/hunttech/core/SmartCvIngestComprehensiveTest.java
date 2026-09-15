@@ -497,10 +497,13 @@ public class SmartCvIngestComprehensiveTest {
         existing.setEmail("vladislav@example.com");
         existing.setTelegramName("@vagabekyan");
 
-        FluentLoader deepLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        FluentLoader deepLoader = mock(FluentLoader.class);
+        FluentLoader.ByQuery queryLoader = mock(FluentLoader.ByQuery.class);
         when(mockDataManager.load(JobCandidate.class)).thenReturn(deepLoader);
-        when(deepLoader.query(anyString()).parameter(anyString(), any()).view(anyString()).list())
-                .thenReturn(Collections.singletonList(existing));
+        when(deepLoader.query(anyString())).thenReturn(queryLoader);
+        when(queryLoader.parameter(anyString(), any())).thenReturn(queryLoader);
+        when(queryLoader.view(anyString())).thenReturn(queryLoader);
+        when(queryLoader.list()).thenReturn(Collections.singletonList(existing));
 
         // 1. Поиск по телефону в другом формате
         SmartCvParsedData dataPhone = new SmartCvParsedData();

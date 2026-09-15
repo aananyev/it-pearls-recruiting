@@ -12,6 +12,7 @@ public class SmartOpenPositionParsedData implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String rawText;
+    private String vacansyID;
     private String vacansyName;
     private String rawVacansyName;
     private String projectName;
@@ -46,6 +47,14 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     public void setRawText(String rawText) {
         this.rawText = rawText;
+    }
+
+    public String getVacansyID() {
+        return vacansyID;
+    }
+
+    public void setVacansyID(String vacansyID) {
+        this.vacansyID = vacansyID;
     }
 
     public String getVacansyName() {

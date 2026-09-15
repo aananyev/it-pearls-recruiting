@@ -1,5 +1,7 @@
 package com.company.hunttech.service;
 
+import com.company.hunttech.core.InteractionService;
+import com.company.hunttech.core.OpenPositionService;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.CandidateSkillPriority;
@@ -9,6 +11,7 @@ import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.Iteraction;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.Position;
 import com.company.hunttech.entity.SkillTree;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,6 +61,8 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
     private static final Logger log = LoggerFactory.getLogger(SmartCvIngestServiceBean.class);
 
     private static final String FUNCTION_CV_SMART_PARSE_JSON = "CV_SMART_PARSE_JSON";
+    private static final int DEFAULT_NEW_CANDIDATE_INTERACTION_RATING = 4;
+    private static final String DEFAULT_RECRUITER_NAME = "System";
 
     @Inject
     private DataManager dataManager;
@@ -66,6 +72,10 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
     private FileLoader fileLoader;
     @Inject
     private AiExecutionService aiExecutionService;
+    @Inject
+    private OpenPositionService openPositionService;
+    @Inject
+    private InteractionService interactionService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -470,16 +480,28 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         // Создание взаимодействия «Новый кандидат»
         Iteraction interactionType = resolveNewCandidateInteractionType();
         if (interactionType != null) {
-            IteractionList interaction = metadata.create(IteractionList.class);
-            interaction.setCandidate(candidate);
-            interaction.setRecrutier(recruiter);
-            interaction.setDateIteraction(new Date());
-            interaction.setIteractionType(interactionType);
-            if (data.getSalary() != null && !data.getSalary().isEmpty()) {
-                interaction.setAddString("Зарплатные ожидания: " + data.getSalary());
+            OpenPosition defaultVacancy = resolveDefaultVacancy();
+            if (defaultVacancy != null) {
+                IteractionList interaction = metadata.create(IteractionList.class);
+                interaction.setCandidate(candidate);
+                interaction.setVacancy(defaultVacancy);
+                interaction.setRecrutier(recruiter);
+                interaction.setRecrutierName(recruiter != null ? recruiter.getName() : DEFAULT_RECRUITER_NAME);
+                interaction.setDateIteraction(new Date());
+                interaction.setIteractionType(interactionType);
+                interaction.setRating(DEFAULT_NEW_CANDIDATE_INTERACTION_RATING);
+                interaction.setNumberIteraction(calculateNextInteractionNumber());
+                if (data.getSalary() != null && !data.getSalary().isEmpty()) {
+                    interaction.setAddString("Зарплатные ожидания: " + data.getSalary());
+                }
+                interaction.setComment("Кандидат автоматически импортирован из файла " + (fileDescriptor != null ? fileDescriptor.getName() : "резюме"));
+                commitContext.addInstanceToCommit(interaction);
+                log.info("[SMART_CV_INGEST] Создано взаимодействие '{}' для кандидата '{}' (вакансия: '{}')",
+                        interactionType.getIterationName(), candidate.getFullName(), defaultVacancy.getVacansyName());
+            } else {
+                log.warn("[SMART_CV_INGEST] Взаимодействие '{}' не создано для кандидата '{}': не определена вакансия по умолчанию (IteractionList.vacancy @NotNull)",
+                        interactionType.getIterationName(), candidate.getFullName());
             }
-            interaction.setComment("Кандидат автоматически импортирован из файла " + (fileDescriptor != null ? fileDescriptor.getName() : "резюме"));
-            commitContext.addInstanceToCommit(interaction);
         }
 
         dataManager.commit(commitContext);
@@ -559,16 +581,28 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
         // Добавляем новое взаимодействие об обновлении резюме
         Iteraction interactionType = resolveNewCandidateInteractionType();
         if (interactionType != null) {
-            IteractionList interaction = metadata.create(IteractionList.class);
-            interaction.setCandidate(existing);
-            interaction.setRecrutier(recruiter);
-            interaction.setDateIteraction(new Date());
-            interaction.setIteractionType(interactionType);
-            if (data.getSalary() != null && !data.getSalary().isEmpty()) {
-                interaction.setAddString("Зарплатные ожидания: " + data.getSalary());
+            OpenPosition defaultVacancy = resolveDefaultVacancy();
+            if (defaultVacancy != null) {
+                IteractionList interaction = metadata.create(IteractionList.class);
+                interaction.setCandidate(existing);
+                interaction.setVacancy(defaultVacancy);
+                interaction.setRecrutier(recruiter);
+                interaction.setRecrutierName(recruiter != null ? recruiter.getName() : DEFAULT_RECRUITER_NAME);
+                interaction.setDateIteraction(new Date());
+                interaction.setIteractionType(interactionType);
+                interaction.setRating(DEFAULT_NEW_CANDIDATE_INTERACTION_RATING);
+                interaction.setNumberIteraction(calculateNextInteractionNumber());
+                if (data.getSalary() != null && !data.getSalary().isEmpty()) {
+                    interaction.setAddString("Зарплатные ожидания: " + data.getSalary());
+                }
+                interaction.setComment("Загружена новая версия резюме из файла " + (fileDescriptor != null ? fileDescriptor.getName() : "резюме"));
+                commitContext.addInstanceToCommit(interaction);
+                log.info("[SMART_CV_INGEST] Создано взаимодействие '{}' при обновлении резюме кандидата '{}'",
+                        interactionType.getIterationName(), existing.getFullName());
+            } else {
+                log.warn("[SMART_CV_INGEST] Взаимодействие '{}' не создано для кандидата '{}': не определена вакансия по умолчанию",
+                        interactionType.getIterationName(), existing.getFullName());
             }
-            interaction.setComment("Загружена новая версия резюме из файла " + (fileDescriptor != null ? fileDescriptor.getName() : "резюме"));
-            commitContext.addInstanceToCommit(interaction);
         }
 
         dataManager.commit(commitContext);
@@ -931,23 +965,83 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
 
     private Iteraction resolveNewCandidateInteractionType() {
         try {
-            List<Iteraction> list = dataManager.load(Iteraction.class)
-                    .query("select e from hunttech_Iteraction e where lower(e.iteractionTree.iterationName) like :name")
+            // 1. Поиск точного совпадения по имени «Новый кандидат»
+            List<Iteraction> exactList = dataManager.load(Iteraction.class)
+                    .query("select e from hunttech_Iteraction e where lower(e.iterationName) = 'новый кандидат'")
+                    .view("iteraction-view")
+                    .maxResults(1)
+                    .list();
+            if (!exactList.isEmpty()) {
+                return exactList.get(0);
+            }
+
+            // 2. Поиск по подстроке «новый кандидат» в наименовании или родителе
+            List<Iteraction> subList = dataManager.load(Iteraction.class)
+                    .query("select e from hunttech_Iteraction e where lower(e.iterationName) like :name or lower(e.iteractionTree.iterationName) like :name")
                     .parameter("name", "%новый кандидат%")
                     .view("iteraction-view")
-                    .list();
-            if (!list.isEmpty()) {
-                return list.get(0);
-            }
-            return dataManager.load(Iteraction.class)
-                    .query("select e from hunttech_Iteraction e order by e.createTs asc")
                     .maxResults(1)
+                    .list();
+            if (!subList.isEmpty()) {
+                return subList.get(0);
+            }
+
+            // 3. Поиск по историческому термину системы «Новый контакт»
+            List<Iteraction> contactList = dataManager.load(Iteraction.class)
+                    .query("select e from hunttech_Iteraction e where lower(e.iterationName) like :name or lower(e.iteractionTree.iterationName) like :name")
+                    .parameter("name", "%новый контакт%")
                     .view("iteraction-view")
-                    .optional()
-                    .orElse(null);
-        } catch (Exception e) {
-            log.error("Не удалось определить тип взаимодействия: " + e.getMessage());
+                    .maxResults(1)
+                    .list();
+            if (!contactList.isEmpty()) {
+                return contactList.get(0);
+            }
+
+            log.warn("[SMART_CV_INGEST] Тип взаимодействия «Новый кандидат» или «Новый контакт» не найден в справочнике hunttech_Iteraction");
             return null;
+        } catch (Exception e) {
+            log.error("[SMART_CV_INGEST] Ошибка при подборе типа взаимодействия: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private OpenPosition resolveDefaultVacancy() {
+        try {
+            if (openPositionService != null) {
+                OpenPosition defPos = openPositionService.getOpenPositionDefault();
+                if (defPos != null) return defPos;
+            }
+        } catch (Exception e) {
+            log.warn("[SMART_CV_INGEST] Не удалось получить вакансию по умолчанию из openPositionService: {}", e.getMessage());
+        }
+
+        try {
+            List<OpenPosition> list = dataManager.load(OpenPosition.class)
+                    .query("select e from hunttech_OpenPosition e where lower(e.vacansyName) = 'default' or lower(e.vacansyName) = 'по умолчанию'")
+                    .view("openPosition-view")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        } catch (Exception e) {
+            log.error("[SMART_CV_INGEST] Ошибка поиска вакансии по умолчанию: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    private synchronized BigDecimal calculateNextInteractionNumber() {
+        try {
+            if (interactionService != null) {
+                BigDecimal maxNum = interactionService.getCountInteraction();
+                return (maxNum != null ? maxNum : BigDecimal.ZERO).add(BigDecimal.ONE);
+            }
+            BigDecimal maxNum = dataManager
+                    .loadValue("select max(e.numberIteraction) from hunttech_IteractionList e", BigDecimal.class)
+                    .optional()
+                    .orElse(BigDecimal.ZERO);
+            return (maxNum != null ? maxNum : BigDecimal.ZERO).add(BigDecimal.ONE);
+        } catch (Exception e) {
+            log.warn("[SMART_CV_INGEST] Ошибка при расчете номера взаимодействия: {}", e.getMessage());
+            return BigDecimal.ONE;
         }
     }
 }

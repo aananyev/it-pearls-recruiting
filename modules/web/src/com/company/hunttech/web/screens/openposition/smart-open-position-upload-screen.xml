@@ -109,11 +109,15 @@
                                     <label id="previewVacancyName" value="-" stylename="bold" css="color: #1e3a8a;"/>
                                 </row>
                                 <row>
+                                    <label value="ID вакансии:" stylename="bold"/>
+                                    <label id="previewVacansyId" value="-" stylename="bold" css="color: #0d9488;"/>
+                                </row>
+                                <row>
                                     <label value="Проект / Компания:" stylename="bold"/>
                                     <label id="previewProject" value="-"/>
                                 </row>
                                 <row>
-                                    <label value="Специализация:" stylename="bold"/>
+                                    <label value="Должность:" stylename="bold"/>
                                     <label id="previewPositionType" value="-"/>
                                 </row>
                                 <row>

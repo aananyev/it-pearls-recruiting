@@ -249,5 +249,7 @@
              relativeToChangelogFile="true"/>
     <include file="260914-3-preseedCorporateYandexCalendars.xml"
              relativeToChangelogFile="true"/>
+    <include file="260915-updateSmartVacancyHtmlPrompts.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

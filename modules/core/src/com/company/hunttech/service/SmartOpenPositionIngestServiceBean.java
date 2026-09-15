@@ -33,6 +33,21 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
     private static final String FUNCTION_VACANCY_SMART_PARSE_JSON = "VACANCY_SMART_PARSE_JSON";
 
+    private static final Pattern MD_DETECT_HEADER_PATTERN = Pattern.compile("(?m)^#{1,6}\\s+");
+    private static final Pattern MD_DETECT_LIST_PATTERN = Pattern.compile("(?m)^\\s*[-*•]\\s+");
+    private static final Pattern HTML_TAG_DETECT_PATTERN = Pattern.compile("(?i)<[a-z1-6]+(?:\\s+[^>]*?)?>");
+    private static final Pattern MD_HEADER_LINE_PATTERN = Pattern.compile("^(#{1,6})\\s+(.*)$");
+    private static final Pattern MD_UL_LINE_PATTERN = Pattern.compile("^\\s*[-*•]\\s+(.*)$");
+    private static final Pattern MD_OL_LINE_PATTERN = Pattern.compile("^\\s*\\d+[.)]\\s+(.*)$");
+    private static final Pattern MD_TABLE_SPLIT_PATTERN = Pattern.compile("^\\|?\\s*(:?-+:?\\s*\\|?)+\\s*$");
+    private static final Pattern DANGEROUS_TAGS_PATTERN = Pattern.compile("(?is)<(script|iframe|object|embed|applet|svg|meta|link)[^>]*?>.*?</\\1>");
+    private static final Pattern DANGEROUS_TAG_SINGLE_PATTERN = Pattern.compile("(?is)<(script|iframe|object|embed|applet|svg|meta|link)[^>]*?>");
+    private static final Pattern JAVASCRIPT_URI_PATTERN = Pattern.compile("(?i)javascript:[^\"'\\s>]*");
+    private static final Pattern ON_EVENT_HANDLER_PATTERN = Pattern.compile("(?i)[/\\s]on[a-z0-9_-]+\\s*=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+)");
+    private static final Pattern URL_VACANCY_ID_PATTERN = Pattern.compile("(?iu)/(?:vacancy|openPosition|requisition)/((?=[A-Za-z0-9_-]*\\d)[A-Za-z0-9_-]{3,16})");
+    private static final Pattern KEYWORD_VACANCY_ID_PATTERN = Pattern.compile("(?iu)(?:id\\s*вакансии|req[\\s_-]*id|requisition[\\s_-]*id|код\\s*вакансии|номер\\s*вакансии|вакансия\\s*№|заявка\\s*№|№\\s*заявки|№\\s*вакансии)\\s*[:#№=\\-\\s]+((?=[A-Za-z0-9_-]*\\d)[A-Za-z0-9_-]{2,16})");
+    private static final Pattern HASHTAG_VACANCY_ID_PATTERN = Pattern.compile("(?iu)#((?:req|vac|id|job)-?\\d{2,12})\\b");
+
     @Inject
     private DataManager dataManager;
     @Inject
@@ -237,6 +252,13 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 
                 log.info("[SMART_VACANCY_OPENING] JSON успешно десериализован из AI-ответа: {}", json.toString());
 
+                // 1.0 ID вакансии (поддержка вариаций id, vacansyId, vacancyId, requisitionId)
+                String vacId = getJsonString(json, "vacansyId", "vacancyId", "id", "vacansyID", "requisitionId", "externalId", "reqId");
+                if (vacId != null && !vacId.isEmpty()) {
+                    data.setVacansyID(cleanVacansyId(vacId));
+                    log.info("[SMART_VACANCY_OPENING] Извлечен ID вакансии из AI JSON: '{}'", data.getVacansyID());
+                }
+
                 // 1.1 Название вакансии (поддержка вариаций c/s и алиасов)
                 String vacName = getJsonString(json, "vacancyName", "vacansyName", "title", "name", "position");
                 if (vacName != null && !vacName.isEmpty()) {
@@ -360,18 +382,24 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 String memo = getJsonString(json, "memoForInterview", "memo", "interviewMemo");
                 if (memo != null) data.setMemoForInterview(cleanHtmlToPlainText(memo));
 
-                // 1.16 Разделы из AI-промптов: чек-лист, карта поиска, план собеседования
+                // 1.16 Разделы из AI-промптов: чек-лист, карта поиска, план собеседования (строго валидный HTML)
                 String chkText = getJsonString(json, "interviewChecklist", "checklistText");
-                if (chkText != null) data.setInterviewChecklist(cleanHtmlToPlainText(chkText));
+                if (chkText != null && !chkText.trim().isEmpty()) {
+                    data.setInterviewChecklist(formatAsCleanHtml(chkText));
+                }
                 String sMap = getJsonString(json, "searchMap", "sourcingMap");
-                if (sMap != null) data.setSearchMap(cleanHtmlToPlainText(sMap));
+                if (sMap != null && !sMap.trim().isEmpty()) {
+                    data.setSearchMap(formatAsCleanHtml(sMap));
+                }
                 String iPlan = getJsonString(json, "interviewPlan", "interviewStructure");
-                if (iPlan != null) data.setInterviewPlan(cleanHtmlToPlainText(iPlan));
+                if (iPlan != null && !iPlan.trim().isEmpty()) {
+                    data.setInterviewPlan(formatAsCleanHtml(iPlan));
+                }
 
-                // 1.17 Стандартизированное описание вакансии
+                // 1.17 Стандартизированное описание вакансии (строго валидный HTML)
                 String fullCommentJson = getJsonString(json, "comment", "standardizedDescription");
                 if (fullCommentJson != null && fullCommentJson.length() > 50) {
-                    data.setComment(cleanHtmlToPlainText(fullCommentJson));
+                    data.setComment(formatAsCleanHtml(fullCommentJson));
                 }
 
                 if (data.getVacansyName() != null && !data.getVacansyName().isEmpty()) {
@@ -389,12 +417,21 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     e.getClass().getSimpleName(), e.getMessage(), e);
         }
 
+        // 1.18 Резервное извлечение ID вакансии/заявки регулярными выражениями из текста и URL (если AI не определил)
+        if (data.getVacansyID() == null || data.getVacansyID().isEmpty()) {
+            String extractedId = extractVacancyIdFromTextOrUrl(actualSourceText);
+            if (extractedId != null && !extractedId.isEmpty()) {
+                data.setVacansyID(extractedId);
+                log.info("[SMART_VACANCY_OPENING] ID вакансии извлечен регулярным выражением: '{}'", data.getVacansyID());
+            }
+        }
+
         // 2. Эвристический fallback-парсинг, если AI недоступен или вернул пустые поля
         if (!parsedByAi || data.getVacansyName() == null || data.getVacansyName().isEmpty()) {
             log.info("[SMART_VACANCY_OPENING] Запуск эвристического fallback-парсера...");
             fallbackHeuristicParse(textForAi, data);
-            log.info("[SMART_VACANCY_OPENING] Результаты эвристического парсинга: vacansyName='{}', remoteWork={}, salaryMin={}, salaryMax={}, grade='{}', skills={}",
-                    data.getVacansyName(), data.getRemoteWork(), data.getSalaryMin(), data.getSalaryMax(), data.getGradeName(), data.getRequiredSkills());
+            log.info("[SMART_VACANCY_OPENING] Результаты эвристического парсинга: vacansyName='{}', vacansyID='{}', remoteWork={}, salaryMin={}, salaryMax={}, grade='{}', skills={}",
+                    data.getVacansyName(), data.getVacansyID(), data.getRemoteWork(), data.getSalaryMin(), data.getSalaryMax(), data.getGradeName(), data.getRequiredSkills());
         }
 
         if (data.getComment() == null || data.getComment().trim().isEmpty()) {
@@ -681,6 +718,19 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         if (data.getRequiredSkills() == null || data.getRequiredSkills().isEmpty()) {
             data.setRequiredSkills(foundSkills);
         }
+
+        // Извлечение ID вакансии/заявки в fallback (если еще не извлечен)
+        if (data.getVacansyID() == null || data.getVacansyID().isEmpty()) {
+            String extractedId = extractVacancyIdFromTextOrUrl(text);
+            if (extractedId != null && !extractedId.isEmpty()) {
+                data.setVacansyID(extractedId);
+            }
+        }
+
+        // Если должность не определена явно, используем название вакансии
+        if (data.getPositionTypeName() == null && data.getVacansyName() != null) {
+            data.setPositionTypeName(cleanTitle(data.getVacansyName()));
+        }
     }
 
     private void ensureFourArtifacts(SmartOpenPositionParsedData data, String sourceText) {
@@ -713,204 +763,321 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         String proj = data.getProjectFullDescription() != null ? data.getProjectFullDescription() : (data.getProjectName() != null ? data.getProjectName() : "НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.");
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<b>1. Роль, название должности</b>\n").append(role).append("\n\n");
-        sb.append("<b>2. Грейд, опыт работы</b>\n").append(grade).append("\n\n");
-        sb.append("<b>3. Описание проекта</b>\n");
+        sb.append("<h3>1. Роль, название должности</h3>\n<p>").append(escapeHtml(role)).append("</p>\n\n");
+        sb.append("<h3>2. Грейд, опыт работы</h3>\n<p>").append(escapeHtml(grade)).append("</p>\n\n");
+        sb.append("<h3>3. Описание проекта</h3>\n<p>");
         if (data.getProjectFullDescription() != null && !data.getProjectFullDescription().trim().isEmpty()) {
-            sb.append(data.getProjectFullDescription()).append("\n\n");
+            sb.append(escapeHtml(data.getProjectFullDescription()));
         } else if (data.getProjectShortDescription() != null && !data.getProjectShortDescription().trim().isEmpty()) {
-            sb.append(data.getProjectShortDescription()).append("\n\n");
+            sb.append(escapeHtml(data.getProjectShortDescription()));
         } else {
-            sb.append(proj).append("\n\n");
+            sb.append(escapeHtml(proj));
         }
-        sb.append("<b>4. Обязанности</b>\n");
+        sb.append("</p>\n\n");
+
+        sb.append("<h3>4. Обязанности</h3>\n");
         if (data.getChecklist() != null && !data.getChecklist().isEmpty()) {
+            sb.append("<ul>\n");
             for (String ch : data.getChecklist()) {
-                sb.append("• ").append(ch).append("\n");
+                sb.append("  <li>").append(escapeHtml(ch)).append("</li>\n");
             }
+            sb.append("</ul>\n\n");
         } else {
-            sb.append("НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.\n");
+            sb.append("<p>НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.</p>\n\n");
         }
-        sb.append("\n<b>5. Описание требований к вакансии (Хард-скиллы) обязательные</b>\n");
+
+        sb.append("<h3>5. Описание требований к вакансии (Хард-скиллы) обязательные</h3>\n");
         if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
+            sb.append("<ul>\n");
             for (String s : data.getRequiredSkills()) {
-                sb.append("• ").append(s).append("\n");
+                sb.append("  <li>").append(escapeHtml(s)).append("</li>\n");
             }
+            sb.append("</ul>\n\n");
         } else {
-            sb.append("НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.\n");
+            sb.append("<p>НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.</p>\n\n");
         }
-        sb.append("\n<b>6. Описание требований к вакансии (Хард-скиллы) желательные</b>\n");
-        sb.append("• Опыт работы в кросс-функциональных командах\n• Понимание CI/CD и современных процессов разработки\n\n");
-        sb.append("<b>7. Требования к софт-скиллам</b>\n");
-        sb.append("• Высокие коммуникативные навыки, ответственность, системность мышления\n• Умение работать в распределенной команде и договариваться с заказчиками\n\n");
-        sb.append("<b>8. Дополнительная информация</b>\n");
+
+        sb.append("<h3>6. Описание требований к вакансии (Хард-скиллы) желательные</h3>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Опыт работы в кросс-функциональных командах</li>\n");
+        sb.append("  <li>Понимание CI/CD и современных процессов разработки</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>7. Требования к софт-скиллам</h3>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Высокие коммуникативные навыки, ответственность, системность мышления</li>\n");
+        sb.append("  <li>Умение работать в распределенной команде и договариваться с заказчиками</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>8. Дополнительная информация</h3>\n");
         String loc = data.getCityName() != null ? ("Локация / география: " + data.getCityName() + " (РФ, РБ). ") : "Локация: РФ, РБ. ";
-        sb.append("• ").append(loc).append("Часовой пояс: МСК ± 2 часа.\n");
-        sb.append("• Формат оформления: по ТК РФ или ИП/ГПХ. Долгосрочное сотрудничество.\n");
-        sb.append("• Проверки: прохождение внутренней проверки службы безопасности заказчика.\n\n");
-        sb.append("<b>9. Условия работы</b>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>").append(escapeHtml(loc)).append("Часовой пояс: МСК ± 2 часа.</li>\n");
+        sb.append("  <li>Формат оформления: по ТК РФ или ИП/ГПХ. Долгосрочное сотрудничество.</li>\n");
+        sb.append("  <li>Проверки: прохождение внутренней проверки службы безопасности заказчика.</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>9. Условия работы</h3>\n");
         String rw = (data.getRemoteWork() != null && data.getRemoteWork() == 1) ? "Удаленный формат работы" : ((data.getRemoteWork() != null && data.getRemoteWork() == 2) ? "Гибридный формат" : "Работа в офисе");
-        sb.append("• ").append(rw).append("\n• График: полная занятость (МСК ± 2 часа)\n• Ставка обсуждается индивидуально с успешным кандидатом\n\n");
-        sb.append("<b>10. Список обязательных знаний технологий</b>\n");
-        sb.append(!data.getRequiredSkills().isEmpty() ? String.join(", ", data.getRequiredSkills()) : "НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.").append("\n\n");
-        sb.append("<b>11. Список желательных знаний технологий</b>\n");
-        sb.append("Git, Docker, Jira, Confluence, Linux\n\n");
-        sb.append("<b>12. Требования к резюме</b>\n");
-        sb.append("• Экспресс-скрининг (30 секунд): в опыте за последние 1-2 года должен быть явно подтвержден Core-стек (").append(!data.getRequiredSkills().isEmpty() ? String.join(", ", data.getRequiredSkills()) : "ключевые технологии роли").append(").\n");
-        sb.append("• Описание коммерческих проектов с указанием решаемых задач, архитектурных подходов и личного вклада кандидата.\n");
-        sb.append("• В резюме обязательно должны быть указаны текущая локация, гражданство и готовность к полной занятости.\n\n");
-        sb.append("<b>13. Собеседование</b>\n");
-        sb.append("1. Первичное скрининг-интервью с рекрутером (30 мин).\n2. Техническое интервью с лидом проекта (60 мин).\n\n");
-        sb.append("<b>14. Рекомендации рекрутеру</b>\n");
-        sb.append("• Elevator Pitch: «Ищем опытного ").append(role).append(" в проект ").append(data.getProjectName() != null ? data.getProjectName() : "заказчика").append(" на полный удаленный формат без лишней бюрократии с современным стеком задач».\n");
-        sb.append("• Selling Points: полная стабильная удаленка, масштабный продукт, быстрое согласование кандидатов, прозрачные выплаты.\n");
-        sb.append("• Красные флаги отсева: отсутствие подтвержденного практического опыта с Core-стеком, частая смена мест (менее 6 мес.), опыт только в саппорте при требовании разработки с нуля.\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>").append(escapeHtml(rw)).append("</li>\n");
+        sb.append("  <li>График: полная занятость (МСК ± 2 часа)</li>\n");
+        sb.append("  <li>Ставка обсуждается индивидуально с успешным кандидатом</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>10. Список обязательных знаний технологий</h3>\n<p>");
+        sb.append(!data.getRequiredSkills().isEmpty() ? escapeHtml(String.join(", ", data.getRequiredSkills())) : "НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.");
+        sb.append("</p>\n\n");
+
+        sb.append("<h3>11. Список желательных знаний технологий</h3>\n<p>Git, Docker, Jira, Confluence, Linux</p>\n\n");
+
+        sb.append("<h3>12. Требования к резюме</h3>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Экспресс-скрининг (30 секунд): в опыте за последние 1-2 года должен быть явно подтвержден Core-стек (")
+                .append(!data.getRequiredSkills().isEmpty() ? escapeHtml(String.join(", ", data.getRequiredSkills())) : "ключевые технологии роли")
+                .append(").</li>\n");
+        sb.append("  <li>Описание коммерческих проектов с указанием решаемых задач, архитектурных подходов и личного вклада кандидата.</li>\n");
+        sb.append("  <li>В резюме обязательно должны быть указаны текущая локация, гражданство и готовность к полной занятости.</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>13. Собеседование</h3>\n");
+        sb.append("<ol>\n");
+        sb.append("  <li>Первичное скрининг-интервью с рекрутером (30 мин).</li>\n");
+        sb.append("  <li>Техническое интервью с лидом проекта (60 мин).</li>\n");
+        sb.append("</ol>\n\n");
+
+        sb.append("<h3>14. Рекомендации рекрутеру</h3>\n");
+        sb.append("<p><b>Elevator Pitch:</b> Ищем опытного ").append(escapeHtml(role)).append(" в проект ")
+                .append(data.getProjectName() != null ? escapeHtml(data.getProjectName()) : "заказчика")
+                .append(" на полный удаленный формат без лишней бюрократии с современным стеком задач.</p>\n");
+        sb.append("<p><b>Selling Points:</b> полная стабильная удаленка, масштабный продукт, быстрое согласование кандидатов, прозрачные выплаты.</p>\n");
+        sb.append("<p><b>Красные флаги отсева:</b> отсутствие подтвержденного практического опыта с Core-стеком, частая смена мест (менее 6 мес.), опыт только в саппорте при требовании разработки с нуля.</p>\n");
         String topSkill = !data.getRequiredSkills().isEmpty() ? data.getRequiredSkills().get(0) : "ключевой технологии";
-        sb.append("• Контрольный вопрос для скрининга: «Расскажите о самом сложном кейсе использования ").append(topSkill).append(" на ваших последних проектах: какую проблему решали и каков был результат?»");
+        sb.append("<p><b>Контрольный вопрос для скрининга:</b> «Расскажите о самом сложном кейсе использования ")
+                .append(escapeHtml(topSkill))
+                .append(" на ваших последних проектах: какую проблему решали и каков был результат?»</p>");
         return sb.toString();
     }
 
     private String buildInterviewChecklist(SmartOpenPositionParsedData data) {
         StringBuilder sb = new StringBuilder();
-        sb.append("### Чек-лист первичного скрининга кандидата (Must-Have критерии за 60 секунд)\n\n");
-        sb.append("| Группа навыков | Конкретный навык / Вопрос для проверки | Ключевой навык? | Отметка / Примечания рекрутера | Где искать в резюме? |\n");
-        sb.append("| --- | --- | --- | --- | --- |\n");
+        sb.append("<h3>Чек-лист первичного скрининга кандидата (Must-Have критерии за 60 секунд)</h3>\n");
+        sb.append("<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%; font-size: 13px;\">\n");
+        sb.append("<thead>\n");
+        sb.append("  <tr style=\"background-color: #f1f5f9; text-align: left;\">\n");
+        sb.append("    <th style=\"width: 18%;\">Группа навыков</th>\n");
+        sb.append("    <th style=\"width: 38%;\">Конкретный навык / Вопрос для проверки</th>\n");
+        sb.append("    <th style=\"width: 14%;\">Ключевой навык?</th>\n");
+        sb.append("    <th style=\"width: 12%;\">Отметка рекрутера</th>\n");
+        sb.append("    <th style=\"width: 18%;\">Где искать в резюме?</th>\n");
+        sb.append("  </tr>\n");
+        sb.append("</thead>\n");
+        sb.append("<tbody>\n");
 
-        // 1. Административные условия и стоп-факторы
-        String loc = data.getCityName() != null ? data.getCityName() : "РФ, РБ";
-        sb.append("| 1. Административные фильтры | Проживание: ").append(loc).append(", рабочий график строго по МСК (± 2 часа).<br>• Вопрос: «Подходит ли вам график работы по Москве и где вы территориально находитесь?»<br>• Маркер зачета: резидент РФ/РБ, доступен в рабочие часы МСК. Красный флаг: таймзона > ±3 ч, закрытые локации. | Да (Блокирующий) | | Шапка резюме, контакты |\n");
-        sb.append("| | Формат оформления: готовность к ИП / ГПХ или ТК РФ на полный день (40 ч/нед).<br>• Вопрос: «Рассматриваете ли оформление по ИП/ГПХ и готовы ли к полной загрузке без совмещения?»<br>• Маркер: готовность к сотрудничеству на full-time. Красный флаг: только part-time или оверлап с другой работой. | Да (Блокирующий) | | Желаемые условия, занятость |\n");
+        // 1. Административные фильтры
+        String loc = data.getCityName() != null ? escapeHtml(data.getCityName()) : "РФ, РБ";
+        sb.append("  <tr>\n");
+        sb.append("    <td rowspan=\"2\"><b>1. Административные фильтры</b></td>\n");
+        sb.append("    <td>Проживание: ").append(loc).append(", рабочий график строго по МСК (± 2 часа).<br>• <i>Вопрос:</i> «Подходит ли вам график работы по Москве и где вы территориально находитесь?»<br>• <i>Маркер зачета:</i> резидент РФ/РБ, доступен в рабочие часы МСК.<br>• <i>Красный флаг:</i> таймзона &gt; ±3 ч, закрытые локации.</td>\n");
+        sb.append("    <td><b style=\"color: #b91c1c;\">Да (Блокирующий)</b></td>\n");
+        sb.append("    <td></td>\n");
+        sb.append("    <td>Шапка резюме, контакты</td>\n");
+        sb.append("  </tr>\n");
+        sb.append("  <tr>\n");
+        sb.append("    <td>Формат оформления: готовность к ИП / ГПХ или ТК РФ на полный день (40 ч/нед).<br>• <i>Вопрос:</i> «Рассматриваете ли оформление по ИП/ГПХ и готовы ли к полной загрузке без совмещения?»<br>• <i>Маркер:</i> готовность к сотрудничеству full-time.<br>• <i>Красный флаг:</i> только part-time или оверлап.</td>\n");
+        sb.append("    <td><b style=\"color: #b91c1c;\">Да (Блокирующий)</b></td>\n");
+        sb.append("    <td></td>\n");
+        sb.append("    <td>Желаемые условия, занятость</td>\n");
+        sb.append("  </tr>\n");
 
         // 2. Опыт и грейд
-        String role = data.getPositionTypeName() != null ? data.getPositionTypeName() : (data.getVacansyName() != null ? data.getVacansyName() : "специалиста");
+        String role = data.getPositionTypeName() != null ? escapeHtml(data.getPositionTypeName()) : (data.getVacansyName() != null ? escapeHtml(data.getVacansyName()) : "специалиста");
         String expYears = (data.getWorkExperience() != null ? data.getWorkExperience() : 3) + "+ лет";
-        sb.append("| 2. Опыт и грейд | Подтвержденный коммерческий опыт в роли ").append(role).append(" от ").append(expYears).append(".<br>• Вопрос: «Сколько лет решаете подобные задачи на коммерческих проектах в продакшене?»<br>• Маркер: непрерывный релевантный опыт. Красный флаг: суммарный стаж менее требуемого или большой перерыв. | Да (Блокирующий) | | Раздел «Опыт работы» за 3–5 лет |\n");
+        sb.append("  <tr>\n");
+        sb.append("    <td><b>2. Опыт и грейд</b></td>\n");
+        sb.append("    <td>Подтвержденный коммерческий опыт в роли ").append(role).append(" от ").append(expYears).append(".<br>• <i>Вопрос:</i> «Сколько лет решаете подобные задачи на коммерческих проектах в продакшене?»<br>• <i>Маркер:</i> непрерывный релевантный опыт.<br>• <i>Красный флаг:</i> суммарный стаж менее требуемого или большой перерыв.</td>\n");
+        sb.append("    <td><b style=\"color: #b91c1c;\">Да (Блокирующий)</b></td>\n");
+        sb.append("    <td></td>\n");
+        sb.append("    <td>Раздел «Опыт работы» за 3–5 лет</td>\n");
+        sb.append("  </tr>\n");
 
-        // 3. Ключевой технологический стек (Core)
+        // 3. Core-стек
         if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
             boolean firstSkill = true;
             for (String skill : data.getRequiredSkills()) {
-                String groupCol = firstSkill ? "3. Ключевой Core-стек" : "";
+                String escSkill = escapeHtml(skill);
+                sb.append("  <tr>\n");
+                sb.append("    <td>").append(firstSkill ? "<b>3. Ключевой Core-стек</b>" : "").append("</td>\n");
                 firstSkill = false;
-                sb.append("| ").append(groupCol).append(" | Уверенное практическое владение ").append(skill).append(".<br>• Вопрос: «С какими версиями ").append(skill).append(" и архитектурными задачами сталкивались на последнем месте?»<br>• Маркер: уверенно называет технологии, компоненты и сценарии применения. Красный флаг: поверхностные знания, только курсы без коммерческой практики. | Да (Блокирующий) | | Последние 1–2 места работы (2024–2026 гг.) |\n");
+                sb.append("    <td>Уверенное практическое владение ").append(escSkill).append(".<br>• <i>Вопрос:</i> «С какими версиями ").append(escSkill).append(" и архитектурными задачами сталкивались на последнем месте?»<br>• <i>Маркер:</i> уверенно называет технологии, компоненты и сценарии применения.<br>• <i>Красный флаг:</i> поверхностные знания, только курсы без коммерческой практики.</td>\n");
+                sb.append("    <td><b style=\"color: #b91c1c;\">Да (Блокирующий)</b></td>\n");
+                sb.append("    <td></td>\n");
+                sb.append("    <td>Последние 1–2 места работы (2024–2026 гг.)</td>\n");
+                sb.append("  </tr>\n");
             }
         } else {
-            sb.append("| 3. Ключевой Core-стек | Практический опыт решения производственных задач по ключевому технологическому профилю позиции.<br>• Вопрос: «Какие основные технологии использовали в недавних проектах?» | Да (Блокирующий) | | Проекты за последние 2 года |\n");
+            sb.append("  <tr>\n");
+            sb.append("    <td><b>3. Ключевой Core-стек</b></td>\n");
+            sb.append("    <td>Практический опыт решения производственных задач по профилю позиции.<br>• <i>Вопрос:</i> «Какие основные технологии использовали в недавних проектах?»</td>\n");
+            sb.append("    <td><b style=\"color: #b91c1c;\">Да (Блокирующий)</b></td>\n");
+            sb.append("    <td></td>\n");
+            sb.append("    <td>Проекты за последние 2 года</td>\n");
+            sb.append("  </tr>\n");
         }
 
         // 4. Архитектура и базы данных
-        sb.append("| 4. Архитектура и базы данных | Проектирование API (REST/gRPC), интеграции сервисов, работа с СУБД и структурами данных.<br>• Вопрос: «Как проектировали контракты взаимодействия и как оптимизировали запросы к БД?»<br>• Маркер: понимание нормализации, индексов, обработки ошибок API. Красный флаг: опыт ограничен простым CRUD без интеграций. | Да | | Описания проектов, стек |\n");
+        sb.append("  <tr>\n");
+        sb.append("    <td><b>4. Архитектура и БД</b></td>\n");
+        sb.append("    <td>Проектирование API (REST/gRPC), интеграции сервисов, работа с СУБД и структурами данных.<br>• <i>Вопрос:</i> «Как проектировали контракты взаимодействия и как оптимизировали запросы к БД?»<br>• <i>Маркер:</i> понимание нормализации, индексов, обработки ошибок API.<br>• <i>Красный флаг:</i> только простой CRUD без интеграций.</td>\n");
+        sb.append("    <td>Да</td>\n");
+        sb.append("    <td></td>\n");
+        sb.append("    <td>Описания проектов, стек</td>\n");
+        sb.append("  </tr>\n");
 
         // 5. Инженерные практики
-        sb.append("| 5. Инженерные практики | Работа с Git, участие в код-ревью, понимание CI/CD пайплайнов и командных процессов (Agile/Scrum).<br>• Вопрос: «Какой процесс код-ревью и доставки кода в прод был выстроен в вашей команде?»<br>• Маркер: знание Git flow, автотестов, культуры разработки. | Да | | Инструменты, обязанности |\n");
+        sb.append("  <tr>\n");
+        sb.append("    <td><b>5. Инженерные практики</b></td>\n");
+        sb.append("    <td>Работа с Git, участие в код-ревью, понимание CI/CD пайплайнов и командных процессов (Agile/Scrum).<br>• <i>Вопрос:</i> «Какой процесс код-ревью и доставки кода в прод был выстроен в вашей команде?»<br>• <i>Маркер:</i> знание Git flow, автотестов, культуры разработки.</td>\n");
+        sb.append("    <td>Да</td>\n");
+        sb.append("    <td></td>\n");
+        sb.append("    <td>Инструменты, обязанности</td>\n");
+        sb.append("  </tr>\n");
 
+        sb.append("</tbody>\n");
+        sb.append("</table>");
         return sb.toString();
     }
 
     private String buildSearchMap(SmartOpenPositionParsedData data) {
-        String role = data.getPositionTypeName() != null ? data.getPositionTypeName() : (data.getVacansyName() != null ? data.getVacansyName() : "IT-специалист");
-        String grade = data.getGradeName() != null ? data.getGradeName() : "Middle+ / Senior";
-        String location = data.getCityName() != null ? data.getCityName() : "РФ (Удаленно)";
-        String skillsStr = (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty())
-                ? String.join("\" AND \"", data.getRequiredSkills()) : "Java";
+        String role = data.getPositionTypeName() != null ? escapeHtml(data.getPositionTypeName()) : (data.getVacansyName() != null ? escapeHtml(data.getVacansyName()) : "IT-специалист");
+        String grade = data.getGradeName() != null ? escapeHtml(data.getGradeName()) : "Middle+ / Senior";
+        String location = data.getCityName() != null ? escapeHtml(data.getCityName()) : "РФ (Удаленно)";
+        String skillsListStr = (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty())
+                ? escapeHtml(String.join(", ", data.getRequiredSkills())) : "Java";
+        String booleanSkillsStr = (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty())
+                ? escapeHtml(String.join("\" AND \"", data.getRequiredSkills())) : "Java";
         String firstSkill = (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty())
-                ? data.getRequiredSkills().get(0) : "Java";
+                ? escapeHtml(data.getRequiredSkills().get(0)) : "Java";
 
         StringBuilder sb = new StringBuilder();
-        sb.append("### Карта поиска кандидата (Search Map) / Инструкция сорсеру и рекрутеру HuntTech\n\n");
+        sb.append("<h3>Карта поиска кандидата (Search Map) / Инструкция сорсеру и рекрутеру HuntTech</h3>\n\n");
 
-        sb.append("#### 1. Целевой профиль кандидата (Target Profile)\n");
-        sb.append("• **Целевая роль:** ").append(role).append("\n");
-        sb.append("• **Альтернативные наименования (Title matching):** ").append(role).append(", Senior ").append(role)
-                .append(", ").append(firstSkill).append(" Developer, Инженер-разработчик ").append(firstSkill).append("\n");
-        sb.append("• **Целевой грейд и подтвержденный стаж:** ").append(grade)
-                .append(", коммерческий опыт от ").append(data.getWorkExperience() != null ? data.getWorkExperience() : 3).append(" лет в профильном стеке\n");
-        sb.append("• **Локация и часовой пояс:** ").append(location).append(", рабочий день в интервале 09:00–18:00 или 10:00–19:00 по МСК\n\n");
+        sb.append("<h4>1. Целевой профиль кандидата (Target Profile)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Целевая роль:</b> ").append(role).append("</li>\n");
+        sb.append("  <li><b>Альтернативные наименования:</b> ").append(role).append(", Senior ").append(role)
+                .append(", ").append(firstSkill).append(" Developer, Инженер-разработчик ").append(firstSkill).append("</li>\n");
+        sb.append("  <li><b>Целевой грейд и подтвержденный стаж:</b> ").append(grade)
+                .append(", коммерческий опыт от ").append(data.getWorkExperience() != null ? data.getWorkExperience() : 3).append(" лет в профильном стеке</li>\n");
+        sb.append("  <li><b>Локация и часовой пояс:</b> ").append(location).append(", рабочий день в интервале 09:00–18:00 или 10:00–19:00 по МСК</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### 2. Экспресс-фильтр: «Рентген резюме за 15 секунд»\n");
-        sb.append("• **Что обязательно должно быть в опыте за последние 1–2 года (Must-have маркеры):**\n");
-        sb.append("  - Реальный коммерческий опыт с ключевым стеком: ").append(skillsStr.replace("\" AND \"", ", ")).append(";\n");
-        sb.append("  - Решение прикладных задач: проектирование модулей, разработка интеграций, оптимизация производительности;\n");
-        sb.append("  - Роль в команде: самостоятельная реализация фич, участие в архитектурных обсуждениях и код-ревью.\n");
-        sb.append("• **Красные флаги мгновенного отсева (Stop-факторы):**\n");
-        sb.append("  - Частая смена мест работы (менее 6–8 месяцев на проекте без объективных причин);\n");
-        sb.append("  - Опыт исключительно на учебных проектах / курсах без коммерческого продакшн-опыта;\n");
-        sb.append("  - Отсутствие практики по ключевой технологии в недавнем опыте;\n");
-        sb.append("  - Формат «только подработка / менторство», когда требуется full-time занятость.\n\n");
+        sb.append("<h4>2. Экспресс-фильтр: «Рентген резюме за 15 секунд»</h4>\n");
+        sb.append("<p><b>Что обязательно должно быть в опыте за последние 1–2 года (Must-have маркеры):</b></p>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Реальный коммерческий опыт с ключевым стеком: ").append(skillsListStr).append(";</li>\n");
+        sb.append("  <li>Решение прикладных задач: проектирование модулей, разработка интеграций, оптимизация производительности;</li>\n");
+        sb.append("  <li>Роль в команде: самостоятельная реализация фич, участие в архитектурных обсуждениях и код-ревью.</li>\n");
+        sb.append("</ul>\n");
+        sb.append("<p><b>Красные флаги мгновенного отсева (Stop-факторы):</b></p>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Частая смена мест работы (менее 6–8 месяцев на проекте без объективных причин);</li>\n");
+        sb.append("  <li>Опыт исключительно на учебных проектах / курсах без коммерческого продакшн-опыта;</li>\n");
+        sb.append("  <li>Отсутствие практики по ключевой технологии в недавнем опыте;</li>\n");
+        sb.append("  <li>Формат «только подработка / менторство», когда требуется full-time занятость.</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### 3. Готовые поисковые запросы (Boolean Search Strings)\n");
-        sb.append("##### Для hh.ru:\n");
-        sb.append("```text\n");
-        sb.append("(\"").append(role).append("\" OR \"").append(firstSkill).append(" Developer\") AND (\"").append(firstSkill).append("\") AND NOT (\"курсы\" OR \"стажер\" OR \"стажерка\" OR \"интерн\" OR \"преподаватель\")\n");
-        sb.append("```\n");
-        sb.append("##### Для Хабр Карьеры (Habr Career):\n");
-        sb.append("```text\n");
-        sb.append("Специализация: Разработка • Ключевые навыки: ").append(firstSkill).append(" • Квалификация: ").append(grade).append("\n");
-        sb.append("```\n");
-        sb.append("##### X-Ray поисковые запросы (Google / Yandex):\n");
-        sb.append("```text\n");
+        sb.append("<h4>3. Готовые поисковые запросы (Boolean Search Strings)</h4>\n");
+        sb.append("<p><b>Для hh.ru:</b></p>\n");
+        sb.append("<pre style=\"background: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px;\"><code>");
+        sb.append("(\"").append(role).append("\" OR \"").append(firstSkill).append(" Developer\") AND (\"").append(booleanSkillsStr).append("\") AND NOT (\"курсы\" OR \"стажер\" OR \"стажерка\" OR \"интерн\" OR \"преподаватель\")");
+        sb.append("</code></pre>\n");
+
+        sb.append("<p><b>Для Хабр Карьеры:</b></p>\n");
+        sb.append("<pre style=\"background: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px;\"><code>");
+        sb.append("Специализация: Разработка • Ключевые навыки: ").append(firstSkill).append(" • Квалификация: ").append(grade);
+        sb.append("</code></pre>\n");
+
+        sb.append("<p><b>X-Ray поисковые запросы (Google / Yandex):</b></p>\n");
+        sb.append("<pre style=\"background: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px;\"><code>");
         sb.append("site:hh.ru/resume (\"").append(role).append("\") AND (\"").append(firstSkill).append("\") -intitle:курсы -intitle:стажер\n");
-        sb.append("site:linkedin.com/in (\"").append(role).append("\" OR \"").append(firstSkill).append(" Developer\") (\"Россия\" OR \"Москва\" OR \"Remote\")\n");
-        sb.append("```\n\n");
+        sb.append("site:linkedin.com/in (\"").append(role).append("\" OR \"").append(firstSkill).append(" Developer\") (\"Россия\" OR \"Москва\" OR \"Remote\")");
+        sb.append("</code></pre>\n\n");
 
-        sb.append("#### 4. Компании-доноры кандидатов (Target Companies)\n");
-        sb.append("• **Системные интеграторы и IT-консалтинг:** ЛАНИТ, КРОК, IBS, Bell Integrator, Neoflex, Иннотех, Лига Цифровой Экономики, Т1\n");
-        sb.append("• **Продуктовый BigTech и Финтех:** Сбер, Т-Банк, ВТБ, Яндекс, VK, Ozon, Авито, МТС, Wildberries\n");
-        sb.append("• **Отраслевые лидеры:** профильные компании целевого сектора проекта (ритейл, финтех, телеком, логистика)\n\n");
+        sb.append("<h4>4. Компании-доноры кандидатов (Target Companies)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Системные интеграторы и IT-консалтинг:</b> ЛАНИТ, КРОК, IBS, Bell Integrator, Neoflex, Иннотех, Лига Цифровой Экономики, Т1</li>\n");
+        sb.append("  <li><b>Продуктовый BigTech и Финтех:</b> Сбер, Т-Банк, ВТБ, Яндекс, VK, Ozon, Авито, МТС, Wildberries</li>\n");
+        sb.append("  <li><b>Отраслевые лидеры:</b> профильные компании целевого сектора проекта (ритейл, финтех, телеком, логистика)</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### 5. Хук для холодного контакта (Elevator Pitch в Telegram / LinkedIn)\n");
+        sb.append("<h4>5. Хук для холодного контакта (Elevator Pitch в Telegram / LinkedIn)</h4>\n");
+        sb.append("<blockquote style=\"border-left: 3px solid #0284c7; padding-left: 10px; margin-left: 0; color: #0f172a;\">\n");
         sb.append("«[Имя], добрый день! Обратил внимание на ваш сильный опыт в ").append(firstSkill)
                 .append(". В HuntTech открыта отличная позиция ").append(role).append(" в проектную команду ")
-                .append(data.getProjectName() != null ? data.getProjectName() : "надежного технологического партнера")
-                .append(": 100% удаленка, современный стек без устаревшего легаси, прямой контакт с техлидом проекта без бюрократии. Буду рад кратко поделиться деталями задач и условий на 10-минутном созвоне. Удобно пообщаться сегодня или завтра?»");
+                .append(data.getProjectName() != null ? escapeHtml(data.getProjectName()) : "надежного технологического партнера")
+                .append(": 100% удаленка, современный стек без устаревшего легаси, прямой контакт с техлидом проекта без бюрократии. Буду рад кратко поделиться деталями задач и условий на 10-минутном созвоне. Удобно пообщаться сегодня или завтра?»\n");
+        sb.append("</blockquote>");
 
         return sb.toString();
     }
 
     private String buildInterviewPlan(SmartOpenPositionParsedData data) {
-        String projName = data.getProjectName() != null ? data.getProjectName() : "Корпоративный проект";
-        String vacName = data.getVacansyName() != null ? data.getVacansyName() : "Позиция в проектную команду";
+        String projName = data.getProjectName() != null ? escapeHtml(data.getProjectName()) : "Корпоративный проект";
+        String vacName = data.getVacansyName() != null ? escapeHtml(data.getVacansyName()) : "Позиция в проектную команду";
         String firstSkill = (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty())
-                ? data.getRequiredSkills().get(0) : "профильному стеку";
+                ? escapeHtml(data.getRequiredSkills().get(0)) : "профильному стеку";
 
         StringBuilder sb = new StringBuilder();
-        sb.append("### План продающего собеседования (Interview Plan) / Сценарий рекрутера HuntTech\n\n");
+        sb.append("<h3>План продающего собеседования (Interview Plan) / Сценарий рекрутера HuntTech</h3>\n\n");
 
-        sb.append("#### Блок 1. Введение и презентация компании HuntTech (5–7 минут)\n");
-        sb.append("• **Цель:** Установить контакт, сформировать доверие, снять барьер «просто кадровое агентство».\n");
-        sb.append("• **Ключевые акценты:** HuntTech — аккредитованная IT-компания полного цикла; прямой контракт с техническими лидерами проекта; забота о специалисте и персональный HRBP.\n");
-        sb.append("• **Скрипт рекрутера:** «[Имя], добрый день! Спасибо, что нашли время пообщаться. Меня зовут [Имя], я представляю IT-компанию HuntTech. Наша цель на сегодня — познакомиться, подробно рассказать вам о проекте и задачах, обсудить ваш опыт и понять, насколько мы взаимно подходим друг другу. По таймингу займет около 35–40 минут. Подскажите в двух словах: что для вас сейчас в приоритете при выборе новой роли — технологический стек, масштаб задач или условия сотрудничества?»\n\n");
+        sb.append("<h4>Блок 1. Введение и презентация компании HuntTech (5–7 минут)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Цель:</b> Установить контакт, сформировать доверие, снять барьер «просто кадровое агентство».</li>\n");
+        sb.append("  <li><b>Ключевые акценты:</b> HuntTech — аккредитованная IT-компания полного цикла; прямой контракт с техническими лидерами проекта; забота о специалисте и персональный HRBP.</li>\n");
+        sb.append("  <li><b>Скрипт рекрутера:</b> «[Имя], добрый день! Спасибо, что нашли время пообщаться. Меня зовут [Имя], я представляю IT-компанию HuntTech. Наша цель на сегодня — познакомиться, подробно рассказать вам о проекте и задачах, обсудить ваш опыт и понять, насколько мы взаимно подходим друг другу. По таймингу займет около 35–40 минут. Подскажите в двух словах: что для вас сейчас в приоритете при выборе новой роли — технологический стек, масштаб задач или условия сотрудничества?»</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### Блок 2. Презентация проекта и его технологического вызова (8–10 минут)\n");
-        sb.append("• **Проект:** ").append(projName).append(". **Вакансия:** ").append(vacName).append(".\n");
-        sb.append("• **Цель:** Влюбить кандидата в проект, показать реальный инженерный масштаб.\n");
-        sb.append("• **Скрипт рекрутера:** «Мы усиливаем ключевую команду на проекте ").append(projName)
+        sb.append("<h4>Блок 2. Презентация проекта и его технологического вызова (8–10 минут)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Проект:</b> ").append(projName).append(". <b>Вакансия:</b> ").append(vacName).append(".</li>\n");
+        sb.append("  <li><b>Цель:</b> Влюбить кандидата в проект, показать реальный инженерный масштаб.</li>\n");
+        sb.append("  <li><b>Скрипт рекрутера:</b> «Мы усиливаем ключевую команду на проекте ").append(projName)
                 .append(". Проект сейчас на этапе активного развития и масштабирования. Основной стек — ")
-                .append(firstSkill).append(". Ключевой инженерный вызов — разработка надежных сервисов и реализация сложных интеграций без унылой бюрократии. Решения принимаются внутри команды, вы напрямую влияете на архитектуру.»\n");
-        sb.append("• **Selling Points вакансии:** Современный стек без легаси; свобода инженерных решений и высокая автономность; сильная команда сеньор-разработчиков.\n\n");
+                .append(firstSkill).append(". Ключевой инженерный вызов — разработка надежных сервисов и реализация сложных интеграций без унылой бюрократии. Решения принимаются внутри команды, вы напрямую влияете на архитектуру.»</li>\n");
+        sb.append("  <li><b>Selling Points вакансии:</b> Современный стек без легаси; свобода инженерных решений и высокая автономность; сильная команда сеньор-разработчиков.</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### Блок 3. Проверка по чек-листу ключевых требований (12–15 минут)\n");
-        sb.append("• **Цель:** Провести валидацию коммерческого опыта по технике STAR (Ситуация — Задача — Действие — Результат).\n");
-        sb.append("• **Кейс 1 (Ключевой стек):** «Расскажите о самом технически сложном модуле на ").append(firstSkill)
+        sb.append("<h4>Блок 3. Проверка по чек-листу ключевых требований (12–15 минут)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Цель:</b> Провести валидацию коммерческого опыта по технике STAR (Ситуация — Задача — Действие — Результат).</li>\n");
+        sb.append("  <li><b>Кейс 1 (Ключевой стек):</b> «Расскажите о самом технически сложном модуле на ").append(firstSkill)
                 .append(", который вы разрабатывали за последние 1–2 года. С какими нетривиальными проблемами столкнулись и как их решили?»<br>")
-                .append("  - *Зеленый флаг:* Четкое описание архитектуры, знание подводных камней и метрик производительности.<br>")
-                .append("  - *Красный флаг:* Общие шаблонные фразы, непонимание внутренних механизмов работы фреймворка.\n");
-        sb.append("• **Кейс 2 (Базы данных и оптимизация):** «С какими СУБД работали на проде? Приходилось ли профилировать медленные запросы и проектировать схемы данных?»<br>")
-                .append("  - *Зеленый флаг:* Понимание индексов, планов выполнения запросов (EXPLAIN), транзакционной модели.<br>")
-                .append("  - *Красный флаг:* Работа исключительно через ORM без понимания структуры генерируемых SQL-запросов.\n");
-        sb.append("• **Кейс 3 (Интеграции и архитектура):** «Как реализовывали межсервисное взаимодействие? Использовали ли очереди сообщений или REST API?»<br>")
-                .append("  - *Зеленый флаг:* Понимание идемпотентности, обработки сбоев сети, контрактов API.\n\n");
+                .append("  • <i>Зеленый флаг:</i> Четкое описание архитектуры, знание подводных камней и метрик производительности.<br>")
+                .append("  • <i>Красный флаг:</i> Общие шаблонные фразы, непонимание внутренних механизмов фреймворка.</li>\n");
+        sb.append("  <li><b>Кейс 2 (Базы данных и оптимизация):</b> «С какими СУБД работали на проде? Приходилось ли профилировать медленные запросы и проектировать схемы данных?»<br>")
+                .append("  • <i>Зеленый флаг:</i> Понимание индексов, планов выполнения (EXPLAIN), транзакционной модели.<br>")
+                .append("  • <i>Красный флаг:</i> Работа исключительно через ORM без понимания SQL-запросов.</li>\n");
+        sb.append("  <li><b>Кейс 3 (Интеграции и архитектура):</b> «Как реализовывали межсервисное взаимодействие? Использовали ли очереди сообщений или REST API?»<br>")
+                .append("  • <i>Зеленый флаг:</i> Понимание идемпотентности, обработки сбоев сети, контрактов API.</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### Блок 4. Продажа условий работы и формата сотрудничества (5 минут)\n");
-        sb.append("• **Цель:** Зафиксировать прозрачные и комфортные условия сотрудничества (без раскрытия ставки заказчика!).\n");
-        sb.append("• **Скрипт рекрутера:** «По формату работы: у нас 100% удаленка с гибким началом дня. Мы ценим результат, поэтому никакого микроменеджмента и трекеров времени. По оформлению: работаем по [ТК РФ / ИП / Самозанятости] с гарантией стабильных своевременных выплат. Что касается дохода — вилка формируется индивидуально на основе ваших ожиданий и результатов технического интервью. На какую сумму вы ориентируетесь?»\n\n");
+        sb.append("<h4>Блок 4. Продажа условий работы и формата сотрудничества (5 минут)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Цель:</b> Зафиксировать прозрачные и комфортные условия сотрудничества (без раскрытия ставки заказчика!).</li>\n");
+        sb.append("  <li><b>Скрипт рекрутера:</b> «По формату работы: у нас 100% удаленка с гибким началом дня. Мы ценим результат, поэтому никакого микроменеджмента и трекеров времени. По оформлению: работаем по [ТК РФ / ИП / Самозанятости] с гарантией стабильных своевременных выплат. Что касается дохода — вилка формируется индивидуально на основе ваших ожиданий и результатов технического интервью. На какую сумму вы ориентируетесь?»</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### Блок 5. Ответы на вопросы кандидата и отработка возражений (5–7 минут)\n");
-        sb.append("• **Возражение «Почему через HuntTech, а не напрямую?»:** «HuntTech — генеральный IT-партнер заказчика. Для вас это ускоренный найм за 1–2 этапа без бесконечной корпоративной бюрократии, персональный менеджер и возможность плавного перехода на другие проекты нашей экосистемы.»\n");
-        sb.append("• **Возражение «Есть ли переработки?»:** «Процессы выстроены по Agile: спринты планируются реалистично. Переработки не приветствуются, при овертаймах — оплата всегда согласуется отдельно.»\n\n");
+        sb.append("<h4>Блок 5. Ответы на вопросы кандидата и отработка возражений (5–7 минут)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Возражение «Почему через HuntTech, а не напрямую?»:</b> «HuntTech — генеральный IT-партнер заказчика. Для вас это ускоренный найм за 1–2 этапа без бесконечной корпоративной бюрократии, персональный менеджер и возможность плавного перехода на другие проекты нашей экосистемы.»</li>\n");
+        sb.append("  <li><b>Возражение «Есть ли переработки?»:</b> «Процессы выстроены по Agile: спринты планируются реалистично. Переработки не приветствуются, при овертаймах — оплата всегда согласуется отдельно.»</li>\n");
+        sb.append("</ul>\n\n");
 
-        sb.append("#### Блок 6. Закрытие и согласование следующих шагов (3–5 минут)\n");
-        sb.append("• **Скрипт рекрутера:** «[Имя], спасибо за содержательный разговор! Ваш опыт отлично ложится в стек и задачи проекта. Со своей стороны я с удовольствием готова передать ваше резюме напрямую тимлиду проекта. Следующий шаг — техническое интервью на 45–60 минут. Я подготовлю резюме и вернусь к вам с датой встречи в течение 24–48 часов. Договорились? Передаем резюме в работу?»");
+        sb.append("<h4>Блок 6. Закрытие и согласование следующих шагов (3–5 минут)</h4>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li><b>Скрипт рекрутера:</b> «[Имя], спасибо за содержательный разговор! Ваш опыт отлично ложится в стек и задачи проекта. Со своей стороны я с удовольствием готова передать ваше резюме напрямую тимлиду проекта. Следующий шаг — техническое интервью на 45–60 минут. Я подготовлю резюме и вернусь к вам с датой встречи в течение 24–48 часов. Договорились? Передаем резюме в работу?»</li>\n");
+        sb.append("</ul>");
 
         return sb.toString();
     }
@@ -996,6 +1163,10 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
             OpenPosition openPosition = metadata.create(OpenPosition.class);
             openPosition.setVacansyName(safeVacName);
+            if (data.getVacansyID() != null && !data.getVacansyID().trim().isEmpty()) {
+                openPosition.setVacansyID(cleanVacansyId(data.getVacansyID()));
+                log.info("[SMART_VACANCY_OPENING] Установлен vacansyID вакансии: '{}'", openPosition.getVacansyID());
+            }
             openPosition.setOpenClose(false); // Открыта
             openPosition.setSignDraft(true);  // Вакансия создается как черновик (требование: скрыта до ручной проверки и снятия черновика)
             openPosition.setRemoteWork(data.getRemoteWork() != null ? data.getRemoteWork() : 1);
@@ -1007,7 +1178,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setPriority(OpenPositionPriority.UNDER_REVIEW.getId());
 
             String fullComment = data.getComment() != null ? data.getComment() : data.getRawText();
-            openPosition.setComment(cleanHtmlToPlainText(fullComment));
+            openPosition.setComment(fullComment != null ? fullComment : "");
 
             String shortDesc = data.getShortDescription() != null && !data.getShortDescription().isEmpty()
                     ? cleanHtmlToPlainText(data.getShortDescription()) : safeVacName;
@@ -1017,8 +1188,8 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setOwner(recruiter);
             openPosition.setCommandCandidate(1);
 
-            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', signDraft=true (ЧЕРНОВИК), priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
-                    openPosition.getVacansyName(), openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getWorkExperience());
+            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', vacansyID='{}', signDraft=true (ЧЕРНОВИК), priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
+                    openPosition.getVacansyName(), openPosition.getVacansyID(), openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getWorkExperience());
 
             // Дополнительные реквизиты сущности OpenPosition
             if (data.getSalaryIE() != null) {
@@ -1054,12 +1225,14 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setProjectName(project);
             log.info("[SMART_VACANCY_OPENING] Проект позиции: {}", project != null ? (project.getProjectName() + " (ID=" + project.getId() + ")") : "НЕ НАЙДЕН");
 
-            // 2. Поиск / привязка типа позиции (запрещено создавать новые должности, выбирается наиболее подходящая)
-            String posName = data.getPositionTypeName() != null ? data.getPositionTypeName()
-                    : (data.getRawVacansyName() != null ? data.getRawVacansyName() : data.getVacansyName());
+            // 2. Поиск / привязка типа позиции (должность)
+            String posName = data.getPositionTypeName() != null && !data.getPositionTypeName().trim().isEmpty()
+                    ? data.getPositionTypeName()
+                    : (data.getRawVacansyName() != null && !data.getRawVacansyName().trim().isEmpty()
+                        ? data.getRawVacansyName() : data.getVacansyName());
             Position positionType = findBestMatchingPositionType(posName);
             openPosition.setPositionType(positionType);
-            log.info("[SMART_VACANCY_OPENING] Тип позиции: {}", positionType != null ? (positionType.getPositionRuName() + " (ID=" + positionType.getId() + ")") : "НЕ НАЙДЕН");
+            log.info("[SMART_VACANCY_OPENING] Тип позиции (должность): {}", positionType != null ? (positionType.getPositionRuName() + " (ID=" + positionType.getId() + ")") : "НЕ НАЙДЕН");
 
             // 3. Поиск / привязка грейда
             Grade grade = null;
@@ -1431,9 +1604,292 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         return t.length() <= maxLen ? t : t.substring(0, maxLen).trim();
     }
 
+    private static String cleanVacansyId(String rawId) {
+        if (rawId == null) return null;
+        String clean = rawId.replaceAll("^[#№\\s]+", "").trim();
+        if (clean.contains("/") || clean.contains("?")) {
+            String extracted = extractVacancyIdFromTextOrUrl(clean);
+            if (extracted != null && !extracted.isEmpty()) {
+                clean = extracted;
+            }
+        }
+        if (clean.length() > 16) {
+            log.warn("[SMART_VACANCY_OPENING] vacansyID '{}' превышает 16 символов, обрезается до 16", clean);
+            return clean.substring(0, 16);
+        }
+        return clean;
+    }
+
+    private static String extractVacancyIdFromTextOrUrl(String text) {
+        if (text == null || text.trim().isEmpty()) return null;
+
+        // 1. Извлечение из URL
+        Matcher urlMat = URL_VACANCY_ID_PATTERN.matcher(text);
+        if (urlMat.find()) {
+            return urlMat.group(1);
+        }
+
+        // 2. Извлечение по точным ключевым словам
+        Matcher idMat = KEYWORD_VACANCY_ID_PATTERN.matcher(text);
+        if (idMat.find()) {
+            return idMat.group(1).trim();
+        }
+
+        // 3. Извлечение хештегов идентификаторов
+        Matcher tagMat = HASHTAG_VACANCY_ID_PATTERN.matcher(text);
+        if (tagMat.find()) {
+            return tagMat.group(1).trim();
+        }
+
+        return null;
+    }
+
+    static String formatAsCleanHtml(String input) {
+        if (input == null || input.trim().isEmpty()) return "";
+        String trimmed = sanitizeDangerousHtml(input.trim());
+
+        // Проверяем, содержит ли текст явные признаки Markdown (таблицы, заголовки ###, списки -/*)
+        boolean hasMarkdownTables = trimmed.contains("|") && (trimmed.contains("|---") || trimmed.contains("| ---") || trimmed.contains("|-"));
+        boolean hasMarkdownHeaders = MD_DETECT_HEADER_PATTERN.matcher(trimmed).find();
+        boolean hasMarkdownLists = MD_DETECT_LIST_PATTERN.matcher(trimmed).find();
+
+        if (hasMarkdownTables || hasMarkdownHeaders || hasMarkdownLists) {
+            return convertMarkdownToHtml(trimmed);
+        }
+
+        // Если это уже HTML без markdown-элементов, проверяем наличие тегов
+        boolean hasHtmlTags = HTML_TAG_DETECT_PATTERN.matcher(trimmed).find();
+        if (hasHtmlTags) {
+            return trimmed;
+        }
+
+        // Если это обычный текст без тегов, форматируем в чистый HTML
+        return convertMarkdownToHtml(trimmed);
+    }
+
+    static String sanitizeDangerousHtml(String html) {
+        if (html == null) return "";
+        String sanitized = DANGEROUS_TAGS_PATTERN.matcher(html).replaceAll("");
+        sanitized = DANGEROUS_TAG_SINGLE_PATTERN.matcher(sanitized).replaceAll("");
+        sanitized = JAVASCRIPT_URI_PATTERN.matcher(sanitized).replaceAll("");
+        sanitized = ON_EVENT_HANDLER_PATTERN.matcher(sanitized).replaceAll("");
+        return sanitized;
+    }
+
+    static String convertMarkdownToHtml(String md) {
+        if (md == null || md.trim().isEmpty()) return "";
+        String[] lines = md.replace("\r", "").split("\n");
+        StringBuilder html = new StringBuilder();
+
+        boolean inUl = false;
+        boolean inOl = false;
+        boolean inTable = false;
+        boolean inPre = false;
+        List<String> tableRows = new ArrayList<>();
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            String trimmed = line.trim();
+
+            // 1. Блоки кода (```)
+            if (trimmed.startsWith("```")) {
+                if (inPre) {
+                    html.append("</code></pre>\n");
+                    inPre = false;
+                } else {
+                    if (inUl) { html.append("</ul>\n"); inUl = false; }
+                    if (inOl) { html.append("</ol>\n"); inOl = false; }
+                    html.append("<pre style=\"background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 10px; overflow-x: auto;\"><code>");
+                    inPre = true;
+                }
+                continue;
+            }
+            if (inPre) {
+                html.append(escapeHtml(line)).append("\n");
+                continue;
+            }
+
+            // 2. Таблицы Markdown (| col1 | col2 |)
+            if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+                if (inUl) { html.append("</ul>\n"); inUl = false; }
+                if (inOl) { html.append("</ol>\n"); inOl = false; }
+                tableRows.add(trimmed);
+                inTable = true;
+                continue;
+            } else if (inTable) {
+                // Завершение таблицы
+                html.append(renderMarkdownTable(tableRows));
+                tableRows.clear();
+                inTable = false;
+            }
+
+            // 3. Заголовки (###, ####, ##, #)
+            Matcher hMat = MD_HEADER_LINE_PATTERN.matcher(trimmed);
+            if (hMat.matches()) {
+                if (inUl) { html.append("</ul>\n"); inUl = false; }
+                if (inOl) { html.append("</ol>\n"); inOl = false; }
+                int level = Math.min(Math.max(hMat.group(1).length(), 2), 5); // h2 - h5
+                String title = formatInlineMarkdown(hMat.group(2).trim());
+                html.append("<h").append(level).append(" style=\"margin-top: 14px; margin-bottom: 6px; color: #212529;\">")
+                        .append(title).append("</h").append(level).append(">\n");
+                continue;
+            }
+
+            // 4. Маркированные списки (- item, * item, • item)
+            Matcher ulMat = MD_UL_LINE_PATTERN.matcher(trimmed);
+            if (ulMat.matches()) {
+                if (inOl) { html.append("</ol>\n"); inOl = false; }
+                if (!inUl) {
+                    html.append("<ul style=\"margin-top: 4px; margin-bottom: 8px; padding-left: 20px;\">\n");
+                    inUl = true;
+                }
+                String itemContent = formatInlineMarkdown(ulMat.group(1).trim());
+                html.append("  <li>").append(itemContent).append("</li>\n");
+                continue;
+            }
+
+            // 5. Нумерованные списки (1. item, 2. item)
+            Matcher olMat = MD_OL_LINE_PATTERN.matcher(trimmed);
+            if (olMat.matches()) {
+                if (inUl) { html.append("</ul>\n"); inUl = false; }
+                if (!inOl) {
+                    html.append("<ol style=\"margin-top: 4px; margin-bottom: 8px; padding-left: 20px;\">\n");
+                    inOl = true;
+                }
+                String itemContent = formatInlineMarkdown(olMat.group(1).trim());
+                html.append("  <li>").append(itemContent).append("</li>\n");
+                continue;
+            }
+
+            // Если вышли из списков
+            if (inUl) { html.append("</ul>\n"); inUl = false; }
+            if (inOl) { html.append("</ol>\n"); inOl = false; }
+
+            // 6. Пустая строка
+            if (trimmed.isEmpty()) {
+                html.append("<br/>\n");
+                continue;
+            }
+
+            // 7. Обычный абзац или уже HTML-тег
+            if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
+                html.append(trimmed).append("\n");
+            } else {
+                html.append("<p style=\"margin: 4px 0;\">").append(formatInlineMarkdown(trimmed)).append("</p>\n");
+            }
+        }
+
+        if (inPre) {
+            html.append("</code></pre>\n");
+        }
+        if (inTable) {
+            html.append(renderMarkdownTable(tableRows));
+        }
+        if (inUl) {
+            html.append("</ul>\n");
+        }
+        if (inOl) {
+            html.append("</ol>\n");
+        }
+
+        return html.toString().trim();
+    }
+
+    private static String renderMarkdownTable(List<String> rows) {
+        if (rows == null || rows.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%; margin: 10px 0; border: 1px solid #dee2e6;\">\n");
+
+        boolean hasHeader = false;
+        int headerIndex = -1;
+
+        // Поиск строки разделителя |---|---|
+        for (int i = 0; i < rows.size(); i++) {
+            String r = rows.get(i);
+            if (MD_TABLE_SPLIT_PATTERN.matcher(r).matches() && r.contains("-")) {
+                headerIndex = i;
+                hasHeader = (i > 0);
+                break;
+            }
+        }
+
+        if (hasHeader) {
+            sb.append("  <thead style=\"background-color: #f1f3f5; font-weight: bold;\">\n");
+            for (int i = 0; i < headerIndex; i++) {
+                sb.append("    <tr>\n");
+                String[] cols = parseTableRow(rows.get(i));
+                for (String c : cols) {
+                    sb.append("      <th style=\"border: 1px solid #dee2e6; padding: 8px; text-align: left;\">")
+                            .append(formatInlineMarkdown(c)).append("</th>\n");
+                }
+                sb.append("    </tr>\n");
+            }
+            sb.append("  </thead>\n");
+            sb.append("  <tbody>\n");
+            for (int i = headerIndex + 1; i < rows.size(); i++) {
+                sb.append("    <tr>\n");
+                String[] cols = parseTableRow(rows.get(i));
+                for (String c : cols) {
+                    sb.append("      <td style=\"border: 1px solid #dee2e6; padding: 8px;\">")
+                            .append(formatInlineMarkdown(c)).append("</td>\n");
+                }
+                sb.append("    </tr>\n");
+            }
+            sb.append("  </tbody>\n");
+        } else {
+            sb.append("  <tbody>\n");
+            for (String row : rows) {
+                sb.append("    <tr>\n");
+                String[] cols = parseTableRow(row);
+                for (String c : cols) {
+                    sb.append("      <td style=\"border: 1px solid #dee2e6; padding: 8px;\">")
+                            .append(formatInlineMarkdown(c)).append("</td>\n");
+                }
+                sb.append("    </tr>\n");
+            }
+            sb.append("  </tbody>\n");
+        }
+
+        sb.append("</table>\n");
+        return sb.toString();
+    }
+
+    private static String[] parseTableRow(String row) {
+        String s = row.trim();
+        if (s.startsWith("|")) s = s.substring(1);
+        if (s.endsWith("|")) s = s.substring(0, s.length() - 1);
+        String[] parts = s.split("\\|");
+        String[] clean = new String[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            clean[i] = parts[i].trim();
+        }
+        return clean;
+    }
+
+    private static String formatInlineMarkdown(String text) {
+        if (text == null) return "";
+        // Сначала экранируем спецсимволы HTML
+        String s = escapeHtml(text);
+        // Код `code`
+        s = s.replaceAll("`([^`]+)`", "<code style=\"background-color: #f1f3f5; padding: 2px 4px; border-radius: 3px; font-family: monospace;\">$1</code>");
+        // Жирный **bold**
+        s = s.replaceAll("\\*\\*([^*]+)\\*\\*", "<b>$1</b>");
+        return s;
+    }
+
+    private static String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
     private static String preview(String s, int maxLen) {
         if (s == null) return "null";
         String oneLine = s.replaceAll("\\s+", " ").trim();
         return oneLine.length() <= maxLen ? oneLine : oneLine.substring(0, maxLen) + "...";
     }
 }
+
