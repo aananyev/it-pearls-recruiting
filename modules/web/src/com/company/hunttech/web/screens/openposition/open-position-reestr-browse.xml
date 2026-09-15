@@ -39,6 +39,12 @@
                                 <c:where>e.priority = :priority</c:where>
                             </c:jpql>
                             <c:jpql>
+                                <c:where>(:underReviewOrDraft = true and (e.priority in (-2, -1) or e.signDraft = true))</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>(:excludeDrafts = true and (e.signDraft is null or e.signDraft = false) and (e.priority is null or e.priority >= 0))</c:where>
+                            </c:jpql>
+                            <c:jpql>
                                 <c:where>@between(e.lastOpenDate, now - :newOpenPosition, now + 1, day)</c:where>
                             </c:jpql>
                             <c:jpql>
@@ -257,6 +263,7 @@
                                      stylename="secondary">
                             <actions>
                                 <action id="priorityAll" caption="Все приоритеты" icon="LIST"/>
+                                <action id="priorityUnderReview" caption="На проверку" icon="CLOCK"/>
                                 <action id="priorityHigh" caption="Высокий приоритет" icon="CIRCLE" stylename="priority-high-action"/>
                                 <action id="priorityNormal" caption="Обычный приоритет" icon="CIRCLE-O"/>
                                 <action id="priorityPaused" caption="Приостановленные" icon="PAUSE"/>

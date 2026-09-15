@@ -324,7 +324,16 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         if (openPositionsTable == null) return;
 
         // Колонка 1: Приоритет (векторный индикатор с подсветкой и подсказкой)
-        openPositionsTable.addGeneratedColumn("priority", position -> renderPriorityBadge(position.getPriority()));
+        openPositionsTable.addGeneratedColumn("priority", position -> {
+            Integer p = position.getPriority();
+            if (p != null && p == -2) {
+                return renderPriorityBadge(-2);
+            }
+            if (Boolean.TRUE.equals(position.getSignDraft()) || (p != null && p == -1)) {
+                return renderPriorityBadge(-1);
+            }
+            return renderPriorityBadge(p);
+        });
 
         // Колонка 2: Номер вакансии (ID)
         openPositionsTable.addGeneratedColumn("vacansyID", position -> {
@@ -498,6 +507,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             openPositionsDl.setParameter("positionTypeName", "%" + safeFilter.toLowerCase(Locale.ROOT) + "%");
         }
         openPositionsDl.setParameter("openClosePos", false);
+        openPositionsDl.setParameter("excludeDrafts", true);
         openPositionsDl.load();
     }
 
@@ -692,7 +702,15 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         }
 
         detailRemoteWork.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (remoteStr.isEmpty() ? "Офис / Удаленно" : remoteStr) + "</div>");
-        detailOpenClose.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (Boolean.TRUE.equals(position.getOpenClose()) ? "Закрыта" : "Открыта") + "</div>");
+        String statusText;
+        if (position.getPriority() != null && position.getPriority() == -2) {
+            statusText = "<span style='color: #8b5cf6; font-weight: 600;'>На проверку</span>";
+        } else if (Boolean.TRUE.equals(position.getSignDraft()) || (position.getPriority() != null && position.getPriority() == -1)) {
+            statusText = "<span style='color: #94a3b8; font-weight: 600;'>Черновик</span>";
+        } else {
+            statusText = Boolean.TRUE.equals(position.getOpenClose()) ? "Закрыта" : "Открыта";
+        }
+        detailOpenClose.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + statusText + "</div>");
         detailNumberPosition.setValue("<div style='white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (position.getNumberPosition() != null ? position.getNumberPosition() + " шт." : "1 шт.") + "</div>");
 
         // Куратор и автор
@@ -946,8 +964,20 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 screen.addAfterCloseListener(closeEvent -> {
                     log.info("[SMART_VACANCY_OPENING_UI] Диалог умной загрузки закрыт с результатом: {}", closeEvent.getCloseAction());
                     if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
-                        log.info("[SMART_VACANCY_OPENING_UI] Обновление реестра вакансий (openPositionsDl.load()) после успешного открытия");
+                        log.info("[SMART_VACANCY_OPENING_UI] Переключение фильтра на «На проверку» и обновление реестра вакансий");
+                        openPositionsDl.removeParameter("priority");
+                        openPositionsDl.removeParameter("excludeDrafts");
+                        openPositionsDl.removeParameter("subscriber");
+                        openPositionsDl.removeParameter("newOpenPosition");
+                        openPositionsDl.setParameter("openClosePos", false);
+                        openPositionsDl.setParameter("underReviewOrDraft", true);
                         openPositionsDl.load();
+                        if (priorityFilterPopupButton != null) {
+                            priorityFilterPopupButton.setCaption("На проверку");
+                        }
+                        if (vacanciesFilterPopupButton != null) {
+                            vacanciesFilterPopupButton.setCaption("Все открытые");
+                        }
                     }
                 });
                 screen.show();
@@ -978,16 +1008,25 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
     private void initFilterPopupActions() {
         if (vacanciesFilterPopupButton != null) {
+            for (Action action : new ArrayList<>(vacanciesFilterPopupButton.getActions())) {
+                vacanciesFilterPopupButton.removeAction(action);
+            }
+
             vacanciesFilterPopupButton.addAction(new BaseAction("filterAll")
                     .withCaption("Все открытые вакансии")
                     .withIcon("COMPASS")
                     .withHandler(e -> {
-                        openPositionsDl.removeParameter("openClosePos");
                         openPositionsDl.removeParameter("subscriber");
                         openPositionsDl.removeParameter("newOpenPosition");
+                        openPositionsDl.removeParameter("priority");
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.setParameter("excludeDrafts", true);
                         openPositionsDl.setParameter("openClosePos", false);
                         openPositionsDl.load();
                         vacanciesFilterPopupButton.setCaption("Все открытые");
+                        if (priorityFilterPopupButton != null) {
+                            priorityFilterPopupButton.setCaption("Приоритет");
+                        }
                     }));
 
             vacanciesFilterPopupButton.addAction(new BaseAction("filterMySubscriptions")
@@ -995,10 +1034,16 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                     .withIcon("USER")
                     .withHandler(e -> {
                         openPositionsDl.removeParameter("newOpenPosition");
+                        openPositionsDl.removeParameter("priority");
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.setParameter("excludeDrafts", true);
                         openPositionsDl.setParameter("subscriber", userSession.getUser());
                         openPositionsDl.setParameter("openClosePos", false);
                         openPositionsDl.load();
                         vacanciesFilterPopupButton.setCaption("Мои подписки");
+                        if (priorityFilterPopupButton != null) {
+                            priorityFilterPopupButton.setCaption("Приоритет");
+                        }
                     }));
 
             vacanciesFilterPopupButton.addAction(new BaseAction("filterNew")
@@ -1006,10 +1051,16 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                     .withIcon("CLOCK_O")
                     .withHandler(e -> {
                         openPositionsDl.removeParameter("subscriber");
+                        openPositionsDl.removeParameter("priority");
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.setParameter("excludeDrafts", true);
                         openPositionsDl.setParameter("newOpenPosition", 3);
                         openPositionsDl.setParameter("openClosePos", false);
                         openPositionsDl.load();
                         vacanciesFilterPopupButton.setCaption("Новые (3 дня)");
+                        if (priorityFilterPopupButton != null) {
+                            priorityFilterPopupButton.setCaption("Приоритет");
+                        }
                     }));
 
             vacanciesFilterPopupButton.addAction(new BaseAction("filterAllWithArchive")
@@ -1019,17 +1070,29 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                         openPositionsDl.removeParameter("openClosePos");
                         openPositionsDl.removeParameter("subscriber");
                         openPositionsDl.removeParameter("newOpenPosition");
+                        openPositionsDl.removeParameter("priority");
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.setParameter("excludeDrafts", true);
                         openPositionsDl.load();
                         vacanciesFilterPopupButton.setCaption("Все (с архивом)");
+                        if (priorityFilterPopupButton != null) {
+                            priorityFilterPopupButton.setCaption("Приоритет");
+                        }
                     }));
         }
 
         if (priorityFilterPopupButton != null) {
+            for (Action action : new ArrayList<>(priorityFilterPopupButton.getActions())) {
+                priorityFilterPopupButton.removeAction(action);
+            }
+
             priorityFilterPopupButton.addAction(new BaseAction("priorityAll")
                     .withCaption("Все приоритеты")
                     .withIcon("LIST")
                     .withHandler(e -> {
                         openPositionsDl.removeParameter("priority");
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.setParameter("excludeDrafts", true);
                         openPositionsDl.load();
                         priorityFilterPopupButton.setCaption("Приоритет");
                     }));
@@ -1038,15 +1101,25 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                     .withCaption("На проверку")
                     .withIcon("CLOCK")
                     .withHandler(e -> {
-                        openPositionsDl.setParameter("priority", -2);
+                        openPositionsDl.removeParameter("priority");
+                        openPositionsDl.removeParameter("excludeDrafts");
+                        openPositionsDl.removeParameter("subscriber");
+                        openPositionsDl.removeParameter("newOpenPosition");
+                        openPositionsDl.setParameter("openClosePos", false);
+                        openPositionsDl.setParameter("underReviewOrDraft", true);
                         openPositionsDl.load();
                         priorityFilterPopupButton.setCaption("На проверку");
+                        if (vacanciesFilterPopupButton != null) {
+                            vacanciesFilterPopupButton.setCaption("Все открытые");
+                        }
                     }));
 
             priorityFilterPopupButton.addAction(new BaseAction("priorityHigh")
                     .withCaption("Высокий приоритет")
                     .withIcon("CIRCLE")
                     .withHandler(e -> {
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.setParameter("excludeDrafts", true);
                         openPositionsDl.setParameter("priority", 3);
                         openPositionsDl.load();
                         priorityFilterPopupButton.setCaption("Высокий");
@@ -1056,9 +1129,22 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                     .withCaption("Обычный приоритет")
                     .withIcon("CIRCLE_O")
                     .withHandler(e -> {
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.setParameter("excludeDrafts", true);
                         openPositionsDl.setParameter("priority", 2);
                         openPositionsDl.load();
                         priorityFilterPopupButton.setCaption("Обычный");
+                    }));
+
+            priorityFilterPopupButton.addAction(new BaseAction("priorityPaused")
+                    .withCaption("Приостановленные")
+                    .withIcon("PAUSE")
+                    .withHandler(e -> {
+                        openPositionsDl.removeParameter("underReviewOrDraft");
+                        openPositionsDl.removeParameter("excludeDrafts");
+                        openPositionsDl.setParameter("priority", 0);
+                        openPositionsDl.load();
+                        priorityFilterPopupButton.setCaption("Приостановленные");
                     }));
         }
 
