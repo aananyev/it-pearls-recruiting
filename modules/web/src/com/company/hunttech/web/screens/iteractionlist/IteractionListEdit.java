@@ -723,6 +723,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         getEditedEntity().setCurrentPriority(vacancyFiels.getValue().getPriority());
         getEditedEntity().setCurrentOpenClose(vacancyFiels.getValue().getOpenClose());
 
+        if (addDate != null && addDate.isVisible() && calendarInitSuccess && addToCalendarCheckBox != null && addToCalendarCheckBox.isEnabled()) {
+            getEditedEntity().setAddToCalendar(addToCalendarCheckBox.getValue());
+            if (Boolean.TRUE.equals(addToCalendarCheckBox.getValue())) {
+                getEditedEntity().setCalendarId(calendarLookupField.getValue());
+            }
+        }
+
         setChainInteraction(event);
         checkEmployyementStatus(event);
     }
@@ -1952,7 +1959,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 addToCalendarCheckBox.setEnabled(false);
                 addToCalendarCheckBox.setDescription(messageBundle.getMessage("msgNoCalendarsAvailable"));
                 calendarLookupField.setEnabled(false);
-                calendarInitSuccess = false;
+                calendarInitSuccess = true;
             } else {
                 calendarInitSuccess = true;
                 IteractionList entity = getEditedEntity();

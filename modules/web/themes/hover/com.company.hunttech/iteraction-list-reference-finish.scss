@@ -317,11 +317,12 @@
     }
 
     .iteraction-list-popular-button {
+      position: relative !important;
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
       height: 64px !important;
-      padding: 6px 10px !important;
+      padding: 6px 8px !important;
       color: #ffffff !important;
       font-size: 13px !important;
       font-weight: 600 !important;
@@ -330,17 +331,36 @@
       border-radius: 10px !important;
       box-shadow: none !important;
       white-space: normal !important;
+      // Финальный слой кнопок: центрирование inline-flex и подавление :before/:after
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      &:before {
+        display: none !important;
+        content: none !important;
+      }
+
+      &:after {
+        display: none !important;
+      }
     }
 
+    // Иерархия слоев: wrap (z-index 2) и caption (z-index 3) поверх фона кнопки
     .iteraction-list-popular-button .v-button-wrap {
+      position: relative !important;
+      z-index: 2 !important;
       display: flex !important;
-      width: 100%;
-      height: 100%;
-      align-items: center;
-      justify-content: center;
+      width: 100% !important;
+      height: 100% !important;
+      align-items: center !important;
+      justify-content: center !important;
+      overflow: hidden !important;
     }
 
     .iteraction-list-popular-button .v-button-caption {
+      position: relative !important;
+      z-index: 3 !important;
       display: block !important;
       width: 100%;
       max-height: 48px;
@@ -354,6 +374,7 @@
       white-space: normal;
       visibility: visible !important;
       opacity: 1 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
     }
 
     .iteraction-list-popular-button:hover,
@@ -375,6 +396,7 @@
     .iteraction-list-popular-button.v-disabled .v-button-caption,
     .iteraction-list-popular-button[disabled] .v-button-caption {
       color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      text-shadow: none !important;
     }
 
     // Footer использует один компактный action-group справа; component ID,
@@ -394,8 +416,10 @@
     .iteraction-list-footer-actions > .v-slot {
       width: auto !important;
     }
+  }
 
-    @media (max-width: 1080px) {
+  @media (max-width: 1080px) {
+    .iteraction-list-editor {
       .iteraction-list-project-image,
       .iteraction-list-project-image img,
       .iteraction-list-project-image .v-image-element {

@@ -207,6 +207,7 @@ modules/web/themes/<theme>/com.company.hunttech/edit-screen-shared-styles.scss
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-16 | Интеграция с Яндекс Календарём (CalDAV) синхронизирована с формой (`actionDateCalendarRow` с `addDate` 260px, `addToCalendarCheckBox` и `calendarLookupField` 320px). В SCSS всех 7 тем исправлена геометрия и центрирование быстрых кнопок частых действий через `inline-flex` и подавление `:before`, текст `#ffffff` гарантированно видим и контрастен. |
 | 2026-07-27 | Зафиксирован фактический runtime после `078ba63c...`: базовый `IteractionListEdit` — единственный screen-controller, helper неактивен, placeholders не создаются автоматически. |
 | 2026-07-27 | Добавлено краткое описание полной бизнес-логики и lifecycle. |
 | 2026-07-27 | Зафиксирована двухпанельная архитектура экрана. |
