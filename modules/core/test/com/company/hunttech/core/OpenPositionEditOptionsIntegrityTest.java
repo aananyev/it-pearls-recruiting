@@ -178,4 +178,43 @@ public class OpenPositionEditOptionsIntegrityTest {
         assertNotNull("Не найден корень проекта", root);
         return new String(Files.readAllBytes(root.resolve(relativePath)), StandardCharsets.UTF_8);
     }
+
+    @Test
+    public void testJpqlQueryParsing() {
+        // Case 1: Filter "На проверку" (underReviewOrDraft + openClosePos=false)
+        dataManager.load(com.company.hunttech.entity.OpenPosition.class)
+                .query("select e from hunttech_OpenPosition e where (e.signDraft = :underReviewOrDraft or e.priority = -2 or e.priority = -1) and coalesce(e.openClose, false) = :openClosePos order by e.vacansyName")
+                .parameter("underReviewOrDraft", true)
+                .parameter("openClosePos", false)
+                .maxResults(1)
+                .list();
+        System.out.println("CASE 1 (На проверку) PASSED");
+
+        // Case 2: Filter "Все открытые" (excludeDrafts + openClosePos=false)
+        dataManager.load(com.company.hunttech.entity.OpenPosition.class)
+                .query("select e from hunttech_OpenPosition e where (coalesce(e.signDraft, false) <> :excludeDrafts and (e.priority is null or e.priority >= 0)) and coalesce(e.openClose, false) = :openClosePos order by e.vacansyName")
+                .parameter("excludeDrafts", true)
+                .parameter("openClosePos", false)
+                .maxResults(1)
+                .list();
+        System.out.println("CASE 2 (Все открытые) PASSED");
+
+        // Case 3: Filter by Priority (priority + excludeDrafts + openClosePos=false)
+        dataManager.load(com.company.hunttech.entity.OpenPosition.class)
+                .query("select e from hunttech_OpenPosition e where e.priority = :priority and (coalesce(e.signDraft, false) <> :excludeDrafts and (e.priority is null or e.priority >= 0)) and coalesce(e.openClose, false) = :openClosePos order by e.vacansyName")
+                .parameter("priority", 1)
+                .parameter("excludeDrafts", true)
+                .parameter("openClosePos", false)
+                .maxResults(1)
+                .list();
+        System.out.println("CASE 3 (Фильтр по приоритету) PASSED");
+
+        // Case 4: Filter "Все (с архивом)" (excludeDrafts only)
+        dataManager.load(com.company.hunttech.entity.OpenPosition.class)
+                .query("select e from hunttech_OpenPosition e where (coalesce(e.signDraft, false) <> :excludeDrafts and (e.priority is null or e.priority >= 0)) order by e.vacansyName")
+                .parameter("excludeDrafts", true)
+                .maxResults(1)
+                .list();
+        System.out.println("CASE 4 (Все с архивом) PASSED");
+    }
 }

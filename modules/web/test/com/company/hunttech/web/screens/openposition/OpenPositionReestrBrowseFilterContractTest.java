@@ -30,18 +30,58 @@ public class OpenPositionReestrBrowseFilterContractTest {
     void testJpqlSyntaxValidity() {
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
             com.haulmont.cuba.core.sys.jpql.Parser.parseWhereClause(
-                    "where (:underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true))");
+                    "where (e.signDraft = :underReviewOrDraft or e.priority = -2 or e.priority = -1)");
         }, "JPQL условие underReviewOrDraft должно корректно парситься без JpqlSyntaxException");
 
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
             com.haulmont.cuba.core.sys.jpql.Parser.parseWhereClause(
-                    "where (:excludeDrafts = true and (e.signDraft is null or e.signDraft = false) and (e.priority is null or e.priority >= 0))");
+                    "where (coalesce(e.signDraft, false) <> :excludeDrafts and (e.priority is null or e.priority >= 0))");
         }, "JPQL условие excludeDrafts должно корректно парситься без JpqlSyntaxException");
 
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
             com.haulmont.cuba.core.sys.jpql.Parser.parseWhereClause(
-                    "where ((:underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true)) and (e.openClose = :openClosePos or (:openClosePos = false and (e.openClose is null or e.openClose = false))))");
+                    "where ((e.signDraft = :underReviewOrDraft or e.priority = -2 or e.priority = -1) and coalesce(e.openClose, false) = :openClosePos)");
         }, "Полный составной JPQL запрос с openClosePos и underReviewOrDraft должен парситься без ошибок");
+    }
+
+    @Test
+    @DisplayName("Проверка механизма actualize в CUBA: условие исключается при отсутствии параметра")
+    void testConditionActualizeWhenParameterAbsentOrPresent() {
+        com.haulmont.cuba.core.global.queryconditions.JpqlCondition underReviewCond =
+                com.haulmont.cuba.core.global.queryconditions.JpqlCondition.where(
+                        "(e.signDraft = :underReviewOrDraft or e.priority = -2 or e.priority = -1)");
+        assertTrue(underReviewCond.getParameters().contains("underReviewOrDraft"),
+                "Параметр underReviewOrDraft должен быть распознан");
+        org.junit.jupiter.api.Assertions.assertNull(
+                underReviewCond.actualize(java.util.Collections.emptySet()),
+                "При отсутствии underReviewOrDraft условие должно быть исключено (actualize возвращает null)");
+        org.junit.jupiter.api.Assertions.assertNotNull(
+                underReviewCond.actualize(java.util.Collections.singleton("underReviewOrDraft")),
+                "При наличии underReviewOrDraft условие должно быть включено");
+
+        com.haulmont.cuba.core.global.queryconditions.JpqlCondition excludeDraftsCond =
+                com.haulmont.cuba.core.global.queryconditions.JpqlCondition.where(
+                        "(coalesce(e.signDraft, false) <> :excludeDrafts and (e.priority is null or e.priority >= 0))");
+        assertTrue(excludeDraftsCond.getParameters().contains("excludeDrafts"),
+                "Параметр excludeDrafts должен быть распознан");
+        org.junit.jupiter.api.Assertions.assertNull(
+                excludeDraftsCond.actualize(java.util.Collections.emptySet()),
+                "При отсутствии excludeDrafts условие должно быть исключено (actualize возвращает null)");
+        org.junit.jupiter.api.Assertions.assertNotNull(
+                excludeDraftsCond.actualize(java.util.Collections.singleton("excludeDrafts")),
+                "При наличии excludeDrafts условие должно быть включено");
+
+        com.haulmont.cuba.core.global.queryconditions.JpqlCondition openCloseCond =
+                com.haulmont.cuba.core.global.queryconditions.JpqlCondition.where(
+                        "coalesce(e.openClose, false) = :openClosePos");
+        assertTrue(openCloseCond.getParameters().contains("openClosePos"),
+                "Параметр openClosePos должен быть распознан");
+        org.junit.jupiter.api.Assertions.assertNull(
+                openCloseCond.actualize(java.util.Collections.emptySet()),
+                "При отсутствии openClosePos условие должно быть исключено (actualize возвращает null)");
+        org.junit.jupiter.api.Assertions.assertNotNull(
+                openCloseCond.actualize(java.util.Collections.singleton("openClosePos")),
+                "При наличии openClosePos условие должно быть включено");
     }
 
     @Test
@@ -53,12 +93,16 @@ public class OpenPositionReestrBrowseFilterContractTest {
         String content = new String(Files.readAllBytes(xmlFile.toPath()), StandardCharsets.UTF_8);
 
         // 1. Условие подбора вакансий в статусе драфт/на проверку
-        assertTrue(content.contains(":underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true)"),
+        assertTrue(content.contains("(e.signDraft = :underReviewOrDraft or e.priority = -2 or e.priority = -1)"),
                 "XML обязан содержать валидное JPQL-условие :underReviewOrDraft для отбора вакансий со статусом драфт/на проверку (-2, -1, signDraft=true)");
 
         // 2. Условие исключения черновиков из общего рабочего списка
-        assertTrue(content.contains(":excludeDrafts = true and (e.signDraft is null or e.signDraft = false) and (e.priority is null or e.priority >= 0)"),
+        assertTrue(content.contains("(coalesce(e.signDraft, false) &lt;&gt; :excludeDrafts and (e.priority is null or e.priority &gt;= 0))"),
                 "XML обязан содержать условие :excludeDrafts для исключения черновиков из общего списка");
+
+        // 3. Условие фильтрации открытых/закрытых вакансий
+        assertTrue(content.contains("coalesce(e.openClose, false) = :openClosePos"),
+                "XML обязан содержать условие openClosePos с поддержкой null через coalesce");
 
         // 3. Наличие пункта «На проверку» в выпадающем меню кнопки «Приоритет»
         assertTrue(content.contains("id=\"priorityFilterPopupButton\""),

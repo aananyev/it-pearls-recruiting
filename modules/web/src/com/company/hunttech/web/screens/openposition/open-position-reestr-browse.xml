@@ -39,10 +39,10 @@
                                 <c:where>e.priority = :priority</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(:underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true))</c:where>
+                                <c:where>(e.signDraft = :underReviewOrDraft or e.priority = -2 or e.priority = -1)</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(:excludeDrafts = true and (e.signDraft is null or e.signDraft = false) and (e.priority is null or e.priority >= 0))</c:where>
+                                <c:where>(coalesce(e.signDraft, false) &lt;&gt; :excludeDrafts and (e.priority is null or e.priority &gt;= 0))</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>@between(e.lastOpenDate, now - :newOpenPosition, now + 1, day)</c:where>
@@ -56,7 +56,7 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(e.openClose = :openClosePos or (:openClosePos = false and (e.openClose is null or e.openClose = false)))</c:where>
+                                <c:where>coalesce(e.openClose, false) = :openClosePos</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.signDraft = :signDraft</c:where>
