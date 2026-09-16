@@ -222,6 +222,7 @@ Helper сначала сбрасывает прежний `ValueSource`, про�
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-16 | Исправлена работа `stretchToOval`: селектор CSS `.v-image.ht-oval-stretch` скорректирован под DOM Vaadin (`CubaImageWidget` как корневой `<img>`), добавлен перехват `setSource` в `WebOvaFallbackImage` для сохранения `ScaleMode.FILL`, в `ProjectEdit` настроен кликабельный размер fileupload и расширен `person-picker-view` свойством `fileImageFace` |
 | 2026-09-16 | Реализовано XML-свойство `stretchToOval` (boolean, default: false), правило «один размер → круг», CSS-класс `.ht-oval-stretch` во всех 7 темах, регистрация алиаса `ovalFallbackImage` |
 | 2026-08-28 | Исправлен `scaleMode` с `SCALE_TO_FIT` на `SCALE_DOWN` (валидное значение enum Image.ScaleMode в CUBA 7.3) в реестрах `IteractionListReestrBrowse` / `CandidateCVReestrBrowse` |
 | 2026-08-14 | `OvaFallbackImageLoader` читает XML-атрибут `ovalBackground` (фон-подложка под прозрачные изображения), вызов `setOvalBackground(...)`; в `ProjectEdit` логотипу проекта задан тёмно-серый фон `#3a3e44` |
