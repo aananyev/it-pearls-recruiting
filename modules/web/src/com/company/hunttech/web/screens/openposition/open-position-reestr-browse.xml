@@ -93,7 +93,7 @@
                                               align="TOP_CENTER"
                                               stylename="job-candidate-avatar"
                                               fallbackThemePath="icons/briefcase.png"
-                                              scaleMode="SCALE_DOWN"/>
+                                              stretchToOval="true"/>
                             <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
                                 <label id="detailVacancyName"
                                        value="Выберите вакансию"

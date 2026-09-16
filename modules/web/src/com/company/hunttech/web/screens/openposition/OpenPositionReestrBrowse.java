@@ -524,6 +524,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onAfterShow(Screen.AfterShowEvent event) {
+        if (projectLogoPic != null) {
+            projectLogoPic.setStretchToOval(true);
+        }
         initTableSelectionListener();
         updateSidebarWithPosition(null);
         updateToggleOpenCloseButton(null);
