@@ -479,6 +479,7 @@
         <property name="secondName"/>
         <property name="middleName"/>
         <property name="personPosition" view="_minimal"/>
+        <property name="fileImageFace" view="_minimal"/>
     </view>
     <view entity="hunttech_Person" name="person-owner-view" extends="_minimal">
         <property name="firstName"/>
