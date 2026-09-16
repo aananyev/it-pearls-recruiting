@@ -328,7 +328,7 @@
                             <action id="list" type="listPrintForm"/>
                         </actions>
                         <columns>
-                            <column id="priority" caption="Приоритет" width="55px" align="CENTER" sortable="true"/>
+                            <column id="priority" caption="Приоритет" width="75px" align="CENTER" sortable="true"/>
                             <column id="vacansyID" caption="№ вакансии" width="90px" align="CENTER" sortable="true"/>
                             <column id="logo" caption="Лого" width="55px" align="CENTER" sortable="false"/>
                             <column id="vacansyName" caption="Вакансия" expandRatio="1"/>

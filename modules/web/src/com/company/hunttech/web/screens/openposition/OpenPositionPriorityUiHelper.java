@@ -109,6 +109,42 @@ public final class OpenPositionPriorityUiHelper {
         return new BadgeData(html, desc);
     }
 
+    /**
+     * Формирует SVG-значок закрытой вакансии с подсказкой.
+     */
+     public static BadgeData getClosedBadge(int sizePx, MessageBundle messageBundle) {
+        int clampedSize = Math.max(14, Math.min(sizePx, 64));
+        int iconSize = clampedSize >= 22 ? 11 : 9;
+        String desc = resolveMessage(messageBundle, "msgVacancyClosedTooltip",
+                "<b>Вакансия закрыта</b><br>Подбор по данной позиции завершён.");
+        String titleText = resolveMessage(messageBundle, "msgVacancyClosedTitle", "Вакансия закрыта");
+        String html = "<div style='display: flex; align-items: center; justify-content: center; width: " + clampedSize + "px; height: " + clampedSize + "px; border-radius: 50%; background: rgba(239, 68, 68, 0.18); border: 1.5px solid #ef4444; box-shadow: 0 0 5px rgba(239, 68, 68, 0.35);' title='" + titleText + "'>"
+                + "<svg width='" + iconSize + "' height='" + iconSize + "' viewBox='0 0 24 24' fill='#ef4444'>"
+                + "<path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z'/>"
+                + "</svg></div>";
+        return new BadgeData(html, desc);
+    }
+
+    /**
+     * Формирует составной бейдж (приоритет + признак закрытия при isClosed=true).
+     */
+    public static BadgeData getPriorityAndStatusBadge(Integer priority, Boolean isClosed, int sizePx, MessageBundle messageBundle) {
+        BadgeData priorityBadge = getPriorityBadge(priority, sizePx, messageBundle);
+        if (!Boolean.TRUE.equals(isClosed)) {
+            return priorityBadge;
+        }
+
+        BadgeData closedBadge = getClosedBadge(sizePx, messageBundle);
+        String combinedHtml = "<div style='display: flex; align-items: center; justify-content: center; gap: 4px;'>"
+                + closedBadge.getHtml()
+                + priorityBadge.getHtml()
+                + "</div>";
+        String combinedDesc = closedBadge.getDescription()
+                + "<hr style='border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 4px 0;'/>"
+                + priorityBadge.getDescription();
+        return new BadgeData(combinedHtml, combinedDesc);
+    }
+
     private static String resolveMessage(MessageBundle messageBundle, String key, String defaultVal) {
         if (messageBundle != null) {
             try {

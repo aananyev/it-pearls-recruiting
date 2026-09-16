@@ -16,6 +16,8 @@ import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
+import com.company.hunttech.UiNotificationEvent;
+import com.haulmont.cuba.core.global.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,8 @@ public class SmartOpenPositionUploadScreen extends Screen {
     private FileUploadField uploadField;
     @Inject
     private FileUploadingAPI fileUploadingAPI;
+    @Inject
+    private Events events;
     @Inject
     private ProgressBar progressBar;
     @Inject
@@ -473,6 +477,16 @@ public class SmartOpenPositionUploadScreen extends Screen {
             this.createdPosition = result.getOpenPosition();
             log.info("[SMART_VACANCY_OPENING_UI] ✓ Вакансия успешно открыта! ID={}, Сообщение: '{}'",
                     createdPosition != null ? createdPosition.getId() : "null", result.getMessage());
+
+            try {
+                if (createdPosition != null) {
+                    String globalMsg = OpenPositionNotificationHelper.buildNewVacancyMessage(createdPosition, currentUser);
+                    events.publish(new UiNotificationEvent(this, globalMsg));
+                }
+            } catch (Exception ePub) {
+                log.warn("[SMART_VACANCY_OPENING_UI] Не удалось опубликовать глобальное событие: {}", ePub.getMessage());
+            }
+
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Черновик создан")
                     .withDescription(result.getMessage())

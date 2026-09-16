@@ -7,6 +7,11 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -74,9 +79,13 @@ public class JobCandidateSmartScanContractTest {
         assertTrue(xmlContent.contains("id=\"applyBtn\""), "Диалог должен содержать кнопку подтверждения applyBtn");
         assertTrue(xmlContent.contains("id=\"cancelBtn\""), "Диалог должен содержать кнопку отмены cancelBtn");
 
-        File screensXml = resolveFile("modules/web/src/com/company/hunttech/web-screens.xml");
-        String screensContent = new String(Files.readAllBytes(screensXml.toPath()), StandardCharsets.UTF_8);
-        assertTrue(screensContent.contains("id=\"hunttech_SmartCvScanDialog\""), "Экран hunttech_SmartCvScanDialog должен быть зарегистрирован в web-screens.xml");
+        UiController uiController = SmartCvScanDialog.class.getAnnotation(UiController.class);
+        assertNotNull(uiController, "SmartCvScanDialog должен иметь аннотацию @UiController");
+        assertEquals("hunttech_SmartCvScanDialog", uiController.value(), "ID контроллера должен быть hunttech_SmartCvScanDialog");
+
+        UiDescriptor uiDescriptor = SmartCvScanDialog.class.getAnnotation(UiDescriptor.class);
+        assertNotNull(uiDescriptor, "SmartCvScanDialog должен иметь аннотацию @UiDescriptor");
+        assertEquals("smart-cv-scan-dialog.xml", uiDescriptor.value(), "Дескриптор должен быть smart-cv-scan-dialog.xml");
     }
 
     @Test

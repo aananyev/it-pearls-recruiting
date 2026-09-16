@@ -2352,14 +2352,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     /** Формирование и рассылка уведомления о закрытии позиции. */
     private void sendClosePositionMessage() {
-        events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
-                getEditedEntity().getVacansyName()));
+        events.publish(new UiNotificationEvent(this,
+                OpenPositionNotificationHelper.buildCloseMessage(getEditedEntity(), userSession.getUser())));
     }
 
     /** Формирование и рассылка уведомления об открытии позиции. */
     private void sendOpenPositionMessage() {
-        events.publish(new UiNotificationEvent(this, "Открыта новая вакансия: " +
-                getEditedEntity().getVacansyName()));
+        boolean isNew = PersistenceHelper.isNew(getEditedEntity());
+        String msg = isNew
+                ? OpenPositionNotificationHelper.buildNewVacancyMessage(getEditedEntity(), userSession.getUser())
+                : OpenPositionNotificationHelper.buildOpenMessage(getEditedEntity(), userSession.getUser());
+        events.publish(new UiNotificationEvent(this, msg));
     }
 
     @Subscribe

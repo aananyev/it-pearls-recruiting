@@ -12,11 +12,13 @@ import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import com.company.hunttech.UiNotificationEvent;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.EntityStates;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.View;
@@ -103,6 +105,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private SkillAnalysisService skillAnalysisService;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private Events events;
 
     @Inject
     private GroupTable<OpenPosition> openPositionsTable;
@@ -328,16 +332,18 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private void initTableColumns() {
         if (openPositionsTable == null) return;
 
-        // Колонка 1: Приоритет (векторный индикатор с подсветкой и подсказкой)
+        // Колонка 1: Приоритет и признак закрытой вакансии (векторный индикатор с подсветкой и подсказкой)
         openPositionsTable.addGeneratedColumn("priority", position -> {
             Integer p = position.getPriority();
+            int effectivePriority;
             if (p != null && p == -2) {
-                return renderPriorityBadge(-2);
+                effectivePriority = -2;
+            } else if (Boolean.TRUE.equals(position.getSignDraft()) || (p != null && p == -1)) {
+                effectivePriority = -1;
+            } else {
+                effectivePriority = p != null ? p : 2;
             }
-            if (Boolean.TRUE.equals(position.getSignDraft()) || (p != null && p == -1)) {
-                return renderPriorityBadge(-1);
-            }
-            return renderPriorityBadge(p);
+            return renderPriorityAndStatusBadge(effectivePriority, position.getOpenClose());
         });
 
         // Колонка 2: Номер вакансии (ID)
@@ -629,6 +635,16 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
             updateSidebarWithPosition(saved);
             updateToggleOpenCloseButton(saved);
+
+            // Глобальная нотификация всех пользователей системы (UiNotificationEvent / GlobalUiEvent)
+            try {
+                String globalMsg = targetClosed
+                        ? OpenPositionNotificationHelper.buildCloseMessage(saved, userSession.getUser())
+                        : OpenPositionNotificationHelper.buildOpenMessage(saved, userSession.getUser());
+                events.publish(new UiNotificationEvent(this, globalMsg));
+            } catch (Exception ePub) {
+                log.warn("[OPEN_POSITION_REESTR] Не удалось отправить глобальное событие о вакансии: {}", ePub.getMessage());
+            }
 
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption(targetClosed ? "🔒 Вакансия закрыта" : "🔓 Вакансия открыта")
@@ -1459,13 +1475,14 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
-    private Component renderPriorityBadge(Integer priority) {
+    private Component renderPriorityAndStatusBadge(Integer priority, Boolean isClosed) {
         Label<String> lbl = uiComponents.create(Label.NAME);
         lbl.setHtmlEnabled(true);
         lbl.setDescriptionAsHtml(true);
         lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-        OpenPositionPriorityUiHelper.BadgeData badge = OpenPositionPriorityUiHelper.getPriorityBadge(priority, 22, messageBundle);
+        OpenPositionPriorityUiHelper.BadgeData badge = OpenPositionPriorityUiHelper.getPriorityAndStatusBadge(
+                priority, isClosed, 20, messageBundle);
         lbl.setValue(badge.getHtml());
         lbl.setDescription(badge.getDescription());
         return lbl;

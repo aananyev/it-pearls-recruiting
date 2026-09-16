@@ -356,7 +356,7 @@ public class ExtMainScreen extends MainScreen {
                 if (event.getMessage().startsWith(EVENT_NOTIFICATIOM_OPEN_POSITION)) {
                     notifications.create(Notifications.NotificationType.TRAY)
                             .withDescription(event.getMessage())
-                            .withHideDelayMs(10000)
+                            .withHideDelayMs(5000)
                             .withPosition(Notifications.Position.TOP_RIGHT)
                             .withCaption("ИНФОРМАЦИЯ")
                             .withStyleName("open-position-notification-open")
@@ -386,7 +386,7 @@ public class ExtMainScreen extends MainScreen {
                             .withDescription(event.getMessage())
                             .withCaption(messageBundle.getMessage("msgWarning"))
                             .withPosition(Notifications.Position.TOP_RIGHT)
-                            .withHideDelayMs(10000)
+                            .withHideDelayMs(5000)
                             .withContentMode(ContentMode.HTML)
                             .withStyleName("open-position-notification-close")
                             .show();
