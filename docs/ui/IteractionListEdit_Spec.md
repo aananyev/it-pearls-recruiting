@@ -50,65 +50,91 @@ UI-рефакторинг не изменяет entity, JPQL, loaders, views, с
 - продолжение цепочки кандидат–вакансия;
 - создание после копирования предыдущей вакансии кандидата.
 
-### 2.2. Иерархия экрана
+### 2.2. Иерархия экрана и двухколоночная компоновка
 
 ```text
 IteractionListEdit
-├── edit-sidebar
+├── edit-sidebar (зафиксирован, 312px)
 │   ├── candidateImage + projectLogoImage
 │   ├── ФИО кандидата
 │   ├── наименование вакансии
 │   ├── статус вакансии
 │   ├── приоритет вакансии
-│   ├── label-navigation
 │   ├── номер + дата
 │   ├── компания / проект / стоимость / рейтинг
 │   └── spacer
 └── edit-workspace
-    ├── toolbar
+    ├── toolbar (iteractionListToolbarBox)
     ├── mostPopularQuickActions
-    ├── vertical scroll
-    │   ├── participantsAccordion — VBox
-    │   ├── interactionAccordion — VBox
-    │   ├── resultAccordion — VBox
-    │   └── commentAccordion — VBox
-    └── footer actions
+    ├── vertical scroll (iteractionListContentScrollBox)
+    │   └── iteractionMainInfoCard → iteractionMainInfoBody
+    │       ├── gridIterationData: Кандидат (50%) | Вакансия (50%)
+    │       ├── onlyMySubscribeCheckBox (выровнен по левой направляющей)
+    │       ├── gridInteractionType: Тип взаимодействия (50%) | buttonsPanelCallAction (50%)
+    │       ├── resultAccordionGrid:
+    │       │   ├── Row 1: Оценка (50%) | Рекрутер (50%)
+    │       │   └── Row 2: Способ коммуникации (colspan=2, 100%)
+    │       └── commentField: Комментарий (100%)
+    └── footer actions (editActions: subscribeButton, windowCommitAndClose, windowClose)
 ```
 
-Legacy component ID с суффиксом `Accordion` сохранены ради совместимости имён, но компоненты являются обычными `VBoxLayout`. В XML отсутствуют `groupBox`, `collapsable`, `collapsed` и `showAsPanel`.
+#### Схема рабочей области:
+
+```text
+Toolbar
+────────────────────────────────────────
+
+Частые взаимодействия
+────────────────────────────────────────
+
+Кандидат             | Вакансия
+─────────────────────┼──────────────────
+Только мои подписки / вакансии
+────────────────────────────────────────
+Тип взаимодействия   | Доп. действие
+─────────────────────┼──────────────────
+Оценка               | Рекрутер
+─────────────────────┴──────────────────
+Способ коммуникации
+────────────────────────────────────────
+Комментарий
+────────────────────────────────────────
+
+                         Footer actions
+```
 
 ### 2.3. Постоянные блоки ввода
 
-| ID блока | Заголовок | Основные компоненты | Focus target |
+| Блок / Сетка | Заголовок / Назначение | Основные компоненты | Focus target |
 |---|---|---|---|
-| `participantsAccordion` | Кандидат и вакансия | `candidateField`, `vacancyFiels`, `onlyMySubscribeCheckBox` | `candidateField` |
-| `interactionAccordion` | Тип и действие | `iteractionTypeField`, `buttonCallAction`, `addString`, `actionDateCalendarRow` (`addDate` + `calendarBox`), `addInteger` | `iteractionTypeField` |
-| `resultAccordion` | Оценка и коммуникация | `ratingField`, `recrutierField`, `communicationMethodField` | `ratingField` |
-| `commentAccordion` | Комментарий | `commentField` | `commentField` |
+| `gridIterationData` | Участники (50/50) | `candidateField`, `vacancyFiels` | `candidateField` |
+| `onlyMySubscribeCheckBox` | Фильтр вакансий | `onlyMySubscribeCheckBox` | `onlyMySubscribeCheckBox` |
+| `gridInteractionType` | Тип и действие (50/50) | `iteractionTypeField`, `buttonsPanelCallAction` (`buttonCallAction`, `addString`, `actionDateCalendarRow` (`addDate` + `calendarBox`), `addInteger`) | `iteractionTypeField` |
+| `resultAccordionGrid` | Оценка и коммуникация (50/50 + 100%) | `ratingField`, `recrutierField`, `communicationMethodField` | `ratingField` |
+| `commentField` | Комментарий (100%) | `commentField` | `commentField` |
 
-Все четыре блока:
+Все блоки:
 
 - постоянно видимы;
-- расположены вертикально;
+- расположены в единой двухколоночной сетке 50% / 50%;
 - имеют естественную высоту `AUTO`;
-- не меняют высоту при клике по заголовку;
-- имеют статический title и отдельный body;
-- используют локальный класс `iteraction-list-flat-section`.
+- выровнены по 4 строгим вертикальным направляющим (`LEFT EDGE`, `CENTER LEFT`, `CENTER RIGHT`, `RIGHT EDGE`);
+- используют локальные классы `iteraction-list-form-grid`, `iteraction-list-participants-grid`, `iteraction-list-action-grid`, `iteraction-list-result-grid`.
 
 ### 2.3.1. Единый визуальный контракт и компактность полей
 
 Основные поля ввода в правой рабочей области используют общий stylename `edit-form-control` (ровно 7 контролов по контракту тестов: `iteractionTypeField`, `addString`, `addDate`, `addInteger`, `ratingField`, `recrutierField`, `commentField`):
 
 - `candidateField` и `vacancyFiels` сохраняют специализированный `iteraction-list-primary-picker`, но итоговая SCSS-геометрия совпадает с `edit-form-control`: высота `38px`, единая рамка, фон, focus-state и фиксированная ширина action-кнопок.
-- **Короткие поля ввода не растягиваются на всю ширину экрана**:
+- `ratingField` и `recrutierField` занимают по 50% ширины (width="100%" внутри своей колонки), с единым выравниванием caption и нижней базовой линии.
+- `communicationMethodField` занимает 100% ширины (colspan="2" внутри `resultAccordionGrid`).
+- `commentField` занимает 100% ширины рабочей области (`height="170px"`, `rows="7"`).
+- `buttonsPanelCallAction` и динамические поля:
   - `addDate`: ширина `260px`, сгруппирована в единый ряд `actionDateCalendarRow` вместе с плашкой календаря `calendarBox`.
   - `calendarBox` / `calendarInlineBox`: компактная плашка (`padding: 6px 12px`, border-radius 6px) с чекбоксом `addToCalendarCheckBox` и выпадающим списком календарей `calendarLookupField` (`width="320px"` со стилем `iteraction-calendar-lookup`).
-  - `buttonCallAction`: `width="AUTO"`, ограничена `max-width: 340px` (стиль `iteraction-call-action-btn`), выровнена по левому краю (`MIDDLE_LEFT`).
+  - `buttonCallAction`: `width="AUTO"`, `align="MIDDLE_LEFT"`, стилизована классом `iteraction-call-action-btn`.
   - `addInteger`: ширина `220px`.
   - `addString`: максимальная ширина `640px`.
-  - `ratingField`: ширина `260px`.
-  - `communicationMethodField`: ширина `340px`.
-  Это обеспечивает комфортное визуальное восприятие формы, устраняя пустоты и неестественно растянутые элементы ввода дат, чисел и списков выбора.
 
 ### 2.4. Label-navigation
 

@@ -72,7 +72,7 @@ public class IteractionListEditAccordionLayoutTest {
         String participants = section(
                 descriptor(),
                 "id=\"gridIterationData\"",
-                "id=\"iteractionTypeField\"");
+                "id=\"gridInteractionType\"");
 
         assertEquals(2, count(participants, "<column width=\"50%\"/>"));
         assertEquals(0, count(participants, "<column flex=\"1\"/>"));

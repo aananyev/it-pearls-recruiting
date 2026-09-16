@@ -510,18 +510,24 @@
                                   spacing="true"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-body iteraction-list-unified-body iteraction-list-section-content">
-                                <!-- Участники: Кандидат и Вакансия -->
+                                <!-- Участники: Кандидат и Вакансия в двухколоночной сетке 50/50 -->
                                 <grid id="gridIterationData"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
                                       stylename="iteraction-list-form-grid iteraction-list-participants-grid">
+                                    <!-- Определение колонок сетки участников -->
                                     <columns>
+                                        <!-- Левая колонка для выбора кандидата -->
                                         <column width="50%"/>
+                                        <!-- Правая колонка для выбора вакансии -->
                                         <column width="50%"/>
                                     </columns>
+                                    <!-- Строки сетки участников -->
                                     <rows>
+                                        <!-- Строка полей кандидата и вакансии -->
                                         <row id="row">
+                                            <!-- SuggestionPickerField для быстрого поиска кандидата по ФИО -->
                                             <suggestionPickerField id="candidateField"
                                                                    inputPrompt="mainMsg://msgStartInput"
                                                                    minSearchStringLength="3"
@@ -532,10 +538,14 @@
                                                                    required="true"
                                                                    dataContainer="iteractionListDc"
                                                                    property="candidate">
+                                                <!-- Действия выбора и открытия карточки кандидата -->
                                                 <actions>
+                                                    <!-- Стандартное действие lookup кандидата -->
                                                     <action id="lookup" type="picker_lookup"/>
+                                                    <!-- Действие открытия редактора кандидата -->
                                                     <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                 </actions>
+                                                <!-- Поисковый JPQL-запрос для автодополнения кандидатов -->
                                                 <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                        view="jobCandidate-iteraction-list-suggestion-view"
                                                        escapeValueForLike="true"
@@ -557,14 +567,18 @@
                                                                height="AUTO"
                                                                width="100%"
                                                                stylename="edit-form-control iteraction-list-primary-picker">
+                                                <!-- Действия выбора и открытия карточки вакансии -->
                                                 <actions>
+                                                    <!-- Стандартное действие lookup вакансии -->
                                                     <action id="lookup" type="picker_lookup"/>
+                                                    <!-- Действие открытия редактора вакансии -->
                                                     <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                 </actions>
                                             </lookupPickerField>
                                         </row>
                                     </rows>
                                 </grid>
+                                <!-- Чекбокс фильтрации вакансий по подпискам текущего рекрутера -->
                                 <checkBox id="onlyMySubscribeCheckBox"
                                           width="100%"
                                           height="AUTO"
@@ -573,75 +587,108 @@
                                           caption="msg://msgOnlyMySubscribe"
                                           stylename="iteraction-list-subscription-filter"/>
 
-                                <!-- Тип взаимодействия и динамические поля действия -->
-                                <lookupPickerField id="iteractionTypeField"
-                                                   optionsContainer="iteractionTypesDc"
-                                                   caption="msg://msgIteractionType"
-                                                   width="100%"
-                                                   height="AUTO"
-                                                   stylename="edit-form-control"
-                                                   required="true"
-                                                   dataContainer="iteractionListDc"
-                                                   property="iteractionType">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                    </actions>
-                                </lookupPickerField>
-                                <buttonsPanel id="buttonsPanelCallAction"
-                                              width="100%"
-                                              height="AUTO"
-                                              align="BOTTOM_LEFT"
-                                              stylename="iteraction-list-dynamic-panel">
-                                    <vbox id="dynamicActionFieldsBox" width="100%" height="AUTO" spacing="true">
-                                        <button id="buttonCallAction"
-                                                invoke="callActionEntity"
-                                                width="AUTO"
-                                                align="MIDDLE_LEFT"
-                                                stylename="iteraction-call-action-btn"/>
-                                        <textField id="addString"
-                                                   dataContainer="iteractionListDc"
-                                                   property="addString"
-                                                   width="100%"
-                                                   maxWidth="640px"/>
-                                        <hbox id="actionDateCalendarRow"
-                                              width="100%"
-                                              spacing="false"
-                                              visible="false"
-                                              align="MIDDLE_LEFT"
-                                              stylename="iteraction-date-calendar-row">
-                                            <dateField id="addDate"
-                                                       dataContainer="iteractionListDc"
-                                                       property="addDate"
-                                                       width="260px"/>
-                                            <vbox id="calendarBox"
-                                                  width="AUTO"
-                                                  spacing="false"
-                                                  visible="false"
-                                                  stylename="iteraction-calendar-box">
-                                                <hbox id="calendarInlineBox"
-                                                      spacing="false"
-                                                      align="MIDDLE_LEFT"
-                                                      stylename="iteraction-calendar-inline-box">
-                                                    <checkBox id="addToCalendarCheckBox"
-                                                              caption="msg://msgAddToCalendar"
-                                                              dataContainer="iteractionListDc"
-                                                              property="addToCalendar"
-                                                              align="MIDDLE_LEFT"/>
-                                                    <lookupField id="calendarLookupField"
-                                                                 caption="msg://msgCalendarLookup"
-                                                                 dataContainer="iteractionListDc"
-                                                                 property="calendarId"
-                                                                 width="320px"
-                                                                 stylename="iteraction-calendar-lookup"/>
-                                                </hbox>
-                                            </vbox>
-                                        </hbox>
-                                        <textField id="addInteger"
-                                                   dataContainer="iteractionListDc"
-                                                   property="addInteger"
-                                                   width="220px"/>
-                                    </vbox>
-                                </buttonsPanel>
+                                <!-- Тип взаимодействия и динамические поля действия: двухколоночная строка 50/50 -->
+                                <grid id="gridInteractionType"
+                                      width="100%"
+                                      height="AUTO"
+                                      spacing="true"
+                                      stylename="iteraction-list-form-grid iteraction-list-action-grid">
+                                    <!-- Определение колонок сетки типа взаимодействия и действия -->
+                                    <columns>
+                                        <!-- Левая колонка для типа взаимодействия -->
+                                        <column width="50%"/>
+                                        <!-- Правая колонка для динамической панели действий -->
+                                        <column width="50%"/>
+                                    </columns>
+                                    <!-- Строки сетки типа взаимодействия и действия -->
+                                    <rows>
+                                        <!-- Строка типа взаимодействия и динамических контролов -->
+                                        <row id="interactionTypeRow">
+                                            <!-- LookupPickerField для выбора справочного типа взаимодействия -->
+                                            <lookupPickerField id="iteractionTypeField"
+                                                               optionsContainer="iteractionTypesDc"
+                                                               caption="msg://msgIteractionType"
+                                                               width="100%"
+                                                               height="AUTO"
+                                                               stylename="edit-form-control"
+                                                               required="true"
+                                                               dataContainer="iteractionListDc"
+                                                               property="iteractionType">
+                                                <!-- Действия выбора типа взаимодействия -->
+                                                <actions>
+                                                    <!-- Стандартное действие lookup типа -->
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <!-- Динамическая панель дополнительных контролов действия -->
+                                            <buttonsPanel id="buttonsPanelCallAction"
+                                                          width="100%"
+                                                          height="AUTO"
+                                                          align="BOTTOM_LEFT"
+                                                          stylename="iteraction-list-dynamic-panel">
+                                                <!-- Контейнер динамических полей действия -->
+                                                <vbox id="dynamicActionFieldsBox" width="100%" height="AUTO" spacing="true">
+                                                    <!-- Кнопка вызова действия над сущностью -->
+                                                    <button id="buttonCallAction"
+                                                            invoke="callActionEntity"
+                                                            width="AUTO"
+                                                            align="MIDDLE_LEFT"
+                                                            stylename="iteraction-call-action-btn"/>
+                                                    <!-- Дополнительное строковое поле действия -->
+                                                    <textField id="addString"
+                                                               dataContainer="iteractionListDc"
+                                                               property="addString"
+                                                               width="100%"
+                                                               maxWidth="640px"/>
+                                                    <!-- Горизонтальный ряд выбора даты и интеграции с календарем -->
+                                                    <hbox id="actionDateCalendarRow"
+                                                          width="100%"
+                                                          spacing="false"
+                                                          visible="false"
+                                                          align="MIDDLE_LEFT"
+                                                          stylename="iteraction-date-calendar-row">
+                                                        <!-- Дополнительное поле даты действия -->
+                                                        <dateField id="addDate"
+                                                                   dataContainer="iteractionListDc"
+                                                                   property="addDate"
+                                                                   width="260px"/>
+                                                        <!-- Контейнер настроек календаря Яндекс -->
+                                                        <vbox id="calendarBox"
+                                                              width="AUTO"
+                                                              spacing="false"
+                                                              visible="false"
+                                                              stylename="iteraction-calendar-box">
+                                                            <!-- Внутренняя строка чекбокса и списка календарей -->
+                                                            <hbox id="calendarInlineBox"
+                                                                  spacing="false"
+                                                                  align="MIDDLE_LEFT"
+                                                                  stylename="iteraction-calendar-inline-box">
+                                                                <!-- Чекбокс добавления встречи в календарь -->
+                                                                <checkBox id="addToCalendarCheckBox"
+                                                                          caption="msg://msgAddToCalendar"
+                                                                          dataContainer="iteractionListDc"
+                                                                          property="addToCalendar"
+                                                                          align="MIDDLE_LEFT"/>
+                                                                <!-- Выпадающий список выбора календаря -->
+                                                                <lookupField id="calendarLookupField"
+                                                                             caption="msg://msgCalendarLookup"
+                                                                             dataContainer="iteractionListDc"
+                                                                             property="calendarId"
+                                                                             width="320px"
+                                                                             stylename="iteraction-calendar-lookup"/>
+                                                            </hbox>
+                                                        </vbox>
+                                                    </hbox>
+                                                    <!-- Дополнительное числовое поле действия -->
+                                                    <textField id="addInteger"
+                                                               dataContainer="iteractionListDc"
+                                                               property="addInteger"
+                                                               width="220px"/>
+                                                </vbox>
+                                            </buttonsPanel>
+                                        </row>
+                                    </rows>
+                                </grid>
 
                                 <!-- Оценка, рекрутер и способ связи -->
                                 <grid id="resultAccordionGrid"
@@ -649,12 +696,18 @@
                                       height="AUTO"
                                       spacing="true"
                                       stylename="iteraction-list-form-grid iteraction-list-result-grid">
+                                    <!-- Определение колонок сетки результатов -->
                                     <columns>
+                                        <!-- Левая колонка для оценки -->
                                         <column width="50%"/>
+                                        <!-- Правая колонка для рекрутера -->
                                         <column width="50%"/>
                                     </columns>
+                                    <!-- Строки сетки результатов -->
                                     <rows>
+                                        <!-- Строка оценки и ответственного рекрутера -->
                                         <row id="rating">
+                                            <!-- LookupField для выбора числовой оценки взаимодействия -->
                                             <lookupField id="ratingField"
                                                          required="true"
                                                          align="MIDDLE_LEFT"
@@ -663,7 +716,8 @@
                                                          property="rating"
                                                          description="msg://msgRatingDecription"
                                                          stylename="edit-form-control"
-                                                         width="260px"/>
+                                                         width="100%"/>
+                                            <!-- LookupPickerField для выбора ответственного рекрутера -->
                                             <lookupPickerField id="recrutierField"
                                                                caption="msg://msgRecrutier"
                                                                width="100%"
@@ -671,14 +725,18 @@
                                                                property="recrutier"
                                                                stylename="edit-form-control"
                                                                optionsContainer="usersDc">
+                                                <!-- Действия выбора рекрутера -->
                                                 <actions>
+                                                    <!-- Стандартное действие lookup рекрутера -->
                                                     <action id="lookup" type="picker_lookup"/>
                                                 </actions>
                                             </lookupPickerField>
                                         </row>
+                                        <!-- Строка способа коммуникации -->
                                         <row>
+                                            <!-- Поле ввода способа связи на всю ширину двух колонок -->
                                             <textField id="communicationMethodField"
-                                                       width="340px"
+                                                       width="100%"
                                                        caption="msg://msgCommunicationMethod"
                                                        dataContainer="iteractionListDc"
                                                        property="communicationMethod"

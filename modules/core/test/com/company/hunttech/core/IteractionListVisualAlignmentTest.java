@@ -37,7 +37,7 @@ public class IteractionListVisualAlignmentTest {
         assertEquals(2, count(descriptor, "height=\"96px\""));
         assertEquals(2, count(descriptor, "ovalWidth=\"96px\""));
         assertEquals(2, count(descriptor, "ovalHeight=\"96px\""));
-        assertEquals(4, count(descriptor, "<column width=\"50%\"/>"));
+        assertEquals(6, count(descriptor, "<column width=\"50%\"/>"));
         assertEquals(0, count(descriptor, "<column flex=\"1\"/>"));
 
         assertFalse(descriptor.contains("id=\"iteractionListNavigation\""));
