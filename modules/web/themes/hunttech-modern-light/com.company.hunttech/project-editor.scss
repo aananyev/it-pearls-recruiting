@@ -167,6 +167,11 @@
       box-shadow: none !important;
     }
 
+    .edit-sidebar-visual .c-fileupload input {
+      width: 96px !important;
+      height: 36px !important;
+    }
+
     .edit-sidebar-visual .c-fileupload .v-button:hover,
     .edit-sidebar-visual .c-fileupload-clear:hover {
       background: rgba(255, 255, 255, 0.12) !important;

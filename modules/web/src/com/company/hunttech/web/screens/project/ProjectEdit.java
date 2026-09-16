@@ -58,13 +58,35 @@ public class ProjectEdit extends StandardEditor<Project> {
     @Inject
     private FileUploadField projectLogoFileUpload;
 
-    // OvaFallbackImage сам читает projectLogo из projectDc и показывает fallback
-    // (icons/no-company.png) при отсутствии файла; загрузка/очистка через upload
-    // (fileStoragePutMode=IMMEDIATE, property=projectLogo) обновляет контейнер —
-    // ручное переключение видимости/источника не требуется.
+    @Subscribe("projectLogoFileUpload")
+    public void onProjectLogoFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        FileDescriptor fd = projectLogoFileUpload.getFileDescriptor();
+        if (fd == null) {
+            Object val = projectLogoFileUpload.getValue();
+            if (val instanceof FileDescriptor) {
+                fd = (FileDescriptor) val;
+            }
+        }
+        if (fd != null) {
+            try {
+                projectLogoFileImage.setSource(projectLogoFileImage.createResource(FileDescriptorResource.class)
+                        .setFileDescriptor(fd));
+            } catch (Exception e) {
+                log.warn("Не удалось установить логотип проекта: {} - {}", e.getClass().getSimpleName(), e.getMessage());
+            }
+        }
+    }
+
+    @Subscribe("projectLogoFileUpload")
+    public void onProjectLogoFileUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
+        projectLogoFileImage.applyFallback();
+    }
+
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
-        // логотип отображается компонентом автоматически
+        if (getEditedEntity().getProjectLogo() == null) {
+            projectLogoFileImage.applyFallback();
+        }
     }
 
 

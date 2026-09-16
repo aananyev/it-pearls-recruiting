@@ -1,6 +1,7 @@
 package com.company.hunttech.web.components;
 
 import com.haulmont.cuba.gui.components.Image;
+import com.haulmont.cuba.gui.components.Resource;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import com.hunttech.hrm.web.loaders.OvaFallbackImageLoader;
@@ -254,6 +255,23 @@ public class OvalFallbackImageStretchTest {
         String registrar = new String(Files.readAllBytes(regFile.toPath()), StandardCharsets.UTF_8);
         assertTrue(registrar.contains("webUiComponents.register(OvaFallbackImage.NAME, WebOvaFallbackImage.class);"));
         assertTrue(registrar.contains("webUiComponents.register(OvaFallbackImage.ALIAS_NAME, WebOvaFallbackImage.class);"));
+    }
+
+    @Test
+    @DisplayName("Тест 12: setSource сохраняет stretchToOval=true и ScaleMode.FILL")
+    public void test12_SetSourcePreservesStretchToOval() {
+        WebOvaFallbackImage img = new WebOvaFallbackImage();
+        img.setWidth("120px");
+        img.setHeight("120px");
+        img.setStretchToOval(true);
+
+        assertEquals(Image.ScaleMode.FILL, img.getScaleMode());
+        assertTrue(img.isStretchToOval());
+
+        // При установке source stretchToOval и ScaleMode.FILL должны оставаться активными
+        img.setSource((Resource) null);
+        assertEquals(Image.ScaleMode.FILL, img.getScaleMode());
+        assertTrue(img.getStyleName().contains(WebOvaFallbackImage.STRETCH_STYLE_NAME));
     }
 
     private void setResultComponent(OvaFallbackImageLoader loader, WebOvaFallbackImage comp) {

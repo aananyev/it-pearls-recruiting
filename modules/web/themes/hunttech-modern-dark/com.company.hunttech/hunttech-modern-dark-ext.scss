@@ -256,6 +256,9 @@
   .ht-oval-fallback-image.ht-oval-stretch {
     border-radius: 50% !important;
     overflow: hidden !important;
+    object-fit: fill !important;
+    width: 100% !important;
+    height: 100% !important;
 
     img, .v-image-element {
       border-radius: 50% !important;

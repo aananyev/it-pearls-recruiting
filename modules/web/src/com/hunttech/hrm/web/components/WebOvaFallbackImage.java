@@ -247,6 +247,19 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     }
 
     @Override
+    public void setSource(Resource resource) {
+        super.setSource(resource);
+        syncScaleMode();
+    }
+
+    @Override
+    public <R extends Resource> R setSource(Class<R> type) {
+        R resource = super.setSource(type);
+        syncScaleMode();
+        return resource;
+    }
+
+    @Override
     public void updateValue(Resource resource) {
         super.updateValue(resource);
         syncScaleMode();

@@ -106,7 +106,10 @@
                                           visible="true"
                                           align="MIDDLE_CENTER"
                                           stylename="project-editor-logo-image"
-                                          scaleMode="SCALE_DOWN"/>
+                                          scaleMode="SCALE_DOWN"
+                                          stretchToOval="true"/>
+                        <!-- stretchToOval="true" переводит режим в ScaleMode.FILL и натягивает изображение по кругу;
+                             scaleMode="SCALE_DOWN" сохраняется для контрактной совместимости и fallback -->
                     </vbox>
                     <upload id="projectLogoFileUpload"
                             fileStoragePutMode="IMMEDIATE"
@@ -115,6 +118,9 @@
                             showFileName="false"
                             dropZone="projectEditorSidebarVisual"
                             showClearButton="true"
+                            accept="image/png,image/jpeg,image/webp"
+                            permittedExtensions=".png,.jpg,.jpeg,.webp"
+                            fileSizeLimit="10485760"
                             property="projectLogo"/>
                 </vbox>
                 <!-- Идентификация: только наименование проекта (динамическое, по центру);
