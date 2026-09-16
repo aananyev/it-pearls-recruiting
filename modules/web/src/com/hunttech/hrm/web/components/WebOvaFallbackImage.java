@@ -23,8 +23,15 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, OvalImageHost, FallbackImageHost {
 
+    public static final String STRETCH_STYLE_NAME = "ht-oval-stretch";
+
     private final OvalImageShapeDelegate ovalDelegate;
     private final FallbackImageResourceDelegate fallbackDelegate;
+
+    private String configuredWidth;
+    private String configuredHeight;
+    private boolean stretchToOval = false;
+    private ScaleMode originalScaleMode;
 
     public WebOvaFallbackImage() {
         super();
@@ -39,7 +46,7 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
         image.addStyleName("ht-oval-fallback-image");
         // По умолчанию режим масштабирования SCALE_DOWN для вписывания по вертикали и горизонтали
         if (getScaleMode() == null || getScaleMode() == ScaleMode.NONE) {
-            setScaleMode(ScaleMode.SCALE_DOWN);
+            super.setScaleMode(ScaleMode.SCALE_DOWN);
         }
     }
 
@@ -47,44 +54,137 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
         fallbackDelegate.initDefaultFromConfig();
+        applyGeometrySizing();
         syncScaleMode();
+    }
+
+    // --- StretchToOval API ---
+
+    @Override
+    public boolean isStretchToOval() {
+        return stretchToOval;
+    }
+
+    @Override
+    public void setStretchToOval(boolean stretchToOval) {
+        this.stretchToOval = stretchToOval;
+        if (stretchToOval) {
+            addStyleName(STRETCH_STYLE_NAME);
+            ScaleMode current = getScaleMode();
+            if (current != ScaleMode.FILL && current != null && current != ScaleMode.NONE) {
+                this.originalScaleMode = current;
+            }
+            super.setScaleMode(ScaleMode.FILL);
+        } else {
+            removeStyleName(STRETCH_STYLE_NAME);
+            if (originalScaleMode != null) {
+                super.setScaleMode(originalScaleMode);
+            } else {
+                super.setScaleMode(ScaleMode.SCALE_DOWN);
+            }
+        }
+        applyGeometrySizing();
+        syncScaleMode();
+    }
+
+    // --- Effective Sizing and Geometry ---
+
+    @Override
+    public String getEffectiveWidth() {
+        if (StringUtils.isNotBlank(configuredWidth)) {
+            return configuredWidth;
+        }
+        if (StringUtils.isNotBlank(configuredHeight)) {
+            return configuredHeight;
+        }
+        if (ovalDelegate != null) {
+            if (StringUtils.isNotBlank(ovalDelegate.getOvalWidth())) {
+                return ovalDelegate.getOvalWidth();
+            }
+            if (StringUtils.isNotBlank(ovalDelegate.getOvalHeight())) {
+                return ovalDelegate.getOvalHeight();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getEffectiveHeight() {
+        if (StringUtils.isNotBlank(configuredHeight)) {
+            return configuredHeight;
+        }
+        if (StringUtils.isNotBlank(configuredWidth)) {
+            return configuredWidth;
+        }
+        if (ovalDelegate != null) {
+            if (StringUtils.isNotBlank(ovalDelegate.getOvalHeight())) {
+                return ovalDelegate.getOvalHeight();
+            }
+            if (StringUtils.isNotBlank(ovalDelegate.getOvalWidth())) {
+                return ovalDelegate.getOvalWidth();
+            }
+        }
+        return null;
+    }
+
+    private void applyGeometrySizing() {
+        String effW = getEffectiveWidth();
+        String effH = getEffectiveHeight();
+
+        if (effW != null && effH != null) {
+            if (ovalDelegate != null) {
+                ovalDelegate.setOvalWidthExplicit(effW);
+                ovalDelegate.setOvalHeightExplicit(effH);
+            }
+            super.setWidth(effW);
+            super.setHeight(effH);
+        }
     }
 
     // --- Sizing and Scaling Synchronization ---
 
     @Override
     public void setWidth(String width) {
+        this.configuredWidth = width;
         super.setWidth(width);
-        if (ovalDelegate != null && StringUtils.isNotBlank(width)) {
-            if (StringUtils.isBlank(ovalDelegate.getOvalWidth())) {
-                ovalDelegate.setOvalWidth(width);
-            }
-        }
+        applyGeometrySizing();
         syncScaleMode();
     }
 
     @Override
     public void setHeight(String height) {
+        this.configuredHeight = height;
         super.setHeight(height);
-        if (ovalDelegate != null && StringUtils.isNotBlank(height)) {
-            if (StringUtils.isBlank(ovalDelegate.getOvalHeight())) {
-                ovalDelegate.setOvalHeight(height);
-            }
-        }
+        applyGeometrySizing();
         syncScaleMode();
     }
 
     @Override
     public void setScaleMode(ScaleMode scaleMode) {
-        super.setScaleMode(scaleMode);
+        if (scaleMode != null && scaleMode != ScaleMode.FILL && scaleMode != ScaleMode.NONE) {
+            this.originalScaleMode = scaleMode;
+        }
+        if (stretchToOval) {
+            super.setScaleMode(ScaleMode.FILL);
+        } else {
+            super.setScaleMode(scaleMode);
+        }
         syncScaleMode();
     }
 
     private void syncScaleMode() {
-        ScaleMode currentMode = getScaleMode();
-        if (currentMode == null || currentMode == ScaleMode.NONE) {
-            currentMode = ScaleMode.SCALE_DOWN;
-            super.setScaleMode(currentMode);
+        if (stretchToOval) {
+            if (getScaleMode() != ScaleMode.FILL) {
+                super.setScaleMode(ScaleMode.FILL);
+            }
+            addStyleName(STRETCH_STYLE_NAME);
+        } else {
+            removeStyleName(STRETCH_STYLE_NAME);
+            ScaleMode currentMode = getScaleMode();
+            if (currentMode == null || currentMode == ScaleMode.NONE) {
+                currentMode = ScaleMode.SCALE_DOWN;
+                super.setScaleMode(currentMode);
+            }
         }
         if (component != null) {
             component.markAsDirty();
@@ -95,23 +195,25 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
 
     @Override
     public String getOvalWidth() {
-        return ovalDelegate.getOvalWidth();
+        return getEffectiveWidth();
     }
 
     @Override
     public void setOvalWidth(String width) {
-        ovalDelegate.setOvalWidth(width);
+        this.configuredWidth = width;
+        applyGeometrySizing();
         syncScaleMode();
     }
 
     @Override
     public String getOvalHeight() {
-        return ovalDelegate.getOvalHeight();
+        return getEffectiveHeight();
     }
 
     @Override
     public void setOvalHeight(String height) {
-        ovalDelegate.setOvalHeight(height);
+        this.configuredHeight = height;
+        applyGeometrySizing();
         syncScaleMode();
     }
 

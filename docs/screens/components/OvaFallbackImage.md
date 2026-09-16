@@ -55,27 +55,65 @@
 
 `WebOvaFallbackImage` наследует стандартный CUBA `WebImage`. Собственный Vaadin `ServerRpc` компонент не регистрирует; oval- и fallback-поведение реализуются composition/delegation.
 
-## 2. Геометрия изображения
+## 2. Геометрия изображения и свойство `stretchToOval`
 
 - `ht-oval-image` задаёт `border-radius: 50%`;
 - `ovalWidth` и `ovalHeight` задаются явно для стабильного slot;
 - при указании только одного oval-размера loader синхронизирует второй;
+- **Правило «один размер → круг»**: если задан только `width` или только `height`, второй недостающий размер логически принимается равным первому (например, `width="80px"` трактуется как круг `80 × 80px`);
 - `SCALE_DOWN` или `CONTAIN` используются, когда искажение исходного изображения недопустимо;
 - локальный экранный SCSS может задавать рамку, фон и тень только внутри namespace экрана.
 
-Пример:
+### Свойство `stretchToOval`
 
+| Параметр | Значение |
+|---|---|
+| **Имя XML-атрибута** | `stretchToOval` |
+| **Java API** | `boolean isStretchToOval()`, `void setStretchToOval(boolean stretchToOval)` |
+| **Тип** | `boolean` |
+| **Default** | `false` |
+
+**Назначение:**
+> Масштабирует переданное изображение независимо по горизонтали и вертикали до внутренних размеров `OvalFallbackImage`, после чего изображение отображается через овальную маску. Если задан только `width` или только `height`, компонент трактует область отображения как круг с диаметром, равным указанному размеру.
+
+Когда `stretchToOval="true"`:
+- Изображение масштабируется по осям X и Y так, чтобы занимать 100% ширины и 100% высоты компонента (`object-fit: fill`), после чего маскируется овалом (`border-radius: 50%; overflow: hidden;`).
+- Допускается изменение исходного aspect ratio изображения (эффект изображения, натянутого на круглую/овальную поверхность, без обрезания краёв по правилу cover и без пустых полей по правилу contain).
+- Исходный бинарный файл в `FileStorage` не модифицируется — преобразование является строго визуальным на уровне UI/rendering.
+- Полная обратная совместимость: если `stretchToOval="false"` или атрибут не задан, действует стандартное поведение компонента (`scaleMode=SCALE_DOWN`).
+
+### XML-примеры использования
+
+**Пример 1 — круг с натянутым логотипом:**
+```xml
+<custom:ovalFallbackImage
+        id="companyLogo"
+        width="80px"
+        stretchToOval="true"
+        fallbackThemePath="icons/no-company.png"/>
+```
+
+**Пример 2 — овал:**
+```xml
+<custom:ovalFallbackImage
+        id="projectLogo"
+        width="120px"
+        height="80px"
+        stretchToOval="true"
+        fallbackThemePath="icons/no-company.png"/>
+```
+
+**Пример 3 — со стандартным тегом `ovaFallbackImage` и привязкой к данным:**
 ```xml
 <ovaFallbackImage id="candidateImage"
                   dataContainer="iteractionListDc"
                   property="candidate.fileImageFace"
                   width="112px"
                   height="112px"
-                  ovalWidth="112px"
-                  ovalHeight="112px"
-                  scaleMode="SCALE_DOWN"
+                  stretchToOval="true"
                   fallbackThemePath="icons/no-programmer.jpeg"/>
 ```
+
 
 ## 3. Fallback и FileStorage
 
@@ -184,6 +222,7 @@ Helper сначала сбрасывает прежний `ValueSource`, про�
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-16 | Реализовано XML-свойство `stretchToOval` (boolean, default: false), правило «один размер → круг», CSS-класс `.ht-oval-stretch` во всех 7 темах, регистрация алиаса `ovalFallbackImage` |
 | 2026-08-28 | Исправлен `scaleMode` с `SCALE_TO_FIT` на `SCALE_DOWN` (валидное значение enum Image.ScaleMode в CUBA 7.3) в реестрах `IteractionListReestrBrowse` / `CandidateCVReestrBrowse` |
 | 2026-08-14 | `OvaFallbackImageLoader` читает XML-атрибут `ovalBackground` (фон-подложка под прозрачные изображения), вызов `setOvalBackground(...)`; в `ProjectEdit` логотипу проекта задан тёмно-серый фон `#3a3e44` |
 | 2026-08-14 | Унаследован атрибут `ovalBackground` от `OvalImage` (фон-подложка под прозрачные изображения); `WebOvaFallbackImage` реализует его через общий `OvalImageBackgroundSupport` |

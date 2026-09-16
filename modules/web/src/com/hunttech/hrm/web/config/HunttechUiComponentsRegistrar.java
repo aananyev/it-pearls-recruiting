@@ -40,5 +40,6 @@ public class HunttechUiComponentsRegistrar {
         webUiComponents.register(OvalImage.NAME, WebOvalImage.class);
         webUiComponents.register(FallbackImage.NAME, WebFallbackImage.class);
         webUiComponents.register(OvaFallbackImage.NAME, WebOvaFallbackImage.class);
+        webUiComponents.register(OvaFallbackImage.ALIAS_NAME, WebOvaFallbackImage.class);
     }
 }

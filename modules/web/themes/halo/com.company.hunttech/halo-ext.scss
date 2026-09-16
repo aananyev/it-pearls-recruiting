@@ -1799,6 +1799,20 @@ rating_battery_yellow_3:before {
       }
     }
 
+    .v-image.ht-oval-stretch,
+    .ht-oval-image.ht-oval-stretch,
+    .ht-oval-fallback-image.ht-oval-stretch {
+      border-radius: 50% !important;
+      overflow: hidden !important;
+
+      img, .v-image-element {
+        border-radius: 50% !important;
+        object-fit: fill !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
+
     /* ── Hide amCharts watermark across all graphical widgets ── */
     .amcharts-chart-div > a[href*="amcharts.com"],
     .amcharts-chart-div a[href*="amcharts.com"],

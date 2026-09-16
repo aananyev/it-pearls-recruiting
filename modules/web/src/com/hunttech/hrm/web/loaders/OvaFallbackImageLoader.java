@@ -16,6 +16,22 @@ public class OvaFallbackImageLoader extends ImageLoader {
     public void loadComponent() {
         super.loadComponent();
 
+        OvaFallbackImage component = (OvaFallbackImage) resultComponent;
+
+        String stretchToOval = element.attributeValue("stretchToOval");
+        if (StringUtils.isNotBlank(stretchToOval)) {
+            component.setStretchToOval(Boolean.parseBoolean(stretchToOval));
+        }
+
+        String width = element.attributeValue("width");
+        String height = element.attributeValue("height");
+        if (StringUtils.isNotBlank(width)) {
+            component.setWidth(width);
+        }
+        if (StringUtils.isNotBlank(height)) {
+            component.setHeight(height);
+        }
+
         String ovalWidth = element.attributeValue("ovalWidth");
         String ovalHeight = element.attributeValue("ovalHeight");
 
@@ -25,7 +41,6 @@ public class OvaFallbackImageLoader extends ImageLoader {
             ovalWidth = ovalHeight;
         }
 
-        OvaFallbackImage component = (OvaFallbackImage) resultComponent;
         if (StringUtils.isNotBlank(ovalWidth)) {
             component.setOvalWidth(ovalWidth);
         }

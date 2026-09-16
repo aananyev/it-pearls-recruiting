@@ -45,6 +45,14 @@ public class OvalImageShapeDelegate {
         }
     }
 
+    public void setOvalWidthExplicit(String width) {
+        this.ovalWidth = width;
+    }
+
+    public void setOvalHeightExplicit(String height) {
+        this.ovalHeight = height;
+    }
+
     private void setOvalWidthInternal(String width) {
         this.ovalWidth = width;
         host.setWidth(width);

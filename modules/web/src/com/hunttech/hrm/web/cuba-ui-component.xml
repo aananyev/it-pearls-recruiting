@@ -15,6 +15,12 @@
         <class>com.hunttech.hrm.web.components.WebOvaFallbackImage</class>
         <componentLoader>com.hunttech.hrm.web.loaders.OvaFallbackImageLoader</componentLoader>
     </component>
+    <!-- Алиас XML-тега ovalFallbackImage, соответствует OvaFallbackImage.ALIAS_NAME -->
+    <component>
+        <name>ovalFallbackImage</name>
+        <class>com.hunttech.hrm.web.components.WebOvaFallbackImage</class>
+        <componentLoader>com.hunttech.hrm.web.loaders.OvaFallbackImageLoader</componentLoader>
+    </component>
     <!-- Загрузчик файлов с обработкой изображений (логотип проекта/компании, фотография
          кандидата): регистрируется под стандартным именем upload, поэтому заменяет
          WebFileUploadField во всех экранах без правки XML. Обработка выполняется только
