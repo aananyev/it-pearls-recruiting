@@ -39,7 +39,7 @@
                                 <c:where>e.priority = :priority</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(:underReviewOrDraft = true and (e.priority in (-2, -1) or e.signDraft = true))</c:where>
+                                <c:where>(:underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true))</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>(:excludeDrafts = true and (e.signDraft is null or e.signDraft = false) and (e.priority is null or e.priority >= 0))</c:where>

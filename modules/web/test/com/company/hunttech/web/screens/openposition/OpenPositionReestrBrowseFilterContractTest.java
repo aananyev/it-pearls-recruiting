@@ -26,6 +26,25 @@ public class OpenPositionReestrBrowseFilterContractTest {
     }
 
     @Test
+    @DisplayName("Проверка синтаксической валидности JPQL-условий парсером CUBA")
+    void testJpqlSyntaxValidity() {
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            com.haulmont.cuba.core.sys.jpql.Parser.parseWhereClause(
+                    "where (:underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true))");
+        }, "JPQL условие underReviewOrDraft должно корректно парситься без JpqlSyntaxException");
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            com.haulmont.cuba.core.sys.jpql.Parser.parseWhereClause(
+                    "where (:excludeDrafts = true and (e.signDraft is null or e.signDraft = false) and (e.priority is null or e.priority >= 0))");
+        }, "JPQL условие excludeDrafts должно корректно парситься без JpqlSyntaxException");
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            com.haulmont.cuba.core.sys.jpql.Parser.parseWhereClause(
+                    "where ((:underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true)) and (e.openClose = :openClosePos or (:openClosePos = false and (e.openClose is null or e.openClose = false))))");
+        }, "Полный составной JPQL запрос с openClosePos и underReviewOrDraft должен парситься без ошибок");
+    }
+
+    @Test
     @DisplayName("Проверка JPQL-условий и компонентов в open-position-reestr-browse.xml")
     void testXmlDescriptorFilterConditions() throws Exception {
         File xmlFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/openposition/open-position-reestr-browse.xml");
@@ -34,8 +53,8 @@ public class OpenPositionReestrBrowseFilterContractTest {
         String content = new String(Files.readAllBytes(xmlFile.toPath()), StandardCharsets.UTF_8);
 
         // 1. Условие подбора вакансий в статусе драфт/на проверку
-        assertTrue(content.contains(":underReviewOrDraft = true and (e.priority in (-2, -1) or e.signDraft = true)"),
-                "XML обязан содержать условие :underReviewOrDraft для отбора вакансий со статусом драфт/на проверку (-2, -1, signDraft=true)");
+        assertTrue(content.contains(":underReviewOrDraft = true and (e.priority = -2 or e.priority = -1 or e.signDraft = true)"),
+                "XML обязан содержать валидное JPQL-условие :underReviewOrDraft для отбора вакансий со статусом драфт/на проверку (-2, -1, signDraft=true)");
 
         // 2. Условие исключения черновиков из общего рабочего списка
         assertTrue(content.contains(":excludeDrafts = true and (e.signDraft is null or e.signDraft = false) and (e.priority is null or e.priority >= 0)"),
