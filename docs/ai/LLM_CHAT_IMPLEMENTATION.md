@@ -34,6 +34,12 @@
 - Read-only transport smoke для staging вынесен в `scripts/verify-llm-chat-staging.sh`; authenticated сценарии и нагрузка выполняются только в выделенном staging.
 - План migration/rehearsal, seed-данных и rollback зафиксирован в `LLM_CHAT_PRODUCTION_MIGRATION_PLAN.md`; production-перенос без отдельного распоряжения запрещён.
 - Текущая release readiness и все оставшиеся шаги зафиксированы в `LLM_CHAT_RELEASE_READINESS_REPORT.md`; статус остаётся `NOT READY FOR PRODUCTION`.
+- Назначение собеседований кандидатам из обеих вкладок чата («Локальный чат» и «Hermes») через сервис `InterviewSchedulingActionService`:
+  - Распознавание интента (`isInterviewSchedulingIntent` + AI NLU функция `INTERVIEW_SCHEDULING_PARSE`).
+  - Многошаговый диалог с хранением состояния в `LlmChatPendingAction` (`NEED_CANDIDATE`, `NEED_VACANCY`, `NEED_INTERACTION_TYPE`, `CONFIRM_SCHEDULE`).
+  - Резолвинг открытых вакансий (`openClose != true`) с поддержкой названия проекта и руководителя проекта (`Project.projectOwner -> Person`).
+  - Создание `IteractionList` с полным lifecycle (`numberIteraction = max + 1`, `dateIteraction = now`, `addDate = targetDate`, `chainInteraction`, `recrutier = currentUser`).
+  - Синхронизация события в Яндекс-Календаре (CalDAV), создание видеовстречи Телемост и отправка приглашения кандидату по email.
 - Перед каждым новым этапом roadmap необходимо читать актуальный план и сопутствующие отчёты; текущий handoff и следующий staging gate описаны в release-readiness report.
 - Security-contract проверки текущего среза находятся в `LlmChatSecurityContractTest`; runtime security acceptance выполняется только в staging.
 - Компактный канонический статус, verdict аналитика/QA и актуальный порядок этапов находятся в `LLM_CHAT_CURRENT_STATUS.md`.

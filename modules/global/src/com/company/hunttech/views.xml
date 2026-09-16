@@ -1661,4 +1661,6 @@
         <property name="toVacancy" view="_minimal"/>
         <property name="resumePosition" view="_minimal"/>
     </view>
+
+    <view entity="hunttech_LlmChatPendingAction" name="llmChatPendingAction-view" extends="_local"/>
 </views>

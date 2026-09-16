@@ -2,6 +2,7 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.LlmChatStreamEvent;
 import com.company.hunttech.dto.HrmDataContextSnapshot;
+import com.company.hunttech.dto.action.InterviewSchedulingResult;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.ai.LlmChatConversation;
@@ -112,6 +113,8 @@ public class LlmChatServiceBean implements LlmChatService {
     @Inject
     private AiYandexOrchestrationService aiYandexOrchestrationService;
     @Inject
+    private InterviewSchedulingActionService interviewSchedulingActionService;
+    @Inject
     private SmartOpenPositionIngestService smartOpenPositionIngestService;
     @Resource(name = "scheduler")
     private TaskScheduler scheduler;
@@ -180,7 +183,33 @@ public class LlmChatServiceBean implements LlmChatService {
             throw new DevelopmentException("Запрос отменён до обращения к AI-провайдеру.");
         }
 
-        // 1. Попытка бронирования встречи в календаре CalDAV
+        // 0. Назначение собеседования кандидату и обработка многошагового диалога
+        if (interviewSchedulingActionService != null) {
+            InterviewSchedulingResult schedRes = null;
+            try {
+                schedRes = interviewSchedulingActionService.handleSchedulingAction(conversation.getId(), message.trim(), user, requestId.trim());
+            } catch (Exception ex) {
+                log.error("Сбой обработки сценария назначения собеседования: {}", ex.getMessage(), ex);
+            }
+            if (schedRes != null && schedRes.getMessage() != null) {
+                String responseText = schedRes.getMessage();
+                LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+                assistantMessage.setConversation(conversation);
+                assistantMessage.setRole("ASSISTANT");
+                assistantMessage.setContent(responseText);
+                assistantMessage.setSequenceNo(nextSequence + 1);
+                assistantMessage.setRequestId(requestId.trim());
+                assistantMessage.setStatus("COMPLETED");
+                assistantMessage.setProviderCode("yandex");
+                assistantMessage.setModelName("caldav-telemost");
+                conversation.setLastMessageAt(new Date());
+                dataManager.commit(new CommitContext(conversation, assistantMessage));
+                settleObservedUsage(quota, 50, "yandex-caldav");
+                return new LlmChatResponse(conversation.getId(), responseText, "yandex", "caldav-telemost", null);
+            }
+        }
+
+        // 1. Попытка бронирования встречи в календаре CalDAV (универсальный fallback для произвольных тем)
         if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(message.trim())) {
             AiMeetingParseResult parseResult = aiYandexOrchestrationService.parseMeetingIntent(message.trim(), user.getId());
             if (parseResult.isIntentDetected() && AiYandexOrchestrationService.containsBookingVerb(message)) {
@@ -421,6 +450,35 @@ public class LlmChatServiceBean implements LlmChatService {
 
         String rawContent = session.userMessage != null && session.userMessage.getContent() != null
                 ? session.userMessage.getContent().trim() : "";
+
+        // 0. Назначение собеседования кандидату и обработка многошагового диалога
+        if (interviewSchedulingActionService != null) {
+            InterviewSchedulingResult schedRes = null;
+            try {
+                schedRes = interviewSchedulingActionService.handleSchedulingAction(session.conversationId, rawContent, user, session.requestId);
+            } catch (Exception ex) {
+                log.error("Сбой стриминга сценария назначения собеседования: {}", ex.getMessage(), ex);
+            }
+            if (schedRes != null && schedRes.getMessage() != null) {
+                String responseText = schedRes.getMessage();
+                session.append(responseText);
+                LlmChatMessage assistantMessage = metadata.create(LlmChatMessage.class);
+                assistantMessage.setConversation(conversation);
+                assistantMessage.setRole("ASSISTANT");
+                assistantMessage.setContent(responseText);
+                assistantMessage.setSequenceNo(session.nextSequence + 1);
+                assistantMessage.setRequestId(session.requestId);
+                assistantMessage.setStatus("COMPLETED");
+                assistantMessage.setProviderCode("yandex");
+                assistantMessage.setModelName("caldav-telemost");
+                conversation.setLastMessageAt(new Date());
+                dataManager.commit(new CommitContext(conversation, assistantMessage));
+                settleObservedUsage(session.quota, 50, "yandex-caldav");
+                session.complete("COMPLETED", null);
+                publishStreamEvent(session, true);
+                return;
+            }
+        }
 
         // 1. Попытка бронирования встречи в календаре CalDAV
         if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(rawContent)) {

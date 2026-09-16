@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- 1. Создание таблицы HUNTTECH_LLM_CHAT_PENDING_ACTION для многошаговых диалогов и подтверждений -->
+    <changeSet id="260916-1-createLlmChatPendingActionTable" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="HUNTTECH_LLM_CHAT_PENDING_ACTION"/>
+            </not>
+        </preConditions>
+        <createTable tableName="HUNTTECH_LLM_CHAT_PENDING_ACTION">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="USER_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="CONVERSATION_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="ACTION_TYPE" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="STATUS" type="varchar(32)" defaultValue="PENDING"><constraints nullable="false"/></column>
+            <column name="EXPIRES_AT" type="timestamp"><constraints nullable="false"/></column>
+            <column name="STATE_DATA" type="text"/>
+            <column name="REQUEST_ID" type="varchar(64)"/>
+        </createTable>
+        <createIndex tableName="HUNTTECH_LLM_CHAT_PENDING_ACTION" indexName="IDX_HUNTTECH_PENDING_ACTION_USER_CONV">
+            <column name="USER_ID"/>
+            <column name="CONVERSATION_ID"/>
+            <column name="STATUS"/>
+            <column name="EXPIRES_AT"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="HUNTTECH_LLM_CHAT_PENDING_ACTION"/>
+        </rollback>
+    </changeSet>
+
+    <!-- 2. Seed-миграция AI-функции INTERVIEW_SCHEDULING_PARSE -->
+    <changeSet id="260916-1-seedInterviewSchedulingParseAiFunction" author="hunttech">
+        <sql dbms="postgresql"><![CDATA[
+            INSERT INTO HUNTTECH_AI_FUNCTION_CONFIGURATION (
+                ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME, DESCRIPTION,
+                CAPABILITY, SYSTEM_PROMPT, PROMPT_TEMPLATE, TEMPERATURE, MAX_TOKENS,
+                DEFAULT_MONTHLY_TOKEN_QUOTA,
+                EXECUTION_POLICY, FALLBACK_POLICY, ALLOW_MODEL_OVERRIDE,
+                IS_ACTIVE, INCLUDE_USER_CONTEXT, CONFIGURATION_VERSION
+            )
+            SELECT
+                'c0ffee00-0000-4000-8000-000000000020'::uuid,
+                1, CURRENT_TIMESTAMP, 'migration', 'INTERVIEW_SCHEDULING_PARSE',
+                'NLU разбор назначения собеседования кандидату',
+                'Интеллектуальное структурирование запроса рекрутера на назначение собеседования кандидату на вакансию и проект с определением даты и времени.',
+                'TEXT_GENERATION',
+                'Ты — высокоточный модуль NLU-распознавания намерений HRM HuntTech.
+Твоя задача — извлечь из русского текста запроса рекрутера структурированные параметры назначения собеседования кандидату.
+
+Верни СТРОГО один валидный JSON-объект без markdown-разметки (без ```json), без вводных слов и пояснений со следующими полями:
+{
+  "candidateQuery": "ФИО или фамилия кандидата в исходной или именительной форме (или null)",
+  "vacancyQuery": "Название или ключевые слова вакансии/должности (например «Системный аналитик», «Java разработчик», или null)",
+  "projectQuery": "Название проекта или компании клиента (например «ВТБ», «Сбер», или null)",
+  "projectOwnerQuery": "ФИО или фамилия руководителя/владельца проекта (например «Денис Гаркушин», «Гаркушин», или null)",
+  "interactionTypeQuery": "Желаемый тип взаимодействия («Собеседование», «Интервью с заказчиком», «Техническое интервью», или null)",
+  "rawDateTime": "Сырая строка даты и времени из сообщения (например «завтра на 17-00», «в пятницу в 15:30 по Москве»)",
+  "timeZone": "Europe/Moscow или Europe/Saratov (если упомянуто самарское/саратовское время), по умолчанию Europe/Moscow",
+  "online": true,
+  "intentDetected": true
+}
+
+ПРАВИЛА:
+1. Если в тексте есть фразы «в проект Дениса Гаркушина», «у Гаркушина», поле projectOwnerQuery = "Денис Гаркушин", projectQuery = null (или название проекта, если указано отдельно).
+2. Если в тексте «в проект ВТБ», projectQuery = "ВТБ", projectOwnerQuery = null.
+3. Не придумывай данные, которых нет в сообщении. Если поле не упомянуто, установи null.
+4. intentDetected = true, если пользователь выражает намерение назначить, запланировать или провести собеседование/интервью/встречу с кандидатом.',
+                E'Запрос пользователя:\n${sourceText}',
+                0.1, 1000, NULL, 'USER_OVERRIDE_ALLOWED', 'FALLBACK_TO_ADMIN', FALSE,
+                TRUE, FALSE, 1
+            WHERE NOT EXISTS (
+                SELECT 1 FROM HUNTTECH_AI_FUNCTION_CONFIGURATION
+                 WHERE CODE = 'INTERVIEW_SCHEDULING_PARSE'
+            );
+        ]]></sql>
+        <rollback>
+            DELETE FROM HUNTTECH_AI_FUNCTION_CONFIGURATION WHERE CODE = 'INTERVIEW_SCHEDULING_PARSE';
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

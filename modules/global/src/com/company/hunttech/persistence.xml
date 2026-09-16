@@ -74,6 +74,7 @@
         <class>com.company.hunttech.entity.ai.LlmChatQuotaPeriod</class>
         <class>com.company.hunttech.entity.ai.LlmUserQuotaOverride</class>
         <class>com.company.hunttech.entity.ai.LlmChatQuotaReservation</class>
+        <class>com.company.hunttech.entity.ai.LlmChatPendingAction</class>
         <class>com.company.hunttech.entity.AccountingExpenseCategory</class>
         <class>com.company.hunttech.entity.AccountingRecipient</class>
         <class>com.company.hunttech.entity.AccountingCompanyAlias</class>

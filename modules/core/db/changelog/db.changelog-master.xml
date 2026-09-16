@@ -251,5 +251,7 @@
              relativeToChangelogFile="true"/>
     <include file="260915-updateSmartVacancyHtmlPrompts.xml"
              relativeToChangelogFile="true"/>
+    <include file="260916-1-addInterviewSchedulingActionAndPendingTable.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -1,6 +1,7 @@
 package com.company.hunttech.service;
 
 import com.company.hunttech.config.HunttechHermesConfig;
+import com.company.hunttech.dto.action.InterviewSchedulingResult;
 import com.company.hunttech.core.ai.AiCostCalculator;
 import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.ExtUser;
@@ -84,6 +85,8 @@ public class HermesChatServiceBean implements HermesChatService {
     private UserAiContextService userAiContextService;
     @Inject
     private AiYandexOrchestrationService aiYandexOrchestrationService;
+    @Inject
+    private InterviewSchedulingActionService interviewSchedulingActionService;
 
     @Override
     public UUID startHermesConversation() {
@@ -188,6 +191,42 @@ public class HermesChatServiceBean implements HermesChatService {
 
         log.info("sendHermesMessage: convId={}, пользователь={}, длина сообщения={}",
                 conversationId, currentUser.getLogin(), message.length());
+
+        // 0. Назначение собеседования кандидату и многошаговый диалог
+        if (interviewSchedulingActionService != null) {
+            InterviewSchedulingResult schedRes = null;
+            try {
+                schedRes = interviewSchedulingActionService.handleSchedulingAction(conversationId, message.trim(), currentUser, UUID.randomUUID().toString());
+            } catch (Exception ex) {
+                log.error("Сбой сценария назначения собеседования в Hermes Chat: {}", ex.getMessage(), ex);
+            }
+            if (schedRes != null && schedRes.getMessage() != null) {
+                String responseText = schedRes.getMessage();
+                long duration = System.currentTimeMillis() - startTime;
+                LlmChatMessage userMsg = metadata.create(LlmChatMessage.class);
+                userMsg.setConversation(conversation);
+                userMsg.setRole("USER");
+                userMsg.setContent(message.trim());
+                userMsg.setSequenceNo(maxSeq + 1);
+                userMsg.setStatus("COMPLETED");
+
+                LlmChatMessage assistantMsg = metadata.create(LlmChatMessage.class);
+                assistantMsg.setConversation(conversation);
+                assistantMsg.setRole("ASSISTANT");
+                assistantMsg.setContent(responseText);
+                assistantMsg.setSequenceNo(maxSeq + 2);
+                assistantMsg.setStatus("COMPLETED");
+                assistantMsg.setProviderCode("yandex");
+                assistantMsg.setModelName("caldav-telemost");
+
+                conversation.setLastMessageAt(new Date());
+                dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
+                HermesChatResponse hermesResp = new HermesChatResponse(conversationId, responseText, null, duration);
+                hermesResp.setProviderCode("yandex");
+                hermesResp.setModelName("caldav-telemost");
+                return hermesResp;
+            }
+        }
 
         // Перехват прямого запроса на создание встречи в календаре / Телемосте
         if (aiYandexOrchestrationService != null && aiYandexOrchestrationService.isMeetingBookingIntent(message.trim())) {
