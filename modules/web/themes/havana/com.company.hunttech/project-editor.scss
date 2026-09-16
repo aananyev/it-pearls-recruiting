@@ -148,6 +148,14 @@
       min-width: 0 !important;
     }
 
+    .edit-sidebar-visual .c-fileupload {
+      position: relative !important;
+      display: inline-block !important;
+      width: 96px !important;
+      height: 36px !important;
+      overflow: hidden !important;
+    }
+
     .edit-sidebar-visual .c-fileupload .v-button,
     .edit-sidebar-visual .c-fileupload-clear {
       box-sizing: border-box;
@@ -168,14 +176,27 @@
     }
 
     .edit-sidebar-visual .c-fileupload input {
-      width: 96px !important;
-      height: 36px !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      opacity: 0 !important;
+      cursor: pointer !important;
+      z-index: 10 !important;
     }
 
+    .edit-sidebar-visual .c-fileupload:hover .v-button,
     .edit-sidebar-visual .c-fileupload .v-button:hover,
     .edit-sidebar-visual .c-fileupload-clear:hover {
       background: rgba(255, 255, 255, 0.12) !important;
       border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .edit-sidebar-visual .c-fileupload input:focus ~ .v-button,
+    .edit-sidebar-visual .c-fileupload .v-button-focus {
+      outline: 2px solid rgba(255, 177, 27, 0.8) !important;
+      outline-offset: 1px !important;
     }
 
     // Полоса-заголовок набора навигации «Разделы» и раздела «Коротко» (контракт
