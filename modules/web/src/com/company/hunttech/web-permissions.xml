@@ -6,6 +6,9 @@
             <permission id="hunttech.ai.manageCorporateCredentials"/>
             <permission id="hunttech.ai.viewChatHistoryAdmin"/>
             <permission id="hunttech.ai.reconcileChatQuota"/>
+            <!-- LLM-chat access boundaries. Grant only to the corresponding CUBA roles. -->
+            <permission id="hunttech.ai.useLocalChat"/>
+            <permission id="hunttech.ai.useManagerHermesWrite"/>
         </category>
     </specific>
 </permission-config>
