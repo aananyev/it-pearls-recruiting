@@ -5,6 +5,7 @@ import com.company.hunttech.dto.HrmDataContextSnapshot;
 import com.company.hunttech.dto.action.InterviewSchedulingResult;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.OpenPositionPriority;
 import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
 import com.company.hunttech.entity.ai.AiFunctionConfiguration;
@@ -1423,38 +1424,80 @@ public class LlmChatServiceBean implements LlmChatService {
                 return "⚠️ Не удалось распознать данные вакансии из предоставленного текста или ссылки. Пожалуйста, проверьте ссылку или описание.";
             }
 
-            // Проверка дубликатов
+            // Проверка на статус паузы в запросе
+            String lowerMsg = message.toLowerCase();
+            if (lowerMsg.contains("пауз") || lowerMsg.contains("pause")) {
+                parsedData.setPriority(OpenPositionPriority.PAUSED.getId()); // 0
+            }
+
+            // Проверка дубликатов (в первую очередь по точной vacansyID)
             OpenPosition duplicate = smartOpenPositionIngestService.findDuplicate(parsedData);
             if (duplicate != null) {
-                return "⚠️ **Вакансия уже существует в базе (дубликат)**\n\n" +
-                        "В системе уже есть открытая позиция с аналогичными параметрами:\n" +
-                        "• **Наименование:** `" + duplicate.getVacansyName() + "` (ID: " + (duplicate.getVacansyID() != null ? duplicate.getVacansyID() : duplicate.getId()) + ")\n" +
-                        "• **Проект:** " + (duplicate.getProjectName() != null ? duplicate.getProjectName().getProjectName() : "-") + "\n\n" +
-                        "Создание повторного дубликата отменено согласно правилам системы.";
+                String dupTitle = duplicate.getVacansyName() != null ? duplicate.getVacansyName() : "Вакансия";
+                String dupLink = "[" + dupTitle + "](hrm://vacancy/" + duplicate.getId() + ")";
+                return "⚠️ **Вакансия уже существует в системе (дубликат)**\n\n" +
+                        "В HRM уже зарегистрирована позиция с идентичными реквизитами:\n" +
+                        "• **Карточка вакансии:** " + dupLink + (duplicate.getVacansyID() != null ? " (ID заявки: " + duplicate.getVacansyID() + ")" : "") + "\n" +
+                        "• **Проект:** " + (duplicate.getProjectName() != null ? duplicate.getProjectName().getProjectName() : "Не указан") + "\n" +
+                        "• **Статус:** " + (Boolean.TRUE.equals(duplicate.getOpenClose()) ? "Закрыта" : "Открыта") + "\n\n" +
+                        "Согласно регламенту **HuntTech Vacancy Opening**, создание повторного дубликата отменено.";
             }
 
             SmartOpenPositionIngestResult result = smartOpenPositionIngestService.createOpenPosition(parsedData, user);
             if (!result.isSuccess() || result.getOpenPosition() == null) {
-                return "❌ Не удалось сохранить вакансию: " + result.getMessage();
+                return "❌ Не удалось сохранить вакансию в HRM: " + result.getMessage();
             }
 
             OpenPosition op = result.getOpenPosition();
+            String vacTitle = op.getVacansyName() != null ? op.getVacansyName() : "Открытая вакансия";
+            String vacLink = "[" + vacTitle + "](hrm://vacancy/" + op.getId() + ")";
+
             StringBuilder sb = new StringBuilder();
-            sb.append("✅ **Вакансия успешно открыта в HRM (Черновик)**\n\n");
-            sb.append("• **Наименование:** `").append(op.getVacansyName()).append("`\n");
+            sb.append("✅ **Вакансия успешно открыта в HRM**\n\n");
+            sb.append("• **Карточка вакансии:** ").append(vacLink).append("\n");
+            if (op.getVacansyID() != null) {
+                sb.append("• **ID заявки:** `").append(op.getVacansyID()).append("`\n");
+            }
             sb.append("• **Проект:** ").append(op.getProjectName() != null ? op.getProjectName().getProjectName() : "Не указан").append("\n");
             sb.append("• **Специализация:** ").append(op.getPositionType() != null ? op.getPositionType().getPositionRuName() : "Не указана").append("\n");
             sb.append("• **Грейд:** ").append(op.getGrade() != null ? op.getGrade().getGradeName() : "Не указан").append("\n");
-            sb.append("• **Формат:** ").append(op.getRemoteWork() != null && op.getRemoteWork() == 1 ? "Удаленно" : (op.getRemoteWork() != null && op.getRemoteWork() == 2 ? "Гибрид" : "В офисе")).append("\n");
-            if (parsedData.getRequiredSkills() != null && !parsedData.getRequiredSkills().isEmpty()) {
-                sb.append("• **Ключевой стек:** ").append(String.join(", ", parsedData.getRequiredSkills())).append("\n");
+            sb.append("• **Формат:** ").append(op.getRemoteWork() != null && op.getRemoteWork() == 1 ? "Удаленно (РФ / МСК ±2ч)" : (op.getRemoteWork() != null && op.getRemoteWork() == 2 ? "Гибрид" : "В офисе")).append("\n");
+            sb.append("• **Оформление:** ").append(op.getRegistrationForWork() != null && op.getRegistrationForWork() == 0 ? "Аутстаффинг" : "ТК / ГПХ").append("\n");
+            sb.append("• **Приоритет:** ").append(op.getPriority() != null && op.getPriority() == 0 ? "На паузе (0)" : "Нормальный (2)").append("\n");
+            sb.append("• **Ответственный:** ").append(op.getOwner() != null ? op.getOwner().getName() : "HRM Bot").append("\n");
+
+            if (Boolean.TRUE.equals(op.getSalaryCandidateRequest())) {
+                sb.append("• **Доход / Ставка:** по запросу кандидата (обсуждается на собеседовании)\n");
+            } else if (op.getSalaryMin() != null || op.getSalaryMax() != null) {
+                sb.append("• **Зарплатное предложение:** ");
+                if (op.getSalaryMin() != null && op.getSalaryMax() != null) {
+                    sb.append(op.getSalaryMin()).append(" – ").append(op.getSalaryMax()).append(" руб.");
+                } else if (op.getSalaryMax() != null) {
+                    sb.append("до ").append(op.getSalaryMax()).append(" руб.");
+                } else {
+                    sb.append("от ").append(op.getSalaryMin()).append(" руб.");
+                }
+                if (op.getSalaryIE() != null) {
+                    sb.append(" (ИП до ").append(op.getSalaryIE()).append(" руб.)");
+                }
+                sb.append("\n");
             }
-            sb.append("\n📋 **Сформированные артефакты:**\n");
-            sb.append("1. **Стандартизированное описание:** 14 обязательных разделов (коммерческая ставка скрыта).\n");
-            sb.append("2. **Чек-лист скрининга:** Must-have требования и маркеры поиска в резюме.\n");
-            sb.append("3. **Карта поиска:** Сформированы Boolean-запросы и компании-доноры.\n");
-            sb.append("4. **План интервью:** 6 структурированных блоков скрипта рекрутера.\n\n");
-            sb.append("Вакансия создана со статусом **«На проверку»** и доступна в форме **«Реестр открытых вакансий»**.");
+            if (op.getSalaryComment() != null && !op.getSalaryComment().trim().isEmpty()) {
+                sb.append("• **Сетка ставок:** ").append(op.getSalaryComment()).append("\n");
+            }
+
+            sb.append("\n📁 **Сформированные и синхронизированные артефакты:**\n");
+            sb.append("1. **Стандартизированное описание:** 14 обязательных разделов на русском (`comment`) + перевод на английский (`commentEn`).\n");
+            sb.append("2. **Must-Have чеклист:** записан в `interviewChecklist` и продублирован в `exercise`.\n");
+            sb.append("3. **Карта поиска сорсера:** записана в `searchMap` и продублирована в `memoForInterview`.\n");
+            sb.append("4. **План продающего интервью:** записан в `interviewPlan` и продублирован в `templateLetter`.\n");
+
+            if (parsedData.getTelegramPost() != null && !parsedData.getTelegramPost().trim().isEmpty()) {
+                sb.append("\n📢 **Готовая публикация для Telegram-канала рекрутеров:**\n```markdown\n");
+                sb.append(parsedData.getTelegramPost().trim()).append("\n```\n");
+            }
+
+            sb.append("\nВакансия полностью готова к работе рекрутеров и доступна в **Реестре открытых вакансий**.");
             return sb.toString();
         } catch (Exception e) {
             log.error("[LLM_CHAT_VACANCY] Ошибка при открытии вакансии из чата: " + e.getMessage(), e);

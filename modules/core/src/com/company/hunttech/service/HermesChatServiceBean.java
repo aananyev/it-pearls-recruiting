@@ -12,6 +12,8 @@ import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
 import com.company.hunttech.service.AiSecuritySanitizer;
 import com.company.hunttech.service.dto.AiUserContext;
+import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.OpenPositionPriority;
 import com.company.hunttech.service.dto.HermesChatMessage;
 import com.company.hunttech.service.dto.HermesChatResponse;
 import com.company.hunttech.service.dto.HermesConnectionStatus;
@@ -87,6 +89,8 @@ public class HermesChatServiceBean implements HermesChatService {
     private AiYandexOrchestrationService aiYandexOrchestrationService;
     @Inject
     private InterviewSchedulingActionService interviewSchedulingActionService;
+    @Inject
+    private SmartOpenPositionIngestService smartOpenPositionIngestService;
 
     @Override
     public UUID startHermesConversation() {
@@ -268,6 +272,11 @@ public class HermesChatServiceBean implements HermesChatService {
                 hermesResp.setModelName("caldav-telemost");
                 return hermesResp;
             }
+        }
+
+        // 0.2 Перехват запроса на создание / открытие вакансии по стандарту hunttech-vacancy-opening
+        if (isVacancyOpeningIntent(message.trim())) {
+            return handleVacancyOpeningInHermes(conversation, message.trim(), currentUser, maxSeq, startTime);
         }
 
         // 1. Выполняем запрос к Hermes Agent с перебором моделей по утвержденному сценарию:
@@ -1044,6 +1053,17 @@ public class HermesChatServiceBean implements HermesChatService {
         contextBlock.append("     * Фразы «в календаре собеседования с заказчиком», «собеседование у заказчика», «в календаре с заказчиком» -> Корпоративный календарь «Hunttech у заказчика».\n");
         contextBlock.append("   - Для любых видеовстреч создавай ссылку на Яндекс Телемост, информируй о записи и AI-конспекте встречи.\n");
         contextBlock.append("   - Часовой пояс по умолчанию: Europe/Saratov (UTC+4, на 1 час вперед относительно Москвы).\n\n");
+        contextBlock.append("5. СТАНДАРТ И РЕГЛАМЕНТ ОТКРЫТИЯ ВАКАНСИЙ (HUNTTECH VACANCY OPENING):\n");
+        contextBlock.append("   - При создании/открытии вакансий из текстов или ссылок (SSP Soft, hh.ru и др.):\n");
+        contextBlock.append("     * Единственный источник истины — оригинальный текст вакансии заказчика.\n");
+        contextBlock.append("     * Если данные отсутствуют: строго использовать «НЕТ ДАННЫХ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.»\n");
+        contextBlock.append("     * Если данные противоречивы: строго «УКАЗАНЫ ПРОТИВОРЕЧИВЫЕ ДАННЫЕ, УТОЧНЯЙТЕ У РЕКРУТЕРА НА СОБЕСЕДОВАНИИ.»\n");
+        contextBlock.append("     * Запрещено выдумывать зарплаты, ставки, бонусы, контакты или условия компании.\n");
+        contextBlock.append("     * Обязательно формируются 4 ключевых артефакта: стандартизированное описание (14 разделов на русском и перевод на английский), чеклист скрининга (must-have), карта поиска сорсера, план продающего собеседования.\n");
+        contextBlock.append("     * Дублирование полей: чеклист пишется в interview_checklist и exercise; карта поиска — в search_map и memo_for_interview; план интервью — в interview_plan и template_letter.\n");
+        contextBlock.append("     * Оформление по умолчанию: аутстаффинг (0). Приоритет по умолчанию: NORMAL (2), при слове «пауза» — PAUSED (0).\n");
+        contextBlock.append("     * Локация для удаленки по умолчанию: «Регионы РФ (МСК +/- 2 часа)».\n");
+        contextBlock.append("     * Расчет ставок кандидатов: строго по сетке OutstaffingRates (точный шаг либо ближайший меньший). При отсутствии ставки клиента — salary_candidate_request=true.\n\n");
 
         contextBlock.append("=== Запрос пользователя ===\n");
         contextBlock.append(userMessage);
@@ -1093,5 +1113,175 @@ public class HermesChatServiceBean implements HermesChatService {
         Integer promptTokens;
         Integer completionTokens;
         Integer totalTokens;
+    }
+
+    private boolean isVacancyOpeningIntent(String message) {
+        if (message == null || message.trim().isEmpty()) return false;
+        String lower = message.trim().toLowerCase();
+        boolean hasVacancyKeyword = lower.contains("ваканси") || lower.contains("позици") || lower.contains("openposition");
+        boolean hasActionKeyword = lower.contains("открой") || lower.contains("создай") || lower.contains("добавь")
+                || lower.contains("загрузи") || lower.contains("открыть") || lower.contains("создать") || lower.contains("загрузить");
+        boolean hasVacancyUrl = (lower.contains("need.ssp-soft.com") || lower.contains("hh.ru/vacancy") || lower.contains("career.habr.com"))
+                && (hasVacancyKeyword || hasActionKeyword || lower.contains("http"));
+        return (hasVacancyKeyword && hasActionKeyword) || hasVacancyUrl;
+    }
+
+    private boolean isManagerOrDirector(ExtUser user) {
+        if (user == null) return false;
+        String login = user.getLogin() != null ? user.getLogin().toLowerCase() : "";
+        if ("admin".equals(login) || "alan".equals(login)) {
+            return true;
+        }
+        if (user.getGroup() != null && user.getGroup().getName() != null) {
+            String grp = user.getGroup().getName().toLowerCase();
+            if (grp.contains("менедж") || grp.contains("директор") || grp.contains("руковод") || grp.contains("управлен") || grp.contains("admin")) {
+                return true;
+            }
+        }
+        if (user.getUserRoles() != null) {
+            for (com.haulmont.cuba.security.entity.UserRole ur : user.getUserRoles()) {
+                if (ur.getRole() != null && ur.getRole().getName() != null) {
+                    String r = ur.getRole().getName().toLowerCase();
+                    if (r.contains("manager") || r.contains("менедж") || r.contains("director") || r.contains("директор") || r.contains("admin")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private HermesChatResponse handleVacancyOpeningInHermes(LlmChatConversation conversation, String message, ExtUser currentUser, int maxSeq, long startTime) {
+        log.info("[HERMES_CHAT_VACANCY] Инициировано открытие вакансии в Hermes Chat пользователем '{}'", currentUser.getLogin());
+        String responseText;
+
+        if (!isManagerOrDirector(currentUser)) {
+            log.warn("[HERMES_CHAT_VACANCY] Отказ в доступе: пользователь '{}' не входит в группу Менеджеры/Директор", currentUser.getLogin());
+            responseText = "⚠️ **Ограничение доступа**\n\nФункция открытия вакансий через LLM-чат Hermes доступна исключительно пользователям из групп **«Менеджеры»** и **«Директор»**.\nУ вашей учетной записи недостаточно полномочий для выполнения этой операции.";
+        } else if (smartOpenPositionIngestService == null) {
+            responseText = "❌ Сервис умного открытия вакансий (SmartOpenPositionIngestService) недоступен.";
+        } else {
+            try {
+                // Извлекаем URL если есть
+                Pattern urlPattern = Pattern.compile("(?i)(https?://[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]+)");
+                Matcher urlMatcher = urlPattern.matcher(message);
+                String targetInput = message;
+                if (urlMatcher.find()) {
+                    targetInput = urlMatcher.group(1).trim();
+                    log.info("[HERMES_CHAT_VACANCY] Извлечен URL вакансии из сообщения: {}", targetInput);
+                } else {
+                    targetInput = message.replaceAll("(?i)^(?:открой|создай|добавь|загрузи)(?:\\s+пожалуйста)?\\s+вакансию[:\\s]*", "").trim();
+                }
+
+                SmartOpenPositionParsedData parsedData = smartOpenPositionIngestService.parseVacancyText(targetInput);
+                if (parsedData == null || parsedData.getVacansyName() == null || parsedData.getVacansyName().trim().isEmpty()) {
+                    responseText = "⚠️ Не удалось распознать данные вакансии из предоставленного текста или ссылки. Пожалуйста, проверьте ссылку или описание.";
+                } else {
+                    // Проверка на статус паузы в запросе
+                    String lowerMsg = message.toLowerCase();
+                    if (lowerMsg.contains("пауз") || lowerMsg.contains("pause")) {
+                        parsedData.setPriority(OpenPositionPriority.PAUSED.getId()); // 0
+                    }
+
+                    // Проверка дубликатов (в первую очередь по точной vacansyID)
+                    OpenPosition duplicate = smartOpenPositionIngestService.findDuplicate(parsedData);
+                    if (duplicate != null) {
+                        String dupTitle = duplicate.getVacansyName() != null ? duplicate.getVacansyName() : "Вакансия";
+                        String dupLink = "[" + dupTitle + "](hrm://vacancy/" + duplicate.getId() + ")";
+                        responseText = "⚠️ **Вакансия уже существует в системе (дубликат)**\n\n" +
+                                "В HRM уже зарегистрирована позиция с идентичными реквизитами:\n" +
+                                "• **Карточка вакансии:** " + dupLink + (duplicate.getVacansyID() != null ? " (ID заявки: " + duplicate.getVacansyID() + ")" : "") + "\n" +
+                                "• **Проект:** " + (duplicate.getProjectName() != null ? duplicate.getProjectName().getProjectName() : "Не указан") + "\n" +
+                                "• **Статус:** " + (Boolean.TRUE.equals(duplicate.getOpenClose()) ? "Закрыта" : "Открыта") + "\n\n" +
+                                "Согласно регламенту **HuntTech Vacancy Opening**, создание повторного дубликата отменено.";
+                    } else {
+                        SmartOpenPositionIngestResult result = smartOpenPositionIngestService.createOpenPosition(parsedData, currentUser);
+                        if (!result.isSuccess() || result.getOpenPosition() == null) {
+                            responseText = "❌ Не удалось сохранить вакансию в HRM: " + result.getMessage();
+                        } else {
+                            OpenPosition op = result.getOpenPosition();
+                            String vacTitle = op.getVacansyName() != null ? op.getVacansyName() : "Открытая вакансия";
+                            String vacLink = "[" + vacTitle + "](hrm://vacancy/" + op.getId() + ")";
+
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("✅ **Вакансия успешно открыта в HRM**\n\n");
+                            sb.append("• **Карточка вакансии:** ").append(vacLink).append("\n");
+                            if (op.getVacansyID() != null) {
+                                sb.append("• **ID заявки:** `").append(op.getVacansyID()).append("`\n");
+                            }
+                            sb.append("• **Проект:** ").append(op.getProjectName() != null ? op.getProjectName().getProjectName() : "Не указан").append("\n");
+                            sb.append("• **Специализация:** ").append(op.getPositionType() != null ? op.getPositionType().getPositionRuName() : "Не указана").append("\n");
+                            sb.append("• **Грейд:** ").append(op.getGrade() != null ? op.getGrade().getGradeName() : "Не указан").append("\n");
+                            sb.append("• **Формат:** ").append(op.getRemoteWork() != null && op.getRemoteWork() == 1 ? "Удаленно (РФ / МСК ±2ч)" : (op.getRemoteWork() != null && op.getRemoteWork() == 2 ? "Гибрид" : "В офисе")).append("\n");
+                            sb.append("• **Оформление:** ").append(op.getRegistrationForWork() != null && op.getRegistrationForWork() == 0 ? "Аутстаффинг" : "ТК / ГПХ").append("\n");
+                            sb.append("• **Приоритет:** ").append(op.getPriority() != null && op.getPriority() == 0 ? "На паузе (0)" : "Нормальный (2)").append("\n");
+                            sb.append("• **Ответственный:** ").append(op.getOwner() != null ? op.getOwner().getName() : "HRM Bot").append("\n");
+
+                            if (Boolean.TRUE.equals(op.getSalaryCandidateRequest())) {
+                                sb.append("• **Доход / Ставка:** по запросу кандидата (обсуждается на собеседовании)\n");
+                            } else if (op.getSalaryMin() != null || op.getSalaryMax() != null) {
+                                sb.append("• **Зарплатное предложение:** ");
+                                if (op.getSalaryMin() != null && op.getSalaryMax() != null) {
+                                    sb.append(op.getSalaryMin()).append(" – ").append(op.getSalaryMax()).append(" руб.");
+                                } else if (op.getSalaryMax() != null) {
+                                    sb.append("до ").append(op.getSalaryMax()).append(" руб.");
+                                } else {
+                                    sb.append("от ").append(op.getSalaryMin()).append(" руб.");
+                                }
+                                if (op.getSalaryIE() != null) {
+                                    sb.append(" (ИП до ").append(op.getSalaryIE()).append(" руб.)");
+                                }
+                                sb.append("\n");
+                            }
+                            if (op.getSalaryComment() != null && !op.getSalaryComment().trim().isEmpty()) {
+                                sb.append("• **Сетка ставок:** ").append(op.getSalaryComment()).append("\n");
+                            }
+
+                            sb.append("\n📁 **Сформированные и синхронизированные артефакты:**\n");
+                            sb.append("1. **Стандартизированное описание:** 14 обязательных разделов на русском (`comment`) + перевод на английский (`commentEn`).\n");
+                            sb.append("2. **Must-Have чеклист:** записан в `interviewChecklist` и продублирован в `exercise`.\n");
+                            sb.append("3. **Карта поиска сорсера:** записана в `searchMap` и продублирована в `memoForInterview`.\n");
+                            sb.append("4. **План продающего интервью:** записан в `interviewPlan` и продублирован в `templateLetter`.\n");
+
+                            if (parsedData.getTelegramPost() != null && !parsedData.getTelegramPost().trim().isEmpty()) {
+                                sb.append("\n📢 **Готовая публикация для Telegram-канала рекрутеров:**\n```markdown\n");
+                                sb.append(parsedData.getTelegramPost().trim()).append("\n```\n");
+                            }
+
+                            sb.append("\nВакансия полностью готова к работе рекрутеров и доступна в **Реестре открытых вакансий**.");
+                            responseText = sb.toString();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("[HERMES_CHAT_VACANCY] Ошибка при открытии вакансии в Hermes Chat: {}", e.getMessage(), e);
+                responseText = "❌ Произошла ошибка при обработке открытия вакансии: " + e.getMessage();
+            }
+        }
+
+        long duration = System.currentTimeMillis() - startTime;
+        LlmChatMessage userMsg = metadata.create(LlmChatMessage.class);
+        userMsg.setConversation(conversation);
+        userMsg.setRole("USER");
+        userMsg.setContent(message.trim());
+        userMsg.setSequenceNo(maxSeq + 1);
+        userMsg.setStatus("COMPLETED");
+
+        LlmChatMessage assistantMsg = metadata.create(LlmChatMessage.class);
+        assistantMsg.setConversation(conversation);
+        assistantMsg.setRole("ASSISTANT");
+        assistantMsg.setContent(responseText);
+        assistantMsg.setSequenceNo(maxSeq + 2);
+        assistantMsg.setStatus("COMPLETED");
+        assistantMsg.setProviderCode("hermes");
+        assistantMsg.setModelName("vacancy-opening-skill");
+
+        conversation.setLastMessageAt(new Date());
+        dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
+
+        HermesChatResponse hermesResp = new HermesChatResponse(conversation.getId(), responseText, null, duration);
+        hermesResp.setProviderCode("hermes");
+        hermesResp.setModelName("vacancy-opening-skill");
+        return hermesResp;
     }
 }

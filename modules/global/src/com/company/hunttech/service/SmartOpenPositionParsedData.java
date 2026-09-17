@@ -32,6 +32,13 @@ public class SmartOpenPositionParsedData implements Serializable {
     private Integer priority = 2; // Обычный
     private String shortDescription;
     private String comment;
+    private String commentEn;
+    private String templateLetter;
+    private BigDecimal outstaffingCost;
+    private Boolean salaryCandidateRequest;
+    private Integer registrationForWork = 0; // 0=Аутстаффинг по умолчанию
+    private String telegramPost;
+    private String ownerLogin;
     private String exercise;
     private String memoForInterview;
     private String interviewChecklist;
@@ -271,5 +278,61 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     public void setInterviewPlan(String interviewPlan) {
         this.interviewPlan = interviewPlan;
+    }
+
+    public String getCommentEn() {
+        return commentEn;
+    }
+
+    public void setCommentEn(String commentEn) {
+        this.commentEn = commentEn;
+    }
+
+    public String getTemplateLetter() {
+        return templateLetter;
+    }
+
+    public void setTemplateLetter(String templateLetter) {
+        this.templateLetter = templateLetter;
+    }
+
+    public BigDecimal getOutstaffingCost() {
+        return outstaffingCost;
+    }
+
+    public void setOutstaffingCost(BigDecimal outstaffingCost) {
+        this.outstaffingCost = outstaffingCost;
+    }
+
+    public Boolean getSalaryCandidateRequest() {
+        return salaryCandidateRequest;
+    }
+
+    public void setSalaryCandidateRequest(Boolean salaryCandidateRequest) {
+        this.salaryCandidateRequest = salaryCandidateRequest;
+    }
+
+    public Integer getRegistrationForWork() {
+        return registrationForWork;
+    }
+
+    public void setRegistrationForWork(Integer registrationForWork) {
+        this.registrationForWork = registrationForWork;
+    }
+
+    public String getTelegramPost() {
+        return telegramPost;
+    }
+
+    public void setTelegramPost(String telegramPost) {
+        this.telegramPost = telegramPost;
+    }
+
+    public String getOwnerLogin() {
+        return ownerLogin;
+    }
+
+    public void setOwnerLogin(String ownerLogin) {
+        this.ownerLogin = ownerLogin;
     }
 }

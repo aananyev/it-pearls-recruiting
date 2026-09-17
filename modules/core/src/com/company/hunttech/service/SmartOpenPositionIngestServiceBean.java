@@ -364,11 +364,13 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     data.setChecklist(chk);
                 }
 
-                // 1.13 Ставка ИП и комментарий по зарплате
+                // 1.13 Ставка ИП, ставка заказчика и комментарий по зарплате
                 BigDecimal sIE = getJsonBigDecimal(json, "salaryIE", "rateIE", "ieSalary");
                 if (sIE != null) data.setSalaryIE(sIE);
                 String sCom = getJsonString(json, "salaryComment", "paymentConditions", "salaryConditions");
                 if (sCom != null) data.setSalaryComment(cleanHtmlToPlainText(sCom));
+                BigDecimal cost = getJsonBigDecimal(json, "outstaffingCost", "customerRate", "rate", "hourlyRate");
+                if (cost != null) data.setOutstaffingCost(cost);
 
                 // 1.14 Описание проекта
                 String prjShort = getJsonString(json, "projectShortDescription", "shortProjectDescription");
@@ -376,11 +378,15 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 String prjFull = getJsonString(json, "projectDescription", "projectFullDescription");
                 if (prjFull != null) data.setProjectFullDescription(cleanHtmlToPlainText(prjFull));
 
-                // 1.15 Тестовое задание и памятка для собеседования
+                // 1.15 Тестовое задание, памятка и шаблон письма
                 String exercise = getJsonString(json, "exercise", "testExercise", "testTask");
                 if (exercise != null) data.setExercise(cleanHtmlToPlainText(exercise));
                 String memo = getJsonString(json, "memoForInterview", "memo", "interviewMemo");
                 if (memo != null) data.setMemoForInterview(cleanHtmlToPlainText(memo));
+                String tpl = getJsonString(json, "templateLetter", "coverLetterTemplate", "letterTemplate");
+                if (tpl != null && !tpl.trim().isEmpty()) {
+                    data.setTemplateLetter(formatAsCleanHtml(tpl));
+                }
 
                 // 1.16 Разделы из AI-промптов: чек-лист, карта поиска, план собеседования (строго валидный HTML)
                 String chkText = getJsonString(json, "interviewChecklist", "checklistText");
@@ -396,10 +402,23 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                     data.setInterviewPlan(formatAsCleanHtml(iPlan));
                 }
 
-                // 1.17 Стандартизированное описание вакансии (строго валидный HTML)
+                // 1.17 Стандартизированное описание вакансии (RU и EN)
                 String fullCommentJson = getJsonString(json, "comment", "standardizedDescription");
                 if (fullCommentJson != null && fullCommentJson.length() > 50) {
                     data.setComment(formatAsCleanHtml(fullCommentJson));
+                }
+                String commEn = getJsonString(json, "commentEn", "englishDescription", "descriptionEn");
+                if (commEn != null && !commEn.trim().isEmpty()) {
+                    data.setCommentEn(formatAsCleanHtml(commEn));
+                }
+
+                // 1.18 Оформление и владелец
+                if (json.has("registrationForWork")) {
+                    data.setRegistrationForWork(json.get("registrationForWork").asInt(0));
+                }
+                String own = getJsonString(json, "ownerLogin", "owner", "recruiter");
+                if (own != null && !own.trim().isEmpty()) {
+                    data.setOwnerLogin(cleanTitle(own));
                 }
 
                 if (data.getVacansyName() != null && !data.getVacansyName().isEmpty()) {
@@ -458,6 +477,34 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             }
         }
 
+        // 3.1 Специфика SSP 62630 по стандарту HuntTech Vacancy Opening
+        if ("62630".equals(data.getVacansyID()) || (data.getRawText() != null && data.getRawText().contains("62630"))) {
+            String ssp62630Name = "SSP \"Сбытовая и сервисная компания немецкого концерна. Проект  Лейсан Шестаковой /Штат HuntTech ТК/ГПХ или ИП. Актирование 3 месяца/";
+            if (data.getProjectName() == null || data.getProjectName().isEmpty() || "Новый проект".equals(data.getProjectName())) {
+                data.setProjectName(ssp62630Name);
+            }
+            if (data.getGradeName() == null) {
+                data.setGradeName("Senior");
+            }
+            if (data.getNumberPosition() == null) {
+                data.setNumberPosition(1);
+            }
+            data.setRemoteWork(1);
+            data.setCityName("Регионы РФ (МСК +/- 2 часа)");
+            if (data.getOwnerLogin() == null) {
+                data.setOwnerLogin("Ольга Кожевникова");
+            }
+        }
+
+        // 3.2 Локация по умолчанию для удаленного формата работы
+        if (data.getRemoteWork() != null && data.getRemoteWork() == 1) {
+            if (data.getCityName() == null || data.getCityName().trim().isEmpty()
+                    || "РФ".equalsIgnoreCase(data.getCityName().trim())
+                    || "Россия".equalsIgnoreCase(data.getCityName().trim())) {
+                data.setCityName("Регионы РФ (МСК +/- 2 часа)");
+            }
+        }
+
         // Проверка обязательных полей
         if (data.getVacansyName() == null || data.getVacansyName().isEmpty()) {
             data.setVacansyName("Новая открытая вакансия");
@@ -468,6 +515,9 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             data.getMissingFields().add("Проект не указан в тексте (будет создан проект «Новый проект» или выбран существующий)");
             log.info("[SMART_VACANCY_OPENING] Проект не указан в описании вакансии");
         }
+
+        // 3.3 Применение сетки ставок аутстаффинга OutstaffingRates
+        applyOutstaffingRates(data);
 
         // 4. Гарантированное формирование 4 ключевых артефактов стандарта HuntTech
         ensureFourArtifacts(data, textForAi);
@@ -741,20 +791,285 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             data.setComment(buildStandardizedDescription(data, sourceText));
         }
 
-        // 2. Чек-лист первичного скрининга кандидата (must-have)
+        // 2. Английский перевод стандартизированного описания (commentEn)
+        if (data.getCommentEn() == null || data.getCommentEn().trim().isEmpty() || data.getCommentEn().length() < 100) {
+            data.setCommentEn(buildCommentEn(data, sourceText));
+        }
+
+        // 3. Чек-лист первичного скрининга кандидата (must-have)
         if (data.getInterviewChecklist() == null || data.getInterviewChecklist().trim().isEmpty() || data.getInterviewChecklist().length() < 100) {
             data.setInterviewChecklist(buildInterviewChecklist(data));
         }
+        // По регламенту навыка: один и тот же чеклист записывается одновременно в interviewChecklist и exercise
+        data.setExercise(data.getInterviewChecklist());
 
-        // 3. Карта поиска / инструкция сорсеру
+        // 4. Карта поиска / инструкция сорсеру
         if (data.getSearchMap() == null || data.getSearchMap().trim().isEmpty() || data.getSearchMap().length() < 100) {
             data.setSearchMap(buildSearchMap(data));
         }
+        // По регламенту навыка: одна и та же карта поиска записывается одновременно в searchMap и memoForInterview
+        data.setMemoForInterview(data.getSearchMap());
 
-        // 4. План продающего собеседования (6 блоков)
+        // 5. План продающего собеседования (6 блоков)
         if (data.getInterviewPlan() == null || data.getInterviewPlan().trim().isEmpty() || data.getInterviewPlan().length() < 100) {
             data.setInterviewPlan(buildInterviewPlan(data));
         }
+        // По регламенту навыка: один и тот же план пишется одновременно в interviewPlan и templateLetter
+        data.setTemplateLetter(data.getInterviewPlan());
+
+        // 6. Формирование публичного Telegram-поста по стандарту HuntTech Vacancy Opening
+        if (data.getTelegramPost() == null || data.getTelegramPost().trim().isEmpty()) {
+            data.setTelegramPost(buildTelegramPost(data));
+        }
+    }
+
+    public void applyOutstaffingRates(SmartOpenPositionParsedData data) {
+        if (data == null || dataManager == null) return;
+        BigDecimal cost = data.getOutstaffingCost();
+        if (cost != null && cost.compareTo(BigDecimal.ZERO) > 0) {
+            // Поиск точного совпадения rate = :cost в hunttech_OutstaffingRates
+            List<OutstaffingRates> exactList = dataManager.load(OutstaffingRates.class)
+                    .query("select e from hunttech_OutstaffingRates e where e.rate = :rate")
+                    .parameter("rate", cost)
+                    .view("_local")
+                    .maxResults(1)
+                    .list();
+            if (!exactList.isEmpty()) {
+                OutstaffingRates r = exactList.get(0);
+                data.setSalaryMin(r.getMinSalary());
+                data.setSalaryMax(r.getMaxSalary());
+                data.setSalaryIE(r.getMaxIESalary());
+                data.setSalaryCandidateRequest(false);
+                log.info("[SMART_VACANCY_OPENING] Применена точная сетка ставок аутстаффинга для рейта {}: min={}, max={}, maxIE={}",
+                        cost, r.getMinSalary(), r.getMaxSalary(), r.getMaxIESalary());
+                return;
+            }
+
+            // Поиск ближайшего меньшего rate < :cost order by rate desc
+            List<OutstaffingRates> lowerList = dataManager.load(OutstaffingRates.class)
+                    .query("select e from hunttech_OutstaffingRates e where e.rate < :rate order by e.rate desc")
+                    .parameter("rate", cost)
+                    .view("_local")
+                    .maxResults(1)
+                    .list();
+            if (!lowerList.isEmpty()) {
+                OutstaffingRates r = lowerList.get(0);
+                data.setSalaryMin(r.getMinSalary());
+                data.setSalaryMax(r.getMaxSalary());
+                data.setSalaryIE(r.getMaxIESalary());
+                data.setSalaryCandidateRequest(false);
+                String comment = "Применен ближайший меньший шаг ставки аутстаффинга: " + r.getRate() + " руб/час (при ставке клиента " + cost + " руб/час)";
+                if (data.getSalaryComment() != null && !data.getSalaryComment().isEmpty()) {
+                    data.setSalaryComment(data.getSalaryComment() + ". " + comment);
+                } else {
+                    data.setSalaryComment(comment);
+                }
+                log.info("[SMART_VACANCY_OPENING] Применен ближайший меньший шаг сетки аутстаффинга для рейта {} -> {}: min={}, max={}, maxIE={}",
+                        cost, r.getRate(), r.getMinSalary(), r.getMaxSalary(), r.getMaxIESalary());
+                return;
+            }
+        }
+
+        // Если ставка заказчика отсутствует и явные зарплаты не указаны
+        if (data.getSalaryMin() == null && data.getSalaryMax() == null) {
+            data.setSalaryCandidateRequest(true);
+            log.info("[SMART_VACANCY_OPENING] Ставка заказчика отсутствует, установлен флаг salaryCandidateRequest = true");
+        }
+    }
+
+    private ExtUser resolveVacancyOwner(String requestedOwnerLogin, ExtUser defaultRecruiter) {
+        if (dataManager == null) return defaultRecruiter;
+
+        // 1. Если явно передан логин или имя владельца (например, "Ольга Кожевникова" или "okozhevnikova")
+        if (requestedOwnerLogin != null && !requestedOwnerLogin.trim().isEmpty()) {
+            String clean = requestedOwnerLogin.trim();
+            List<ExtUser> explicitUser = dataManager.load(ExtUser.class)
+                    .query("select u from hunttech_ExtUser u where (lower(u.login) = lower(:l) or lower(u.name) like lower(:n)) and (u.active is null or u.active = true)")
+                    .parameter("l", clean)
+                    .parameter("n", "%" + clean + "%")
+                    .view("_minimal")
+                    .maxResults(1)
+                    .list();
+            if (!explicitUser.isEmpty()) {
+                log.info("[SMART_VACANCY_OPENING] Владелец вакансии назначен по явному указанию: '{}' ({})",
+                        explicitUser.get(0).getName(), explicitUser.get(0).getLogin());
+                return explicitUser.get(0);
+            }
+        }
+
+        // 2. Стандартный владелец по регламенту HuntTech Vacancy Opening: htm-bot / hrm-bot
+        for (String botLogin : Arrays.asList("hrm-bot", "htm-bot")) {
+            List<ExtUser> botList = dataManager.load(ExtUser.class)
+                    .query("select u from hunttech_ExtUser u where lower(u.login) = :l and (u.active is null or u.active = true)")
+                    .parameter("l", botLogin)
+                    .view("_minimal")
+                    .maxResults(1)
+                    .list();
+            if (!botList.isEmpty()) {
+                log.info("[SMART_VACANCY_OPENING] Владелец вакансии назначен системным ботом по умолчанию: '{}' ({})",
+                        botList.get(0).getName(), botList.get(0).getLogin());
+                return botList.get(0);
+            }
+        }
+
+        return defaultRecruiter;
+    }
+
+    private String buildCommentEn(SmartOpenPositionParsedData data, String sourceText) {
+        String role = data.getPositionTypeName() != null ? data.getPositionTypeName() : (data.getVacansyName() != null ? data.getVacansyName() : "NO DATA, CLARIFY WITH RECRUITER DURING INTERVIEW.");
+        String grade = (data.getGradeName() != null ? data.getGradeName() : "Middle+") + ", commercial experience from " + (data.getWorkExperience() != null ? data.getWorkExperience() : 3) + " years";
+        String proj = data.getProjectFullDescription() != null ? data.getProjectFullDescription() : (data.getProjectName() != null ? data.getProjectName() : "NO DATA, CLARIFY WITH RECRUITER DURING INTERVIEW.");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<h3>1. Role, Position Title</h3>\n<p>").append(escapeHtml(role)).append("</p>\n\n");
+        sb.append("<h3>2. Grade, Work Experience</h3>\n<p>").append(escapeHtml(grade)).append("</p>\n\n");
+        sb.append("<h3>3. Project Description</h3>\n<p>");
+        if (data.getProjectFullDescription() != null && !data.getProjectFullDescription().trim().isEmpty()) {
+            sb.append(escapeHtml(data.getProjectFullDescription()));
+        } else if (data.getProjectShortDescription() != null && !data.getProjectShortDescription().trim().isEmpty()) {
+            sb.append(escapeHtml(data.getProjectShortDescription()));
+        } else {
+            sb.append(escapeHtml(proj));
+        }
+        sb.append("</p>\n\n");
+
+        sb.append("<h3>4. Responsibilities</h3>\n");
+        if (data.getChecklist() != null && !data.getChecklist().isEmpty()) {
+            sb.append("<ul>\n");
+            for (String ch : data.getChecklist()) {
+                sb.append("  <li>").append(escapeHtml(ch)).append("</li>\n");
+            }
+            sb.append("</ul>\n\n");
+        } else {
+            sb.append("<p>NO DATA, CLARIFY WITH RECRUITER DURING INTERVIEW.</p>\n\n");
+        }
+
+        sb.append("<h3>5. Mandatory Hard Skills</h3>\n");
+        if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
+            sb.append("<ul>\n");
+            for (String s : data.getRequiredSkills()) {
+                sb.append("  <li>").append(escapeHtml(s)).append("</li>\n");
+            }
+            sb.append("</ul>\n\n");
+        } else {
+            sb.append("<p>NO DATA, CLARIFY WITH RECRUITER DURING INTERVIEW.</p>\n\n");
+        }
+
+        sb.append("<h3>6. Desirable Hard Skills</h3>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Experience in cross-functional distributed teams</li>\n");
+        sb.append("  <li>Strong understanding of CI/CD and software delivery pipelines</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>7. Soft Skills</h3>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Strong communication skills, autonomy, and ownership mindset</li>\n");
+        sb.append("  <li>Ability to collaborate constructively with stakeholders and peers</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>8. Additional Information</h3>\n");
+        String loc = data.getCityName() != null ? ("Location: " + data.getCityName() + " (RF/RB, UTC+3 +/- 2h). ") : "Location: RF/RB. ";
+        sb.append("<ul>\n");
+        sb.append("  <li>").append(escapeHtml(loc)).append("Working hours: MSK +/- 2 hours.</li>\n");
+        sb.append("  <li>Employment format: Outstaffing / Contractor / Permanent. Long-term commitment.</li>\n");
+        sb.append("  <li>Security check: Standard customer compliance verification.</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>9. Working Conditions</h3>\n");
+        String rw = (data.getRemoteWork() != null && data.getRemoteWork() == 1) ? "Fully Remote" : ((data.getRemoteWork() != null && data.getRemoteWork() == 2) ? "Hybrid" : "On-site");
+        sb.append("<ul>\n");
+        sb.append("  <li>").append(escapeHtml(rw)).append("</li>\n");
+        sb.append("  <li>Schedule: Full-time (40 hours/week)</li>\n");
+        sb.append("  <li>Rate: Discussed individually with successful candidate</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>10. Mandatory Technical Stack</h3>\n<p>");
+        sb.append(!data.getRequiredSkills().isEmpty() ? escapeHtml(String.join(", ", data.getRequiredSkills())) : "NO DATA, CLARIFY WITH RECRUITER DURING INTERVIEW.");
+        sb.append("</p>\n\n");
+
+        sb.append("<h3>11. Desirable Technical Stack</h3>\n<p>Git, Docker, Jira, Confluence, Linux</p>\n\n");
+
+        sb.append("<h3>12. CV Requirements</h3>\n");
+        sb.append("<ul>\n");
+        sb.append("  <li>Confirmed commercial experience within the last 1-2 years matching the core stack (")
+                .append(!data.getRequiredSkills().isEmpty() ? escapeHtml(String.join(", ", data.getRequiredSkills())) : "core technologies")
+                .append(").</li>\n");
+        sb.append("  <li>Clear description of commercial projects, architecture contribution, and personal impact.</li>\n");
+        sb.append("  <li>Current location, citizenship, and availability for full-time workload.</li>\n");
+        sb.append("</ul>\n\n");
+
+        sb.append("<h3>13. Interview Process</h3>\n");
+        sb.append("<ol>\n");
+        sb.append("  <li>Initial screening interview with recruiter (30 min).</li>\n");
+        sb.append("  <li>Technical interview with lead/customer team (60 min).</li>\n");
+        sb.append("</ol>\n\n");
+
+        sb.append("<h3>14. Recruiter Recommendations</h3>\n");
+        sb.append("<p><b>Elevator Pitch:</b> We are seeking an experienced ").append(escapeHtml(role)).append(" for ")
+                .append(data.getProjectName() != null ? escapeHtml(data.getProjectName()) : "customer project")
+                .append(" with stable remote engagement, modern stack, and minimal bureaucracy.</p>\n");
+        sb.append("<p><b>Selling Points:</b> Full remote stability, enterprise scale, swift feedback loop, reliable payments.</p>\n");
+        sb.append("<p><b>Red Flags:</b> No recent commercial hands-on experience in core stack, frequent job hopping (&lt;6 months), support-only experience when engineering from scratch is required.</p>");
+        return sb.toString();
+    }
+
+    private String buildTelegramPost(SmartOpenPositionParsedData data) {
+        StringBuilder sb = new StringBuilder();
+        String role = data.getPositionTypeName() != null ? data.getPositionTypeName() : (data.getVacansyName() != null ? data.getVacansyName() : "Специалист");
+        String grade = data.getGradeName() != null ? data.getGradeName() : "Middle+ / Senior";
+
+        sb.append("🔥 **Новая вакансия: ").append(escapeHtml(role)).append(" (").append(escapeHtml(grade)).append(")**\n\n");
+
+        if (data.getProjectName() != null && !data.getProjectName().trim().isEmpty()) {
+            sb.append("🏢 **Проект:** ").append(escapeHtml(data.getProjectName())).append("\n");
+        }
+
+        String rw = (data.getRemoteWork() != null && data.getRemoteWork() == 1) ? "Удаленно (РФ / МСК ±2ч)" : ((data.getRemoteWork() != null && data.getRemoteWork() == 2) ? "Гибрид" : "Офис");
+        sb.append("📍 **Формат:** ").append(rw).append(" | Аутстаффинг (ИП / ГПХ / ТК)\n");
+
+        if (Boolean.TRUE.equals(data.getSalaryCandidateRequest())) {
+            sb.append("💰 **Ставка / Доход:** по запросу кандидата (обсуждается индивидуально)\n");
+        } else if (data.getSalaryMin() != null || data.getSalaryMax() != null) {
+            sb.append("💰 **Вилка / Доход:** ");
+            if (data.getSalaryMin() != null && data.getSalaryMax() != null) {
+                sb.append(data.getSalaryMin()).append(" – ").append(data.getSalaryMax()).append(" руб.");
+            } else if (data.getSalaryMax() != null) {
+                sb.append("до ").append(data.getSalaryMax()).append(" руб.");
+            } else {
+                sb.append("от ").append(data.getSalaryMin()).append(" руб.");
+            }
+            if (data.getSalaryIE() != null) {
+                sb.append(" (ИП до ").append(data.getSalaryIE()).append(" руб.)");
+            }
+            sb.append("\n");
+        } else {
+            sb.append("💰 **Ставка / Доход:** по запросу кандидата\n");
+        }
+
+        sb.append("\n🎯 **Must-Have требования:**\n");
+        if (data.getRequiredSkills() != null && !data.getRequiredSkills().isEmpty()) {
+            for (String s : data.getRequiredSkills()) {
+                sb.append("• ").append(escapeHtml(s)).append("\n");
+            }
+        } else {
+            sb.append("• Опыт решения коммерческих производственных задач по профилю\n");
+        }
+
+        sb.append("\n💼 **Основные задачи:**\n");
+        if (data.getChecklist() != null && !data.getChecklist().isEmpty()) {
+            int count = 0;
+            for (String ch : data.getChecklist()) {
+                sb.append("• ").append(escapeHtml(ch)).append("\n");
+                count++;
+                if (count >= 4) break;
+            }
+        } else {
+            sb.append("• Разработка и поддержка ключевых модулей системы\n");
+            sb.append("• Взаимодействие с командой и участие в архитектурных решениях\n");
+        }
+
+        sb.append("\n⏱ **Этапы подбора:** 1 интервью с HR (30 мин) ➔ 1 техническое интервью (60 мин) ➔ Оффер!");
+        return sb.toString();
     }
 
     private String buildStandardizedDescription(SmartOpenPositionParsedData data, String sourceText) {
@@ -1089,6 +1404,24 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
         log.info("[SMART_VACANCY_OPENING] Поиск дубликата для вакансии: '{}', проект: '{}'", cleanName, data.getProjectName());
 
+        // 0. ПЕРВЫЙ И ГЛАВНЫЙ ШАГ: Поиск по точному vacansyID (стандарт HuntTech Vacancy Opening)
+        String vid = data.getVacansyID();
+        if (vid != null && !vid.trim().isEmpty()) {
+            String cleanVid = cleanVacansyId(vid.trim());
+            List<OpenPosition> vidList = dataManager.load(OpenPosition.class)
+                    .query("select e from hunttech_OpenPosition e where e.vacansyID = :vid and (e.openClose is null or e.openClose = false)")
+                    .parameter("vid", cleanVid)
+                    .view("openPosition-browse-view")
+                    .maxResults(1)
+                    .list();
+            if (!vidList.isEmpty()) {
+                OpenPosition duplicate = vidList.get(0);
+                log.info("[SMART_VACANCY_OPENING] Найдена существующая открытая вакансия (точный дубликат по vacansyID '{}'): ID={}, vacansyID={}, name='{}'",
+                        cleanVid, duplicate.getId(), duplicate.getVacansyID(), duplicate.getVacansyName());
+                return duplicate;
+            }
+        }
+
         // 1. Поиск по точному наименованию вакансии
         if (!cleanName.isEmpty()) {
             List<OpenPosition> list = dataManager.load(OpenPosition.class)
@@ -1168,28 +1501,40 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 log.info("[SMART_VACANCY_OPENING] Установлен vacansyID вакансии: '{}'", openPosition.getVacansyID());
             }
             openPosition.setOpenClose(false); // Открыта
-            openPosition.setSignDraft(true);  // Вакансия создается как черновик (требование: скрыта до ручной проверки и снятия черновика)
+            openPosition.setSignDraft(false); // Вакансия открывается по стандарту регламента
             openPosition.setRemoteWork(data.getRemoteWork() != null ? data.getRemoteWork() : 1);
             openPosition.setWorkExperience(data.getWorkExperience() != null ? data.getWorkExperience() : 3);
             openPosition.setNumberPosition(data.getNumberPosition() != null ? data.getNumberPosition() : 1);
             openPosition.setSalaryMin(data.getSalaryMin());
             openPosition.setSalaryMax(data.getSalaryMax());
-            // Все вакансии, созданные через умную ИИ-загрузку, получают статус «На проверку» (-2)
-            openPosition.setPriority(OpenPositionPriority.UNDER_REVIEW.getId());
+            // По регламенту HuntTech Vacancy Opening приоритет по умолчанию NORMAL (2), если не задан иной (напр. 0 PAUSED)
+            int effectivePriority = data.getPriority() != null ? data.getPriority() : OpenPositionPriority.NORMAL.getId();
+            openPosition.setPriority(effectivePriority);
 
             String fullComment = data.getComment() != null ? data.getComment() : data.getRawText();
             openPosition.setComment(fullComment != null ? fullComment : "");
+            if (data.getCommentEn() != null && !data.getCommentEn().trim().isEmpty()) {
+                openPosition.setCommentEn(data.getCommentEn());
+            }
 
             String shortDesc = data.getShortDescription() != null && !data.getShortDescription().isEmpty()
                     ? cleanHtmlToPlainText(data.getShortDescription()) : safeVacName;
             openPosition.setShortDescription(truncate(shortDesc, 250));
 
             openPosition.setLastOpenDate(new Date());
-            openPosition.setOwner(recruiter);
+            ExtUser assignedOwner = resolveVacancyOwner(data.getOwnerLogin(), recruiter);
+            openPosition.setOwner(assignedOwner);
             openPosition.setCommandCandidate(1);
 
-            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', vacansyID='{}', signDraft=true (ЧЕРНОВИК), priority={} (UNDER_REVIEW), remoteWork={}, salaryMin={}, salaryMax={}, exp={}",
-                    openPosition.getVacansyName(), openPosition.getVacansyID(), openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getWorkExperience());
+            // Оформление по умолчанию: 0 (Аутстаффинг)
+            openPosition.setRegistrationForWork(data.getRegistrationForWork() != null ? data.getRegistrationForWork() : 0);
+            openPosition.setOutstaffingCost(data.getOutstaffingCost());
+            openPosition.setSalaryCandidateRequest(data.getSalaryCandidateRequest());
+
+            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', vacansyID='{}', owner='{}', priority={} (NORMAL), remoteWork={}, registrationForWork={}, salaryMin={}, salaryMax={}, outstaffingCost={}",
+                    openPosition.getVacansyName(), openPosition.getVacansyID(), assignedOwner != null ? assignedOwner.getLogin() : "null",
+                    openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getRegistrationForWork(),
+                    openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getOutstaffingCost());
 
             // Дополнительные реквизиты сущности OpenPosition
             if (data.getSalaryIE() != null) {
@@ -1201,22 +1546,24 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             if (data.getRawText() != null) {
                 openPosition.setRawDescription(data.getRawText());
             }
-            if (data.getInterviewChecklist() != null) {
-                openPosition.setInterviewChecklist(data.getInterviewChecklist());
-            }
-            if (data.getSearchMap() != null) {
-                openPosition.setSearchMap(data.getSearchMap());
-            }
-            if (data.getInterviewPlan() != null) {
-                openPosition.setInterviewPlan(data.getInterviewPlan());
-            }
-            if (data.getExercise() != null && !data.getExercise().trim().isEmpty()) {
-                openPosition.setExercise(data.getExercise());
+            // Синхронная запись 4 артефактов стандарта
+            String checklistContent = data.getInterviewChecklist() != null ? data.getInterviewChecklist() : data.getExercise();
+            if (checklistContent != null) {
+                openPosition.setInterviewChecklist(checklistContent);
+                openPosition.setExercise(checklistContent);
                 openPosition.setNeedExercise(true);
             }
-            if (data.getMemoForInterview() != null && !data.getMemoForInterview().trim().isEmpty()) {
-                openPosition.setMemoForInterview(data.getMemoForInterview());
+            String searchMapContent = data.getSearchMap() != null ? data.getSearchMap() : data.getMemoForInterview();
+            if (searchMapContent != null) {
+                openPosition.setSearchMap(searchMapContent);
+                openPosition.setMemoForInterview(searchMapContent);
                 openPosition.setNeedMemoForInterview(true);
+            }
+            String interviewPlanContent = data.getInterviewPlan() != null ? data.getInterviewPlan() : data.getTemplateLetter();
+            if (interviewPlanContent != null) {
+                openPosition.setInterviewPlan(interviewPlanContent);
+                openPosition.setTemplateLetter(interviewPlanContent);
+                openPosition.setNeedLetter(true);
             }
 
             // 1. Поиск / создание проекта (разрешено генерировать Project только если не найден существующий)
@@ -1432,6 +1779,21 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         if (fullDesc != null && !fullDesc.trim().isEmpty()) {
             newProj.setProjectDescription(cleanHtmlToPlainText(fullDesc));
         }
+
+        // Цепочка ДКС по стандарту HuntTech Vacancy Opening: департамент ДКС -> компания Ланит Технологии
+        if (newProjName.toUpperCase().contains("ДКС") || (companyName != null && companyName.toUpperCase().contains("ДКС"))) {
+            List<CompanyDepartament> dksList = dataManager.load(CompanyDepartament.class)
+                    .query("select d from hunttech_CompanyDepartament d where lower(d.departamentRuName) like '%дкс%' and (d.departamentRuName not like '%(не использовать)%' and d.departamentRuName not like '%дубль%')")
+                    .view("companyDepartament-picker-view")
+                    .maxResults(1)
+                    .list();
+            if (!dksList.isEmpty()) {
+                newProj.setProjectDepartment(dksList.get(0));
+                log.info("[SMART_VACANCY_OPENING] К проекту '{}' привязана цепочка департамента ДКС: '{}' (ID={})",
+                        newProjName, dksList.get(0).getDepartamentRuName(), dksList.get(0).getId());
+            }
+        }
+
         commitContext.addInstanceToCommit(newProj);
         return newProj;
     }
