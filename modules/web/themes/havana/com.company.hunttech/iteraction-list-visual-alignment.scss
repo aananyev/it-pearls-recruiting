@@ -549,7 +549,7 @@
       padding: 0 !important;
     }
 
-    // Слоты ячеек сетки: строго по 50% ширины, относительное позиционирование, идеальный верхний край
+    // Слоты ячеек сетки: строго по 50% ширины, вертикальный Flexbox-поток (подпись сверху, поле снизу)
     .iteraction-list-flat-section .v-gridlayout-slot,
     .iteraction-list-form-grid .v-gridlayout-slot,
     .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot,
@@ -557,6 +557,10 @@
     .iteraction-list-action-grid > .v-gridlayout-slot,
     .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot {
       box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+      align-items: stretch !important;
       position: relative !important;
       top: auto !important;
       left: auto !important;
@@ -570,7 +574,6 @@
       min-height: 0 !important;
       margin: 0 !important;
       padding: 0 !important;
-      vertical-align: top;
       overflow: visible !important;
     }
 
@@ -586,23 +589,43 @@
       padding-right: 0 !important;
     }
 
-    // Заголовки полей ввода: одинаковая высота 20px и отступ снизу 4px
+    // Заголовки полей ввода: гарантированно сверху поля ввода в естественном потоке
+    .iteraction-list-form-grid .v-gridlayout-slot > .v-caption,
     .iteraction-list-form-grid .v-caption {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
       display: block !important;
+      width: 100% !important;
       min-height: 20px !important;
+      height: 20px !important;
       line-height: 20px !important;
-      margin-bottom: 4px !important;
+      margin: 0 0 4px 0 !important;
       padding: 0 !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      color: rgba($v-font-color, 0.82) !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      flex: 0 0 20px !important;
     }
 
+    // Поля ввода: строго под подписью, без перекрытия
+    .iteraction-list-form-grid .v-gridlayout-slot > :not(.v-caption),
     .iteraction-list-participants-grid .v-gridlayout-slot > *,
     .iteraction-list-action-grid .v-gridlayout-slot > *,
     .iteraction-list-result-grid .v-gridlayout-slot > * {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
+      margin: 0 !important;
+      flex: 0 0 auto !important;
     }
 
     .iteraction-list-primary-picker .c-pickerfield-layout {
@@ -680,15 +703,94 @@
       max-width: 100% !important;
     }
 
+    // Адаптивное растяжение блока информации до нижнего края окна и адаптивный комментарий
+    .iteraction-list-scroll {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+
+      > .v-scrollable {
+        box-sizing: border-box;
+        height: 100% !important;
+      }
+    }
+
     .iteraction-list-content,
-    .iteraction-list-flat-content,
+    .iteraction-list-flat-content {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+
+      > .v-slot {
+        height: 100% !important;
+        flex: 1 1 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+    }
+
     .iteraction-list-unified-card,
+    .iteraction-list-flat-section,
+    .iteraction-list-form-section {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      flex: 1 1 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+
+      > .v-slot {
+        height: 100% !important;
+        flex: 1 1 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+    }
+
     .iteraction-list-unified-body,
+    .iteraction-list-flat-section-body,
+    .iteraction-list-section-content {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      flex: 1 1 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
     .iteraction-list-unified-body > .v-slot {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
+      flex: 0 0 auto !important;
+    }
+
+    // Слот поля "Комментарий" занимает всё свободное оставшееся пространство до нижнего края карточки
+    .iteraction-list-unified-body > .v-slot:last-child {
+      flex: 1 1 auto !important;
+      height: 100% !important;
+      min-height: 140px !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    .iteraction-list-unified-body > .v-slot:last-child > .v-has-caption,
+    .iteraction-list-unified-body > .v-slot:last-child > .v-widget,
+    .iteraction-list-unified-body .iteraction-list-comment-field,
+    .iteraction-list-unified-body textarea,
+    .iteraction-list-unified-body .v-textarea {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 120px !important;
+      flex: 1 1 auto !important;
+      resize: none !important;
     }
 
     .iteraction-list-dynamic-panel,

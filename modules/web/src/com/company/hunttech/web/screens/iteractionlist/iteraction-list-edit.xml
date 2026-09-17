@@ -503,21 +503,24 @@
                     <!-- Контейнер контента располагает четыре смысловых блока формы вертикально друг под другом. -->
                     <vbox id="iteractionListSectionsBox"
                           width="100%"
-                          height="AUTO"
-                          spacing="true"
+                          height="100%"
+                          expand="iteractionMainInfoCard"
+                          spacing="false"
                           margin="true"
                           stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
 
                         <!-- Единый блок всей информации взаимодействия объединяет участников, тип, результат и комментарий. -->
                         <vbox id="iteractionMainInfoCard"
                               width="100%"
-                              height="AUTO"
+                              height="100%"
+                              expand="iteractionMainInfoBody"
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-unified-card edit-card">
                             <!-- Body содержит все поля ввода формы в едином блоке. -->
                             <vbox id="iteractionMainInfoBody"
                                   width="100%"
-                                  height="AUTO"
+                                  height="100%"
+                                  expand="commentField"
                                   spacing="true"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-body iteraction-list-unified-body iteraction-list-section-content">
@@ -761,9 +764,9 @@
                                           dataContainer="iteractionListDc"
                                           property="comment"
                                           caption="msg://msgComment"
-                                          stylename="edit-form-control"
+                                          stylename="edit-form-control iteraction-list-comment-field"
                                           width="100%"
-                                          height="170px"
+                                          height="100%"
                                           rows="7"/>
                             </vbox>
                         </vbox>
