@@ -15,29 +15,59 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает обязательную living-документацию XML-дескриптора IteractionListEdit:
- * перед каждым открывающим элементом должен находиться отдельный смысловой комментарий.
+ * Защищает living-документацию XML-дескриптора IteractionListEdit:
+ * каждый открывающий UI/data element должен быть предварён отдельным
+ * смысловым комментарием, объясняющим его роль в новой форме.
  */
 public class IteractionListXmlSemanticCommentsTest {
 
     @Test
-    public void commentsExplainPurposeInsteadOfRepeatingTagName() throws IOException {
+    public void everyOpeningElementHasMeaningfulCommentImmediatelyBeforeIt() throws IOException {
+        List<String> lines = normalizedLines(readDescriptor());
+
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i).trim();
+            if (!isOpeningElement(line)) {
+                continue;
+            }
+
+            int previous = previousNonBlankLine(lines, i - 1);
+            assertTrue("Перед XML-элементом отсутствует комментарий: " + line,
+                    previous >= 0);
+            String comment = lines.get(previous).trim();
+            assertTrue("Комментарий недостаточно смысловой перед: " + line + " -> " + comment,
+                    isSemanticComment(comment));
+        }
+    }
+
+    @Test
+    public void commentsDescribeBusinessAndLayoutPurposeInsteadOfRepeatingTagNames()
+            throws IOException {
         String descriptor = readDescriptor();
 
         assertTrue(descriptor.contains(
-                "Корневой экран объявляет editor взаимодействия"));
+                "Data layer сохраняет исходные containers, views, loaders и JPQL-контракты"));
         assertTrue(descriptor.contains(
-                "Контейнер редактируемого взаимодействия хранит текущий экземпляр"));
+                "Sidebar сохраняет контекст кандидата/вакансии"));
         assertTrue(descriptor.contains(
-                "Sidebar удерживает контекст кандидата, вакансии, навигацию"));
+                "Quick actions остаются отдельной карточкой"));
         assertTrue(descriptor.contains(
-                "LookupPickerField выбирает вакансию из отфильтрованного openPositionDc"));
+                "DateTime add-field включается для addType=1"));
         assertTrue(descriptor.contains(
-                "TextArea сохраняет обязательное бизнес-описание контакта"));
+                "TextArea сохраняет comment"));
 
         assertFalse(descriptor.contains("<!-- Элемент vbox"));
         assertFalse(descriptor.contains("<!-- Элемент label"));
         assertFalse(descriptor.contains("<!-- TODO"));
+    }
+
+    private List<String> normalizedLines(String descriptor) {
+        String[] raw = descriptor.replace("\r\n", "\n").split("\n");
+        List<String> lines = new ArrayList<>();
+        for (String line : raw) {
+            lines.add(line);
+        }
+        return lines;
     }
 
     private boolean isOpeningElement(String line) {
