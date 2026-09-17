@@ -187,6 +187,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private Button suggestCandidatesBtn;
     @Inject
     private Button subscribeBtn;
+    @Inject
+    private Button explainRequirementsBtn;
 
     /** Кэш требуемых навыков для всех видимых вакансий (Zero N+1) */
     private Map<UUID, List<OpenPositionSkill>> skillsByPositionId = Collections.emptyMap();
@@ -563,6 +565,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         if (subscribeBtn != null) {
             subscribeBtn.setEnabled(hasSelection);
         }
+        if (explainRequirementsBtn != null) {
+            explainRequirementsBtn.setEnabled(hasSelection);
+        }
     }
 
     private void initSidebarButtons() {
@@ -584,6 +589,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 }
             });
         }
+        if (explainRequirementsBtn != null) {
+            explainRequirementsBtn.addClickListener(e -> openRequirementExplanationDialog());
+        }
         if (subscribeBtn != null) {
             subscribeBtn.addClickListener(e -> {
                 OpenPosition selected = openPositionsTable.getSingleSelected();
@@ -595,6 +603,24 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                 }
             });
         }
+    }
+
+    private void openRequirementExplanationDialog() {
+        OpenPosition selected = openPositionsTable.getSingleSelected();
+        if (selected == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Вакансия не выбрана")
+                    .withDescription("Пожалуйста, выберите вакансию в списке для анализа требований.")
+                    .show();
+            return;
+        }
+
+        OpenPositionRequirementExplanationDialog dialog = screenBuilders.screen(this)
+                .withScreenClass(OpenPositionRequirementExplanationDialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        dialog.setOpenPosition(selected);
+        dialog.show();
     }
 
     private void updateToggleOpenCloseButton(OpenPosition position) {

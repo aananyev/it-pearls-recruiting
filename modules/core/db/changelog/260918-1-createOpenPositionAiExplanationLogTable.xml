@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260918-1-createOpenPositionAiExplanationLogTable" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="HUNTTECH_OP_AI_EXPLANATION_LOG"/>
+            </not>
+        </preConditions>
+        <createTable tableName="HUNTTECH_OP_AI_EXPLANATION_LOG">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="OPEN_POSITION_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="USER_ID" type="uuid"/>
+            <column name="USER_LOGIN" type="varchar(128)"/>
+            <column name="USER_NAME" type="varchar(255)"/>
+            <column name="CALL_TIME" type="timestamp"/>
+            <column name="EXPLANATION_TYPE" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="SERVICE_TYPE" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="MODEL_NAME" type="varchar(128)"/>
+            <column name="PROVIDER_CODE" type="varchar(64)"/>
+            <column name="DURATION_MS" type="bigint"/>
+            <column name="PROMPT_TOKENS" type="int"/>
+            <column name="COMPLETION_TOKENS" type="int"/>
+            <column name="TOTAL_TOKENS" type="int"/>
+            <column name="REQUEST_CONTEXT" type="text"/>
+            <column name="RESPONSE_CONTENT" type="text"/>
+            <column name="TECHNICAL_INFO" type="text"/>
+            <column name="STATUS" type="varchar(32)"/>
+            <column name="ERROR_MESSAGE" type="varchar(1000)"/>
+        </createTable>
+
+        <createIndex tableName="HUNTTECH_OP_AI_EXPLANATION_LOG" indexName="IDX_HUNTTECH_OP_AI_EXP_LOG_OP">
+            <column name="OPEN_POSITION_ID"/>
+        </createIndex>
+        <createIndex tableName="HUNTTECH_OP_AI_EXPLANATION_LOG" indexName="IDX_HUNTTECH_OP_AI_EXP_LOG_USER">
+            <column name="USER_ID"/>
+        </createIndex>
+        <createIndex tableName="HUNTTECH_OP_AI_EXPLANATION_LOG" indexName="IDX_HUNTTECH_OP_AI_EXP_LOG_TIME">
+            <column name="CALL_TIME"/>
+        </createIndex>
+        <createIndex tableName="HUNTTECH_OP_AI_EXPLANATION_LOG" indexName="IDX_HUNTTECH_OP_AI_EXP_LOG_TYPE">
+            <column name="EXPLANATION_TYPE"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="HUNTTECH_OP_AI_EXPLANATION_LOG"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

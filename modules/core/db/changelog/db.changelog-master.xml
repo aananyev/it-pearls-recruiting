@@ -253,5 +253,9 @@
              relativeToChangelogFile="true"/>
     <include file="260916-1-addInterviewSchedulingActionAndPendingTable.xml"
              relativeToChangelogFile="true"/>
+    <include file="260918-1-createOpenPositionAiExplanationLogTable.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260918-2-seedVacancyRequirementExplanationAiFunctions.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

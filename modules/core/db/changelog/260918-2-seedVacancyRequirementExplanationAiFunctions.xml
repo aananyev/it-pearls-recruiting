@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260918-2-seedVacancyRequirementExplanationAiFunctions" author="hunttech">
+        <sql dbms="postgresql"><![CDATA[
+            INSERT INTO HUNTTECH_AI_FUNCTION_CONFIGURATION (
+                ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME, DESCRIPTION,
+                CAPABILITY, SYSTEM_PROMPT, PROMPT_TEMPLATE, TEMPERATURE, MAX_TOKENS,
+                DEFAULT_MONTHLY_TOKEN_QUOTA,
+                EXECUTION_POLICY, FALLBACK_POLICY, ALLOW_MODEL_OVERRIDE,
+                IS_ACTIVE, INCLUDE_USER_CONTEXT, CONFIGURATION_VERSION
+            )
+            SELECT
+                'c0ffee00-0000-4000-8000-000000000021'::uuid,
+                1, CURRENT_TIMESTAMP, 'migration', 'VACANCY_EXPLAIN_REQUIREMENTS',
+                'Умный анализ и объяснение требований вакансии',
+                'Генерация доступного структурированного рассказа рекрутеру о сути вакансии, технологиях, ключевых критериях отбора и карте поиска простым языком.',
+                'TEXT_GENERATION',
+                'Ты — опытный тимлид и IT-ментор в HRM HuntTech.
+Твоя задача — проанализировать описание вакансии, требования к кандидату и карту поиска, а затем объяснить рекрутеру человеческим, доступным, структурированным языком:
+1. В чём суть роли и проекта: зачем эта позиция нужна бизнесу и какие реальные задачи предстоит решать сотруднику.
+2. Что значат ключевые технические требования и стек технологий: расшифруй профессиональный сленг простыми словами, объясни взаимосвязь инструментов.
+3. Кто идеальный кандидат (must-have vs nice-to-have): на что обращать внимание в резюме в первую очередь, а какие пункты являются вторичными.
+4. Карта поиска и тактика скрининга: какие ключевые слова искать в резюме, как отличить сильного специалиста от неподходящего, какие вопросы задать на первом телефонном интервью, чтобы быстро проверить компетенции.
+
+Пиши живо, профессионально, понятно человеку без глубокого технического бэкграунда, используй четкие смысловые блоки и списки.',
+                'Название вакансии: ${vacancyName}
+Грейд: ${grade}
+Проект: ${projectName}
+Стек и навыки: ${skills}
+Описание вакансии:
+${comment}
+
+Чек-лист проверки и требования:
+${interviewChecklist}
+
+Карта поиска сорсера:
+${searchMap}
+
+Объясни требования этой вакансии рекрутеру доступным и структурированным языком.',
+                0.3, 4000, 200000,
+                'ADMIN_ONLY', 'FALLBACK_TO_ADMIN', true,
+                true, true, 1
+            WHERE NOT EXISTS (
+                SELECT 1 FROM HUNTTECH_AI_FUNCTION_CONFIGURATION WHERE CODE = 'VACANCY_EXPLAIN_REQUIREMENTS'
+            );
+
+            INSERT INTO HUNTTECH_AI_FUNCTION_CONFIGURATION (
+                ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME, DESCRIPTION,
+                CAPABILITY, SYSTEM_PROMPT, PROMPT_TEMPLATE, TEMPERATURE, MAX_TOKENS,
+                DEFAULT_MONTHLY_TOKEN_QUOTA,
+                EXECUTION_POLICY, FALLBACK_POLICY, ALLOW_MODEL_OVERRIDE,
+                IS_ACTIVE, INCLUDE_USER_CONTEXT, CONFIGURATION_VERSION
+            )
+            SELECT
+                'c0ffee00-0000-4000-8000-000000000022'::uuid,
+                1, CURRENT_TIMESTAMP, 'migration', 'VACANCY_EXPLAIN_SIMPLIFIED_WEB',
+                'Объяснение требований вакансии на житейских примерах с поиском в интернете',
+                'Сверхпонятное объяснение требований вакансии рекрутеру на бытовых аналогиях и житейских примерах с использованием свежего интернет-контекста через Hermes hrm-viewer.',
+                'TEXT_GENERATION',
+                'Ты — мастер простых бытовых объяснений и ментор для рекрутеров HRM HuntTech.
+Твоя задача — объяснить рекрутеру сложнейшие технические требования вакансии, технологии и стек на ярких житейских примерах, бытовых аналогиях и реальном интернет-контексте (как если бы ты объяснял бабушке или гуманитарию, но без потери технической сути).
+
+СТРУКТУРА ОБЪЯСНЕНИЯ:
+1. 🏠 Житейская аналогия роли: представь эту специальность через понятную бытовую профессию или жизненную ситуацию (например: архитектор как проектировщик многоэтажки, backend-разработчик как шеф-повар на кухне ресторана, DevOps как служба доставки и логистики).
+2. 🧰 Технологический стек на пальцах: для каждой ключевой технологии и термина из описания вакансии и карты поиска приведи простую бытовую метафору (что это за инструмент в реальной жизни и зачем он нужен).
+3. 🌐 Контекст из индустрии и интернета: найди свежую информацию о том, где и как эта технология применяется в 2026 году, какие продукты на ней создают и почему за таких людей борются компании.
+4. 💡 Памятка рекрутеру на скрининге: 3-4 простых бытовых вопроса кандидату, по ответам на которые сразу ясно, понимает ли он реальную работу или просто заучил термины.
+
+Будь дружелюбен, остроумен, выражайся кристально ясно и понятно!',
+                'Название вакансии: ${vacancyName}
+Грейд: ${grade}
+Проект: ${projectName}
+Стек и навыки: ${skills}
+Описание вакансии:
+${comment}
+
+Карта поиска:
+${searchMap}
+
+Предыдущее объяснение (если есть):
+${previousExplanation}
+
+Объясни требования вакансии на житейских примерах и бытовых аналогиях, используя интернет-поиск по технологиям!',
+                0.4, 4000, 200000,
+                'ADMIN_ONLY', 'FALLBACK_TO_ADMIN', true,
+                true, true, 1
+            WHERE NOT EXISTS (
+                SELECT 1 FROM HUNTTECH_AI_FUNCTION_CONFIGURATION WHERE CODE = 'VACANCY_EXPLAIN_SIMPLIFIED_WEB'
+            );
+        ]]></sql>
+        <rollback>
+            <delete tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION">
+                <where>CODE IN ('VACANCY_EXPLAIN_REQUIREMENTS', 'VACANCY_EXPLAIN_SIMPLIFIED_WEB')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

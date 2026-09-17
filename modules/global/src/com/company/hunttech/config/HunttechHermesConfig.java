@@ -41,4 +41,16 @@ public interface HunttechHermesConfig extends Config {
     @Property("hunttech.hermes.timeoutSeconds")
     @DefaultInt(90)
     int getTimeoutSeconds();
+
+    @Property("hunttech.hermes.viewer.containerName")
+    @DefaultString("hermes-hrm-viewer")
+    String getViewerContainerName();
+
+    @Property("hunttech.hermes.viewer.profile")
+    @DefaultString("hrm-viewer")
+    String getViewerProfile();
+
+    @Property("hunttech.hermes.viewer.timeoutSeconds")
+    @DefaultInt(120)
+    int getViewerTimeoutSeconds();
 }

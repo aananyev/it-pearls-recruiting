@@ -140,6 +140,13 @@
                                     icon="font-icon:MAGIC"
                                     enabled="false"
                                     width="100%"/>
+                            <button id="explainRequirementsBtn"
+                                    caption="msg://explainRequirements"
+                                    icon="font-icon:LIGHTBULB_O"
+                                    stylename="friendly"
+                                    description="msg://explainRequirementsDesc"
+                                    enabled="false"
+                                    width="100%"/>
                             <button id="subscribeBtn"
                                     caption="Подписаться"
                                     icon="font-icon:BELL"

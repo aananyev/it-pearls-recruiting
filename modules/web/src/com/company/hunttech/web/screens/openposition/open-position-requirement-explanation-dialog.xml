@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://openPositionRequirementExplanationDialog.caption"
+        messagesPack="com.company.hunttech.web.screens.openposition"
+        icon="font-icon:LIGHTBULB_O">
+    <dialogMode width="960px" height="720px" modal="true" closeable="true" resizable="true"/>
+    <layout spacing="true" expand="mainContentScroll" width="100%" height="100%" stylename="edit-screen-layout">
+
+        <!-- Шапка окна с элементами управления и кнопкой житейского объяснения -->
+        <hbox id="topBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <vbox spacing="false" width="100%">
+                <label id="dialogTitle" value="msg://openPositionRequirementExplanationDialog.caption" stylename="edit-toolbar-title h2"/>
+                <label id="vacancySubTitle" value="Загрузка данных вакансии..." stylename="edit-toolbar-description edit-help" htmlEnabled="true"/>
+            </vbox>
+            <hbox id="topActionsBox" spacing="true" align="MIDDLE_RIGHT">
+                <button id="explainSimplifiedBtn"
+                        caption="msg://explainSimplified"
+                        icon="font-icon:MAGIC"
+                        stylename="primary"
+                        description="msg://explainSimplifiedDesc"/>
+                <button id="refreshStandardBtn"
+                        caption="msg://refreshStandard"
+                        icon="font-icon:REFRESH"
+                        stylename="secondary"
+                        description="msg://refreshStandardDesc"/>
+                <button id="copyTextBtn"
+                        caption="msg://copyText"
+                        icon="font-icon:COPY"
+                        stylename="secondary"
+                        description="msg://copyTextDesc"/>
+            </hbox>
+        </hbox>
+
+        <!-- Индикатор прогресса и статус выполнения -->
+        <vbox id="progressBox" width="100%" spacing="true" visible="false" stylename="edit-card">
+            <progressBar id="progressBar" indeterminate="true" width="100%"/>
+            <label id="statusLabel" value="Анализируем требования вакансии нейросетью..." stylename="bold"
+                   css="color: #2563eb; font-size: 13px;"/>
+        </vbox>
+
+        <!-- Блок сообщения об ошибке -->
+        <vbox id="errorBox" width="100%" spacing="true" visible="false" stylename="edit-card"
+              css="border-left: 4px solid #ef4444 !important; background: #fef2f2 !important;">
+            <label value="Ошибка генерации объяснения" stylename="bold"
+                   css="color: #b91c1c !important; font-size: 13px !important;"/>
+            <label id="errorDetailsLabel" htmlEnabled="true" width="100%"/>
+        </vbox>
+
+        <!-- Основная область с текстом объяснения требований -->
+        <scrollBox id="mainContentScroll" width="100%" height="100%" spacing="true" stylename="edit-card">
+            <vbox width="100%" spacing="true">
+                <label id="explanationContentLabel"
+                       htmlEnabled="true"
+                       width="100%"
+                       stylename="h3"
+                       css="line-height: 1.6; font-size: 14px; color: #1e293b; padding: 8px;"/>
+            </vbox>
+        </scrollBox>
+
+        <!-- Нижняя панель метаданных и кнопка закрытия -->
+        <hbox id="bottomBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <label id="metaInfoLabel"
+                   value="Готов к работе"
+                   width="100%"
+                   stylename="edit-help"
+                   htmlEnabled="true"
+                   align="MIDDLE_LEFT"/>
+            <button id="closeBtn"
+                    caption="msg://closeBtn"
+                    icon="font-icon:CLOSE"
+                    stylename="secondary"
+                    align="MIDDLE_RIGHT"/>
+        </hbox>
+
+    </layout>
+</window>
