@@ -19,9 +19,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает читаемость новой XML-компоновки IteractionListEdit: каждый Box
- * обязан иметь уникальный смысловой ID, а четыре бизнес-раздела и sidebar
- * должны быть явно идентифицируемы для поддержки и UI-регрессий.
+ * Защищает читаемость XML-компоновки IteractionListEdit: каждый Box-компонент
+ * обязан иметь уникальный ID, который отражает его назначение на экране.
  */
 public class IteractionListBoxIdContractTest {
 
@@ -30,13 +29,7 @@ public class IteractionListBoxIdContractTest {
     ));
 
     private static final Set<String> REQUIRED_IDS = new HashSet<>(Arrays.asList(
-            "iteractionListMainLayout",
-            "iteractionListSidebar",
-            "iteractionIdentityImages",
-            "iteractionIdentityTextBox",
-            "iteractionListNavigation",
-            "iteractionServiceCard",
-            "iteractionVacancyCard",
+            "iteractionProfileSummaryBox",
             "vacancyStatusValueBox",
             "vacancyPriorityValueBox",
             "vacancyCompanyDepartmentBox",
@@ -44,19 +37,11 @@ public class IteractionListBoxIdContractTest {
             "outstaffingCostContentBox",
             "outstaffingCostValueBox",
             "vacancyRatingContextBox",
-            "iteractionListWorkspace",
             "iteractionListToolbarBox",
-            "mostPopularQuickActions",
-            "mostPopularHbox",
-            "iteractionListContentScrollBox",
             "iteractionListSectionsBox",
-            "participantsAccordion",
-            "interactionAccordion",
-            "dynamicActionFieldsBox",
-            "resultAccordion",
-            "commentAccordion",
-            "editActions",
-            "editActionsGroup"
+            "iteractionMainInfoCard",
+            "iteractionMainInfoBody",
+            "dynamicActionFieldsBox"
     ));
 
     @Test
@@ -96,10 +81,6 @@ public class IteractionListBoxIdContractTest {
                 foundRequiredIds.containsAll(REQUIRED_IDS));
         assertFalse("Устаревший общий id labelHBox не должен использоваться",
                 ids.contains("labelHBox"));
-        assertFalse("Активный descriptor больше не должен содержать unified-card",
-                ids.contains("iteractionMainInfoCard"));
-        assertFalse("Активный descriptor больше не должен содержать unified-body",
-                ids.contains("iteractionMainInfoBody"));
     }
 
     private void assertSemantic(String id, String tag) {

@@ -16,8 +16,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает новый стандартный sidebar IteractionListEdit и критичный контекст
- * кандидата/вакансии без изменения controller bindings.
+ * Защищает постоянную sidebar IteractionListEdit и порядок критичного контекста вакансии.
  */
 public class IteractionListSidebarContextPanelTest {
 
@@ -49,69 +48,49 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("property=\"dateIteraction\""));
         assertTrue(xml.contains("resolution=\"DAY\""));
         assertTrue(xml.contains("dateFormat=\"dd.MM.yyyy\""));
-
         assertOrdered(xml,
-                "id=\"iteractionIdentityImages\"",
                 "id=\"iteractionCandidateNameLabel\"",
                 "id=\"iteractionVacancyNameLabel\"",
-                "id=\"iteractionListNavigation\"",
                 "id=\"iteractionServiceCard\"",
-                "id=\"iteractionVacancyCard\"",
                 "id=\"vacancyStateSummary\"");
-
         assertTrue(xml.contains("id=\"outstaffingCostHBox\""));
         assertTrue(xml.contains("property=\"vacancy.outstaffingCost\""));
     }
 
     @Test
-    public void vacancyStatusPriorityAndDetailsLiveInsideOneContextCard() throws IOException {
+    public void vacancyStatusAndPriorityAppearBeforeVacancyCard() throws IOException {
         String xml = descriptor();
 
         assertOrdered(xml,
-                "id=\"iteractionVacancyCard\"",
-                "id=\"sidebarVacancyNameLabel\"",
+                "id=\"iteractionVacancyNameLabel\"",
                 "id=\"vacancyStateSummary\"",
                 "id=\"statusOfVacansyLabel\"",
                 "id=\"currentPriorityLabel\"",
-                "id=\"closingDateVacancyLabel\"",
-                "id=\"vacancyCompanyDepartmentBox\"",
-                "id=\"vacancyProjectBox\"",
-                "id=\"outstaffingCostHBox\"");
-
-        String vacancyCard = section(
-                xml,
-                "id=\"iteractionVacancyCard\"",
-                "id=\"iteractionListSidebarSpacer\"");
-        assertTrue(vacancyCard.contains("id=\"alternativeVacancyLinkButton\""));
-        assertTrue(vacancyCard.contains("id=\"trafficLighterImage\""));
-        assertTrue(vacancyCard.contains("id=\"statusOfVacansyLabel\""));
-        assertTrue(vacancyCard.contains("id=\"currentPriorityLabel\""));
-    }
-
-    @Test
-    public void labelNavigationIsPlacedBeforeServiceAndVacancyContext() throws IOException {
-        String xml = descriptor();
-
-        assertTrue(xml.contains("id=\"iteractionListNavigation\""));
-        assertTrue(xml.contains("id=\"iteractionListNavigationTitle\""));
-        assertTrue(xml.contains("id=\"participantsAccordionNav\""));
-        assertTrue(xml.contains("id=\"interactionAccordionNav\""));
-        assertTrue(xml.contains("id=\"resultAccordionNav\""));
-        assertTrue(xml.contains("id=\"commentAccordionNav\""));
-        assertTrue(xml.contains("label-nav-item-active"));
-        assertOrdered(xml,
-                "id=\"iteractionListNavigation\"",
-                "id=\"iteractionServiceCard\"",
                 "id=\"iteractionVacancyCard\"");
+
+        String stateSummary = section(
+                xml,
+                "id=\"vacancyStateSummary\"",
+                "id=\"iteractionVacancyCard\"");
+        assertTrue(stateSummary.contains("id=\"alternativeVacancyLinkButton\""));
+        assertTrue(stateSummary.contains("id=\"trafficLighterImage\""));
+        assertFalse(xml.contains("id=\"iteractionListNavigation\""));
+
+        String lowerVacancyCard = section(
+                xml,
+                "iteraction-list-vacancy-card",
+                "id=\"iteractionListSidebarSpacer\"");
+        assertFalse(lowerVacancyCard.contains("id=\"statusOfVacansyLabel\""));
+        assertFalse(lowerVacancyCard.contains("id=\"currentPriorityLabel\""));
     }
 
     @Test
-    public void candidateAndProjectImagesKeepEqualIdentityGeometry() throws IOException {
+    public void candidatePhotoIsPrimaryAndProjectLogoIsSecondary() throws IOException {
         String xml = descriptor();
         String identity = section(
                 xml,
-                "id=\"iteractionIdentityImages\"",
-                "id=\"iteractionIdentityTextBox\"");
+                "stylename=\"iteraction-list-identity-images edit-sidebar-visual\"",
+                "id=\"iteractionCandidateNameLabel\"");
 
         assertTrue(identity.contains("id=\"candidateImage\""));
         assertTrue(identity.contains("width=\"96px\""));
@@ -177,10 +156,6 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("edit-sidebar-summary"));
         assertTrue(xml.contains("edit-sidebar-warning"));
         assertTrue(xml.contains("edit-sidebar-spacer"));
-        assertTrue(xml.contains("edit-workspace"));
-        assertTrue(xml.contains("edit-toolbar"));
-        assertTrue(xml.contains("edit-card"));
-        assertTrue(xml.contains("edit-card-title"));
     }
 
     private String descriptor() throws IOException {
