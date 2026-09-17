@@ -1,5 +1,5 @@
 -- Выдача специфических прав hunttech.ai.useLocalChat и hunttech.ai.useManagerHermesWrite
--- для роли Manager (в UI отображается как «Директор»).
+-- для ролей Manager (в UI «Директор») и Administrators (системные администраторы).
 -- Обычным ролям (Researcher, Recruiter, Headhunter и др.) эти права не выдаются.
 
 INSERT INTO sec_permission (id, create_ts, version, permission_type, target, value_, role_id)
@@ -12,7 +12,7 @@ SELECT
     1, 
     r.id
 FROM sec_role r
-WHERE r.name = 'Manager'
+WHERE r.name IN ('Manager', 'Administrators')
   AND NOT EXISTS (
       SELECT 1 FROM sec_permission p 
       WHERE p.role_id = r.id 
@@ -30,7 +30,7 @@ SELECT
     1, 
     r.id
 FROM sec_role r
-WHERE r.name = 'Manager'
+WHERE r.name IN ('Manager', 'Administrators')
   AND NOT EXISTS (
       SELECT 1 FROM sec_permission p 
       WHERE p.role_id = r.id 

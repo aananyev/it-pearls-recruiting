@@ -138,6 +138,7 @@ public class LlmChatScreen extends Screen {
     private int localVisibleLimit = PAGE_SIZE;
     private int hermesVisibleLimit = PAGE_SIZE;
     private int hermesManagerVisibleLimit = PAGE_SIZE;
+    private boolean hermesManagerConnectionWarningShown = false;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -297,7 +298,10 @@ public class LlmChatScreen extends Screen {
         }
 
         // Initialize Hermes Manager tab
+        boolean canUseManagerHermes = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
         hermesManagerInputArea.setTrimming(false);
+        hermesManagerInputArea.setEnabled(canUseManagerHermes);
+        hermesManagerSendBtn.setEnabled(canUseManagerHermes);
         hermesManagerSendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" preserveAspectRatio=\"xMidYMid meet\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
         hermesManagerSendBtn.setDescription("Отправить команду в Hermes (Enter, перенос строки — Shift+Enter)");
         hermesManagerSendBtn.addClickListener(clickEvent -> executeHermesManagerSend(null));
@@ -1303,9 +1307,15 @@ public class LlmChatScreen extends Screen {
     // =========================================================================
 
     private void initHermesManagerTab() {
-        if (security == null || !security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE)) {
-            hermesManagerInputArea.setEnabled(false);
-            hermesManagerSendBtn.setEnabled(false);
+        boolean canUseManagerHermes = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
+        hermesManagerInputArea.setEnabled(canUseManagerHermes);
+        hermesManagerSendBtn.setEnabled(canUseManagerHermes);
+
+        if (!canUseManagerHermes) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Hermes — управление HRM")
+                    .withDescription("Для коммуникации с Hermes (профиль hrm-operator) требуется право hunttech.ai.useManagerHermesWrite")
+                    .show();
             return;
         }
 
@@ -1322,36 +1332,34 @@ public class LlmChatScreen extends Screen {
             }
         }
 
+        hermesManagerInputArea.focus();
+
         // Фоновая проверка доступности второго Hermes-контейнера (hermes-hrm-operator)
         final UI ui = (chatUi != null) ? chatUi : UI.getCurrent();
         new Thread(() -> {
             try {
                 com.company.hunttech.service.dto.HermesConnectionStatus status =
                         hermesManagerChatService.checkManagerHermesConnection();
-                if (ui != null) {
+                if (status != null && status.isAvailable()) {
+                    hermesManagerConnectionWarningShown = false;
+                } else if (ui != null && status != null && !status.isAvailable() && !hermesManagerConnectionWarningShown) {
+                    hermesManagerConnectionWarningShown = true;
                     ui.access(() -> {
-                        if (status != null && status.isAvailable()) {
-                            hermesManagerInputArea.setEnabled(true);
-                            hermesManagerSendBtn.setEnabled(true);
-                            hermesManagerInputArea.focus();
-                        } else {
-                            hermesManagerInputArea.setEnabled(false);
-                            hermesManagerSendBtn.setEnabled(false);
-                            String details = status != null ? status.getDetails() : "Контейнер недоступен";
-                            notifications.create(Notifications.NotificationType.WARNING)
-                                    .withCaption("Hermes — управление HRM")
-                                    .withDescription("Контур управления временно недоступен: " + details)
-                                    .show();
-                        }
+                        String details = status.getDetails() != null ? status.getDetails() : "Контейнер недоступен";
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption("Hermes — управление HRM")
+                                .withDescription("Контур управления: " + details)
+                                .show();
                     });
                 }
             } catch (Exception e) {
                 log.warn("Ошибка проверки статуса Manager Hermes: {}", e.getMessage());
-                if (ui != null) {
-                    ui.access(() -> {
-                        hermesManagerInputArea.setEnabled(false);
-                        hermesManagerSendBtn.setEnabled(false);
-                    });
+                if (ui != null && !hermesManagerConnectionWarningShown) {
+                    hermesManagerConnectionWarningShown = true;
+                    ui.access(() -> notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Hermes — управление HRM")
+                            .withDescription("Не удалось проверить статус контура управления: " + e.getMessage())
+                            .show());
                 }
             }
         }, "HermesManagerHealthCheck").start();

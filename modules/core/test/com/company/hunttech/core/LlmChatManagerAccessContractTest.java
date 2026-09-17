@@ -32,15 +32,18 @@ public class LlmChatManagerAccessContractTest {
     }
 
     @Test
-    public void existingHermesRemainsAvailableAndManagerWriteControlsStayDisabled() throws IOException {
+    public void existingHermesRemainsAvailableAndManagerControlsAreEnabledForCommunication() throws IOException {
         String descriptor = source("modules/web/src/com/company/hunttech/web/screens/llmchat/llm-chat-screen.xml");
 
         assertTrue(descriptor.contains("id=\"hermesChatTab\""));
         assertFalse(descriptor.contains("id=\"hermesChatTab\" caption=\"msg://tabHermes\" margin=\"true\" spacing=\"true\" visible=\"false\""));
+        assertTrue(descriptor.contains("id=\"hermesManagerChatTab\""));
         assertTrue(descriptor.contains("id=\"hermesManagerInputArea\""));
         assertTrue(descriptor.contains("id=\"hermesManagerSendBtn\""));
-        assertTrue(descriptor.contains("id=\"hermesManagerInputArea\" width=\"100%\" rows=\"2\" stylename=\"llm-chat-input-area\" enabled=\"false\""));
-        assertTrue(descriptor.contains("id=\"hermesManagerSendBtn\" stylename=\"llm-chat-send-btn primary\" captionAsHtml=\"true\" align=\"MIDDLE_RIGHT\" enabled=\"false\""));
+        assertFalse(descriptor.contains("id=\"hermesManagerInputArea\" width=\"100%\" rows=\"2\" stylename=\"llm-chat-input-area\" enabled=\"false\""));
+        assertFalse(descriptor.contains("id=\"hermesManagerSendBtn\" stylename=\"llm-chat-send-btn primary\" captionAsHtml=\"true\" align=\"MIDDLE_RIGHT\" enabled=\"false\""));
+        assertTrue(descriptor.contains("hermes-manager-chat-input-area"));
+        assertTrue(descriptor.contains("hermes-manager-chat-send-btn"));
     }
 
     @Test

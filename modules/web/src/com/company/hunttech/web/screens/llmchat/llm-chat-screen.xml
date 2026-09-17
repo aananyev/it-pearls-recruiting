@@ -44,7 +44,7 @@
                 </vbox>
             </tab>
 
-            <!-- ВКЛАДКА 3: HERMES MANAGER/WRITE. Fail-closed до role discovery и безопасного CUBA-mediated gateway. -->
+            <!-- ВКЛАДКА 3: HERMES (профиль hrm-operator, управление HRM). Fail-closed до проверки прав. -->
             <tab id="hermesManagerChatTab" caption="msg://tabHermesManager" margin="true" spacing="true" visible="false">
                 <vbox width="100%" height="100%" spacing="false" expand="hermesManagerHistoryScrollBox" stylename="hermes-manager-chat-tab-pane">
                     <vbox width="100%" spacing="false" stylename="llm-chat-header">
@@ -55,9 +55,9 @@
                         <label id="hermesManagerHistoryLabel" width="100%" htmlEnabled="true" stylename="llm-chat-history-content"
                                value="msg://hermesManagerPlaceholder"/>
                     </scrollBox>
-                    <hbox id="hermesManagerInputBar" width="100%" spacing="true" expand="hermesManagerInputArea" stylename="llm-chat-input-bar">
-                        <textArea id="hermesManagerInputArea" width="100%" rows="2" stylename="llm-chat-input-area" enabled="false"/>
-                        <button id="hermesManagerSendBtn" stylename="llm-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT" enabled="false"/>
+                    <hbox id="hermesManagerInputBar" width="100%" spacing="true" expand="hermesManagerInputArea" stylename="llm-chat-input-bar hermes-manager-chat-input-bar">
+                        <textArea id="hermesManagerInputArea" width="100%" rows="2" stylename="llm-chat-input-area hermes-manager-chat-input-area"/>
+                        <button id="hermesManagerSendBtn" stylename="llm-chat-send-btn hermes-manager-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT"/>
                     </hbox>
                 </vbox>
             </tab>

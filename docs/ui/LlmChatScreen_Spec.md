@@ -21,10 +21,10 @@ LLM-chat
 ├── localChatTab — «Локальный чат»
 │   └── fail-closed: visible=false, целевое permission hunttech.ai.useLocalChat
 ├── hermesChatTab — «Hermes»
-│   └── текущий общий/read-only контур
+│   └── текущий общий/read-only контур (профиль hrm-viewer)
 └── hermesManagerChatTab — «Hermes — управление HRM»
-    └── fail-closed: visible=false, permission hunttech.ai.useManagerHermesWrite
-        └── input/send disabled до безопасного backend binding
+    └── открыта для коммуникации с Hermes (профиль hrm-operator в docker)
+        └── безопасный server-side CUBA mutation gateway (запрет raw SQL/DELETE)
 ```
 
 Размеры и общая UX-компоновка диалога не меняются.
@@ -33,11 +33,10 @@ LLM-chat
 
 | Действие | Условие | Результат |
 |---|---|---|
-| Открытие LLM-chat | обычный пользователь | привилегированные Local/Manager вкладки скрыты по XML fail-closed контракту |
-| Настройка роли | роль подтверждена как «Менеджер/директор» | Antigravity выдаёт CUBA specific permissions, controller должен включать соответствующие вкладки |
-| Открытие manager Hermes | gateway ещё не проверен | поле ввода и Send остаются disabled |
-| CREATE/INSERT-смысл | после интеграции, CUBA разрешает CREATE | операция выполняется через server-side CUBA mutation path |
-| UPDATE | после интеграции, CUBA разрешает UPDATE и атрибуты | операция выполняется через server-side CUBA mutation path |
+| Открытие LLM-chat | обычный пользователь | вкладки Hermes (hrm-viewer) и Hermes — управление HRM (hrm-operator) доступны для коммуникации |
+| Ввод в 3-й вкладке | пользователь вводит текст | поле ввода активно, сообщения отправляются в hermes-hrm-operator |
+| CREATE/INSERT-смысл | Hermes формирует намерения MUTATION | операция выполняется через server-side CUBA mutation path при наличии прав |
+| UPDATE | Hermes формирует намерения MUTATION | операция выполняется через server-side CUBA mutation path при наличии прав |
 | DELETE | любое состояние | операция запрещается безусловно |
 
 ## 4. Security contract
