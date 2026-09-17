@@ -121,11 +121,10 @@ public class IteractionListVisualAlignmentTest {
         assertTrue(partial.contains(".v-slot-iteraction-list-sidebar"));
         assertTrue(partial.contains("width: 312px !important;"));
         assertTrue(partial.contains(".iteraction-list-form-grid.iteraction-list-participants-grid"));
-        assertTrue(partial.contains("height: 59px !important;"));
         assertTrue(partial.contains(".iteraction-list-form-grid.iteraction-list-result-grid"));
-        assertTrue(partial.contains("height: 126px !important;"));
-        assertTrue(partial.contains("padding: 19px 8px 0 !important;"));
-        assertTrue(partial.contains("left: 50% !important;"));
+        assertTrue(partial.contains(".iteraction-list-form-grid .v-gridlayout-slot"));
+        assertTrue(partial.contains(".iteraction-list-form-grid > .v-gridlayout-slot:nth-of-type(1)"));
+        assertTrue(partial.contains(".iteraction-list-form-grid > .v-gridlayout-slot:nth-of-type(2)"));
         assertTrue(partial.contains("height: auto !important"));
         assertTrue(partial.contains(".iteraction-list-vacancy-name-value"));
         assertFalse(partial.contains("\n  .v-label {"));

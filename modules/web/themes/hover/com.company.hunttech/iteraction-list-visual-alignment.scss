@@ -515,76 +515,85 @@
       height: auto !important;
     }
 
-    .iteraction-list-flat-section .v-gridlayout,
-    .iteraction-list-flat-section .v-gridlayout > div,
-    .iteraction-list-flat-section .v-gridlayout-layout,
-    .iteraction-list-flat-section table,
-    .iteraction-list-flat-section tbody,
-    .iteraction-list-flat-section tr,
+    // Строгая геометрическая сетка 50/50 для строк ввода формы:
+    // переопределяет инлайн абсолютные координаты Vaadin GWT (top/left) на надежный Flexbox
     .iteraction-list-form-grid,
-    .iteraction-list-form-grid > div,
-    .iteraction-list-form-grid .v-gridlayout-layout {
+    .iteraction-list-form-grid.iteraction-list-participants-grid,
+    .iteraction-list-form-grid.iteraction-list-action-grid,
+    .iteraction-list-form-grid.iteraction-list-result-grid {
       box-sizing: border-box;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: flex-start !important;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
       height: auto !important;
-      table-layout: fixed;
+      min-height: 59px !important;
+      position: relative !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
+    // Скрываем служебные маргинальные и спейсинг-блоки Vaadin GridLayout
+    .iteraction-list-form-grid > .v-gridlayout-margin-top,
+    .iteraction-list-form-grid > .v-gridlayout-margin-bottom,
+    .iteraction-list-form-grid > .v-gridlayout-margin-left,
+    .iteraction-list-form-grid > .v-gridlayout-margin-right,
+    .iteraction-list-form-grid > .v-gridlayout-spacing {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    // Слоты ячеек сетки: строго по 50% ширины, относительное позиционирование, идеальный верхний край
     .iteraction-list-flat-section .v-gridlayout-slot,
-    .iteraction-list-form-grid .v-gridlayout-slot {
-      box-sizing: border-box;
+    .iteraction-list-form-grid .v-gridlayout-slot,
+    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot,
+    .iteraction-list-form-grid.iteraction-list-action-grid > .v-gridlayout-slot,
+    .iteraction-list-action-grid > .v-gridlayout-slot,
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot {
+      box-sizing: border-box !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      flex: 1 1 50% !important;
+      width: 50% !important;
       min-width: 0 !important;
-      max-width: 100% !important;
+      max-width: 50% !important;
       height: auto !important;
-      padding: 19px 8px 0 !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
       vertical-align: top;
       overflow: visible !important;
     }
 
-    // CUBA GridLayout оставляет slot-ы absolute-positioned. При процентных
-    // колонках их inline width может стать 0px, поэтому геометрия фиксируется
-    // на локальных классах формы с более высокой специфичностью.
-    .iteraction-list-form-grid.iteraction-list-participants-grid,
-    .iteraction-list-form-grid.iteraction-list-action-grid {
-      height: auto !important;
-      min-height: 59px !important;
-    }
-
-    .iteraction-list-form-grid.iteraction-list-result-grid {
-      height: 126px !important;
-      min-height: 126px !important;
-    }
-
-    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot,
-    .iteraction-list-form-grid.iteraction-list-action-grid > .v-gridlayout-slot,
-    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot {
-      width: 50% !important;
-      min-width: 0 !important;
-      max-width: 50% !important;
-    }
-
-    // Выравнивание колонок по левой и правой границе формы.
-    // participants-grid и action-grid состоят из 2 слотов (50/50).
-    // result-grid состоит из 3 слотов: 2 верхних (50/50) и последний (colspan=2, 100%).
-    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:first-child,
-    .iteraction-list-form-grid.iteraction-list-action-grid > .v-gridlayout-slot:first-child,
-    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:first-child {
-      left: 0 !important;
-      top: 0 !important;
-      padding-left: 0 !important;
+    // Левая колонка: правый отступ 8px между полями
+    .iteraction-list-form-grid > .v-gridlayout-slot:nth-of-type(1) {
       padding-right: 8px !important;
+      padding-left: 0 !important;
     }
 
-    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:last-child,
-    .iteraction-list-form-grid.iteraction-list-action-grid > .v-gridlayout-slot:last-child,
-    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:nth-child(2),
-    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:last-child {
-      left: 50% !important;
-      top: 0 !important;
+    // Правая колонка: левый отступ 8px между полями
+    .iteraction-list-form-grid > .v-gridlayout-slot:nth-of-type(2) {
       padding-left: 8px !important;
       padding-right: 0 !important;
+    }
+
+    // Заголовки полей ввода: одинаковая высота 20px и отступ снизу 4px
+    .iteraction-list-form-grid .v-caption {
+      box-sizing: border-box;
+      display: block !important;
+      min-height: 20px !important;
+      line-height: 20px !important;
+      margin-bottom: 4px !important;
+      padding: 0 !important;
     }
 
     .iteraction-list-participants-grid .v-gridlayout-slot > *,
