@@ -15,20 +15,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает точную двухпанельную компоновку IteractionListEdit с четырьмя
- * постоянными VBox-блоками и неизменными business bindings.
+ * Защищает новую двухпанельную архитектуру IteractionListEdit: стандартный
+ * HuntTech sidebar, отдельную панель быстрых действий, четыре независимых
+ * бизнес-раздела и неизменные bindings/actions существующего controller-а.
  */
 public class IteractionListEditAccordionLayoutTest {
 
-    private static final String[] THEMES = {
-            "halo", "havana", "helium", "hover",
-            "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
-    };
-
     @Test
-    public void descriptorParsesAndFollowsDesignedScreenOrder() throws Exception {
-        Path descriptorPath = projectRoot().resolve(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    public void descriptorParsesAndFollowsNewEditArchitecture() throws Exception {
+        Path descriptorPath = descriptorPath();
         DocumentBuilderFactory.newInstance()
                 .newDocumentBuilder()
                 .parse(descriptorPath.toFile());
@@ -36,34 +31,59 @@ public class IteractionListEditAccordionLayoutTest {
         String descriptor = descriptor();
         assertOrdered(descriptor,
                 "id=\"iteractionListMainLayout\"",
-                "stylename=\"iteraction-list-sidebar edit-sidebar\"",
+                "id=\"iteractionListSidebar\"",
+                "id=\"iteractionListNavigation\"",
                 "id=\"iteractionListWorkspace\"",
-                "stylename=\"iteraction-list-toolbar edit-toolbar\"",
+                "id=\"iteractionListToolbarBox\"",
                 "id=\"mostPopularQuickActions\"",
                 "id=\"mostPopularHbox\"",
                 "id=\"iteractionListContentScrollBox\"",
-                "id=\"iteractionMainInfoCard\"",
+                "id=\"participantsAccordion\"",
+                "id=\"interactionAccordion\"",
+                "id=\"resultAccordion\"",
+                "id=\"commentAccordion\"",
                 "id=\"editActions\"");
+
+        assertFalse(descriptor.contains("id=\"iteractionMainInfoCard\""));
+        assertFalse(descriptor.contains("id=\"iteractionMainInfoBody\""));
         assertFalse(descriptor.contains("<tabSheet"));
         assertFalse(descriptor.contains("<groupBox"));
         assertEquals(1, count(descriptor, "id=\"mostPopularHbox\""));
     }
 
     @Test
-    public void workspaceContainsUnifiedInputBlockAndSeparateQuickActions() throws IOException {
+    public void previousDescriptorIsArchivedAsOldAndActiveDescriptorIsNew() throws IOException {
+        Path oldDescriptor = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit-old.xml");
+        assertTrue("Старый descriptor должен быть сохранён как old", Files.exists(oldDescriptor));
+
+        String active = descriptor();
+        String old = new String(Files.readAllBytes(oldDescriptor), StandardCharsets.UTF_8);
+        assertTrue(active.contains("id=\"participantsAccordion\""));
+        assertFalse(active.contains("id=\"iteractionMainInfoCard\""));
+        assertTrue(old.contains("id=\"iteractionMainInfoCard\""));
+    }
+
+    @Test
+    public void sidebarUsesHuntTechOrderIdentityNavigationThenContext() throws IOException {
         String descriptor = descriptor();
 
-        assertEquals(1, count(descriptor, "id=\"mostPopularQuickActions\""));
-        assertEquals(1, count(descriptor, "id=\"iteractionMainInfoCard\""));
-        assertEquals(1, count(descriptor, "id=\"iteractionMainInfoBody\""));
-        assertFalse(descriptor.contains("collapsable="));
-        assertFalse(descriptor.contains("collapsed="));
-        assertFalse(descriptor.contains("showAsPanel="));
-        assertFalse(descriptor.contains("id=\"popularAccordion\""));
-        assertFalse(descriptor.contains("id=\"participantsAccordion\""));
-        assertFalse(descriptor.contains("id=\"interactionAccordion\""));
-        assertFalse(descriptor.contains("id=\"resultAccordion\""));
-        assertFalse(descriptor.contains("id=\"commentAccordion\""));
+        assertTrue(descriptor.contains(
+                "stylename=\"edit-sidebar iteraction-list-sidebar-v2\""));
+        assertTrue(descriptor.contains("width=\"270px\""));
+        assertOrdered(descriptor,
+                "id=\"iteractionIdentityImages\"",
+                "id=\"iteractionCandidateNameLabel\"",
+                "id=\"iteractionVacancyNameLabel\"",
+                "id=\"iteractionListNavigation\"",
+                "id=\"iteractionServiceCard\"",
+                "id=\"iteractionVacancyCard\"");
+
+        assertTrue(descriptor.contains("stylename=\"label-navigation iteraction-list-navigation\""));
+        assertTrue(descriptor.contains("id=\"participantsAccordionNav\""));
+        assertTrue(descriptor.contains("id=\"interactionAccordionNav\""));
+        assertTrue(descriptor.contains("id=\"resultAccordionNav\""));
+        assertTrue(descriptor.contains("id=\"commentAccordionNav\""));
     }
 
     @Test
@@ -71,17 +91,18 @@ public class IteractionListEditAccordionLayoutTest {
             throws IOException {
         String participants = section(
                 descriptor(),
-                "id=\"gridIterationData\"",
-                "id=\"iteractionTypeField\"");
+                "id=\"participantsAccordion\"",
+                "id=\"interactionAccordion\"");
 
         assertEquals(2, count(participants, "<column width=\"50%\"/>"));
-        assertEquals(0, count(participants, "<column flex=\"1\"/>"));
         assertOrdered(participants,
                 "id=\"candidateField\"",
                 "id=\"vacancyFiels\"",
                 "id=\"onlyMySubscribeCheckBox\"");
         assertTrue(participants.contains("property=\"candidate\""));
         assertTrue(participants.contains("property=\"vacancy\""));
+        assertTrue(participants.contains(
+                "iteraction-list-form-grid iteraction-list-participants-grid"));
     }
 
     @Test
@@ -100,56 +121,62 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"recrutierField\"",
                 "id=\"communicationMethodField\"",
                 "id=\"commentField\"");
+
         assertTrue(descriptor.contains("invoke=\"callActionEntity\""));
         assertTrue(descriptor.contains("invoke=\"onButtonSubscribeClick\""));
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));
         assertTrue(descriptor.contains("action=\"windowClose\""));
-        assertTrue(descriptor.contains("required=\"true\""));
-        assertEquals(7, count(descriptor, "edit-form-control"));
-        assertTrue(descriptor.contains("iteraction-list-form-grid iteraction-list-participants-grid"));
+        assertTrue(descriptor.contains("optionsContainer=\"iteractionTypesDc\""));
+        assertTrue(descriptor.contains("optionsContainer=\"openPositionDc\""));
+        assertTrue(descriptor.contains("optionsContainer=\"usersDc\""));
     }
 
     @Test
-    public void activeControllerUsesVBoxSectionsWithoutExpandedState() throws IOException {
+    public void calendarDateFieldKeepsDateTimeBindingForCalendarInteractions() throws IOException {
+        String interaction = section(
+                descriptor(),
+                "id=\"interactionAccordion\"",
+                "id=\"resultAccordion\"");
+
+        String addDate = section(interaction,
+                "id=\"addDate\"",
+                "id=\"addInteger\"");
+        assertTrue(addDate.contains("property=\"addDate\""));
+        assertTrue(addDate.contains("resolution=\"MIN\""));
+        assertTrue(addDate.contains("dateFormat=\"dd.MM.yyyy HH:mm\""));
+        assertTrue(addDate.contains("visible=\"false\""));
+
+        String controller = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+        assertTrue(controller.contains("case 1:"));
+        assertTrue(controller.contains("addDate.setVisible(true)"));
+        assertTrue(controller.contains("addDate.setRequired(true)"));
+        assertTrue(controller.contains("getSetDateTime()"));
+        assertTrue(controller.contains("addDate.setValue(date)"));
+    }
+
+    @Test
+    public void controllerKeepsBusinessLogicIndependentFromNewPresentationSections()
+            throws IOException {
         String controller = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
 
-        assertFalse(controller.contains("iteractionListNavigation"));
-        assertFalse(controller.contains("participantsAccordionNav"));
+        assertTrue(controller.contains("interactionService.getMostPolularIteraction("));
+        assertTrue(controller.contains("private void changeField()"));
+        assertTrue(controller.contains("public void callActionEntity()"));
+        assertTrue(controller.contains("onBeforeCommitChanges"));
+        assertTrue(controller.contains("onAfterCommitChanges1"));
         assertFalse(controller.contains("GroupBoxLayout"));
         assertFalse(controller.contains("setExpanded("));
-        assertFalse(controller.contains("addExpandedStateChangeListener"));
-        assertFalse(controller.contains("popularAccordionNav"));
-    }
-
-    @Test
-    public void everyThemeUsesExactLocalFlatLayoutContract() throws IOException {
-        for (String theme : THEMES) {
-            String partial = readProjectFile(
-                    "modules/web/themes/" + theme
-                            + "/com.company.hunttech/iteraction-list-flat-layout.scss");
-            assertTrue(theme, partial.contains("@mixin iteraction-list-flat-layout-theme"));
-            assertTrue(theme, partial.contains(".iteraction-list-flat-section-header"));
-            assertTrue(theme, partial.contains(".iteraction-list-flat-section-title"));
-            assertTrue(theme, partial.contains(".iteraction-list-flat-section-body"));
-            assertTrue(theme, partial.contains(".iteraction-list-flat-section-active"));
-            assertTrue(theme, partial.contains(".iteraction-list-flat-section:focus-within"));
-            assertTrue(theme, partial.contains("width: 312px !important"));
-            assertFalse(theme, partial.contains(".v-panel-collapsed"));
-            assertFalse(theme, partial.contains("nth-child(6)"));
-            assertFalse(theme, partial.contains("\n  .v-panel {"));
-            assertFalse(theme, partial.contains("\n  .v-button {"));
-
-            String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
-            assertTrue(theme, styles.contains(
-                    "@import \"com.company.hunttech/iteraction-list-flat-layout\";"));
-            assertTrue(theme, styles.contains(
-                    "@include iteraction-list-flat-layout-theme;"));
-        }
     }
 
     private String descriptor() throws IOException {
         return readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    }
+
+    private Path descriptorPath() {
+        return projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
     }
 

@@ -16,7 +16,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает постоянную sidebar IteractionListEdit и порядок критичного контекста вакансии.
+ * Защищает новый стандартный sidebar IteractionListEdit и критичный контекст
+ * кандидата/вакансии без изменения controller bindings.
  */
 public class IteractionListSidebarContextPanelTest {
 
@@ -48,49 +49,69 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("property=\"dateIteraction\""));
         assertTrue(xml.contains("resolution=\"DAY\""));
         assertTrue(xml.contains("dateFormat=\"dd.MM.yyyy\""));
+
         assertOrdered(xml,
+                "id=\"iteractionIdentityImages\"",
                 "id=\"iteractionCandidateNameLabel\"",
                 "id=\"iteractionVacancyNameLabel\"",
+                "id=\"iteractionListNavigation\"",
                 "id=\"iteractionServiceCard\"",
+                "id=\"iteractionVacancyCard\"",
                 "id=\"vacancyStateSummary\"");
+
         assertTrue(xml.contains("id=\"outstaffingCostHBox\""));
         assertTrue(xml.contains("property=\"vacancy.outstaffingCost\""));
     }
 
     @Test
-    public void vacancyStatusAndPriorityAppearBeforeVacancyCard() throws IOException {
+    public void vacancyStatusPriorityAndDetailsLiveInsideOneContextCard() throws IOException {
         String xml = descriptor();
 
         assertOrdered(xml,
-                "id=\"iteractionVacancyNameLabel\"",
+                "id=\"iteractionVacancyCard\"",
+                "id=\"sidebarVacancyNameLabel\"",
                 "id=\"vacancyStateSummary\"",
                 "id=\"statusOfVacansyLabel\"",
                 "id=\"currentPriorityLabel\"",
-                "id=\"iteractionVacancyCard\"");
+                "id=\"closingDateVacancyLabel\"",
+                "id=\"vacancyCompanyDepartmentBox\"",
+                "id=\"vacancyProjectBox\"",
+                "id=\"outstaffingCostHBox\"");
 
-        String stateSummary = section(
+        String vacancyCard = section(
                 xml,
-                "id=\"vacancyStateSummary\"",
-                "id=\"iteractionVacancyCard\"");
-        assertTrue(stateSummary.contains("id=\"alternativeVacancyLinkButton\""));
-        assertTrue(stateSummary.contains("id=\"trafficLighterImage\""));
-        assertFalse(xml.contains("id=\"iteractionListNavigation\""));
-
-        String lowerVacancyCard = section(
-                xml,
-                "iteraction-list-vacancy-card",
+                "id=\"iteractionVacancyCard\"",
                 "id=\"iteractionListSidebarSpacer\"");
-        assertFalse(lowerVacancyCard.contains("id=\"statusOfVacansyLabel\""));
-        assertFalse(lowerVacancyCard.contains("id=\"currentPriorityLabel\""));
+        assertTrue(vacancyCard.contains("id=\"alternativeVacancyLinkButton\""));
+        assertTrue(vacancyCard.contains("id=\"trafficLighterImage\""));
+        assertTrue(vacancyCard.contains("id=\"statusOfVacansyLabel\""));
+        assertTrue(vacancyCard.contains("id=\"currentPriorityLabel\""));
     }
 
     @Test
-    public void candidatePhotoIsPrimaryAndProjectLogoIsSecondary() throws IOException {
+    public void labelNavigationIsPlacedBeforeServiceAndVacancyContext() throws IOException {
+        String xml = descriptor();
+
+        assertTrue(xml.contains("id=\"iteractionListNavigation\""));
+        assertTrue(xml.contains("id=\"iteractionListNavigationTitle\""));
+        assertTrue(xml.contains("id=\"participantsAccordionNav\""));
+        assertTrue(xml.contains("id=\"interactionAccordionNav\""));
+        assertTrue(xml.contains("id=\"resultAccordionNav\""));
+        assertTrue(xml.contains("id=\"commentAccordionNav\""));
+        assertTrue(xml.contains("label-nav-item-active"));
+        assertOrdered(xml,
+                "id=\"iteractionListNavigation\"",
+                "id=\"iteractionServiceCard\"",
+                "id=\"iteractionVacancyCard\"");
+    }
+
+    @Test
+    public void candidateAndProjectImagesKeepEqualIdentityGeometry() throws IOException {
         String xml = descriptor();
         String identity = section(
                 xml,
-                "stylename=\"iteraction-list-identity-images edit-sidebar-visual\"",
-                "id=\"iteractionCandidateNameLabel\"");
+                "id=\"iteractionIdentityImages\"",
+                "id=\"iteractionIdentityTextBox\"");
 
         assertTrue(identity.contains("id=\"candidateImage\""));
         assertTrue(identity.contains("width=\"96px\""));
@@ -156,6 +177,10 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("edit-sidebar-summary"));
         assertTrue(xml.contains("edit-sidebar-warning"));
         assertTrue(xml.contains("edit-sidebar-spacer"));
+        assertTrue(xml.contains("edit-workspace"));
+        assertTrue(xml.contains("edit-toolbar"));
+        assertTrue(xml.contains("edit-card"));
+        assertTrue(xml.contains("edit-card-title"));
     }
 
     private String descriptor() throws IOException {
