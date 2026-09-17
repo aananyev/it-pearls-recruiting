@@ -69,10 +69,15 @@ public class LlmChatScreen extends Screen {
     private static final String CHAT_DIALOG_STYLENAME = "llm-chat-window";
     private static final int PAGE_SIZE = 20;
 
+    public static final String PERMISSION_LOCAL_CHAT = "hunttech.ai.useLocalChat";
+    public static final String PERMISSION_MANAGER_HERMES_WRITE = "hunttech.ai.useManagerHermesWrite";
+
     @Inject
     private LlmChatService llmChatService;
     @Inject
     private HermesChatService hermesChatService;
+    @Inject
+    private com.company.hunttech.service.HermesManagerChatService hermesManagerChatService;
     @Inject
     private Notifications notifications;
     @Inject
@@ -108,6 +113,16 @@ public class LlmChatScreen extends Screen {
     @Inject
     private Button hermesSendBtn;
 
+    // Hermes Manager tab components
+    @Inject
+    private ScrollBoxLayout hermesManagerHistoryScrollBox;
+    @Inject
+    private Label<String> hermesManagerHistoryLabel;
+    @Inject
+    private TextArea<String> hermesManagerInputArea;
+    @Inject
+    private Button hermesManagerSendBtn;
+
     private UUID conversationId;
     private String activeRequestId;
     private String activeRequestText;
@@ -116,10 +131,13 @@ public class LlmChatScreen extends Screen {
     private List<LlmChatMessage> lastRenderedHistory;
     private UUID hermesConversationId;
     private String activeHermesRequestText;
+    private UUID hermesManagerConversationId;
+    private String activeHermesManagerRequestText;
     private UI chatUi;
     private boolean hrmEntityBridgeRegistered = false;
     private int localVisibleLimit = PAGE_SIZE;
     private int hermesVisibleLimit = PAGE_SIZE;
+    private int hermesManagerVisibleLimit = PAGE_SIZE;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -135,17 +153,50 @@ public class LlmChatScreen extends Screen {
         }
         inputArea.setTrimming(false);
         ensureUserFallbackConsent();
-        try {
-            conversationId = resolveActiveConversationId();
-            renderHistory(llmChatService.loadHistory(conversationId));
-        } catch (RuntimeException ex) {
-            sendBtn.setEnabled(false);
-            showError(ex);
+
+        applyTabPermissions();
+
+        if (security != null && security.isSpecificPermitted(PERMISSION_LOCAL_CHAT)) {
+            try {
+                conversationId = resolveActiveConversationId();
+                renderHistory(llmChatService.loadHistory(conversationId));
+            } catch (RuntimeException ex) {
+                sendBtn.setEnabled(false);
+                showError(ex);
+            }
         }
         try {
             initHermesTab();
         } catch (Exception ex) {
             log.warn("Предварительная инициализация вкладки Hermes: {}", ex.getMessage());
+        }
+    }
+
+    private void applyTabPermissions() {
+        boolean canUseLocalChat = security != null && security.isSpecificPermitted(PERMISSION_LOCAL_CHAT);
+        boolean canUseManagerHermes = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
+
+        TabSheet.Tab localTab = chatTabSheet.getTab("localChatTab");
+        TabSheet.Tab hermesTab = chatTabSheet.getTab("hermesChatTab");
+        TabSheet.Tab hermesManagerTab = chatTabSheet.getTab("hermesManagerChatTab");
+
+        if (localTab != null) {
+            localTab.setVisible(canUseLocalChat);
+        }
+        if (hermesManagerTab != null) {
+            hermesManagerTab.setVisible(canUseManagerHermes);
+        }
+
+        // Если сохраненная или текущая вкладка скрыта — переключаем на первую доступную
+        TabSheet.Tab selectedTab = chatTabSheet.getSelectedTab();
+        if (selectedTab == null || !selectedTab.isVisible()) {
+            if (hermesTab != null && hermesTab.isVisible()) {
+                chatTabSheet.setSelectedTab(hermesTab);
+            } else if (localTab != null && localTab.isVisible()) {
+                chatTabSheet.setSelectedTab(localTab);
+            } else if (hermesManagerTab != null && hermesManagerTab.isVisible()) {
+                chatTabSheet.setSelectedTab(hermesManagerTab);
+            }
         }
     }
 
@@ -158,7 +209,7 @@ public class LlmChatScreen extends Screen {
             LlmChatConversation latestConv = dataManager.load(LlmChatConversation.class)
                     .query("select e from hunttech_LlmChatConversation e " +
                             "where e.user.id = :userId and e.status = 'ACTIVE' " +
-                            "and (e.title is null or e.title not like 'Hermes:%') " +
+                            "and (e.title is null or (e.title not like 'Hermes:%' and e.title not like 'Hermes-Manager:%')) " +
                             "order by e.lastMessageAt desc nulls last, e.createTs desc")
                     .parameter("userId", userId)
                     .view("llm-chat-conversation-view")
@@ -245,6 +296,17 @@ public class LlmChatScreen extends Screen {
             vHermesTextArea.setValueChangeTimeout(300);
         }
 
+        // Initialize Hermes Manager tab
+        hermesManagerInputArea.setTrimming(false);
+        hermesManagerSendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" preserveAspectRatio=\"xMidYMid meet\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
+        hermesManagerSendBtn.setDescription("Отправить команду в Hermes (Enter, перенос строки — Shift+Enter)");
+        hermesManagerSendBtn.addClickListener(clickEvent -> executeHermesManagerSend(null));
+        com.vaadin.ui.TextArea vHermesManagerTextArea = hermesManagerInputArea.unwrap(com.vaadin.ui.TextArea.class);
+        if (vHermesManagerTextArea != null) {
+            vHermesManagerTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.TIMEOUT);
+            vHermesManagerTextArea.setValueChangeTimeout(300);
+        }
+
         // Add tab change listener to handle tab-specific behavior and autoscroll to bottom
         chatTabSheet.addSelectedTabChangeListener(tabChangeEvent -> {
             TabSheet.Tab selectedTab = tabChangeEvent.getSelectedTab();
@@ -253,6 +315,10 @@ public class LlmChatScreen extends Screen {
                 if ("hermesChatTab".equals(tabId)) {
                     initHermesTab();
                     scrollToBottomHermes();
+                    executeScrollBottomJs();
+                } else if ("hermesManagerChatTab".equals(tabId)) {
+                    initHermesManagerTab();
+                    scrollToBottomHermesManager();
                     executeScrollBottomJs();
                 } else if ("localChatTab".equals(tabId)) {
                     inputArea.focus();
@@ -263,13 +329,18 @@ public class LlmChatScreen extends Screen {
         });
 
         TabSheet.Tab initialSelectedTab = chatTabSheet.getSelectedTab();
-        if (initialSelectedTab != null && "hermesChatTab".equals(initialSelectedTab.getName())) {
-            initHermesTab();
+        if (initialSelectedTab != null) {
+            if ("hermesChatTab".equals(initialSelectedTab.getName())) {
+                initHermesTab();
+            } else if ("hermesManagerChatTab".equals(initialSelectedTab.getName())) {
+                initHermesManagerTab();
+            }
         }
 
         // Первичное гарантированное перемещение истории в самый конец (Требование 1)
         scrollToBottom();
         scrollToBottomHermes();
+        scrollToBottomHermesManager();
         executeScrollBottomJs();
 
         com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
@@ -296,11 +367,24 @@ public class LlmChatScreen extends Screen {
                     }
                 }
             });
+            js.addFunction("hunttechSendHermesManagerChatMessage", (JsonArray arguments) -> {
+                if (arguments != null && arguments.length() >= 1) {
+                    try {
+                        String msg = arguments.getString(0);
+                        executeHermesManagerSend(msg);
+                    } catch (Exception ex) {
+                        log.warn("Ошибка обработки вызова hunttechSendHermesManagerChatMessage: {}", ex.getMessage());
+                    }
+                }
+            });
             js.addFunction("hunttechLoadEarlierMessages", (JsonArray arguments) -> {
                 loadEarlierMessages();
             });
             js.addFunction("hunttechLoadEarlierHermesMessages", (JsonArray arguments) -> {
                 loadEarlierHermesMessages();
+            });
+            js.addFunction("hunttechLoadEarlierHermesManagerMessages", (JsonArray arguments) -> {
+                loadEarlierHermesManagerMessages();
             });
             js.addFunction("hunttechExecuteChatAction", (JsonArray arguments) -> {
                 if (arguments != null && arguments.length() >= 1) {
@@ -335,6 +419,7 @@ public class LlmChatScreen extends Screen {
                     "          el.classList.contains('llm-chat-input-area') ||" +
                     "          el.classList.contains('v-textarea') ||" +
                     "          el.classList.contains('hermes-chat-input-area') ||" +
+                    "          el.classList.contains('hermes-manager-chat-input-area') ||" +
                     "          el.classList.contains('local-chat-input-area')" +
                     "      )) {" +
                     "        return true;" +
@@ -343,11 +428,40 @@ public class LlmChatScreen extends Screen {
                     "          el.closest('.llm-chat-input-bar') ||" +
                     "          el.closest('.llm-chat-input-area') ||" +
                     "          el.closest('.hermes-chat-tab-pane') ||" +
+                    "          el.closest('.hermes-manager-chat-tab-pane') ||" +
                     "          el.closest('.local-chat-tab-pane') ||" +
                     "          el.closest('.llm-chat-screen')" +
                     "      )) {" +
                     "        return true;" +
                     "      }" +
+                    "    }" +
+                    "    return false;" +
+                    "  }" +
+                    "  function isManagerHermesContext(el) {" +
+                    "    if (!el) return false;" +
+                    "    if (el.classList && (" +
+                    "        el.classList.contains('hermes-manager-chat-input-area') ||" +
+                    "        el.classList.contains('hermes-manager-chat-send-btn') ||" +
+                    "        el.classList.contains('hermes-manager-chat-tab-pane') ||" +
+                    "        el.classList.contains('hermes-manager-chat-input-bar')" +
+                    "    )) {" +
+                    "      return true;" +
+                    "    }" +
+                    "    if (el.closest && (" +
+                    "        el.closest('.hermes-manager-chat-tab-pane') ||" +
+                    "        el.closest('.hermes-manager-chat-input-bar') ||" +
+                    "        el.closest('.hermes-manager-chat-input-area') ||" +
+                    "        el.closest('.hermes-manager-chat-send-btn') ||" +
+                    "        el.closest('[cuba-id=\"hermesManagerChatTab\"]') ||" +
+                    "        el.closest('[cuba-id=\"hermesManagerInputArea\"]') ||" +
+                    "        el.closest('[cuba-id=\"hermesManagerSendBtn\"]') ||" +
+                    "        el.closest('#hermesManagerChatTab')" +
+                    "    )) {" +
+                    "      return true;" +
+                    "    }" +
+                    "    var mPane = document.querySelector('.hermes-manager-chat-tab-pane');" +
+                    "    if (mPane && mPane.offsetParent !== null) {" +
+                    "      return true;" +
                     "    }" +
                     "    return false;" +
                     "  }" +
@@ -375,7 +489,7 @@ public class LlmChatScreen extends Screen {
                     "      return true;" +
                     "    }" +
                     "    var selectedTab = document.querySelector('.llm-chat-tabsheet .v-tabsheet-tabitem-selected, .v-tabsheet-tabitem-selected');" +
-                    "    if (selectedTab && selectedTab.textContent && selectedTab.textContent.toLowerCase().indexOf('hermes') >= 0) {" +
+                    "    if (selectedTab && selectedTab.textContent && selectedTab.textContent.toLowerCase().indexOf('hermes') >= 0 && selectedTab.textContent.toLowerCase().indexOf('управление') < 0) {" +
                     "      return true;" +
                     "    }" +
                     "    var hermesPane = document.querySelector('.hermes-chat-tab-pane');" +
@@ -395,6 +509,20 @@ public class LlmChatScreen extends Screen {
                     "        if (isChatInput(target)) {" +
                     "          e.preventDefault();" +
                     "          e.stopPropagation();" +
+                    "          if (isManagerHermesContext(target)) {" +
+                    "            var mBtn = document.querySelector('.hermes-manager-chat-send-btn, #hermesManagerSendBtn, [cuba-id=\"hermesManagerSendBtn\"]');" +
+                    "            if (mBtn && (mBtn.classList.contains('v-disabled') || mBtn.disabled)) {" +
+                    "              return;" +
+                    "            }" +
+                    "            var mText = target.value;" +
+                    "            if (window.hunttechSendHermesManagerChatMessage) {" +
+                    "              target.value = '';" +
+                    "              window.hunttechSendHermesManagerChatMessage(mText);" +
+                    "            } else if (mBtn) {" +
+                    "              mBtn.click();" +
+                    "            }" +
+                    "            return;" +
+                    "          }" +
                     "          var isHermes = isHermesContext(target);" +
                     "          if (isHermes) {" +
                     "            var hBtn = document.querySelector('.hermes-chat-send-btn, #hermesSendBtn, [cuba-id=\"hermesSendBtn\"]');" +
@@ -431,6 +559,19 @@ public class LlmChatScreen extends Screen {
                     "      var target = e.target;" +
                     "      var btn = target ? (target.closest ? target.closest('.llm-chat-send-btn') : null) : null;" +
                     "      if (btn && !btn.classList.contains('v-disabled') && !btn.disabled) {" +
+                    "        if (isManagerHermesContext(btn)) {" +
+                    "          if (window.hunttechSendHermesManagerChatMessage) {" +
+                    "            var mTa = document.querySelector('.hermes-manager-chat-input-area textarea, textarea.hermes-manager-chat-input-area, .hermes-manager-chat-tab-pane textarea, [cuba-id=\"hermesManagerInputArea\"] textarea');" +
+                    "            if (mTa && mTa.value && mTa.value.trim().length > 0) {" +
+                    "              e.preventDefault();" +
+                    "              e.stopPropagation();" +
+                    "              var mText = mTa.value;" +
+                    "              mTa.value = '';" +
+                    "              window.hunttechSendHermesManagerChatMessage(mText);" +
+                    "            }" +
+                    "          }" +
+                    "          return;" +
+                    "        }" +
                     "        var isHermesBtn = isHermesContext(btn);" +
                     "        if (isHermesBtn) {" +
                     "          if (window.hunttechSendHermesChatMessage) {" +
@@ -531,9 +672,20 @@ public class LlmChatScreen extends Screen {
                     "        }" +
                     "      });" +
                     "    }" +
+                    "    var mPane = document.querySelector('.hermes-manager-chat-tab-pane .v-scrollable');" +
+                    "    if (mPane && !mPane._scrollAttached) {" +
+                    "      mPane._scrollAttached = true;" +
+                    "      mPane.addEventListener('scroll', function() {" +
+                    "        if (mPane.scrollTop <= 5 && mPane.scrollHeight > mPane.clientHeight + 40) {" +
+                    "          if (window.hunttechLoadEarlierHermesManagerMessages) {" +
+                    "            window.hunttechLoadEarlierHermesManagerMessages();" +
+                    "          }" +
+                    "        }" +
+                    "      });" +
+                    "    }" +
                     "  }" +
                     "  function scrollAllToBottom() {" +
-                    "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
+                    "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .hermes-manager-chat-tab-pane .v-scrollable, .hermes-manager-chat-tab-pane .v-panel-content, .llm-chat-history-scroll, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
                     "    var nodes = document.querySelectorAll(sel);" +
                     "    for (var i = 0; i < nodes.length; i++) {" +
                     "      nodes[i].scrollTop = nodes[i].scrollHeight + 100000;" +
@@ -557,8 +709,10 @@ public class LlmChatScreen extends Screen {
             try {
                 chatUi.getPage().getJavaScript().removeFunction("hunttechSendChatMessage");
                 chatUi.getPage().getJavaScript().removeFunction("hunttechSendHermesChatMessage");
+                chatUi.getPage().getJavaScript().removeFunction("hunttechSendHermesManagerChatMessage");
                 chatUi.getPage().getJavaScript().removeFunction("hunttechLoadEarlierMessages");
                 chatUi.getPage().getJavaScript().removeFunction("hunttechLoadEarlierHermesMessages");
+                chatUi.getPage().getJavaScript().removeFunction("hunttechLoadEarlierHermesManagerMessages");
                 chatUi.getPage().getJavaScript().removeFunction("hunttechExecuteChatAction");
                 chatUi.getPage().getJavaScript().removeFunction("hunttechOpenHrmEntity");
             } catch (Exception ignored) {
@@ -959,6 +1113,11 @@ public class LlmChatScreen extends Screen {
         executeHermesSend(null);
     }
 
+    @Subscribe("hermesManagerSendBtn")
+    public void onHermesManagerSend(Button.ClickEvent event) {
+        executeHermesManagerSend(null);
+    }
+
     private void initHermesTab() {
         if (hermesConversationId == null) {
             try {
@@ -1137,6 +1296,237 @@ public class LlmChatScreen extends Screen {
                 .withCaption("Ошибка Hermes Agent")
                 .withDescription(ex.getMessage() == null ? "Не удалось связаться с агентом на сервере." : ex.getMessage())
                 .show();
+    }
+
+    // =========================================================================
+    // Hermes Manager Tab (hrm-operator, управление HRM)
+    // =========================================================================
+
+    private void initHermesManagerTab() {
+        if (security == null || !security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE)) {
+            hermesManagerInputArea.setEnabled(false);
+            hermesManagerSendBtn.setEnabled(false);
+            return;
+        }
+
+        if (hermesManagerConversationId == null) {
+            try {
+                log.info("Инициализация диалога Hermes Manager для текущего пользователя");
+                hermesManagerConversationId = hermesManagerChatService.startManagerHermesConversation();
+                log.info("Создан/получен Hermes Manager диалог convId={}", hermesManagerConversationId);
+                List<HermesChatMessage> history = hermesManagerChatService.loadManagerHermesHistory(hermesManagerConversationId);
+                renderHermesManagerHistory(history);
+            } catch (Exception ex) {
+                log.warn("Не удалось инициализировать диалог Hermes Manager: {}", ex.getMessage());
+                renderHermesManagerHistory(Collections.emptyList());
+            }
+        }
+
+        // Фоновая проверка доступности второго Hermes-контейнера (hermes-hrm-operator)
+        final UI ui = (chatUi != null) ? chatUi : UI.getCurrent();
+        new Thread(() -> {
+            try {
+                com.company.hunttech.service.dto.HermesConnectionStatus status =
+                        hermesManagerChatService.checkManagerHermesConnection();
+                if (ui != null) {
+                    ui.access(() -> {
+                        if (status != null && status.isAvailable()) {
+                            hermesManagerInputArea.setEnabled(true);
+                            hermesManagerSendBtn.setEnabled(true);
+                            hermesManagerInputArea.focus();
+                        } else {
+                            hermesManagerInputArea.setEnabled(false);
+                            hermesManagerSendBtn.setEnabled(false);
+                            String details = status != null ? status.getDetails() : "Контейнер недоступен";
+                            notifications.create(Notifications.NotificationType.WARNING)
+                                    .withCaption("Hermes — управление HRM")
+                                    .withDescription("Контур управления временно недоступен: " + details)
+                                    .show();
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                log.warn("Ошибка проверки статуса Manager Hermes: {}", e.getMessage());
+                if (ui != null) {
+                    ui.access(() -> {
+                        hermesManagerInputArea.setEnabled(false);
+                        hermesManagerSendBtn.setEnabled(false);
+                    });
+                }
+            }
+        }, "HermesManagerHealthCheck").start();
+
+        scrollToBottomHermesManager();
+        executeScrollBottomJs();
+    }
+
+    private void executeHermesManagerSend(String rawText) {
+        if (!hermesManagerSendBtn.isEnabled()) {
+            return;
+        }
+        if (security == null || !security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE)) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Отказ в доступе")
+                    .withDescription("Недостаточно прав для выполнения операции")
+                    .show();
+            return;
+        }
+        String message = (rawText != null && !rawText.trim().isEmpty())
+                ? rawText
+                : hermesManagerInputArea.getValue();
+        if (message == null || message.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Введите команду для Hermes")
+                    .show();
+            return;
+        }
+        final String request = message.trim();
+
+        if (hermesManagerConversationId == null) {
+            try {
+                hermesManagerConversationId = hermesManagerChatService.startManagerHermesConversation();
+            } catch (Exception ex) {
+                resetHermesManagerControls(false);
+                showHermesManagerError(ex);
+                return;
+            }
+        }
+
+        hermesManagerInputArea.setValue("");
+        hermesManagerInputArea.setEnabled(false);
+        hermesManagerSendBtn.setEnabled(false);
+        activeHermesManagerRequestText = request;
+
+        final UUID convId = hermesManagerConversationId;
+        final UI ui = (chatUi != null) ? chatUi : UI.getCurrent();
+        final SecurityContext securityContext = AppContext.getSecurityContext();
+
+        List<HermesChatMessage> loadedHistory;
+        try {
+            loadedHistory = hermesManagerChatService.loadManagerHermesHistory(convId);
+        } catch (Exception ex) {
+            log.warn("Не удалось загрузить историю диалога перед отправкой в Hermes Manager: {}", ex.getMessage());
+            loadedHistory = Collections.emptyList();
+        }
+        final List<HermesChatMessage> currentHistory = (loadedHistory != null) ? loadedHistory : Collections.emptyList();
+        HermesChatMessage pendingUserMsg = new HermesChatMessage("user", request);
+        List<HermesChatMessage> pendingList = new ArrayList<>(currentHistory);
+        pendingList.add(pendingUserMsg);
+        renderHermesManagerHistory(pendingList, "Hermes выполняет операцию управления...");
+
+        log.info("executeHermesManagerSend: отправка команды в Hermes Manager (convId={}, length={})", convId, request.length());
+
+        new Thread(() -> {
+            AppContext.setSecurityContext(securityContext);
+            long threadStart = System.currentTimeMillis();
+            try {
+                HermesChatResponse resp = hermesManagerChatService.sendManagerHermesMessage(convId, request);
+                long elapsed = System.currentTimeMillis() - threadStart;
+                log.info("Hermes Manager background thread finished: convId={}, success={}, elapsed={}ms", convId, resp.isSuccess(), elapsed);
+                if (ui != null) {
+                    ui.access(() -> {
+                        resetHermesManagerControls(true);
+                        activeHermesManagerRequestText = null;
+                        renderHermesManagerHistory(hermesManagerChatService.loadManagerHermesHistory(convId));
+                        if (!resp.isSuccess() && resp.getErrorMessage() != null) {
+                            showHermesManagerError(new RuntimeException(resp.getErrorMessage()));
+                        }
+                    });
+                }
+            } catch (Exception ex) {
+                long elapsed = System.currentTimeMillis() - threadStart;
+                log.error("Ошибка при обращении к Hermes Manager (elapsed={}ms): {}", elapsed, ex.getMessage(), ex);
+                if (ui != null) {
+                    ui.access(() -> {
+                        resetHermesManagerControls(false);
+                        showHermesManagerError(ex);
+                        try {
+                            renderHermesManagerHistory(hermesManagerChatService.loadManagerHermesHistory(convId));
+                        } catch (Exception historyEx) {
+                            renderHermesManagerHistory(currentHistory);
+                        }
+                    });
+                }
+            } finally {
+                AppContext.setSecurityContext(null);
+            }
+        }, "HermesManagerWorker-" + convId).start();
+    }
+
+    private void renderHermesManagerHistory(List<HermesChatMessage> messages) {
+        renderHermesManagerHistory(messages, null, false);
+    }
+
+    private void renderHermesManagerHistory(List<HermesChatMessage> messages, String liveText) {
+        renderHermesManagerHistory(messages, liveText, false);
+    }
+
+    private void renderHermesManagerHistory(List<HermesChatMessage> messages, String liveText, boolean preserveScroll) {
+        int total = messages != null ? messages.size() : 0;
+        List<HermesChatMessage> visible;
+        if (messages != null && total > hermesManagerVisibleLimit) {
+            visible = messages.subList(total - hermesManagerVisibleLimit, total);
+        } else {
+            visible = messages != null ? messages : Collections.emptyList();
+        }
+        String html = MarkdownRenderer.renderHermesChatHistory(visible, liveText,
+                "Задайте команду Hermes Agent (профиль hrm-operator). Контур управления позволяет безопасно создавать и изменять вакансии в HRM.",
+                total, visible.size());
+        hermesManagerHistoryLabel.setValue(html);
+        if (preserveScroll) {
+            restoreHermesScrollPositionJs();
+        } else {
+            scrollToBottomHermesManager();
+            executeScrollBottomJs();
+        }
+    }
+
+    private void loadEarlierHermesManagerMessages() {
+        hermesManagerVisibleLimit += PAGE_SIZE;
+        log.debug("loadEarlierHermesManagerMessages: hermesManagerVisibleLimit увеличен до {}", hermesManagerVisibleLimit);
+        if (hermesManagerConversationId != null) {
+            renderHermesManagerHistory(hermesManagerChatService.loadManagerHermesHistory(hermesManagerConversationId), null, true);
+        }
+    }
+
+    private void scrollToBottomHermesManager() {
+        try {
+            com.vaadin.ui.Component comp = hermesManagerHistoryScrollBox.unwrap(com.vaadin.ui.Component.class);
+            if (comp instanceof com.vaadin.ui.Panel) {
+                ((com.vaadin.ui.Panel) comp).setScrollTop(Integer.MAX_VALUE / 2);
+            }
+        } catch (Exception ex) {
+            log.trace("Не удалось выполнить автоскролл hermesManagerHistoryScrollBox: {}", ex.getMessage());
+        }
+    }
+
+    private void resetHermesManagerControls(boolean clearInput) {
+        if (clearInput) {
+            hermesManagerInputArea.setValue("");
+        } else if (activeHermesManagerRequestText != null && !activeHermesManagerRequestText.isEmpty()) {
+            hermesManagerInputArea.setValue(activeHermesManagerRequestText);
+        }
+        boolean canWrite = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
+        hermesManagerInputArea.setEnabled(canWrite);
+        hermesManagerSendBtn.setEnabled(canWrite);
+        if (canWrite) {
+            hermesManagerInputArea.focus();
+        }
+    }
+
+    private void showHermesManagerError(Exception ex) {
+        String msg = ex.getMessage() != null ? ex.getMessage() : "Не удалось выполнить операцию.";
+        if (msg.contains("SecurityException") || msg.contains("Недостаточно прав")) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Отказ в доступе")
+                    .withDescription("Недостаточно прав для выполнения операции")
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Hermes — управление HRM")
+                    .withDescription(msg)
+                    .show();
+        }
     }
 
     private void openHrmEntityScreen(String entityType, String entityId) {

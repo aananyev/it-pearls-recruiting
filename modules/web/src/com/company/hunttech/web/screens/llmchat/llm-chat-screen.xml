@@ -45,9 +45,9 @@
                 </vbox>
             </tab>
 
-            <!-- ВКЛАДКА 3: HERMES MANAGER/WRITE. До подключения write-Hermes намеренно disabled. -->
+            <!-- ВКЛАДКА 3: HERMES MANAGER/WRITE. Управление HRM для менеджеров и директоров. -->
             <tab id="hermesManagerChatTab" caption="msg://tabHermesManager" margin="true" spacing="true">
-                <vbox width="100%" height="100%" spacing="false" expand="hermesManagerHistoryScrollBox">
+                <vbox width="100%" height="100%" spacing="false" expand="hermesManagerHistoryScrollBox" stylename="hermes-manager-chat-tab-pane">
                     <vbox width="100%" spacing="false" stylename="llm-chat-header">
                         <label value="msg://hermesManagerScreenTitle" stylename="h2"/>
                         <label value="msg://hermesManagerScreenDescription" width="100%" stylename="user-ai-profile-help"/>
@@ -56,9 +56,9 @@
                         <label id="hermesManagerHistoryLabel" width="100%" htmlEnabled="true" stylename="llm-chat-history-content"
                                value="msg://hermesManagerPlaceholder"/>
                     </scrollBox>
-                    <hbox id="hermesManagerInputBar" width="100%" spacing="true" expand="hermesManagerInputArea" stylename="llm-chat-input-bar">
-                        <textArea id="hermesManagerInputArea" width="100%" rows="2" stylename="llm-chat-input-area" enabled="false"/>
-                        <button id="hermesManagerSendBtn" stylename="llm-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT" enabled="false"/>
+                    <hbox id="hermesManagerInputBar" width="100%" spacing="true" expand="hermesManagerInputArea" stylename="llm-chat-input-bar hermes-manager-chat-input-bar">
+                        <textArea id="hermesManagerInputArea" width="100%" rows="2" stylename="llm-chat-input-area hermes-manager-chat-input-area" enabled="false"/>
+                        <button id="hermesManagerSendBtn" stylename="llm-chat-send-btn hermes-manager-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT" enabled="false"/>
                     </hbox>
                 </vbox>
             </tab>
