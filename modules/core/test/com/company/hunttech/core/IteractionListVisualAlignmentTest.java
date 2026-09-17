@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Защищает согласованную геометрию XML и локального SCSS IteractionListEdit:
- * одинаковые OvaFallbackImage, label-навигацию, sidebar-карточки и AUTO-блок результата.
+ * identity images, label-navigation, sidebar context и двухколоночные grids.
  */
 public class IteractionListVisualAlignmentTest {
 
@@ -30,7 +30,7 @@ public class IteractionListVisualAlignmentTest {
     };
 
     @Test
-    public void descriptorKeepsRequestedSidebarAndResultGeometry() throws IOException {
+    public void descriptorKeepsNewSidebarAndSectionGeometry() throws IOException {
         String descriptor = descriptor();
 
         assertEquals(2, count(descriptor, "width=\"96px\""));
@@ -40,30 +40,37 @@ public class IteractionListVisualAlignmentTest {
         assertEquals(4, count(descriptor, "<column width=\"50%\"/>"));
         assertEquals(0, count(descriptor, "<column flex=\"1\"/>"));
 
-        assertFalse(descriptor.contains("id=\"iteractionListNavigation\""));
-        assertFalse(descriptor.contains("id=\"iteractionListNavigationTitle\""));
+        assertTrue(descriptor.contains("id=\"iteractionListNavigation\""));
+        assertTrue(descriptor.contains("id=\"iteractionListNavigationTitle\""));
+        assertTrue(descriptor.contains("stylename=\"label-navigation iteraction-list-navigation\""));
+        assertTrue(descriptor.contains("label-nav-item-active"));
 
         assertEquals(2, count(descriptor,
                 "stylename=\"edit-form-control iteraction-list-primary-picker\""));
         assertOrdered(descriptor,
+                "id=\"iteractionIdentityImages\"",
                 "id=\"iteractionCandidateNameLabel\"",
                 "id=\"iteractionVacancyNameLabel\"",
+                "id=\"iteractionListNavigation\"",
                 "id=\"iteractionServiceCard\"",
-                "id=\"vacancyStateSummary\"",
-                "id=\"iteractionVacancyCard\"");
+                "id=\"iteractionVacancyCard\"",
+                "id=\"vacancyStateSummary\"");
 
-        assertTrue(descriptor.contains("id=\"iteractionMainInfoCard\""));
+        assertTrue(descriptor.contains("id=\"participantsAccordion\""));
+        assertTrue(descriptor.contains("id=\"interactionAccordion\""));
+        assertTrue(descriptor.contains("id=\"resultAccordion\""));
+        assertTrue(descriptor.contains("id=\"commentAccordion\""));
+        assertFalse(descriptor.contains("id=\"iteractionMainInfoCard\""));
         assertTrue(descriptor.contains("iteraction-list-form-grid iteraction-list-result-grid"));
 
         String state = section(
                 descriptor,
                 "id=\"vacancyStateSummary\"",
-                "id=\"iteractionVacancyCard\"");
+                "id=\"closingDateVacancyLabel\"");
         assertTrue(state.startsWith("id=\"vacancyStateSummary\""));
         assertEquals(2, count(state, "width=\"50%\""));
 
         assertTrue(descriptor.contains("id=\"iteractionServiceCard\""));
-        assertTrue(descriptor.contains("id=\"iteractionServiceFields\""));
         assertTrue(descriptor.contains("id=\"iteractionVacancyCard\""));
         assertTrue(descriptor.contains("id=\"sidebarVacancyNameLabel\""));
         assertTrue(descriptor.contains("property=\"vacancy.vacansyName\""));
@@ -137,7 +144,6 @@ public class IteractionListVisualAlignmentTest {
     public void sectionTitlesHaveTwoInsetLinesLikeInfoCaption() throws IOException {
         String descriptor = descriptor();
 
-        // Заголовок карточки вакансии в sidebar несет локальный класс полосы.
         assertTrue(descriptor.contains("iteraction-list-sidebar-card-title"));
         assertTrue(descriptor.contains("value=\"mainMsg://msgVacancy\""));
 
@@ -147,8 +153,6 @@ public class IteractionListVisualAlignmentTest {
                 "iteraction-list-navigation .iteraction-list-navigation-title",
                 ".label-nav-item,");
 
-        // Полоса заголовка «Разделы формы» повторяет caption инфокарточки (контракт §4.1):
-        // две горизонтальные inset-линии (белая сверху, светлая снизу) + разделитель снизу.
         assertTrue(navigationBlock.contains("min-height: 36px !important;"));
         assertTrue(navigationBlock.contains("padding: 7px 11px !important;"));
         assertTrue(navigationBlock.contains("color: #ffb11b !important;"));
@@ -167,7 +171,6 @@ public class IteractionListVisualAlignmentTest {
                 "iteraction-list-sidebar-card-title,",
                 "iteraction-list-service-fields {");
 
-        // Полоса заголовка «Вакансия» растягивается на карточку и несёт те же две inset-линии.
         assertTrue(cardTitleBlock.contains("min-height: 36px !important;"));
         assertTrue(cardTitleBlock.contains("padding: 7px 11px !important;"));
         assertTrue(cardTitleBlock.contains("margin: -14px -14px 12px !important;"));
@@ -176,7 +179,6 @@ public class IteractionListVisualAlignmentTest {
         assertTrue(cardTitleBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
         assertTrue(cardTitleBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
 
-        // Оба partial'а обязаны оставаться идентичными во всех 7 темах.
         for (String theme : THEMES) {
             String themeVisual = readProjectFile(
                     "modules/web/themes/" + theme + "/com.company.hunttech/"
