@@ -704,91 +704,158 @@
     }
 
     // Адаптивное растяжение блока информации до нижнего края окна и адаптивный комментарий
-    .iteraction-list-scroll {
-      box-sizing: border-box;
+    .iteraction-list-scroll,
+    .v-slot-iteraction-list-scroll {
+      box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
+      min-height: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 100% !important;
 
-      > .v-scrollable {
-        box-sizing: border-box;
+      > .v-scrollable,
+      .v-scrollable {
+        box-sizing: border-box !important;
+        width: 100% !important;
         height: 100% !important;
+        min-height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 100% !important;
+        overflow-y: auto !important;
+      }
+
+      .c-scrollbox-content {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
       }
     }
 
     .iteraction-list-content,
     .iteraction-list-flat-content {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
       min-height: 100% !important;
       display: flex !important;
       flex-direction: column !important;
+      flex: 1 1 100% !important;
+      padding: 8px 16px 8px 16px !important;
 
       > .v-slot {
+        box-sizing: border-box !important;
+        width: 100% !important;
         height: 100% !important;
-        flex: 1 1 100% !important;
+        min-height: 100% !important;
         display: flex !important;
         flex-direction: column !important;
+        flex: 1 1 100% !important;
       }
     }
 
     .iteraction-list-unified-card,
     .iteraction-list-flat-section,
     .iteraction-list-form-section {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
       min-height: 100% !important;
       flex: 1 1 100% !important;
       display: flex !important;
       flex-direction: column !important;
+      margin-bottom: 0 !important;
 
       > .v-slot {
+        box-sizing: border-box !important;
+        width: 100% !important;
         height: 100% !important;
-        flex: 1 1 100% !important;
+        min-height: 100% !important;
         display: flex !important;
         flex-direction: column !important;
+        flex: 1 1 100% !important;
       }
     }
 
     .iteraction-list-unified-body,
     .iteraction-list-flat-section-body,
     .iteraction-list-section-content {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
       min-height: 100% !important;
       flex: 1 1 100% !important;
       display: flex !important;
       flex-direction: column !important;
+      padding: 14px 16px 14px 16px !important;
     }
 
     .iteraction-list-unified-body > .v-slot {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
       flex: 0 0 auto !important;
+      height: auto !important;
     }
 
     // Слот поля "Комментарий" занимает всё свободное оставшееся пространство до нижнего края карточки
-    .iteraction-list-unified-body > .v-slot:last-child {
-      flex: 1 1 auto !important;
-      height: 100% !important;
-      min-height: 140px !important;
-      display: flex !important;
-      flex-direction: column !important;
-    }
-
-    .iteraction-list-unified-body > .v-slot:last-child > .v-has-caption,
-    .iteraction-list-unified-body > .v-slot:last-child > .v-widget,
-    .iteraction-list-unified-body .iteraction-list-comment-field,
-    .iteraction-list-unified-body textarea,
-    .iteraction-list-unified-body .v-textarea {
+    .iteraction-list-unified-body > .v-slot-iteraction-list-comment-field,
+    .iteraction-list-unified-body > .v-slot:last-child,
+    .iteraction-list-unified-body > .v-slot:last-of-type,
+    .iteraction-list-unified-body > .v-slot:has(.iteraction-list-comment-field) {
       box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
-      min-height: 120px !important;
+      min-height: 180px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+    }
+
+    .iteraction-list-unified-body .v-slot-iteraction-list-comment-field > .v-has-caption,
+    .iteraction-list-unified-body > .v-slot:last-child > .v-has-caption,
+    .iteraction-list-unified-body > .v-slot:last-of-type > .v-has-caption,
+    .iteraction-list-unified-body > .v-slot:has(.iteraction-list-comment-field) > .v-has-caption {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 180px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+    }
+
+    .iteraction-list-unified-body .v-slot-iteraction-list-comment-field > .v-has-caption > .v-caption,
+    .iteraction-list-unified-body > .v-slot:last-child > .v-has-caption > .v-caption,
+    .iteraction-list-unified-body > .v-slot:last-of-type > .v-has-caption > .v-caption,
+    .iteraction-list-unified-body > .v-slot:has(.iteraction-list-comment-field) > .v-has-caption > .v-caption {
+      box-sizing: border-box !important;
+      display: block !important;
+      width: 100% !important;
+      height: 20px !important;
+      flex: 0 0 20px !important;
+      margin: 0 0 4px 0 !important;
+    }
+
+    .iteraction-list-unified-body .v-slot-iteraction-list-comment-field > .v-has-caption > .v-widget,
+    .iteraction-list-unified-body .v-slot-iteraction-list-comment-field .iteraction-list-comment-field,
+    .iteraction-list-unified-body .v-slot-iteraction-list-comment-field .v-textarea,
+    .iteraction-list-unified-body .iteraction-list-comment-field,
+    .iteraction-list-unified-body .iteraction-list-comment-field textarea,
+    .iteraction-list-unified-body textarea.iteraction-list-comment-field {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 150px !important;
+      display: block !important;
       flex: 1 1 auto !important;
       resize: none !important;
     }

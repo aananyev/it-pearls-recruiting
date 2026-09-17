@@ -506,7 +506,7 @@
                           height="100%"
                           expand="iteractionMainInfoCard"
                           spacing="false"
-                          margin="true"
+                          margin="false"
                           stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
 
                         <!-- Единый блок всей информации взаимодействия объединяет участников, тип, результат и комментарий. -->
@@ -522,7 +522,7 @@
                                   height="100%"
                                   expand="commentField"
                                   spacing="true"
-                                  margin="true"
+                                  margin="false"
                                   stylename="iteraction-list-flat-section-body iteraction-list-unified-body iteraction-list-section-content">
                                 <!-- Участники: Кандидат и Вакансия в двухколоночной сетке 50/50 -->
                                 <grid id="gridIterationData"
