@@ -500,6 +500,7 @@
                            orientation="vertical"
                            width="100%"
                            height="100%"
+                           spacing="false"
                            stylename="iteraction-list-scroll edit-workspace-scroll">
                     <!-- Контейнер контента располагает четыре смысловых блока формы вертикально друг под другом. -->
                     <vbox id="iteractionListSectionsBox"
