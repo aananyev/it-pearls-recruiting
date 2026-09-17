@@ -1117,10 +1117,9 @@ public class HermesChatServiceBean implements HermesChatService {
 
     private boolean isVacancyOpeningIntent(String message) {
         if (message == null || message.trim().isEmpty()) return false;
-        String lower = message.trim().toLowerCase();
-        boolean hasVacancyKeyword = lower.contains("ваканси") || lower.contains("позици") || lower.contains("openposition");
-        boolean hasActionKeyword = lower.contains("открой") || lower.contains("создай") || lower.contains("добавь")
-                || lower.contains("загрузи") || lower.contains("открыть") || lower.contains("создать") || lower.contains("загрузить");
+        String lower = message.trim().toLowerCase(Locale.ROOT);
+        boolean hasVacancyKeyword = lower.matches("(?s).*(ваканси[яеиюей]|позици[яеиюей]|openposition).*");
+        boolean hasActionKeyword = lower.matches("(?s).*(открой[а-я]*|создай[а-я]*|добавь[а-я]*|загрузи[а-я]*|открыть|создать|добавить|загрузить).*");
         boolean hasVacancyUrl = (lower.contains("need.ssp-soft.com") || lower.contains("hh.ru/vacancy") || lower.contains("career.habr.com"))
                 && (hasVacancyKeyword || hasActionKeyword || lower.contains("http"));
         return (hasVacancyKeyword && hasActionKeyword) || hasVacancyUrl;
@@ -1178,10 +1177,13 @@ public class HermesChatServiceBean implements HermesChatService {
                     responseText = "⚠️ Не удалось распознать данные вакансии из предоставленного текста или ссылки. Пожалуйста, проверьте ссылку или описание.";
                 } else {
                     // Проверка на статус паузы в запросе
-                    String lowerMsg = message.toLowerCase();
-                    if (lowerMsg.contains("пауз") || lowerMsg.contains("pause")) {
+                    String lowerMsg = message.toLowerCase(Locale.ROOT);
+                    if (lowerMsg.matches("(?s).*(пауз|pause).*")) {
                         parsedData.setPriority(OpenPositionPriority.PAUSED.getId()); // 0
+                    } else {
+                        parsedData.setPriority(OpenPositionPriority.NORMAL.getId()); // 2
                     }
+                    parsedData.setSignDraft(false); // В чате вакансия открывается сразу по стандарту регламента
 
                     // Проверка дубликатов (в первую очередь по точной vacansyID)
                     OpenPosition duplicate = smartOpenPositionIngestService.findDuplicate(parsedData);
@@ -1255,7 +1257,7 @@ public class HermesChatServiceBean implements HermesChatService {
                 }
             } catch (Exception e) {
                 log.error("[HERMES_CHAT_VACANCY] Ошибка при открытии вакансии в Hermes Chat: {}", e.getMessage(), e);
-                responseText = "❌ Произошла ошибка при обработке открытия вакансии: " + e.getMessage();
+                responseText = "❌ Произошла непредвиденная ошибка при открытии вакансии. Пожалуйста, проверьте текст запроса или обратитесь к администратору системы.";
             }
         }
 

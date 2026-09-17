@@ -478,8 +478,9 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         }
 
         // 3.1 Специфика SSP 62630 по стандарту HuntTech Vacancy Opening
-        if ("62630".equals(data.getVacansyID()) || (data.getRawText() != null && data.getRawText().contains("62630"))) {
-            String ssp62630Name = "SSP \"Сбытовая и сервисная компания немецкого концерна. Проект  Лейсан Шестаковой /Штат HuntTech ТК/ГПХ или ИП. Актирование 3 месяца/";
+        String cleanVid = cleanVacansyId(data.getVacansyID());
+        if ("62630".equals(cleanVid) || (data.getRawText() != null && data.getRawText().contains("62630"))) {
+            String ssp62630Name = "SSP \"Сбытовая и сервисная компания немецкого концерна. Проект Лейсан Шестаковой /Штат HuntTech ТК/ГПХ или ИП. Актирование 3 месяца/";
             if (data.getProjectName() == null || data.getProjectName().isEmpty() || "Новый проект".equals(data.getProjectName())) {
                 data.setProjectName(ssp62630Name);
             }
@@ -823,7 +824,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         }
     }
 
-    public void applyOutstaffingRates(SmartOpenPositionParsedData data) {
+    void applyOutstaffingRates(SmartOpenPositionParsedData data) {
         if (data == null || dataManager == null) return;
         BigDecimal cost = data.getOutstaffingCost();
         if (cost != null && cost.compareTo(BigDecimal.ZERO) > 0) {
@@ -884,7 +885,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         if (requestedOwnerLogin != null && !requestedOwnerLogin.trim().isEmpty()) {
             String clean = requestedOwnerLogin.trim();
             List<ExtUser> explicitUser = dataManager.load(ExtUser.class)
-                    .query("select u from hunttech_ExtUser u where (lower(u.login) = lower(:l) or lower(u.name) like lower(:n)) and (u.active is null or u.active = true)")
+                    .query("select u from hunttech_ExtUser u where (lower(u.login) = lower(:l) or lower(u.name) like lower(:n)) and (u.active is null or u.active = true) order by u.createTs asc")
                     .parameter("l", clean)
                     .parameter("n", "%" + clean + "%")
                     .view("_minimal")
@@ -1501,14 +1502,17 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
                 log.info("[SMART_VACANCY_OPENING] Установлен vacansyID вакансии: '{}'", openPosition.getVacansyID());
             }
             openPosition.setOpenClose(false); // Открыта
-            openPosition.setSignDraft(false); // Вакансия открывается по стандарту регламента
+            // Если signDraft задан явно (например, из LLM-чата = false), используем его; иначе по умолчанию черновик для мастера
+            boolean isDraft = data.getSignDraft() != null ? data.getSignDraft() : true;
+            openPosition.setSignDraft(isDraft);
             openPosition.setRemoteWork(data.getRemoteWork() != null ? data.getRemoteWork() : 1);
             openPosition.setWorkExperience(data.getWorkExperience() != null ? data.getWorkExperience() : 3);
             openPosition.setNumberPosition(data.getNumberPosition() != null ? data.getNumberPosition() : 1);
             openPosition.setSalaryMin(data.getSalaryMin());
             openPosition.setSalaryMax(data.getSalaryMax());
-            // По регламенту HuntTech Vacancy Opening приоритет по умолчанию NORMAL (2), если не задан иной (напр. 0 PAUSED)
-            int effectivePriority = data.getPriority() != null ? data.getPriority() : OpenPositionPriority.NORMAL.getId();
+            // Если черновик — по умолчанию UNDER_REVIEW (-2); если открытая вакансия по стандарту — NORMAL (2)
+            int defaultPriority = isDraft ? OpenPositionPriority.UNDER_REVIEW.getId() : OpenPositionPriority.NORMAL.getId();
+            int effectivePriority = data.getPriority() != null ? data.getPriority() : defaultPriority;
             openPosition.setPriority(effectivePriority);
 
             String fullComment = data.getComment() != null ? data.getComment() : data.getRawText();
@@ -1531,9 +1535,9 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             openPosition.setOutstaffingCost(data.getOutstaffingCost());
             openPosition.setSalaryCandidateRequest(data.getSalaryCandidateRequest());
 
-            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', vacansyID='{}', owner='{}', priority={} (NORMAL), remoteWork={}, registrationForWork={}, salaryMin={}, salaryMax={}, outstaffingCost={}",
+            log.info("[SMART_VACANCY_OPENING] Заполнены атрибуты OpenPosition: name='{}', vacansyID='{}', owner='{}', priority={}, signDraft={}, remoteWork={}, registrationForWork={}, salaryMin={}, salaryMax={}, outstaffingCost={}",
                     openPosition.getVacansyName(), openPosition.getVacansyID(), assignedOwner != null ? assignedOwner.getLogin() : "null",
-                    openPosition.getPriority(), openPosition.getRemoteWork(), openPosition.getRegistrationForWork(),
+                    openPosition.getPriority(), openPosition.getSignDraft(), openPosition.getRemoteWork(), openPosition.getRegistrationForWork(),
                     openPosition.getSalaryMin(), openPosition.getSalaryMax(), openPosition.getOutstaffingCost());
 
             // Дополнительные реквизиты сущности OpenPosition
@@ -1657,12 +1661,15 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
             log.info("[SMART_VACANCY_OPENING] Отправка CommitContext в DataManager...");
             dataManager.commit(commitContext);
-            log.info("[SMART_VACANCY_OPENING] ✓ Вакансия успешно зафиксирована в БД! ID={}, vacansyID={}, name='{}', signDraft=true, priority={}",
-                    openPosition.getId(), openPosition.getVacansyID(), openPosition.getVacansyName(), openPosition.getPriority());
+            boolean savedAsDraft = Boolean.TRUE.equals(openPosition.getSignDraft());
+            log.info("[SMART_VACANCY_OPENING] ✓ Вакансия успешно зафиксирована в БД! ID={}, vacansyID={}, name='{}', signDraft={}, priority={}",
+                    openPosition.getId(), openPosition.getVacansyID(), openPosition.getVacansyName(), savedAsDraft, openPosition.getPriority());
 
             result.setSuccess(true);
             result.setOpenPosition(openPosition);
-            result.setMessage("Черновик вакансии «" + openPosition.getVacansyName() + "» успешно создан!");
+            result.setMessage(savedAsDraft
+                    ? "Черновик вакансии «" + openPosition.getVacansyName() + "» успешно создан!"
+                    : "Вакансия «" + openPosition.getVacansyName() + "» успешно открыта в HRM!");
         } catch (Exception e) {
             log.error("[SMART_VACANCY_OPENING] ✘ КРИТИЧЕСКАЯ ОШИБКА при сохранении вакансии в БД", e);
             result.setSuccess(false);
@@ -1783,7 +1790,7 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         // Цепочка ДКС по стандарту HuntTech Vacancy Opening: департамент ДКС -> компания Ланит Технологии
         if (newProjName.toUpperCase().contains("ДКС") || (companyName != null && companyName.toUpperCase().contains("ДКС"))) {
             List<CompanyDepartament> dksList = dataManager.load(CompanyDepartament.class)
-                    .query("select d from hunttech_CompanyDepartament d where lower(d.departamentRuName) like '%дкс%' and (d.departamentRuName not like '%(не использовать)%' and d.departamentRuName not like '%дубль%')")
+                    .query("select d from hunttech_CompanyDepartament d where lower(d.departamentRuName) like '%дкс%' and (d.departamentRuName not like '%(не использовать)%' and d.departamentRuName not like '%дубль%') order by d.createTs asc")
                     .view("companyDepartament-picker-view")
                     .maxResults(1)
                     .list();

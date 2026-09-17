@@ -29,7 +29,7 @@ public class SmartOpenPositionParsedData implements Serializable {
     private String salaryComment;
     private Integer workExperience = 3;
     private Integer numberPosition = 1;
-    private Integer priority = 2; // Обычный
+    private Integer priority;
     private String shortDescription;
     private String comment;
     private String commentEn;
@@ -37,6 +37,7 @@ public class SmartOpenPositionParsedData implements Serializable {
     private BigDecimal outstaffingCost;
     private Boolean salaryCandidateRequest;
     private Integer registrationForWork = 0; // 0=Аутстаффинг по умолчанию
+    private Boolean signDraft;
     private String telegramPost;
     private String ownerLogin;
     private String exercise;
@@ -334,5 +335,13 @@ public class SmartOpenPositionParsedData implements Serializable {
 
     public void setOwnerLogin(String ownerLogin) {
         this.ownerLogin = ownerLogin;
+    }
+
+    public Boolean getSignDraft() {
+        return signDraft;
+    }
+
+    public void setSignDraft(Boolean signDraft) {
+        this.signDraft = signDraft;
     }
 }

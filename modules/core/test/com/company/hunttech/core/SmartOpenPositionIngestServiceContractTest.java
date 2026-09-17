@@ -60,10 +60,10 @@ public class SmartOpenPositionIngestServiceContractTest {
         assertTrue("SmartOpenPositionIngestServiceBean.java должен существовать", beanFile.exists());
 
         String content = Files.readString(beanFile.toPath());
-        assertTrue("createOpenPosition должен устанавливать signDraft(true)",
-                content.contains("openPosition.setSignDraft(true)"));
-        assertTrue("createOpenPosition должен устанавливать priority UNDER_REVIEW (-2)",
-                content.contains("openPosition.setPriority(OpenPositionPriority.UNDER_REVIEW.getId())"));
+        assertTrue("createOpenPosition должен устанавливать signDraft",
+                content.contains("openPosition.setSignDraft(isDraft)"));
+        assertTrue("createOpenPosition должен устанавливать priority с поддержкой UNDER_REVIEW (-2)",
+                content.contains("int defaultPriority = isDraft ? OpenPositionPriority.UNDER_REVIEW.getId() : OpenPositionPriority.NORMAL.getId();"));
     }
 
     @Test
