@@ -1,0 +1,98 @@
+/*
+ * IteractionListEdit — финальный контракт геометрии правой рабочей области.
+ *
+ * Этот слой подключается после iteraction-list-visual-alignment и исправляет
+ * две CUBA/Vaadin-особенности: ширину slot расширяемого workspace внутри HBox
+ * и absolute-positioned slot-ы GridLayout. Бизнес-компоненты и bindings не меняются.
+ */
+@mixin iteraction-list-workspace-layout-theme {
+  .iteraction-list-editor {
+    // Sidebar имеет фиксированную ширину 312px; workspace должен занимать только
+    // оставшуюся ширину HBox. Нельзя задавать его Vaadin-slot как 100% родителя:
+    // тогда HorizontalLayout переносит/смещает правую часть формы вниз.
+    .v-slot-iteraction-list-workspace {
+      box-sizing: border-box;
+      width: calc(100% - 312px) !important;
+      min-width: 0 !important;
+      max-width: calc(100% - 312px) !important;
+      height: 100% !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      vertical-align: top !important;
+    }
+
+    .iteraction-list-workspace {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    // Увеличенный вертикальный ритм разделяет логические строки единой карточки.
+    // Используется штатный spacing VBox, поэтому дополнительные layout-контейнеры
+    // и изменения XML не требуются.
+    .iteraction-list-unified-body > .v-spacing {
+      box-sizing: border-box;
+      height: 12px !important;
+      min-height: 12px !important;
+    }
+
+    // CUBA GridLayout рендерит ячейки как absolute-positioned slot-ы. В общем
+    // Edit-контракте они переводятся в relative-flow, поэтому старые left/top
+    // координаты становятся нестабильными. Для двух рабочих сеток используем
+    // локальный CSS Grid: 50/50, 16px межколоночный зазор через padding и 12px
+    // между строками. Component ID, bindings и порядок полей сохраняются.
+    .iteraction-list-form-grid.iteraction-list-participants-grid,
+    .iteraction-list-form-grid.iteraction-list-result-grid {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-auto-flow: row;
+      column-gap: 0;
+      row-gap: 12px;
+      align-items: start;
+    }
+
+    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot,
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot {
+      box-sizing: border-box;
+      position: static !important;
+      top: auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+    }
+
+    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:first-child,
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:first-child {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:last-child,
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:nth-child(2) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    // Способ связи остаётся второй полноширинной строкой результата и больше
+    // не может наложиться на rating/recrutier или соседние поля VBox.
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:last-child {
+      grid-column: 1 / span 2;
+      grid-row: 2;
+    }
+
+    // На узком окне sidebar по существующему адаптивному контракту становится
+    // 252px, поэтому рабочая область пересчитывается синхронно с ним.
+    @media (max-width: 1100px) {
+      .v-slot-iteraction-list-workspace {
+        width: calc(100% - 252px) !important;
+        max-width: calc(100% - 252px) !important;
+      }
+    }
+  }
+}
