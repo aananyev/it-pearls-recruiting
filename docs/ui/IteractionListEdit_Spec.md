@@ -68,15 +68,14 @@ IteractionListEdit
 └── edit-workspace
     ├── toolbar (iteractionListToolbarBox)
     ├── mostPopularQuickActions (5 кнопок 20%, #008000 с четким белым двухстрочным текстом v-button-caption)
-    ├── vertical scroll (iteractionListContentScrollBox)
-    │   └── iteractionMainInfoCard → iteractionMainInfoBody
+    ├── vertical scroll (iteractionListContentScrollBox, 100% x 100%)
+    │   └── iteractionMainInfoCard → iteractionMainInfoBody (height="100%", expand="commentField")
     │       ├── gridIterationData: Кандидат (50%) | Вакансия (50%)
     │       ├── onlyMySubscribeCheckBox (width="100%", выровнен по левой направляющей)
-    │       ├── gridInteractionType: Тип взаимодействия (50%) | buttonsPanelCallAction (50%)
-    │       ├── resultAccordionGrid:
-    │       │   ├── Row 1: Оценка (50%, maxWidth="240px") | Рекрутер (50%)
-    │       │   └── Row 2: Способ коммуникации (colspan=2, maxWidth="540px")
-    │       └── commentField: Комментарий (100%, 7 строк, 170px)
+    │       ├── gridInteractionType: Тип взаимодействия (50%) | Рекрутер (50%)
+    │       ├── buttonsPanelCallAction (динамическая панель действий под строкой взаимодействия)
+    │       ├── resultAccordionGrid: Рейтинг кандидата (50%, maxWidth="240px") | Способ связи (50%, maxWidth="540px")
+    │       └── commentField: Комментарий (100%, height="100%", адаптивно заполняет всё оставшееся пространство карточки)
     └── footer actions (editActions: subscribeButton, windowCommitAndClose, windowClose)
 ```
 
@@ -91,19 +90,19 @@ Toolbar
 
 Кандидат (50%)          | Вакансия (50%)
 ────────────────────────┼──────────────────
-Только мои подписки / вакансии (100%)
+Только мои подписки (100%)
 ────────────────────────────────────────
-Тип взаимодействия (50%) | Доп. действие (50%)
-────────────────────────┼──────────────────
-Оценка (maxWidth=240px) | Рекрутер (50%)
+Тип взаимодействия (50%) | Рекрутер (50%)
 ────────────────────────┴──────────────────
-Способ коммуникации (maxWidth=540px)
+Динамические поля действия (кнопка, дата, календарь, число, строка)
 ────────────────────────────────────────
-Комментарий (100%)
+Рейтинг кандидата (50%) | Способ связи (50%)
+────────────────────────┴──────────────────
+Комментарий (100%, адаптивно до нижнего края карточки)
 ────────────────────────────────────────
-
-                         Footer actions
+Подвал действий: [Подписаться]  [✓ ОК]  [⊘ Отмена]
 ```
+
 
 ### 2.3. Постоянные блоки ввода
 
