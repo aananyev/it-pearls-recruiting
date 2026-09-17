@@ -1,16 +1,13 @@
 /*
- * IteractionListEdit — финальный контракт адаптивной геометрии правой рабочей области.
+ * IteractionListEdit — финальный контракт адаптивной геометрии рабочей области.
  *
- * Слой подключается после iteraction-list-visual-alignment. Он исправляет только
- * presentation правой части формы: динамическую ширину workspace, адаптивную
- * сетку полей, положение caption и контраст подписей быстрых действий.
- * Размеры и визуальный контракт sidebar этим файлом не изменяются.
+ * Слой подключается после iteraction-list-visual-alignment. Он обслуживает
+ * новую архитектуру sidebar + workspace + четыре independent section cards,
+ * не меняя business bindings, controller lifecycle или данные.
  */
 @mixin iteraction-list-workspace-layout-theme {
   .iteraction-list-editor {
-    // HBox должен отдавать workspace всё фактически оставшееся место независимо
-    // от текущей ширины sidebar. Жёсткие calc(width - sidebar) здесь запрещены:
-    // flex учитывает реальную геометрию браузера и существующие breakpoint sidebar.
+    // HBox отдаёт workspace всё фактически оставшееся место без calc(width - sidebar).
     .iteraction-list-main-layout {
       box-sizing: border-box;
       display: flex !important;
@@ -22,7 +19,6 @@
     }
 
     // Vaadin может поместить expand-элемент HBox во внутренний .v-expand.
-    // Wrapper тоже должен занимать только оставшееся место, а не 100% + sidebar.
     .iteraction-list-main-layout > .v-expand {
       box-sizing: border-box;
       display: flex !important;
@@ -34,8 +30,11 @@
       height: 100% !important;
     }
 
+    // Поддерживаем и historical class, и новый sidebar-v2; размер задаётся XML/shared edit-sidebar.
     .iteraction-list-main-layout > .v-slot-iteraction-list-sidebar,
-    .iteraction-list-main-layout > .v-expand > .v-slot-iteraction-list-sidebar {
+    .iteraction-list-main-layout > .v-expand > .v-slot-iteraction-list-sidebar,
+    .iteraction-list-main-layout > .v-slot-iteraction-list-sidebar-v2,
+    .iteraction-list-main-layout > .v-expand > .v-slot-iteraction-list-sidebar-v2 {
       flex: 0 0 auto !important;
     }
 
@@ -55,6 +54,7 @@
 
     .iteraction-list-workspace,
     .iteraction-list-content,
+    .iteraction-list-section-card,
     .iteraction-list-unified-card,
     .iteraction-list-unified-body,
     .iteraction-list-section-content {
@@ -70,17 +70,15 @@
       padding-top: 0 !important;
     }
 
-    // Увеличенный вертикальный ритм разделяет логические строки единой карточки.
-    // Используется штатный spacing VBox, поэтому XML и business bindings не меняются.
+    // Новый section rhythm отделяет заголовок, grid/control и соседние строки.
+    .iteraction-list-section-card > .v-spacing,
     .iteraction-list-unified-body > .v-spacing {
       box-sizing: border-box;
       height: 12px !important;
       min-height: 12px !important;
     }
 
-    // CUBA GridLayout исторически позиционирует slot-ы через координаты. Для
-    // рабочей карточки переводим только две существующие сетки в CSS Grid.
-    // Колонки делят доступную ширину поровну и сжимаются вместе с браузером.
+    // Две business grids переводятся в CSS Grid normal flow: без absolute slot geometry.
     .iteraction-list-form-grid.iteraction-list-participants-grid,
     .iteraction-list-form-grid.iteraction-list-result-grid {
       display: grid !important;
@@ -128,9 +126,8 @@
       grid-row: 2;
     }
 
-    // Caption каждого input принадлежит его собственному slot и расположен
-    // непосредственно над control. Сбрасываем Vaadin-offset, из-за которого
-    // подпись визуально прилипала к левому краю всей карточки вместо поля.
+    // Caption каждого input принадлежит собственному slot и располагается над control.
+    .iteraction-list-section-card .v-has-caption,
     .iteraction-list-unified-body .v-has-caption {
       box-sizing: border-box;
       display: flex !important;
@@ -141,6 +138,7 @@
       max-width: 100% !important;
     }
 
+    .iteraction-list-section-card .v-has-caption > .v-caption,
     .iteraction-list-unified-body .v-has-caption > .v-caption {
       box-sizing: border-box;
       position: static !important;
@@ -159,6 +157,7 @@
       text-align: left !important;
     }
 
+    .iteraction-list-section-card .v-has-caption > .v-caption .v-captiontext,
     .iteraction-list-unified-body .v-has-caption > .v-caption .v-captiontext {
       display: block !important;
       width: 100% !important;
@@ -168,6 +167,10 @@
       white-space: normal !important;
     }
 
+    .iteraction-list-section-card .v-has-caption > .v-widget,
+    .iteraction-list-section-card .v-has-caption > .v-filterselect,
+    .iteraction-list-section-card .v-has-caption > .c-pickerfield,
+    .iteraction-list-section-card .v-has-caption > .c-suggestionfield,
     .iteraction-list-unified-body .v-has-caption > .v-widget,
     .iteraction-list-unified-body .v-has-caption > .v-filterselect,
     .iteraction-list-unified-body .v-has-caption > .c-pickerfield,
@@ -179,9 +182,7 @@
       margin-left: 0 !important;
     }
 
-    // Только активные зелёные quick-action кнопки получают обязательный
-    // белый жирный caption. Disabled-placeholder «Нет данных» сохраняет
-    // существующий нейтральный визуальный контракт.
+    // Активные исторические зелёные quick-action buttons сохраняют белый жирный caption.
     .iteraction-list-popular-button:not(.v-disabled):not([disabled]),
     .iteraction-list-popular-button:not(.v-disabled):not([disabled]) .v-button-wrap,
     .iteraction-list-popular-button:not(.v-disabled):not([disabled]) .v-button-caption {
@@ -189,8 +190,7 @@
       font-weight: 700 !important;
     }
 
-    // При недостаточной ширине браузера правая карточка меняет только собственную
-    // раскладку: поля переходят в одну колонку. Sidebar не участвует в этом rule.
+    // На узком viewport меняется только раскладка правой формы; sidebar остаётся отдельным contract.
     @media (max-width: 960px) {
       .iteraction-list-form-grid.iteraction-list-participants-grid,
       .iteraction-list-form-grid.iteraction-list-result-grid {
