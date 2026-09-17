@@ -488,13 +488,14 @@
                            orientation="vertical"
                            width="100%"
                            height="100%"
+                           spacing="false"
                            stylename="iteraction-list-scroll edit-workspace-scroll">
                     <!-- Контейнер контента располагает четыре смысловых блока формы вертикально друг под другом. -->
                     <vbox id="iteractionListSectionsBox"
                           width="100%"
                           height="AUTO"
-                          spacing="true"
-                          margin="true"
+                          spacing="false"
+                          margin="false"
                           stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
 
                         <!-- Единый блок всей информации взаимодействия объединяет участников, тип, результат и комментарий. -->
@@ -508,7 +509,7 @@
                                   width="100%"
                                   height="AUTO"
                                   spacing="true"
-                                  margin="true"
+                                  margin="false"
                                   stylename="iteraction-list-flat-section-body iteraction-list-unified-body iteraction-list-section-content">
                                 <!-- Участники: Кандидат и Вакансия -->
                                 <grid id="gridIterationData"
