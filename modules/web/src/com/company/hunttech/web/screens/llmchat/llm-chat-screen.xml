@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://screenCaption"
-        focusComponent="inputArea"
         messagesPack="com.company.hunttech.web.screens.llmchat">
     <!-- Floating non-modal panel (840px); output is incrementally received through the middleware snapshot. -->
     <dialogMode width="840px" height="560px" modal="false" resizable="true" closeable="true"/>
@@ -11,8 +10,8 @@
     </facets>
     <layout stylename="llm-chat-screen" expand="chatTabSheet" spacing="true" width="100%" height="100%">
         <tabSheet id="chatTabSheet" width="100%" height="100%" stylename="framed llm-chat-tabsheet">
-            <!-- ВКЛАДКА 1: ЛОКАЛЬНЫЙ ЧАТ. Видимость должна управляться CUBA permission hunttech.ai.useLocalChat. -->
-            <tab id="localChatTab" caption="msg://tabLocalChat" margin="true" spacing="true">
+            <!-- ВКЛАДКА 1: ЛОКАЛЬНЫЙ ЧАТ. Fail-closed: Antigravity включает её только по CUBA permission hunttech.ai.useLocalChat. -->
+            <tab id="localChatTab" caption="msg://tabLocalChat" margin="true" spacing="true" visible="false">
                 <vbox width="100%" height="100%" spacing="false" expand="historyScrollBox" stylename="local-chat-tab-pane">
                     <vbox width="100%" spacing="false" stylename="llm-chat-header">
                         <label value="msg://screenTitle" stylename="h2"/>
@@ -45,8 +44,8 @@
                 </vbox>
             </tab>
 
-            <!-- ВКЛАДКА 3: HERMES MANAGER/WRITE. Управление HRM для менеджеров и директоров. -->
-            <tab id="hermesManagerChatTab" caption="msg://tabHermesManager" margin="true" spacing="true">
+            <!-- ВКЛАДКА 3: HERMES MANAGER/WRITE. Fail-closed до role discovery и безопасного CUBA-mediated gateway. -->
+            <tab id="hermesManagerChatTab" caption="msg://tabHermesManager" margin="true" spacing="true" visible="false">
                 <vbox width="100%" height="100%" spacing="false" expand="hermesManagerHistoryScrollBox" stylename="hermes-manager-chat-tab-pane">
                     <vbox width="100%" spacing="false" stylename="llm-chat-header">
                         <label value="msg://hermesManagerScreenTitle" stylename="h2"/>
@@ -56,9 +55,9 @@
                         <label id="hermesManagerHistoryLabel" width="100%" htmlEnabled="true" stylename="llm-chat-history-content"
                                value="msg://hermesManagerPlaceholder"/>
                     </scrollBox>
-                    <hbox id="hermesManagerInputBar" width="100%" spacing="true" expand="hermesManagerInputArea" stylename="llm-chat-input-bar hermes-manager-chat-input-bar">
-                        <textArea id="hermesManagerInputArea" width="100%" rows="2" stylename="llm-chat-input-area hermes-manager-chat-input-area" enabled="false"/>
-                        <button id="hermesManagerSendBtn" stylename="llm-chat-send-btn hermes-manager-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT" enabled="false"/>
+                    <hbox id="hermesManagerInputBar" width="100%" spacing="true" expand="hermesManagerInputArea" stylename="llm-chat-input-bar">
+                        <textArea id="hermesManagerInputArea" width="100%" rows="2" stylename="llm-chat-input-area" enabled="false"/>
+                        <button id="hermesManagerSendBtn" stylename="llm-chat-send-btn primary" captionAsHtml="true" align="MIDDLE_RIGHT" enabled="false"/>
                     </hbox>
                 </vbox>
             </tab>
