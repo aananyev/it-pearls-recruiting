@@ -809,8 +809,7 @@
     // Слот поля "Комментарий" занимает всё свободное оставшееся пространство до нижнего края карточки
     .iteraction-list-unified-body > .v-slot-iteraction-list-comment-field,
     .iteraction-list-unified-body > .v-slot:last-child,
-    .iteraction-list-unified-body > .v-slot:last-of-type,
-    .iteraction-list-unified-body > .v-slot:has(.iteraction-list-comment-field) {
+    .iteraction-list-unified-body > .v-slot:last-of-type {
       box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
@@ -822,8 +821,7 @@
 
     .iteraction-list-unified-body .v-slot-iteraction-list-comment-field > .v-has-caption,
     .iteraction-list-unified-body > .v-slot:last-child > .v-has-caption,
-    .iteraction-list-unified-body > .v-slot:last-of-type > .v-has-caption,
-    .iteraction-list-unified-body > .v-slot:has(.iteraction-list-comment-field) > .v-has-caption {
+    .iteraction-list-unified-body > .v-slot:last-of-type > .v-has-caption {
       box-sizing: border-box !important;
       width: 100% !important;
       height: 100% !important;
@@ -835,8 +833,7 @@
 
     .iteraction-list-unified-body .v-slot-iteraction-list-comment-field > .v-has-caption > .v-caption,
     .iteraction-list-unified-body > .v-slot:last-child > .v-has-caption > .v-caption,
-    .iteraction-list-unified-body > .v-slot:last-of-type > .v-has-caption > .v-caption,
-    .iteraction-list-unified-body > .v-slot:has(.iteraction-list-comment-field) > .v-has-caption > .v-caption {
+    .iteraction-list-unified-body > .v-slot:last-of-type > .v-has-caption > .v-caption {
       box-sizing: border-box !important;
       display: block !important;
       width: 100% !important;
