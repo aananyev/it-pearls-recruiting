@@ -9,12 +9,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает геометрию правой рабочей области IteractionListEdit от двух регрессий:
- * переноса workspace вниз из-за 100%-ширины Vaadin-slot и наложения строк GridLayout.
+ * Защищает presentation-контракт правой рабочей области IteractionListEdit:
+ * адаптивную ширину без изменения sidebar, устойчивую сетку, caption над своим
+ * control и белую жирную подпись активных быстрых действий.
  */
 public class IteractionListWorkspaceLayoutContractTest {
 
@@ -53,30 +55,65 @@ public class IteractionListWorkspaceLayoutContractTest {
     }
 
     @Test
-    public void workspaceUsesRemainingHBoxWidthAndKeepsTopAlignment() throws IOException {
+    public void workspaceUsesFlexForRemainingWidthWithoutChangingSidebarDimensions() throws IOException {
         String partial = partial("halo");
 
-        assertTrue(partial.contains("width: calc(100% - 312px) !important;"));
-        assertTrue(partial.contains("max-width: calc(100% - 312px) !important;"));
+        assertTrue(partial.contains("display: flex !important;"));
+        assertTrue(partial.contains("flex: 1 1 0% !important;"));
+        assertTrue(partial.contains("width: auto !important;"));
+        assertTrue(partial.contains("min-width: 0 !important;"));
         assertTrue(partial.contains("vertical-align: top !important;"));
-        assertTrue(partial.contains("width: calc(100% - 252px) !important;"));
+
+        // Размеры sidebar принадлежат существующему screen contract и не должны
+        // переопределяться финальным слоем адаптивной правой рабочей области.
+        assertFalse(partial.contains("calc(100% - 312px)"));
+        assertFalse(partial.contains("calc(100% - 252px)"));
+        assertFalse(partial.contains("width: 312px"));
+        assertFalse(partial.contains("width: 252px"));
     }
 
     @Test
-    public void formRowsUseNormalCssGridFlowAndExplicitVerticalRhythm() throws IOException {
+    public void formRowsUseResponsiveCssGridAndExplicitVerticalRhythm() throws IOException {
         String partial = partial("halo");
 
-        // CUBA GridLayout slot-ы переводятся из absolute/relative координат
-        // в нормальный CSS Grid flow, чтобы строки не могли перекрывать друг друга.
+        // CUBA GridLayout slot-ы переводятся в CSS Grid normal flow, чтобы
+        // строки не перекрывались и могли сжиматься вместе с браузером.
         assertTrue(partial.contains("display: grid !important;"));
-        assertTrue(partial.contains("grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);"));
+        assertTrue(partial.contains("grid-template-columns: repeat(2, minmax(0, 1fr));"));
+        assertTrue(partial.contains("column-gap: 16px;"));
         assertTrue(partial.contains("row-gap: 12px;"));
         assertTrue(partial.contains("position: static !important;"));
         assertTrue(partial.contains("grid-column: 1 / span 2;"));
 
+        // На узком viewport меняется только раскладка правой формы.
+        assertTrue(partial.contains("@media (max-width: 960px)"));
+        assertTrue(partial.contains("grid-template-columns: minmax(0, 1fr);"));
+
         // Между прямыми строками VBox используется единый 12px rhythm.
         assertTrue(partial.contains(".iteraction-list-unified-body > .v-spacing"));
         assertTrue(partial.contains("height: 12px !important;"));
+    }
+
+    @Test
+    public void everyFieldCaptionStaysAboveAndAlignedWithItsOwnControl() throws IOException {
+        String partial = partial("halo");
+
+        assertTrue(partial.contains(".iteraction-list-unified-body .v-has-caption"));
+        assertTrue(partial.contains("flex-direction: column !important;"));
+        assertTrue(partial.contains(".v-has-caption > .v-caption"));
+        assertTrue(partial.contains("position: static !important;"));
+        assertTrue(partial.contains("margin: 0 0 5px !important;"));
+        assertTrue(partial.contains("text-align: left !important;"));
+        assertTrue(partial.contains(".v-has-caption > .v-caption .v-captiontext"));
+    }
+
+    @Test
+    public void activePopularButtonsHaveWhiteBoldCaption() throws IOException {
+        String partial = partial("halo");
+
+        assertTrue(partial.contains(".iteraction-list-popular-button:not(.v-disabled):not([disabled])"));
+        assertTrue(partial.contains("color: #ffffff !important;"));
+        assertTrue(partial.contains("font-weight: 700 !important;"));
     }
 
     private String partial(String theme) throws IOException {
