@@ -80,7 +80,6 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(factory.contains("popularButton.setCaption(EMPTY_POPULAR_CAPTION)"));
         assertTrue(factory.contains("popularButton.setEnabled(false)"));
         assertTrue(factory.contains("return popularButton"));
-        // Подпись быстрой кнопки совпадает со всплывающей подсказкой (название взаимодействия).
         assertTrue(factory.contains("popularButton.setCaption(interaction.getIterationName())"));
         assertTrue(factory.contains("popularButton.setDescription(interaction.getIterationName())"));
         assertTrue(factory.contains("iteractionTypeField.setValue(interaction)"));
@@ -96,16 +95,19 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     @Test
-    public void quickActionsStayBetweenToolbarAndInputBlocks() throws IOException {
+    public void quickActionsStayBetweenToolbarAndBusinessSections() throws IOException {
         String descriptor = descriptor();
         String workspace = descriptor.substring(descriptor.indexOf("id=\"iteractionListWorkspace\""));
 
         assertOrdered(workspace,
-                "stylename=\"iteraction-list-toolbar edit-toolbar\"",
+                "id=\"iteractionListToolbarBox\"",
                 "id=\"mostPopularQuickActions\"",
                 "id=\"mostPopularHbox\"",
                 "id=\"iteractionListContentScrollBox\"",
-                "id=\"iteractionMainInfoCard\"",
+                "id=\"participantsAccordion\"",
+                "id=\"interactionAccordion\"",
+                "id=\"resultAccordion\"",
+                "id=\"commentAccordion\"",
                 "id=\"editActions\"");
         assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
         assertFalse(workspace.contains("id=\"popularAccordion\""));
@@ -125,7 +127,6 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(scss.contains("white-space: normal"));
         assertTrue(scss.contains("visibility: visible !important"));
         assertTrue(scss.contains("$v-font-color, $v-panel-background-color, 82%"));
-        // Исторический зелёный стиль быстрых кнопок 2024 года.
         assertTrue(scss.contains("background: #008000 !important"));
         assertTrue(scss.contains("color: #ffffff !important"));
         assertTrue(scss.contains("rgba(81, 255, 0"));
