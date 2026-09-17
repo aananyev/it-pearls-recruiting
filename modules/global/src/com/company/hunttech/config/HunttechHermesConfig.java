@@ -9,7 +9,7 @@ import com.haulmont.cuba.core.config.defaults.DefaultInt;
 import com.haulmont.cuba.core.config.defaults.DefaultString;
 
 /**
- * Конфигурация подключения к Hermes Agent (профиль hrm-viewer в Docker на hr.hunttech.ru).
+ * Конфигурация подключения к Hermes Agent (профиль hrm-operator в Docker на hr.hunttech.ru).
  */
 @Source(type = SourceType.APP)
 public interface HunttechHermesConfig extends Config {
@@ -31,11 +31,11 @@ public interface HunttechHermesConfig extends Config {
     int getSshPort();
 
     @Property("hunttech.hermes.containerName")
-    @DefaultString("hermes-hrm-viewer")
+    @DefaultString("hermes-hrm-operator")
     String getContainerName();
 
     @Property("hunttech.hermes.profile")
-    @DefaultString("hrm-viewer")
+    @DefaultString("hrm-operator")
     String getProfile();
 
     @Property("hunttech.hermes.timeoutSeconds")

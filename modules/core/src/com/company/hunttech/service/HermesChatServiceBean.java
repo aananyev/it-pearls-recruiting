@@ -48,7 +48,7 @@ import com.company.hunttech.dto.yandex.AiMeetingParseResult;
 import com.company.hunttech.dto.yandex.YandexMeetingResult;
 
 /**
- * Реализация сервиса взаимодействия с Hermes Agent (профиль hrm-viewer в Docker).
+ * Реализация сервиса взаимодействия с Hermes Agent (профиль hrm-operator в Docker).
  */
 @Service(HermesChatService.NAME)
 public class HermesChatServiceBean implements HermesChatService {

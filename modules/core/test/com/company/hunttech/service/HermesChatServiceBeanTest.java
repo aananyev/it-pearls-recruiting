@@ -57,8 +57,8 @@ public class HermesChatServiceBeanTest {
         userAiContextService = mock(UserAiContextService.class);
 
         when(configuration.getConfig(HunttechHermesConfig.class)).thenReturn(hermesConfig);
-        when(hermesConfig.getProfile()).thenReturn("hrm-viewer");
-        when(hermesConfig.getContainerName()).thenReturn("hermes-hrm-viewer");
+        when(hermesConfig.getProfile()).thenReturn("hrm-operator");
+        when(hermesConfig.getContainerName()).thenReturn("hermes-hrm-operator");
 
         ReflectionTestUtils.setField(service, "dataManager", dataManager);
         ReflectionTestUtils.setField(service, "metadata", metadata);
