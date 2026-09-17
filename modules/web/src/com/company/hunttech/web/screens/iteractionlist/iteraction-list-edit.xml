@@ -671,6 +671,7 @@
                                         <textField id="addString"
                                                    dataContainer="iteractionListDc"
                                                    property="addString"
+                                                   stylename="edit-form-control"
                                                    width="100%"
                                                    maxWidth="540px"/>
                                         <!-- Горизонтальный ряд выбора даты и интеграции с календарем -->
@@ -684,7 +685,9 @@
                                             <dateField id="addDate"
                                                        dataContainer="iteractionListDc"
                                                        property="addDate"
-                                                       width="220px"/>
+                                                       stylename="edit-form-control"
+                                                       width="100%"
+                                                       maxWidth="220px"/>
                                             <!-- Контейнер настроек календаря Яндекс -->
                                             <vbox id="calendarBox"
                                                   width="AUTO"
@@ -707,8 +710,9 @@
                                                                  caption="msg://msgCalendarLookup"
                                                                  dataContainer="iteractionListDc"
                                                                  property="calendarId"
-                                                                 width="280px"
-                                                                 stylename="iteraction-calendar-lookup"/>
+                                                                 width="100%"
+                                                                 maxWidth="280px"
+                                                                 stylename="edit-form-control iteraction-calendar-lookup"/>
                                                 </hbox>
                                             </vbox>
                                         </hbox>
@@ -716,7 +720,9 @@
                                         <textField id="addInteger"
                                                    dataContainer="iteractionListDc"
                                                    property="addInteger"
-                                                   width="140px"/>
+                                                   stylename="edit-form-control"
+                                                   width="100%"
+                                                   maxWidth="140px"/>
                                     </vbox>
                                 </buttonsPanel>
 

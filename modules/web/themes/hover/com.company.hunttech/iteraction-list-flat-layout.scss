@@ -285,10 +285,19 @@
       transition: border-color 120ms ease, box-shadow 120ms ease;
     }
 
+    /* Фокус полей ввода по эталону OpenPositionEdit */
     .iteraction-list-flat-section .v-textfield:focus,
     .iteraction-list-flat-section .v-textarea:focus,
+    .iteraction-list-flat-section .v-filterselect:focus,
+    .iteraction-list-flat-section .v-datefield:focus,
     .iteraction-list-flat-section .v-filterselect-focus,
-    .iteraction-list-flat-section .v-datefield-focus .v-datefield-textfield,
+    .iteraction-list-flat-section .v-datefield-focus .v-datefield-textfield {
+      outline: 2px solid rgba($v-selection-color, 0.38) !important;
+      outline-offset: -1px;
+      border-color: $v-selection-color !important;
+      box-shadow: none !important;
+    }
+
     .iteraction-list-flat-section .v-button:focus {
       border-color: $v-selection-color !important;
       box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
