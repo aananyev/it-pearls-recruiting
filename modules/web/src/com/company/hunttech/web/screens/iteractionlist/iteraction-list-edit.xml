@@ -111,14 +111,23 @@
                   stylename="iteraction-list-sidebar edit-sidebar"
                   width="312px"
                   height="100%"
-                  spacing="true"
-                  expand="iteractionListSidebarSpacer">
-                <!-- Профильный блок объединяет изображения, имя кандидата, служебные данные, статус и приоритет вакансии. -->
-                <vbox id="iteractionProfileSummaryBox"
-                      width="100%"
-                      height="AUTO"
-                      spacing="true"
-                      stylename="iteraction-list-profile-header edit-sidebar-identity">
+                  spacing="false">
+                <!-- Скроллер для комфортного просмотра всех карточек сайдбара по стандарту OpenPositionEdit -->
+                <scrollBox id="iteractionListSidebarScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical">
+                    <!-- Внутренний контейнер карточек сайдбара с вертикальным ритмом отступов -->
+                    <vbox id="iteractionListSidebarContentBox"
+                          width="100%"
+                          height="AUTO"
+                          spacing="true">
+                        <!-- Профильный блок объединяет изображения, имя кандидата, служебные данные, статус и приоритет вакансии. -->
+                        <vbox id="iteractionProfileSummaryBox"
+                              width="100%"
+                              height="AUTO"
+                              spacing="true"
+                              stylename="iteraction-list-profile-header edit-sidebar-identity">
                     <!-- Горизонтальный контейнер показывает фотографию кандидата и логотип проекта одинакового размера. -->
                     <hbox id="iteractionIdentityImages"
                           width="100%"
@@ -415,11 +424,13 @@
                     </hbox>
                 </vbox>
 
-                <!-- Spacer забирает оставшуюся высоту sidebar и удерживает информационные карточки сверху. -->
-                <vbox id="iteractionListSidebarSpacer"
-                      width="100%"
-                      height="100%"
-                      stylename="iteraction-list-sidebar-spacer edit-sidebar-spacer"/>
+                        <!-- Фиксированный спейсер в конце скроллера по эталону HuntTech -->
+                        <vbox id="iteractionListSidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="iteraction-list-sidebar-spacer edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
             </vbox>
 
             <!-- Рабочая область содержит toolbar, быстрые действия, прокручиваемые поля и постоянный footer. -->
@@ -639,19 +650,19 @@
                                                                dataContainer="iteractionListDc"
                                                                property="addString"
                                                                width="100%"
-                                                               maxWidth="640px"/>
+                                                               maxWidth="540px"/>
                                                     <!-- Горизонтальный ряд выбора даты и интеграции с календарем -->
                                                     <hbox id="actionDateCalendarRow"
-                                                          width="100%"
-                                                          spacing="false"
-                                                          visible="false"
-                                                          align="MIDDLE_LEFT"
-                                                          stylename="iteraction-date-calendar-row">
-                                                        <!-- Дополнительное поле даты действия -->
+                                                           width="100%"
+                                                           spacing="false"
+                                                           visible="false"
+                                                           align="MIDDLE_LEFT"
+                                                           stylename="iteraction-date-calendar-row">
+                                                        <!-- Дополнительное поле даты действия (16 символов) -->
                                                         <dateField id="addDate"
                                                                    dataContainer="iteractionListDc"
                                                                    property="addDate"
-                                                                   width="260px"/>
+                                                                   width="220px"/>
                                                         <!-- Контейнер настроек календаря Яндекс -->
                                                         <vbox id="calendarBox"
                                                               width="AUTO"
@@ -674,29 +685,29 @@
                                                                              caption="msg://msgCalendarLookup"
                                                                              dataContainer="iteractionListDc"
                                                                              property="calendarId"
-                                                                             width="320px"
+                                                                             width="280px"
                                                                              stylename="iteraction-calendar-lookup"/>
                                                             </hbox>
                                                         </vbox>
                                                     </hbox>
-                                                    <!-- Дополнительное числовое поле действия -->
+                                                    <!-- Дополнительное числовое поле действия (компактная ширина под числовые данные) -->
                                                     <textField id="addInteger"
                                                                dataContainer="iteractionListDc"
                                                                property="addInteger"
-                                                               width="220px"/>
+                                                               width="140px"/>
                                                 </vbox>
                                             </buttonsPanel>
                                         </row>
                                     </rows>
                                 </grid>
 
-                                <!-- Оценка, рекрутер и способ связи -->
+                                <!-- Оценка, рекрутер и способ связи с учетом длин выводимых строк данных -->
                                 <grid id="resultAccordionGrid"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
                                       stylename="iteraction-list-form-grid iteraction-list-result-grid">
-                                    <!-- Определение колонок сетки результатов -->
+                                    <!-- Определение колонок сетки результатов (две колонки 50/50 по контрактной сетке) -->
                                     <columns>
                                         <!-- Левая колонка для оценки -->
                                         <column width="50%"/>
@@ -707,7 +718,7 @@
                                     <rows>
                                         <!-- Строка оценки и ответственного рекрутера -->
                                         <row id="rating">
-                                            <!-- LookupField для выбора числовой оценки взаимодействия -->
+                                            <!-- LookupField для выбора числовой оценки взаимодействия с компактной шириной под длину значения 1..5 -->
                                             <lookupField id="ratingField"
                                                          required="true"
                                                          align="MIDDLE_LEFT"
@@ -716,7 +727,8 @@
                                                          property="rating"
                                                          description="msg://msgRatingDecription"
                                                          stylename="edit-form-control"
-                                                         width="100%"/>
+                                                         width="100%"
+                                                         maxWidth="240px"/>
                                             <!-- LookupPickerField для выбора ответственного рекрутера -->
                                             <lookupPickerField id="recrutierField"
                                                                caption="msg://msgRecrutier"
@@ -734,9 +746,10 @@
                                         </row>
                                         <!-- Строка способа коммуникации -->
                                         <row>
-                                            <!-- Поле ввода способа связи на всю ширину двух колонок -->
+                                            <!-- Поле ввода способа связи с кандидатом с шириной под длину телефона/Telegram -->
                                             <textField id="communicationMethodField"
                                                        width="100%"
+                                                       maxWidth="540px"
                                                        caption="msg://msgCommunicationMethod"
                                                        dataContainer="iteractionListDc"
                                                        property="communicationMethod"

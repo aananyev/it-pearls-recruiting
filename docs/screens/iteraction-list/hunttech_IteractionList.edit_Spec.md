@@ -94,10 +94,10 @@ InteractionService.getMostPolularIteraction(userSession.getUser(), 5)
  
  | Раздел | Компоненты |
  |---|---|
- | Кандидат и вакансия | `candidateField`, `vacancyFiels`, `onlyMySubscribeCheckBox` |
- | Тип | `iteractionTypeField`, `buttonCallAction` (auto/компактная), `addString` (до 640px), `actionDateCalendarRow` (`addDate` 260px + `calendarBox`), `addInteger` (220px) |
- | Результат | `ratingField` (260px), `recrutierField`, `communicationMethodField` (340px) |
- | Комментарий | `commentField` |
+ | Кандидат и вакансия | `candidateField` (50%), `vacancyFiels` (50%), `onlyMySubscribeCheckBox` (100%) |
+ | Тип | `iteractionTypeField` (50%), `buttonCallAction` (auto/компактная), `addString` (до 540px), `actionDateCalendarRow` (`addDate` 220px + `calendarBox` с `calendarLookupField` 280px), `addInteger` (140px) |
+ | Результат | `ratingField` (maxWidth 240px), `recrutierField` (50%), `communicationMethodField` (maxWidth 540px) |
+ | Комментарий | `commentField` (100%, 7 строк, 170px) |
  | Footer | `subscribeButton`, `windowCommitAndClose`, `windowClose` |
 
 ## 7. Кандидат и вакансия

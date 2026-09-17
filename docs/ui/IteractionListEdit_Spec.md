@@ -54,27 +54,29 @@ UI-рефакторинг не изменяет entity, JPQL, loaders, views, с
 
 ```text
 IteractionListEdit
-├── edit-sidebar (зафиксирован, 312px)
-│   ├── candidateImage + projectLogoImage
-│   ├── ФИО кандидата
-│   ├── наименование вакансии
-│   ├── статус вакансии
-│   ├── приоритет вакансии
-│   ├── номер + дата
-│   ├── компания / проект / стоимость / рейтинг
-│   └── spacer
+├── edit-sidebar (зафиксирован, 312px, scrollBox по эталону OpenPositionEdit)
+│   └── scrollBox (iteractionListSidebarScroll, 100% x 100%, vertical)
+│       └── vbox (iteractionListSidebarContentBox)
+│           ├── candidateImage + projectLogoImage
+│           ├── ФИО кандидата
+│           ├── наименование вакансии
+│           ├── статус вакансии
+│           ├── приоритет вакансии
+│           ├── номер + дата
+│           ├── компания / проект / стоимость / рейтинг
+│           └── spacer (iteractionListSidebarSpacer, 16px)
 └── edit-workspace
     ├── toolbar (iteractionListToolbarBox)
-    ├── mostPopularQuickActions
+    ├── mostPopularQuickActions (5 кнопок 20%, #008000 с четким белым двухстрочным текстом v-button-caption)
     ├── vertical scroll (iteractionListContentScrollBox)
     │   └── iteractionMainInfoCard → iteractionMainInfoBody
     │       ├── gridIterationData: Кандидат (50%) | Вакансия (50%)
-    │       ├── onlyMySubscribeCheckBox (выровнен по левой направляющей)
+    │       ├── onlyMySubscribeCheckBox (width="100%", выровнен по левой направляющей)
     │       ├── gridInteractionType: Тип взаимодействия (50%) | buttonsPanelCallAction (50%)
     │       ├── resultAccordionGrid:
-    │       │   ├── Row 1: Оценка (50%) | Рекрутер (50%)
-    │       │   └── Row 2: Способ коммуникации (colspan=2, 100%)
-    │       └── commentField: Комментарий (100%)
+    │       │   ├── Row 1: Оценка (50%, maxWidth="240px") | Рекрутер (50%)
+    │       │   └── Row 2: Способ коммуникации (colspan=2, maxWidth="540px")
+    │       └── commentField: Комментарий (100%, 7 строк, 170px)
     └── footer actions (editActions: subscribeButton, windowCommitAndClose, windowClose)
 ```
 
@@ -84,20 +86,20 @@ IteractionListEdit
 Toolbar
 ────────────────────────────────────────
 
-Частые взаимодействия
+Частые взаимодействия (зеленые плашки с читаемым белым заголовком)
 ────────────────────────────────────────
 
-Кандидат             | Вакансия
-─────────────────────┼──────────────────
-Только мои подписки / вакансии
+Кандидат (50%)          | Вакансия (50%)
+────────────────────────┼──────────────────
+Только мои подписки / вакансии (100%)
 ────────────────────────────────────────
-Тип взаимодействия   | Доп. действие
-─────────────────────┼──────────────────
-Оценка               | Рекрутер
-─────────────────────┴──────────────────
-Способ коммуникации
+Тип взаимодействия (50%) | Доп. действие (50%)
+────────────────────────┼──────────────────
+Оценка (maxWidth=240px) | Рекрутер (50%)
+────────────────────────┴──────────────────
+Способ коммуникации (maxWidth=540px)
 ────────────────────────────────────────
-Комментарий
+Комментарий (100%)
 ────────────────────────────────────────
 
                          Footer actions
@@ -108,8 +110,36 @@ Toolbar
 | Блок / Сетка | Заголовок / Назначение | Основные компоненты | Focus target |
 |---|---|---|---|
 | `gridIterationData` | Участники (50/50) | `candidateField`, `vacancyFiels` | `candidateField` |
-| `onlyMySubscribeCheckBox` | Фильтр вакансий | `onlyMySubscribeCheckBox` | `onlyMySubscribeCheckBox` |
+| `onlyMySubscribeCheckBox` | Фильтр вакансий | `onlyMySubscribeCheckBox` (100%) | `onlyMySubscribeCheckBox` |
 | `gridInteractionType` | Тип и действие (50/50) | `iteractionTypeField`, `buttonsPanelCallAction` (`buttonCallAction`, `addString`, `actionDateCalendarRow` (`addDate` + `calendarBox`), `addInteger`) | `iteractionTypeField` |
+| `resultAccordionGrid` | Оценка и коммуникация (50/50 + 100%) | `ratingField` (maxWidth 240px), `recrutierField` (100%), `communicationMethodField` (maxWidth 540px) | `ratingField` |
+| `commentField` | Комментарий (100%) | `commentField` (100%, rows="7", height="170px") | `commentField` |
+
+Все блоки:
+
+- постоянно видимы;
+- расположены в единой двухколоночной сетке 50% / 50%;
+- имеют естественную высоту `AUTO`;
+- выровнены по 4 строгим вертикальным направляющим (`LEFT EDGE`, `CENTER LEFT`, `CENTER RIGHT`, `RIGHT EDGE`);
+- учитывают длину данных вводимых значений (короткие числовые и оценочные поля компактны, текстовые описания и ФИО имеют достаточную ширину);
+- используют локальные классы `iteraction-list-form-grid`, `iteraction-list-participants-grid`, `iteraction-list-action-grid`, `iteraction-list-result-grid`.
+
+### 2.3.1. Единый визуальный контракт и компоновка по длине данных
+
+Основные поля ввода в правой рабочей области используют общий stylename `edit-form-control` (ровно 7 контролов по контракту тестов: `iteractionTypeField`, `addString`, `addDate`, `addInteger`, `ratingField`, `recrutierField`, `commentField`):
+
+- `candidateField` и `vacancyFiels` сохраняют специализированный `iteraction-list-primary-picker`, но итоговая SCSS-геометрия совпадает с `edit-form-control`: высота `38px`, единая рамка, фон, focus-state и фиксированная ширина action-кнопок. Ширина 50% (~630px) обеспечивает достаточное пространство для длинных названий вакансий (40-80 символов) и ФИО кандидатов.
+- `onlyMySubscribeCheckBox`: ширина `100%`, исключает перенос или обрезку текста длинного чекбокса.
+- `ratingField`: ширина колонки 50%, но с `maxWidth="240px"`, так как значение рейтинга (1..5) не требует растяжения на пол-экрана.
+- `recrutierField`: занимает 50% ширины (width="100%" внутри своей колонки), с единым выравниванием caption и нижней базовой линии.
+- `communicationMethodField`: расположен во второй строке `resultAccordionGrid` (colspan="2"), но ограничен `maxWidth="540px"`, что обеспечивает аккуратное отображение номера телефона, Telegram-ника или email без неестественного растяжения на всю ширину формы.
+- `commentField`: занимает 100% ширины рабочей области (`height="170px"`, `rows="7"`), обеспечивая удобный ввод развернутых заметок рекрутера.
+- `buttonsPanelCallAction` и динамические поля:
+  - `addDate`: ширина `220px`, сгруппирована в единый ряд `actionDateCalendarRow` вместе с плашкой календаря `calendarBox`.
+  - `calendarBox` / `calendarInlineBox`: компактная плашка (`padding: 6px 12px`, border-radius 6px) с чекбоксом `addToCalendarCheckBox` и выпадающим списком календарей `calendarLookupField` (`width="280px"` со стилем `iteraction-calendar-lookup`).
+  - `buttonCallAction`: `width="AUTO"`, `align="MIDDLE_LEFT"`, стилизована классом `iteraction-call-action-btn`.
+  - `addInteger`: ширина `140px` (для кратких числовых значений).
+  - `addString`: максимальная ширина `540px`.gridInteractionType` | Тип и действие (50/50) | `iteractionTypeField`, `buttonsPanelCallAction` (`buttonCallAction`, `addString`, `actionDateCalendarRow` (`addDate` + `calendarBox`), `addInteger`) | `iteractionTypeField` |
 | `resultAccordionGrid` | Оценка и коммуникация (50/50 + 100%) | `ratingField`, `recrutierField`, `communicationMethodField` | `ratingField` |
 | `commentField` | Комментарий (100%) | `commentField` | `commentField` |
 

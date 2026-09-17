@@ -322,6 +322,7 @@
       width: 100% !important;
       min-width: 0 !important;
       height: 64px !important;
+      min-height: 64px !important;
       padding: 6px 8px !important;
       color: #ffffff !important;
       font-size: 13px !important;
@@ -351,27 +352,30 @@
       position: relative !important;
       z-index: 2 !important;
       display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
       width: 100% !important;
       height: 100% !important;
-      align-items: center !important;
-      justify-content: center !important;
-      overflow: hidden !important;
+      overflow: visible !important;
+      margin: 0 auto !important;
+      text-align: center !important;
     }
 
     .iteraction-list-popular-button .v-button-caption {
       position: relative !important;
       z-index: 3 !important;
       display: block !important;
-      width: 100%;
+      width: 100% !important;
       max-height: 48px;
-      overflow: hidden;
+      overflow: hidden !important;
       color: #ffffff !important;
       font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 16px;
-      text-align: center;
+      line-height: 16px !important;
+      text-align: center !important;
       text-overflow: ellipsis;
-      white-space: normal;
+      white-space: normal !important;
       visibility: visible !important;
       opacity: 1 !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
