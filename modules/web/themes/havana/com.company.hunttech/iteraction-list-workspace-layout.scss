@@ -22,7 +22,8 @@
     }
 
     // Vaadin может поместить expand-элемент HBox во внутренний .v-expand.
-    // Wrapper тоже должен занимать только оставшееся место, а не 100% + sidebar.
+    // Wrapper тоже должен занимать только оставшееся место, а не 100% + sidebar,
+    // и быть строго прижат к верхнему краю без отступа.
     .iteraction-list-main-layout > .v-expand {
       box-sizing: border-box;
       display: flex !important;
@@ -32,6 +33,11 @@
       min-width: 0 !important;
       max-width: none !important;
       height: 100% !important;
+      position: relative !important;
+      top: 0 !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      align-self: stretch !important;
     }
 
     .iteraction-list-main-layout > .v-slot-iteraction-list-sidebar,
@@ -39,6 +45,7 @@
       flex: 0 0 auto !important;
     }
 
+    // Правая рабочая область: строго вверху без отступа от верхнего края экрана
     .iteraction-list-main-layout > .v-slot-iteraction-list-workspace,
     .iteraction-list-main-layout > .v-expand > .v-slot-iteraction-list-workspace,
     .v-slot-iteraction-list-workspace {
@@ -48,9 +55,12 @@
       min-width: 0 !important;
       max-width: none !important;
       height: 100% !important;
+      position: relative !important;
+      top: 0 !important;
       margin-top: 0 !important;
       padding-top: 0 !important;
       vertical-align: top !important;
+      align-self: stretch !important;
     }
 
     .iteraction-list-workspace,
@@ -66,8 +76,18 @@
 
     .iteraction-list-workspace {
       height: 100% !important;
+      position: relative !important;
+      top: 0 !important;
       margin-top: 0 !important;
       padding-top: 0 !important;
+    }
+
+    // Тулбар правой части: строго сверху без отступа
+    .v-slot-iteraction-list-toolbar,
+    .iteraction-list-toolbar {
+      position: relative !important;
+      top: 0 !important;
+      margin-top: 0 !important;
     }
 
     // Увеличенный вертикальный ритм разделяет логические строки единой карточки.
