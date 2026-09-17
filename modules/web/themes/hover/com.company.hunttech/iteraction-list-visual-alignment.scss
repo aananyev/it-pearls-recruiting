@@ -572,23 +572,19 @@
     .iteraction-list-form-grid.iteraction-list-action-grid > .v-gridlayout-slot:first-child,
     .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:first-child {
       left: 0 !important;
+      top: 0 !important;
       padding-left: 0 !important;
       padding-right: 8px !important;
     }
 
     .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:last-child,
     .iteraction-list-form-grid.iteraction-list-action-grid > .v-gridlayout-slot:last-child,
-    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:nth-child(2) {
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:nth-child(2),
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:last-child {
       left: 50% !important;
+      top: 0 !important;
       padding-left: 8px !important;
       padding-right: 0 !important;
-    }
-
-    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:last-child {
-      left: 0 !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      padding: 19px 8px 0 !important;
     }
 
     .iteraction-list-participants-grid .v-gridlayout-slot > *,

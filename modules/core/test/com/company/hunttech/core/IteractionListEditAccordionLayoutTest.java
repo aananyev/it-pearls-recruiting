@@ -92,12 +92,12 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"candidateField\"",
                 "id=\"vacancyFiels\"",
                 "id=\"iteractionTypeField\"",
+                "id=\"recrutierField\"",
                 "id=\"buttonCallAction\"",
                 "id=\"addString\"",
                 "id=\"addDate\"",
                 "id=\"addInteger\"",
                 "id=\"ratingField\"",
-                "id=\"recrutierField\"",
                 "id=\"communicationMethodField\"",
                 "id=\"commentField\"");
         assertTrue(descriptor.contains("invoke=\"callActionEntity\""));

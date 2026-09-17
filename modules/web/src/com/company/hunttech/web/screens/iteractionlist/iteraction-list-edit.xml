@@ -613,7 +613,7 @@
                                     </columns>
                                     <!-- Строки сетки типа взаимодействия и действия -->
                                     <rows>
-                                        <!-- Строка типа взаимодействия и динамических контролов -->
+                                        <!-- Строка типа взаимодействия и ответственного рекрутера (50/50 в одну строку) -->
                                         <row id="interactionTypeRow">
                                             <!-- LookupPickerField для выбора справочного типа взаимодействия -->
                                             <lookupPickerField id="iteractionTypeField"
@@ -631,105 +631,7 @@
                                                     <action id="lookup" type="picker_lookup"/>
                                                 </actions>
                                             </lookupPickerField>
-                                            <!-- Динамическая панель дополнительных контролов действия -->
-                                            <buttonsPanel id="buttonsPanelCallAction"
-                                                          width="100%"
-                                                          height="AUTO"
-                                                          align="BOTTOM_LEFT"
-                                                          stylename="iteraction-list-dynamic-panel">
-                                                <!-- Контейнер динамических полей действия -->
-                                                <vbox id="dynamicActionFieldsBox" width="100%" height="AUTO" spacing="true">
-                                                    <!-- Кнопка вызова действия над сущностью -->
-                                                    <button id="buttonCallAction"
-                                                            invoke="callActionEntity"
-                                                            width="AUTO"
-                                                            align="MIDDLE_LEFT"
-                                                            stylename="iteraction-call-action-btn"/>
-                                                    <!-- Дополнительное строковое поле действия -->
-                                                    <textField id="addString"
-                                                               dataContainer="iteractionListDc"
-                                                               property="addString"
-                                                               width="100%"
-                                                               maxWidth="540px"/>
-                                                    <!-- Горизонтальный ряд выбора даты и интеграции с календарем -->
-                                                    <hbox id="actionDateCalendarRow"
-                                                           width="100%"
-                                                           spacing="false"
-                                                           visible="false"
-                                                           align="MIDDLE_LEFT"
-                                                           stylename="iteraction-date-calendar-row">
-                                                        <!-- Дополнительное поле даты действия (16 символов) -->
-                                                        <dateField id="addDate"
-                                                                   dataContainer="iteractionListDc"
-                                                                   property="addDate"
-                                                                   width="220px"/>
-                                                        <!-- Контейнер настроек календаря Яндекс -->
-                                                        <vbox id="calendarBox"
-                                                              width="AUTO"
-                                                              spacing="false"
-                                                              visible="false"
-                                                              stylename="iteraction-calendar-box">
-                                                            <!-- Внутренняя строка чекбокса и списка календарей -->
-                                                            <hbox id="calendarInlineBox"
-                                                                  spacing="false"
-                                                                  align="MIDDLE_LEFT"
-                                                                  stylename="iteraction-calendar-inline-box">
-                                                                <!-- Чекбокс добавления встречи в календарь -->
-                                                                <checkBox id="addToCalendarCheckBox"
-                                                                          caption="msg://msgAddToCalendar"
-                                                                          dataContainer="iteractionListDc"
-                                                                          property="addToCalendar"
-                                                                          align="MIDDLE_LEFT"/>
-                                                                <!-- Выпадающий список выбора календаря -->
-                                                                <lookupField id="calendarLookupField"
-                                                                             caption="msg://msgCalendarLookup"
-                                                                             dataContainer="iteractionListDc"
-                                                                             property="calendarId"
-                                                                             width="280px"
-                                                                             stylename="iteraction-calendar-lookup"/>
-                                                            </hbox>
-                                                        </vbox>
-                                                    </hbox>
-                                                    <!-- Дополнительное числовое поле действия (компактная ширина под числовые данные) -->
-                                                    <textField id="addInteger"
-                                                               dataContainer="iteractionListDc"
-                                                               property="addInteger"
-                                                               width="140px"/>
-                                                </vbox>
-                                            </buttonsPanel>
-                                        </row>
-                                    </rows>
-                                </grid>
-
-                                <!-- Оценка, рекрутер и способ связи с учетом длин выводимых строк данных -->
-                                <grid id="resultAccordionGrid"
-                                      width="100%"
-                                      height="AUTO"
-                                      spacing="true"
-                                      stylename="iteraction-list-form-grid iteraction-list-result-grid">
-                                    <!-- Определение колонок сетки результатов (две колонки 50/50 по контрактной сетке) -->
-                                    <columns>
-                                        <!-- Левая колонка для оценки -->
-                                        <column width="50%"/>
-                                        <!-- Правая колонка для рекрутера -->
-                                        <column width="50%"/>
-                                    </columns>
-                                    <!-- Строки сетки результатов -->
-                                    <rows>
-                                        <!-- Строка оценки и ответственного рекрутера -->
-                                        <row id="rating">
-                                            <!-- LookupField для выбора числовой оценки взаимодействия с компактной шириной под длину значения 1..5 -->
-                                            <lookupField id="ratingField"
-                                                         required="true"
-                                                         align="MIDDLE_LEFT"
-                                                         caption="msg://msgRating"
-                                                         dataContainer="iteractionListDc"
-                                                         property="rating"
-                                                         description="msg://msgRatingDecription"
-                                                         stylename="edit-form-control"
-                                                         width="100%"
-                                                         maxWidth="240px"/>
-                                            <!-- LookupPickerField для выбора ответственного рекрутера -->
+                                            <!-- LookupPickerField для выбора ответственного рекрутера в паре с типом взаимодействия -->
                                             <lookupPickerField id="recrutierField"
                                                                caption="msg://msgRecrutier"
                                                                width="100%"
@@ -744,8 +646,104 @@
                                                 </actions>
                                             </lookupPickerField>
                                         </row>
-                                        <!-- Строка способа коммуникации -->
-                                        <row>
+                                    </rows>
+                                </grid>
+
+                                <!-- Динамическая панель дополнительных контролов действия под строкой взаимодействия -->
+                                <buttonsPanel id="buttonsPanelCallAction"
+                                              width="100%"
+                                              height="AUTO"
+                                              align="MIDDLE_LEFT"
+                                              stylename="iteraction-list-dynamic-panel">
+                                    <!-- Контейнер динамических полей действия -->
+                                    <vbox id="dynamicActionFieldsBox" width="100%" height="AUTO" spacing="true">
+                                        <!-- Кнопка вызова действия над сущностью -->
+                                        <button id="buttonCallAction"
+                                                invoke="callActionEntity"
+                                                width="AUTO"
+                                                align="MIDDLE_LEFT"
+                                                stylename="iteraction-call-action-btn"/>
+                                        <!-- Дополнительное строковое поле действия -->
+                                        <textField id="addString"
+                                                   dataContainer="iteractionListDc"
+                                                   property="addString"
+                                                   width="100%"
+                                                   maxWidth="540px"/>
+                                        <!-- Горизонтальный ряд выбора даты и интеграции с календарем -->
+                                        <hbox id="actionDateCalendarRow"
+                                               width="100%"
+                                               spacing="false"
+                                               visible="false"
+                                               align="MIDDLE_LEFT"
+                                               stylename="iteraction-date-calendar-row">
+                                            <!-- Дополнительное поле даты действия (16 символов) -->
+                                            <dateField id="addDate"
+                                                       dataContainer="iteractionListDc"
+                                                       property="addDate"
+                                                       width="220px"/>
+                                            <!-- Контейнер настроек календаря Яндекс -->
+                                            <vbox id="calendarBox"
+                                                  width="AUTO"
+                                                  spacing="false"
+                                                  visible="false"
+                                                  stylename="iteraction-calendar-box">
+                                                <!-- Внутренняя строка чекбокса и списка календарей -->
+                                                <hbox id="calendarInlineBox"
+                                                      spacing="false"
+                                                      align="MIDDLE_LEFT"
+                                                      stylename="iteraction-calendar-inline-box">
+                                                    <!-- Чекбокс добавления встречи в календарь -->
+                                                    <checkBox id="addToCalendarCheckBox"
+                                                              caption="msg://msgAddToCalendar"
+                                                              dataContainer="iteractionListDc"
+                                                              property="addToCalendar"
+                                                              align="MIDDLE_LEFT"/>
+                                                    <!-- Выпадающий список выбора календаря -->
+                                                    <lookupField id="calendarLookupField"
+                                                                 caption="msg://msgCalendarLookup"
+                                                                 dataContainer="iteractionListDc"
+                                                                 property="calendarId"
+                                                                 width="280px"
+                                                                 stylename="iteraction-calendar-lookup"/>
+                                                </hbox>
+                                            </vbox>
+                                        </hbox>
+                                        <!-- Дополнительное числовое поле действия (компактная ширина под числовые данные) -->
+                                        <textField id="addInteger"
+                                                   dataContainer="iteractionListDc"
+                                                   property="addInteger"
+                                                   width="140px"/>
+                                    </vbox>
+                                </buttonsPanel>
+
+                                <!-- Оценка и способ связи в две колонки 50/50 в одну строку -->
+                                <grid id="resultAccordionGrid"
+                                      width="100%"
+                                      height="AUTO"
+                                      spacing="true"
+                                      stylename="iteraction-list-form-grid iteraction-list-result-grid">
+                                    <!-- Определение колонок сетки результатов (две колонки 50/50 по контрактной сетке) -->
+                                    <columns>
+                                        <!-- Левая колонка для оценки -->
+                                        <column width="50%"/>
+                                        <!-- Правая колонка для способа коммуникации -->
+                                        <column width="50%"/>
+                                    </columns>
+                                    <!-- Строки сетки результатов -->
+                                    <rows>
+                                        <!-- Строка оценки и способа связи -->
+                                        <row id="rating">
+                                            <!-- LookupField для выбора числовой оценки взаимодействия с компактной шириной под длину значения 1..5 -->
+                                            <lookupField id="ratingField"
+                                                         required="true"
+                                                         align="MIDDLE_LEFT"
+                                                         caption="msg://msgRating"
+                                                         dataContainer="iteractionListDc"
+                                                         property="rating"
+                                                         description="msg://msgRatingDecription"
+                                                         stylename="edit-form-control"
+                                                         width="100%"
+                                                         maxWidth="240px"/>
                                             <!-- Поле ввода способа связи с кандидатом с шириной под длину телефона/Telegram -->
                                             <textField id="communicationMethodField"
                                                        width="100%"
@@ -753,8 +751,7 @@
                                                        caption="msg://msgCommunicationMethod"
                                                        dataContainer="iteractionListDc"
                                                        property="communicationMethod"
-                                                       stylename="edit-form-control"
-                                                       colspan="2"/>
+                                                       stylename="edit-form-control"/>
                                         </row>
                                     </rows>
                                 </grid>

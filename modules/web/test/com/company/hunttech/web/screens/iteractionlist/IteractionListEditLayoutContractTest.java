@@ -113,11 +113,11 @@ class IteractionListEditLayoutContractTest {
         assertTrue(participantsGrid.getAttribute("stylename").contains("iteraction-list-participants-grid"));
         assertEquals("100%", participantsGrid.getAttribute("width"));
 
-        // 3. Строка 3: Тип взаимодействия (50%) | buttonsPanelCallAction (50%)
+        // 3. Строка 2: Тип взаимодействия (50%) | Рекрутер (50%)
         assertTrue(actionGrid.getAttribute("stylename").contains("iteraction-list-action-grid"));
         assertEquals("100%", actionGrid.getAttribute("width"));
 
-        // 4. Строка 4 & 5: Оценка (50%) | Рекрутер (50%) и Способ коммуникации (colspan=2)
+        // 4. Строка 3: Оценка (50%) | Способ коммуникации (50%)
         assertTrue(resultGrid.getAttribute("stylename").contains("iteraction-list-result-grid"));
         assertEquals("100%", resultGrid.getAttribute("width"));
     }
@@ -133,6 +133,7 @@ class IteractionListEditLayoutContractTest {
                 "vacancyFiels",
                 "onlyMySubscribeCheckBox",
                 "iteractionTypeField",
+                "recrutierField",
                 "buttonsPanelCallAction",
                 "dynamicActionFieldsBox",
                 "buttonCallAction",
@@ -140,7 +141,6 @@ class IteractionListEditLayoutContractTest {
                 "addDate",
                 "addInteger",
                 "ratingField",
-                "recrutierField",
                 "communicationMethodField",
                 "commentField"
         );
