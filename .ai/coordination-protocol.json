@@ -1,45 +1,45 @@
 {
   "agents": {
-    "Hermes-1 (CI/CD)": {
-      "role": "проверка PR, merge, deploy, restart, миграции, отчёты, pr-watcher",
-      "reads": [".ai/instructions/", ".ai/tasks/", "PR-описания и комментарии"],
-      "writes": [".ai/reports/", "PR-комментарии", "метки WAITING_FOR_HERMES"]
+    "Antigravity (Главный разработчик, Владелец master)": {
+      "role": "Главный разработчик (Tech Lead), Руководитель проектов, Владелец главной ветки master; архитектурный надзор, утверждение и слияние PR в master, запуск миграций БД и промптов, локальный и прод деплой",
+      "reads": [".ai/instructions/", ".ai/reports/", ".ai/tasks/", "PR-описания и комментарии", "ветки agent/*"],
+      "writes": [".ai/instructions/", ".ai/reports/", ".ai/tasks/", "master", "ветки agent/*", "PR-комментарии", "релизы"]
+    },
+    "Hermes-1 (CI/CD воркер)": {
+      "role": "вспомогательный воркер CI/CD и автотестов под управлением Главного разработчика Antigravity",
+      "reads": [".ai/instructions/", ".ai/tasks/", "PR-описания"],
+      "writes": [".ai/reports/"]
     },
     "Hermes-2 (разработка)": {
-      "role": "фичи, ветки agent/*, PR; своя сессия Hermes в своём worktree",
-      "reads": [".ai/instructions/", ".ai/reports/", "PR-статусы"],
-      "writes": [".ai/instructions/", "ветки agent/*", "PR с описанием"]
-    },
-    "Antigravity (разработка)": {
-      "role": "второй поток фич: Antigravity IDE (agentic IDE Google, launcher ~/bin/antigravity-ide, форвардер 127.0.0.1:18080 → 209.46.2.183); свой worktree, ветки agent/*, PR",
+      "role": "фичи, ветки agent/hermes2-*, направление PR Главному разработчику Antigravity",
       "reads": [".ai/instructions/", ".ai/reports/", "PR-статусы"],
       "writes": [".ai/instructions/", "ветки agent/*", "PR с описанием"]
     },
     "QA-тестировщик (проверка)": {
-      "role": "проверка работы разработчиков перед PR (diff-ревью, тесты, docs), вердикт PASS/FAIL; без своего worktree и ветки; запускается как субагент агентом-разработчиком; не пишет код, не коммитит, не деплоит",
+      "role": "проверка работы разработчиков перед мержем в master (diff-ревью, тесты, docs), вердикт PASS/FAIL; субагент под управлением Главного разработчика / Руководителя проектов",
       "reads": [".ai/instructions/", ".ai/tasks/", ".ai/reports/", "ветки agent/*", "diff/PR-статусы"],
       "writes": [".ai/reports/qa-*.md", "PR-комментарии (вердикт QA)"]
     }
   },
   "channels": {
-    "Hermes-1 → разработчики": {
-      "description": "Hermes-1 пишет сюда результаты сборок, найденные ошибки, задачи на исправление",
-      "actions": ["create_pr_finding", "build_report", "verification_result", "error_fix_request"]
+    "Разработчики → Главный разработчик (Antigravity)": {
+      "description": "Разработчики создают PR в master и направляют на review Главному разработчику",
+      "actions": ["pr_created", "status_update", "review_request"]
     },
-    "Hermes-2/Antigravity → Hermes-1": {
-      "description": "Разработчики создают PR, указывают статус и что сделано",
-      "actions": ["pr_created", "status_update"]
+    "Главный разработчик (Antigravity) → Разработчики": {
+      "description": "Главный разработчик ставит задачи, рецензирует PR, утверждает или отклоняет merge",
+      "actions": ["task_assignment", "code_review", "pr_approved", "pr_merged", "pr_rejected"]
     },
-    "QA → разработчики": {
-      "description": "QA проверяет работу перед PR: вердикт PASS/FAIL, найденные ошибки P1/P2/P3 с путями, требование исправить до PR (при FAIL работа не принимается); отчёты .ai/reports/qa-*.md",
+    "QA → Главный разработчик / Разработчики": {
+      "description": "QA проверяет работу перед мержем в master: вердикт PASS/FAIL, найденные ошибки P1/P2/P3 с путями; отчёты .ai/reports/qa-*.md",
       "actions": ["qa_verdict", "error_fix_request", "qa_report"]
     },
     "Общий git": {
-      "description": "Ветки agent/*, PR (base=master), merge только Hermes-1 после проверки и согласия пользователя",
+      "description": "Владелец ветки master — Antigravity. Прямой мерж в master осуществляет Antigravity после тестирования и QA.",
       "rules": [
         "один агент = одна ветка + свой worktree",
         "рабочее дерево держать чистым (коммит + push после каждого шага)",
-        "один gradle-процесс в момент времени",
+        "один gradle-процесс в момент времени (mutex)",
         "конфликты shared-файлов (styles.scss x7, messages, build.gradle) резолвит автор ветки, беря обе стороны"
       ]
     }
