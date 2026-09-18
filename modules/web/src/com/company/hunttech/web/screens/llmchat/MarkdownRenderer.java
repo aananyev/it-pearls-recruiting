@@ -184,16 +184,31 @@ public class MarkdownRenderer {
      * Renders Hermes chat history with custom live badge and pagination awareness.
      */
     public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String liveBadgeText, String emptyHint, int totalCount, int visibleCount) {
+        return renderHermesChatHistory(messages, liveText, liveBadgeText, emptyHint, totalCount, visibleCount, "Hermes-viewer");
+    }
+
+    /**
+     * Renders Hermes chat history with custom agent name, live badge and pagination awareness.
+     */
+    public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String liveBadgeText, String emptyHint, int totalCount, int visibleCount, String agentName) {
+        return renderHermesChatHistory(messages, liveText, liveBadgeText, emptyHint, totalCount, visibleCount, agentName, false);
+    }
+
+    /**
+     * Renders Hermes chat history with custom agent name, operator flag, live badge and pagination awareness.
+     */
+    public static String renderHermesChatHistory(List<com.company.hunttech.service.dto.HermesChatMessage> messages, String liveText, String liveBadgeText, String emptyHint, int totalCount, int visibleCount, String agentName, boolean isOperator) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"llm-chat-messages-container\">");
 
+        String defaultAuthor = (agentName != null && !agentName.trim().isEmpty()) ? agentName.trim() : "Hermes-viewer";
         boolean hasMessages = messages != null && !messages.isEmpty();
         boolean hasLiveText = liveText != null && !liveText.trim().isEmpty();
 
         if (!hasMessages && !hasLiveText) {
             String hint = (emptyHint != null && !emptyHint.trim().isEmpty())
                     ? emptyHint
-                    : "Задайте вопрос Hermes Agent (профиль hrm-viewer). Агент подключен к базе данных HRM в режиме чтения.";
+                    : "Задайте вопрос " + defaultAuthor + ".";
             sb.append("<div class=\"llm-chat-empty-hint\">")
               .append(escapeHtml(hint))
               .append("</div>");
@@ -203,8 +218,11 @@ public class MarkdownRenderer {
 
         if (totalCount > visibleCount) {
             int remaining = totalCount - visibleCount;
+            String jsHandler = isOperator
+                    ? "if(window.hunttechLoadEarlierHermesManagerMessages) window.hunttechLoadEarlierHermesManagerMessages();"
+                    : "if(window.hunttechLoadEarlierHermesMessages) window.hunttechLoadEarlierHermesMessages();";
             sb.append("<div class=\"llm-chat-load-earlier-container\" style=\"text-align: center; margin: 4px 0 10px 0;\">")
-              .append("<button type=\"button\" class=\"llm-chat-load-earlier-btn\" onclick=\"if(window.hunttechLoadEarlierHermesMessages) window.hunttechLoadEarlierHermesMessages();\" style=\"cursor: pointer; padding: 5px 14px; font-size: 12px; font-weight: 600; border-radius: 14px; border: 1px solid rgba(120, 140, 160, 0.35); background: rgba(120, 140, 160, 0.12); color: inherit;\">")
+              .append("<button type=\"button\" class=\"llm-chat-load-earlier-btn\" onclick=\"").append(jsHandler).append("\" style=\"cursor: pointer; padding: 5px 14px; font-size: 12px; font-weight: 600; border-radius: 14px; border: 1px solid rgba(120, 140, 160, 0.35); background: rgba(120, 140, 160, 0.12); color: inherit;\">")
               .append("↑ Загрузить предыдущие сообщения (ещё ").append(remaining).append(")")
               .append("</button></div>");
         }
@@ -212,7 +230,7 @@ public class MarkdownRenderer {
         if (hasMessages) {
             for (com.company.hunttech.service.dto.HermesChatMessage message : messages) {
                 boolean isUser = "user".equalsIgnoreCase(message.getRole());
-                String author = isUser ? "Вы" : "Hermes Agent (hrm-viewer)";
+                String author = isUser ? "Вы" : defaultAuthor;
                 String roleClass = isUser ? "llm-chat-msg-user" : "llm-chat-msg-ai";
                 String content = message.getContent() != null ? message.getContent() : "";
 
@@ -238,7 +256,7 @@ public class MarkdownRenderer {
                     : "Выполняется запрос...";
             sb.append("<div class=\"llm-chat-msg llm-chat-msg-ai llm-chat-msg-live\">");
             sb.append("<div class=\"llm-chat-msg-header\">");
-            sb.append("<span class=\"llm-chat-msg-author\">Hermes Agent (hrm-viewer)</span>");
+            sb.append("<span class=\"llm-chat-msg-author\">").append(escapeHtml(defaultAuthor)).append("</span>");
             sb.append("<span class=\"llm-chat-live-badge\">").append(escapeHtml(badge)).append("</span>");
             sb.append("</div>");
             sb.append("<div class=\"llm-chat-msg-body\">");

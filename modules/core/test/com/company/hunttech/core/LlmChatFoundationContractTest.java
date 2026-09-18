@@ -136,7 +136,7 @@ public class LlmChatFoundationContractTest {
         assertTrue(service.contains("events.publish(new LlmChatStreamEvent"));
         assertTrue(screen.contains("PushMode.AUTOMATIC"));
         assertTrue(screen.contains("ui.access"));
-        assertTrue(descriptor.contains("delay=\"1200\"") || descriptor.contains("delay=\"3000\""));
+        assertTrue(descriptor.contains("delay=\"750\"") || descriptor.contains("delay=\"1200\"") || descriptor.contains("delay=\"3000\""));
     }
 
     @Test

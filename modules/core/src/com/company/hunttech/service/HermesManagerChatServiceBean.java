@@ -132,6 +132,7 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
                         "order by e.createTs desc")
                 .parameter("userId", currentUser.getId())
                 .parameter("title", title)
+                .view("llm-chat-conversation-view")
                 .optional()
                 .orElse(null);
 
@@ -163,16 +164,18 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
                         "order by e.sequenceNo asc")
                 .parameter("conversationId", conversationId)
                 .parameter("userId", currentUserId)
+                .view("llm-chat-message-view")
                 .list();
 
         List<HermesChatMessage> result = new ArrayList<>();
         for (LlmChatMessage msg : messages) {
             HermesChatMessage dto = new HermesChatMessage();
             dto.setId(msg.getId());
-            dto.setRole(msg.getRole());
+            dto.setRole("USER".equalsIgnoreCase(msg.getRole()) ? "user" : "assistant");
             dto.setContent(msg.getContent());
             dto.setCreateTs(msg.getCreateTs());
             dto.setSequenceNo(msg.getSequenceNo());
+            dto.setHermesSessionId(msg.getProviderRequestId());
             result.add(dto);
         }
         return result;
@@ -193,6 +196,7 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
                         "where e.conversation.id = :conversationId and e.conversation.user.id = :userId and e.deleteTs is null")
                 .parameter("conversationId", conversationId)
                 .parameter("userId", currentUserId)
+                .view("llm-chat-message-view")
                 .list();
 
         for (LlmChatMessage msg : messages) {
@@ -281,12 +285,16 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         // Загружаем или создаем беседу
         LlmChatConversation conversation = dataManager.load(LlmChatConversation.class)
                 .id(conversationId)
+                .view("llm-chat-conversation-view")
                 .optional()
                 .orElse(null);
 
         if (conversation == null) {
             conversationId = startManagerHermesConversation();
-            conversation = dataManager.load(LlmChatConversation.class).id(conversationId).one();
+            conversation = dataManager.load(LlmChatConversation.class)
+                    .id(conversationId)
+                    .view("llm-chat-conversation-view")
+                    .one();
         }
 
         // Вычисляем следующий порядковый номер

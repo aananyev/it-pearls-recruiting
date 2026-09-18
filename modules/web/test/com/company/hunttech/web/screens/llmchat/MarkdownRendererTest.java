@@ -367,6 +367,25 @@ class MarkdownRendererTest {
     }
 
     @Test
+    void testRenderHermesOperatorChatHistory() {
+        List<com.company.hunttech.service.dto.HermesChatMessage> messages = new ArrayList<>();
+        com.company.hunttech.service.dto.HermesChatMessage userMsg = new com.company.hunttech.service.dto.HermesChatMessage("user", "Создай вакансию QA");
+        com.company.hunttech.service.dto.HermesChatMessage aiMsg = new com.company.hunttech.service.dto.HermesChatMessage("assistant", "Вакансия создана");
+        messages.add(userMsg);
+        messages.add(aiMsg);
+
+        String html = MarkdownRenderer.renderHermesChatHistory(messages, "Инициализация hermes-hrm-operator...", "Docker", null, 2, 2, "Hermes-operator");
+
+        assertTrue(html.contains("llm-chat-msg-user"));
+        assertTrue(html.contains("Создай вакансию QA"));
+        assertTrue(html.contains("Hermes-operator"));
+        assertTrue(html.contains("Вакансия создана"));
+        assertTrue(html.contains("llm-chat-msg-live"));
+        assertTrue(html.contains("Docker"));
+        assertTrue(html.contains("Инициализация hermes-hrm-operator..."));
+    }
+
+    @Test
     void testResolveEntityUuidInQuotesReplacesWithNamedEntityLink() {
         UUID vacancyId = UUID.fromString("05532e90-1b43-5a2f-47ad-8dca3dcb665a");
         HrmEntityNameResolver.registerEntity(

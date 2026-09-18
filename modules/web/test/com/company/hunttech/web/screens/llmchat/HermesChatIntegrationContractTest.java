@@ -158,7 +158,7 @@ class HermesChatIntegrationContractTest {
         assertNotNull(html);
         assertTrue(html.contains("llm-chat-msg-user"), "Должен содержать блок пользователя");
         assertTrue(html.contains("llm-chat-msg-ai"), "Должен содержать блок ассистента");
-        assertTrue(html.contains("Hermes Agent (hrm-viewer)"), "Должен содержать имя Hermes Agent (hrm-viewer)");
+        assertTrue(html.contains("Hermes-viewer"), "Должен содержать имя Hermes-viewer");
         assertTrue(html.contains("class=\"llm-md-strong\">Hermes Agent</strong>"), "Markdown жирный текст должен рендериться как strong");
         assertTrue(html.contains("class=\"llm-md-code-inline\">hrm-viewer</code>"), "Инлайн-код должен рендериться как code");
     }

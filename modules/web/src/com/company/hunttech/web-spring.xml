@@ -86,6 +86,8 @@
                        value="com.company.hunttech.service.AiYandexOrchestrationService"/>
                 <entry key="hunttech_InterviewSchedulingActionService"
                        value="com.company.hunttech.service.InterviewSchedulingActionService"/>
+                <entry key="hunttech_OpenPositionExplanationService"
+                       value="com.company.hunttech.service.OpenPositionExplanationService"/>
             </map>
         </property>
     </bean>

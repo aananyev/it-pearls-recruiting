@@ -131,14 +131,84 @@ public class LlmChatScreen extends Screen {
     private List<LlmChatMessage> lastRenderedHistory;
     private UUID hermesConversationId;
     private String activeHermesRequestText;
+    private long activeHermesStartTime = 0L;
+    private List<HermesChatMessage> activeHermesPendingHistory;
+    private HermesStatusPhase lastRenderedViewerPhase;
     private UUID hermesManagerConversationId;
     private String activeHermesManagerRequestText;
+    private long activeHermesManagerStartTime = 0L;
+    private List<HermesChatMessage> activeHermesManagerPendingHistory;
+    private HermesStatusPhase lastRenderedOperatorPhase;
     private UI chatUi;
     private boolean hrmEntityBridgeRegistered = false;
     private int localVisibleLimit = PAGE_SIZE;
     private int hermesVisibleLimit = PAGE_SIZE;
     private int hermesManagerVisibleLimit = PAGE_SIZE;
     private boolean hermesManagerConnectionWarningShown = false;
+
+    private static class HermesStatusPhase {
+        final long minElapsedMs;
+        final String badge;
+        final String text;
+
+        HermesStatusPhase(long minElapsedMs, String badge, String text) {
+            this.minElapsedMs = minElapsedMs;
+            this.badge = badge;
+            this.text = text;
+        }
+    }
+
+    private static final HermesStatusPhase[] HERMES_VIEWER_PHASES = new HermesStatusPhase[]{
+            new HermesStatusPhase(0, "SSH-сессия", "Подключение к серверу hr.hunttech.ru..."),
+            new HermesStatusPhase(900, "Docker", "Проверка контейнера hermes-hrm-viewer..."),
+            new HermesStatusPhase(1800, "Профиль", "Загрузка окружения hrm-viewer..."),
+            new HermesStatusPhase(2700, "Контекст", "Анализ структуры входящего вопроса..."),
+            new HermesStatusPhase(3700, "База HRM", "Подготовка инструментов чтения данных..."),
+            new HermesStatusPhase(4800, "Промпт", "Сборка системного контекста агента..."),
+            new HermesStatusPhase(6000, "Модель", "Передача контекста в нейросеть..."),
+            new HermesStatusPhase(7300, "Мышление", "Генерация логики и структуры ответа..."),
+            new HermesStatusPhase(8800, "Поиск фактов", "Извлечение точных сведений из HRM..."),
+            new HermesStatusPhase(10500, "Синтез", "Формирование ключевых тезисов..."),
+            new HermesStatusPhase(12500, "Разметка", "Компоновка markdown-структуры..."),
+            new HermesStatusPhase(15000, "Верификация", "Контрольная проверка целостности..."),
+            new HermesStatusPhase(18000, "Финализация", "Завершение вывода ассистента..."),
+            new HermesStatusPhase(22000, "Ожидание", "Финальная передача потока ответа...")
+    };
+
+    private static final HermesStatusPhase[] HERMES_OPERATOR_PHASES = new HermesStatusPhase[]{
+            new HermesStatusPhase(0, "SSH-сессия", "Подключение к контуру управления HRM..."),
+            new HermesStatusPhase(900, "Docker", "Инициализация hermes-hrm-operator..."),
+            new HermesStatusPhase(1800, "Профиль", "Загрузка профиля hrm-operator..."),
+            new HermesStatusPhase(2700, "Security", "Аудит прав доступа CUBA Security..."),
+            new HermesStatusPhase(3700, "Навыки", "Подключение навыка hunttech-vacancy-opening..."),
+            new HermesStatusPhase(4800, "Парсинг", "Разбор инструкций и параметров..."),
+            new HermesStatusPhase(6000, "Модель", "Обращение к нейросети deepseek..."),
+            new HermesStatusPhase(7300, "Мышление", "Синтез требований и атрибутов..."),
+            new HermesStatusPhase(8800, "Мутации", "Формирование безопасного намерения..."),
+            new HermesStatusPhase(10500, "Валидация", "Проверка допустимости полей..."),
+            new HermesStatusPhase(12500, "Аудит", "Контроль запрета опасных операций..."),
+            new HermesStatusPhase(15000, "Сборка", "Компоновка ответа для руководителя..."),
+            new HermesStatusPhase(18000, "Финализация", "Подготовка результата операции..."),
+            new HermesStatusPhase(22000, "Ожидание", "Завершение обработки запроса...")
+    };
+
+    private static HermesStatusPhase resolvePhase(HermesStatusPhase[] phases, long elapsed) {
+        if (phases == null || phases.length == 0) {
+            return new HermesStatusPhase(0, "В работе", "Обработка запроса...");
+        }
+        if (elapsed < 0) {
+            elapsed = 0;
+        }
+        HermesStatusPhase current = phases[0];
+        for (HermesStatusPhase phase : phases) {
+            if (elapsed >= phase.minElapsedMs) {
+                current = phase;
+            } else {
+                break;
+            }
+        }
+        return current;
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -682,6 +752,8 @@ public class LlmChatScreen extends Screen {
                     "      mPane.addEventListener('scroll', function() {" +
                     "        if (mPane.scrollTop <= 5 && mPane.scrollHeight > mPane.clientHeight + 40) {" +
                     "          if (window.hunttechLoadEarlierHermesManagerMessages) {" +
+                    "            window._lastHermesManagerScrollHeight = mPane.scrollHeight;" +
+                    "            window._lastHermesManagerScrollTop = mPane.scrollTop;" +
                     "            window.hunttechLoadEarlierHermesManagerMessages();" +
                     "          }" +
                     "        }" +
@@ -744,7 +816,10 @@ public class LlmChatScreen extends Screen {
             try {
                 applyStreamState(llmChatService.pollStreaming(conversationId, activeRequestId));
             } catch (RuntimeException ex) {
-                streamPollTimer.stop();
+                activeRequestId = null;
+                activeRequestStartTime = 0L;
+                currentStreamingHistory = null;
+                checkStopStreamPollTimer();
                 resetControls(false);
                 showError(ex);
             }
@@ -882,7 +957,7 @@ public class LlmChatScreen extends Screen {
         currentStreamingHistory = pendingList;
 
         renderHistory(pendingList, "ИИ обрабатывает запрос и подготавливает контекст...", "Подготовка...");
-        executeScrollBottomJs();
+        executeScrollBottomJs(PANE_LOCAL);
 
         try {
             LlmChatStreamState state = llmChatService.startStreaming(conversationId, request, requestId);
@@ -901,30 +976,76 @@ public class LlmChatScreen extends Screen {
         }
     }
 
+    private static final String PANE_LOCAL = ".local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .llm-chat-history-scroll, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content";
+    private static final String PANE_HERMES = ".hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content";
+    private static final String PANE_HERMES_MANAGER = ".hermes-manager-chat-tab-pane .v-scrollable, .hermes-manager-chat-tab-pane .v-panel-content";
+    private static final String PANE_ALL = PANE_LOCAL + ", " + PANE_HERMES + ", " + PANE_HERMES_MANAGER;
+
+    private long lastLocalStreamPollTime = 0L;
+
     @Subscribe("streamPollTimer")
     public void onStreamPoll(Timer.TimerActionEvent event) {
-        if (conversationId == null || activeRequestId == null) {
-            streamPollTimer.stop();
-            activeRequestStartTime = 0L;
-            currentStreamingHistory = null;
-            return;
-        }
-        try {
-            applyStreamState(llmChatService.pollStreaming(conversationId, activeRequestId));
-        } catch (RuntimeException ex) {
-            streamPollTimer.stop();
-            activeRequestStartTime = 0L;
-            currentStreamingHistory = null;
-            resetControls(false);
-            showError(ex);
-            try {
-                renderHistory(llmChatService.loadHistory(conversationId));
-            } catch (Exception historyEx) {
-                log.warn("Не удалось перезагрузить историю диалога после ошибки стриминга: {}", historyEx.getMessage());
-                if (lastRenderedHistory != null) {
-                    renderHistory(lastRenderedHistory);
+        boolean anyActive = false;
+
+        // 1. Local AI Chat (опрос сервиса с интервалом не чаще 1400 мс для экономии ресурсов)
+        if (conversationId != null && activeRequestId != null) {
+            anyActive = true;
+            long now = System.currentTimeMillis();
+            if (now - lastLocalStreamPollTime >= 1400L) {
+                lastLocalStreamPollTime = now;
+                try {
+                    LlmChatStreamState state = llmChatService.pollStreaming(conversationId, activeRequestId);
+                    applyStreamState(state);
+                } catch (RuntimeException ex) {
+                    log.warn("Ошибка при опросе стриминга: {}", ex.getMessage());
+                    activeRequestId = null;
+                    activeRequestStartTime = 0L;
+                    currentStreamingHistory = null;
+                    checkStopStreamPollTimer();
+                    resetControls(false);
+                    showError(ex);
+                    try {
+                        renderHistory(llmChatService.loadHistory(conversationId));
+                    } catch (Exception historyEx) {
+                        log.warn("Не удалось перезагрузить историю диалога после ошибки стриминга: {}", historyEx.getMessage());
+                        if (lastRenderedHistory != null) {
+                            renderHistory(lastRenderedHistory);
+                        }
+                    }
                 }
             }
+        }
+
+        // 2. Hermes-viewer (вторая вкладка)
+        if (activeHermesStartTime > 0 && activeHermesPendingHistory != null) {
+            anyActive = true;
+            long elapsed = Math.max(0L, System.currentTimeMillis() - activeHermesStartTime);
+            HermesStatusPhase phase = resolvePhase(HERMES_VIEWER_PHASES, elapsed);
+            if (phase != lastRenderedViewerPhase) {
+                lastRenderedViewerPhase = phase;
+                renderHermesHistory(activeHermesPendingHistory, phase.text, phase.badge, true);
+            }
+        }
+
+        // 3. Hermes-operator (третья вкладка)
+        if (activeHermesManagerStartTime > 0 && activeHermesManagerPendingHistory != null) {
+            anyActive = true;
+            long elapsed = Math.max(0L, System.currentTimeMillis() - activeHermesManagerStartTime);
+            HermesStatusPhase phase = resolvePhase(HERMES_OPERATOR_PHASES, elapsed);
+            if (phase != lastRenderedOperatorPhase) {
+                lastRenderedOperatorPhase = phase;
+                renderHermesManagerHistory(activeHermesManagerPendingHistory, phase.text, phase.badge, true);
+            }
+        }
+
+        if (!anyActive) {
+            streamPollTimer.stop();
+        }
+    }
+
+    private void checkStopStreamPollTimer() {
+        if (activeRequestId == null && activeHermesStartTime == 0L && activeHermesManagerStartTime == 0L) {
+            streamPollTimer.stop();
         }
     }
 
@@ -980,15 +1101,23 @@ public class LlmChatScreen extends Screen {
     }
 
     private void executeScrollBottomJs() {
+        executeScrollBottomJs(PANE_ALL);
+    }
+
+    private void executeScrollBottomJs(String specificSelector) {
         try {
             com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
                     ? chatUi.getPage().getJavaScript()
                     : com.vaadin.ui.JavaScript.getCurrent();
             if (js != null) {
+                String selector = (specificSelector != null && !specificSelector.trim().isEmpty())
+                        ? specificSelector
+                        : PANE_ALL;
+                String escapedSelector = selector.replace("\"", "\\\"");
                 js.execute(
                         "(function() {" +
                         "  var scrollFn = function() {" +
-                        "    var sel = '.local-chat-tab-pane .v-scrollable, .local-chat-tab-pane .v-panel-content, .hermes-chat-tab-pane .v-scrollable, .hermes-chat-tab-pane .v-panel-content, .llm-chat-history-scroll, .llm-chat-history-scroll .v-scrollable, .llm-chat-history-scroll .v-panel-content';" +
+                        "    var sel = \"" + escapedSelector + "\";" +
                         "    var nodes = document.querySelectorAll(sel);" +
                         "    for (var i = 0; i < nodes.length; i++) {" +
                         "      nodes[i].scrollTop = nodes[i].scrollHeight + 100000;" +
@@ -1006,18 +1135,19 @@ public class LlmChatScreen extends Screen {
         }
     }
 
-    private void restoreLocalScrollPositionJs() {
+    private void restoreScrollPositionJs(String paneSelector, String heightVar, String topVar) {
         try {
             com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
                     ? chatUi.getPage().getJavaScript()
                     : com.vaadin.ui.JavaScript.getCurrent();
             if (js != null) {
                 js.execute(
-                        "var el = document.querySelector('.local-chat-tab-pane .v-scrollable');" +
-                        "if (el && window._lastLocalScrollHeight) {" +
-                        "  var diff = el.scrollHeight - window._lastLocalScrollHeight;" +
-                        "  el.scrollTop = (window._lastLocalScrollTop || 0) + diff;" +
-                        "  window._lastLocalScrollHeight = null;" +
+                        "var el = document.querySelector('" + paneSelector + " .v-scrollable');" +
+                        "if (el && window." + heightVar + ") {" +
+                        "  var diff = el.scrollHeight - window." + heightVar + ";" +
+                        "  el.scrollTop = (window." + topVar + " || 0) + diff;" +
+                        "  window." + heightVar + " = null;" +
+                        "  window." + topVar + " = null;" +
                         "}"
                 );
             }
@@ -1025,23 +1155,16 @@ public class LlmChatScreen extends Screen {
         }
     }
 
+    private void restoreLocalScrollPositionJs() {
+        restoreScrollPositionJs(".local-chat-tab-pane", "_lastLocalScrollHeight", "_lastLocalScrollTop");
+    }
+
     private void restoreHermesScrollPositionJs() {
-        try {
-            com.vaadin.ui.JavaScript js = (chatUi != null && chatUi.getPage() != null)
-                    ? chatUi.getPage().getJavaScript()
-                    : com.vaadin.ui.JavaScript.getCurrent();
-            if (js != null) {
-                js.execute(
-                        "var el = document.querySelector('.hermes-chat-tab-pane .v-scrollable');" +
-                        "if (el && window._lastHermesScrollHeight) {" +
-                        "  var diff = el.scrollHeight - window._lastHermesScrollHeight;" +
-                        "  el.scrollTop = (window._lastHermesScrollTop || 0) + diff;" +
-                        "  window._lastHermesScrollHeight = null;" +
-                        "}"
-                );
-            }
-        } catch (Exception ignored) {
-        }
+        restoreScrollPositionJs(".hermes-chat-tab-pane", "_lastHermesScrollHeight", "_lastHermesScrollTop");
+    }
+
+    private void restoreHermesManagerScrollPositionJs() {
+        restoreScrollPositionJs(".hermes-manager-chat-tab-pane", "_lastHermesManagerScrollHeight", "_lastHermesManagerScrollTop");
     }
 
     private void applyStreamState(LlmChatStreamState state) {
@@ -1078,13 +1201,13 @@ public class LlmChatScreen extends Screen {
             }
             return;
         }
-        streamPollTimer.stop();
         activeRequestStartTime = 0L;
         currentStreamingHistory = null;
         boolean success = "COMPLETED".equals(state.getStatus());
         resetControls(success);
         activeRequestId = null;
         activeRequestText = null;
+        checkStopStreamPollTimer();
         renderHistory(llmChatService.loadHistory(conversationId));
         if (!success && state.getErrorMessage() != null) {
             notifications.create(Notifications.NotificationType.ERROR)
@@ -1189,7 +1312,13 @@ public class LlmChatScreen extends Screen {
         HermesChatMessage pendingUserMsg = new HermesChatMessage("user", request);
         List<HermesChatMessage> pendingList = new ArrayList<>(currentHistory);
         pendingList.add(pendingUserMsg);
-        renderHermesHistory(pendingList, "Hermes обрабатывает запрос...");
+
+        activeHermesStartTime = System.currentTimeMillis();
+        activeHermesPendingHistory = pendingList;
+        HermesStatusPhase initialPhase = resolvePhase(HERMES_VIEWER_PHASES, 0);
+        lastRenderedViewerPhase = initialPhase;
+        renderHermesHistory(pendingList, initialPhase.text, initialPhase.badge, false);
+        streamPollTimer.start();
 
         log.info("executeHermesSend: отправка сообщения в Hermes Agent (convId={}, length={})", convId, request.length());
         log.debug("executeHermesSend: prompt preview: {}", request.length() > 80 ? request.substring(0, 80) + "..." : request);
@@ -1205,14 +1334,18 @@ public class LlmChatScreen extends Screen {
                         convId, resp.isSuccess(), elapsed, resp.getErrorMessage());
                 if (ui != null) {
                     ui.access(() -> {
+                        activeHermesStartTime = 0L;
+                        activeHermesPendingHistory = null;
+                        lastRenderedViewerPhase = null;
+                        checkStopStreamPollTimer();
                         resetHermesControls(true);
                         activeHermesRequestText = null;
                         renderHermesHistory(hermesChatService.loadHermesHistory(convId));
                         if (!resp.isSuccess() && resp.getErrorMessage() != null) {
                             notifications.create(Notifications.NotificationType.ERROR)
-                                    .withCaption("Hermes Agent")
-                                    .withDescription(resp.getErrorMessage())
-                                    .show();
+                                     .withCaption("Hermes-viewer")
+                                     .withDescription(resp.getErrorMessage())
+                                     .show();
                         }
                     });
                 }
@@ -1221,6 +1354,10 @@ public class LlmChatScreen extends Screen {
                 log.error("Ошибка при обращении к Hermes Agent в фоновом потоке (elapsed={}ms): {}", elapsed, ex.getMessage(), ex);
                 if (ui != null) {
                     ui.access(() -> {
+                        activeHermesStartTime = 0L;
+                        activeHermesPendingHistory = null;
+                        lastRenderedViewerPhase = null;
+                        checkStopStreamPollTimer();
                         resetHermesControls(false);
                         showHermesError(ex);
                         try {
@@ -1238,14 +1375,18 @@ public class LlmChatScreen extends Screen {
     }
 
     private void renderHermesHistory(List<HermesChatMessage> messages) {
-        renderHermesHistory(messages, null, false);
+        renderHermesHistory(messages, null, null, false);
     }
 
     private void renderHermesHistory(List<HermesChatMessage> messages, String liveText) {
-        renderHermesHistory(messages, liveText, false);
+        renderHermesHistory(messages, liveText, null, false);
     }
 
     private void renderHermesHistory(List<HermesChatMessage> messages, String liveText, boolean preserveScroll) {
+        renderHermesHistory(messages, liveText, null, preserveScroll);
+    }
+
+    private void renderHermesHistory(List<HermesChatMessage> messages, String liveText, String liveBadgeText, boolean preserveScroll) {
         int total = messages != null ? messages.size() : 0;
         List<HermesChatMessage> visible;
         if (messages != null && total > hermesVisibleLimit) {
@@ -1253,15 +1394,15 @@ public class LlmChatScreen extends Screen {
         } else {
             visible = messages != null ? messages : Collections.emptyList();
         }
-        String html = MarkdownRenderer.renderHermesChatHistory(visible, liveText,
-                "Задайте вопрос Hermes Agent (профиль hrm-viewer). Агент подключен к базе данных HRM в режиме чтения.",
-                total, visible.size());
+        String html = MarkdownRenderer.renderHermesChatHistory(visible, liveText, liveBadgeText,
+                "Задайте вопрос Hermes-viewer (профиль hrm-viewer). Агент подключен к базе данных HRM в режиме чтения.",
+                total, visible.size(), "Hermes-viewer", false);
         hermesHistoryLabel.setValue(html);
         if (preserveScroll) {
             restoreHermesScrollPositionJs();
         } else {
             scrollToBottomHermes();
-            executeScrollBottomJs();
+            executeScrollBottomJs(PANE_HERMES);
         }
     }
 
@@ -1297,7 +1438,7 @@ public class LlmChatScreen extends Screen {
 
     private void showHermesError(Exception ex) {
         notifications.create(Notifications.NotificationType.ERROR)
-                .withCaption("Ошибка Hermes Agent")
+                .withCaption("Hermes-viewer")
                 .withDescription(ex.getMessage() == null ? "Не удалось связаться с агентом на сервере." : ex.getMessage())
                 .show();
     }
@@ -1313,7 +1454,7 @@ public class LlmChatScreen extends Screen {
 
         if (!canUseManagerHermes) {
             notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("Hermes — управление HRM")
+                    .withCaption("Hermes-operator")
                     .withDescription("Для коммуникации с Hermes (профиль hrm-operator) требуется право hunttech.ai.useManagerHermesWrite")
                     .show();
             return;
@@ -1347,7 +1488,7 @@ public class LlmChatScreen extends Screen {
                     ui.access(() -> {
                         String details = status.getDetails() != null ? status.getDetails() : "Контейнер недоступен";
                         notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption("Hermes — управление HRM")
+                                .withCaption("Hermes-operator")
                                 .withDescription("Контур управления: " + details)
                                 .show();
                     });
@@ -1357,7 +1498,7 @@ public class LlmChatScreen extends Screen {
                 if (ui != null && !hermesManagerConnectionWarningShown) {
                     hermesManagerConnectionWarningShown = true;
                     ui.access(() -> notifications.create(Notifications.NotificationType.WARNING)
-                            .withCaption("Hermes — управление HRM")
+                            .withCaption("Hermes-operator")
                             .withDescription("Не удалось проверить статус контура управления: " + e.getMessage())
                             .show());
                 }
@@ -1420,7 +1561,13 @@ public class LlmChatScreen extends Screen {
         HermesChatMessage pendingUserMsg = new HermesChatMessage("user", request);
         List<HermesChatMessage> pendingList = new ArrayList<>(currentHistory);
         pendingList.add(pendingUserMsg);
-        renderHermesManagerHistory(pendingList, "Hermes выполняет операцию управления...");
+
+        activeHermesManagerStartTime = System.currentTimeMillis();
+        activeHermesManagerPendingHistory = pendingList;
+        HermesStatusPhase initialPhase = resolvePhase(HERMES_OPERATOR_PHASES, 0);
+        lastRenderedOperatorPhase = initialPhase;
+        renderHermesManagerHistory(pendingList, initialPhase.text, initialPhase.badge, false);
+        streamPollTimer.start();
 
         log.info("executeHermesManagerSend: отправка команды в Hermes Manager (convId={}, length={})", convId, request.length());
 
@@ -1433,6 +1580,10 @@ public class LlmChatScreen extends Screen {
                 log.info("Hermes Manager background thread finished: convId={}, success={}, elapsed={}ms", convId, resp.isSuccess(), elapsed);
                 if (ui != null) {
                     ui.access(() -> {
+                        activeHermesManagerStartTime = 0L;
+                        activeHermesManagerPendingHistory = null;
+                        lastRenderedOperatorPhase = null;
+                        checkStopStreamPollTimer();
                         resetHermesManagerControls(true);
                         activeHermesManagerRequestText = null;
                         renderHermesManagerHistory(hermesManagerChatService.loadManagerHermesHistory(convId));
@@ -1446,6 +1597,10 @@ public class LlmChatScreen extends Screen {
                 log.error("Ошибка при обращении к Hermes Manager (elapsed={}ms): {}", elapsed, ex.getMessage(), ex);
                 if (ui != null) {
                     ui.access(() -> {
+                        activeHermesManagerStartTime = 0L;
+                        activeHermesManagerPendingHistory = null;
+                        lastRenderedOperatorPhase = null;
+                        checkStopStreamPollTimer();
                         resetHermesManagerControls(false);
                         showHermesManagerError(ex);
                         try {
@@ -1462,14 +1617,18 @@ public class LlmChatScreen extends Screen {
     }
 
     private void renderHermesManagerHistory(List<HermesChatMessage> messages) {
-        renderHermesManagerHistory(messages, null, false);
+        renderHermesManagerHistory(messages, null, null, false);
     }
 
     private void renderHermesManagerHistory(List<HermesChatMessage> messages, String liveText) {
-        renderHermesManagerHistory(messages, liveText, false);
+        renderHermesManagerHistory(messages, liveText, null, false);
     }
 
     private void renderHermesManagerHistory(List<HermesChatMessage> messages, String liveText, boolean preserveScroll) {
+        renderHermesManagerHistory(messages, liveText, null, preserveScroll);
+    }
+
+    private void renderHermesManagerHistory(List<HermesChatMessage> messages, String liveText, String liveBadgeText, boolean preserveScroll) {
         int total = messages != null ? messages.size() : 0;
         List<HermesChatMessage> visible;
         if (messages != null && total > hermesManagerVisibleLimit) {
@@ -1477,15 +1636,15 @@ public class LlmChatScreen extends Screen {
         } else {
             visible = messages != null ? messages : Collections.emptyList();
         }
-        String html = MarkdownRenderer.renderHermesChatHistory(visible, liveText,
-                "Задайте команду Hermes Agent (профиль hrm-operator). Контур управления позволяет безопасно создавать и изменять вакансии в HRM.",
-                total, visible.size());
+        String html = MarkdownRenderer.renderHermesChatHistory(visible, liveText, liveBadgeText,
+                "Задайте команду Hermes-operator (профиль hrm-operator). Контур управления позволяет безопасно создавать и изменять вакансии в HRM.",
+                total, visible.size(), "Hermes-operator", true);
         hermesManagerHistoryLabel.setValue(html);
         if (preserveScroll) {
-            restoreHermesScrollPositionJs();
+            restoreHermesManagerScrollPositionJs();
         } else {
             scrollToBottomHermesManager();
-            executeScrollBottomJs();
+            executeScrollBottomJs(PANE_HERMES_MANAGER);
         }
     }
 
@@ -1531,7 +1690,7 @@ public class LlmChatScreen extends Screen {
                     .show();
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Hermes — управление HRM")
+                    .withCaption("Hermes-operator")
                     .withDescription(msg)
                     .show();
         }
