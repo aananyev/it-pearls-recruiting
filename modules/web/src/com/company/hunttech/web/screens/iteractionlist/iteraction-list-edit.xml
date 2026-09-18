@@ -505,8 +505,7 @@
                     <!-- Контейнер контента располагает четыре смысловых блока формы вертикально друг под другом. -->
                     <vbox id="iteractionListSectionsBox"
                           width="100%"
-                          height="100%"
-                          expand="iteractionMainInfoCard"
+                          height="AUTO"
                           spacing="false"
                           margin="false"
                           stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
@@ -514,15 +513,13 @@
                         <!-- Единый блок всей информации взаимодействия объединяет участников, тип, результат и комментарий. -->
                         <vbox id="iteractionMainInfoCard"
                               width="100%"
-                              height="100%"
-                              expand="iteractionMainInfoBody"
+                              height="AUTO"
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-unified-card edit-card">
                             <!-- Body содержит все поля ввода формы в едином блоке. -->
                             <vbox id="iteractionMainInfoBody"
                                   width="100%"
-                                  height="100%"
-                                  expand="commentField"
+                                  height="AUTO"
                                   spacing="true"
                                   margin="false"
                                   stylename="iteraction-list-flat-section-body iteraction-list-unified-body iteraction-list-section-content">
@@ -773,8 +770,8 @@
                                           caption="msg://msgComment"
                                           stylename="edit-form-control iteraction-list-comment-field"
                                           width="100%"
-                                          height="100%"
-                                          rows="7"/>
+                                          height="AUTO"
+                                          rows="6"/>
                             </vbox>
                         </vbox>
                     </vbox>

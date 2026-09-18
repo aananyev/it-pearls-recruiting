@@ -61,6 +61,7 @@
       padding-top: 0 !important;
       vertical-align: top !important;
       align-self: stretch !important;
+      overflow: hidden;
     }
 
     .iteraction-list-workspace,
@@ -74,12 +75,113 @@
       max-width: 100% !important;
     }
 
+    // Правая рабочая область как вертикальный Flexbox:
+    // тулбар и быстрые действия сверху, прокручиваемый контент посередине,
+    // подвал с кнопками «ОК» и «Отмена» всегда зафиксирован внизу и виден при любых разрешениях.
     .iteraction-list-workspace {
+      display: flex !important;
+      flex-direction: column !important;
       height: 100% !important;
+      min-height: 0 !important;
       position: relative !important;
       top: 0 !important;
       margin-top: 0 !important;
       padding-top: 0 !important;
+      overflow: hidden;
+    }
+
+    .iteraction-list-workspace > .v-slot {
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+    }
+
+    // Тулбар
+    .iteraction-list-workspace > .v-slot-iteraction-list-toolbar {
+      flex: 0 0 auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+    }
+
+    // Быстрые действия (зеленые кнопки сохраняют свои размеры и стили)
+    .iteraction-list-workspace > .v-slot-iteraction-list-quick-actions {
+      flex: 0 0 auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+    }
+
+    // Центральная прокручиваемая область формы: занимает все оставшееся место
+    .iteraction-list-workspace > .v-slot-iteraction-list-scroll,
+    .iteraction-list-workspace > .v-expand {
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      position: relative !important;
+      overflow: hidden !important;
+    }
+
+    .iteraction-list-scroll {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .iteraction-list-scroll > .v-scrollable {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    // Постоянный подвал действий (футер): всегда прижат к низу, кнопки ОК и Отмена на виду
+    .iteraction-list-workspace > .v-slot-iteraction-list-footer {
+      flex: 0 0 auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      min-height: 52px !important;
+      padding: 0 !important;
+      margin-top: auto !important;
+      z-index: 10 !important;
+    }
+
+    .iteraction-list-footer {
+      box-sizing: border-box !important;
+      display: flex !important;
+      align-items: center !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 52px !important;
+      height: auto !important;
+      padding: 8px 16px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+    }
+
+    .iteraction-list-footer-actions {
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      margin-left: auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-footer-actions > .v-slot {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
     }
 
     // Увеличенный вертикальный ритм разделяет логические строки единой карточки.
@@ -224,6 +326,41 @@
       .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:last-child {
         grid-column: 1;
         grid-row: 3;
+      }
+    }
+
+    // Адаптивный скроллинг при низких разрешениях экрана (ноутбуки, сжатые окна, масштабирование):
+    // если кнопки или форма выходят за границы, включается вертикальный и горизонтальный скроллинг
+    @media (max-height: 600px) {
+      .iteraction-list-workspace {
+        overflow-y: auto !important;
+        overflow-x: auto !important;
+      }
+      .iteraction-list-workspace > .v-slot-iteraction-list-scroll,
+      .iteraction-list-workspace > .v-expand {
+        flex: 1 0 auto !important;
+        height: auto !important;
+        min-height: 180px !important;
+        overflow: visible !important;
+      }
+      .iteraction-list-scroll,
+      .iteraction-list-scroll > .v-scrollable {
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .iteraction-list-workspace > .v-slot-iteraction-list-footer {
+        position: sticky !important;
+        bottom: 0 !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .iteraction-list-main-layout {
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+      }
+      .iteraction-list-workspace {
+        min-width: 360px !important;
       }
     }
   }

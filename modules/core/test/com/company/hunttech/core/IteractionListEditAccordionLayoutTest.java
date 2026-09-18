@@ -105,7 +105,7 @@ public class IteractionListEditAccordionLayoutTest {
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));
         assertTrue(descriptor.contains("action=\"windowClose\""));
         assertTrue(descriptor.contains("required=\"true\""));
-        assertEquals(7, count(descriptor, "edit-form-control"));
+        assertEquals(11, count(descriptor, "edit-form-control"));
         assertTrue(descriptor.contains("iteraction-list-form-grid iteraction-list-participants-grid"));
     }
 
