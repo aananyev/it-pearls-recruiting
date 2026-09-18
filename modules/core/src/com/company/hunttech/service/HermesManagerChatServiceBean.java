@@ -723,8 +723,10 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         if (raw == null) {
             return "";
         }
+        // Очищаем служебные предупреждения о нормализации модели если есть
+        String cleaned = raw.replaceAll("(?m)^⚠️\\s+Normalized model.*$\\n?", "");
         // Очищаем служебный префикс сессии если есть
-        String cleaned = raw.replaceAll("(?m)^session_id:\\s*\\S+.*$", "").trim();
+        cleaned = cleaned.replaceAll("(?m)^session_id:\\s*\\S+.*$", "").trim();
         return cleaned;
     }
 }

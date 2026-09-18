@@ -159,37 +159,57 @@ public class LlmChatScreen extends Screen {
     }
 
     private static final HermesStatusPhase[] HERMES_VIEWER_PHASES = new HermesStatusPhase[]{
-            new HermesStatusPhase(0, "SSH-сессия", "Подключение к серверу hr.hunttech.ru..."),
-            new HermesStatusPhase(900, "Docker", "Проверка контейнера hermes-hrm-viewer..."),
-            new HermesStatusPhase(1800, "Профиль", "Загрузка окружения hrm-viewer..."),
-            new HermesStatusPhase(2700, "Контекст", "Анализ структуры входящего вопроса..."),
-            new HermesStatusPhase(3700, "База HRM", "Подготовка инструментов чтения данных..."),
-            new HermesStatusPhase(4800, "Промпт", "Сборка системного контекста агента..."),
-            new HermesStatusPhase(6000, "Модель", "Передача контекста в нейросеть..."),
-            new HermesStatusPhase(7300, "Мышление", "Генерация логики и структуры ответа..."),
-            new HermesStatusPhase(8800, "Поиск фактов", "Извлечение точных сведений из HRM..."),
-            new HermesStatusPhase(10500, "Синтез", "Формирование ключевых тезисов..."),
-            new HermesStatusPhase(12500, "Разметка", "Компоновка markdown-структуры..."),
-            new HermesStatusPhase(15000, "Верификация", "Контрольная проверка целостности..."),
-            new HermesStatusPhase(18000, "Финализация", "Завершение вывода ассистента..."),
-            new HermesStatusPhase(22000, "Ожидание", "Финальная передача потока ответа...")
+            new HermesStatusPhase(0, "Канал", "Установка соединения с hr.hunttech.ru..."),
+            new HermesStatusPhase(400, "SSH", "Открытие защищенного туннеля..."),
+            new HermesStatusPhase(800, "Docker", "Проверка hermes-hrm-viewer..."),
+            new HermesStatusPhase(1200, "Профиль", "Инициализация hrm-viewer..."),
+            new HermesStatusPhase(1600, "Вход", "Разбор входящего запроса..."),
+            new HermesStatusPhase(2000, "Инструменты", "Подготовка HRM Data Tools..."),
+            new HermesStatusPhase(2500, "Промпт", "Сборка контекста агента..."),
+            new HermesStatusPhase(3000, "Нейросеть", "Отправка запроса в модель..."),
+            new HermesStatusPhase(3600, "В очереди", "Ожидание слота генерации..."),
+            new HermesStatusPhase(4200, "Мышление", "Анализ семантики вопроса..."),
+            new HermesStatusPhase(4900, "Выборка", "Запрос справочников HRM..."),
+            new HermesStatusPhase(5600, "Кандидаты", "Поиск релевантных сущностей..."),
+            new HermesStatusPhase(6400, "Вакансии", "Сопоставление требований..."),
+            new HermesStatusPhase(7200, "Календарь", "Проверка слотов и событий..."),
+            new HermesStatusPhase(8100, "Аналитика", "Синтез структуры ответа..."),
+            new HermesStatusPhase(9000, "Аргументы", "Формирование ключевых тезисов..."),
+            new HermesStatusPhase(10000, "Генерация", "Построение связного текста..."),
+            new HermesStatusPhase(11200, "Разметка", "Форматирование таблиц и списков..."),
+            new HermesStatusPhase(12500, "Сверка", "Контроль непротиворечивости..."),
+            new HermesStatusPhase(14000, "Валидация", "Проверка фактов и дат..."),
+            new HermesStatusPhase(15800, "Компоновка", "Сборка итогового markdown..."),
+            new HermesStatusPhase(17800, "Стриминг", "Получение выходного потока..."),
+            new HermesStatusPhase(20000, "Финал", "Завершение генерации..."),
+            new HermesStatusPhase(23000, "Ожидание", "Финальная передача ответа...")
     };
 
     private static final HermesStatusPhase[] HERMES_OPERATOR_PHASES = new HermesStatusPhase[]{
-            new HermesStatusPhase(0, "SSH-сессия", "Подключение к контуру управления HRM..."),
-            new HermesStatusPhase(900, "Docker", "Инициализация hermes-hrm-operator..."),
-            new HermesStatusPhase(1800, "Профиль", "Загрузка профиля hrm-operator..."),
-            new HermesStatusPhase(2700, "Security", "Аудит прав доступа CUBA Security..."),
-            new HermesStatusPhase(3700, "Навыки", "Подключение навыка hunttech-vacancy-opening..."),
-            new HermesStatusPhase(4800, "Парсинг", "Разбор инструкций и параметров..."),
-            new HermesStatusPhase(6000, "Модель", "Обращение к нейросети deepseek..."),
-            new HermesStatusPhase(7300, "Мышление", "Синтез требований и атрибутов..."),
-            new HermesStatusPhase(8800, "Мутации", "Формирование безопасного намерения..."),
-            new HermesStatusPhase(10500, "Валидация", "Проверка допустимости полей..."),
-            new HermesStatusPhase(12500, "Аудит", "Контроль запрета опасных операций..."),
-            new HermesStatusPhase(15000, "Сборка", "Компоновка ответа для руководителя..."),
-            new HermesStatusPhase(18000, "Финализация", "Подготовка результата операции..."),
-            new HermesStatusPhase(22000, "Ожидание", "Завершение обработки запроса...")
+            new HermesStatusPhase(0, "Канал", "Подключение к контуру управления..."),
+            new HermesStatusPhase(400, "SSH", "Туннель к серверу hr.hunttech.ru..."),
+            new HermesStatusPhase(800, "Docker", "Инициализация hermes-hrm-operator..."),
+            new HermesStatusPhase(1200, "Профиль", "Загрузка профиля hrm-operator..."),
+            new HermesStatusPhase(1600, "Права", "Проверка контекста пользователя..."),
+            new HermesStatusPhase(2000, "Навык", "Загрузка hunttech-vacancy-opening..."),
+            new HermesStatusPhase(2500, "Параметры", "Разбор инструкций и атрибутов..."),
+            new HermesStatusPhase(3000, "Нейросеть", "Вызов модели deepseek..."),
+            new HermesStatusPhase(3600, "В очереди", "Ожидание вычислительного слота..."),
+            new HermesStatusPhase(4200, "Мышление", "Анализ бизнес-требований..."),
+            new HermesStatusPhase(4900, "Стек", "Проверка технологий и грейда..."),
+            new HermesStatusPhase(5600, "Зарплата", "Валидация вилок и компенсаций..."),
+            new HermesStatusPhase(6400, "Локация", "Формат работы и график..."),
+            new HermesStatusPhase(7200, "Мутация", "Формирование намерения..."),
+            new HermesStatusPhase(8100, "Схема", "Проверка JSON-структуры..."),
+            new HermesStatusPhase(9000, "Allowlist", "Контроль разрешенных полей..."),
+            new HermesStatusPhase(10000, "Аудит", "Проверка запрета DELETE/SQL..."),
+            new HermesStatusPhase(11200, "Транзакция", "Подготовка контекста CUBA..."),
+            new HermesStatusPhase(12500, "Сборка", "Синтез ответа для оператора..."),
+            new HermesStatusPhase(14000, "Чек-лист", "Проверка полноты критериев..."),
+            new HermesStatusPhase(15800, "Карта поиска", "Подготовка рекомендаций..."),
+            new HermesStatusPhase(17800, "Разметка", "Форматирование результата..."),
+            new HermesStatusPhase(20000, "Финал", "Завершение операции..."),
+            new HermesStatusPhase(23000, "Ожидание", "Финальная передача данных...")
     };
 
     private static HermesStatusPhase resolvePhase(HermesStatusPhase[] phases, long elapsed) {
@@ -227,14 +247,12 @@ public class LlmChatScreen extends Screen {
 
         applyTabPermissions();
 
-        if (security != null && security.isSpecificPermitted(PERMISSION_LOCAL_CHAT)) {
-            try {
-                conversationId = resolveActiveConversationId();
-                renderHistory(llmChatService.loadHistory(conversationId));
-            } catch (RuntimeException ex) {
-                sendBtn.setEnabled(false);
-                showError(ex);
-            }
+        try {
+            conversationId = resolveActiveConversationId();
+            renderHistory(llmChatService.loadHistory(conversationId));
+        } catch (RuntimeException ex) {
+            sendBtn.setEnabled(false);
+            showError(ex);
         }
         try {
             initHermesTab();
@@ -244,27 +262,27 @@ public class LlmChatScreen extends Screen {
     }
 
     private void applyTabPermissions() {
-        boolean canUseLocalChat = security != null && security.isSpecificPermitted(PERMISSION_LOCAL_CHAT);
-        boolean canUseManagerHermes = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
-
         TabSheet.Tab localTab = chatTabSheet.getTab("localChatTab");
         TabSheet.Tab hermesTab = chatTabSheet.getTab("hermesChatTab");
         TabSheet.Tab hermesManagerTab = chatTabSheet.getTab("hermesManagerChatTab");
 
         if (localTab != null) {
-            localTab.setVisible(canUseLocalChat);
+            localTab.setVisible(true);
+        }
+        if (hermesTab != null) {
+            hermesTab.setVisible(true);
         }
         if (hermesManagerTab != null) {
-            hermesManagerTab.setVisible(canUseManagerHermes);
+            hermesManagerTab.setVisible(true);
         }
 
         // Если сохраненная или текущая вкладка скрыта — переключаем на первую доступную
         TabSheet.Tab selectedTab = chatTabSheet.getSelectedTab();
         if (selectedTab == null || !selectedTab.isVisible()) {
-            if (hermesTab != null && hermesTab.isVisible()) {
-                chatTabSheet.setSelectedTab(hermesTab);
-            } else if (localTab != null && localTab.isVisible()) {
+            if (localTab != null && localTab.isVisible()) {
                 chatTabSheet.setSelectedTab(localTab);
+            } else if (hermesTab != null && hermesTab.isVisible()) {
+                chatTabSheet.setSelectedTab(hermesTab);
             } else if (hermesManagerTab != null && hermesManagerTab.isVisible()) {
                 chatTabSheet.setSelectedTab(hermesManagerTab);
             }
@@ -368,13 +386,11 @@ public class LlmChatScreen extends Screen {
         }
 
         // Initialize Hermes Manager tab
-        boolean canUseManagerHermes = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
         hermesManagerInputArea.setTrimming(false);
-        hermesManagerInputArea.setEnabled(canUseManagerHermes);
-        hermesManagerSendBtn.setEnabled(canUseManagerHermes);
+        hermesManagerInputArea.setEnabled(true);
+        hermesManagerSendBtn.setEnabled(true);
         hermesManagerSendBtn.setCaption("<svg class=\"llm-chat-send-svg\" viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" preserveAspectRatio=\"xMidYMid meet\"><path fill=\"white\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3 1.1 9.873l16.216 2.155L1.1 14.183z\"/></svg>");
         hermesManagerSendBtn.setDescription("Отправить команду в Hermes (Enter, перенос строки — Shift+Enter)");
-        hermesManagerSendBtn.addClickListener(clickEvent -> executeHermesManagerSend(null));
         com.vaadin.ui.TextArea vHermesManagerTextArea = hermesManagerInputArea.unwrap(com.vaadin.ui.TextArea.class);
         if (vHermesManagerTextArea != null) {
             vHermesManagerTextArea.setValueChangeMode(com.vaadin.shared.ui.ValueChangeMode.TIMEOUT);
@@ -1448,17 +1464,8 @@ public class LlmChatScreen extends Screen {
     // =========================================================================
 
     private void initHermesManagerTab() {
-        boolean canUseManagerHermes = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
-        hermesManagerInputArea.setEnabled(canUseManagerHermes);
-        hermesManagerSendBtn.setEnabled(canUseManagerHermes);
-
-        if (!canUseManagerHermes) {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("Hermes-operator")
-                    .withDescription("Для коммуникации с Hermes (профиль hrm-operator) требуется право hunttech.ai.useManagerHermesWrite")
-                    .show();
-            return;
-        }
+        hermesManagerInputArea.setEnabled(true);
+        hermesManagerSendBtn.setEnabled(true);
 
         if (hermesManagerConversationId == null) {
             try {
@@ -1511,13 +1518,6 @@ public class LlmChatScreen extends Screen {
 
     private void executeHermesManagerSend(String rawText) {
         if (!hermesManagerSendBtn.isEnabled()) {
-            return;
-        }
-        if (security == null || !security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE)) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Отказ в доступе")
-                    .withDescription("Недостаточно прав для выполнения операции")
-                    .show();
             return;
         }
         String message = (rawText != null && !rawText.trim().isEmpty())
@@ -1673,12 +1673,9 @@ public class LlmChatScreen extends Screen {
         } else if (activeHermesManagerRequestText != null && !activeHermesManagerRequestText.isEmpty()) {
             hermesManagerInputArea.setValue(activeHermesManagerRequestText);
         }
-        boolean canWrite = security != null && security.isSpecificPermitted(PERMISSION_MANAGER_HERMES_WRITE);
-        hermesManagerInputArea.setEnabled(canWrite);
-        hermesManagerSendBtn.setEnabled(canWrite);
-        if (canWrite) {
-            hermesManagerInputArea.focus();
-        }
+        hermesManagerInputArea.setEnabled(true);
+        hermesManagerSendBtn.setEnabled(true);
+        hermesManagerInputArea.focus();
     }
 
     private void showHermesManagerError(Exception ex) {
