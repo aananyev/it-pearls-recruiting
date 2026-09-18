@@ -7,5 +7,4 @@
     <screen id="settings" template="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-main-background.xml"/>
     <screen id="hunttech_AboutHrmScreen" template="com/company/hunttech/web/screens/about/about-hrm-screen.xml"/>
     <screen id="hunttech_TelegramPhotoSelectDialog" template="com/company/hunttech/web/screens/telegram/telegram-photo-select-dialog.xml"/>
-    <screen id="hunttech_OpenPositionRequirementExplanationDialog" template="com/company/hunttech/web/screens/openposition/open-position-requirement-explanation-dialog.xml"/>
 </screen-config>
