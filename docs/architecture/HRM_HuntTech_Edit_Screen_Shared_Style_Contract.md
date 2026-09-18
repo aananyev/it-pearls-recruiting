@@ -298,36 +298,68 @@ stylename="edit-form-control iteraction-list-primary-picker"
 
 ### 5.2. Базовая XML-композиция
 
+Каноническая Edit-форма с нижними действиями строится как двухпанельная композиция. Правая рабочая область содержит постоянный верхний контекст, единственную расширяемую прокручиваемую область и постоянный footer.
+
 ```xml
-<hbox width="100%" height="100%" expand="workspaceScroll" stylename="edit-screen-layout">
-    <vbox width="270px" height="100%" stylename="edit-sidebar">
+<hbox width="100%"
+      height="100%"
+      expand="workspace"
+      stylename="edit-screen-layout">
+
+    <vbox width="270px"
+          height="100%"
+          stylename="edit-sidebar">
         <!-- visual → identity → label-navigation → summary → hint -->
     </vbox>
 
-    <scrollBox id="workspaceScroll"
-               width="100%"
-               height="100%"
-               orientation="vertical"
-               scrollBars="vertical"
-               stylename="edit-workspace edit-workspace-scroll">
-        <vbox width="100%" spacing="true" stylename="edit-workspace-content">
-            <hbox width="100%" stylename="edit-toolbar">
-                <!-- title, description, existing actions -->
-            </hbox>
+    <vbox id="workspace"
+          width="100%"
+          height="100%"
+          expand="workspaceScroll"
+          stylename="edit-workspace">
 
-            <groupBox width="100%"
-                      collapsable="true"
-                      collapsed="false"
-                      showAsPanel="true"
-                      stylename="edit-accordion-section">
-                <!-- existing fields and bindings -->
-            </groupBox>
-        </vbox>
-    </scrollBox>
+        <hbox width="100%"
+              height="AUTO"
+              stylename="edit-toolbar">
+            <!-- title, description, existing toolbar actions -->
+        </hbox>
+
+        <!-- optional non-growing screen-specific blocks -->
+
+        <scrollBox id="workspaceScroll"
+                   width="100%"
+                   height="100%"
+                   orientation="vertical"
+                   scrollBars="vertical"
+                   stylename="edit-workspace-scroll">
+            <vbox width="100%"
+                  height="AUTO"
+                  spacing="true"
+                  stylename="edit-workspace-content">
+
+                <groupBox width="100%"
+                          collapsable="true"
+                          collapsed="false"
+                          showAsPanel="true"
+                          stylename="edit-accordion-section">
+                    <!-- existing fields and bindings -->
+                </groupBox>
+            </vbox>
+        </scrollBox>
+
+        <hbox id="editActions"
+              width="100%"
+              height="AUTO"
+              stylename="edit-footer-actions">
+            <!-- save / cancel / other existing completion actions -->
+        </hbox>
+    </vbox>
 </hbox>
 ```
 
 `edit-screen-layout` не отменяет локальный root style конкретного экрана.
+
+Если форма использует footer, он располагается вне `edit-workspace-scroll`, если UI-спецификация явно не фиксирует другой сценарий. Расширяемым компонентом workspace является центральная content/scroll area, а не toolbar, footer или весь контент вместе с footer.
 
 ### 5.3. Геометрический контракт по эталону SettingsWindow
 
@@ -341,6 +373,41 @@ stylename="edit-form-control iteraction-list-primary-picker"
 - аккордеон занимает 100% полезной ширины;
 - рабочая область имеет `min-width: 0`;
 - основная горизонтальная прокрутка считается дефектом, кроме специализированных таблиц.
+
+### 5.3.1. Vertical viewport contract
+
+Каждый новый или рефакторируемый Edit-экран обязан корректно работать не только при уменьшении ширины, но и при уменьшении высоты viewport.
+
+- корневой layout и workspace ограничиваются доступной высотой экрана;
+- цепочка layout-компонентов от workspace до расширяемого scroll-контейнера должна допускать реальное сжатие;
+- для flex/grid DOM-обёрток CUBA/Vaadin, участвующих в этой цепочке, должен быть обеспечен эквивалент `min-height: 0`;
+- наличие `height: 100%` само по себе не считается достаточной защитой: дочерний компонент не должен увеличивать parent сверх доступной высоты;
+- единственная зона, которая поглощает недостаток вертикального пространства, — `edit-workspace-scroll` либо функционально эквивалентная content-area;
+- внутренняя scrollable-область получает ограниченную родителем высоту и `overflow-y: auto` при переполнении;
+- `edit-workspace-content` использует естественную высоту содержимого и не заставляет workspace расти сверх viewport;
+- `edit-toolbar`, дополнительные постоянные верхние блоки и `edit-footer-actions` не получают expand-ratio центральной области;
+- `edit-footer-actions` располагается вне прокручиваемой области и остаётся полностью видимым при минимальном поддерживаемом viewport;
+- уменьшение высоты `TextArea`, `RichTextArea`, таблицы или другого business-control не может быть единственным способом сохранить footer;
+- responsive-уменьшение отдельных контролов допускается только как дополнительная UX-оптимизация после обеспечения корректного scroll/shrink contract.
+
+Для `TabSheet` запрещена схема, в которой `TabSheet height="100%"` занимает весь workspace, а footer располагается после него без отдельной расширяемой scroll-area либо эквивалентного shrink-контракта панели вкладки.
+
+### 5.3.2. Инвариант footer
+
+`edit-footer-actions` является постоянно доступной зоной завершения операции.
+
+При resize браузера должны выполняться все условия:
+
+- нижняя граница footer не выходит за нижнюю границу workspace;
+- footer не перекрывает содержимое;
+- footer не зависит от количества полей и их фактической высоты;
+- validation messages не вытесняют footer;
+- динамически создаваемые поля не вытесняют footer;
+- увеличение многострочного поля не вытесняет footer;
+- прокрутка центрального содержимого не перемещает footer;
+- page-level vertical scrollbar не используется как штатный способ доступа к save/cancel полноэкранной Edit-формы.
+
+Нарушение этих условий классифицируется как дефект базового Edit-layout contract, а не как локальная проблема высоты отдельного поля.
 
 ### 5.4. Стандартные элементы каждой Edit-формы
 
@@ -549,11 +616,12 @@ Shared слой отвечает за типовые роли. Screen-specific �
 5. Сначала добавить общие stylename, временно сохранив legacy-класс там, где он нужен для совместимости.
 6. Перевести active-state на добавление/удаление только `label-nav-item-active`, не удаляя `label-nav-item`.
 7. Заменить повторяющиеся локальные правила общим UI API; оставить локально только уникальную геометрию экрана.
-8. Проверить отсутствие переполнения, наложения секций, скачков active-state и горизонтальной прокрутки.
-9. Сравнить форму до/после минимум на `1700×950`, `1366×768`, `1100×760` и в темах `hover`, `halo`, `hunttech-modern-dark`.
-10. Выполнить профильные tests, `ScreenViewIntegrityTest 8/8`, SCSS build, clean assemble, local deploy, HTTP 200, runtime logs и visual smoke.
-11. Удалить legacy stylename только после подтверждения отсутствия Java/XML/SCSS-зависимостей.
-12. Обновить UI-спецификацию, историю, тесты визуального контракта и инструкцию Hermes.
+8. Проверить отсутствие переполнения, наложения секций, скачков active-state, горизонтальной прокрутки и вытеснения footer при уменьшении высоты окна.
+9. Сравнить форму до/после минимум на `1700×950`, `1366×768`, `1280×720`, `1100×650`, `1024×600` и в темах `hover`, `halo`, `hunttech-modern-dark`; для форм с большим количеством полей дополнительно проверить `1280×600`.
+10. Выполнить интерактивный resize между контрольными viewport: центральная content-area должна начинать прокручиваться раньше, чем footer выходит за границы workspace.
+11. Выполнить профильные tests, `ScreenViewIntegrityTest 8/8`, SCSS build, clean assemble, local deploy, HTTP 200, runtime logs и visual smoke.
+12. Удалить legacy stylename только после подтверждения отсутствия Java/XML/SCSS-зависимостей.
+13. Обновить UI-спецификацию, историю, тесты визуального контракта и инструкцию Hermes.
 
 Массовая замена всех экранов одним непроверенным коммитом запрещена.
 
@@ -585,11 +653,14 @@ Hermes подтверждает:
 12. горизонтальная прокрутка формы отсутствует;
 13. длинные значения, empty/read-only/disabled/validation и accordion states не ломают компоновку;
 14. footer-actions не перекрывает рабочую область;
-15. семь `edit-screen-shared-styles.scss` идентичны и подключены перед локальным SCSS;
-16. UI-спецификация содержит применённые общие классы и обоснованные отклонения;
-17. применимые regression-правила раздела 5.7 проверены на `1700×950`, `1366×768` и `1100×760`;
-18. Tomcat critical errors отсутствуют; P1=0; P2=0;
-19. на вкладках `TabSheet` с единственным блоком ввода контейнер `label-navigation`
+15. footer-actions полностью видим при минимальном поддерживаемом viewport и не вытесняется validation messages, dynamic fields или многострочными контролами;
+16. при недостатке высоты вертикальная прокрутка возникает внутри `edit-workspace-scroll`/эквивалентной content-area, а не за счёт ухода footer за viewport;
+17. DOM-цепочка расширяемой content-area допускает vertical shrink и не содержит некомпенсированного `min-height: auto`, вытесняющего footer;
+18. семь `edit-screen-shared-styles.scss` идентичны и подключены перед локальным SCSS;
+19. UI-спецификация содержит применённые общие классы и обоснованные отклонения;
+20. применимые regression-правила раздела 5.7 и vertical viewport contract проверены на `1700×950`, `1366×768`, `1280×720`, `1100×650` и `1024×600`;
+21. Tomcat critical errors отсутствуют; P1=0; P2=0;
+22. на вкладках `TabSheet` с единственным блоком ввода контейнер `label-navigation`
     (заголовок и пункты) скрыт целиком; на вкладках с двумя и более блоками показан
     набор активной вкладки с подсвеченным первым пунктом (правило 3.6).
 
@@ -607,6 +678,12 @@ Hermes подтверждает:
 - показывать label-навигацию (или её заголовок `label-nav-title`) на вкладке `TabSheet` с единственным блоком ввода (правило 3.6);
 - начинать создание или рефакторинг Edit-формы без обязательного preflight из раздела 0;
 - считать реализацию принятой только по compile, HTTP 200 или `BUILD SUCCESSFUL` без visual smoke.
+- исправлять исчезновение footer только уменьшением высоты `TextArea`, таблицы или другого поля;
+- назначать `height: 100%` расширяемому дочернему контейнеру так, что вместе с toolbar/footer суммарная высота превышает workspace;
+- оставлять flex/grid-child с неограниченным `min-height: auto`, если этот элемент должен сжиматься внутри viewport;
+- расширять `TabSheet` или content-root на полную высоту workspace и одновременно располагать footer после него без отдельного vertical shrink/scroll contract;
+- использовать page-level vertical scrollbar как штатный способ доступа к save/cancel полноэкранной Edit-формы;
+- исправлять вертикальное переполнение workspace изменением sidebar, если дефект находится в правой рабочей области.
 
 ## 11. Текущее состояние на 2026-07-28
 
@@ -624,6 +701,7 @@ Hermes подтверждает:
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-18 | Добавлен обязательный vertical viewport contract для Edit-экранов: каноническая структура `workspace → expanded scrollable content → footer`, непрерывный shrink-контракт `min-height: 0` для CUBA/Vaadin layout-chain, постоянная видимость `edit-footer-actions`, запрет лечения переполнения только уменьшением полей, runtime resize-проверки до `1024×600` и новые критерии приёмки footer/scroll behavior. |
 | 2026-08-12 | Раздел 4.1: добавлено правило оформления кнопок «Загрузить»/«Очистить» загрузчика фото/логотипа в sidebar — пара 96×36 с полупрозрачным белым фоном `rgba(255,255,255,.06)`, рамкой `rgba(255,255,255,.34)`, скруглением 5px и текстом 14px/600 `#f8fafc`, центрирование flex'ом (зазор 10px, `.c-fileupload-wrapper` на всю ширину блока); эталон `JobCandidateEdit`, реализация `SkillTreeEdit` |
 | 2026-08-10 | Раздел 4.1: реализация добавлена в `ExtUserEdit` — заголовок блока «Профиль» `ext-user-editor-profile-title` (поверх `label-nav-title`, 1:1 с заголовком «Разделы»); растяжение полосы внутри карточки `edit-sidebar-summary` с padding 10px — `margin: -10px -10px 12px` (частный случай правила «заголовок карточки растягивается на её ширину»); значения блока — `ext-user-editor-profile-status` 13px/600, `-caption` 10.5px/700 uppercase `rgba(248,250,252,.62)`, `-value` 13px/500 `#f8fafc` (1:1 с sidebar-caption/value) |
 | 2026-08-09 | Новый раздел 3.6 «Видимость label-навигации на вкладках TabSheet»: на вкладке с единственным блоком ввода контейнер `label-navigation` скрывается целиком (заголовок и пункты); на вкладках с 2+ блоками показывается набор активной вкладки с подсвеченным первым пунктом. Эталон — `OpenPositionEdit` (константа `TABS_WITH_SIDEBAR_NAVIGATION`, видимость контейнера через Java `setVisible`, наборы одноблочных вкладок всегда скрыты). Правило внесено также в §3.4 (active-state при переключении вкладки), §4.1 (порядок sidebar-блоков), §8.1 шаг 7 (новые формы), §9 критерий 19 (приёмка) и §10 (запрещённые решения) |
