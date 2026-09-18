@@ -849,16 +849,11 @@
       overflow: hidden !important;
     }
 
-    // Тулбар рабочей области: строго у верхнего края без паразитного зазора
-    .v-slot-iteraction-list-toolbar,
+    // Тулбар рабочей области: полная ширина без вмешательства в позиционирование слота
     .iteraction-list-toolbar {
       box-sizing: border-box !important;
       width: 100% !important;
       min-width: 0 !important;
-      flex: 0 0 auto !important;
-      position: relative !important;
-      top: 0 !important;
-      margin-top: 0 !important;
     }
 
     .v-slot-iteraction-list-footer {
