@@ -31,15 +31,15 @@ public interface HunttechHermesConfig extends Config {
     int getSshPort();
 
     @Property("hunttech.hermes.containerName")
-    @DefaultString("hermes-hrm-operator")
+    @DefaultString("hermes-hrm-viewer")
     String getContainerName();
 
     @Property("hunttech.hermes.profile")
-    @DefaultString("hrm-operator")
+    @DefaultString("hrm-viewer")
     String getProfile();
 
     @Property("hunttech.hermes.timeoutSeconds")
-    @DefaultInt(90)
+    @DefaultInt(180)
     int getTimeoutSeconds();
 
     @Property("hunttech.hermes.viewer.containerName")

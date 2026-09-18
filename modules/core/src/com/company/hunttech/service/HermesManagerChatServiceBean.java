@@ -634,11 +634,6 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         ProcessBuilder pb = new ProcessBuilder(command);
         Process process = pb.start();
 
-        try (OutputStream os = process.getOutputStream()) {
-            os.write(prompt.getBytes(StandardCharsets.UTF_8));
-            os.flush();
-        }
-
         CompletableFuture<String> stdoutFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 return readStream(process.getInputStream());
@@ -655,6 +650,11 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
                 return "";
             }
         });
+
+        try (OutputStream os = process.getOutputStream()) {
+            os.write(prompt.getBytes(StandardCharsets.UTF_8));
+            os.flush();
+        }
 
         int timeoutSeconds = config.getTimeoutSeconds();
         boolean completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);

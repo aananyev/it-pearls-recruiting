@@ -677,12 +677,6 @@ public class HermesChatServiceBean implements HermesChatService {
         ProcessBuilder pb = new ProcessBuilder(command);
         Process process = pb.start();
 
-        // Безопасная передача промпта через STDIN (исключает шелл-инъекции и поломку спецсимволов)
-        try (OutputStream os = process.getOutputStream()) {
-            os.write(prompt.getBytes(StandardCharsets.UTF_8));
-            os.flush();
-        }
-
         // Асинхронное чтение stdout и stderr во избежание deadlock при переполнении буфера пайпа OS
         CompletableFuture<String> stdoutFuture = CompletableFuture.supplyAsync(() -> {
             try {
@@ -700,6 +694,12 @@ public class HermesChatServiceBean implements HermesChatService {
                 return "";
             }
         });
+
+        // Безопасная передача промпта через STDIN (исключает шелл-инъекции и поломку спецсимволов)
+        try (OutputStream os = process.getOutputStream()) {
+            os.write(prompt.getBytes(StandardCharsets.UTF_8));
+            os.flush();
+        }
 
         int timeoutSeconds = config.getTimeoutSeconds();
         boolean completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);

@@ -40,6 +40,6 @@ public interface HunttechHermesManagerConfig extends Config {
     String getProfile();
 
     @Property("hunttech.hermes.manager.timeoutSeconds")
-    @DefaultInt(90)
+    @DefaultInt(240)
     int getTimeoutSeconds();
 }
