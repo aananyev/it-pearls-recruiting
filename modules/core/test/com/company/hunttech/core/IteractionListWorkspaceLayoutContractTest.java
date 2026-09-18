@@ -116,6 +116,41 @@ public class IteractionListWorkspaceLayoutContractTest {
         assertTrue(partial.contains("font-weight: 700 !important;"));
     }
 
+    @Test
+    public void verticalShrinkContractProtectsCentralScrollBoxAndPinnedFooter() throws IOException {
+        String xml = readProjectFile("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+        String partial = partial("halo");
+
+        // 1. XML: workspace расширяет именно центральный ScrollBox, footer расположен строго после него вне прокрутки
+        assertTrue("Workspace должен расширять iteractionListContentScrollBox",
+                xml.contains("expand=\"iteractionListContentScrollBox\""));
+        int scrollBoxIndex = xml.indexOf("id=\"iteractionListContentScrollBox\"");
+        int footerIndex = xml.indexOf("id=\"editActions\"");
+        assertTrue("ScrollBox должен присутствовать в XML", scrollBoxIndex > 0);
+        assertTrue("Footer editActions должен присутствовать в XML", footerIndex > 0);
+        assertTrue("Footer editActions обязан следовать после ScrollBox вне прокручиваемого содержимого",
+                footerIndex > scrollBoxIndex);
+
+        // 2. SCSS: вертикальный shrink contract в цепочке workspace -> v-expand -> scroll slot -> scrollBox
+        assertTrue("Workspace обязан содержать min-height: 0",
+                partial.contains(".iteraction-list-workspace"));
+        assertTrue("Workspace должен иметь min-height: 0 для сжатия во flexbox",
+                partial.contains("min-height: 0 !important;"));
+        assertTrue("v-expand обёртка workspace обязана иметь min-height: 0",
+                partial.contains(".iteraction-list-workspace > .v-expand"));
+        assertTrue("Слот ScrollBox обязан быть единственным расширяемым и сжимаемым элементом",
+                partial.contains(".v-slot-iteraction-list-scroll"));
+
+        // 3. Вертикальная прокрутка относится исключительно к центральной контентной зоне
+        assertTrue("ScrollBox обязан прокручиваться по вертикали",
+                partial.contains("overflow-y: auto !important;"));
+        assertTrue("Footer обязан быть fixed/non-growing (flex: 0 0 auto)",
+                partial.contains(".v-slot-iteraction-list-footer"));
+
+        // 4. Sidebar не затрагивается
+        assertFalse("Sidebar размеры не должны модифицироваться", partial.contains("width: 312px"));
+    }
+
     private String partial(String theme) throws IOException {
         return readProjectFile("modules/web/themes/" + theme
                 + "/com.company.hunttech/iteraction-list-workspace-layout.scss");
