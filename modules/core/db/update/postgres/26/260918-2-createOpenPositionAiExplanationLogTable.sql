@@ -1,0 +1,41 @@
+CREATE TABLE IF NOT EXISTS HUNTTECH_OP_AI_EXPLANATION_LOG (
+    ID uuid NOT NULL,
+    VERSION integer NOT NULL,
+    CREATE_TS timestamp without time zone,
+    CREATED_BY character varying(50),
+    UPDATE_TS timestamp without time zone,
+    UPDATED_BY character varying(50),
+    DELETE_TS timestamp without time zone,
+    DELETED_BY character varying(50),
+    OPEN_POSITION_ID uuid NOT NULL,
+    USER_ID uuid,
+    USER_LOGIN character varying(128),
+    USER_NAME character varying(255),
+    CALL_TIME timestamp without time zone,
+    EXPLANATION_TYPE character varying(32) NOT NULL,
+    SERVICE_TYPE character varying(32) NOT NULL,
+    MODEL_NAME character varying(128),
+    PROVIDER_CODE character varying(64),
+    DURATION_MS bigint,
+    PROMPT_TOKENS integer,
+    COMPLETION_TOKENS integer,
+    TOTAL_TOKENS integer,
+    REQUEST_CONTEXT text,
+    RESPONSE_CONTENT text,
+    TECHNICAL_INFO text,
+    STATUS character varying(32),
+    ERROR_MESSAGE character varying(1000),
+    CONSTRAINT PK_HUNTTECH_OP_AI_EXPLANATION_LOG PRIMARY KEY (ID)
+);
+
+CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_OP_AI_EXP_LOG_OP
+    ON HUNTTECH_OP_AI_EXPLANATION_LOG (OPEN_POSITION_ID);
+
+CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_OP_AI_EXP_LOG_USER
+    ON HUNTTECH_OP_AI_EXPLANATION_LOG (USER_ID);
+
+CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_OP_AI_EXP_LOG_TIME
+    ON HUNTTECH_OP_AI_EXPLANATION_LOG (CALL_TIME);
+
+CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_OP_AI_EXP_LOG_TYPE
+    ON HUNTTECH_OP_AI_EXPLANATION_LOG (EXPLANATION_TYPE);
