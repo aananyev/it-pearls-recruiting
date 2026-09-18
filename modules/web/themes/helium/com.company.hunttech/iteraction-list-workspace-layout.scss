@@ -75,19 +75,24 @@
       max-width: 100% !important;
     }
 
-    // Правая рабочая область как вертикальный Flexbox:
-    // тулбар и быстрые действия сверху, прокручиваемый контент посередине,
-    // подвал с кнопками «ОК» и «Отмена» всегда зафиксирован внизу и виден при любых разрешениях.
+    // Правая рабочая область: вертикальный скроллбар проходит по всей правой части экрана
+    // от верхнего края до нижнего края окна, а внутренний scrollBox раскрывается без локальной полосы прокрутки.
     .iteraction-list-workspace {
+      box-sizing: border-box !important;
       display: flex !important;
       flex-direction: column !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
       height: 100% !important;
-      min-height: 0 !important;
+      min-height: 100% !important;
       position: relative !important;
       top: 0 !important;
       margin-top: 0 !important;
       padding-top: 0 !important;
-      overflow: hidden;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch;
     }
 
     .iteraction-list-workspace > .v-slot {
@@ -112,39 +117,48 @@
       height: auto !important;
     }
 
-    // Центральная прокручиваемая область формы: занимает все оставшееся место
+    // Центральная область формы: внутренний скроллбокс раскрывается по высоте содержимого,
+    // чтобы скроллбар был один на всю правую часть экрана
     .iteraction-list-workspace > .v-slot-iteraction-list-scroll,
     .iteraction-list-workspace > .v-expand {
-      flex: 1 1 auto !important;
+      flex: 1 0 auto !important;
       width: 100% !important;
       min-width: 0 !important;
-      height: 0 !important;
+      height: auto !important;
       min-height: 0 !important;
       position: relative !important;
-      overflow: hidden !important;
+      overflow: visible !important;
     }
 
     .iteraction-list-scroll {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 100% !important;
-      height: 100% !important;
+      height: auto !important;
       min-width: 0 !important;
       min-height: 0 !important;
-      overflow: hidden !important;
+      overflow: visible !important;
     }
 
     .iteraction-list-scroll > .v-scrollable {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       width: 100% !important;
-      height: 100% !important;
+      height: auto !important;
       min-width: 0 !important;
       min-height: 0 !important;
-      overflow-y: auto !important;
-      overflow-x: auto !important;
-      -webkit-overflow-scrolling: touch;
+      overflow: visible !important;
+      overflow-y: visible !important;
+      overflow-x: visible !important;
     }
 
-    // Постоянный подвал действий (футер): всегда прижат к низу, кнопки ОК и Отмена на виду
+    .iteraction-list-scroll .c-scrollbox-content {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+
+    // Постоянный подвал действий (футер): прилипает к низу (sticky), кнопки ОК и Отмена всегда на виду
     .iteraction-list-workspace > .v-slot-iteraction-list-footer {
       flex: 0 0 auto !important;
       width: 100% !important;
@@ -153,7 +167,10 @@
       min-height: 52px !important;
       padding: 0 !important;
       margin-top: auto !important;
-      z-index: 10 !important;
+      position: sticky !important;
+      bottom: 0 !important;
+      z-index: 20 !important;
+      background: $v-panel-background-color !important;
     }
 
     .iteraction-list-footer {
@@ -329,30 +346,6 @@
       }
     }
 
-    // Адаптивный скроллинг при низких разрешениях экрана (ноутбуки, сжатые окна, масштабирование):
-    // если кнопки или форма выходят за границы, включается вертикальный и горизонтальный скроллинг
-    @media (max-height: 600px) {
-      .iteraction-list-workspace {
-        overflow-y: auto !important;
-        overflow-x: auto !important;
-      }
-      .iteraction-list-workspace > .v-slot-iteraction-list-scroll,
-      .iteraction-list-workspace > .v-expand {
-        flex: 1 0 auto !important;
-        height: auto !important;
-        min-height: 180px !important;
-        overflow: visible !important;
-      }
-      .iteraction-list-scroll,
-      .iteraction-list-scroll > .v-scrollable {
-        height: auto !important;
-        overflow: visible !important;
-      }
-      .iteraction-list-workspace > .v-slot-iteraction-list-footer {
-        position: sticky !important;
-        bottom: 0 !important;
-      }
-    }
 
     @media (max-width: 768px) {
       .iteraction-list-main-layout {
