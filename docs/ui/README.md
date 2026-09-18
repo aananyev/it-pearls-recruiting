@@ -113,7 +113,7 @@ Living-документация экранов, окон, фрагментов �
 | Edit | `itpearls_IteractionList.edit` | [itpearls_IteractionList.edit_Spec.md](itpearls_IteractionList.edit_Spec.md) · [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) |
 | Simple browse | `itpearls_IteractionListSimple.browse` | [itpearls_IteractionListSimple.browse_Spec.md](itpearls_IteractionListSimple.browse_Spec.md) |
 | Fragment (jobcandidate) | `itpearls_IteractionListBrowse` | [itpearls_IteractionListBrowse_Spec.md](itpearls_IteractionListBrowse_Spec.md) |
-| Browse (реестр) | `hunttech_IteractionListReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](ReestrBrowseFallbackNoCandidate_Spec.md) | Реестр взаимодействий Split-View: таблица + профильный сайдбар (312px), аватар кандидата `logoPic` 120×120 с fallback `icons/no-candidate.png` (`SCALE_DOWN`) |
+| Browse (реестр) | `hunttech_IteractionListReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](ReestrBrowseFallbackNoCandidate_Spec.md) · [IteractionListReestr_Toolbar_Spec.md](IteractionListReestr_Toolbar_Spec.md) | Реестр взаимодействий Split-View: таблица + профильный сайдбар (312px), адаптивный командный тулбар cssLayout без рывков кнопок, аватар кандидата `logoPic` 120×120 с fallback `icons/no-candidate.png` (`SCALE_DOWN`) |
 
 ### Iteraction
 

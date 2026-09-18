@@ -1441,6 +1441,62 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════
+   * Тулбар действий и быстрых фильтров реестра взаимодействий (IteractionListReestr)
+   * Исключает скачки, рывки и "прыжки" кнопок правой части при любых разрешениях экрана
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  .candidate-filter-bar.iteraction-reestr-filter-bar {
+    .filter-buttons-panel {
+      display: inline-flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 6px 8px !important;
+      min-width: 0 !important;
+      width: auto !important;
+    }
+
+    .left-action-buttons {
+      display: inline-flex !important;
+      justify-content: flex-start !important;
+      flex: 0 1 auto !important;
+      width: auto !important;
+    }
+
+    .right-action-buttons {
+      display: inline-flex !important;
+      justify-content: flex-end !important;
+      flex: 0 0 auto !important;
+      margin-left: auto !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      border-top: none !important;
+      width: auto !important;
+    }
+
+    .v-button,
+    .v-popupbutton,
+    .candidate-btn {
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    @media (max-width: 960px) {
+      .left-action-buttons {
+        width: 100% !important;
+        justify-content: flex-start !important;
+      }
+
+      .right-action-buttons {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-left: 0 !important;
+        margin-top: 4px !important;
+        padding-top: 4px !important;
+        border-top: 1px dashed rgba(15, 23, 42, 0.08) !important;
+      }
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
    * Тулбар действий и быстрых фильтров (таблицы JobCandidate и OpenPosition)
    * Единая высота 34px и строгое вертикальное выравнивание для всех кнопок
    * ═══════════════════════════════════════════════════════════════════════════ */
@@ -1681,7 +1737,7 @@
   }
 
   @media (max-width: 1240px) {
-    .candidate-filter-bar {
+    .candidate-filter-bar:not(.iteraction-reestr-filter-bar) {
       justify-content: flex-start !important;
 
       .left-action-buttons {

@@ -69,7 +69,7 @@ Living-документация экранов, окон, фрагментов �
 | Edit | `hunttech_IteractionList.edit` | [hunttech_IteractionList.edit_Spec.md](iteraction-list/hunttech_IteractionList.edit_Spec.md) |
 | Simple browse | `hunttech_IteractionListSimple.browse` | [hunttech_IteractionListSimple.browse_Spec.md](iteraction-list/hunttech_IteractionListSimple.browse_Spec.md) |
 | Fragment (jobcandidate) | `hunttech_IteractionListBrowse` | [hunttech_IteractionListBrowse_Spec.md](iteraction-list/hunttech_IteractionListBrowse_Spec.md) |
-| Browse (реестр) | `hunttech_IteractionListReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](../ui/ReestrBrowseFallbackNoCandidate_Spec.md) |
+| Browse (реестр) | `hunttech_IteractionListReestr.browse` | [ReestrBrowseFallbackNoCandidate_Spec.md](../ui/ReestrBrowseFallbackNoCandidate_Spec.md) · [IteractionListReestr_Toolbar_Spec.md](../ui/IteractionListReestr_Toolbar_Spec.md) |
 
 ### Iteraction
 

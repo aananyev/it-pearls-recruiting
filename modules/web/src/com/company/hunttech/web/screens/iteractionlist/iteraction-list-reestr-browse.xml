@@ -146,16 +146,15 @@
             <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
             <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
                 
-                <!-- Командный тулбар -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
-                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                <!-- Командный тулбар (адаптивный cssLayout без рывков и скачков) -->
+                <cssLayout id="tableFilterBar" width="100%" stylename="candidate-filter-bar edit-card iteraction-reestr-filter-bar">
+                    <cssLayout id="leftActionButtons" stylename="filter-buttons-panel left-action-buttons">
                         <button id="createBtn" caption="Создать взаимодействие" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="iteractionListsTable.create"/>
-                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="iteractionListsTable.edit"/>
-                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="iteractionListsTable.remove"/>
-                    </hbox>
-                    <hbox id="toolbarSpacer" width="100%"/>
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
-                        <popupButton id="filterPopupButton" caption="Все взаимодействия" icon="FILTER" stylename="secondary candidate-btn">
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" action="iteractionListsTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" action="iteractionListsTable.remove"/>
+                    </cssLayout>
+                    <cssLayout id="rightActionButtons" stylename="filter-buttons-panel right-action-buttons">
+                        <popupButton id="filterPopupButton" caption="Все взаимодействия" icon="FILTER" showActionIcons="true" stylename="secondary candidate-btn candidate-filter-scope-btn">
                             <actions>
                                 <action id="filterAll" caption="Все взаимодействия"/>
                                 <action id="filterMyOnly" caption="Только мои взаимодействия"/>
@@ -164,14 +163,14 @@
                                 <action id="filterLast90Days" caption="За 90 дней"/>
                             </actions>
                         </popupButton>
-                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" showActionIcons="true" stylename="primary candidate-btn">
                             <actions>
                                 <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
                                 <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
                             </actions>
                         </popupButton>
-                    </hbox>
-                </hbox>
+                    </cssLayout>
+                </cssLayout>
 
                 <!-- Generic Filter -->
                 <filter id="filter"
