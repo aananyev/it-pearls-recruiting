@@ -57,12 +57,21 @@
 ### 2.2. SCSS во всех 7 темах оформления
 В файлах `job-candidate-editor.scss` для тем `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark`:
 1. Добавлен селектор `.candidate-filter-bar.iteraction-reestr-filter-bar`:
-   - `.filter-buttons-panel`: `display: inline-flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 6px 8px !important; min-width: 0 !important; width: auto !important;`
-   - `.left-action-buttons`: `display: inline-flex !important; justify-content: flex-start !important; flex: 0 1 auto !important; width: auto !important;`
-   - `.right-action-buttons`: `display: inline-flex !important; justify-content: flex-end !important; flex: 0 0 auto !important; margin-left: auto !important; margin-top: 0 !important; padding-top: 0 !important; border-top: none !important; width: auto !important;`
-   - Кнопки тулбара: `flex-shrink: 0 !important; white-space: nowrap !important;`
-   - Адаптивный перенос при `<= 960px`: только на узких экранах правая панель плавно переносится на новую строку.
-2. Медиа-запрос 1240px изолирован: `.candidate-filter-bar:not(.iteraction-reestr-filter-bar)` исключает тулбар взаимодействий от ложного разрыва строки.
+   - **Строго однострочное размещение**: `display: flex !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; min-width: 0 !important; gap: 6px !important; overflow-x: auto !important; overflow-y: hidden !important;`
+   - `.filter-buttons-panel`: `display: inline-flex !important; flex-wrap: nowrap !important; align-items: center !important; min-width: 0 !important; width: auto !important; gap: 5px !important;`
+   - `.left-action-buttons`: `display: inline-flex !important; justify-content: flex-start !important; flex: 1 1 auto !important; min-width: 0 !important;`
+   - `.right-action-buttons`: `display: inline-flex !important; justify-content: flex-end !important; flex: 0 0 auto !important; margin-left: auto !important; min-width: 0 !important;`
+   - **Масштабируемость кнопок (Fluid Scalable Buttons)**:
+     - Кнопки: `flex: 0 1 auto !important; min-width: 32px !important; max-width: 100% !important; white-space: nowrap !important;`
+     - Подписи кнопок (`.v-button-caption`): `min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;`
+     - Иконки и индикаторы popup: `flex-shrink: 0 !important;`
+   - **Плавная градация размеров при уменьшении ширины экрана**:
+     - `> 1440px`: высота 34px (min-height/max-height: 34px), line-height: 32px, паддинг 0 10px, шрифт 12.5px, gap 6px.
+     - `<= 1440px`: паддинг 0 8px, шрифт 12px, gap 5px.
+     - `<= 1240px`: высота 32px (min-height/max-height: 32px), line-height: 30px, паддинг 0 6px, шрифт 11.5px, gap 4px.
+     - `<= 1024px`: высота 30px (min-height/max-height: 30px), line-height: 28px, паддинг 0 4px, шрифт 11px, min-width 28px, gap 3px.
+     - `<= 900px`: высота 28px (min-height/max-height: 28px), line-height: 26px, паддинг 0 3px, шрифт 10.5px, min-width 28px, gap 2px.
+2. Исключен перенос на вторую строку: `iteraction-reestr-filter-bar` исключен из общих правил переноса через `:not(.iteraction-reestr-filter-bar)`. Тулбар сохраняет монолитное однострочное представление без наложений и выпадений. При экстремально узких окнах доступен горизонтальный скролл (`overflow-x: auto`), гарантируя доступность всех действий.
 
 ---
 
@@ -72,7 +81,7 @@
    - Использование `cssLayout` для `tableFilterBar`, `leftActionButtons`, `rightActionButtons`.
    - Отсутствие промежуточного `toolbarSpacer`.
    - Сохранность всех идентификаторов кнопок (`createBtn`, `editBtn`, `removeBtn`, `filterPopupButton`, `actionsPopupButton`) и их привязок.
-   - Синхронизацию SCSS-правил во всех 7 темах.
-2. **Code Review**: `ocr review --audience agent` — 0 замечаний по всем 8 файлам.
+   - Синхронизацию SCSS-правил во всех 7 темах: однострочность `flex-wrap: nowrap`, эллипсис `text-overflow: ellipsis`, выравнивание `justify-content: space-between` и `margin-left: auto`.
+2. **Code Review**: `ocr review --audience agent` — 0 замечаний.
 3. **Сборка SCSS-тем**: `buildScssThemes` завершилась успешно (`BUILD SUCCESSFUL`).
 4. **Тесты**: Все тесты пакета `iteractionlist` и `ScreenViewIntegrityTest` успешно пройдены.

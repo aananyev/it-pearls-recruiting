@@ -148,7 +148,7 @@ class IteractionListReestrLayoutContractTest {
     }
 
     @Test
-    @DisplayName("Проверка SCSS-контракта во всех 7 темах: правила iteraction-reestr-filter-bar и защита от спрыгивания при 1240px")
+    @DisplayName("Проверка SCSS-контракта во всех 7 темах: однострочное размещение и масштабирование iteraction-reestr-filter-bar")
     void testScssContractAcrossAllThemes() throws IOException {
         for (String theme : THEMES) {
             File scssFile = resolveFile(String.format(
@@ -159,10 +159,18 @@ class IteractionListReestrLayoutContractTest {
 
             assertTrue(scss.contains(".candidate-filter-bar.iteraction-reestr-filter-bar"),
                     "Тема " + theme + " должна содержать селектор .candidate-filter-bar.iteraction-reestr-filter-bar");
+            assertTrue(scss.contains("flex-wrap: nowrap !important"),
+                    "Тема " + theme + " должна удерживать тулбар строго в одну строку (flex-wrap: nowrap)");
             assertTrue(scss.contains("justify-content: space-between !important"),
                     "Тема " + theme + " должна выравнивать группы кнопок тулбара через space-between");
             assertTrue(scss.contains("margin-left: auto !important"),
                     "Тема " + theme + " должна прижимать правую группу кнопок через margin-left: auto");
+            assertTrue(scss.contains("text-overflow: ellipsis !important"),
+                    "Тема " + theme + " должна поддерживать эллипсис подписей кнопок при сжатии");
+            assertTrue(scss.contains("overflow-x: auto !important"),
+                    "Тема " + theme + " должна обеспечивать горизонтальную прокрутку при критическом сжатии");
+            assertTrue(scss.contains("scrollbar-width: none !important"),
+                    "Тема " + theme + " должна скрывать видимый скроллбар во избежание обрезки кнопок");
             assertTrue(scss.contains(".candidate-filter-bar:not(.iteraction-reestr-filter-bar)"),
                     "Тема " + theme + " должна исключать iteraction-reestr-filter-bar из медиа-запроса 1240px");
         }

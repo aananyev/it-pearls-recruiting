@@ -1442,56 +1442,92 @@
 
   /* ═══════════════════════════════════════════════════════════════════════════
    * Тулбар действий и быстрых фильтров реестра взаимодействий (IteractionListReestr)
-   * Исключает скачки, рывки и "прыжки" кнопок правой части при любых разрешениях экрана
+   * Строго однострочное размещение кнопок и масштабирование при любых разрешениях экрана
+   * Исключает наезжание кнопок друг на друга, перенос на вторую строку и рывки
    * ═══════════════════════════════════════════════════════════════════════════ */
   .candidate-filter-bar.iteraction-reestr-filter-bar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+
+    &::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
     .filter-buttons-panel {
       display: inline-flex !important;
-      flex-wrap: wrap !important;
+      flex-wrap: nowrap !important;
       align-items: center !important;
-      gap: 6px 8px !important;
       min-width: 0 !important;
       width: auto !important;
+      gap: 5px !important;
     }
 
     .left-action-buttons {
       display: inline-flex !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
       justify-content: flex-start !important;
-      flex: 0 1 auto !important;
-      width: auto !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      gap: 5px !important;
     }
 
     .right-action-buttons {
       display: inline-flex !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
       justify-content: flex-end !important;
       flex: 0 0 auto !important;
       margin-left: auto !important;
       margin-top: 0 !important;
       padding-top: 0 !important;
       border-top: none !important;
-      width: auto !important;
+      min-width: 0 !important;
+      gap: 5px !important;
     }
 
     .v-button,
     .v-popupbutton,
     .candidate-btn {
-      flex-shrink: 0 !important;
+      flex: 0 1 auto !important;
+      min-width: 28px !important;
+      max-width: 100% !important;
+      height: 34px !important;
+      line-height: 32px !important;
+      padding: 0 10px !important;
+      font-size: 12.5px !important;
       white-space: nowrap !important;
-    }
 
-    @media (max-width: 960px) {
-      .left-action-buttons {
-        width: 100% !important;
-        justify-content: flex-start !important;
+      .v-button-wrap {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
       }
 
-      .right-action-buttons {
-        width: 100% !important;
-        justify-content: flex-start !important;
-        margin-left: 0 !important;
-        margin-top: 4px !important;
-        padding-top: 4px !important;
-        border-top: 1px dashed rgba(15, 23, 42, 0.08) !important;
+      .v-button-caption {
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
+
+      .v-icon {
+        flex-shrink: 0 !important;
+      }
+
+      .v-popup-indicator {
+        flex-shrink: 0 !important;
       }
     }
   }
@@ -1710,7 +1746,29 @@
 
   /* Адаптивные правила для тулбаров и фильтра на разных разрешениях экрана */
   @media (max-width: 1440px) {
-    .candidate-filter-bar {
+    .candidate-filter-bar.iteraction-reestr-filter-bar {
+      gap: 5px !important;
+      padding: 6px 10px !important;
+
+      .filter-buttons-panel,
+      .left-action-buttons,
+      .right-action-buttons {
+        gap: 4px !important;
+      }
+
+      .v-button,
+      .v-popupbutton,
+      .candidate-btn {
+        padding: 0 8px !important;
+        font-size: 12px !important;
+
+        .v-button-caption {
+          font-size: 12px !important;
+        }
+      }
+    }
+
+    .candidate-filter-bar:not(.iteraction-reestr-filter-bar) {
       padding: 6px 10px !important;
       gap: 6px 10px !important;
 
@@ -1737,6 +1795,37 @@
   }
 
   @media (max-width: 1240px) {
+    .candidate-filter-bar.iteraction-reestr-filter-bar {
+      gap: 4px !important;
+      padding: 5px 8px !important;
+
+      .filter-buttons-panel,
+      .left-action-buttons,
+      .right-action-buttons {
+        gap: 3px !important;
+      }
+
+      .v-button,
+      .v-popupbutton,
+      .candidate-btn {
+        padding: 0 6px !important;
+        font-size: 11.5px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        line-height: 30px !important;
+
+        .v-button-caption {
+          font-size: 11.5px !important;
+        }
+
+        .v-icon {
+          margin-right: 3px !important;
+          font-size: 12px !important;
+        }
+      }
+    }
+
     .candidate-filter-bar:not(.iteraction-reestr-filter-bar) {
       justify-content: flex-start !important;
 
@@ -1760,8 +1849,74 @@
     }
   }
 
+  @media (max-width: 1024px) {
+    .candidate-filter-bar.iteraction-reestr-filter-bar {
+      gap: 3px !important;
+      padding: 4px 6px !important;
+
+      .filter-buttons-panel,
+      .left-action-buttons,
+      .right-action-buttons {
+        gap: 2px !important;
+      }
+
+      .v-button,
+      .v-popupbutton,
+      .candidate-btn {
+        padding: 0 4px !important;
+        font-size: 11px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+        line-height: 28px !important;
+        min-width: 28px !important;
+
+        .v-button-caption {
+          font-size: 11px !important;
+        }
+
+        .v-icon {
+          margin-right: 3px !important;
+          font-size: 11.5px !important;
+        }
+      }
+    }
+  }
+
   @media (max-width: 900px) {
-    .candidate-filter-bar {
+    .candidate-filter-bar.iteraction-reestr-filter-bar {
+      gap: 2px !important;
+      padding: 3px 4px !important;
+
+      .filter-buttons-panel,
+      .left-action-buttons,
+      .right-action-buttons {
+        gap: 2px !important;
+      }
+
+      .v-button,
+      .v-popupbutton,
+      .candidate-btn {
+        padding: 0 3px !important;
+        font-size: 10.5px !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
+        line-height: 26px !important;
+        min-width: 28px !important;
+
+        .v-button-caption {
+          font-size: 10.5px !important;
+        }
+
+        .v-icon {
+          margin-right: 2px !important;
+          font-size: 11px !important;
+        }
+      }
+    }
+
+    .candidate-filter-bar:not(.iteraction-reestr-filter-bar) {
       padding: 6px 8px !important;
       gap: 4px 6px !important;
 
