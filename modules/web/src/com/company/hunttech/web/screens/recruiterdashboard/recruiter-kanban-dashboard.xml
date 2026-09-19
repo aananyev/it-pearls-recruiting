@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Полноэкранный CUBA Dashboard собирает Kanban-апплет из classpath JSON-модели. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd"
+        caption="Кандидаты в работе — Kanban">
+    <!-- Рабочая область сохраняет локальный recruiter-dashboard-root и штатный Dashboard lifecycle. -->
+    <layout expand="candidateKanbanDashboard" stylename="edit-workspace recruiter-dashboard-root">
+        <!-- Dashboard Add-on загружает версионируемую JSON-композицию без зависимости от persistent DB model. -->
+        <dashboard:dashboard id="candidateKanbanDashboard"
+                             jsonPath="com/company/hunttech/web/screens/recruiterdashboard/recruiter-kanban-dashboard.json"
+                             timerDelay="60"
+                             width="100%"
+                             height="100%"/>
+    </layout>
+</window>
