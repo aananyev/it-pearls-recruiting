@@ -69,7 +69,7 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
             addMessage(messages, "user", prompt);
             customizeRequestBody(requestBody, options);
 
-            connection = openJsonPostConnection(getApiUrl());
+            connection = openJsonPostConnection(resolveApiUrl(options));
             connection.setRequestProperty("Authorization", "Bearer " + apiKey.trim());
             customizeConnection(connection);
             registerRequest(requestId, connection);
@@ -136,7 +136,7 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
             addMessage(messages, "user", prompt);
             customizeRequestBody(requestBody, options);
 
-            connection = openJsonPostConnection(getApiUrl());
+            connection = openJsonPostConnection(resolveApiUrl(options));
             connection.setRequestProperty("Authorization", "Bearer " + apiKey.trim());
             connection.setRequestProperty("Accept", "text/event-stream");
             customizeConnection(connection);
@@ -249,6 +249,23 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
     /** Позволяет провайдеру добавить специфичные параметры запроса. */
     protected void customizeRequestBody(ObjectNode requestBody, Map<String, Object> options) {
         // Большинству OpenAI-совместимых API дополнительные поля не требуются.
+    }
+
+    /**
+     * Вычисляет целевой URL для отправки запроса.
+     * Если в options передан кастомный baseApiUrl, используется он.
+     */
+    protected String resolveApiUrl(Map<String, Object> options) {
+        if (options != null && options.get("baseApiUrl") instanceof String) {
+            String customUrl = ((String) options.get("baseApiUrl")).trim();
+            if (!customUrl.isEmpty()) {
+                if (customUrl.endsWith("/chat/completions")) {
+                    return customUrl;
+                }
+                return customUrl.endsWith("/") ? customUrl + "chat/completions" : customUrl + "/chat/completions";
+            }
+        }
+        return getApiUrl();
     }
 
     /** Позволяет провайдеру добавить специфичные HTTP-заголовки. */

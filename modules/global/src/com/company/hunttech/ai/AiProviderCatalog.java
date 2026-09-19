@@ -43,7 +43,7 @@ public final class AiProviderCatalog {
         defaultModels.put("kimi", "kimi-k2.5");
         defaultModels.put("glm", "glm-5.1");
         defaultModels.put("openrouter", "nvidia/nemotron-3-ultra-550b-a55b:free");
-        defaultModels.put("bai", "bai/chat");
+        defaultModels.put("bai", "glm-5.2");
         DEFAULT_MODELS = Collections.unmodifiableMap(defaultModels);
     }
 

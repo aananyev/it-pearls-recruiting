@@ -155,7 +155,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 }
             }
         } else {
-            if (userAiQuotaService != null && currentUser != null) {
+            if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY) {
                 userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
             }
             ensureAdminFallbackAllowed(function, currentUser, userContext);
@@ -241,7 +241,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 }
             }
         } else {
-            if (userAiQuotaService != null && currentUser != null) {
+            if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY) {
                 userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
             }
             ensureAdminFallbackAllowed(function, currentUser, userContext);
@@ -308,7 +308,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
         }
-        if (userAiQuotaService != null && currentUser != null) {
+        if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY) {
             userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
         }
         return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime, tracker);
@@ -620,13 +620,15 @@ public class AiExecutionServiceBean implements AiExecutionService {
             int maxAttempts = resolveAdminMaxRetries(config);
             String model = isConfigured(candidate.modelOverride)
                     ? candidate.modelOverride
-                    : (isConfigured(function.getAdminModelName()) ? function.getAdminModelName() : config.getDefaultModelName());
+                    : (isSameAdminConfig(config, function.getAdminConfiguration()) && isConfigured(function.getAdminModelName())
+                        ? function.getAdminModelName()
+                        : config.getDefaultModelName());
             String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
                     AiProviderResponse response = executeProvider(config.getProviderCode(), apiKey, model,
-                            function, prompt, effectiveSystemPrompt, requestId);
+                            function, prompt, effectiveSystemPrompt, requestId, config.getBaseApiUrl());
                     tracker.recordSuccess();
                     saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                             prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
@@ -751,13 +753,15 @@ public class AiExecutionServiceBean implements AiExecutionService {
             int maxAttempts = resolveAdminMaxRetries(config);
             String model = isConfigured(candidate.modelOverride)
                     ? candidate.modelOverride
-                    : (isConfigured(function.getAdminModelName()) ? function.getAdminModelName() : config.getDefaultModelName());
+                    : (isSameAdminConfig(config, function.getAdminConfiguration()) && isConfigured(function.getAdminModelName())
+                        ? function.getAdminModelName()
+                        : config.getDefaultModelName());
             String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
                     AiProviderResponse response = executeProviderStreaming(config.getProviderCode(), apiKey, model,
-                            function, prompt, effectiveSystemPrompt, requestId, listener);
+                            function, prompt, effectiveSystemPrompt, requestId, listener, config.getBaseApiUrl());
                     tracker.recordSuccess();
                     saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
                             prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
@@ -926,6 +930,17 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                String prompt,
                                                String effectiveSystemPrompt,
                                                String requestId) {
+        return executeProvider(providerCode, apiKey, model, function, prompt, effectiveSystemPrompt, requestId, null);
+    }
+
+    private AiProviderResponse executeProvider(String providerCode,
+                                               String apiKey,
+                                               String model,
+                                               AiFunctionConfiguration function,
+                                               String prompt,
+                                               String effectiveSystemPrompt,
+                                               String requestId,
+                                               String baseApiUrl) {
         if (!isConfigured(providerCode) || !isConfigured(apiKey)) {
             throw new DevelopmentException("Эффективное AI-подключение настроено не полностью.");
         }
@@ -939,7 +954,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         log.info("executeProvider: вызов {} (модель {}), requestId={}", providerCode, model, requestId);
         try {
             return provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model,
-                    buildOptions(function, requestId));
+                    buildOptions(function, requestId, baseApiUrl));
         } finally {
             aiProviderRegistry.unregisterRequest(requestId, provider);
         }
@@ -949,6 +964,14 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                         AiFunctionConfiguration function, String prompt,
                                                         String effectiveSystemPrompt, String requestId,
                                                         AiStreamListener listener) {
+        return executeProviderStreaming(providerCode, apiKey, model, function, prompt, effectiveSystemPrompt, requestId, listener, null);
+    }
+
+    private AiProviderResponse executeProviderStreaming(String providerCode, String apiKey, String model,
+                                                        AiFunctionConfiguration function, String prompt,
+                                                        String effectiveSystemPrompt, String requestId,
+                                                        AiStreamListener listener,
+                                                        String baseApiUrl) {
         if (!isConfigured(providerCode) || !isConfigured(apiKey)) {
             throw new DevelopmentException("Эффективное AI-подключение настроено не полностью.");
         }
@@ -963,10 +986,10 @@ public class AiExecutionServiceBean implements AiExecutionService {
         try {
             if (provider.supportsStreaming()) {
                 return provider.executeTextStreaming(prompt, effectiveSystemPrompt, apiKey, model,
-                        buildOptions(function, requestId), listener::onDelta);
+                        buildOptions(function, requestId, baseApiUrl), listener::onDelta);
             }
             AiProviderResponse response = provider.executeTextWithTokens(prompt, effectiveSystemPrompt, apiKey, model,
-                    buildOptions(function, requestId));
+                    buildOptions(function, requestId, baseApiUrl));
             if (response != null && response.getText() != null) {
                 listener.onDelta(response.getText());
             }
@@ -1227,6 +1250,10 @@ public class AiExecutionServiceBean implements AiExecutionService {
     }
 
     private Map<String, Object> buildOptions(AiFunctionConfiguration function, String requestId) {
+        return buildOptions(function, requestId, null);
+    }
+
+    private Map<String, Object> buildOptions(AiFunctionConfiguration function, String requestId, String baseApiUrl) {
         Map<String, Object> options = new HashMap<>();
         options.put("temperature", function.getTemperature() == null ? 0.7 : function.getTemperature());
         if (function.getMaxTokens() != null) {
@@ -1235,7 +1262,17 @@ public class AiExecutionServiceBean implements AiExecutionService {
         if (requestId != null && !requestId.trim().isEmpty()) {
             options.put("requestId", requestId.trim());
         }
+        if (baseApiUrl != null && !baseApiUrl.trim().isEmpty()) {
+            options.put("baseApiUrl", baseApiUrl.trim());
+        }
         return options;
+    }
+
+    private boolean isSameAdminConfig(AdminAiConfiguration a, AdminAiConfiguration b) {
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.getId() != null && a.getId().equals(b.getId());
     }
 
     private String requestIdFromContext(Map<String, Object> context) {

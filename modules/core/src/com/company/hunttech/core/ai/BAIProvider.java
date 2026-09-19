@@ -31,19 +31,32 @@ public class BAIProvider extends AbstractOpenAiCompatibleProvider {
 
     @Override
     protected String getApiUrl() {
-        // Assuming B.AI uses an OpenAI-compatible API endpoint.
-        // Replace with the actual endpoint if known.
-        return "https://api.bai.chat/v1/chat/completions";
+        return "https://api.b.ai/v1/chat/completions";
     }
 
     @Override
     protected String getDefaultModel() {
-        return "bai/chat";
+        return "glm-5.2";
     }
 
     @Override
     protected String getProviderDisplayName() {
         return "B.AI";
+    }
+
+    @Override
+    protected String resolveModelName(String modelName) {
+        String resolved = super.resolveModelName(modelName);
+        if (resolved != null) {
+            String trimmed = resolved.trim();
+            if ("glm52".equalsIgnoreCase(trimmed) || "glm-52".equalsIgnoreCase(trimmed) || "glm5.2".equalsIgnoreCase(trimmed)) {
+                return "glm-5.2";
+            }
+            if ("qwen".equalsIgnoreCase(trimmed) || "qwen3".equalsIgnoreCase(trimmed) || "qwen3.8".equalsIgnoreCase(trimmed)) {
+                return "qwen3.8-flash";
+            }
+        }
+        return resolved;
     }
 
     // Note: B.AI may not support image generation via the same endpoint as OpenAI.

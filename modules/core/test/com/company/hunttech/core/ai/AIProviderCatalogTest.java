@@ -69,5 +69,21 @@ public class AIProviderCatalogTest {
         assertEquals("nvidia/nemotron-3-ultra-550b-a55b", provider.resolveModelName("nvidia/nemotron-3-ultra-550b-a55b"));
         assertEquals("anthropic/claude-3.5-sonnet", provider.resolveModelName("anthropic/claude-3.5-sonnet"));
     }
+
+    @Test
+    public void baiProviderModelResolution() {
+        BAIProvider provider = new BAIProvider();
+        assertEquals("bai", provider.getProviderCode());
+        assertEquals("glm-5.2", provider.getDefaultModel());
+        assertEquals("glm-5.2", provider.resolveModelName(null));
+        assertEquals("glm-5.2", provider.resolveModelName(""));
+        assertEquals("glm-5.2", provider.resolveModelName("glm52"));
+        assertEquals("glm-5.2", provider.resolveModelName("glm-52"));
+        assertEquals("glm-5.2", provider.resolveModelName("glm5.2"));
+        assertEquals("qwen3.8-flash", provider.resolveModelName("qwen"));
+        assertEquals("qwen3.8-flash", provider.resolveModelName("qwen3"));
+        assertEquals("qwen3.8-flash", provider.resolveModelName("qwen3.8"));
+        assertEquals("custom-model", provider.resolveModelName("custom-model"));
+    }
 }
 
