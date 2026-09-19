@@ -72,6 +72,8 @@ public class AdminAiDashboard extends Screen {
     private LookupField<String> providerLookup;
     @Inject
     private LookupField<String> ownerLookup;
+    @Inject
+    private LookupField<String> functionLookup;
 
     @Inject
     private Label<String> totalSpendLabel;
@@ -154,6 +156,45 @@ public class AdminAiDashboard extends Screen {
         ownerOptions.put("Личный (User)", "USER");
         ownerLookup.setOptionsMap(ownerOptions);
         ownerLookup.setValue("");
+
+        initFunctionLookup();
+    }
+
+    private void initFunctionLookup() {
+        Map<String, String> functionOptions = new LinkedHashMap<>();
+        functionOptions.put("Все функции AI", "");
+
+        // Загружаем активные AI-функции из БД с fallback
+        try {
+            List<com.company.hunttech.entity.ai.AiFunctionConfiguration> configs = dataManager.load(com.company.hunttech.entity.ai.AiFunctionConfiguration.class)
+                    .query("select e from hunttech_AiFunctionConfiguration e order by e.name asc")
+                    .list();
+            for (com.company.hunttech.entity.ai.AiFunctionConfiguration c : configs) {
+                if (c.getCode() != null) {
+                    String title = c.getName() != null && !c.getName().trim().isEmpty() ? c.getName() : c.getCode();
+                    functionOptions.put(title, c.getCode());
+                }
+            }
+        } catch (Exception e) {
+            // fallback если БД еще не содержит записей
+        }
+
+        // Гарантируем присутствие ключевых последних функций
+        ensureFunctionOption(functionOptions, "AI-подбор вакансий для кандидата", "CANDIDATE_VACANCY_MATCH_ANALYZE");
+        ensureFunctionOption(functionOptions, "Фоновое определение навыков кандидатов", "SKILLS_EXTRACT_BACKGROUND");
+        ensureFunctionOption(functionOptions, "Умный анализ требований вакансии", "VACANCY_EXPLAIN_REQUIREMENTS");
+        ensureFunctionOption(functionOptions, "Объяснение требований вакансии на примерах", "VACANCY_EXPLAIN_SIMPLIFIED_WEB");
+        ensureFunctionOption(functionOptions, "Плавающий чат с ИИ", "LLM_CHAT");
+        ensureFunctionOption(functionOptions, "Извлечение навыков из текста", "SKILLS_EXTRACT");
+
+        functionLookup.setOptionsMap(functionOptions);
+        functionLookup.setValue("");
+    }
+
+    private void ensureFunctionOption(Map<String, String> map, String name, String code) {
+        if (!map.containsValue(code)) {
+            map.put(name, code);
+        }
     }
 
     private void applyPeriod(String period) {
@@ -200,6 +241,7 @@ public class AdminAiDashboard extends Screen {
     @Subscribe("resetFilterBtn")
     public void onResetFilterBtnClick(Button.ClickEvent event) {
         userPicker.setValue(null);
+        functionLookup.setValue("");
         providerLookup.setValue("");
         ownerLookup.setValue("");
         periodLookup.setValue(PERIOD_MONTH);
@@ -339,6 +381,7 @@ public class AdminAiDashboard extends Screen {
         User filterUser = userPicker.getValue();
         String filterProvider = providerLookup.getValue();
         String filterOwner = ownerLookup.getValue();
+        String filterFunction = functionLookup.getValue();
 
         StringBuilder query = new StringBuilder("select e from hunttech_AiCallLog e where e.callTime >= :from and e.callTime <= :to ");
         Map<String, Object> params = new HashMap<>();
@@ -348,6 +391,10 @@ public class AdminAiDashboard extends Screen {
         if (filterUser != null) {
             query.append("and e.user = :filterUser ");
             params.put("filterUser", filterUser);
+        }
+        if (filterFunction != null && !filterFunction.trim().isEmpty()) {
+            query.append("and e.functionCode = :filterFunction ");
+            params.put("filterFunction", filterFunction);
         }
         if (filterProvider != null && !filterProvider.trim().isEmpty()) {
             query.append("and e.providerCode = :filterProvider ");
@@ -440,7 +487,7 @@ public class AdminAiDashboard extends Screen {
             }
 
             // Function spend
-            String fName = log.getFunctionName() != null ? log.getFunctionName() : (log.getFunctionCode() != null ? log.getFunctionCode() : "Прочее");
+            String fName = formatFunctionName(log.getFunctionName(), log.getFunctionCode());
             functionSpendMap.put(fName, functionSpendMap.getOrDefault(fName, BigDecimal.ZERO).add(cost));
 
             // Model stats
@@ -626,6 +673,29 @@ public class AdminAiDashboard extends Screen {
 
         userSummaryDc.getMutableItems().clear();
         userSummaryDc.getMutableItems().addAll(summaryList);
+    }
+
+    private String formatFunctionName(String name, String code) {
+        if (name != null && !name.trim().isEmpty() && !name.equalsIgnoreCase(code)) {
+            return name;
+        }
+        if (code == null) return "Прочее";
+        switch (code) {
+            case "CANDIDATE_VACANCY_MATCH_ANALYZE":
+                return "AI-подбор вакансий";
+            case "SKILLS_EXTRACT_BACKGROUND":
+                return "Фоновое определение навыков";
+            case "VACANCY_EXPLAIN_REQUIREMENTS":
+                return "Анализ требований вакансии";
+            case "VACANCY_EXPLAIN_SIMPLIFIED_WEB":
+                return "Объяснение требований вакансии";
+            case "LLM_CHAT":
+                return "Плавающий чат с ИИ";
+            case "SKILLS_EXTRACT":
+                return "Извлечение навыков";
+            default:
+                return code;
+        }
     }
 
     private String formatTokenCount(long count) {

@@ -2,15 +2,25 @@ package com.company.hunttech.web.screens.jobcandidate;
 
 import com.company.hunttech.dto.CandidateVacancyMatchReport;
 import com.company.hunttech.entity.CandidateVacancyMatchItem;
+import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.CandidateVacancyMatchAiService;
+import com.company.hunttech.service.CandidateVacancyWorkflowService;
+import com.company.hunttech.service.dto.BulkTakeIntoWorkResult;
+import com.company.hunttech.service.dto.TakeIntoWorkResult;
+import com.company.hunttech.web.screens.candidatevacancymatch.CandidateOutreachDraftDialog;
+import com.company.hunttech.web.screens.candidatevacancymatch.RejectCandidateMatchDialog;
+import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
 import com.company.hunttech.web.screens.openposition.OpenPositionEdit;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -21,10 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Экран экспертного аналитического отчёта AI-сопоставления кандидата с вакансиями.
+ * Экран результатов AI-подбора кандидатов и вакансий с рабочим процессом рекрутера (Этап 2 и Этап 3).
  */
 @UiController("hunttech_CandidateVacancyMatch")
 @UiDescriptor("candidate-vacancy-match-screen.xml")
@@ -32,11 +43,22 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     private static final Logger log = LoggerFactory.getLogger(CandidateVacancyMatchScreen.class);
 
+    private enum Mode {
+        CANDIDATE_TO_VACANCIES,
+        VACANCY_TO_CANDIDATES
+    }
+
+    private Mode mode = Mode.CANDIDATE_TO_VACANCIES;
     private JobCandidate candidate;
+    private OpenPosition openPosition;
     private CandidateVacancyMatchReport currentReport;
+    private List<CandidateVacancyMatchItem> allReportItems = new ArrayList<>();
 
     @Inject
     private CandidateVacancyMatchAiService candidateVacancyMatchAiService;
+
+    @Inject
+    private CandidateVacancyWorkflowService workflowService;
 
     @Inject
     private BackgroundWorker backgroundWorker;
@@ -45,12 +67,18 @@ public class CandidateVacancyMatchScreen extends Screen {
     private Notifications notifications;
 
     @Inject
+    private Dialogs dialogs;
+
+    @Inject
     private ScreenBuilders screenBuilders;
 
     @Inject
     private DataManager dataManager;
 
-    /* UI Components */
+    @Inject
+    private UiComponents uiComponents;
+
+    /* Top Bar Components */
     @Inject
     private CollectionContainer<CandidateVacancyMatchItem> matchesDc;
 
@@ -58,10 +86,10 @@ public class CandidateVacancyMatchScreen extends Screen {
     private Table<CandidateVacancyMatchItem> matchesTable;
 
     @Inject
-    private Label<String> candidateTitleLabel;
+    private Label<String> mainTitleLabel;
 
     @Inject
-    private Label<String> candidateSubTitleLabel;
+    private Label<String> subTitleLabel;
 
     @Inject
     private ProgressBar analysisProgressBar;
@@ -73,17 +101,69 @@ public class CandidateVacancyMatchScreen extends Screen {
     private Button refreshAnalysisBtn;
 
     @Inject
-    private Button openVacancyBtn;
+    private Button closeBtn;
+
+    /* Toolbar Action Buttons */
+    @Inject
+    private Button takeIntoWorkBtn;
+
+    @Inject
+    private Button createInteractionBtn;
+
+    @Inject
+    private Button outreachDraftBtn;
+
+    @Inject
+    private Button bulkTakeIntoWorkBtn;
+
+    @Inject
+    private Button postponeBtn;
+
+    @Inject
+    private Button rejectBtn;
+
+    @Inject
+    private Button openEntityBtn;
+
+    @Inject
+    private LookupField<String> decisionFilter;
 
     @Inject
     private Label<String> countLabel;
 
-    /* Detail Card Components */
+    /* Right Detail Card Components */
     @Inject
-    private Label<String> detailVacancyTitle;
+    private Label<String> detailTitle;
 
     @Inject
-    private Label<String> detailVacancyMeta;
+    private Label<String> detailMeta;
+
+    @Inject
+    private HBoxLayout quickActionsBox;
+
+    @Inject
+    private Button quickTakeBtn;
+
+    @Inject
+    private Button quickInteractionBtn;
+
+    @Inject
+    private Button quickOutreachBtn;
+
+    @Inject
+    private Button quickPostponeBtn;
+
+    @Inject
+    private Button quickRejectBtn;
+
+    @Inject
+    private VBoxLayout recruiterDecisionBox;
+
+    @Inject
+    private Label<String> recruiterDecisionTextLabel;
+
+    @Inject
+    private Label<String> recruiterCommentTextLabel;
 
     @Inject
     private VBoxLayout scoresBox;
@@ -144,16 +224,44 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     public void setCandidate(JobCandidate candidate) {
         this.candidate = candidate;
+        this.mode = Mode.CANDIDATE_TO_VACANCIES;
+    }
+
+    public void setOpenPosition(OpenPosition openPosition) {
+        this.openPosition = openPosition;
+        this.mode = Mode.VACANCY_TO_CANDIDATES;
     }
 
     @Subscribe
     public void onInit(InitEvent event) {
-        // Настройка визуального оформления колонок таблицы
+        initTableColumns();
+        initDecisionFilter();
+    }
+
+    private void initTableColumns() {
         matchesTable.addGeneratedColumn("score", item -> {
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
             int score = item.getScore() != null ? item.getScore() : 0;
             String bg = score >= 80 ? "#28a745" : (score >= 65 ? "#007bff" : (score >= 45 ? "#e0a800" : "#6c757d"));
             label.setValue(String.format("<span style='background-color: %s; color: white; font-weight: bold; padding: 2px 8px; border-radius: 4px;'>%d/100</span>", bg, score));
+            label.setHtmlEnabled(true);
+            return label;
+        });
+
+        matchesTable.addGeneratedColumn("recruiterDecisionDisplay", item -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            String dec = item.getRecruiterDecision();
+            if (dec == null || dec.trim().isEmpty() || "—".equals(dec)) {
+                label.setValue("<span style='color: #6c757d;'>—</span>");
+            } else if ("В работе".equalsIgnoreCase(dec) || "IN_WORK".equalsIgnoreCase(dec)) {
+                label.setValue("<span style='background-color: #28a745; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>В работе</span>");
+            } else if ("Отложен".equalsIgnoreCase(dec) || "POSTPONED".equalsIgnoreCase(dec)) {
+                label.setValue("<span style='background-color: #fd7e14; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>Отложен</span>");
+            } else if ("Не подходит".equalsIgnoreCase(dec) || "REJECTED".equalsIgnoreCase(dec)) {
+                label.setValue("<span style='background-color: #dc3545; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>Не подходит</span>");
+            } else {
+                label.setValue(escapeHtml(dec));
+            }
             label.setHtmlEnabled(true);
             return label;
         });
@@ -167,16 +275,79 @@ public class CandidateVacancyMatchScreen extends Screen {
             label.setHtmlEnabled(true);
             return label;
         });
+
+        matchesTable.addGeneratedColumn("candidateName", item -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            String name = item.getCandidateFullName() != null ? item.getCandidateFullName() : "";
+            if (item.getCandidateCity() != null && !item.getCandidateCity().isEmpty()) {
+                name += " (" + item.getCandidateCity() + ")";
+            }
+            label.setValue(escapeHtml(name));
+            return label;
+        });
+
+        matchesTable.addGeneratedColumn("matchedSkillsDisplay", item -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            if (item.getMatchedSkills() != null && !item.getMatchedSkills().isEmpty()) {
+                label.setValue(escapeHtml(String.join(", ", item.getMatchedSkills())));
+            } else {
+                label.setValue("—");
+            }
+            return label;
+        });
+
+        matchesTable.addGeneratedColumn("missingCriticalRequirementsDisplay", item -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            if (item.getMissingCriticalRequirements() != null && !item.getMissingCriticalRequirements().isEmpty()) {
+                label.setValue(escapeHtml(String.join(", ", item.getMissingCriticalRequirements())));
+            } else {
+                label.setValue("—");
+            }
+            return label;
+        });
     }
 
-    @Inject
-    private com.haulmont.cuba.gui.UiComponents uiComponents;
+    private void initDecisionFilter() {
+        Map<String, String> options = new LinkedHashMap<>();
+        options.put("Все", "ALL");
+        options.put("Не обработаны рекрутером", "UNPROCESSED");
+        options.put("В работе", "IN_WORK");
+        options.put("Отложены", "POSTPONED");
+        options.put("Не подходят", "REJECTED");
+        decisionFilter.setOptionsMap(options);
+        decisionFilter.setValue("ALL");
+
+        decisionFilter.addValueChangeListener(e -> applyFilter(e.getValue()));
+    }
+
+    private void applyFilter(String filterKey) {
+        if (filterKey == null || "ALL".equalsIgnoreCase(filterKey)) {
+            matchesDc.setItems(allReportItems);
+        } else if ("UNPROCESSED".equalsIgnoreCase(filterKey)) {
+            matchesDc.setItems(allReportItems.stream()
+                    .filter(it -> it.getRecruiterDecision() == null || it.getRecruiterDecision().trim().isEmpty() || "—".equals(it.getRecruiterDecision()))
+                    .collect(Collectors.toList()));
+        } else if ("IN_WORK".equalsIgnoreCase(filterKey)) {
+            matchesDc.setItems(allReportItems.stream()
+                    .filter(it -> "В работе".equalsIgnoreCase(it.getRecruiterDecision()) || "IN_WORK".equalsIgnoreCase(it.getRecruiterDecision()))
+                    .collect(Collectors.toList()));
+        } else if ("POSTPONED".equalsIgnoreCase(filterKey)) {
+            matchesDc.setItems(allReportItems.stream()
+                    .filter(it -> "Отложен".equalsIgnoreCase(it.getRecruiterDecision()) || "POSTPONED".equalsIgnoreCase(it.getRecruiterDecision()))
+                    .collect(Collectors.toList()));
+        } else if ("REJECTED".equalsIgnoreCase(filterKey)) {
+            matchesDc.setItems(allReportItems.stream()
+                    .filter(it -> "Не подходит".equalsIgnoreCase(it.getRecruiterDecision()) || "REJECTED".equalsIgnoreCase(it.getRecruiterDecision()))
+                    .collect(Collectors.toList()));
+        }
+        countLabel.setValue("Найдено совпадений: " + matchesDc.getItems().size());
+    }
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        if (candidate != null) {
+        if (mode == Mode.CANDIDATE_TO_VACANCIES && candidate != null) {
             String fio = candidate.getFullName() != null ? candidate.getFullName() : "Кандидат";
-            candidateTitleLabel.setValue("Кандидат: " + fio);
+            mainTitleLabel.setValue("Кандидат: " + fio);
 
             StringBuilder sub = new StringBuilder();
             if (candidate.getPersonPosition() != null && candidate.getPersonPosition().getPositionRuName() != null) {
@@ -186,34 +357,52 @@ public class CandidateVacancyMatchScreen extends Screen {
                 if (sub.length() > 0) sub.append(" • ");
                 sub.append("📍 ").append(candidate.getCityOfResidence().getCityRuName());
             }
-            candidateSubTitleLabel.setValue(sub.toString());
+            subTitleLabel.setValue(sub.toString());
+            openEntityBtn.setCaption("Открыть вакансию");
+            startAnalysis();
+        } else if (mode == Mode.VACANCY_TO_CANDIDATES && openPosition != null) {
+            String vacName = openPosition.getVacansyName() != null ? openPosition.getVacansyName() : "Вакансия";
+            mainTitleLabel.setValue("Вакансия: " + vacName);
 
+            StringBuilder sub = new StringBuilder();
+            if (openPosition.getProjectName() != null && openPosition.getProjectName().getProjectName() != null) {
+                sub.append("Проект: ").append(openPosition.getProjectName().getProjectName());
+            }
+            if (openPosition.getCityPosition() != null && openPosition.getCityPosition().getCityRuName() != null) {
+                if (sub.length() > 0) sub.append(" • ");
+                sub.append("📍 ").append(openPosition.getCityPosition().getCityRuName());
+            }
+            subTitleLabel.setValue(sub.toString());
+            openEntityBtn.setCaption("Открыть кандидата");
             startAnalysis();
         } else {
-            statusLabel.setValue("Кандидат не выбран.");
+            statusLabel.setValue("Объект для AI-подбора не выбран.");
         }
     }
 
     private void startAnalysis() {
-        if (candidate == null) {
-            return;
-        }
-
-        setBusy(true, "AI анализирует резюме кандидата и открытые вакансии...");
+        setBusy(true, "AI анализирует профили и формирует ранжированные рекомендации...");
         matchesDc.getMutableItems().clear();
+        allReportItems.clear();
         clearDetailsPane();
+        updateToolbarActionsState();
 
         BackgroundTask<Integer, CandidateVacancyMatchReport> task =
                 new BackgroundTask<Integer, CandidateVacancyMatchReport>(240, this) {
                     @Override
                     public CandidateVacancyMatchReport run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
                         taskLifeCycle.publish(1);
-                        return candidateVacancyMatchAiService.matchVacanciesForCandidate(candidate.getId());
+                        if (mode == Mode.VACANCY_TO_CANDIDATES && openPosition != null) {
+                            return candidateVacancyMatchAiService.matchCandidatesForVacancy(openPosition.getId());
+                        } else if (candidate != null) {
+                            return candidateVacancyMatchAiService.matchVacanciesForCandidate(candidate.getId());
+                        }
+                        return null;
                     }
 
                     @Override
                     public void progress(List<Integer> changes) {
-                        statusLabel.setValue("Анализ и ранжирование вакансий нейросетью...");
+                        statusLabel.setValue("Анализ соответствия и расчёт рейтинга нейросетью...");
                     }
 
                     @Override
@@ -228,7 +417,7 @@ public class CandidateVacancyMatchScreen extends Screen {
                         log.error("Timeout during candidate-vacancy matching");
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Превышено время AI-подбора")
-                                .withDescription("Анализ вакансий занял слишком много времени.")
+                                .withDescription("Анализ занял слишком много времени.")
                                 .show();
                         statusLabel.setValue("Превышено время выполнения AI-анализа.");
                         return true;
@@ -240,7 +429,7 @@ public class CandidateVacancyMatchScreen extends Screen {
                         log.error("Error during candidate-vacancy matching", ex);
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Ошибка AI-подбора")
-                                .withDescription("Не удалось выполнить анализ вакансий: " + ex.getMessage())
+                                .withDescription("Не удалось выполнить анализ: " + ex.getMessage())
                                 .show();
                         statusLabel.setValue("Ошибка при выполнении AI-анализа.");
                         return true;
@@ -268,62 +457,123 @@ public class CandidateVacancyMatchScreen extends Screen {
             String msg = report.getStatusMessage() != null ? report.getStatusMessage() : "Ошибка анализа.";
             statusLabel.setValue(msg);
             notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("Подбор вакансий")
+                    .withCaption("AI-подбор")
                     .withDescription(msg)
                     .show();
             return;
         }
 
         this.currentReport = report;
-        List<CandidateVacancyMatchItem> items = report.getItems();
-        matchesDc.setItems(items);
-        countLabel.setValue("Найдено вакансий: " + items.size());
+        this.allReportItems = new ArrayList<>(report.getItems());
+        applyFilter(decisionFilter.getValue());
 
         if (report.isFallbackUsed()) {
-            statusLabel.setValue("AI недоступен. Выполнена предварительная оценка без AI.");
+            statusLabel.setValue("AI недоступен. Выполнена предварительная оценка по совпадению навыков.");
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("Внимание")
-                    .withDescription("AI-сервис временно недоступен. Расчёт выполнен по эвристическим правилам совпадения навыков.")
+                    .withDescription("AI-сервис временно недоступен. Отображён честный эвристический расчёт.")
                     .show();
         } else {
-            statusLabel.setValue(String.format("AI-анализ завершен. Проанализировано %d вакансий.", report.getTotalVacanciesAnalyzed()));
+            statusLabel.setValue(String.format("AI-анализ завершен. Рекомендовано: %d.", report.getItems().size()));
             if (report.getAiExecutionResult() != null) {
                 AiOperationNotifier.show(notifications, report.getAiExecutionResult(),
-                        "AI-подбор вакансий выполнен",
-                        String.format("Проанализировано %d вакансий, рекомендовано к рассмотрению %d",
-                                report.getTotalVacanciesAnalyzed(), items.size()));
+                        "AI-подбор завершён",
+                        String.format("Проанализировано объектов: %d, сформировано рекомендаций: %d",
+                                report.getTotalVacanciesAnalyzed(), report.getItems().size()));
             }
         }
 
-        if (!items.isEmpty()) {
-            matchesTable.setSelected(items.get(0));
-            populateDetailPane(items.get(0));
+        if (!report.getItems().isEmpty()) {
+            matchesTable.setSelected(report.getItems().get(0));
+            populateDetailPane(report.getItems().get(0));
         }
     }
 
     @Subscribe(id = "matchesDc", target = Target.DATA_CONTAINER)
     public void onMatchesDcItemChange(CollectionContainer.ItemChangeEvent<CandidateVacancyMatchItem> event) {
+        updateToolbarActionsState();
         CandidateVacancyMatchItem item = event.getItem();
         if (item != null) {
-            openVacancyBtn.setEnabled(true);
             populateDetailPane(item);
         } else {
-            openVacancyBtn.setEnabled(false);
             clearDetailsPane();
         }
     }
 
+    @Subscribe("matchesTable")
+    public void onMatchesTableSelection(Table.SelectionEvent<CandidateVacancyMatchItem> event) {
+        updateToolbarActionsState();
+    }
+
+    private void updateToolbarActionsState() {
+        Set<CandidateVacancyMatchItem> selected = matchesTable.getSelected();
+        int count = selected != null ? selected.size() : 0;
+
+        if (count > 1) {
+            bulkTakeIntoWorkBtn.setVisible(true);
+            bulkTakeIntoWorkBtn.setCaption("Взять выбранных в работу (" + count + ")");
+            takeIntoWorkBtn.setEnabled(false);
+            createInteractionBtn.setEnabled(false);
+            outreachDraftBtn.setEnabled(false);
+            postponeBtn.setEnabled(false);
+            rejectBtn.setEnabled(false);
+            openEntityBtn.setEnabled(false);
+        } else if (count == 1) {
+            bulkTakeIntoWorkBtn.setVisible(false);
+            takeIntoWorkBtn.setEnabled(true);
+            createInteractionBtn.setEnabled(true);
+            outreachDraftBtn.setEnabled(true);
+            postponeBtn.setEnabled(true);
+            rejectBtn.setEnabled(true);
+            openEntityBtn.setEnabled(true);
+        } else {
+            bulkTakeIntoWorkBtn.setVisible(false);
+            takeIntoWorkBtn.setEnabled(false);
+            createInteractionBtn.setEnabled(false);
+            outreachDraftBtn.setEnabled(false);
+            postponeBtn.setEnabled(false);
+            rejectBtn.setEnabled(false);
+            openEntityBtn.setEnabled(false);
+        }
+    }
+
     private void populateDetailPane(CandidateVacancyMatchItem item) {
-        detailVacancyTitle.setValue(item.getVacancyName() != null ? item.getVacancyName() : "Вакансия");
+        String title = mode == Mode.VACANCY_TO_CANDIDATES
+                ? (item.getCandidateFullName() != null ? item.getCandidateFullName() : "Кандидат")
+                : (item.getVacancyName() != null ? item.getVacancyName() : "Вакансия");
+        detailTitle.setValue(title);
+
         StringBuilder meta = new StringBuilder();
+        if (item.getPositionName() != null && !item.getPositionName().isEmpty()) {
+            meta.append("Должность: ").append(item.getPositionName());
+        }
         if (item.getProjectName() != null && !item.getProjectName().isEmpty()) {
+            if (meta.length() > 0) meta.append(" • ");
             meta.append("Проект: ").append(item.getProjectName());
         }
-        if (item.getPositionName() != null && !item.getPositionName().isEmpty()) {
+        if (item.getCandidateCity() != null && !item.getCandidateCity().isEmpty()) {
             if (meta.length() > 0) meta.append(" • ");
-            meta.append(item.getPositionName());
+            meta.append("📍 ").append(item.getCandidateCity());
         }
-        detailVacancyMeta.setValue(meta.toString());
+        detailMeta.setValue(meta.toString());
+
+        quickActionsBox.setVisible(true);
+
+        // Recruiter Decision
+        if (item.getRecruiterDecision() != null && !item.getRecruiterDecision().trim().isEmpty() && !"—".equals(item.getRecruiterDecision())) {
+            recruiterDecisionBox.setVisible(true);
+            recruiterDecisionTextLabel.setValue(item.getRecruiterDecision());
+            StringBuilder commentBuilder = new StringBuilder();
+            if (item.getRejectionReason() != null && !item.getRejectionReason().isEmpty()) {
+                commentBuilder.append("Причина: ").append(item.getRejectionReason()).append(". ");
+            }
+            if (item.getRecruiterComment() != null && !item.getRecruiterComment().isEmpty()) {
+                commentBuilder.append(item.getRecruiterComment());
+            }
+            recruiterCommentTextLabel.setValue(commentBuilder.toString());
+        } else {
+            recruiterDecisionBox.setVisible(false);
+        }
 
         // Subscores
         scoresBox.setVisible(true);
@@ -392,6 +642,20 @@ public class CandidateVacancyMatchScreen extends Screen {
         }
     }
 
+    private void clearDetailsPane() {
+        detailTitle.setValue("Выберите строку из списка слева");
+        detailMeta.setValue("");
+        quickActionsBox.setVisible(false);
+        recruiterDecisionBox.setVisible(false);
+        scoresBox.setVisible(false);
+        reasonsBox.setVisible(false);
+        matchedSkillsBox.setVisible(false);
+        missingReqsBox.setVisible(false);
+        risksBox.setVisible(false);
+        summaryBox.setVisible(false);
+        aiMetaBox.setVisible(false);
+    }
+
     private String formatListAsHtml(List<String> list) {
         if (list == null || list.isEmpty()) return "";
         StringBuilder sb = new StringBuilder("<ul style='margin: 4px 0; padding-left: 20px;'>");
@@ -409,16 +673,299 @@ public class CandidateVacancyMatchScreen extends Screen {
                 .replace(">", "&gt;");
     }
 
-    private void clearDetailsPane() {
-        detailVacancyTitle.setValue("Выберите вакансию из списка слева");
-        detailVacancyMeta.setValue("");
-        scoresBox.setVisible(false);
-        reasonsBox.setVisible(false);
-        matchedSkillsBox.setVisible(false);
-        missingReqsBox.setVisible(false);
-        risksBox.setVisible(false);
-        summaryBox.setVisible(false);
-        aiMetaBox.setVisible(false);
+    /* Actions Implementation */
+
+    @Subscribe("takeIntoWorkBtn")
+    public void onTakeIntoWorkBtnClick(Button.ClickEvent event) {
+        executeTakeIntoWork();
+    }
+
+    @Subscribe("quickTakeBtn")
+    public void onQuickTakeBtnClick(Button.ClickEvent event) {
+        executeTakeIntoWork();
+    }
+
+    private void executeTakeIntoWork() {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        UUID candId = resolveCandidateId(selected);
+        UUID vacId = resolveVacancyId(selected);
+
+        if (candId == null || vacId == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Недостаточно данных для привязки кандидата к вакансии.")
+                    .show();
+            return;
+        }
+
+        TakeIntoWorkResult res = workflowService.takeIntoWork(candId, vacId, selected.getScore(), selected.getMatchRunId());
+        if (res.isSuccess()) {
+            if (res.isAlreadyInWork()) {
+                dialogs.createOptionDialog()
+                        .withCaption("Кандидат уже в работе")
+                        .withMessage(res.getMessage() + "\n\nЖелаете открыть существующую запись взаимодействия?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.OK)
+                                        .withCaption("Открыть существующую")
+                                        .withHandler(e -> openInteraction(res.getInteractionId())),
+                                new DialogAction(DialogAction.Type.CANCEL).withCaption("Закрыть")
+                        )
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Кандидат взят в работу")
+                        .withDescription(res.getMessage())
+                        .show();
+            }
+            selected.setAlreadyInWork(true);
+            selected.setRecruiterDecision("В работе");
+            matchesDc.replaceItem(selected);
+            populateDetailPane(selected);
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка")
+                    .withDescription(res.getMessage())
+                    .show();
+        }
+    }
+
+    @Subscribe("bulkTakeIntoWorkBtn")
+    public void onBulkTakeIntoWorkBtnClick(Button.ClickEvent event) {
+        Set<CandidateVacancyMatchItem> selectedSet = matchesTable.getSelected();
+        if (selectedSet == null || selectedSet.isEmpty()) return;
+
+        UUID targetVacId = mode == Mode.VACANCY_TO_CANDIDATES && openPosition != null
+                ? openPosition.getId() : null;
+
+        if (targetVacId == null && mode == Mode.CANDIDATE_TO_VACANCIES) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Массовое добавление доступно при подборе кандидатов на выбранную вакансию.")
+                    .show();
+            return;
+        }
+
+        List<UUID> candIds = selectedSet.stream()
+                .map(this::resolveCandidateId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        String vacTitle = openPosition != null ? openPosition.getVacansyName() : "вакансию";
+
+        dialogs.createOptionDialog()
+                .withCaption("Подтверждение пакетного действия")
+                .withMessage(String.format("Добавить %d кандидатов в работу по вакансии «%s»?", candIds.size(), vacTitle))
+                .withActions(
+                        new DialogAction(DialogAction.Type.YES)
+                                .withCaption("Добавить в работу")
+                                .withHandler(e -> {
+                                    UUID runId = selectedSet.iterator().next().getMatchRunId();
+                                    BulkTakeIntoWorkResult bulkRes = workflowService.bulkTakeIntoWork(candIds, targetVacId, runId);
+                                    dialogs.createMessageDialog()
+                                            .withCaption("Результат пакетного добавления")
+                                            .withMessage(String.format("Добавлено: %d\nУже находились в работе: %d\nОшибок: %d",
+                                                    bulkRes.getAddedCount(), bulkRes.getAlreadyInWorkCount(), bulkRes.getErrorCount()))
+                                            .show();
+
+                                    for (CandidateVacancyMatchItem item : selectedSet) {
+                                        item.setAlreadyInWork(true);
+                                        item.setRecruiterDecision("В работе");
+                                        matchesDc.replaceItem(item);
+                                    }
+                                }),
+                        new DialogAction(DialogAction.Type.NO).withCaption("Отмена")
+                )
+                .show();
+    }
+
+    @Subscribe("createInteractionBtn")
+    public void onCreateInteractionBtnClick(Button.ClickEvent event) {
+        executeCreateInteraction();
+    }
+
+    @Subscribe("quickInteractionBtn")
+    public void onQuickInteractionBtnClick(Button.ClickEvent event) {
+        executeCreateInteraction();
+    }
+
+    private void executeCreateInteraction() {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        UUID candId = resolveCandidateId(selected);
+        UUID vacId = resolveVacancyId(selected);
+
+        IteractionList draft = workflowService.prepareInteractionDraft(candId, vacId, selected.getScore(),
+                selected.getMatchedSkills(), selected.getMissingCriticalRequirements());
+
+        screenBuilders.editor(IteractionList.class, this)
+                .withScreenClass(IteractionListEdit.class)
+                .newEntity(draft)
+                .withOpenMode(OpenMode.DIALOG)
+                .show();
+    }
+
+    @Subscribe("outreachDraftBtn")
+    public void onOutreachDraftBtnClick(Button.ClickEvent event) {
+        executeOutreachDraft();
+    }
+
+    @Subscribe("quickOutreachBtn")
+    public void onQuickOutreachBtnClick(Button.ClickEvent event) {
+        executeOutreachDraft();
+    }
+
+    private void executeOutreachDraft() {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        UUID candId = resolveCandidateId(selected);
+        UUID vacId = resolveVacancyId(selected);
+
+        String candName = selected.getCandidateFullName() != null ? selected.getCandidateFullName()
+                : (candidate != null ? candidate.getFullName() : "Кандидат");
+        String vacName = selected.getVacancyName() != null ? selected.getVacancyName()
+                : (openPosition != null ? openPosition.getVacansyName() : "Вакансия");
+
+        CandidateOutreachDraftDialog dialog = screenBuilders.screen(this)
+                .withScreenClass(CandidateOutreachDraftDialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        dialog.initParams(candId, vacId, candName, vacName, selected.getReasonsToOffer(), selected.getMatchedSkills(), selected.getScore());
+        dialog.show();
+    }
+
+    @Subscribe("postponeBtn")
+    public void onPostponeBtnClick(Button.ClickEvent event) {
+        executePostpone();
+    }
+
+    @Subscribe("quickPostponeBtn")
+    public void onQuickPostponeBtnClick(Button.ClickEvent event) {
+        executePostpone();
+    }
+
+    private void executePostpone() {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        UUID candId = resolveCandidateId(selected);
+        UUID vacId = resolveVacancyId(selected);
+
+        workflowService.recordFeedback(candId, vacId, "POSTPONED", null, null, selected.getScore(), selected.getMatchRunId());
+
+        selected.setRecruiterDecision("Отложен");
+        matchesDc.replaceItem(selected);
+        populateDetailPane(selected);
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Кандидат отложен")
+                .show();
+    }
+
+    @Subscribe("rejectBtn")
+    public void onRejectBtnClick(Button.ClickEvent event) {
+        executeReject();
+    }
+
+    @Subscribe("quickRejectBtn")
+    public void onQuickRejectBtnClick(Button.ClickEvent event) {
+        executeReject();
+    }
+
+    private void executeReject() {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        UUID candId = resolveCandidateId(selected);
+        UUID vacId = resolveVacancyId(selected);
+
+        String candName = selected.getCandidateFullName() != null ? selected.getCandidateFullName()
+                : (candidate != null ? candidate.getFullName() : "Кандидат");
+        String vacName = selected.getVacancyName() != null ? selected.getVacancyName()
+                : (openPosition != null ? openPosition.getVacansyName() : "Вакансия");
+
+        RejectCandidateMatchDialog dialog = screenBuilders.screen(this)
+                .withScreenClass(RejectCandidateMatchDialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        dialog.initParams(candName, vacName);
+        dialog.addAfterCloseListener(afterCloseEvent -> {
+            if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                String reason = dialog.getSelectedReason();
+                String comment = dialog.getComment();
+
+                workflowService.recordFeedback(candId, vacId, "REJECTED", reason, comment, selected.getScore(), selected.getMatchRunId());
+
+                selected.setRecruiterDecision("Не подходит");
+                selected.setRejectionReason(reason);
+                selected.setRecruiterComment(comment);
+                matchesDc.replaceItem(selected);
+                populateDetailPane(selected);
+
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Решение сохранено")
+                        .withDescription("Кандидат отмечен как «Не подходит». AI-балл сохранён без изменений.")
+                        .show();
+            }
+        });
+        dialog.show();
+    }
+
+    @Subscribe("openEntityBtn")
+    public void onOpenEntityBtnClick(Button.ClickEvent event) {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        if (mode == Mode.VACANCY_TO_CANDIDATES) {
+            UUID candId = resolveCandidateId(selected);
+            if (candId != null) {
+                JobCandidate cand = dataManager.load(JobCandidate.class).id(candId).view("jobCandidate-full-view").optional().orElse(null);
+                if (cand != null) {
+                    screenBuilders.editor(JobCandidate.class, this)
+                            .editEntity(cand)
+                            .withOpenMode(OpenMode.NEW_TAB)
+                            .show();
+                }
+            }
+        } else {
+            UUID vacId = resolveVacancyId(selected);
+            if (vacId != null) {
+                OpenPosition op = dataManager.load(OpenPosition.class).id(vacId).view("openPosition-full-view").optional().orElse(null);
+                if (op != null) {
+                    screenBuilders.editor(OpenPosition.class, this)
+                            .withScreenClass(OpenPositionEdit.class)
+                            .editEntity(op)
+                            .withOpenMode(OpenMode.NEW_TAB)
+                            .show();
+                }
+            }
+        }
+    }
+
+    private void openInteraction(UUID interactionId) {
+        if (interactionId == null) return;
+        IteractionList it = dataManager.load(IteractionList.class).id(interactionId).view("iteractionList-full-view").optional().orElse(null);
+        if (it != null) {
+            screenBuilders.editor(IteractionList.class, this)
+                    .withScreenClass(IteractionListEdit.class)
+                    .editEntity(it)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .show();
+        }
+    }
+
+    private UUID resolveCandidateId(CandidateVacancyMatchItem item) {
+        if (item.getCandidateId() != null) return item.getCandidateId();
+        if (candidate != null) return candidate.getId();
+        return null;
+    }
+
+    private UUID resolveVacancyId(CandidateVacancyMatchItem item) {
+        if (item.getOpenPositionId() != null) return item.getOpenPositionId();
+        if (openPosition != null) return openPosition.getId();
+        return null;
     }
 
     @Subscribe("refreshAnalysisBtn")
@@ -429,30 +976,5 @@ public class CandidateVacancyMatchScreen extends Screen {
     @Subscribe("closeBtn")
     public void onCloseBtnClick(Button.ClickEvent event) {
         closeWithDefaultAction();
-    }
-
-    @Subscribe("openVacancyBtn")
-    public void onOpenVacancyBtnClick(Button.ClickEvent event) {
-        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
-        if (selected == null || selected.getOpenPositionId() == null) {
-            return;
-        }
-
-        OpenPosition op = selected.getOpenPosition();
-        if (op == null) {
-            op = dataManager.load(OpenPosition.class).id(selected.getOpenPositionId()).optional().orElse(null);
-        }
-
-        if (op != null) {
-            screenBuilders.editor(OpenPosition.class, this)
-                    .withScreenClass(OpenPositionEdit.class)
-                    .editEntity(op)
-                    .withOpenMode(OpenMode.NEW_TAB)
-                    .show();
-        } else {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("Вакансия не найдена")
-                    .show();
-        }
     }
 }

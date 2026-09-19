@@ -274,4 +274,12 @@
     <include file="260919-4-setOpenRouterNemotronAsPrimaryAdminModel.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Этап 3: Таблицы аудита AI-подбора и решений рекрутера -->
+    <include file="260919-5-createVacancyCandidateMatchAuditTables.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Этап 3: Seed AI-функции CANDIDATE_VACANCY_OUTREACH_DRAFT -->
+    <include file="260919-6-seedCandidateVacancyOutreachDraftAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

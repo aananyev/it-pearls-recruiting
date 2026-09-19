@@ -48,14 +48,15 @@
                     </hbox>
                     <!-- Filter Row 2: Entity selectors & Actions -->
                     <hbox spacing="true" alignment="BOTTOM_LEFT">
-                        <lookupPickerField id="userPicker" caption="msg://userFilter" width="220px">
+                        <lookupPickerField id="userPicker" caption="msg://userFilter" width="200px">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                                 <action id="clear" type="picker_clear"/>
                             </actions>
                         </lookupPickerField>
-                        <lookupField id="providerLookup" caption="msg://providerFilter" width="180px"/>
-                        <lookupField id="ownerLookup" caption="msg://ownerFilter" width="180px"/>
+                        <lookupField id="functionLookup" caption="msg://functionFilter" width="220px"/>
+                        <lookupField id="providerLookup" caption="msg://providerFilter" width="160px"/>
+                        <lookupField id="ownerLookup" caption="msg://ownerFilter" width="160px"/>
                         <button id="applyFilterBtn" caption="msg://apply" icon="SEARCH" stylename="primary ai-action-btn"/>
                         <button id="resetFilterBtn" caption="msg://reset" icon="ERASER" stylename="ai-secondary-btn"/>
                     </hbox>

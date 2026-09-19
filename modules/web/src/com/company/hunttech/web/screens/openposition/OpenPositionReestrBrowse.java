@@ -13,6 +13,7 @@ import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import com.company.hunttech.UiNotificationEvent;
+import com.company.hunttech.web.screens.jobcandidate.CandidateVacancyMatchScreen;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
@@ -578,16 +579,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             openEditCardBtn.addClickListener(e -> openSelectedForEdit());
         }
         if (suggestCandidatesBtn != null) {
-            suggestCandidatesBtn.addClickListener(e -> {
-                OpenPosition selected = openPositionsTable.getSingleSelected();
-                if (selected != null) {
-                    screenBuilders.screen(this)
-                            .withScreenId("hunttech_Suggestjobcandidate")
-                            .withOpenMode(OpenMode.NEW_TAB)
-                            .build()
-                            .show();
-                }
-            });
+            suggestCandidatesBtn.addClickListener(e -> openCandidateVacancyMatchForSelected());
         }
         if (explainRequirementsBtn != null) {
             explainRequirementsBtn.addClickListener(e -> openRequirementExplanationDialog());
@@ -1287,17 +1279,26 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             actionsWithPositionButton.addAction(new BaseAction("suggestCandidatesAction")
                     .withCaption("Подобрать кандидатов")
                     .withIcon("font-icon:MAGIC")
-                    .withHandler(e -> {
-                        OpenPosition selected = openPositionsTable.getSingleSelected();
-                        if (selected != null) {
-                            screenBuilders.screen(this)
-                                    .withScreenId("hunttech_Suggestjobcandidate")
-                                    .withOpenMode(OpenMode.NEW_TAB)
-                                    .build()
-                                    .show();
-                        }
-                    }));
+                    .withHandler(e -> openCandidateVacancyMatchForSelected()));
         }
+    }
+
+    private void openCandidateVacancyMatchForSelected() {
+        OpenPosition selected = openPositionsTable.getSingleSelected();
+        if (selected == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Вакансия не выбрана")
+                    .withDescription("Выберите вакансию в таблице для AI-подбора кандидатов.")
+                    .show();
+            return;
+        }
+
+        CandidateVacancyMatchScreen matchScreen = screenBuilders.screen(this)
+                .withScreenClass(CandidateVacancyMatchScreen.class)
+                .withOpenMode(OpenMode.NEW_TAB)
+                .build();
+        matchScreen.setOpenPosition(selected);
+        matchScreen.show();
     }
 
     /**

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="Отметить как не подходящего"
+        messagesPack="com.company.hunttech.web.screens.candidatevacancymatch">
+    <layout spacing="true" width="500px">
+        <vbox spacing="true" width="100%">
+            <label id="candidateLabel" value="Кандидат: —" stylename="bold h3"/>
+            <label id="vacancyLabel" value="Вакансия: —" stylename="h4"/>
+
+            <label value="Выберите причину отклонения:" stylename="bold"/>
+            <lookupField id="reasonLookup" width="100%" nullOptionVisible="false" required="true" requiredMessage="Выберите причину отказа"/>
+
+            <label value="Комментарий к решению:" stylename="bold"/>
+            <textArea id="commentField" width="100%" rows="4" placeholder="Укажите подробности решения (обязательно при выборе 'Другая причина')..."/>
+        </vbox>
+
+        <hbox spacing="true" width="100%" alignment="BOTTOM_RIGHT">
+            <button id="cancelBtn" caption="Отмена" icon="font-icon:TIMES"/>
+            <button id="confirmBtn" caption="Сохранить решение" icon="font-icon:CHECK" stylename="danger"/>
+        </hbox>
+    </layout>
+</window>

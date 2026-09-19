@@ -48,4 +48,12 @@ public interface CandidateVacancyMatchAiService {
      * @return структурированный отчёт с ранжированным списком подходящих вакансий
      */
     CandidateVacancyMatchReport matchVacanciesForCandidate(UUID candidateId);
+
+    /**
+     * Выполняет интеллектуальный подбор наиболее подходящих кандидатов для выбранной открытой вакансии (Этап 2 и Этап 3).
+     *
+     * @param openPositionId уникальный идентификатор вакансии (OpenPosition)
+     * @return структурированный отчёт с ранжированным списком кандидатов
+     */
+    CandidateVacancyMatchReport matchCandidatesForVacancy(UUID openPositionId);
 }

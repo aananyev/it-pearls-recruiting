@@ -76,6 +76,187 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
     @MetaProperty
     protected OpenPosition openPosition;
 
+    @MetaProperty
+    protected UUID candidateId;
+
+    @MetaProperty
+    protected String candidateName;
+
+    @MetaProperty
+    protected String candidateCity;
+
+    @MetaProperty
+    protected String candidateSalary;
+
+    @MetaProperty
+    protected String candidateRole;
+
+    @MetaProperty
+    protected JobCandidate candidate;
+
+    @MetaProperty
+    protected String recruiterDecision = "NEW";
+
+    @MetaProperty
+    protected String rejectionReason;
+
+    @MetaProperty
+    protected String recruiterComment;
+
+    @MetaProperty
+    protected java.util.Date decisionTime;
+
+    @MetaProperty
+    protected Boolean alreadyInWork = false;
+
+    @MetaProperty
+    protected UUID existingInteractionId;
+
+    @MetaProperty
+    protected UUID matchRunId;
+
+    public UUID getCandidateId() {
+        return candidateId;
+    }
+
+    public void setCandidateId(UUID candidateId) {
+        this.candidateId = candidateId;
+    }
+
+    public String getCandidateName() {
+        return candidateName;
+    }
+
+    public void setCandidateName(String candidateName) {
+        this.candidateName = candidateName;
+    }
+
+    public String getCandidateCity() {
+        return candidateCity;
+    }
+
+    public void setCandidateCity(String candidateCity) {
+        this.candidateCity = candidateCity;
+    }
+
+    public String getCandidateFullName() {
+        return candidateName;
+    }
+
+    public void setCandidateFullName(String candidateFullName) {
+        this.candidateName = candidateFullName;
+    }
+
+    public String getCandidatePosition() {
+        return candidateRole;
+    }
+
+    public void setCandidatePosition(String candidatePosition) {
+        this.candidateRole = candidatePosition;
+    }
+
+    public String getCandidateCurrentCompany() {
+        return projectName;
+    }
+
+    public void setCandidateCurrentCompany(String company) {
+        if (this.projectName == null || this.projectName.isEmpty()) {
+            this.projectName = company;
+        }
+    }
+
+    public String getCandidateSalary() {
+        return candidateSalary;
+    }
+
+    public void setCandidateSalary(String candidateSalary) {
+        this.candidateSalary = candidateSalary;
+    }
+
+    public String getCandidateRole() {
+        return candidateRole;
+    }
+
+    public void setCandidateRole(String candidateRole) {
+        this.candidateRole = candidateRole;
+    }
+
+    public JobCandidate getCandidate() {
+        return candidate;
+    }
+
+    public void setCandidate(JobCandidate candidate) {
+        this.candidate = candidate;
+    }
+
+    public String getRecruiterDecision() {
+        return recruiterDecision;
+    }
+
+    public void setRecruiterDecision(String recruiterDecision) {
+        this.recruiterDecision = recruiterDecision;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public String getRecruiterComment() {
+        return recruiterComment;
+    }
+
+    public void setRecruiterComment(String recruiterComment) {
+        this.recruiterComment = recruiterComment;
+    }
+
+    public java.util.Date getDecisionTime() {
+        return decisionTime;
+    }
+
+    public void setDecisionTime(java.util.Date decisionTime) {
+        this.decisionTime = decisionTime;
+    }
+
+    public Boolean getAlreadyInWork() {
+        return alreadyInWork;
+    }
+
+    public void setAlreadyInWork(Boolean alreadyInWork) {
+        this.alreadyInWork = alreadyInWork;
+    }
+
+    public UUID getExistingInteractionId() {
+        return existingInteractionId;
+    }
+
+    public void setExistingInteractionId(UUID existingInteractionId) {
+        this.existingInteractionId = existingInteractionId;
+    }
+
+    public UUID getMatchRunId() {
+        return matchRunId;
+    }
+
+    public void setMatchRunId(UUID matchRunId) {
+        this.matchRunId = matchRunId;
+    }
+
+    @MetaProperty
+    public String getRecruiterDecisionDisplay() {
+        if ("IN_WORK".equalsIgnoreCase(recruiterDecision)) {
+            return "В работе";
+        } else if ("POSTPONED".equalsIgnoreCase(recruiterDecision)) {
+            return "Отложен";
+        } else if ("REJECTED".equalsIgnoreCase(recruiterDecision)) {
+            return "Не подходит" + (rejectionReason != null && !rejectionReason.isEmpty() ? ": " + rejectionReason : "");
+        }
+        return "—";
+    }
+
     public UUID getOpenPositionId() {
         return openPositionId;
     }

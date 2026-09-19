@@ -85,5 +85,8 @@
         <class>com.company.hunttech.entity.CandidateSkill</class>
         <class>com.company.hunttech.entity.OpenPositionSkill</class>
         <class>com.company.hunttech.entity.ai.OpenPositionAiExplanationLog</class>
+        <class>com.company.hunttech.entity.CandidateCvSkillAnalysis</class>
+        <class>com.company.hunttech.entity.VacancyCandidateMatchRun</class>
+        <class>com.company.hunttech.entity.VacancyCandidateMatchFeedback</class>
     </persistence-unit>
 </persistence>

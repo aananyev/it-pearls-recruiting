@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260919-5-createVacancyCandidateMatchAuditTables" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="HUNTTECH_VACANCY_CANDIDATE_MATCH_RUN"/>
+            </not>
+        </preConditions>
+        <sqlFile path="modules/core/db/update/postgres/26/260919-5-createVacancyCandidateMatchAuditTables.sql"
+                 relativeToChangelogFile="false"
+                 stripComments="true"/>
+    </changeSet>
+
+</databaseChangeLog>

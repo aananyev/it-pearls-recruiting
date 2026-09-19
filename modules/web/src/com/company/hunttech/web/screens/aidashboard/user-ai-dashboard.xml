@@ -8,7 +8,7 @@
                     class="com.company.hunttech.entity.ai.AiCallLog"
                     view="ai-call-log-browse-view">
             <loader id="recentCallsDl">
-                <query><![CDATA[select e from hunttech_AiCallLog e where e.user = :currentUser order by e.callTime desc]]></query>
+                <query><![CDATA[select e from hunttech_AiCallLog e where e.user = :currentUser and (:functionCode is null or e.functionCode = :functionCode) order by e.callTime desc]]></query>
             </loader>
         </collection>
     </data>
@@ -32,6 +32,7 @@
                     <lookupField id="periodLookup" caption="msg://periodLabel" width="200px" nullOptionVisible="false"/>
                     <dateField id="dateFromField" caption="msg://dateFrom" resolution="DAY"/>
                     <dateField id="dateToField" caption="msg://dateTo" resolution="DAY"/>
+                    <lookupField id="functionLookup" caption="msg://functionFilter" width="220px"/>
                     <button id="refreshBtn" caption="msg://refresh" icon="REFRESH" stylename="primary ai-action-btn"/>
                 </hbox>
             </vbox>

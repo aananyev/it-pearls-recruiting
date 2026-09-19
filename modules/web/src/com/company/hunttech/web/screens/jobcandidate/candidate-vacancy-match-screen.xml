@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
-        caption="AI-подбор вакансий для кандидата"
+        caption="Результаты AI-подбора"
         focusComponent="matchesTable">
     <data>
         <collection id="matchesDc" class="com.company.hunttech.entity.CandidateVacancyMatchItem"/>
     </data>
 
     <layout expand="mainSplit" spacing="true" width="100%" height="100%">
-        <!-- Верхняя карточка кандидата и статуса анализа -->
+        <!-- Верхняя карточка объекта анализа и статуса -->
         <hbox width="100%" spacing="true" align="MIDDLE_LEFT" stylename="well" margin="true">
             <vbox expand="statusHBox" spacing="false" width="100%">
                 <hbox spacing="true" align="MIDDLE_LEFT" width="100%">
-                    <label id="candidateTitleLabel" value="Кандидат: —" stylename="h2 bold" align="MIDDLE_LEFT"/>
-                    <label id="candidateSubTitleLabel" value="" stylename="h4 text-muted" align="MIDDLE_LEFT"/>
+                    <label id="mainTitleLabel" value="Объект анализа: —" stylename="h2 bold" align="MIDDLE_LEFT"/>
+                    <label id="subTitleLabel" value="" stylename="h4 text-muted" align="MIDDLE_LEFT"/>
                 </hbox>
                 <hbox id="statusHBox" spacing="true" align="MIDDLE_LEFT" width="100%">
                     <progressBar id="analysisProgressBar" indeterminate="true" visible="false" width="220px"/>
@@ -33,30 +33,65 @@
 
         <!-- Основная двухпанельная область SplitPanel -->
         <split id="mainSplit" orientation="horizontal" splitterPosition="58" width="100%" height="100%">
-            <!-- Левая панель: Таблица сопоставления -->
+            <!-- Левая панель: Таблица сопоставления и действия рекрутера -->
             <vbox expand="matchesTable" spacing="true" width="100%" height="100%" margin="false,true,false,false">
-                <buttonsPanel id="buttonsPanel" spacing="true">
-                    <button id="openVacancyBtn"
-                            caption="Открыть вакансию"
-                            icon="EXTERNAL_LINK"
+                <hbox spacing="true" width="100%" align="MIDDLE_LEFT">
+                    <!-- Основные действия рекрутера -->
+                    <button id="takeIntoWorkBtn"
+                            caption="Взять в работу"
+                            icon="font-icon:CHECK"
                             stylename="primary"
                             enabled="false"/>
-                    <label id="countLabel" value="Найдено вакансий: 0" stylename="bold" align="MIDDLE_LEFT"/>
-                </buttonsPanel>
+                    <button id="createInteractionBtn"
+                            caption="Создать взаимодействие"
+                            icon="font-icon:COMMENTS"
+                            enabled="false"/>
+                    <button id="outreachDraftBtn"
+                            caption="Подготовить предложение"
+                            icon="font-icon:MAGIC"
+                            enabled="false"/>
+                    <button id="bulkTakeIntoWorkBtn"
+                            caption="Взять выбранных в работу"
+                            icon="font-icon:USERS"
+                            stylename="friendly"
+                            visible="false"/>
+                    <button id="postponeBtn"
+                            caption="Отложить"
+                            icon="font-icon:CLOCK_O"
+                            enabled="false"/>
+                    <button id="rejectBtn"
+                            caption="Не подходит"
+                            icon="font-icon:TIMES"
+                            stylename="danger"
+                            enabled="false"/>
+                    <button id="openEntityBtn"
+                            caption="Открыть"
+                            icon="EXTERNAL_LINK"
+                            enabled="false"/>
+                </hbox>
+
+                <hbox spacing="true" width="100%" align="MIDDLE_LEFT">
+                    <label value="Фильтр по решению:" align="MIDDLE_LEFT" stylename="bold"/>
+                    <lookupField id="decisionFilter" width="220px" nullOptionVisible="false"/>
+                    <label id="countLabel" value="Найдено совпадений: 0" stylename="bold" align="MIDDLE_RIGHT" width="100%"/>
+                </hbox>
 
                 <table id="matchesTable"
                        dataContainer="matchesDc"
                        width="100%"
-                       height="100%">
+                       height="100%"
+                       multiselect="true">
                     <columns>
-                        <column id="score" caption="Балл" width="90px" align="CENTER"/>
-                        <column id="verdict" caption="Решение" width="180px"/>
-                        <column id="vacancyName" caption="Вакансия" width="220px"/>
-                        <column id="projectName" caption="Проект" width="140px"/>
-                        <column id="positionName" caption="Должность" width="150px"/>
-                        <column id="matchedSkillsDisplay" caption="Совпадающие навыки" width="200px"/>
-                        <column id="missingCriticalRequirementsDisplay" caption="Критические пробелы" width="200px"/>
-                        <column id="summary" caption="Краткий вывод" width="260px"/>
+                        <column id="score" caption="AI Score" width="90px" align="CENTER"/>
+                        <column id="recruiterDecisionDisplay" caption="Решение рекрутера" width="150px"/>
+                        <column id="verdict" caption="AI Вердикт" width="160px"/>
+                        <column id="candidateName" caption="Кандидат" width="200px"/>
+                        <column id="vacancyName" caption="Вакансия" width="200px"/>
+                        <column id="positionName" caption="Должность" width="140px"/>
+                        <column id="projectName" caption="Проект" width="130px"/>
+                        <column id="matchedSkillsDisplay" caption="Совпадающие навыки" width="180px"/>
+                        <column id="missingCriticalRequirementsDisplay" caption="Критические пробелы" width="180px"/>
+                        <column id="summary" caption="Краткий вывод" width="240px"/>
                     </columns>
                 </table>
             </vbox>
@@ -64,8 +99,24 @@
             <!-- Правая панель: Детальная аналитическая карточка -->
             <scrollBox id="detailsScrollBox" width="100%" height="100%" spacing="true" margin="false,false,false,true">
                 <vbox spacing="true" width="100%" stylename="well" margin="true">
-                    <label id="detailVacancyTitle" value="Выберите вакансию из списка слева" stylename="h3 bold" width="100%"/>
-                    <label id="detailVacancyMeta" value="" stylename="text-muted" width="100%"/>
+                    <label id="detailTitle" value="Выберите строку из списка слева" stylename="h3 bold" width="100%"/>
+                    <label id="detailMeta" value="" stylename="text-muted" width="100%"/>
+
+                    <!-- Быстрые действия рекрутера в карточке -->
+                    <hbox id="quickActionsBox" spacing="true" width="100%" visible="false">
+                        <button id="quickTakeBtn" caption="Взять в работу" icon="font-icon:CHECK" stylename="primary"/>
+                        <button id="quickInteractionBtn" caption="Взаимодействие" icon="font-icon:COMMENTS"/>
+                        <button id="quickOutreachBtn" caption="Предложение" icon="font-icon:MAGIC"/>
+                        <button id="quickPostponeBtn" caption="Отложить" icon="font-icon:CLOCK_O"/>
+                        <button id="quickRejectBtn" caption="Не подходит" icon="font-icon:TIMES" stylename="danger"/>
+                    </hbox>
+
+                    <!-- Статус решения рекрутера в карточке -->
+                    <vbox id="recruiterDecisionBox" spacing="false" width="100%" visible="false" stylename="card">
+                        <label value="РЕШЕНИЕ РЕКРУТЕРА" stylename="bold" width="100%"/>
+                        <label id="recruiterDecisionTextLabel" value="—" stylename="h4" width="100%"/>
+                        <label id="recruiterCommentTextLabel" value="" stylename="text-muted" width="100%"/>
+                    </vbox>
 
                     <!-- Индикаторы суб-оценок -->
                     <vbox id="scoresBox" spacing="true" width="100%" visible="false">
@@ -97,7 +148,7 @@
 
                     <!-- Блок: Почему стоит предложить -->
                     <vbox id="reasonsBox" spacing="true" width="100%" visible="false">
-                        <label value="ПОЧЕМУ ВАКАНСИЮ СТОИТ ПРЕДЛОЖИТЬ" stylename="h4 bold" width="100%"/>
+                        <label value="ПОЧЕМУ СТОИТ ПРЕДЛОЖИТЬ" stylename="h4 bold" width="100%"/>
                         <label id="reasonsLabel" htmlEnabled="true" width="100%"/>
                     </vbox>
 

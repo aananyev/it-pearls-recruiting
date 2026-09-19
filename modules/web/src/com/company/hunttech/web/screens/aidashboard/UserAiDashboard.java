@@ -54,6 +54,8 @@ public class UserAiDashboard extends Screen {
     @Inject
     private DateField<Date> dateToField;
     @Inject
+    private LookupField<String> functionLookup;
+    @Inject
     private Label<String> totalCallsLabel;
     @Inject
     private Label<String> totalCallsSubLabel;
@@ -86,6 +88,7 @@ public class UserAiDashboard extends Screen {
     @Subscribe
     public void onInit(InitEvent event) {
         initPeriodLookup();
+        initFunctionLookup();
         initTableColumns();
     }
 
@@ -112,6 +115,42 @@ public class UserAiDashboard extends Screen {
                 }
             }
         });
+    }
+
+    private void initFunctionLookup() {
+        Map<String, String> functionOptions = new LinkedHashMap<>();
+        functionOptions.put("Все функции AI", "");
+
+        try {
+            List<com.company.hunttech.entity.ai.AiFunctionConfiguration> configs = dataManager.load(com.company.hunttech.entity.ai.AiFunctionConfiguration.class)
+                    .query("select e from hunttech_AiFunctionConfiguration e order by e.name asc")
+                    .list();
+            for (com.company.hunttech.entity.ai.AiFunctionConfiguration c : configs) {
+                if (c.getCode() != null) {
+                    String title = c.getName() != null && !c.getName().trim().isEmpty() ? c.getName() : c.getCode();
+                    functionOptions.put(title, c.getCode());
+                }
+            }
+        } catch (Exception e) {
+            // fallback
+        }
+
+        ensureFunctionOption(functionOptions, "AI-подбор вакансий для кандидата", "CANDIDATE_VACANCY_MATCH_ANALYZE");
+        ensureFunctionOption(functionOptions, "Фоновое определение навыков кандидатов", "SKILLS_EXTRACT_BACKGROUND");
+        ensureFunctionOption(functionOptions, "Умный анализ требований вакансии", "VACANCY_EXPLAIN_REQUIREMENTS");
+        ensureFunctionOption(functionOptions, "Объяснение требований вакансии на примерах", "VACANCY_EXPLAIN_SIMPLIFIED_WEB");
+        ensureFunctionOption(functionOptions, "Плавающий чат с ИИ", "LLM_CHAT");
+        ensureFunctionOption(functionOptions, "Извлечение навыков из текста", "SKILLS_EXTRACT");
+
+        functionLookup.setOptionsMap(functionOptions);
+        functionLookup.setValue("");
+        functionLookup.addValueChangeListener(e -> refreshData());
+    }
+
+    private void ensureFunctionOption(Map<String, String> map, String name, String code) {
+        if (!map.containsValue(code)) {
+            map.put(name, code);
+        }
     }
 
     private void applyPeriod(String period) {
@@ -244,13 +283,23 @@ public class UserAiDashboard extends Screen {
         toCal.set(Calendar.SECOND, 59);
         Date toInclusive = toCal.getTime();
 
-        List<AiCallLog> logs = dataManager.load(AiCallLog.class)
-                .query("select e from hunttech_AiCallLog e where e.user = :user and e.callTime >= :from and e.callTime <= :to order by e.callTime asc")
+        String selectedFunction = functionLookup != null ? functionLookup.getValue() : null;
+        StringBuilder query = new StringBuilder("select e from hunttech_AiCallLog e where e.user = :user and e.callTime >= :from and e.callTime <= :to ");
+        if (selectedFunction != null && !selectedFunction.trim().isEmpty()) {
+            query.append("and e.functionCode = :functionCode ");
+        }
+        query.append("order by e.callTime asc");
+
+        com.haulmont.cuba.core.global.FluentLoader.ByQuery<AiCallLog, UUID> loader = dataManager.load(AiCallLog.class)
+                .query(query.toString())
                 .parameter("user", currentUser)
                 .parameter("from", from)
                 .parameter("to", toInclusive)
-                .view("ai-call-log-browse-view")
-                .list();
+                .view("ai-call-log-browse-view");
+        if (selectedFunction != null && !selectedFunction.trim().isEmpty()) {
+            loader.parameter("functionCode", selectedFunction);
+        }
+        List<AiCallLog> logs = loader.list();
 
         // 1. Update KPI
         int totalCalls = logs.size();
@@ -298,7 +347,7 @@ public class UserAiDashboard extends Screen {
         speedLabel.setValue(String.format("%.2f с", avgSpeed));
         successRateLabel.setValue(String.format("%.1f%% успешных", successRate));
 
-        // 2. Dynamics chart (by day)
+        // 2. Dynamics Chart (Daily breakdown)
         Map<String, int[]> dayStats = new LinkedHashMap<>();
         Calendar cur = Calendar.getInstance();
         cur.setTime(from);
@@ -333,7 +382,7 @@ public class UserAiDashboard extends Screen {
         // 3. Function share pie chart
         Map<String, Integer> funcCounts = new HashMap<>();
         for (AiCallLog log : logs) {
-            String fName = log.getFunctionName() != null ? log.getFunctionName() : (log.getFunctionCode() != null ? log.getFunctionCode() : "Прочее");
+            String fName = formatFunctionName(log.getFunctionName(), log.getFunctionCode());
             funcCounts.put(fName, funcCounts.getOrDefault(fName, 0) + 1);
         }
 
@@ -348,7 +397,35 @@ public class UserAiDashboard extends Screen {
 
         // 4. Update recent calls table loader
         recentCallsDl.setParameter("currentUser", currentUser);
+        if (selectedFunction != null && !selectedFunction.trim().isEmpty()) {
+            recentCallsDl.setParameter("functionCode", selectedFunction);
+        } else {
+            recentCallsDl.removeParameter("functionCode");
+        }
         recentCallsDl.load();
+    }
+
+    private String formatFunctionName(String name, String code) {
+        if (name != null && !name.trim().isEmpty() && !name.equalsIgnoreCase(code)) {
+            return name;
+        }
+        if (code == null) return "Прочее";
+        switch (code) {
+            case "CANDIDATE_VACANCY_MATCH_ANALYZE":
+                return "AI-подбор вакансий";
+            case "SKILLS_EXTRACT_BACKGROUND":
+                return "Фоновое определение навыков";
+            case "VACANCY_EXPLAIN_REQUIREMENTS":
+                return "Анализ требований вакансии";
+            case "VACANCY_EXPLAIN_SIMPLIFIED_WEB":
+                return "Объяснение требований вакансии";
+            case "LLM_CHAT":
+                return "Плавающий чат с ИИ";
+            case "SKILLS_EXTRACT":
+                return "Извлечение навыков";
+            default:
+                return code;
+        }
     }
 
     private String formatTokenCount(long count) {

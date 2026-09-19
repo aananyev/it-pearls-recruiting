@@ -6,9 +6,11 @@ import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.CandidateSkillPriority;
 import com.company.hunttech.entity.CandidateVacancyMatchItem;
+import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.SkillTree;
+import com.company.hunttech.entity.VacancyCandidateMatchRun;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.haulmont.cuba.core.global.DataManager;
@@ -40,6 +42,9 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
     @Inject
     private AiExecutionService aiExecutionService;
+
+    @Inject
+    private CandidateVacancyWorkflowService workflowService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -190,6 +195,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                     seenVacancyIds.add(op.getId());
                 }
             }
+            enrichItemsWithCandidateAndStatus(allItems, candidate, null);
             allItems.sort(getComparator());
             report.setItems(allItems);
             report.setMatchedVacanciesCount(allItems.size());
@@ -202,6 +208,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         // 7. Честный Fallback при недоступности AI: рассчитываем базовую эвристическую оценку без фальсификации
         log.warn("AI service unavailable for candidate-vacancy match. Using honest rule-based fallback.");
         List<CandidateVacancyMatchItem> fallbackItems = buildHonestFallbackItems(candidate, candidateSkills, candidateResumeText, openPositions);
+        enrichItemsWithCandidateAndStatus(fallbackItems, candidate, null);
         fallbackItems.sort(getComparator());
 
         report.setItems(fallbackItems);
@@ -211,6 +218,195 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         report.setStatusMessage("Предварительная оценка без AI");
         report.setSuccess(true);
         return report;
+    }
+
+    @Override
+    public CandidateVacancyMatchReport matchCandidatesForVacancy(UUID openPositionId) {
+        if (openPositionId == null) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("Идентификатор вакансии не указан.");
+            return emptyReport;
+        }
+
+        // 1. Загрузка вакансии
+        OpenPosition vacancy = dataManager.load(OpenPosition.class)
+                .id(openPositionId)
+                .view(viewBuilder -> viewBuilder.addAll(
+                        "vacansyID", "vacansyName", "positionType.positionRuName", "comment", "shortDescription",
+                        "workExperience", "grade", "skillsList.skillName", "remoteWork",
+                        "remoteComment", "cityPosition.cityRuName", "cities.cityRuName",
+                        "projectName.projectName", "priority", "openClose"
+                ))
+                .optional()
+                .orElse(null);
+
+        if (vacancy == null) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("Вакансия с указанным ID не найдена.");
+            return emptyReport;
+        }
+
+        // 2. Загрузка релевантного пула кандидатов
+        List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
+                .query("select distinct e from hunttech_JobCandidate e where (e.blocked = false or e.blocked is null) and exists (select cv from hunttech_CandidateCV cv where cv.candidate.id = e.id and cv.textCV is not null and length(trim(cv.textCV)) > 0) order by e.updateTs desc")
+                .view("jobCandidate-full-view")
+                .maxResults(25)
+                .list();
+
+        if (candidates.isEmpty()) {
+            candidates = dataManager.load(JobCandidate.class)
+                    .query("select e from hunttech_JobCandidate e where e.blocked = false or e.blocked is null order by e.updateTs desc")
+                    .view("jobCandidate-full-view")
+                    .maxResults(25)
+                    .list();
+        }
+
+        if (candidates.isEmpty()) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("В базе нет кандидатов для анализа.");
+            return emptyReport;
+        }
+
+        CandidateVacancyMatchReport report = new CandidateVacancyMatchReport();
+        report.setTotalVacanciesAnalyzed(candidates.size());
+        report.setSuccess(true);
+
+        List<CandidateVacancyMatchItem> allItems = new ArrayList<>();
+        List<OpenPosition> singleVacancyList = Collections.singletonList(vacancy);
+        String vacanciesJson = buildVacanciesJson(singleVacancyList);
+        Map<UUID, OpenPosition> positionById = Collections.singletonMap(vacancy.getId(), vacancy);
+
+        AiExecutionResult lastAiResult = null;
+        boolean anyAiSuccess = false;
+
+        for (JobCandidate cand : candidates) {
+            List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
+                    .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(cv.textCV)) > 0 order by e.datePost desc, e.createTs desc")
+                    .parameter("candId", cand.getId())
+                    .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy"))
+                    .list();
+
+            List<CandidateSkill> candidateSkills = dataManager.load(CandidateSkill.class)
+                    .query("select e from hunttech_CandidateSkill e where e.candidate.id = :candId")
+                    .parameter("candId", cand.getId())
+                    .view(viewBuilder -> viewBuilder.add("skill.skillName").add("priority"))
+                    .list();
+
+            String candidateProfile = buildCandidateProfileString(cand);
+            String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
+            String candidateResumeText = buildCandidateResumeText(cvList);
+
+            Map<String, Object> context = new HashMap<>();
+            context.put(PARAM_CANDIDATE_PROFILE, candidateProfile);
+            context.put(PARAM_CANDIDATE_SKILLS, candidateSkillsText);
+            context.put(PARAM_CANDIDATE_RESUME_TEXT, candidateResumeText);
+            context.put(PARAM_VACANCIES_JSON, vacanciesJson);
+
+            CandidateVacancyMatchItem matchedItem = null;
+            try {
+                AiExecutionResult aiResult = aiExecutionService.executeText(FUNCTION_CODE, context);
+                if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
+                    lastAiResult = aiResult;
+                    Set<UUID> seenVacancyIds = new HashSet<>();
+                    List<CandidateVacancyMatchItem> parsed = parseAiResponse(aiResult.getText(), singleVacancyList, positionById, seenVacancyIds, report);
+                    if (!parsed.isEmpty()) {
+                        matchedItem = parsed.get(0);
+                        anyAiSuccess = true;
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("AI match failed for candidate {}: {}", cand.getFullName(), e.getMessage());
+            }
+
+            if (matchedItem == null) {
+                List<CandidateVacancyMatchItem> fallbackList = buildHonestFallbackItems(cand, candidateSkills, candidateResumeText, singleVacancyList);
+                if (!fallbackList.isEmpty()) {
+                    matchedItem = fallbackList.get(0);
+                }
+            }
+
+            if (matchedItem != null) {
+                matchedItem.setCandidateId(cand.getId());
+                matchedItem.setCandidateFullName(cand.getFullName());
+                matchedItem.setCandidatePosition(cand.getPersonPosition() != null ? cand.getPersonPosition().getPositionRuName() : "");
+                matchedItem.setCandidateCity(cand.getCityOfResidence() != null ? cand.getCityOfResidence().getCityRuName() : "");
+                matchedItem.setCandidateCurrentCompany(cand.getCurrentCompany() != null ?
+                        (cand.getCurrentCompany().getComanyName() != null ? cand.getCurrentCompany().getComanyName() : cand.getCurrentCompany().getCompanyShortName()) : "");
+
+                if (workflowService != null) {
+                    IteractionList existing = workflowService.getExistingRelation(cand.getId(), vacancy.getId());
+                    if (existing != null) {
+                        matchedItem.setAlreadyInWork(true);
+                        matchedItem.setRecruiterDecision("В работе");
+                    }
+                }
+
+                allItems.add(matchedItem);
+            }
+        }
+
+        VacancyCandidateMatchRun run = null;
+        if (workflowService != null) {
+            try {
+                run = workflowService.createMatchRun(openPositionId, null, FUNCTION_CODE, allItems.size());
+            } catch (Exception e) {
+                log.warn("Failed to create match run: {}", e.getMessage());
+            }
+        }
+
+        if (run != null) {
+            final UUID runId = run.getId();
+            allItems.forEach(it -> it.setMatchRunId(runId));
+        }
+
+        allItems.sort((i1, i2) -> {
+            int s1 = i1.getScore() != null ? i1.getScore() : 0;
+            int s2 = i2.getScore() != null ? i2.getScore() : 0;
+            if (s1 != s2) return Integer.compare(s2, s1);
+            String n1 = i1.getCandidateFullName() != null ? i1.getCandidateFullName() : "";
+            String n2 = i2.getCandidateFullName() != null ? i2.getCandidateFullName() : "";
+            return n1.compareToIgnoreCase(n2);
+        });
+
+        report.setItems(allItems);
+        report.setMatchedVacanciesCount(allItems.size());
+        report.setAiExecutionResult(lastAiResult);
+        report.setFallbackUsed(!anyAiSuccess);
+        return report;
+    }
+
+    private void enrichItemsWithCandidateAndStatus(List<CandidateVacancyMatchItem> items, JobCandidate candidate, UUID vacancyId) {
+        VacancyCandidateMatchRun run = null;
+        if (workflowService != null) {
+            try {
+                run = workflowService.createMatchRun(vacancyId, candidate != null ? candidate.getId() : null, FUNCTION_CODE, items.size());
+            } catch (Exception e) {
+                log.warn("Failed to create match run: {}", e.getMessage());
+            }
+        }
+
+        final UUID rId = run != null ? run.getId() : null;
+        for (CandidateVacancyMatchItem it : items) {
+            if (candidate != null) {
+                it.setCandidateId(candidate.getId());
+                it.setCandidateFullName(candidate.getFullName());
+                it.setCandidatePosition(candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "");
+                it.setCandidateCity(candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "");
+            }
+            if (rId != null) {
+                it.setMatchRunId(rId);
+            }
+            if (workflowService != null && it.getCandidateId() != null && it.getOpenPositionId() != null) {
+                IteractionList existing = workflowService.getExistingRelation(it.getCandidateId(), it.getOpenPositionId());
+                if (existing != null) {
+                    it.setAlreadyInWork(true);
+                    it.setRecruiterDecision("В работе");
+                }
+            }
+        }
     }
 
     private Comparator<CandidateVacancyMatchItem> getComparator() {

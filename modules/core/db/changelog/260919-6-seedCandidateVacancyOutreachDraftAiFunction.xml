@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260919-6-seedCandidateVacancyOutreachDraftAiFunction" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*)
+                      FROM HUNTTECH_AI_FUNCTION_CONFIGURATION
+                     WHERE CODE = 'CANDIDATE_VACANCY_OUTREACH_DRAFT'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <sqlFile path="modules/core/db/update/postgres/26/260919-6-seedCandidateVacancyOutreachDraftAiFunction.sql"
+                 relativeToChangelogFile="false"
+                 stripComments="true"/>
+    </changeSet>
+
+</databaseChangeLog>

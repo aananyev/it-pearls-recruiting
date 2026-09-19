@@ -1,20 +1,11 @@
 package com.company.hunttech.service.dto.telegram;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Результат отправки сообщения или медиа в Telegram.
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class TelegramSendResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -46,32 +37,91 @@ public class TelegramSendResult implements Serializable {
     /**
      * Время отправки
      */
-    @Builder.Default
     private Date timestamp = new Date();
 
+    public TelegramSendResult() {
+    }
+
+    public TelegramSendResult(boolean success, Integer messageId, Long chatId, String failureReason, Integer errorCode, Date timestamp) {
+        this.success = success;
+        this.messageId = messageId;
+        this.chatId = chatId;
+        this.failureReason = failureReason;
+        this.errorCode = errorCode;
+        this.timestamp = timestamp != null ? timestamp : new Date();
+    }
+
     public static TelegramSendResult ok(Integer messageId, Long chatId) {
-        return TelegramSendResult.builder()
-                .success(true)
-                .messageId(messageId)
-                .chatId(chatId)
-                .timestamp(new Date())
-                .build();
+        TelegramSendResult res = new TelegramSendResult();
+        res.setSuccess(true);
+        res.setMessageId(messageId);
+        res.setChatId(chatId);
+        res.setTimestamp(new Date());
+        return res;
     }
 
     public static TelegramSendResult fail(String failureReason) {
-        return TelegramSendResult.builder()
-                .success(false)
-                .failureReason(failureReason)
-                .timestamp(new Date())
-                .build();
+        TelegramSendResult res = new TelegramSendResult();
+        res.setSuccess(false);
+        res.setFailureReason(failureReason);
+        res.setTimestamp(new Date());
+        return res;
     }
 
     public static TelegramSendResult fail(Integer errorCode, String failureReason) {
-        return TelegramSendResult.builder()
-                .success(false)
-                .errorCode(errorCode)
-                .failureReason(failureReason)
-                .timestamp(new Date())
-                .build();
+        TelegramSendResult res = new TelegramSendResult();
+        res.setSuccess(false);
+        res.setErrorCode(errorCode);
+        res.setFailureReason(failureReason);
+        res.setTimestamp(new Date());
+        return res;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public Integer getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(Integer messageId) {
+        this.messageId = messageId;
+    }
+
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
+    }
+
+    public Integer getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(Integer errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 }
