@@ -79,6 +79,8 @@ public class LlmChatScreen extends Screen {
     @Inject
     private com.company.hunttech.service.HermesManagerChatService hermesManagerChatService;
     @Inject
+    private com.company.hunttech.service.UserAiQuotaService userAiQuotaService;
+    @Inject
     private Notifications notifications;
     @Inject
     private ScrollBoxLayout historyScrollBox;
@@ -944,6 +946,11 @@ public class LlmChatScreen extends Screen {
         if (handleChatCommand(request, false)) {
             return;
         }
+
+        if (!ensureQuotaAvailable()) {
+            return;
+        }
+
         inputArea.setValue("");
         inputArea.setEnabled(false);
         sendBtn.setEnabled(false);
@@ -1244,11 +1251,33 @@ public class LlmChatScreen extends Screen {
         inputArea.focus();
     }
 
-    private void showError(Exception ex) {
+    private boolean ensureQuotaAvailable() {
+        if (userAiQuotaService != null && userSession != null && userSession.getUser() != null) {
+            if (!userAiQuotaService.isQuotaAvailable(userSession.getUser().getId(), 1)) {
+                showQuotaExhaustedError();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void showQuotaExhaustedError() {
         notifications.create(Notifications.NotificationType.ERROR)
-                .withCaption("Не удалось выполнить запрос к ИИ")
-                .withDescription(ex.getMessage() == null ? "Проверьте настройки AI и согласие на fallback." : ex.getMessage())
+                .withCaption("Лимит токенов исчерпан")
+                .withDescription(com.company.hunttech.service.UserAiQuotaService.MSG_QUOTA_EXHAUSTED)
                 .show();
+    }
+
+    private void showError(Exception ex) {
+        String msg = ex.getMessage() == null ? "Проверьте настройки AI и согласие на fallback." : ex.getMessage();
+        if (msg.contains("Закончились доступные токены ИИ") || msg.contains(com.company.hunttech.service.UserAiQuotaService.MSG_QUOTA_EXHAUSTED)) {
+            showQuotaExhaustedError();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Не удалось выполнить запрос к ИИ")
+                    .withDescription(msg)
+                    .show();
+        }
     }
 
     @Subscribe("hermesSendBtn")
@@ -1307,6 +1336,11 @@ public class LlmChatScreen extends Screen {
         if (handleChatCommand(request, true)) {
             return;
         }
+
+        if (!ensureQuotaAvailable()) {
+            return;
+        }
+
         hermesInputArea.setValue("");
         hermesInputArea.setEnabled(false);
         hermesSendBtn.setEnabled(false);
@@ -1358,10 +1392,7 @@ public class LlmChatScreen extends Screen {
                         activeHermesRequestText = null;
                         renderHermesHistory(hermesChatService.loadHermesHistory(convId));
                         if (!resp.isSuccess() && resp.getErrorMessage() != null) {
-                            notifications.create(Notifications.NotificationType.ERROR)
-                                     .withCaption("Hermes-viewer")
-                                     .withDescription(resp.getErrorMessage())
-                                     .show();
+                            showHermesError(new RuntimeException(resp.getErrorMessage()));
                         }
                     });
                 }
@@ -1453,10 +1484,15 @@ public class LlmChatScreen extends Screen {
     }
 
     private void showHermesError(Exception ex) {
-        notifications.create(Notifications.NotificationType.ERROR)
-                .withCaption("Hermes-viewer")
-                .withDescription(ex.getMessage() == null ? "Не удалось связаться с агентом на сервере." : ex.getMessage())
-                .show();
+        String msg = ex.getMessage() == null ? "Не удалось связаться с агентом на сервере." : ex.getMessage();
+        if (msg.contains("Закончились доступные токены ИИ") || msg.contains(com.company.hunttech.service.UserAiQuotaService.MSG_QUOTA_EXHAUSTED)) {
+            showQuotaExhaustedError();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Hermes-viewer")
+                    .withDescription(msg)
+                    .show();
+        }
     }
 
     // =========================================================================
@@ -1539,6 +1575,10 @@ public class LlmChatScreen extends Screen {
                 showHermesManagerError(ex);
                 return;
             }
+        }
+
+        if (!ensureQuotaAvailable()) {
+            return;
         }
 
         hermesManagerInputArea.setValue("");
@@ -1680,7 +1720,9 @@ public class LlmChatScreen extends Screen {
 
     private void showHermesManagerError(Exception ex) {
         String msg = ex.getMessage() != null ? ex.getMessage() : "Не удалось выполнить операцию.";
-        if (msg.contains("SecurityException") || msg.contains("Недостаточно прав")) {
+        if (msg.contains("Закончились доступные токены ИИ") || msg.contains(com.company.hunttech.service.UserAiQuotaService.MSG_QUOTA_EXHAUSTED)) {
+            showQuotaExhaustedError();
+        } else if (msg.contains("SecurityException") || msg.contains("Недостаточно прав")) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption("Отказ в доступе")
                     .withDescription("Недостаточно прав для выполнения операции")

@@ -1132,7 +1132,7 @@ public class LlmChatServiceBean implements LlmChatService {
         long totalAllowed = isUnlimited ? -1L : ((long) safeInt(period.getQuotaTokens()) + extraTokens);
         if (!isUnlimited && totalAllowed != -1L
                 && ((long) used + estimatedTokens > totalAllowed)) {
-            throw new DevelopmentException("Месячная квота чата исчерпана или занята текущими запросами.");
+            throw new DevelopmentException("Закончились доступные токены ИИ. Пожалуйста, обратитесь к администратору системы для пополнения квоты.");
         }
         period.setReservedTokens(safeInt(period.getReservedTokens()) + estimatedTokens);
         LlmChatQuotaReservation reservation = metadata.create(LlmChatQuotaReservation.class);

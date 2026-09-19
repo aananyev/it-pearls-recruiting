@@ -249,4 +249,79 @@ public class UserAiQuotaServiceContractTest {
         assertFalse(editor.contains("update HUNTTECH_LLM_CHAT_QUOTA_PERIOD"));
         assertFalse(editScreen.contains("update HUNTTECH_LLM_CHAT_QUOTA_PERIOD"));
     }
+
+    /**
+     * Test 8 — Проверка доступности квоты и блокировки при перерасходе
+     */
+    @Test
+    public void test8_quotaAvailableAndBlockingContract() {
+        // 1. Безлимитный пользователь
+        UserAiQuotaInfo unlimitedQuota = new UserAiQuotaInfo();
+        unlimitedQuota.setAllocatedTokens(-1);
+        unlimitedQuota.setConsumedTokens(10_000_000);
+        assertTrue(unlimitedQuota.isUnlimited());
+        assertNull(unlimitedQuota.getRemainingTokens());
+
+        // 2. Пользователь с нормальным остатком
+        UserAiQuotaInfo normalQuota = new UserAiQuotaInfo(100_000, 20_000, 30_000, 0, 0, false);
+        assertFalse(normalQuota.isUnlimited());
+        assertEquals(90_000, (int) normalQuota.getRemainingTokens());
+        assertTrue(normalQuota.getRemainingTokens() > 0);
+
+        // 3. Пользователь с исчерпанной квотой
+        UserAiQuotaInfo exhaustedQuota = new UserAiQuotaInfo(100_000, 0, 100_000, 0, 0, false);
+        assertFalse(exhaustedQuota.isUnlimited());
+        assertEquals(0, (int) exhaustedQuota.getRemainingTokens());
+        assertTrue(exhaustedQuota.getRemainingTokens() <= 0);
+
+        // 4. Пользователь с перерасходом
+        UserAiQuotaInfo overrunQuota = new UserAiQuotaInfo(100_000, 0, 125_000, 0, 0, false);
+        assertFalse(overrunQuota.isUnlimited());
+        assertEquals(0, (int) overrunQuota.getRemainingTokens());
+        assertTrue(overrunQuota.getRemainingTokens() <= 0);
+    }
+
+    /**
+     * Test 9 — Проверка контрактов сервисов и интеграции Hermes с системой учета токенов
+     */
+    @Test
+    public void test9_hermesTokenAccountingContracts() throws IOException {
+        String quotaInterface = source("modules/global/src/com/company/hunttech/service/UserAiQuotaService.java");
+        String quotaBean = source("modules/core/src/com/company/hunttech/service/UserAiQuotaServiceBean.java");
+        String hermesChat = source("modules/core/src/com/company/hunttech/service/HermesChatServiceBean.java");
+        String hermesManager = source("modules/core/src/com/company/hunttech/service/HermesManagerChatServiceBean.java");
+        String llmChat = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String aiExecution = source("modules/core/src/com/company/hunttech/service/AiExecutionServiceBean.java");
+        String llmChatScreen = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+
+        String expectedMessage = "Закончились доступные токены ИИ. Пожалуйста, обратитесь к администратору системы для пополнения квоты.";
+
+        // UserAiQuotaService interface & bean
+        assertTrue(quotaInterface.contains("checkQuotaAvailable(UUID userId, int estimatedTokens)"));
+        assertTrue(quotaInterface.contains("isQuotaAvailable(UUID userId, int estimatedTokens)"));
+        assertTrue(quotaInterface.contains("recordTokenConsumption(UUID userId, int tokensUsed)"));
+        assertTrue(quotaInterface.contains(expectedMessage));
+        assertTrue(quotaBean.contains("MSG_QUOTA_EXHAUSTED"));
+        assertTrue(quotaBean.contains("recordTokenConsumption"));
+
+        // HermesChatServiceBean (Hermes-viewer)
+        assertTrue(hermesChat.contains("userAiQuotaService.checkQuotaAvailable"));
+        assertTrue(hermesChat.contains("userAiQuotaService.recordTokenConsumption"));
+        assertTrue(hermesChat.contains("Hermes-viewer (ассистент)"));
+
+        // HermesManagerChatServiceBean (Hermes-operator)
+        assertTrue(hermesManager.contains("userAiQuotaService.checkQuotaAvailable"));
+        assertTrue(hermesManager.contains("userAiQuotaService.recordTokenConsumption"));
+        assertTrue(hermesManager.contains("HERMES_OPERATOR"));
+        assertTrue(hermesManager.contains("Hermes-operator (управление HRM)"));
+
+        // LlmChatServiceBean & AiExecutionServiceBean
+        assertTrue(llmChat.contains(expectedMessage));
+        assertTrue(aiExecution.contains("userAiQuotaService.checkQuotaAvailable"));
+        assertTrue(aiExecution.contains("userAiQuotaService.recordTokenConsumption"));
+
+        // LlmChatScreen
+        assertTrue(llmChatScreen.contains("MSG_QUOTA_EXHAUSTED"));
+        assertTrue(llmChatScreen.contains("userAiQuotaService.isQuotaAvailable"));
+    }
 }

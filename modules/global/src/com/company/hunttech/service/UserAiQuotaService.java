@@ -13,6 +13,7 @@ import java.util.UUID;
  */
 public interface UserAiQuotaService {
     String NAME = "hunttech_UserAiQuotaService";
+    String MSG_QUOTA_EXHAUSTED = "Закончились доступные токены ИИ. Пожалуйста, обратитесь к администратору системы для пополнения квоты.";
 
     /**
      * Возвращает сводную информацию о квоте пользователя на текущий месяц.
@@ -66,4 +67,32 @@ public interface UserAiQuotaService {
      * @return квота по умолчанию
      */
     int loadDefaultMonthlyQuota();
+
+    /**
+     * Проверяет доступность квоты токенов для пользователя.
+     * Если квота исчерпана (remainingTokens <= 0 и нет безлимита), выбрасывает DevelopmentException с каноническим сообщением:
+     * "Закончились доступные токены ИИ. Пожалуйста, обратитесь к администратору системы для пополнения квоты."
+     *
+     * @param userId идентификатор пользователя
+     * @param estimatedTokens предварительная оценка требуемых токенов
+     */
+    void checkQuotaAvailable(UUID userId, int estimatedTokens);
+
+    /**
+     * Проверяет, доступна ли квота для пользователя (true - доступна или безлимит, false - исчерпана).
+     *
+     * @param userId идентификатор пользователя
+     * @param estimatedTokens предварительная оценка требуемых токенов
+     * @return true если квоты достаточно
+     */
+    boolean isQuotaAvailable(UUID userId, int estimatedTokens);
+
+    /**
+     * Списывает фактически израсходованные токены пользователя в счет квоты текущего календарного месяца.
+     * Увеличивает consumedTokens в LlmChatQuotaPeriod текущего месяца.
+     *
+     * @param userId идентификатор пользователя
+     * @param tokensUsed количество фактически израсходованных токенов (prompt + completion)
+     */
+    void recordTokenConsumption(UUID userId, int tokensUsed);
 }

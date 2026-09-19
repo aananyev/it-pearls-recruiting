@@ -17,6 +17,12 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.core.global.UserSessionSource;
+import com.company.hunttech.core.ai.AiCostCalculator;
+import com.company.hunttech.entity.ai.AiCallLog;
+import com.company.hunttech.service.AiSecuritySanitizer;
+import com.company.hunttech.service.UserAiQuotaService;
+import com.haulmont.cuba.core.global.CommitContext;
+import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.security.entity.EntityAttrAccess;
 import com.haulmont.cuba.security.entity.EntityOp;
 import org.slf4j.Logger;
@@ -96,6 +102,8 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
     private Security security;
     @Inject
     private UserSessionSource userSessionSource;
+    @Inject
+    private UserAiQuotaService userAiQuotaService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -282,6 +290,25 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
             throw new IllegalStateException("Пользователь не авторизован");
         }
 
+        long startTime = System.currentTimeMillis();
+        String prompt = buildManagerPrompt(messageText.trim());
+        int estimatedPromptTokens = estimateTokens(prompt);
+        if (userAiQuotaService != null) {
+            try {
+                userAiQuotaService.checkQuotaAvailable(currentUser.getId(), estimatedPromptTokens);
+            } catch (DevelopmentException de) {
+                long duration = System.currentTimeMillis() - startTime;
+                String quotaErrorMsg = de.getMessage();
+                log.warn("[MANAGER_HERMES] Пользователь {} исчерпал лимит токенов ИИ: {}",
+                        currentUser.getLogin(), quotaErrorMsg);
+                String model = getManagerConfig() != null ? getManagerConfig().getProfile() : "hrm-operator";
+                logAiCall(currentUser, conversationId, duration, "hermes", model,
+                        "USER", estimatedPromptTokens, 0, estimatedPromptTokens, BigDecimal.ZERO, "USD",
+                        "ERROR", quotaErrorMsg);
+                return HermesChatResponse.error(conversationId, quotaErrorMsg, duration);
+            }
+        }
+
         // Загружаем или создаем беседу
         LlmChatConversation conversation = dataManager.load(LlmChatConversation.class)
                 .id(conversationId)
@@ -315,17 +342,24 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         userMsg.setCreateTs(new Date());
         dataManager.commit(userMsg);
 
-        // Формируем системный запрос для Manager Hermes
-        String prompt = buildManagerPrompt(messageText.trim());
-
         String rawResponseText;
         try {
             rawResponseText = executeHermesCli(prompt);
         } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
             log.error("[MANAGER_HERMES] Сбой при вызове Hermes Agent", e);
             String errorMsg = "Ошибка связи с Hermes-контуром управления: " + e.getMessage();
             saveAssistantMessage(conversation, errorMsg, nextSeq + 1);
-            return HermesChatResponse.error(conversationId, errorMsg, 0);
+
+            int promptTokens = estimateTokens(prompt);
+            String model = getManagerConfig() != null ? getManagerConfig().getProfile() : "hrm-operator";
+            AiCostCalculator.CostResult costResult = AiCostCalculator.calculateCost(
+                    "hermes", model, promptTokens, 0);
+            logAiCall(currentUser, conversationId, duration, "hermes", model,
+                    "USER", promptTokens, 0, promptTokens, costResult.getCost(), costResult.getCurrency(),
+                    "ERROR", errorMsg);
+
+            return HermesChatResponse.error(conversationId, errorMsg, duration);
         }
 
         // Обработка возможного намерения на изменение данных
@@ -343,7 +377,35 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         // Сохраняем ответ ассистента
         saveAssistantMessage(conversation, processedResponseText, nextSeq + 1);
 
-        return new HermesChatResponse(conversationId, processedResponseText, null, 0);
+        long duration = System.currentTimeMillis() - startTime;
+        int promptTokens = estimateTokens(prompt);
+        int completionTokens = estimateTokens(processedResponseText);
+        int totalTokens = promptTokens + completionTokens;
+
+        String providerCode = "hermes";
+        String modelName = getManagerConfig() != null ? getManagerConfig().getProfile() : "hrm-operator";
+        AiCostCalculator.CostResult costResult = AiCostCalculator.calculateCost(
+                providerCode, modelName, promptTokens, completionTokens);
+
+        // Списываем токены
+        if (userAiQuotaService != null && totalTokens > 0) {
+            userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalTokens);
+        }
+
+        // Логируем в AiCallLog
+        logAiCall(currentUser, conversationId, duration, providerCode, modelName, "USER",
+                promptTokens, completionTokens, totalTokens, costResult.getCost(), costResult.getCurrency(),
+                "SUCCESS", null);
+
+        HermesChatResponse resp = new HermesChatResponse(conversationId, processedResponseText, null, duration);
+        resp.setPromptTokens(promptTokens);
+        resp.setCompletionTokens(completionTokens);
+        resp.setTotalTokens(totalTokens);
+        resp.setEstimatedCost(costResult.getCost());
+        resp.setCurrency(costResult.getCurrency());
+        resp.setModelName(modelName);
+        resp.setProviderCode(providerCode);
+        return resp;
     }
 
     private void saveAssistantMessage(LlmChatConversation conversation, String content, int seq) {
@@ -728,5 +790,46 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         // Очищаем служебный префикс сессии если есть
         cleaned = cleaned.replaceAll("(?m)^session_id:\\s*\\S+.*$", "").trim();
         return cleaned;
+    }
+
+    static int estimateTokens(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return 0;
+        }
+        return Math.max(1, (int) Math.ceil(text.length() / 4.0));
+    }
+
+    private void logAiCall(ExtUser user, UUID conversationId, long durationMs,
+                           String providerCode, String modelName, String credentialOwner,
+                           Integer promptTokens, Integer completionTokens, Integer totalTokens,
+                           BigDecimal estimatedCost, String currency,
+                           String status, String errorMessage) {
+        try {
+            AiCallLog callLog = metadata.create(AiCallLog.class);
+            callLog.setUser(user);
+            if (user != null) {
+                callLog.setUserLogin(user.getLogin());
+                callLog.setUserName(user.getName());
+            }
+            callLog.setCallTime(new Date());
+            callLog.setDurationMs(durationMs);
+            callLog.setFunctionCode("HERMES_OPERATOR");
+            callLog.setFunctionName("Hermes-operator (управление HRM)");
+            callLog.setCapability("TEXT_GENERATION");
+            callLog.setProviderCode(providerCode);
+            callLog.setModelName(modelName);
+            callLog.setCredentialOwner(credentialOwner);
+            callLog.setPromptTokens(promptTokens);
+            callLog.setCompletionTokens(completionTokens);
+            callLog.setTotalTokens(totalTokens);
+            callLog.setEstimatedCost(estimatedCost);
+            callLog.setCurrency(currency != null ? currency : "USD");
+            callLog.setCallerSource(conversationId != null ? "HermesManager:" + conversationId : "HermesManager");
+            callLog.setStatus(status);
+            callLog.setErrorMessage(AiSecuritySanitizer.sanitizeError(errorMessage));
+            dataManager.commit(new CommitContext(callLog));
+        } catch (Exception e) {
+            log.error("[MANAGER_HERMES] Не удалось сохранить запись AiCallLog: {}", e.getMessage(), e);
+        }
     }
 }

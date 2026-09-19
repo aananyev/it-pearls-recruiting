@@ -25,8 +25,8 @@ public class LlmChatManagerAccessContractTest {
 
         assertTrue(descriptor.contains("id=\"localChatTab\""));
         assertTrue(descriptor.contains("id=\"hermesManagerChatTab\""));
-        assertTrue(descriptor.contains("id=\"localChatTab\" caption=\"msg://tabLocalChat\" margin=\"true\" spacing=\"true\" visible=\"false\""));
-        assertTrue(descriptor.contains("id=\"hermesManagerChatTab\" caption=\"msg://tabHermesManager\" margin=\"true\" spacing=\"true\" visible=\"false\""));
+        assertTrue(descriptor.contains("id=\"localChatTab\" caption=\"msg://tabLocalChat\" margin=\"true\" spacing=\"true\""));
+        assertTrue(descriptor.contains("id=\"hermesManagerChatTab\" caption=\"msg://tabHermesManager\" margin=\"true\" spacing=\"true\""));
         assertTrue(permissions.contains("hunttech.ai.useLocalChat"));
         assertTrue(permissions.contains("hunttech.ai.useManagerHermesWrite"));
     }

@@ -4,6 +4,7 @@ import com.company.hunttech.config.HunttechHermesConfig;
 import com.company.hunttech.dto.action.InterviewSchedulingResult;
 import com.company.hunttech.core.ai.AiCostCalculator;
 import com.company.hunttech.core.ai.AiSecretService;
+import java.math.BigDecimal;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
@@ -91,6 +92,8 @@ public class HermesChatServiceBean implements HermesChatService {
     private InterviewSchedulingActionService interviewSchedulingActionService;
     @Inject
     private SmartOpenPositionIngestService smartOpenPositionIngestService;
+    @Inject
+    private UserAiQuotaService userAiQuotaService;
 
     @Override
     public UUID startHermesConversation() {
@@ -172,6 +175,24 @@ public class HermesChatServiceBean implements HermesChatService {
             throw new IllegalStateException("Пользователь не авторизован");
         }
 
+        // Проверяем доступность квоты токенов перед запуском запроса к Hermes
+        int estimatedPromptTokens = estimateTokens(message);
+        if (userAiQuotaService != null) {
+            try {
+                userAiQuotaService.checkQuotaAvailable(currentUser.getId(), estimatedPromptTokens);
+            } catch (com.haulmont.cuba.core.global.DevelopmentException de) {
+                long duration = System.currentTimeMillis() - startTime;
+                String quotaErrorMsg = de.getMessage();
+                log.warn("Пользователь {} исчерпал лимит токенов ИИ при вызове Hermes-viewer: {}",
+                        currentUser.getLogin(), quotaErrorMsg);
+                logAiCall(currentUser, conversationId, duration, PROVIDER_HERMES,
+                        getHermesConfig() != null ? getHermesConfig().getProfile() : "hermes",
+                        "USER", estimatedPromptTokens, 0, estimatedPromptTokens, BigDecimal.ZERO, "USD",
+                        "ERROR", quotaErrorMsg);
+                return HermesChatResponse.error(conversationId, quotaErrorMsg, duration);
+            }
+        }
+
         LlmChatConversation conversation = dataManager.load(LlmChatConversation.class)
                 .id(conversationId)
                 .optional()
@@ -225,9 +246,22 @@ public class HermesChatServiceBean implements HermesChatService {
 
                 conversation.setLastMessageAt(new Date());
                 dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
+
+                int promptToks = estimateTokens(message);
+                int compToks = estimateTokens(responseText);
+                int totalToks = promptToks + compToks;
+                if (userAiQuotaService != null && totalToks > 0) {
+                    userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalToks);
+                }
+                logAiCall(currentUser, conversationId, duration, "yandex", "caldav-telemost", "USER",
+                        promptToks, compToks, totalToks, BigDecimal.ZERO, "RUB", "SUCCESS", null);
+
                 HermesChatResponse hermesResp = new HermesChatResponse(conversationId, responseText, null, duration);
                 hermesResp.setProviderCode("yandex");
                 hermesResp.setModelName("caldav-telemost");
+                hermesResp.setPromptTokens(promptToks);
+                hermesResp.setCompletionTokens(compToks);
+                hermesResp.setTotalTokens(totalToks);
                 return hermesResp;
             }
         }
@@ -267,9 +301,22 @@ public class HermesChatServiceBean implements HermesChatService {
 
                 conversation.setLastMessageAt(new Date());
                 dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
+
+                int promptToks = estimateTokens(message);
+                int compToks = estimateTokens(responseText);
+                int totalToks = promptToks + compToks;
+                if (userAiQuotaService != null && totalToks > 0) {
+                    userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalToks);
+                }
+                logAiCall(currentUser, conversationId, duration, "yandex", "caldav-telemost", "USER",
+                        promptToks, compToks, totalToks, BigDecimal.ZERO, "RUB", "SUCCESS", null);
+
                 HermesChatResponse hermesResp = new HermesChatResponse(conversationId, responseText, null, duration);
                 hermesResp.setProviderCode("yandex");
                 hermesResp.setModelName("caldav-telemost");
+                hermesResp.setPromptTokens(promptToks);
+                hermesResp.setCompletionTokens(compToks);
+                hermesResp.setTotalTokens(totalToks);
                 return hermesResp;
             }
         }
@@ -388,6 +435,11 @@ public class HermesChatServiceBean implements HermesChatService {
 
         long duration = System.currentTimeMillis() - startTime;
 
+        // Списываем фактически израсходованные токены в счет месячной квоты пользователя
+        if (userAiQuotaService != null && totalTokens > 0) {
+            userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalTokens);
+        }
+
         // Отдельно и безопасно фиксируем технический аудит вызовов AI (AiCallLog), чтобы сбой аудита не отменял диалог
         logAiCall(currentUser, conversationId, duration, effectiveProvider, effectiveModel, credentialOwner,
                 promptTokens, completionTokens, totalTokens, costResult.getCost(), costResult.getCurrency(),
@@ -419,7 +471,7 @@ public class HermesChatServiceBean implements HermesChatService {
             callLog.setCallTime(new Date());
             callLog.setDurationMs(durationMs);
             callLog.setFunctionCode("HERMES_CHAT");
-            callLog.setFunctionName("Чат с Hermes");
+            callLog.setFunctionName("Hermes-viewer (ассистент)");
             callLog.setCapability("TEXT_GENERATION");
             callLog.setProviderCode(providerCode);
             callLog.setModelName(modelName);
@@ -1281,9 +1333,21 @@ public class HermesChatServiceBean implements HermesChatService {
         conversation.setLastMessageAt(new Date());
         dataManager.commit(new CommitContext(conversation, userMsg, assistantMsg));
 
+        int promptToks = estimateTokens(message);
+        int compToks = estimateTokens(responseText);
+        int totalToks = promptToks + compToks;
+        if (userAiQuotaService != null && totalToks > 0) {
+            userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalToks);
+        }
+        logAiCall(currentUser, conversation.getId(), duration, "hermes", "vacancy-opening-skill", "USER",
+                promptToks, compToks, totalToks, BigDecimal.ZERO, "USD", "SUCCESS", null);
+
         HermesChatResponse hermesResp = new HermesChatResponse(conversation.getId(), responseText, null, duration);
         hermesResp.setProviderCode("hermes");
         hermesResp.setModelName("vacancy-opening-skill");
+        hermesResp.setPromptTokens(promptToks);
+        hermesResp.setCompletionTokens(compToks);
+        hermesResp.setTotalTokens(totalToks);
         return hermesResp;
     }
 }

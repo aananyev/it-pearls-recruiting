@@ -91,6 +91,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
     private AiSecretService aiSecretService;
     @Inject
     private UserAiContextService userAiContextService;
+    @Inject
+    private UserAiQuotaService userAiQuotaService;
 
     @Override
     public AiExecutionResult executeText(String functionCode, Map<String, Object> context) {
@@ -104,6 +106,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
         validatePrivacyPolicy(function);
         String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
         User currentUser = userSessionSource.getUserSession().getUser();
+        if (userAiQuotaService != null && currentUser != null) {
+            userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
+        }
         AiExecutionPolicy policy = function.getExecutionPolicy();
         if (policy == null) {
             throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");
@@ -115,17 +120,17 @@ public class AiExecutionServiceBean implements AiExecutionService {
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
 
+        AiExecutionResult result;
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
             if (userCandidates.isEmpty()) {
                 throw new DevelopmentException(
                         "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
             }
-            return executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
+            result = executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
                     callerSource, startTime, userContext, requestId);
-        }
-        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
+        } else if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
-                return executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
+                result = executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
                         callerSource, startTime, userContext, requestId);
             } catch (RuntimeException userFailure) {
                 if (userFailure instanceof AiRequestCancelledException) {
@@ -136,18 +141,25 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     ensureAdminFallbackAllowed(function, currentUser, userContext);
                     log.warn("Персональные AI-подключения функции {} недоступны; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
-                    return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
+                    result = executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
                             callerSource, startTime, userContext, requestId);
+                } else {
+                    saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
+                            null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
+                            userContext);
+                    throw new DevelopmentException(
+                            "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
                 }
-                saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
-                        null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
-                        userContext);
-                throw new DevelopmentException(
-                        "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
+        } else {
+            ensureAdminFallbackAllowed(function, currentUser, userContext);
+            result = executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
         }
-        ensureAdminFallbackAllowed(function, currentUser, userContext);
-        return executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
+
+        if (!LLM_CHAT_FUNCTION_CODE.equals(functionCode) && userAiQuotaService != null && currentUser != null && result != null && result.getTotalTokens() != null && result.getTotalTokens() > 0) {
+            userAiQuotaService.recordTokenConsumption(currentUser.getId(), result.getTotalTokens());
+        }
+        return result;
     }
 
     @Override
@@ -165,6 +177,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
         validatePrivacyPolicy(function);
         String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
         User currentUser = userSessionSource.getUserSession().getUser();
+        if (userAiQuotaService != null && currentUser != null) {
+            userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
+        }
         AiExecutionPolicy policy = function.getExecutionPolicy();
         if (policy == null) {
             throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");
@@ -181,17 +196,17 @@ public class AiExecutionServiceBean implements AiExecutionService {
             }
             listener.onDelta(delta);
         };
+        AiExecutionResult result;
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
             if (userCandidates.isEmpty()) {
                 throw new DevelopmentException(
                         "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
             }
-            return executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
+            result = executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
                     callerSource, startTime, userContext, requestId, emitted, guardedListener);
-        }
-        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
+        } else if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
-                return executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
+                result = executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
                         callerSource, startTime, userContext, requestId, emitted, guardedListener);
             } catch (RuntimeException userFailure) {
                 // Never append a second provider response after partial output.
@@ -203,16 +218,23 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     ensureAdminFallbackAllowed(function, currentUser, userContext);
                     log.warn("Персональные AI-подключения функции {} недоступны; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
-                    return executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
+                    result = executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
                             callerSource, startTime, userContext, requestId, guardedListener);
+                } else {
+                    throw new DevelopmentException(
+                            "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
                 }
-                throw new DevelopmentException(
-                        "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
+        } else {
+            ensureAdminFallbackAllowed(function, currentUser, userContext);
+            result = executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
+                    callerSource, startTime, userContext, requestId, guardedListener);
         }
-        ensureAdminFallbackAllowed(function, currentUser, userContext);
-        return executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
-                callerSource, startTime, userContext, requestId, guardedListener);
+
+        if (!LLM_CHAT_FUNCTION_CODE.equals(functionCode) && userAiQuotaService != null && currentUser != null && result != null && result.getTotalTokens() != null && result.getTotalTokens() > 0) {
+            userAiQuotaService.recordTokenConsumption(currentUser.getId(), result.getTotalTokens());
+        }
+        return result;
     }
 
     @Override
@@ -229,6 +251,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
         validateImageCapability(function);
         String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
         User currentUser = userSessionSource.getUserSession().getUser();
+        if (userAiQuotaService != null && currentUser != null) {
+            userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
+        }
         AiExecutionPolicy policy = function.getExecutionPolicy();
         if (policy == null) {
             throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");

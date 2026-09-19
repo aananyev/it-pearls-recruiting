@@ -13,6 +13,7 @@ import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.TypedQuery;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.core.global.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -518,5 +519,95 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
+    }
+
+    @Override
+    public boolean isQuotaAvailable(UUID userId, int estimatedTokens) {
+        if (userId == null) {
+            return true;
+        }
+        UserAiQuotaInfo quota = getUserQuota(userId);
+        if (quota == null || quota.isUnlimited()) {
+            return true;
+        }
+        if (quota.getRemainingTokens() != null) {
+            long remaining = quota.getRemainingTokens().longValue();
+            if (remaining <= 0) {
+                return false;
+            }
+            if (estimatedTokens > 0 && remaining < estimatedTokens) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void checkQuotaAvailable(UUID userId, int estimatedTokens) {
+        if (!isQuotaAvailable(userId, estimatedTokens)) {
+            throw new DevelopmentException(MSG_QUOTA_EXHAUSTED);
+        }
+    }
+
+    @Override
+    public void recordTokenConsumption(UUID userId, int tokensUsed) {
+        if (userId == null || tokensUsed <= 0) {
+            return;
+        }
+
+        ExtUser user = dataManager.load(ExtUser.class)
+                .id(userId)
+                .view("extUser-view")
+                .optional()
+                .orElse(null);
+        if (user == null) {
+            log.warn("Не удалось найти пользователя ID: {} для списания токенов", userId);
+            return;
+        }
+
+        Date today = truncateToDate(new Date());
+        Date periodStart = monthStart(today);
+
+        try {
+            try (Transaction tx = persistence.createTransaction()) {
+                EntityManager em = persistence.getEntityManager();
+                TypedQuery<LlmChatQuotaPeriod> query = em.createQuery(
+                        "select e from hunttech_LlmChatQuotaPeriod e " +
+                                "where e.user.id = :userId and e.periodStart = :periodStart and e.deleteTs is null",
+                        LlmChatQuotaPeriod.class);
+                query.setParameter("userId", userId);
+                query.setParameter("periodStart", periodStart);
+                query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+                query.setViewName("llm-chat-quota-period-view");
+
+                List<LlmChatQuotaPeriod> periods = query.getResultList();
+                LlmChatQuotaPeriod period;
+                if (!periods.isEmpty()) {
+                    period = periods.get(0);
+                    int currentConsumed = period.getConsumedTokens() != null ? period.getConsumedTokens() : 0;
+                    long newConsumed = (long) currentConsumed + tokensUsed;
+                    period.setConsumedTokens((int) Math.min((long) Integer.MAX_VALUE, newConsumed));
+                    em.merge(period);
+                } else {
+                    int baseQuota = resolveEffectiveQuotaTokens(userId, today);
+                    period = metadata.create(LlmChatQuotaPeriod.class);
+                    period.setUser(user);
+                    period.setPeriodStart(periodStart);
+                    period.setQuotaTokens(baseQuota);
+                    period.setReservedTokens(0);
+                    period.setConsumedTokens(tokensUsed);
+                    period.setPendingTokens(0);
+                    period.setExtraTokens(0);
+                    em.persist(period);
+                }
+                tx.commit();
+            }
+
+            log.info("Списано {} токенов пользователя {} (ID: {}) в периоде {}",
+                    tokensUsed, user.getLogin(), userId, periodStart);
+        } catch (Exception ex) {
+            log.error("Сбой при списании токенов пользователя {} (ID: {}): {}",
+                    user.getLogin(), userId, ex.getMessage(), ex);
+        }
     }
 }
