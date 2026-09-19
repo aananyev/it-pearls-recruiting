@@ -1364,7 +1364,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     .show();
             return;
         }
-        CandidateVacancyMatchScreen matchScreen = screens.create(CandidateVacancyMatchScreen.class);
+        CandidateVacancyMatchScreen matchScreen = screenBuilders.screen(this)
+                .withScreenClass(CandidateVacancyMatchScreen.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
         matchScreen.setCandidate(selected);
         matchScreen.show();
     }

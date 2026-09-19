@@ -69,6 +69,12 @@ public class CandidateVacancyWorkflowServiceBean implements CandidateVacancyWork
             return result;
         }
 
+        if (Boolean.TRUE.equals(vacancy.getOpenClose())) {
+            result.setSuccess(false);
+            result.setMessage("Вакансия закрыта (openClose = true). Добавление кандидатов возможно только на открытые позиции.");
+            return result;
+        }
+
         result.setCandidateFullName(candidate.getFullName());
         result.setVacancyTitle(vacancy.getVacansyName());
 

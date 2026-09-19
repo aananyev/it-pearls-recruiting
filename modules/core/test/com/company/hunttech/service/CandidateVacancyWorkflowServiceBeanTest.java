@@ -77,6 +77,31 @@ public class CandidateVacancyWorkflowServiceBeanTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    public void testTakeIntoWork_ClosedVacancy() {
+        testVacancy.setOpenClose(true);
+
+        FluentLoader.ById<JobCandidate, UUID> candidateLoader = mock(FluentLoader.ById.class);
+        FluentLoader<JobCandidate, UUID> fluentCandidate = mock(FluentLoader.class);
+        when(dataManager.load(JobCandidate.class)).thenReturn(fluentCandidate);
+        when(fluentCandidate.id(candidateId)).thenReturn(candidateLoader);
+        when(candidateLoader.view(anyString())).thenReturn(candidateLoader);
+        when(candidateLoader.optional()).thenReturn(Optional.of(testCandidate));
+
+        FluentLoader.ById<OpenPosition, UUID> vacancyLoader = mock(FluentLoader.ById.class);
+        FluentLoader<OpenPosition, UUID> fluentVacancy = mock(FluentLoader.class);
+        when(dataManager.load(OpenPosition.class)).thenReturn(fluentVacancy);
+        when(fluentVacancy.id(vacancyId)).thenReturn(vacancyLoader);
+        when(vacancyLoader.view(anyString())).thenReturn(vacancyLoader);
+        when(vacancyLoader.optional()).thenReturn(Optional.of(testVacancy));
+
+        TakeIntoWorkResult res = service.takeIntoWork(candidateId, vacancyId, 85, null);
+        assertFalse(res.isSuccess());
+        assertNotNull(res.getMessage());
+        assertTrue(res.getMessage().contains("закрыта"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void testPrepareInteractionDraft() {
         FluentLoader.ById<JobCandidate, UUID> candidateLoader = mock(FluentLoader.ById.class);
         FluentLoader<JobCandidate, UUID> fluentCandidate = mock(FluentLoader.class);

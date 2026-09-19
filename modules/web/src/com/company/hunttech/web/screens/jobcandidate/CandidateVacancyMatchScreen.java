@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
  */
 @UiController("hunttech_CandidateVacancyMatch")
 @UiDescriptor("candidate-vacancy-match-screen.xml")
+@DialogMode(width = "1300px", height = "850px", modal = true, resizable = true)
 public class CandidateVacancyMatchScreen extends Screen {
 
     private static final Logger log = LoggerFactory.getLogger(CandidateVacancyMatchScreen.class);

@@ -105,6 +105,11 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 ))
                 .list();
 
+        // Строгая фильтрация: гарантируем, что используются ТОЛЬКО открытые вакансии (openClose != true)
+        openPositions = openPositions.stream()
+                .filter(op -> !Boolean.TRUE.equals(op.getOpenClose()))
+                .collect(Collectors.toList());
+
         if (openPositions.isEmpty()) {
             CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
             emptyReport.setCandidateId(candidateId);
@@ -245,6 +250,13 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
             emptyReport.setSuccess(false);
             emptyReport.setStatusMessage("Вакансия с указанным ID не найдена.");
+            return emptyReport;
+        }
+
+        if (Boolean.TRUE.equals(vacancy.getOpenClose())) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("Вакансия закрыта (openClose = true). AI-подбор кандидатов доступен только для открытых вакансий.");
             return emptyReport;
         }
 
@@ -703,6 +715,9 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 candidate.getPersonPosition().getPositionRuName().toLowerCase(Locale.ROOT) : "";
 
         for (OpenPosition op : openPositions) {
+            if (Boolean.TRUE.equals(op.getOpenClose())) {
+                continue;
+            }
             CandidateVacancyMatchItem item = new CandidateVacancyMatchItem();
             item.setOpenPositionId(op.getId());
             item.setOpenPosition(op);
