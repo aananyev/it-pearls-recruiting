@@ -46,8 +46,26 @@ public class AIProviderCatalogTest {
             assertEquals(modelsByProvider.keySet(),
                     new java.util.LinkedHashSet<>(AiProviderCatalog.getProviderOptions().values()));
             assertEquals("deepseek-v4-flash", AiProviderCatalog.getDefaultModel("deepseek"));
+            assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", AiProviderCatalog.getDefaultModel("openrouter"));
             for (Map.Entry<String, String> entry : modelsByProvider.entrySet()) {
                 assertNotNull("Для провайдера " + entry.getKey() + " не задана модель", entry.getValue());
             }
         }
+
+    @Test
+    public void openRouterProviderModelResolution() {
+        OpenRouterProvider provider = new OpenRouterProvider();
+        assertEquals("openrouter", provider.getProviderCode());
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.getDefaultModel());
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName(null));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName(""));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("openrouter/openai"));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nemotron-3-ultra-550b"));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nemotron-3-ultra-550b:free"));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nvidia/nemotron-3-ultra-550b"));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nvidia/nemotron-3-ultra-550b:free"));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nemotron-3-ultra-550b-a55b:free"));
+        assertEquals("anthropic/claude-3.5-sonnet", provider.resolveModelName("anthropic/claude-3.5-sonnet"));
+    }
 }
+

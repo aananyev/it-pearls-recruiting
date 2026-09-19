@@ -60,7 +60,7 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
         HttpURLConnection connection = null;
         try {
             ObjectNode requestBody = objectMapper.createObjectNode();
-            requestBody.put("model", isConfigured(modelName) ? modelName.trim() : getDefaultModel());
+            requestBody.put("model", resolveModelName(modelName));
             requestBody.put("temperature", resolveTemperature(options));
             requestBody.put("stream", false);
 
@@ -127,7 +127,7 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
         int completionTokens = 0;
         try {
             ObjectNode requestBody = objectMapper.createObjectNode();
-            requestBody.put("model", isConfigured(modelName) ? modelName.trim() : getDefaultModel());
+            requestBody.put("model", resolveModelName(modelName));
             requestBody.put("temperature", resolveTemperature(options));
             requestBody.put("stream", true);
             requestBody.putObject("stream_options").put("include_usage", true);
@@ -290,6 +290,10 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
         ObjectNode message = messages.addObject();
         message.put("role", role);
         message.put("content", content);
+    }
+
+    protected String resolveModelName(String modelName) {
+        return isConfigured(modelName) ? modelName.trim() : getDefaultModel();
     }
 
     protected boolean isConfigured(String value) {

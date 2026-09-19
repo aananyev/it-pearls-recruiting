@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Настройка OpenRouter Nemotron 3 Ultra (free) в качестве основной административной AI-модели -->
+    <changeSet id="260919-4-setOpenRouterNemotronAsPrimaryAdminModel-pg" author="antigravity" dbms="postgresql">
+        <sqlFile path="../update/postgres/26/260919-4-setOpenRouterNemotronAsPrimaryAdminModel.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+</databaseChangeLog>

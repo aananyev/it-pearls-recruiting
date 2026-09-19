@@ -270,4 +270,8 @@
     <include file="260919-3-seedSkillsExtractBackgroundAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- OpenRouter: Настройка бесплатной модели nemotron-3-ultra-550b как основной административной -->
+    <include file="260919-4-setOpenRouterNemotronAsPrimaryAdminModel.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -1,20 +1,11 @@
 package com.company.hunttech.core.ai;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Подключение к OpenRouter через Chat Completions API.
@@ -23,6 +14,7 @@ import java.util.UUID;
 public class OpenRouterProvider extends AbstractOpenAiCompatibleProvider {
 
     private static final Logger log = LoggerFactory.getLogger(OpenRouterProvider.class);
+    private static final String DEFAULT_NEMOTRON_FREE_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
 
     @Override
     public String getProviderCode() {
@@ -36,12 +28,35 @@ public class OpenRouterProvider extends AbstractOpenAiCompatibleProvider {
 
     @Override
     protected String getDefaultModel() {
-        return "openrouter/openai";
+        return DEFAULT_NEMOTRON_FREE_MODEL;
     }
 
     @Override
     protected String getProviderDisplayName() {
         return "OpenRouter";
+    }
+
+    @Override
+    protected String resolveModelName(String modelName) {
+        String resolved = super.resolveModelName(modelName);
+        if (resolved != null) {
+            String trimmed = resolved.trim();
+            if ("nemotron-3-ultra-550b".equalsIgnoreCase(trimmed)
+                    || "nemotron-3-ultra-550b:free".equalsIgnoreCase(trimmed)
+                    || "nvidia/nemotron-3-ultra-550b".equalsIgnoreCase(trimmed)
+                    || "nvidia/nemotron-3-ultra-550b:free".equalsIgnoreCase(trimmed)
+                    || "nemotron-3-ultra-550b-a55b:free".equalsIgnoreCase(trimmed)
+                    || "openrouter/openai".equalsIgnoreCase(trimmed)) {
+                return DEFAULT_NEMOTRON_FREE_MODEL;
+            }
+        }
+        return resolved;
+    }
+
+    @Override
+    protected void customizeConnection(HttpURLConnection connection) {
+        connection.setRequestProperty("HTTP-Referer", "https://hunttech.ru");
+        connection.setRequestProperty("X-Title", "HuntTech HRM");
     }
 
     // Note: OpenRouter does not support image generation via the same endpoint as OpenAI.

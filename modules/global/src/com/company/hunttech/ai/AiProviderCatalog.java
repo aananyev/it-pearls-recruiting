@@ -42,7 +42,7 @@ public final class AiProviderCatalog {
         defaultModels.put("qwen", "qwen-plus");
         defaultModels.put("kimi", "kimi-k2.5");
         defaultModels.put("glm", "glm-5.1");
-        defaultModels.put("openrouter", "openrouter/openai");
+        defaultModels.put("openrouter", "nvidia/nemotron-3-ultra-550b-a55b:free");
         defaultModels.put("bai", "bai/chat");
         DEFAULT_MODELS = Collections.unmodifiableMap(defaultModels);
     }
