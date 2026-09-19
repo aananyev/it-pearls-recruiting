@@ -280,3 +280,5 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 | 2026-06-29 | Документация кастомного компонента FallbackImage |
 | 2026-06-27 | AI-администрирование: VacancyPromptTemplate browse/edit, UserAiConfiguration browse, меню aiAdministration |
 | 2026-06-26 | Каталог дополнен UI Spec для 16 documented entities (40 новых файлов + 7 ранее созданных JobCandidate/OpenPosition) |
+
+- [RecruiterDashboards_Spec.md](RecruiterDashboards_Spec.md) — Kanban кандидатов, воронка найма и кадровый резерв на CUBA Dashboard Add-on.
