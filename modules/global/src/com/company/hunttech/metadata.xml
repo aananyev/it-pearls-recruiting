@@ -3,6 +3,11 @@
 
     <!-- Единая runtime-модель HRM HuntTech. Legacy namespace itpearls
          допускается только в исторических migration-артефактах, но не в metadata registry. -->
-    <metadata-model root-package="com.company.hunttech" namespace="hunttech"/>
+    <metadata-model root-package="com.company.hunttech" namespace="hunttech">
+        <class>com.company.hunttech.entity.CandidateVacancyMatchItem</class>
+        <class>com.company.hunttech.entity.GeoCountryData</class>
+        <class>com.company.hunttech.entity.GeoRegionData</class>
+        <class>com.company.hunttech.entity.GeoCityData</class>
+    </metadata-model>
 
 </metadata>

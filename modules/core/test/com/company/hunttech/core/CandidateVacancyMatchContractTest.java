@@ -103,4 +103,15 @@ public class CandidateVacancyMatchContractTest {
         assertTrue("Контроллер должен перенаправлять findSuitableAction на новый экран",
                 java.contains("CandidateVacancyMatchScreen"));
     }
+
+    @Test
+    public void testRegisteredInMetadataXml() throws IOException {
+        Path root = projectRoot();
+        Path metadataPath = root.resolve("modules/global/src/com/company/hunttech/metadata.xml");
+        assertTrue("metadata.xml должен существовать", Files.exists(metadataPath));
+
+        String metadata = new String(Files.readAllBytes(metadataPath), StandardCharsets.UTF_8);
+        assertTrue("CandidateVacancyMatchItem должен быть зарегистрирован в metadata.xml",
+                metadata.contains("com.company.hunttech.entity.CandidateVacancyMatchItem"));
+    }
 }
