@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Dashboard-апплет показывает персональный кадровый резерв и число открытых вакансий той же позиции. -->
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <!-- Корень использует штатную карточку dashboard HuntTech и не меняет PersonelReserve. -->
+    <layout stylename="widget-border recruiter-dashboard-widget recruiter-reserve-widget"
+            spacing="true"
+            width="100%"
+            height="100%">
+        <!-- Заголовок отделяет контекст от реестра резервистов. -->
+        <vbox id="headerBox" spacing="false" width="100%">
+            <!-- Основной заголовок апплета. -->
+            <label value="Кадровый резерв" stylename="widget-table-header"/>
+            <!-- Контроллер показывает объём доступного рынка открытых вакансий. -->
+            <label id="periodLabel" stylename="recruiter-dashboard-subtitle"/>
+        </vbox>
+        <!-- KPI выделяют размер резерва, активность, сроки и возможности повторного трудоустройства. -->
+        <hbox id="kpiBar" width="100%" spacing="true" stylename="recruiter-kpi-bar"/>
+        <!-- Внутренняя карточка содержит плотный реестр без тяжёлого entity graph. -->
+        <vbox id="reserveCard" width="100%" spacing="true" stylename="recruiter-dashboard-inner-card">
+            <!-- Заголовок таблицы объясняет сценарий повторного предложения кандидатов. -->
+            <label value="Кандидаты и возможности трудоустройства"
+                   stylename="recruiter-dashboard-section-title"/>
+            <!-- Строки строятся одним reserve-query и одной bulk-выборкой открытых вакансий. -->
+            <vbox id="reserveRows" width="100%" spacing="false"/>
+        </vbox>
+    </layout>
+</fragment>

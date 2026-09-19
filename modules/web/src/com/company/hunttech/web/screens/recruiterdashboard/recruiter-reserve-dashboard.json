@@ -1,0 +1,76 @@
+{
+  "title": "Кадровый резерв",
+  "code": "recruiter-reserve-dashboard",
+  "visualModel": {
+    "children": [
+      {
+        "className": "com.haulmont.addon.dashboard.model.visualmodel.ResponsiveLayout",
+        "data": {
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "areas": [
+            {
+              "component": {
+                "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                "data": {
+                  "widget": {
+                    "showWidgetCaption": false,
+                    "widgetId": "recruiterTalentReserve",
+                    "caption": "Кадровый резерв",
+                    "name": "Кадровый резерв",
+                    "description": null,
+                    "parameters": [],
+                    "widgetFields": [],
+                    "frameId": "hunttech_RecruiterTalentReserveWidget",
+                    "createdBy": "system",
+                    "id": "33333333-3333-4333-8333-333333333331"
+                  },
+                  "children": [],
+                  "weight": 1,
+                  "expand": null,
+                  "styleName": null,
+                  "width": 100,
+                  "height": 100,
+                  "widthUnit": "%",
+                  "heightUnit": "%",
+                  "id": "33333333-3333-4333-8333-333333333332"
+                }
+              },
+              "order": 1,
+              "xs": 12,
+              "sm": 12,
+              "md": 12,
+              "lg": 12,
+              "id": "33333333-3333-4333-8333-333333333333"
+            }
+          ],
+          "children": [],
+          "weight": 1,
+          "expand": null,
+          "styleName": "recruiter-dashboard-responsive",
+          "width": 100,
+          "height": 100,
+          "widthUnit": "%",
+          "heightUnit": "%",
+          "id": "33333333-3333-4333-8333-333333333334"
+        }
+      }
+    ],
+    "weight": 1,
+    "expand": null,
+    "styleName": null,
+    "width": 100,
+    "height": 100,
+    "widthUnit": "%",
+    "heightUnit": "%",
+    "id": "33333333-3333-4333-8333-333333333335"
+  },
+  "parameters": [],
+  "isAvailableForAllUsers": true,
+  "createdBy": "system",
+  "timerDelay": 60,
+  "assistantBeanName": null,
+  "id": "33333333-3333-4333-8333-333333333336"
+}

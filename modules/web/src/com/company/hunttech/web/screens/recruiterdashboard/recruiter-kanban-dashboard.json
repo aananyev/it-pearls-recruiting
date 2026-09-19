@@ -1,0 +1,76 @@
+{
+  "title": "Кандидаты в работе — Kanban",
+  "code": "recruiter-kanban-dashboard",
+  "visualModel": {
+    "children": [
+      {
+        "className": "com.haulmont.addon.dashboard.model.visualmodel.ResponsiveLayout",
+        "data": {
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "areas": [
+            {
+              "component": {
+                "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                "data": {
+                  "widget": {
+                    "showWidgetCaption": false,
+                    "widgetId": "recruiterCandidateKanban",
+                    "caption": "Кандидаты в работе — Kanban",
+                    "name": "Кандидаты в работе — Kanban",
+                    "description": null,
+                    "parameters": [],
+                    "widgetFields": [],
+                    "frameId": "hunttech_RecruiterCandidateKanbanWidget",
+                    "createdBy": "system",
+                    "id": "11111111-1111-4111-8111-111111111111"
+                  },
+                  "children": [],
+                  "weight": 1,
+                  "expand": null,
+                  "styleName": null,
+                  "width": 100,
+                  "height": 100,
+                  "widthUnit": "%",
+                  "heightUnit": "%",
+                  "id": "11111111-1111-4111-8111-111111111112"
+                }
+              },
+              "order": 1,
+              "xs": 12,
+              "sm": 12,
+              "md": 12,
+              "lg": 12,
+              "id": "11111111-1111-4111-8111-111111111113"
+            }
+          ],
+          "children": [],
+          "weight": 1,
+          "expand": null,
+          "styleName": "recruiter-dashboard-responsive",
+          "width": 100,
+          "height": 100,
+          "widthUnit": "%",
+          "heightUnit": "%",
+          "id": "11111111-1111-4111-8111-111111111114"
+        }
+      }
+    ],
+    "weight": 1,
+    "expand": null,
+    "styleName": null,
+    "width": 100,
+    "height": 100,
+    "widthUnit": "%",
+    "heightUnit": "%",
+    "id": "11111111-1111-4111-8111-111111111115"
+  },
+  "parameters": [],
+  "isAvailableForAllUsers": true,
+  "createdBy": "system",
+  "timerDelay": 60,
+  "assistantBeanName": null,
+  "id": "11111111-1111-4111-8111-111111111116"
+}

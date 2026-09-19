@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Полноэкранный CUBA Dashboard показывает кадровый резерв и повторные возможности трудоустройства. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd"
+        caption="Кадровый резерв">
+    <!-- Рабочая область использует единый namespace dashboard HuntTech. -->
+    <layout expand="talentReserveDashboard" stylename="edit-workspace recruiter-dashboard-root">
+        <!-- JSON-модель Dashboard Add-on подключает reserve-апплет и штатный timer refresh. -->
+        <dashboard:dashboard id="talentReserveDashboard"
+                             jsonPath="com/company/hunttech/web/screens/recruiterdashboard/recruiter-reserve-dashboard.json"
+                             timerDelay="60"
+                             width="100%"
+                             height="100%"/>
+    </layout>
+</window>
