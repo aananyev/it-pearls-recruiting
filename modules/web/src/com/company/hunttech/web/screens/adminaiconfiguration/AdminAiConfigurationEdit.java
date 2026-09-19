@@ -65,6 +65,9 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
     public void onInitEntity(InitEntityEvent<AdminAiConfiguration> event) {
         event.getEntity().setActive(true);
         event.getEntity().setPriority(0);
+        if (event.getEntity().getMaxRetries() == null) {
+            event.getEntity().setMaxRetries(3);
+        }
     }
 
     /**
@@ -73,6 +76,11 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
      */
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        Integer retries = getEditedEntity().getMaxRetries();
+        if (retries == null || retries < 1) {
+            getEditedEntity().setMaxRetries(3);
+        }
+
         Integer maxContext = maxContextTokensField != null && maxContextTokensField.getValue() != null
                 ? maxContextTokensField.getValue()
                 : getEditedEntity().getMaxContextTokens();

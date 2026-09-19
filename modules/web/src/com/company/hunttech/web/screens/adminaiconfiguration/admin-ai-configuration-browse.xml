@@ -67,6 +67,8 @@
                     <column property="priority" width="100px"/>
                     <!-- Лимит контекста. -->
                     <column property="maxContextTokens" width="140px"/>
+                    <!-- Количество обращений до fallback. -->
+                    <column property="maxRetries" width="130px"/>
                     <!-- Последний test status. -->
                     <column property="lastTestStatus" width="140px"/>
                     <!-- Время последнего теста. -->

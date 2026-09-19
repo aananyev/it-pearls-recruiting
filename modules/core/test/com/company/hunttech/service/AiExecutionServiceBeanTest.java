@@ -374,6 +374,7 @@ public class AiExecutionServiceBeanTest {
         personal.setApiKeyEncrypted("personal-secret");
         personal.setDefaultModelName("personal-model");
         personal.setIsActive(true);
+        personal.setMaxRetries(2);
         UserAiFunctionOverride override = new UserAiFunctionOverride();
         override.setUser(user);
         override.setAiFunction(function);
@@ -421,6 +422,7 @@ public class AiExecutionServiceBeanTest {
         personal.setApiKeyEncrypted("personal-secret");
         personal.setDefaultModelName("personal-model");
         personal.setIsActive(true);
+        personal.setMaxRetries(2);
         UserAiFunctionOverride override = new UserAiFunctionOverride();
         override.setUser(user);
         override.setAiFunction(function);

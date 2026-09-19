@@ -78,6 +78,9 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
         if (event.getEntity().getIsActive() == null) {
             event.getEntity().setIsActive(true);
         }
+        if (event.getEntity().getMaxRetries() == null) {
+            event.getEntity().setMaxRetries(3);
+        }
     }
 
     @Subscribe
@@ -91,6 +94,11 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        Integer retries = getEditedEntity().getMaxRetries();
+        if (retries == null || retries < 1) {
+            getEditedEntity().setMaxRetries(3);
+        }
+
         Integer maxContext = maxContextTokensField != null && maxContextTokensField.getValue() != null
                 ? maxContextTokensField.getValue()
                 : getEditedEntity().getMaxContextTokens();

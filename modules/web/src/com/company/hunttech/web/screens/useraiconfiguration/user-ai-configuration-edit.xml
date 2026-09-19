@@ -110,13 +110,20 @@
                                       property="isActive"
                                       width="100%"
                                       caption="msg://userIsActive.caption"/>
-                            <!-- Количество пробных обращений при недоступности. -->
+                            <!-- Количество обращений к модели до fallback -->
                             <textField id="maxRetriesField"
                                        dataContainer="userAiConfigurationDc"
                                        property="maxRetries"
                                        width="100%"
                                        stylename="edit-form-control"
-                                       caption="msg://userMaxRetries.caption"/>
+                                       inputPrompt="3"
+                                       caption="msg://userMaxRetries.caption"
+                                       description="msg://userMaxRetries.description">
+                                <validators>
+                                    <min value="1" message="msg://maxRetriesValidationMin"/>
+                                    <max value="10" message="msg://maxRetriesValidationMax"/>
+                                </validators>
+                            </textField>
                             <!-- Приоритет в очереди перебора нейросетей. -->
                             <textField id="priorityField"
                                        dataContainer="userAiConfigurationDc"

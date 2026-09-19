@@ -50,8 +50,10 @@ public class UserAiConfiguration extends StandardEntity {
     @Column(name = "IS_PRIMARY")
     private Boolean isPrimary = false;
 
+    @Max(10)
+    @Min(1)
     @Column(name = "MAX_RETRIES")
-    private Integer maxRetries = 2;
+    private Integer maxRetries = 3;
 
     @Column(name = "PRIORITY_")
     private Integer priority = 10;

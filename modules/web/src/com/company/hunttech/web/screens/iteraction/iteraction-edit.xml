@@ -663,6 +663,7 @@ order by e.number]]>
                                               caption="msg://msgAdd"
                                               dataContainer="iteractionDc"
                                               property="addFlag"/>
+                                    <!-- Подсказка по использованию дополнительного поля. -->
                                     <label id="additionalFieldHintLabel"
                                            value="msg://msgAdditionalFieldHint"
                                            stylename="edit-sidebar-hint"

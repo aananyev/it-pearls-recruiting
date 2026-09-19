@@ -50,6 +50,7 @@
                     <column id="providerCode" width="140px"/>
                     <column id="isActive" width="100px"/>
                     <column id="maxContextTokens" width="140px"/>
+                    <column id="maxRetries" width="130px"/>
                     <column id="defaultModelName" minimumWidth="220px"/>
                 </columns>
                 <rowsCount/>
