@@ -152,6 +152,28 @@ WHERE NOT EXISTS (
 </databaseChangeLog>
 ```
 
+### 4.3. Стандарт версионирования промптов и безопасных миграций на Production
+> [!IMPORTANT]
+> Системные промпты AI-функций являются развёртываемой конфигурацией (deployable configuration) приложения. Источник истины в runtime — таблица `HUNTTECH_AI_FUNCTION_CONFIGURATION`.
+
+1. **Обязательность Seed-миграции**: Любая новая AI-функция обязана иметь идемпотентную seed-миграцию в репозитории с `CONFIGURATION_VERSION = 1` и `CREATED_BY = 'migration'`. Создание функций только вручную через UI запрещено.
+2. **Иммутабельность исторических миграций**: Запрещено модифицировать ранее применённые файлы миграций. Любое изменение системного промпта, шаблона или параметров модели оформляется **новой** миграцией с инкрементом `CONFIGURATION_VERSION` (2, 3 и т.д.).
+3. **Защита ручных настроек администратора**: Миграция обновления промпта обязана проверять, что текущая запись не была отредактирована администратором вручную через UI. Автоматическое обновление допускается только для нетронутых миграционных версий:
+   ```sql
+   UPDATE HUNTTECH_AI_FUNCTION_CONFIGURATION
+   SET SYSTEM_PROMPT = '...',
+       UPDATE_TS = CURRENT_TIMESTAMP,
+       UPDATED_BY = 'migration',
+       CONFIGURATION_VERSION = 2
+   WHERE CODE = 'MY_FUNCTION_CODE'
+     AND DELETE_TS IS NULL
+     AND (SYSTEM_PROMPT IS NULL OR btrim(SYSTEM_PROMPT) = ''
+          OR (CREATED_BY = 'migration' 
+              AND COALESCE(UPDATED_BY, 'migration') = 'migration' 
+              AND COALESCE(CONFIGURATION_VERSION, 1) < 2));
+   ```
+4. **Контроль релиза**: Перед релизом на прод валидируется наличие актуального `CODE` и требуемой `CONFIGURATION_VERSION` в `db.changelog-master.xml`.
+
 ---
 
 ## 5. Правила бизнес-логики и защиты данных (Data Integrity)

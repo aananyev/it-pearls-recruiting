@@ -1,0 +1,630 @@
+package com.company.hunttech.service;
+
+import com.company.hunttech.dto.CandidateAiSummary;
+import com.company.hunttech.dto.CandidateVacancyMatchReport;
+import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.CandidateSkill;
+import com.company.hunttech.entity.CandidateSkillPriority;
+import com.company.hunttech.entity.CandidateVacancyMatchItem;
+import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.SkillTree;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.haulmont.cuba.core.global.DataManager;
+import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Реализация сервиса AI-сопоставления кандидата с открытыми вакансиями компании.
+ */
+@Service(CandidateVacancyMatchAiService.NAME)
+public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatchAiService {
+
+    private static final Logger log = LoggerFactory.getLogger(CandidateVacancyMatchAiServiceBean.class);
+
+    private static final int MAX_VACANCIES_PER_CHUNK = 12;
+    private static final int MAX_VACANCY_TEXT_CHARS_PER_CHUNK = 40000;
+    private static final int MAX_RESUME_TEXT_CHARS = 20000;
+    private static final int MAX_ADDITIONAL_SNIPPETS_CHARS = 5000;
+    private static final int FALLBACK_BASE_EXPERIENCE_FIT = 10;
+
+    @Inject
+    private DataManager dataManager;
+
+    @Inject
+    private AiExecutionService aiExecutionService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public CandidateVacancyMatchReport matchVacanciesForCandidate(UUID candidateId) {
+        if (candidateId == null) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("Идентификатор кандидата не указан.");
+            return emptyReport;
+        }
+
+        // 1. Загрузка кандидата
+        JobCandidate candidate = dataManager.load(JobCandidate.class)
+                .id(candidateId)
+                .view("jobCandidate-llm-view")
+                .optional()
+                .orElse(null);
+
+        if (candidate == null) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("Кандидат с указанным ID не найден в системе.");
+            return emptyReport;
+        }
+
+        // 2. Загрузка резюме с непустым текстом, отсортированных по datePost DESC
+        List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
+                .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(e.textCV)) > 0 order by e.datePost desc, e.createTs desc")
+                .parameter("candId", candidateId)
+                .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy"))
+                .list();
+
+        if (cvList.isEmpty()) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setCandidateId(candidateId);
+            emptyReport.setCandidateFullName(candidate.getFullName());
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("Для AI-подбора вакансии необходимо резюме кандидата с распознанным текстом.");
+            return emptyReport;
+        }
+
+        // 3. Загрузка структурированных навыков кандидата
+        List<CandidateSkill> candidateSkills = dataManager.load(CandidateSkill.class)
+                .query("select e from hunttech_CandidateSkill e where e.candidate.id = :candId")
+                .parameter("candId", candidateId)
+                .view(viewBuilder -> viewBuilder.add("skill.skillName").add("priority"))
+                .list();
+
+        // 4. Загрузка открытых вакансий: openClose != true (openClose = false or openClose is null)
+        List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
+                .query("select e from hunttech_OpenPosition e where (e.openClose = false or e.openClose is null) order by e.priority desc, e.vacansyName asc")
+                .view(viewBuilder -> viewBuilder.addAll(
+                        "vacansyID", "vacansyName", "positionType.positionRuName", "comment", "shortDescription",
+                        "workExperience", "grade", "skillsList.skillName", "remoteWork",
+                        "remoteComment", "cityPosition.cityRuName", "cities.cityRuName",
+                        "projectName.projectName", "priority", "openClose"
+                ))
+                .list();
+
+        if (openPositions.isEmpty()) {
+            CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
+            emptyReport.setCandidateId(candidateId);
+            emptyReport.setCandidateFullName(candidate.getFullName());
+            emptyReport.setSuccess(false);
+            emptyReport.setStatusMessage("В системе нет открытых вакансий для анализа.");
+            return emptyReport;
+        }
+
+        // 5. Формирование контекста кандидата
+        String candidateProfile = buildCandidateProfileString(candidate);
+        String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
+        String candidateResumeText = buildCandidateResumeText(cvList);
+
+        // 6. Батчинг вакансий на чанки
+        List<List<OpenPosition>> chunks = splitIntoChunks(openPositions);
+        log.info("AI matching for candidate {}: {} open positions split into {} chunks",
+                candidate.getFullName(), openPositions.size(), chunks.size());
+
+        CandidateVacancyMatchReport report = new CandidateVacancyMatchReport();
+        report.setCandidateId(candidateId);
+        report.setCandidateFullName(candidate.getFullName());
+        report.setCandidatePosition(candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : null);
+        report.setCandidateCity(candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : null);
+        report.setCandidateCurrentCompany(candidate.getCurrentCompany() != null ?
+                (candidate.getCurrentCompany().getComanyName() != null ? candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName()) : null);
+        report.setTotalVacanciesAnalyzed(openPositions.size());
+
+        Map<UUID, OpenPosition> positionById = openPositions.stream()
+                .collect(Collectors.toMap(OpenPosition::getId, p -> p, (p1, p2) -> p1));
+
+        List<CandidateVacancyMatchItem> allItems = new ArrayList<>();
+        Set<UUID> seenVacancyIds = new HashSet<>();
+        AiExecutionResult lastAiResult = null;
+        boolean anyAiSuccess = false;
+
+        for (int i = 0; i < chunks.size(); i++) {
+            List<OpenPosition> chunk = chunks.get(i);
+            String vacanciesJson = buildVacanciesJson(chunk);
+
+            Map<String, Object> context = new HashMap<>();
+            context.put(PARAM_CANDIDATE_PROFILE, candidateProfile);
+            context.put(PARAM_CANDIDATE_SKILLS, candidateSkillsText);
+            context.put(PARAM_CANDIDATE_RESUME_TEXT, candidateResumeText);
+            context.put(PARAM_VACANCIES_JSON, vacanciesJson);
+
+            try {
+                AiExecutionResult aiResult = aiExecutionService.executeText(FUNCTION_CODE, context);
+                if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
+                    lastAiResult = aiResult;
+                    List<CandidateVacancyMatchItem> parsedItems = parseAiResponse(aiResult.getText(), chunk, positionById, seenVacancyIds, report);
+                    if (!parsedItems.isEmpty()) {
+                        allItems.addAll(parsedItems);
+                        anyAiSuccess = true;
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed AI execution for candidate-vacancy chunk {}/{}: {}", i + 1, chunks.size(), e.getMessage());
+            }
+        }
+
+        // Если AI отработал успешно хотя бы по части вакансий
+        if (anyAiSuccess) {
+            // Для вакансий, которые по какой-то причине не вернулись в ответе LLM,
+            // добавляем нейтральный элемент, чтобы общее количество соответствовало открытым вакансиям
+            for (OpenPosition op : openPositions) {
+                if (!seenVacancyIds.contains(op.getId())) {
+                    CandidateVacancyMatchItem missingItem = new CandidateVacancyMatchItem();
+                    missingItem.setOpenPositionId(op.getId());
+                    missingItem.setOpenPosition(op);
+                    missingItem.setVacancyName(op.getVacansyName());
+                    missingItem.setProjectName(op.getProjectName() != null ? op.getProjectName().getProjectName() : "");
+                    missingItem.setPositionName(op.getPositionType() != null ? op.getPositionType().getPositionRuName() : "");
+                    missingItem.setPriority(op.getPriority());
+                    missingItem.setScore(0);
+                    missingItem.setRoleFit(0);
+                    missingItem.setSkillsFit(0);
+                    missingItem.setExperienceFit(0);
+                    missingItem.setPreferencesFit(0);
+                    missingItem.setDomainFit(0);
+                    missingItem.setVerdict("Не оценен AI");
+                    missingItem.setMatchedSkills(Collections.emptyList());
+                    missingItem.setMissingCriticalRequirements(Collections.emptyList());
+                    missingItem.setRisks(Collections.emptyList());
+                    missingItem.setReasonsToOffer(Collections.emptyList());
+                    missingItem.setSummary("Вакансия не была возвращена нейросетью в аналитическом пакете.");
+                    allItems.add(missingItem);
+                    seenVacancyIds.add(op.getId());
+                }
+            }
+            allItems.sort(getComparator());
+            report.setItems(allItems);
+            report.setMatchedVacanciesCount(allItems.size());
+            report.setAiExecutionResult(lastAiResult);
+            report.setFallbackUsed(false);
+            report.setSuccess(true);
+            return report;
+        }
+
+        // 7. Честный Fallback при недоступности AI: рассчитываем базовую эвристическую оценку без фальсификации
+        log.warn("AI service unavailable for candidate-vacancy match. Using honest rule-based fallback.");
+        List<CandidateVacancyMatchItem> fallbackItems = buildHonestFallbackItems(candidate, candidateSkills, candidateResumeText, openPositions);
+        fallbackItems.sort(getComparator());
+
+        report.setItems(fallbackItems);
+        report.setMatchedVacanciesCount(fallbackItems.size());
+        report.setFallbackUsed(true);
+        report.setGeneralConclusion("Внимание: экспертный AI-анализ временно недоступен. Отображена предварительная оценка по совпадению ключевых параметров.");
+        report.setStatusMessage("Предварительная оценка без AI");
+        report.setSuccess(true);
+        return report;
+    }
+
+    private Comparator<CandidateVacancyMatchItem> getComparator() {
+        return (i1, i2) -> {
+            // 1. score DESC
+            int c1 = Integer.compare(i2.getScore() != null ? i2.getScore() : 0, i1.getScore() != null ? i1.getScore() : 0);
+            if (c1 != 0) return c1;
+            // 2. priority DESC (nulls last)
+            int p1 = i1.getPriority() != null ? i1.getPriority() : -1;
+            int p2 = i2.getPriority() != null ? i2.getPriority() : -1;
+            int c2 = Integer.compare(p2, p1);
+            if (c2 != 0) return c2;
+            // 3. vacancyName ASC
+            String n1 = i1.getVacancyName() != null ? i1.getVacancyName() : "";
+            String n2 = i2.getVacancyName() != null ? i2.getVacancyName() : "";
+            return n1.compareToIgnoreCase(n2);
+        };
+    }
+
+    private String buildCandidateProfileString(JobCandidate candidate) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ФИО: ").append(candidate.getFullName() != null ? candidate.getFullName() : "Не указано").append("\n");
+        if (candidate.getPersonPosition() != null) {
+            sb.append("Текущая/целевая должность: ").append(candidate.getPersonPosition().getPositionRuName()).append("\n");
+        }
+        if (candidate.getCityOfResidence() != null) {
+            sb.append("Город проживания: ").append(candidate.getCityOfResidence().getCityRuName()).append("\n");
+        }
+        if (candidate.getCurrentCompany() != null) {
+            String company = candidate.getCurrentCompany().getComanyName() != null ?
+                    candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+            if (company != null && !company.trim().isEmpty()) {
+                sb.append("Текущая компания: ").append(company).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    private String buildCandidateSkillsString(List<CandidateSkill> skills) {
+        if (skills == null || skills.isEmpty()) {
+            return "Навыки в базе данных не зафиксированы.";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (CandidateSkill cs : skills) {
+            if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                sb.append("- ").append(cs.getSkill().getSkillName());
+                if (cs.getPriority() != null) {
+                    if (cs.getPriority() == CandidateSkillPriority.MAIN) sb.append(" (основной)");
+                    else if (cs.getPriority() == CandidateSkillPriority.SECONDARY) sb.append(" (второстепенный)");
+                    else if (cs.getPriority() == CandidateSkillPriority.TERTIARY) sb.append(" (третьестепенный)");
+                }
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    private String buildCandidateResumeText(List<CandidateCV> cvList) {
+        StringBuilder sb = new StringBuilder();
+        CandidateCV mainCV = cvList.get(0);
+        sb.append("--- ОСНОВНОЕ РЕЗЮМЕ ---\n");
+        if (mainCV.getTextCV() != null) {
+            String text = mainCV.getTextCV().trim();
+            if (text.length() > MAX_RESUME_TEXT_CHARS) {
+                text = text.substring(0, MAX_RESUME_TEXT_CHARS) + "\n...[текст сокращен]";
+            }
+            sb.append(text).append("\n");
+        }
+
+        // Если есть более ранние резюме, добавляем сжатую историческую справку
+        if (cvList.size() > 1) {
+            sb.append("\n--- ДОПОЛНИТЕЛЬНЫЙ ОПЫТ ИЗ ПРЕДЫДУЩИХ РЕЗЮМЕ ---\n");
+            int pastCharsAdded = 0;
+            for (int i = 1; i < cvList.size() && pastCharsAdded < MAX_ADDITIONAL_SNIPPETS_CHARS; i++) {
+                CandidateCV past = cvList.get(i);
+                if (past.getTextCV() != null && !past.getTextCV().trim().isEmpty()) {
+                    String pastSnippet = past.getTextCV().trim();
+                    if (pastSnippet.length() > 2000) {
+                        pastSnippet = pastSnippet.substring(0, 2000) + "...";
+                    }
+                    String block = "[Резюме от " + (past.getDatePost() != null ? past.getDatePost().toString() : "") + "]:\n"
+                            + pastSnippet + "\n\n";
+                    sb.append(block);
+                    pastCharsAdded += block.length();
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    private List<List<OpenPosition>> splitIntoChunks(List<OpenPosition> openPositions) {
+        List<List<OpenPosition>> chunks = new ArrayList<>();
+        List<OpenPosition> currentChunk = new ArrayList<>();
+        int currentChars = 0;
+
+        for (OpenPosition op : openPositions) {
+            String commentText = op.getComment() != null ? Jsoup.parse(op.getComment()).text() : "";
+            int commentLength = Math.min(commentText.length(), 3000);
+            int approxLength = commentLength + 1000; // комментарий + реквизиты, проект, навыки и JSON-структура
+
+            if (!currentChunk.isEmpty() && (currentChunk.size() >= MAX_VACANCIES_PER_CHUNK || currentChars + approxLength > MAX_VACANCY_TEXT_CHARS_PER_CHUNK)) {
+                chunks.add(currentChunk);
+                currentChunk = new ArrayList<>();
+                currentChars = 0;
+            }
+
+            currentChunk.add(op);
+            currentChars += approxLength;
+        }
+
+        if (!currentChunk.isEmpty()) {
+            chunks.add(currentChunk);
+        }
+        return chunks;
+    }
+
+    private String buildVacanciesJson(List<OpenPosition> chunk) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (OpenPosition op : chunk) {
+            Map<String, Object> v = new LinkedHashMap<>();
+            v.put("id", op.getId().toString());
+            v.put("vacancyName", op.getVacansyName());
+            v.put("projectName", op.getProjectName() != null ? op.getProjectName().getProjectName() : null);
+            v.put("positionType", op.getPositionType() != null ? op.getPositionType().getPositionRuName() : null);
+            v.put("workExperienceYears", op.getWorkExperience());
+            v.put("grade", op.getGrade() != null ? op.getGrade().getId() : null);
+            v.put("priority", op.getPriority());
+
+            if (op.getSkillsList() != null && !op.getSkillsList().isEmpty()) {
+                List<String> skills = op.getSkillsList().stream()
+                        .map(SkillTree::getSkillName)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                v.put("requiredSkills", skills);
+            }
+
+            if (op.getCityPosition() != null) {
+                v.put("city", op.getCityPosition().getCityRuName());
+            }
+            if (op.getRemoteWork() != null) {
+                v.put("remoteWork", op.getRemoteWork());
+            }
+            if (op.getRemoteComment() != null) {
+                v.put("remoteComment", op.getRemoteComment());
+            }
+
+            String plainComment = op.getComment() != null ? Jsoup.parse(op.getComment()).text() : "";
+            if (plainComment.length() > 3000) {
+                plainComment = plainComment.substring(0, 3000) + "...";
+            }
+            v.put("comment", plainComment);
+
+            list.add(v);
+        }
+
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+        } catch (Exception e) {
+            log.error("Failed to serialize vacancies to JSON", e);
+            return "[]";
+        }
+    }
+
+    private List<CandidateVacancyMatchItem> parseAiResponse(String jsonText,
+                                                           List<OpenPosition> chunk,
+                                                           Map<UUID, OpenPosition> positionById,
+                                                           Set<UUID> seenVacancyIds,
+                                                           CandidateVacancyMatchReport report) {
+        List<CandidateVacancyMatchItem> result = new ArrayList<>();
+        String cleaned = cleanJsonText(jsonText);
+
+        try {
+            JsonNode root = objectMapper.readTree(cleaned);
+
+            // Саммари кандидата
+            if (root.has("candidateSummary") && report.getCandidateSummary().getTargetRoles().isEmpty()) {
+                JsonNode summaryNode = root.get("candidateSummary");
+                CandidateAiSummary summary = new CandidateAiSummary();
+                if (summaryNode.has("targetRoles") && summaryNode.get("targetRoles").isArray()) {
+                    summary.setTargetRoles(extractStringList(summaryNode.get("targetRoles")));
+                }
+                if (summaryNode.has("keySkills") && summaryNode.get("keySkills").isArray()) {
+                    summary.setKeySkills(extractStringList(summaryNode.get("keySkills")));
+                }
+                if (summaryNode.has("experienceSummary")) {
+                    summary.setExperienceSummary(summaryNode.get("experienceSummary").asText());
+                }
+                if (summaryNode.has("explicitPreferences") && summaryNode.get("explicitPreferences").isArray()) {
+                    summary.setExplicitPreferences(extractStringList(summaryNode.get("explicitPreferences")));
+                }
+                report.setCandidateSummary(summary);
+            }
+
+            if (root.has("generalConclusion") && report.getGeneralConclusion() == null) {
+                report.setGeneralConclusion(root.get("generalConclusion").asText());
+            }
+
+            // Массив matches
+            JsonNode matchesNode = root.has("matches") ? root.get("matches") : (root.isArray() ? root : null);
+            if (matchesNode != null && matchesNode.isArray()) {
+                Set<UUID> chunkPositionIds = chunk.stream().map(OpenPosition::getId).collect(Collectors.toSet());
+
+                for (JsonNode m : matchesNode) {
+                    if (!m.has("vacancyId")) continue;
+                    String vidStr = m.get("vacancyId").asText();
+                    UUID vid;
+                    try {
+                        vid = UUID.fromString(vidStr);
+                    } catch (Exception ex) {
+                        continue;
+                    }
+
+                    if (!chunkPositionIds.contains(vid) || seenVacancyIds.contains(vid)) {
+                        continue;
+                    }
+
+                    OpenPosition op = positionById.get(vid);
+                    if (op == null) continue;
+
+                    CandidateVacancyMatchItem item = new CandidateVacancyMatchItem();
+                    item.setOpenPositionId(vid);
+                    item.setOpenPosition(op);
+                    item.setVacancyName(op.getVacansyName());
+                    item.setProjectName(op.getProjectName() != null ? op.getProjectName().getProjectName() : "");
+                    item.setPositionName(op.getPositionType() != null ? op.getPositionType().getPositionRuName() : "");
+                    item.setPriority(op.getPriority());
+
+                    // Subscores
+                    int roleFit = clamp(m.path("roleFit").asInt(0), 0, 25);
+                    int skillsFit = clamp(m.path("skillsFit").asInt(0), 0, 35);
+                    int expFit = clamp(m.path("experienceFit").asInt(0), 0, 20);
+                    int prefFit = clamp(m.path("preferencesFit").asInt(0), 0, 10);
+                    int domFit = clamp(m.path("domainFit").asInt(0), 0, 10);
+
+                    item.setRoleFit(roleFit);
+                    item.setSkillsFit(skillsFit);
+                    item.setExperienceFit(expFit);
+                    item.setPreferencesFit(prefFit);
+                    item.setDomainFit(domFit);
+
+                    // Расчет нормализованного score: сумма subscores
+                    int computedScore = roleFit + skillsFit + expFit + prefFit + domFit;
+                    int finalScore = clamp(computedScore, 0, 100);
+                    item.setScore(finalScore);
+
+                    // Verdict по стандартной шкале
+                    item.setVerdict(resolveVerdict(finalScore));
+
+                    if (m.has("matchedSkills")) {
+                        item.setMatchedSkills(extractStringList(m.get("matchedSkills")));
+                    }
+                    if (m.has("missingCriticalRequirements")) {
+                        item.setMissingCriticalRequirements(extractStringList(m.get("missingCriticalRequirements")));
+                    }
+                    if (m.has("risks")) {
+                        item.setRisks(extractStringList(m.get("risks")));
+                    }
+                    if (m.has("reasonsToOffer")) {
+                        item.setReasonsToOffer(extractStringList(m.get("reasonsToOffer")));
+                    }
+                    if (m.has("candidateEvidence")) {
+                        item.setCandidateEvidence(extractStringList(m.get("candidateEvidence")));
+                    }
+                    if (m.has("vacancyEvidence")) {
+                        item.setVacancyEvidence(extractStringList(m.get("vacancyEvidence")));
+                    }
+                    if (m.has("summary")) {
+                        item.setSummary(m.get("summary").asText());
+                    }
+
+                    seenVacancyIds.add(vid);
+                    result.add(item);
+                }
+            }
+
+        } catch (Exception e) {
+            log.warn("Failed to parse JSON response for candidate-vacancy match: {}", e.getMessage());
+        }
+
+        return result;
+    }
+
+    private List<CandidateVacancyMatchItem> buildHonestFallbackItems(JobCandidate candidate,
+                                                                   List<CandidateSkill> candidateSkills,
+                                                                   String resumeText,
+                                                                   List<OpenPosition> openPositions) {
+        List<CandidateVacancyMatchItem> list = new ArrayList<>();
+        Set<String> candidateSkillNames = candidateSkills.stream()
+                .filter(cs -> cs.getSkill() != null && cs.getSkill().getSkillName() != null)
+                .map(cs -> cs.getSkill().getSkillName().toLowerCase(Locale.ROOT).trim())
+                .collect(Collectors.toSet());
+
+        String candidatePosLower = candidate.getPersonPosition() != null && candidate.getPersonPosition().getPositionRuName() != null ?
+                candidate.getPersonPosition().getPositionRuName().toLowerCase(Locale.ROOT) : "";
+
+        for (OpenPosition op : openPositions) {
+            CandidateVacancyMatchItem item = new CandidateVacancyMatchItem();
+            item.setOpenPositionId(op.getId());
+            item.setOpenPosition(op);
+            item.setVacancyName(op.getVacansyName());
+            item.setProjectName(op.getProjectName() != null ? op.getProjectName().getProjectName() : "");
+            item.setPositionName(op.getPositionType() != null ? op.getPositionType().getPositionRuName() : "");
+            item.setPriority(op.getPriority());
+
+            List<String> matchedSkills = new ArrayList<>();
+            List<String> missingRequirements = new ArrayList<>();
+
+            if (op.getSkillsList() != null && !op.getSkillsList().isEmpty()) {
+                List<SkillTree> matchedFromResume = SkillNameMatcher.matchText(op.getSkillsList(), resumeText);
+                Set<UUID> matchedSkillIds = matchedFromResume.stream().map(SkillTree::getId).collect(Collectors.toSet());
+
+                for (SkillTree st : op.getSkillsList()) {
+                    if (st.getSkillName() != null) {
+                        String sName = st.getSkillName().trim();
+                        String sLower = sName.toLowerCase(Locale.ROOT);
+                        if (candidateSkillNames.contains(sLower) || matchedSkillIds.contains(st.getId())) {
+                            matchedSkills.add(sName);
+                        } else {
+                            missingRequirements.add(sName);
+                        }
+                    }
+                }
+            }
+
+            int roleFit = 0;
+            if (!candidatePosLower.isEmpty() && op.getPositionType() != null && op.getPositionType().getPositionRuName() != null) {
+                String vacPosLower = op.getPositionType().getPositionRuName().toLowerCase(Locale.ROOT);
+                if (candidatePosLower.equals(vacPosLower)) {
+                    roleFit = 20;
+                } else if (candidatePosLower.contains(vacPosLower) || vacPosLower.contains(candidatePosLower)) {
+                    roleFit = 14;
+                }
+            }
+
+            int skillsFit = 0;
+            if (!matchedSkills.isEmpty()) {
+                int totalRequired = matchedSkills.size() + missingRequirements.size();
+                skillsFit = (int) Math.round(((double) matchedSkills.size() / Math.max(1, totalRequired)) * 30.0);
+            }
+
+            int score = clamp(roleFit + skillsFit + FALLBACK_BASE_EXPERIENCE_FIT, 0, 100);
+
+            item.setRoleFit(roleFit);
+            item.setSkillsFit(skillsFit);
+            item.setExperienceFit(FALLBACK_BASE_EXPERIENCE_FIT);
+            item.setPreferencesFit(0);
+            item.setDomainFit(0);
+            item.setScore(score);
+            item.setVerdict("Предварительная оценка без AI");
+            item.setMatchedSkills(matchedSkills);
+            item.setMissingCriticalRequirements(missingRequirements);
+            item.setReasonsToOffer(Collections.singletonList("Оценка рассчитана на основе совпадения ключевых навыков и должности"));
+            item.setSummary("Внимание: расчет выполнен по базовым правилам без использования нейросети (AI недоступен).");
+
+            list.add(item);
+        }
+
+        return list;
+    }
+
+    private String resolveVerdict(int score) {
+        if (score >= 80) return "Рекомендуется предложить";
+        if (score >= 65) return "Имеет смысл рассмотреть";
+        if (score >= 45) return "Слабое соответствие";
+        return "Не рекомендуется";
+    }
+
+    private int clamp(int val, int min, int max) {
+        return Math.max(min, Math.min(max, val));
+    }
+
+    private List<String> extractStringList(JsonNode arrayNode) {
+        List<String> list = new ArrayList<>();
+        if (arrayNode != null && arrayNode.isArray()) {
+            for (JsonNode n : arrayNode) {
+                if (n.isTextual() && !n.asText().trim().isEmpty()) {
+                    list.add(n.asText().trim());
+                }
+            }
+        }
+        return list;
+    }
+
+    private String cleanJsonText(String text) {
+        if (text == null) return "";
+        String s = text.trim();
+        if (s.startsWith("```json")) {
+            s = s.substring(7);
+        } else if (s.startsWith("```")) {
+            s = s.substring(3);
+        }
+        if (s.endsWith("```")) {
+            s = s.substring(0, s.length() - 3);
+        }
+        s = s.trim();
+
+        int firstObj = s.indexOf('{');
+        int firstArr = s.indexOf('[');
+        int start = -1;
+        if (firstObj >= 0 && firstArr >= 0) {
+            start = Math.min(firstObj, firstArr);
+        } else if (firstObj >= 0) {
+            start = firstObj;
+        } else {
+            start = firstArr;
+        }
+
+        int lastObj = s.lastIndexOf('}');
+        int lastArr = s.lastIndexOf(']');
+        int end = Math.max(lastObj, lastArr);
+
+        if (start >= 0 && end > start) {
+            return s.substring(start, end + 1).trim();
+        }
+        return s;
+    }
+}

@@ -258,4 +258,8 @@
     <include file="260918-2-seedVacancyRequirementExplanationAiFunctions.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- CandidateVacancyMatchAiService: Seed AI-функции CANDIDATE_VACANCY_MATCH_ANALYZE для интеллектуального подбора вакансий кандидату. -->
+    <include file="260919-1-addCandidateVacancyMatchAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="AI-подбор вакансий для кандидата"
+        focusComponent="matchesTable">
+    <data>
+        <collection id="matchesDc" class="com.company.hunttech.entity.CandidateVacancyMatchItem"/>
+    </data>
+
+    <layout expand="mainSplit" spacing="true" width="100%" height="100%">
+        <!-- Верхняя карточка кандидата и статуса анализа -->
+        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" stylename="well" margin="true">
+            <vbox expand="statusHBox" spacing="false" width="100%">
+                <hbox spacing="true" align="MIDDLE_LEFT" width="100%">
+                    <label id="candidateTitleLabel" value="Кандидат: —" stylename="h2 bold" align="MIDDLE_LEFT"/>
+                    <label id="candidateSubTitleLabel" value="" stylename="h4 text-muted" align="MIDDLE_LEFT"/>
+                </hbox>
+                <hbox id="statusHBox" spacing="true" align="MIDDLE_LEFT" width="100%">
+                    <progressBar id="analysisProgressBar" indeterminate="true" visible="false" width="220px"/>
+                    <label id="statusLabel" value="Подготовка данных..." stylename="bold text-muted" align="MIDDLE_LEFT"/>
+                </hbox>
+            </vbox>
+            <hbox spacing="true" align="MIDDLE_RIGHT">
+                <button id="refreshAnalysisBtn"
+                        caption="Повторить AI-анализ"
+                        icon="font-icon:MAGIC"
+                        stylename="primary"
+                        enabled="false"/>
+                <button id="closeBtn"
+                        caption="Закрыть"
+                        icon="CLOSE"/>
+            </hbox>
+        </hbox>
+
+        <!-- Основная двухпанельная область SplitPanel -->
+        <split id="mainSplit" orientation="horizontal" splitterPosition="58" width="100%" height="100%">
+            <!-- Левая панель: Таблица сопоставления -->
+            <vbox expand="matchesTable" spacing="true" width="100%" height="100%" margin="false,true,false,false">
+                <buttonsPanel id="buttonsPanel" spacing="true">
+                    <button id="openVacancyBtn"
+                            caption="Открыть вакансию"
+                            icon="EXTERNAL_LINK"
+                            stylename="primary"
+                            enabled="false"/>
+                    <label id="countLabel" value="Найдено вакансий: 0" stylename="bold" align="MIDDLE_LEFT"/>
+                </buttonsPanel>
+
+                <table id="matchesTable"
+                       dataContainer="matchesDc"
+                       width="100%"
+                       height="100%">
+                    <columns>
+                        <column id="score" caption="Балл" width="90px" align="CENTER"/>
+                        <column id="verdict" caption="Решение" width="180px"/>
+                        <column id="vacancyName" caption="Вакансия" width="220px"/>
+                        <column id="projectName" caption="Проект" width="140px"/>
+                        <column id="positionName" caption="Должность" width="150px"/>
+                        <column id="matchedSkillsDisplay" caption="Совпадающие навыки" width="200px"/>
+                        <column id="missingCriticalRequirementsDisplay" caption="Критические пробелы" width="200px"/>
+                        <column id="summary" caption="Краткий вывод" width="260px"/>
+                    </columns>
+                </table>
+            </vbox>
+
+            <!-- Правая панель: Детальная аналитическая карточка -->
+            <scrollBox id="detailsScrollBox" width="100%" height="100%" spacing="true" margin="false,false,false,true">
+                <vbox spacing="true" width="100%" stylename="well" margin="true">
+                    <label id="detailVacancyTitle" value="Выберите вакансию из списка слева" stylename="h3 bold" width="100%"/>
+                    <label id="detailVacancyMeta" value="" stylename="text-muted" width="100%"/>
+
+                    <!-- Индикаторы суб-оценок -->
+                    <vbox id="scoresBox" spacing="true" width="100%" visible="false">
+                        <label value="ОЦЕНКА СООТВЕТСТВИЯ ПО ИЗМЕРЕНИЯМ" stylename="h4 bold" width="100%"/>
+                        <grid spacing="true" width="100%">
+                            <columns count="4"/>
+                            <rows>
+                                <row>
+                                    <label value="Должность и роль:" stylename="bold"/>
+                                    <label id="roleFitLabel" value="—"/>
+                                    <label value="Ключевые навыки:" stylename="bold"/>
+                                    <label id="skillsFitLabel" value="—"/>
+                                </row>
+                                <row>
+                                    <label value="Опыт и грейд:" stylename="bold"/>
+                                    <label id="experienceFitLabel" value="—"/>
+                                    <label value="Предпочтения и условия:" stylename="bold"/>
+                                    <label id="preferencesFitLabel" value="—"/>
+                                </row>
+                                <row>
+                                    <label value="Предметная область:" stylename="bold"/>
+                                    <label id="domainFitLabel" value="—"/>
+                                    <label value="Итоговый Score:" stylename="bold"/>
+                                    <label id="totalScoreLabel" value="—" stylename="h3 bold"/>
+                                </row>
+                            </rows>
+                        </grid>
+                    </vbox>
+
+                    <!-- Блок: Почему стоит предложить -->
+                    <vbox id="reasonsBox" spacing="true" width="100%" visible="false">
+                        <label value="ПОЧЕМУ ВАКАНСИЮ СТОИТ ПРЕДЛОЖИТЬ" stylename="h4 bold" width="100%"/>
+                        <label id="reasonsLabel" htmlEnabled="true" width="100%"/>
+                    </vbox>
+
+                    <!-- Блок: Совпадающие навыки -->
+                    <vbox id="matchedSkillsBox" spacing="true" width="100%" visible="false">
+                        <label value="СОВПАДАЮЩИЕ НАВЫКИ И ПОДТВЕРЖДЕНИЯ" stylename="h4 bold" width="100%"/>
+                        <label id="matchedSkillsDetailLabel" htmlEnabled="true" width="100%"/>
+                    </vbox>
+
+                    <!-- Блок: Критические требования и пробелы -->
+                    <vbox id="missingReqsBox" spacing="true" width="100%" visible="false">
+                        <label value="НЕПОДТВЕРЖДЕННЫЕ ТРЕБОВАНИЯ И ПРОБЕЛЫ" stylename="h4 bold" width="100%"/>
+                        <label id="missingReqsLabel" htmlEnabled="true" width="100%"/>
+                    </vbox>
+
+                    <!-- Блок: Риски и зоны сомнений -->
+                    <vbox id="risksBox" spacing="true" width="100%" visible="false">
+                        <label value="РИСКИ И ЗОНЫ ВНИМАНИЯ" stylename="h4 bold" width="100%"/>
+                        <label id="risksLabel" htmlEnabled="true" width="100%"/>
+                    </vbox>
+
+                    <!-- Блок: Итоговое экспертное заключение AI -->
+                    <vbox id="summaryBox" spacing="true" width="100%" visible="false">
+                        <label value="ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ AI" stylename="h4 bold" width="100%"/>
+                        <label id="summaryTextLabel" htmlEnabled="true" width="100%"/>
+                    </vbox>
+
+                    <!-- Метаданные AI вызова -->
+                    <vbox id="aiMetaBox" spacing="false" width="100%" visible="false">
+                        <label id="aiMetaLabel" value="" stylename="text-muted small" width="100%"/>
+                    </vbox>
+                </vbox>
+            </scrollBox>
+        </split>
+    </layout>
+</window>

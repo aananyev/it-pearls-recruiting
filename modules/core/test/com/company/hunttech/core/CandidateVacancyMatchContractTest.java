@@ -1,0 +1,106 @@
+package com.company.hunttech.core;
+
+import com.company.hunttech.service.CandidateVacancyMatchAiService;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * Контрактный тест AI-функции «Подобрать вакансию кандидату» (CandidateVacancyMatchAiService).
+ */
+public class CandidateVacancyMatchContractTest {
+
+    private Path projectRoot() {
+        Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
+        while (root != null && !Files.exists(root.resolve("build.gradle"))) {
+            root = root.getParent();
+        }
+        org.junit.Assert.assertNotNull("Не найден корень проекта HRM HuntTech", root);
+        return root;
+    }
+
+    @Test
+    public void testFunctionCodeConstant() {
+        assertEquals("CANDIDATE_VACANCY_MATCH_ANALYZE", CandidateVacancyMatchAiService.FUNCTION_CODE);
+        assertEquals("hunttech_CandidateVacancyMatchAiService", CandidateVacancyMatchAiService.NAME);
+    }
+
+    @Test
+    public void testSeedMigrationPostgres() throws IOException {
+        Path root = projectRoot();
+        Path sqlPath = root.resolve("modules/core/db/update/postgres/26/260919-1-addCandidateVacancyMatchAiFunction.sql");
+        assertTrue("SQL seed миграция postgres должна существовать", Files.exists(sqlPath));
+
+        String sql = new String(Files.readAllBytes(sqlPath), StandardCharsets.UTF_8);
+        assertTrue("Миграция должна содержать function code", sql.contains("'CANDIDATE_VACANCY_MATCH_ANALYZE'"));
+        assertTrue("Миграция должна объявлять capability TEXT_ANALYSIS", sql.contains("'TEXT_ANALYSIS'"));
+        assertTrue("Миграция должна содержать CONFIGURATION_VERSION = 1", sql.contains("CONFIGURATION_VERSION"));
+        assertTrue("Миграция должна отключать user context для объективности", sql.contains("FALSE"));
+        assertTrue("Миграция должна быть идемпотентной", sql.contains("WHERE NOT EXISTS"));
+    }
+
+    @Test
+    public void testSeedMigrationHsql() throws IOException {
+        Path root = projectRoot();
+        Path sqlPath = root.resolve("modules/core/db/update/hsql/26/260919-1-addCandidateVacancyMatchAiFunction.sql");
+        assertTrue("HSQL seed миграция должна существовать", Files.exists(sqlPath));
+
+        String sql = new String(Files.readAllBytes(sqlPath), StandardCharsets.UTF_8);
+        assertTrue("HSQL миграция должна содержать function code", sql.contains("'CANDIDATE_VACANCY_MATCH_ANALYZE'"));
+    }
+
+    @Test
+    public void testChangelogRegisteredInMaster() throws IOException {
+        Path root = projectRoot();
+        Path masterPath = root.resolve("modules/core/db/changelog/db.changelog-master.xml");
+        assertTrue("db.changelog-master.xml должен существовать", Files.exists(masterPath));
+
+        String master = new String(Files.readAllBytes(masterPath), StandardCharsets.UTF_8);
+        assertTrue("Changelog 260919-1 должен быть подключен в master",
+                master.contains("260919-1-addCandidateVacancyMatchAiFunction.xml"));
+    }
+
+    @Test
+    public void testRegisteredInWebSpringXml() throws IOException {
+        Path root = projectRoot();
+        Path webSpringPath = root.resolve("modules/web/src/com/company/hunttech/web-spring.xml");
+        assertTrue("web-spring.xml должен существовать", Files.exists(webSpringPath));
+
+        String webSpring = new String(Files.readAllBytes(webSpringPath), StandardCharsets.UTF_8);
+        assertTrue("hunttech_CandidateVacancyMatchAiService должен быть зарегистрирован в WebRemoteProxyBeanCreator",
+                webSpring.contains("hunttech_CandidateVacancyMatchAiService") &&
+                webSpring.contains("com.company.hunttech.service.CandidateVacancyMatchAiService"));
+    }
+
+    @Test
+    public void testJobCandidateReestrSidebarButton() throws IOException {
+        Path root = projectRoot();
+        Path xmlPath = root.resolve("modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-reestr.xml");
+        assertTrue("job-candidate-reestr.xml должен существовать", Files.exists(xmlPath));
+
+        String xml = new String(Files.readAllBytes(xmlPath), StandardCharsets.UTF_8);
+        assertTrue("Сайдбар должен содержать кнопку findSuitableVacancyBtn", xml.contains("id=\"findSuitableVacancyBtn\""));
+        assertTrue("Кнопка должна использовать AI-иконку font-icon:MAGIC", xml.contains("icon=\"font-icon:MAGIC\""));
+    }
+
+    @Test
+    public void testJobCandidateReestrControllerHandlers() throws IOException {
+        Path root = projectRoot();
+        Path javaPath = root.resolve("modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateReestr.java");
+        assertTrue("JobCandidateReestr.java должен существовать", Files.exists(javaPath));
+
+        String java = new String(Files.readAllBytes(javaPath), StandardCharsets.UTF_8);
+        assertTrue("Контроллер должен обрабатывать findSuitableVacancyBtn",
+                java.contains("@Subscribe(\"findSuitableVacancyBtn\")"));
+        assertTrue("Контроллер должен перенаправлять findSuitableAction на новый экран",
+                java.contains("CandidateVacancyMatchScreen"));
+    }
+}

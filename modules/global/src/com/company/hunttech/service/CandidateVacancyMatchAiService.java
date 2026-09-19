@@ -1,0 +1,51 @@
+package com.company.hunttech.service;
+
+import com.company.hunttech.dto.CandidateVacancyMatchReport;
+
+import java.util.UUID;
+
+/**
+ * Сервис интеллектуального сопоставления кандидата и открытых вакансий HRM HuntTech.
+ *
+ * <p>Анализирует профиль и текст резюме кандидата относительно всех открытых вакансий
+ * (где {@code openClose != true}), ранжирует их по экспертной оценке соответствия (score 0..100)
+ * и формирует структурированный аналитический отчёт с обоснованием, совпадающими навыками,
+ * критическими пробелами и рисками.</p>
+ */
+public interface CandidateVacancyMatchAiService {
+
+    String NAME = "hunttech_CandidateVacancyMatchAiService";
+
+    /**
+     * Стабильный код системной AI-функции анализа соответствия кандидата и вакансий.
+     */
+    String FUNCTION_CODE = "CANDIDATE_VACANCY_MATCH_ANALYZE";
+
+    /**
+     * Параметр контекста: структурированный профиль кандидата.
+     */
+    String PARAM_CANDIDATE_PROFILE = "candidateProfile";
+
+    /**
+     * Параметр контекста: навыки кандидата из базы данных.
+     */
+    String PARAM_CANDIDATE_SKILLS = "candidateSkills";
+
+    /**
+     * Параметр контекста: текст резюме кандидата.
+     */
+    String PARAM_CANDIDATE_RESUME_TEXT = "candidateResumeText";
+
+    /**
+     * Параметр контекста: JSON-массив вакансий для текущего аналитического батча.
+     */
+    String PARAM_VACANCIES_JSON = "vacanciesJson";
+
+    /**
+     * Выполняет глубокий анализ соответствия кандидата всем открытым вакансиям компании.
+     *
+     * @param candidateId уникальный идентификатор кандидата (JobCandidate)
+     * @return структурированный отчёт с ранжированным списком подходящих вакансий
+     */
+    CandidateVacancyMatchReport matchVacanciesForCandidate(UUID candidateId);
+}

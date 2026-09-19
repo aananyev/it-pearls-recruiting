@@ -87,6 +87,8 @@
                             <button id="createInteractionBtn" caption="Добавить взаимодействие" icon="PLUS" enabled="false" width="100%"/>
                             <!-- Кнопка добавления нового резюме кандидата -->
                             <button id="createCVBtn" caption="Добавить резюме" icon="FILE_TEXT_O" enabled="false" width="100%"/>
+                            <!-- Кнопка AI-подбора подходящих вакансий -->
+                            <button id="findSuitableVacancyBtn" caption="Подобрать вакансию" icon="font-icon:MAGIC" enabled="false" width="100%"/>
                         </vbox>
 
                         <!-- Секция: Готовность и рейтинг -->

@@ -191,6 +191,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private Button createInteractionBtn;
     @Inject
     private Button createCVBtn;
+    @Inject
+    private Button findSuitableVacancyBtn;
 
     @Inject
     private Button createCandidateBtn;
@@ -978,6 +980,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         if (actionsWithCandidateButton.getAction("findSuitableAction") != null) {
             actionsWithCandidateButton.getAction("findSuitableAction").setEnabled(hasSelected);
         }
+        if (findSuitableVacancyBtn != null) {
+            findSuitableVacancyBtn.setEnabled(hasSelected);
+        }
         if (actionsWithCandidateButton.getAction("showCandidateCVListAction") != null) {
             actionsWithCandidateButton.getAction("showCandidateCVListAction").setEnabled(hasSelected);
         }
@@ -1033,6 +1038,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
         createCVBtn.setEnabled(false);
+        if (findSuitableVacancyBtn != null) {
+            findSuitableVacancyBtn.setEnabled(false);
+        }
     }
 
     private void populateDetailPane(JobCandidate candidate) {
@@ -1071,6 +1079,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);
         createCVBtn.setEnabled(true);
+        if (findSuitableVacancyBtn != null) {
+            findSuitableVacancyBtn.setEnabled(true);
+        }
     }
 
     private void updateInteractionNumber(JobCandidate candidate) {
@@ -1332,8 +1343,17 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .show();
     }
 
+    @Subscribe("findSuitableVacancyBtn")
+    public void onFindSuitableVacancyBtnClick(Button.ClickEvent event) {
+        openCandidateVacancyMatchScreen();
+    }
+
     @Subscribe("actionsWithCandidateButton.findSuitableAction")
     public void onActionsWithCandidateButtonFindSuitableAction(Action.ActionPerformedEvent event) {
+        openCandidateVacancyMatchScreen();
+    }
+
+    private void openCandidateVacancyMatchScreen() {
         JobCandidate selected = candidatesTable.getSingleSelected();
         if (selected == null) {
             notifications.create(Notifications.NotificationType.WARNING)
@@ -1342,9 +1362,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     .show();
             return;
         }
-        FindSuitable findSuitable = screens.create(FindSuitable.class);
-        findSuitable.setJobCandidate(selected);
-        findSuitable.show();
+        CandidateVacancyMatchScreen matchScreen = screens.create(CandidateVacancyMatchScreen.class);
+        matchScreen.setCandidate(selected);
+        matchScreen.show();
     }
 
     @Subscribe("actionsWithCandidateButton.scanSkillsAction")

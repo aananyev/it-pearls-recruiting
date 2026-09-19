@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Seed AI-функции CANDIDATE_VACANCY_MATCH_ANALYZE для PostgreSQL -->
+    <changeSet id="260919-1-addCandidateVacancyMatchAiFunction-pg" author="antigravity" dbms="postgresql">
+        <sqlFile path="../update/postgres/26/260919-1-addCandidateVacancyMatchAiFunction.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"/>
+        <rollback>
+            <delete tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION">
+                <where>CODE = 'CANDIDATE_VACANCY_MATCH_ANALYZE' AND ID = 'c0ffee00-0000-4000-8000-000000000025'::uuid AND VERSION = 1</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- Seed AI-функции CANDIDATE_VACANCY_MATCH_ANALYZE для HSQLDB -->
+    <changeSet id="260919-1-addCandidateVacancyMatchAiFunction-hsql" author="antigravity" dbms="hsqldb">
+        <sqlFile path="../update/hsql/26/260919-1-addCandidateVacancyMatchAiFunction.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"/>
+        <rollback>
+            <delete tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION">
+                <where>CODE = 'CANDIDATE_VACANCY_MATCH_ANALYZE' AND ID = 'c0ffee00-0000-4000-8000-000000000025' AND VERSION = 1</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
