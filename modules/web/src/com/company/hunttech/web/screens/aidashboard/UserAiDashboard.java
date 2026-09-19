@@ -71,6 +71,8 @@ public class UserAiDashboard extends Screen {
     private Label<String> speedLabel;
     @Inject
     private Label<String> successRateLabel;
+    @Inject
+    private Label<String> attemptsStatsLabel;
 
     @Inject
     private SerialChart dynamicsChart;
@@ -262,6 +264,23 @@ public class UserAiDashboard extends Screen {
             return label;
         });
 
+        recentCallsTable.addGeneratedColumn("attemptsDisplay", log -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            int succ = log.getSuccessfulAttempts() != null ? log.getSuccessfulAttempts()
+                    : ("SUCCESS".equalsIgnoreCase(log.getStatus()) ? 1 : 0);
+            int fail = log.getFailedAttempts() != null ? log.getFailedAttempts()
+                    : ("ERROR".equalsIgnoreCase(log.getStatus()) ? 1 : 0);
+            int switches = log.getModelSwitchCount() != null ? log.getModelSwitchCount() : 0;
+            String switchNote = switches > 0 ? " <span title='Переключений модели: " + switches + "'>🔀" + switches + "</span>" : "";
+            if (fail > 0) {
+                label.setValue("<span style='color: #059669; font-weight: 600;'>🟢 " + succ + "</span> / <span style='color: #dc2626; font-weight: 600;'>🔴 " + fail + "</span>" + switchNote);
+            } else {
+                label.setValue("<span style='color: #059669; font-weight: 600;'>🟢 " + succ + "</span>" + switchNote);
+            }
+            return label;
+        });
+
         recentCallsTable.addGeneratedColumn("statusDisplay", log -> {
             Label<String> label = uiComponents.create(Label.NAME);
             label.setHtmlEnabled(true);
@@ -318,6 +337,9 @@ public class UserAiDashboard extends Screen {
         long totalCompletionTokens = 0;
         BigDecimal totalCost = BigDecimal.ZERO;
         long totalDurationMs = 0;
+        long totalSuccessfulAttempts = 0;
+        long totalFailedAttempts = 0;
+        long totalModelSwitches = 0;
 
         for (AiCallLog log : logs) {
             if ("SUCCESS".equalsIgnoreCase(log.getStatus())) {
@@ -329,6 +351,14 @@ public class UserAiDashboard extends Screen {
             if (log.getCompletionTokens() != null) totalCompletionTokens += log.getCompletionTokens();
             if (log.getEstimatedCost() != null) totalCost = totalCost.add(log.getEstimatedCost());
             if (log.getDurationMs() != null) totalDurationMs += log.getDurationMs();
+
+            int succAttempts = log.getSuccessfulAttempts() != null ? log.getSuccessfulAttempts()
+                    : ("SUCCESS".equalsIgnoreCase(log.getStatus()) ? 1 : 0);
+            int failAttempts = log.getFailedAttempts() != null ? log.getFailedAttempts()
+                    : ("ERROR".equalsIgnoreCase(log.getStatus()) ? 1 : 0);
+            totalSuccessfulAttempts += succAttempts;
+            totalFailedAttempts += failAttempts;
+            if (log.getModelSwitchCount() != null) totalModelSwitches += log.getModelSwitchCount();
         }
 
         long totalTokens = totalPromptTokens + totalCompletionTokens;
@@ -337,6 +367,11 @@ public class UserAiDashboard extends Screen {
 
         totalCallsLabel.setValue(String.valueOf(totalCalls));
         totalCallsSubLabel.setValue(successCalls + " успешно / " + errorCalls + " сбоев");
+
+        if (attemptsStatsLabel != null) {
+            String note = totalModelSwitches > 0 ? " (🔀 " + totalModelSwitches + ")" : "";
+            attemptsStatsLabel.setValue(String.format("Попытки: 🟢 %d / 🔴 %d%s", totalSuccessfulAttempts, totalFailedAttempts, note));
+        }
 
         UserAiQuotaInfo quota = userAiQuotaService.getUserQuota(currentUser.getId());
         if (quota.isUnlimited()) {

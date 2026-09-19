@@ -71,6 +71,17 @@ public class AdminAiConfiguration extends StandardEntity {
     @Column(name = "MAX_CONTEXT_TOKENS")
     private Integer maxContextTokens = UserAiConfiguration.DEFAULT_MAX_CONTEXT_TOKENS;
 
+    @Column(name = "MAX_RETRIES")
+    private Integer maxRetries = 3;
+
+    public Integer getMaxRetries() {
+        return maxRetries;
+    }
+
+    public void setMaxRetries(Integer maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
     public String getName() {
         return name;
     }

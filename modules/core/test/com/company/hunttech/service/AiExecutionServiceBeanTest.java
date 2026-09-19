@@ -504,6 +504,15 @@ public class AiExecutionServiceBeanTest {
         // Secondary был вызван 1 раз
         verify(secondaryProvider, times(1))
                 .executeTextWithTokens(anyString(), anyString(), eq("secondary-key"), eq("secondary-model"), any());
+
+        ArgumentCaptor<CommitContext> commitCaptor = ArgumentCaptor.forClass(CommitContext.class);
+        verify(dataManager).commit(commitCaptor.capture());
+        AiCallLog logged = (AiCallLog) commitCaptor.getValue().getCommitInstances().iterator().next();
+        assertEquals(Integer.valueOf(3), logged.getAttemptsCount());
+        assertEquals(Integer.valueOf(1), logged.getSuccessfulAttempts());
+        assertEquals(Integer.valueOf(2), logged.getFailedAttempts());
+        assertEquals(Integer.valueOf(1), logged.getModelSwitchCount());
+        assertEquals(Boolean.TRUE, logged.getFallbackUsed());
     }
 
     @Test
@@ -537,6 +546,7 @@ public class AiExecutionServiceBeanTest {
         admin.setProviderCode("admin-provider");
         admin.setDefaultModelName("admin-model");
         admin.setActive(true);
+        admin.setMaxRetries(2);
         admin.setApiKeyEncrypted("admin-secret");
         function.setAdminConfiguration(admin);
 
@@ -564,6 +574,50 @@ public class AiExecutionServiceBeanTest {
                 .executeTextWithTokens(anyString(), anyString(), eq("primary-key"), eq("primary-model"), any());
         verify(adminProvider, times(1))
                 .executeTextWithTokens(anyString(), anyString(), eq("admin-key"), eq("admin-model"), any());
+
+        ArgumentCaptor<CommitContext> commitCaptor = ArgumentCaptor.forClass(CommitContext.class);
+        verify(dataManager).commit(commitCaptor.capture());
+        AiCallLog logged = (AiCallLog) commitCaptor.getValue().getCommitInstances().iterator().next();
+        assertEquals(Integer.valueOf(3), logged.getAttemptsCount());
+        assertEquals(Integer.valueOf(1), logged.getSuccessfulAttempts());
+        assertEquals(Integer.valueOf(2), logged.getFailedAttempts());
+        assertEquals(Boolean.TRUE, logged.getFallbackUsed());
+    }
+
+    @Test
+    public void adminConfiguration_retriesOnTransientFailure_thenSucceeds() {
+        function.setCode("VACANCY_TEXT");
+        function.setExecutionPolicy(AiExecutionPolicy.ADMIN_ONLY);
+        function.setPromptTemplate("Опиши вакансию ${vacancyName}");
+
+        AdminAiConfiguration admin = new AdminAiConfiguration();
+        admin.setProviderCode("openai");
+        admin.setDefaultModelName("gpt-test");
+        admin.setActive(true);
+        admin.setMaxRetries(3);
+        admin.setApiKeyEncrypted("secret");
+        function.setAdminConfiguration(admin);
+
+        // Первый вызов падает с таймаутом, второй успешен
+        when(provider.executeTextWithTokens(anyString(), anyString(), eq("plain-key"), eq("gpt-test"), any()))
+                .thenThrow(new RuntimeException("Connection timeout"))
+                .thenReturn(AiProviderResponse.ofText("Успешный ответ со второй попытки", 100, 50, 150));
+
+        AiExecutionResult result = service.executeText("VACANCY_TEXT",
+                Collections.singletonMap("vacancyName", "QA Engineer"));
+
+        assertNotNull(result);
+        assertEquals("Успешный ответ со второй попытки", result.getText());
+        verify(provider, times(2))
+                .executeTextWithTokens(anyString(), anyString(), eq("plain-key"), eq("gpt-test"), any());
+
+        ArgumentCaptor<CommitContext> commitCaptor = ArgumentCaptor.forClass(CommitContext.class);
+        verify(dataManager).commit(commitCaptor.capture());
+        AiCallLog logged = (AiCallLog) commitCaptor.getValue().getCommitInstances().iterator().next();
+        assertEquals(Integer.valueOf(2), logged.getAttemptsCount());
+        assertEquals(Integer.valueOf(1), logged.getSuccessfulAttempts());
+        assertEquals(Integer.valueOf(1), logged.getFailedAttempts());
+        assertEquals(Integer.valueOf(0), logged.getModelSwitchCount());
     }
 
     @Test

@@ -116,7 +116,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function);
 
+        CallAttemptsTracker tracker = new CallAttemptsTracker();
         AiExecutionResult result;
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
             if (userCandidates.isEmpty()) {
@@ -124,29 +126,30 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
             }
             result = executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
-                    callerSource, startTime, userContext, requestId);
+                    callerSource, startTime, userContext, requestId, tracker);
         } else if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
                 result = executeWithUserCandidatesText(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
-                        callerSource, startTime, userContext, requestId);
+                        callerSource, startTime, userContext, requestId, tracker);
             } catch (RuntimeException userFailure) {
                 if (userFailure instanceof AiRequestCancelledException) {
                     throw userFailure;
                 }
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
-                        && resolveAdminConfiguration(function) != null) {
+                        && !adminCandidates.isEmpty()) {
                     if (userAiQuotaService != null && currentUser != null) {
                         userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
                     }
                     ensureAdminFallbackAllowed(function, currentUser, userContext);
+                    tracker.markFallback();
                     log.warn("Персональные AI-подключения функции {} недоступны; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
-                    result = executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser,
-                            callerSource, startTime, userContext, requestId);
+                    result = executeWithAdminCandidatesText(function, adminCandidates, prompt, effectiveSystemPrompt, currentUser,
+                            callerSource, startTime, userContext, requestId, tracker);
                 } else {
                     saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
                             null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
-                            userContext);
+                            userContext, tracker);
                     throw new DevelopmentException(
                             "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
                 }
@@ -156,7 +159,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
             }
             ensureAdminFallbackAllowed(function, currentUser, userContext);
-            result = executeWithAdmin(function, prompt, effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
+            result = executeWithAdminCandidatesText(function, adminCandidates, prompt, effectiveSystemPrompt, currentUser,
+                    callerSource, startTime, userContext, requestId, tracker);
         }
 
         if (!LLM_CHAT_FUNCTION_CODE.equals(functionCode) && userAiQuotaService != null && currentUser != null && result != null && result.getTotalTokens() != null && result.getTotalTokens() > 0) {
@@ -190,6 +194,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String effectiveSystemPrompt = appendRuntimeContext(userContext.effectiveSystemPrompt, context);
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function);
+        CallAttemptsTracker tracker = new CallAttemptsTracker();
+
         AtomicBoolean emitted = new AtomicBoolean(false);
         AiStreamListener guardedListener = delta -> {
             if (delta != null && !delta.isEmpty()) {
@@ -204,27 +211,31 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
             }
             result = executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
-                    callerSource, startTime, userContext, requestId, emitted, guardedListener);
+                    callerSource, startTime, userContext, requestId, emitted, guardedListener, tracker);
         } else if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
                 result = executeWithUserCandidatesStreaming(function, userCandidates, prompt, effectiveSystemPrompt, currentUser,
-                        callerSource, startTime, userContext, requestId, emitted, guardedListener);
+                        callerSource, startTime, userContext, requestId, emitted, guardedListener, tracker);
             } catch (RuntimeException userFailure) {
                 // Never append a second provider response after partial output.
                 if (emitted.get() || userFailure instanceof AiRequestCancelledException) {
                     throw userFailure;
                 }
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
-                        && resolveAdminConfiguration(function) != null) {
+                        && !adminCandidates.isEmpty()) {
                     if (userAiQuotaService != null && currentUser != null) {
                         userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
                     }
                     ensureAdminFallbackAllowed(function, currentUser, userContext);
+                    tracker.markFallback();
                     log.warn("Персональные AI-подключения функции {} недоступны; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
-                    result = executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
-                            callerSource, startTime, userContext, requestId, guardedListener);
+                    result = executeWithAdminCandidatesStreaming(function, adminCandidates, prompt, effectiveSystemPrompt, currentUser,
+                            callerSource, startTime, userContext, requestId, guardedListener, tracker);
                 } else {
+                    saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
+                            null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
+                            userContext, tracker);
                     throw new DevelopmentException(
                             "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
                 }
@@ -234,8 +245,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
             }
             ensureAdminFallbackAllowed(function, currentUser, userContext);
-            result = executeWithAdminStreaming(function, prompt, effectiveSystemPrompt, currentUser,
-                    callerSource, startTime, userContext, requestId, guardedListener);
+            result = executeWithAdminCandidatesStreaming(function, adminCandidates, prompt, effectiveSystemPrompt, currentUser,
+                    callerSource, startTime, userContext, requestId, guardedListener, tracker);
         }
 
         if (!LLM_CHAT_FUNCTION_CODE.equals(functionCode) && userAiQuotaService != null && currentUser != null && result != null && result.getTotalTokens() != null && result.getTotalTokens() > 0) {
@@ -266,29 +277,33 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function);
+        CallAttemptsTracker tracker = new CallAttemptsTracker();
+
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
             if (userCandidates.isEmpty()) {
                 throw new DevelopmentException(
                         "Для AI-функции «" + functionCode + "» требуется активное персональное подключение.");
             }
-            return executeWithUserCandidatesImage(function, userCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+            return executeWithUserCandidatesImage(function, userCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime, tracker);
         }
         if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && !userCandidates.isEmpty()) {
             try {
-                return executeWithUserCandidatesImage(function, userCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+                return executeWithUserCandidatesImage(function, userCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime, tracker);
             } catch (RuntimeException userFailure) {
                 if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
-                        && isUsableAdminConfiguration(function.getAdminConfiguration())) {
+                        && !adminCandidates.isEmpty()) {
                     log.warn("Персональное AI-подключение функции {} недоступно; используется разрешённый admin fallback. Причина: {}",
                             functionCode, userFailure.getClass().getSimpleName());
                     if (userAiQuotaService != null && currentUser != null) {
                         userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
                     }
-                    return executeWithAdminImage(function, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+                    tracker.markFallback();
+                    return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime, tracker);
                 }
                 saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
                         null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
-                        null);
+                        null, tracker);
                 throw new DevelopmentException(
                         "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
@@ -296,7 +311,51 @@ public class AiExecutionServiceBean implements AiExecutionService {
         if (userAiQuotaService != null && currentUser != null) {
             userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
         }
-        return executeWithAdminImage(function, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+        return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime, tracker);
+    }
+
+    private static class CallAttemptsTracker {
+        private int successfulAttempts = 0;
+        private int failedAttempts = 0;
+        private int modelSwitchCount = 0;
+        private boolean fallbackUsed = false;
+
+        public void recordSuccess() {
+            successfulAttempts++;
+        }
+
+        public void recordFailure() {
+            failedAttempts++;
+        }
+
+        public void recordModelSwitch() {
+            modelSwitchCount++;
+            fallbackUsed = true;
+        }
+
+        public void markFallback() {
+            fallbackUsed = true;
+        }
+
+        public int getSuccessfulAttempts() {
+            return successfulAttempts;
+        }
+
+        public int getFailedAttempts() {
+            return failedAttempts;
+        }
+
+        public int getTotalAttempts() {
+            return successfulAttempts + failedAttempts;
+        }
+
+        public int getModelSwitchCount() {
+            return modelSwitchCount;
+        }
+
+        public boolean isFallbackUsed() {
+            return fallbackUsed;
+        }
     }
 
     private static class UserExecutionCandidate {
@@ -304,6 +363,16 @@ public class AiExecutionServiceBean implements AiExecutionService {
         private final String modelOverride;
 
         private UserExecutionCandidate(UserAiConfiguration configuration, String modelOverride) {
+            this.configuration = configuration;
+            this.modelOverride = modelOverride;
+        }
+    }
+
+    private static class AdminExecutionCandidate {
+        private final AdminAiConfiguration configuration;
+        private final String modelOverride;
+
+        private AdminExecutionCandidate(AdminAiConfiguration configuration, String modelOverride) {
             this.configuration = configuration;
             this.modelOverride = modelOverride;
         }
@@ -399,6 +468,41 @@ public class AiExecutionServiceBean implements AiExecutionService {
         return candidates;
     }
 
+    private List<AdminExecutionCandidate> resolveAdminExecutionCandidates(AiFunctionConfiguration function) {
+        List<AdminExecutionCandidate> candidates = new ArrayList<>();
+        Set<UUID> seenIds = new HashSet<>();
+
+        AdminAiConfiguration configuredAdmin = function != null ? function.getAdminConfiguration() : null;
+        if (isUsableAdminConfiguration(configuredAdmin)) {
+            candidates.add(new AdminExecutionCandidate(configuredAdmin, function.getAdminModelName()));
+            if (configuredAdmin.getId() != null) {
+                seenIds.add(configuredAdmin.getId());
+            }
+        }
+
+        try {
+            com.haulmont.cuba.core.global.FluentLoader<AdminAiConfiguration, UUID> loader =
+                    dataManager != null ? dataManager.load(AdminAiConfiguration.class) : null;
+            if (loader != null) {
+                List<AdminAiConfiguration> loaded = loader
+                        .query("select c from hunttech_AdminAiConfiguration c where c.active = true order by c.priority desc, c.createTs asc")
+                        .view("admin-ai-configuration-secret-view")
+                        .list();
+                if (loaded != null) {
+                    for (AdminAiConfiguration c : loaded) {
+                        if (isUsableAdminConfiguration(c) && (c.getId() == null || seenIds.add(c.getId()))) {
+                            candidates.add(new AdminExecutionCandidate(c, null));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить список корпоративных AI-подключений: {}", e.getMessage());
+        }
+
+        return candidates;
+    }
+
     private boolean isUsableUserConfiguration(UserAiConfiguration configuration, User currentUser) {
         return configuration != null
                 && configuration.getUser() != null
@@ -413,7 +517,25 @@ public class AiExecutionServiceBean implements AiExecutionService {
         if (config != null && config.getMaxRetries() != null && config.getMaxRetries() > 0) {
             return config.getMaxRetries();
         }
-        return 2; // По умолчанию 2 попытки
+        return 3;
+    }
+
+    private int resolveAdminMaxRetries(AdminAiConfiguration config) {
+        if (config != null && config.getMaxRetries() != null && config.getMaxRetries() > 0) {
+            return config.getMaxRetries();
+        }
+        return 3;
+    }
+
+    private void sleepBeforeRetry(int attempt, int maxAttempts) {
+        if (attempt < maxAttempts) {
+            try {
+                Thread.sleep(Math.min(300L * attempt, 2000L));
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Прервано ожидание повторной попытки вызова AI", ie);
+            }
+        }
     }
 
     private AiExecutionResult executeWithUserCandidatesText(AiFunctionConfiguration function,
@@ -424,29 +546,124 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                             String callerSource,
                                                             long startTime,
                                                             UserContextAttachment userContext,
-                                                            String requestId) {
+                                                            String requestId,
+                                                            CallAttemptsTracker tracker) {
         RuntimeException lastException = null;
-        for (UserExecutionCandidate candidate : candidates) {
+        for (int i = 0; i < candidates.size(); i++) {
+            UserExecutionCandidate candidate = candidates.get(i);
+            if (i > 0) {
+                tracker.recordModelSwitch();
+            }
             UserAiConfiguration config = candidate.configuration;
             int maxAttempts = resolveMaxRetries(config);
+            String model = config.getDefaultModelName();
+            if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(candidate.modelOverride)) {
+                model = candidate.modelOverride;
+            }
+            String apiKey = resolveUserApiKey(config);
+
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
-                    return executeWithUserConfig(function, config, candidate.modelOverride, prompt,
-                            effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId);
+                    AiProviderResponse response = executeProvider(config.getProviderCode(), apiKey, model,
+                            function, prompt, effectiveSystemPrompt, requestId);
+                    tracker.recordSuccess();
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                            prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
+                            response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                            userContext, tracker);
+                    return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                            model, config.getProviderCode(), AiCredentialOwner.USER, response.getText(),
+                            response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                            response.getProviderRequestId());
                 } catch (RuntimeException e) {
                     lastException = e;
+                    tracker.recordFailure();
                     if (e instanceof AiRequestCancelledException) {
+                        saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                                prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
+                                userContext, tracker);
                         throw e;
                     }
                     log.warn("Попытка {}/{} вызова пользовательской AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
-                            attempt, maxAttempts, config.getProviderCode(), config.getDefaultModelName(), e.getMessage());
+                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    sleepBeforeRetry(attempt, maxAttempts);
                 }
             }
             log.warn("Пользовательская AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
-                    config.getProviderCode(), config.getDefaultModelName(), maxAttempts);
+                    config.getProviderCode(), model, maxAttempts);
         }
         throw lastException != null ? lastException
                 : new DevelopmentException("Не удалось выполнить текстовый запрос через персональные AI-подключения.");
+    }
+
+    private AiExecutionResult executeWithAdminCandidatesText(AiFunctionConfiguration function,
+                                                             List<AdminExecutionCandidate> candidates,
+                                                             String prompt,
+                                                             String effectiveSystemPrompt,
+                                                             User currentUser,
+                                                             String callerSource,
+                                                             long startTime,
+                                                             UserContextAttachment userContext,
+                                                             String requestId,
+                                                             CallAttemptsTracker tracker) {
+        if (candidates == null || candidates.isEmpty()) {
+            throw new DevelopmentException(
+                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
+        }
+        RuntimeException lastException = null;
+        for (int i = 0; i < candidates.size(); i++) {
+            AdminExecutionCandidate candidate = candidates.get(i);
+            if (i > 0) {
+                tracker.recordModelSwitch();
+            }
+            AdminAiConfiguration config = candidate.configuration;
+            int maxAttempts = resolveAdminMaxRetries(config);
+            String model = isConfigured(candidate.modelOverride)
+                    ? candidate.modelOverride
+                    : (isConfigured(function.getAdminModelName()) ? function.getAdminModelName() : config.getDefaultModelName());
+            String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    AiProviderResponse response = executeProvider(config.getProviderCode(), apiKey, model,
+                            function, prompt, effectiveSystemPrompt, requestId);
+                    tracker.recordSuccess();
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                            prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
+                            response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                            userContext, tracker);
+                    return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                            model, config.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
+                            response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                            response.getProviderRequestId());
+                } catch (RuntimeException e) {
+                    lastException = e;
+                    tracker.recordFailure();
+                    if (e instanceof AiRequestCancelledException) {
+                        saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                                prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
+                                userContext, tracker);
+                        throw e;
+                    }
+                    log.warn("Попытка {}/{} вызова корпоративной AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
+                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    sleepBeforeRetry(attempt, maxAttempts);
+                }
+            }
+            log.warn("Корпоративная AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
+                    config.getProviderCode(), model, maxAttempts);
+        }
+
+        AdminExecutionCandidate lastCandidate = candidates.get(candidates.size() - 1);
+        String lastModel = isConfigured(lastCandidate.modelOverride) ? lastCandidate.modelOverride : lastCandidate.configuration.getDefaultModelName();
+        saveAiCallLog(currentUser, function, lastCandidate.configuration.getProviderCode(), lastModel,
+                AiCredentialOwner.ADMIN.name(), prompt, null, null, null, null,
+                System.currentTimeMillis() - startTime, callerSource, "ERROR",
+                lastException != null ? lastException.getMessage() : "Все корпоративные попытки исчерпаны",
+                userContext, tracker);
+
+        throw lastException != null ? lastException
+                : new DevelopmentException("Не удалось выполнить текстовый запрос через корпоративные AI-подключения.");
     }
 
     private AiExecutionResult executeWithUserCandidatesStreaming(AiFunctionConfiguration function,
@@ -459,29 +676,125 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                                  UserContextAttachment userContext,
                                                                  String requestId,
                                                                  AtomicBoolean emitted,
-                                                                 AiStreamListener guardedListener) {
+                                                                 AiStreamListener guardedListener,
+                                                                 CallAttemptsTracker tracker) {
         RuntimeException lastException = null;
-        for (UserExecutionCandidate candidate : candidates) {
+        for (int i = 0; i < candidates.size(); i++) {
+            UserExecutionCandidate candidate = candidates.get(i);
+            if (i > 0) {
+                tracker.recordModelSwitch();
+            }
             UserAiConfiguration config = candidate.configuration;
             int maxAttempts = resolveMaxRetries(config);
+            String model = config.getDefaultModelName();
+            if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(candidate.modelOverride)) {
+                model = candidate.modelOverride;
+            }
+            String apiKey = resolveUserApiKey(config);
+
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
-                    return executeWithUserConfigStreaming(function, config, candidate.modelOverride, prompt,
-                            effectiveSystemPrompt, currentUser, callerSource, startTime, userContext, requestId, guardedListener);
+                    AiProviderResponse response = executeProviderStreaming(config.getProviderCode(),
+                            apiKey, model, function, prompt, effectiveSystemPrompt, requestId, guardedListener);
+                    tracker.recordSuccess();
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                            prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
+                            response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                            userContext, tracker);
+                    return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                            model, config.getProviderCode(), AiCredentialOwner.USER, response.getText(),
+                            response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                            response.getProviderRequestId());
                 } catch (RuntimeException e) {
                     lastException = e;
+                    tracker.recordFailure();
                     if (emitted.get() || e instanceof AiRequestCancelledException) {
+                        saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                                prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
+                                userContext, tracker);
                         throw e;
                     }
                     log.warn("Попытка {}/{} стриминг-вызова пользовательской AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
-                            attempt, maxAttempts, config.getProviderCode(), config.getDefaultModelName(), e.getMessage());
+                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    sleepBeforeRetry(attempt, maxAttempts);
                 }
             }
             log.warn("Пользовательская AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
-                    config.getProviderCode(), config.getDefaultModelName(), maxAttempts);
+                    config.getProviderCode(), model, maxAttempts);
         }
         throw lastException != null ? lastException
                 : new DevelopmentException("Не удалось выполнить стриминг-запрос через персональные AI-подключения.");
+    }
+
+    private AiExecutionResult executeWithAdminCandidatesStreaming(AiFunctionConfiguration function,
+                                                                  List<AdminExecutionCandidate> candidates,
+                                                                  String prompt,
+                                                                  String effectiveSystemPrompt,
+                                                                  User currentUser,
+                                                                  String callerSource,
+                                                                  long startTime,
+                                                                  UserContextAttachment userContext,
+                                                                  String requestId,
+                                                                  AiStreamListener listener,
+                                                                  CallAttemptsTracker tracker) {
+        if (candidates == null || candidates.isEmpty()) {
+            throw new DevelopmentException(
+                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
+        }
+        RuntimeException lastException = null;
+        for (int i = 0; i < candidates.size(); i++) {
+            AdminExecutionCandidate candidate = candidates.get(i);
+            if (i > 0) {
+                tracker.recordModelSwitch();
+            }
+            AdminAiConfiguration config = candidate.configuration;
+            int maxAttempts = resolveAdminMaxRetries(config);
+            String model = isConfigured(candidate.modelOverride)
+                    ? candidate.modelOverride
+                    : (isConfigured(function.getAdminModelName()) ? function.getAdminModelName() : config.getDefaultModelName());
+            String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    AiProviderResponse response = executeProviderStreaming(config.getProviderCode(), apiKey, model,
+                            function, prompt, effectiveSystemPrompt, requestId, listener);
+                    tracker.recordSuccess();
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                            prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
+                            response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                            userContext, tracker);
+                    return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                            model, config.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
+                            response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
+                            response.getProviderRequestId());
+                } catch (RuntimeException e) {
+                    lastException = e;
+                    tracker.recordFailure();
+                    if (e instanceof AiRequestCancelledException) {
+                        saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                                prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
+                                userContext, tracker);
+                        throw e;
+                    }
+                    log.warn("Попытка {}/{} стриминг-вызова корпоративной AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
+                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    sleepBeforeRetry(attempt, maxAttempts);
+                }
+            }
+            log.warn("Корпоративная AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
+                    config.getProviderCode(), model, maxAttempts);
+        }
+
+        AdminExecutionCandidate lastCandidate = candidates.get(candidates.size() - 1);
+        String lastModel = isConfigured(lastCandidate.modelOverride) ? lastCandidate.modelOverride : lastCandidate.configuration.getDefaultModelName();
+        saveAiCallLog(currentUser, function, lastCandidate.configuration.getProviderCode(), lastModel,
+                AiCredentialOwner.ADMIN.name(), prompt, null, null, null, null,
+                System.currentTimeMillis() - startTime, callerSource, "ERROR",
+                lastException != null ? lastException.getMessage() : "Все корпоративные попытки исчерпаны",
+                userContext, tracker);
+
+        throw lastException != null ? lastException
+                : new DevelopmentException("Не удалось выполнить стриминг-запрос через корпоративные AI-подключения.");
     }
 
     private AiExecutionResult executeWithUserCandidatesImage(AiFunctionConfiguration function,
@@ -491,215 +804,119 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                              String sourceMimeType,
                                                              User currentUser,
                                                              String callerSource,
-                                                             long startTime) {
+                                                             long startTime,
+                                                             CallAttemptsTracker tracker) {
         RuntimeException lastException = null;
-        for (UserExecutionCandidate candidate : candidates) {
+        for (int i = 0; i < candidates.size(); i++) {
+            UserExecutionCandidate candidate = candidates.get(i);
+            if (i > 0) {
+                tracker.recordModelSwitch();
+            }
             UserAiConfiguration config = candidate.configuration;
             int maxAttempts = resolveMaxRetries(config);
+            String model = config.getDefaultModelName();
+            if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(candidate.modelOverride)) {
+                model = candidate.modelOverride;
+            }
+            String apiKey = resolveUserApiKey(config);
+
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
-                    return executeWithUserConfigImage(function, config, candidate.modelOverride, prompt,
-                            sourceImage, sourceMimeType, currentUser, callerSource, startTime);
+                    byte[] image = executeProviderImage(config.getProviderCode(), apiKey, model,
+                            function, prompt, sourceImage, sourceMimeType);
+                    tracker.recordSuccess();
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                            prompt, "[IMAGE DATA " + (image != null ? image.length : 0) + " bytes]",
+                            null, null, null, System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                            null, tracker);
+                    return AiExecutionResult.imageResult(function.getCode(), function.getName(), function.getCapability(),
+                            model, config.getProviderCode(), AiCredentialOwner.USER, image);
                 } catch (RuntimeException e) {
                     lastException = e;
+                    tracker.recordFailure();
                     if (e instanceof AiRequestCancelledException) {
+                        saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                                prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
+                                null, tracker);
                         throw e;
                     }
                     log.warn("Попытка {}/{} вызова пользовательской генерации изображения [{}] ({}) завершилась ошибкой: {}",
-                            attempt, maxAttempts, config.getProviderCode(), config.getDefaultModelName(), e.getMessage());
+                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    sleepBeforeRetry(attempt, maxAttempts);
                 }
             }
             log.warn("Пользовательская AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
-                    config.getProviderCode(), config.getDefaultModelName(), maxAttempts);
+                    config.getProviderCode(), model, maxAttempts);
         }
         throw lastException != null ? lastException
                 : new DevelopmentException("Не удалось сгенерировать изображение через персональные AI-подключения.");
     }
 
-    private AiExecutionResult executeWithUserConfigImage(AiFunctionConfiguration function,
-                                                         UserAiConfiguration configuration,
-                                                         String modelOverride,
-                                                         String prompt, byte[] sourceImage, String sourceMimeType,
-                                                         User currentUser, String callerSource, long startTime) {
-        String model = configuration.getDefaultModelName();
-        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(modelOverride)) {
-            model = modelOverride;
-        }
-        try {
-            byte[] image = executeProviderImage(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
-                    function, prompt, sourceImage, sourceMimeType);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
-                    prompt, "[IMAGE DATA " + (image != null ? image.length : 0) + " bytes]",
-                    null, null, null, System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
-                    null);
-            return AiExecutionResult.imageResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.USER, image);
-        } catch (Exception e) {
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
-                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
-                    null);
-            throw e;
-        }
-    }
-
-    private AiExecutionResult executeWithAdminImage(AiFunctionConfiguration function, String prompt,
-                                                    byte[] sourceImage, String sourceMimeType,
-                                                    User currentUser, String callerSource, long startTime) {
-        AdminAiConfiguration configuration = resolveAdminConfiguration(function);
-        if (configuration == null) {
+    private AiExecutionResult executeWithAdminCandidatesImage(AiFunctionConfiguration function,
+                                                              List<AdminExecutionCandidate> candidates,
+                                                              String prompt,
+                                                              byte[] sourceImage,
+                                                              String sourceMimeType,
+                                                              User currentUser,
+                                                              String callerSource,
+                                                              long startTime,
+                                                              CallAttemptsTracker tracker) {
+        if (candidates == null || candidates.isEmpty()) {
             throw new DevelopmentException(
                     "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
         }
-        String model = isConfigured(function.getAdminModelName())
-                ? function.getAdminModelName() : configuration.getDefaultModelName();
-        String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
-        try {
-            byte[] image = executeProviderImage(configuration.getProviderCode(), apiKey, model, function,
-                    prompt, sourceImage, sourceMimeType);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
-                    prompt, "[IMAGE DATA " + (image != null ? image.length : 0) + " bytes]",
-                    null, null, null, System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
-                    null);
-            return AiExecutionResult.imageResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, image);
-        } catch (Exception e) {
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
-                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
-                    null);
-            throw e;
-        }
-    }
+        RuntimeException lastException = null;
+        for (int i = 0; i < candidates.size(); i++) {
+            AdminExecutionCandidate candidate = candidates.get(i);
+            if (i > 0) {
+                tracker.recordModelSwitch();
+            }
+            AdminAiConfiguration config = candidate.configuration;
+            int maxAttempts = resolveAdminMaxRetries(config);
+            String model = isConfigured(candidate.modelOverride)
+                    ? candidate.modelOverride
+                    : (isConfigured(function.getAdminModelName()) ? function.getAdminModelName() : config.getDefaultModelName());
+            String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
 
-    private AiExecutionResult executeWithUserConfig(AiFunctionConfiguration function,
-                                                    UserAiConfiguration configuration,
-                                                    String modelOverride,
-                                                    String prompt,
-                                                    String effectiveSystemPrompt,
-                                                    User currentUser, String callerSource, long startTime,
-                                                    UserContextAttachment userContext, String requestId) {
-        String model = configuration.getDefaultModelName();
-        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(modelOverride)) {
-            model = modelOverride;
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    byte[] image = executeProviderImage(config.getProviderCode(), apiKey, model, function,
+                            prompt, sourceImage, sourceMimeType);
+                    tracker.recordSuccess();
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                            prompt, "[IMAGE DATA " + (image != null ? image.length : 0) + " bytes]",
+                            null, null, null, System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
+                            null, tracker);
+                    return AiExecutionResult.imageResult(function.getCode(), function.getName(), function.getCapability(),
+                            model, config.getProviderCode(), AiCredentialOwner.ADMIN, image);
+                } catch (RuntimeException e) {
+                    lastException = e;
+                    tracker.recordFailure();
+                    if (e instanceof AiRequestCancelledException) {
+                        saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                                prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
+                                null, tracker);
+                        throw e;
+                    }
+                    log.warn("Попытка {}/{} вызова корпоративной генерации изображения [{}] ({}) завершилась ошибкой: {}",
+                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    sleepBeforeRetry(attempt, maxAttempts);
+                }
+            }
+            log.warn("Корпоративная AI-конфигурация [{}] ({}) исчерпала лимит попыток ({}). Переход к следующей сети.",
+                    config.getProviderCode(), model, maxAttempts);
         }
-        try {
-            AiProviderResponse response = executeProvider(configuration.getProviderCode(), resolveUserApiKey(configuration), model,
-                    function, prompt, effectiveSystemPrompt, requestId);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
-                    prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
-                    response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
-                    userContext);
-            return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText(),
-                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
-                    response.getProviderRequestId());
-        } catch (Exception e) {
-            log.error("executeWithUserConfig: сбой вызова модели {} (провайдер {}) для функции {}: {}",
-                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
-                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
-                    userContext);
-            throw e;
-        }
-    }
 
-    private AiExecutionResult executeWithAdmin(AiFunctionConfiguration function, String prompt,
-                                               String effectiveSystemPrompt,
-                                               User currentUser, String callerSource, long startTime,
-                                               UserContextAttachment userContext, String requestId) {
-        AdminAiConfiguration configuration = resolveAdminConfiguration(function);
-        if (configuration == null) {
-            throw new DevelopmentException(
-                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
-        }
-        String model = isConfigured(function.getAdminModelName())
-                ? function.getAdminModelName() : configuration.getDefaultModelName();
-        String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
-        try {
-            AiProviderResponse response = executeProvider(configuration.getProviderCode(), apiKey, model, function,
-                    prompt, effectiveSystemPrompt, requestId);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
-                    prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
-                    response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
-                    userContext);
-            return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
-                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
-                    response.getProviderRequestId());
-        } catch (Exception e) {
-            log.error("executeWithAdmin: сбой вызова модели {} (провайдер {}) для функции {}: {}",
-                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
-                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", e.getMessage(),
-                    userContext);
-            throw e;
-        }
-    }
+        AdminExecutionCandidate lastCandidate = candidates.get(candidates.size() - 1);
+        String lastModel = isConfigured(lastCandidate.modelOverride) ? lastCandidate.modelOverride : lastCandidate.configuration.getDefaultModelName();
+        saveAiCallLog(currentUser, function, lastCandidate.configuration.getProviderCode(), lastModel,
+                AiCredentialOwner.ADMIN.name(), prompt, null, null, null, null,
+                System.currentTimeMillis() - startTime, callerSource, "ERROR",
+                lastException != null ? lastException.getMessage() : "Все корпоративные попытки исчерпаны",
+                null, tracker);
 
-    private AiExecutionResult executeWithUserConfigStreaming(AiFunctionConfiguration function,
-                                                             UserAiConfiguration configuration,
-                                                             String modelOverride,
-                                                             String prompt, String effectiveSystemPrompt,
-                                                             User currentUser, String callerSource, long startTime,
-                                                             UserContextAttachment userContext, String requestId,
-                                                             AiStreamListener listener) {
-        String model = configuration.getDefaultModelName();
-        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(modelOverride)) {
-            model = modelOverride;
-        }
-        try {
-            AiProviderResponse response = executeProviderStreaming(configuration.getProviderCode(),
-                    resolveUserApiKey(configuration), model, function, prompt, effectiveSystemPrompt,
-                    requestId, listener);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
-                    prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
-                    response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
-                    userContext);
-            return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.USER, response.getText(),
-                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
-                    response.getProviderRequestId());
-        } catch (Exception e) {
-            log.error("executeWithUserConfigStreaming: сбой стриминга модели {} (провайдер {}) для функции {}: {}",
-                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.USER.name(),
-                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource,
-                    "ERROR", e.getMessage(), userContext);
-            throw e;
-        }
-    }
-
-    private AiExecutionResult executeWithAdminStreaming(AiFunctionConfiguration function, String prompt,
-                                                        String effectiveSystemPrompt, User currentUser,
-                                                        String callerSource, long startTime,
-                                                        UserContextAttachment userContext, String requestId,
-                                                        AiStreamListener listener) {
-        AdminAiConfiguration configuration = resolveAdminConfiguration(function);
-        if (configuration == null) {
-            throw new DevelopmentException(
-                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
-        }
-        String model = isConfigured(function.getAdminModelName())
-                ? function.getAdminModelName() : configuration.getDefaultModelName();
-        String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
-        try {
-            AiProviderResponse response = executeProviderStreaming(configuration.getProviderCode(), apiKey, model,
-                    function, prompt, effectiveSystemPrompt, requestId, listener);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
-                    prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
-                    response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
-                    userContext);
-            return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                    model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
-                    response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
-                    response.getProviderRequestId());
-        } catch (Exception e) {
-            log.error("executeWithAdminStreaming: сбой стриминга модели {} (провайдер {}) для функции {}: {}",
-                    model, configuration.getProviderCode(), function.getCode(), e.getMessage(), e);
-            saveAiCallLog(currentUser, function, configuration.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
-                    prompt, null, null, null, null, System.currentTimeMillis() - startTime, callerSource,
-                    "ERROR", e.getMessage(), userContext);
-            throw e;
-        }
+        throw lastException != null ? lastException
+                : new DevelopmentException("Не удалось сгенерировать изображение через корпоративные AI-подключения.");
     }
 
     private AiProviderResponse executeProvider(String providerCode,
@@ -764,6 +981,17 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                String responseText, Integer promptTokens, Integer completionTokens,
                                Integer totalTokens, Long durationMs, String callerSource,
                                String status, String errorMessage, UserContextAttachment userContext) {
+        saveAiCallLog(user, function, providerCode, modelName, credentialOwner, prompt, responseText,
+                promptTokens, completionTokens, totalTokens, durationMs, callerSource, status, errorMessage,
+                userContext, null);
+    }
+
+    private void saveAiCallLog(User user, AiFunctionConfiguration function, String providerCode,
+                               String modelName, String credentialOwner, String prompt,
+                               String responseText, Integer promptTokens, Integer completionTokens,
+                               Integer totalTokens, Long durationMs, String callerSource,
+                               String status, String errorMessage, UserContextAttachment userContext,
+                               CallAttemptsTracker tracker) {
         try {
             AiCallLog callLog = metadata.create(AiCallLog.class);
             callLog.setUser(user);
@@ -784,6 +1012,20 @@ public class AiExecutionServiceBean implements AiExecutionService {
             callLog.setPromptTokens(promptTokens);
             callLog.setCompletionTokens(completionTokens);
             callLog.setTotalTokens(totalTokens);
+
+            if (tracker != null) {
+                callLog.setAttemptsCount(tracker.getTotalAttempts());
+                callLog.setSuccessfulAttempts(tracker.getSuccessfulAttempts());
+                callLog.setFailedAttempts(tracker.getFailedAttempts());
+                callLog.setModelSwitchCount(tracker.getModelSwitchCount());
+                callLog.setFallbackUsed(tracker.isFallbackUsed());
+            } else {
+                callLog.setAttemptsCount(1);
+                callLog.setSuccessfulAttempts("SUCCESS".equalsIgnoreCase(status) ? 1 : 0);
+                callLog.setFailedAttempts("SUCCESS".equalsIgnoreCase(status) ? 0 : 1);
+                callLog.setModelSwitchCount(0);
+                callLog.setFallbackUsed(false);
+            }
 
             AiCostCalculator.CostResult costResult = AiCostCalculator.calculateCost(providerCode, modelName, promptTokens, completionTokens);
             callLog.setEstimatedCost(costResult.getCost());

@@ -77,6 +77,7 @@
                     </hbox>
                     <label id="speedLabel" value="0.00 с" stylename="kpi-value"/>
                     <label id="successRateLabel" value="100% OK" stylename="kpi-sub"/>
+                    <label id="attemptsStatsLabel" value="🟢 0 усп. / 🔴 0 сбоев" stylename="kpi-sub"/>
                 </vbox>
             </hbox>
 
@@ -142,6 +143,7 @@
                         <column id="tokensDisplay" caption="msg://tokens" width="140px"/>
                         <column id="costDisplay" caption="msg://cost" width="120px"/>
                         <column id="durationDisplay" caption="msg://duration" width="100px"/>
+                        <column id="attemptsDisplay" caption="msg://attempts" width="120px"/>
                         <column id="statusDisplay" caption="msg://status" width="110px"/>
                     </columns>
                 </table>

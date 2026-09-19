@@ -286,4 +286,8 @@
     <include file="260919-7-updateOpenRouterFallbackAndUserPriority.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AI Control Plane: Механизм попыток вызова нейросетей (retries) и сбор статистики соединения -->
+    <include file="260919-8-addAiRetryAndConnectionAttemptsFields.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

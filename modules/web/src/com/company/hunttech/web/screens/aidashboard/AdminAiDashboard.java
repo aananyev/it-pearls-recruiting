@@ -353,6 +353,28 @@ public class AdminAiDashboard extends Screen {
             return label;
         });
 
+        userSummaryTable.addGeneratedColumn("successfulAttempts", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            Integer val = kve.getValue("successfulAttempts");
+            int v = val != null ? val : 0;
+            label.setValue("<span style='color: #059669; font-weight: 600;'>🟢 " + v + "</span>");
+            return label;
+        });
+
+        userSummaryTable.addGeneratedColumn("failedAttempts", kve -> {
+            Label<String> label = uiComponents.create(Label.NAME);
+            label.setHtmlEnabled(true);
+            Integer val = kve.getValue("failedAttempts");
+            int v = val != null ? val : 0;
+            if (v > 0) {
+                label.setValue("<span style='color: #dc2626; font-weight: 600;'>🔴 " + v + "</span>");
+            } else {
+                label.setValue("<span style='color: #64748b;'>0</span>");
+            }
+            return label;
+        });
+
         userSummaryTable.addGeneratedColumn("errorCount", kve -> {
             Label<String> label = uiComponents.create(Label.NAME);
             label.setHtmlEnabled(true);
@@ -430,6 +452,10 @@ public class AdminAiDashboard extends Screen {
         BigDecimal adminSpend = BigDecimal.ZERO;
         BigDecimal userSpend = BigDecimal.ZERO;
         long totalLatencyMs = 0;
+        long totalSuccessfulAttempts = 0;
+        long totalFailedAttempts = 0;
+        long totalModelSwitches = 0;
+        long totalFallbackCalls = 0;
 
         Set<String> activeUsers = new HashSet<>();
         Map<String, BigDecimal> userSpendMap = new HashMap<>();
@@ -444,6 +470,15 @@ public class AdminAiDashboard extends Screen {
             if (log.getPromptTokens() != null) totalPromptTokens += log.getPromptTokens();
             if (log.getCompletionTokens() != null) totalCompletionTokens += log.getCompletionTokens();
             if (log.getDurationMs() != null) totalLatencyMs += log.getDurationMs();
+
+            int succAttempts = log.getSuccessfulAttempts() != null ? log.getSuccessfulAttempts()
+                    : ("SUCCESS".equalsIgnoreCase(log.getStatus()) ? 1 : 0);
+            int failAttempts = log.getFailedAttempts() != null ? log.getFailedAttempts()
+                    : ("ERROR".equalsIgnoreCase(log.getStatus()) ? 1 : 0);
+            totalSuccessfulAttempts += succAttempts;
+            totalFailedAttempts += failAttempts;
+            if (log.getModelSwitchCount() != null) totalModelSwitches += log.getModelSwitchCount();
+            if (Boolean.TRUE.equals(log.getFallbackUsed())) totalFallbackCalls++;
 
             BigDecimal cost = log.getEstimatedCost() != null ? log.getEstimatedCost() : BigDecimal.ZERO;
             totalSpend = totalSpend.add(cost);
@@ -472,10 +507,15 @@ public class AdminAiDashboard extends Screen {
                 e.setValue("totalTokens", 0L);
                 e.setValue("estimatedCost", BigDecimal.ZERO);
                 e.setValue("errorCount", 0);
+                e.setValue("successfulAttempts", 0);
+                e.setValue("failedAttempts", 0);
                 return e;
             });
 
             kve.setValue("totalCalls", ((Integer) kve.getValue("totalCalls")) + 1);
+            kve.setValue("successfulAttempts", ((Integer) kve.getValue("successfulAttempts")) + succAttempts);
+            kve.setValue("failedAttempts", ((Integer) kve.getValue("failedAttempts")) + failAttempts);
+
             long pTok = kve.getValue("promptTokens");
             long cTok = kve.getValue("completionTokens");
             if (log.getPromptTokens() != null) pTok += log.getPromptTokens();
@@ -546,7 +586,11 @@ public class AdminAiDashboard extends Screen {
                 formatTokenCount(totalRemainingTokens)));
 
         errorRateLabel.setValue(String.format("%.1f%% ошибок", errorRate));
-        avgLatencyLabel.setValue(String.format("Ср. задержка: %.2f с", avgLatency));
+        String attemptsSummary = String.format("Попытки: 🟢 %d / 🔴 %d", totalSuccessfulAttempts, totalFailedAttempts);
+        if (totalFallbackCalls > 0) {
+            attemptsSummary += " (fallback: " + totalFallbackCalls + ")";
+        }
+        avgLatencyLabel.setValue(String.format("Ср. задержка: %.2f с | %s", avgLatency, attemptsSummary));
 
         // 2. Cost Dynamics Chart
         Map<String, BigDecimal> dayCostStats = new LinkedHashMap<>();

@@ -19,6 +19,8 @@
                 <property name="totalTokens" datatype="long"/>
                 <property name="estimatedCost" datatype="decimal"/>
                 <property name="errorCount" datatype="int"/>
+                <property name="successfulAttempts" datatype="int"/>
+                <property name="failedAttempts" datatype="int"/>
                 <property name="lastCallTime" datatype="dateTime"/>
             </properties>
         </keyValueCollection>
@@ -206,6 +208,8 @@
                                 <column id="totalCalls" caption="msg://colCalls" width="90px"/>
                                 <column id="totalTokens" caption="msg://colTotalTokens" width="130px"/>
                                 <column id="estimatedCost" caption="msg://colCost" width="110px"/>
+                                <column id="successfulAttempts" caption="msg://colSuccessfulAttempts" width="105px"/>
+                                <column id="failedAttempts" caption="msg://colFailedAttempts" width="105px"/>
                                 <column id="errorCount" caption="msg://colErrors" width="80px"/>
                                 <column id="lastCallTime" caption="msg://colLastActive" width="150px"/>
                             </columns>

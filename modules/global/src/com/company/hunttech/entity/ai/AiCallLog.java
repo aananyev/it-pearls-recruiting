@@ -126,6 +126,26 @@ public class AiCallLog extends StandardEntity {
     @Column(name = "ADMIN_FALLBACK_CONSENT_VERSION_SNAPSHOT", length = 64)
     private String adminFallbackConsentVersionSnapshot;
 
+    /** Общее количество выполненных попыток соединения для данного запроса. */
+    @Column(name = "ATTEMPTS_COUNT")
+    private Integer attemptsCount = 1;
+
+    /** Количество успешных попыток соединения (1 при успехе, 0 при сбое). */
+    @Column(name = "SUCCESSFUL_ATTEMPTS")
+    private Integer successfulAttempts = 0;
+
+    /** Количество неудачных попыток соединения перед успехом или отказом. */
+    @Column(name = "FAILED_ATTEMPTS")
+    private Integer failedAttempts = 0;
+
+    /** Количество переключений на резервные модели (0 если отработала первая модель). */
+    @Column(name = "MODEL_SWITCH_COUNT")
+    private Integer modelSwitchCount = 0;
+
+    /** Признак использования резервной модели или корпоративного fallback. */
+    @Column(name = "FALLBACK_USED")
+    private Boolean fallbackUsed = false;
+
     public User getUser() {
         return user;
     }
@@ -332,5 +352,45 @@ public class AiCallLog extends StandardEntity {
 
     public void setAdminFallbackConsentVersionSnapshot(String adminFallbackConsentVersionSnapshot) {
         this.adminFallbackConsentVersionSnapshot = adminFallbackConsentVersionSnapshot;
+    }
+
+    public Integer getAttemptsCount() {
+        return attemptsCount;
+    }
+
+    public void setAttemptsCount(Integer attemptsCount) {
+        this.attemptsCount = attemptsCount;
+    }
+
+    public Integer getSuccessfulAttempts() {
+        return successfulAttempts;
+    }
+
+    public void setSuccessfulAttempts(Integer successfulAttempts) {
+        this.successfulAttempts = successfulAttempts;
+    }
+
+    public Integer getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = failedAttempts;
+    }
+
+    public Integer getModelSwitchCount() {
+        return modelSwitchCount;
+    }
+
+    public void setModelSwitchCount(Integer modelSwitchCount) {
+        this.modelSwitchCount = modelSwitchCount;
+    }
+
+    public Boolean getFallbackUsed() {
+        return fallbackUsed;
+    }
+
+    public void setFallbackUsed(Boolean fallbackUsed) {
+        this.fallbackUsed = fallbackUsed;
     }
 }

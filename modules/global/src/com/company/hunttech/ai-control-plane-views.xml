@@ -12,6 +12,7 @@
         <property name="lastTestAt"/>
         <property name="lastError"/>
         <property name="maxContextTokens"/>
+        <property name="maxRetries"/>
     </view>
     <!-- Edit-view включает шифротекст только для сохранения существующего значения; UI его не отображает. -->
     <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-edit-view" extends="admin-ai-configuration-browse-view">
@@ -104,6 +105,11 @@
         <property name="adminFallbackConsentVersionSnapshot"/>
         <property name="callerSource"/>
         <property name="status"/>
+        <property name="attemptsCount"/>
+        <property name="successfulAttempts"/>
+        <property name="failedAttempts"/>
+        <property name="modelSwitchCount"/>
+        <property name="fallbackUsed"/>
     </view>
     <view entity="hunttech_AiCallLog" name="ai-call-log-edit-view" extends="ai-call-log-browse-view">
         <property name="promptText"/>
