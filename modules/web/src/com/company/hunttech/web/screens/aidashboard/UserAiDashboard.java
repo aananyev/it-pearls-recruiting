@@ -135,12 +135,21 @@ public class UserAiDashboard extends Screen {
             // fallback
         }
 
-        ensureFunctionOption(functionOptions, "AI-подбор вакансий для кандидата", "CANDIDATE_VACANCY_MATCH_ANALYZE");
+        ensureFunctionOption(functionOptions, "Подготовка предложения кандидату (AI Outreach)", "CANDIDATE_VACANCY_OUTREACH_DRAFT");
+        ensureFunctionOption(functionOptions, "AI-подбор кандидатов и вакансий", "CANDIDATE_VACANCY_MATCH_ANALYZE");
         ensureFunctionOption(functionOptions, "Фоновое определение навыков кандидатов", "SKILLS_EXTRACT_BACKGROUND");
         ensureFunctionOption(functionOptions, "Умный анализ требований вакансии", "VACANCY_EXPLAIN_REQUIREMENTS");
         ensureFunctionOption(functionOptions, "Объяснение требований вакансии на примерах", "VACANCY_EXPLAIN_SIMPLIFIED_WEB");
+        ensureFunctionOption(functionOptions, "Приглашение на интервью в Telegram", "INTERVIEW_CONFIRMATION_TELEGRAM_MESSAGE");
+        ensureFunctionOption(functionOptions, "Умный парсинг вакансий", "SMART_VACANCY_PARSE");
+        ensureFunctionOption(functionOptions, "Умный парсинг резюме", "SMART_CV_PARSE");
         ensureFunctionOption(functionOptions, "Плавающий чат с ИИ", "LLM_CHAT");
         ensureFunctionOption(functionOptions, "Извлечение навыков из текста", "SKILLS_EXTRACT");
+        ensureFunctionOption(functionOptions, "Исправление опечаток в тексте", "TEXT_FIX_TYPOS");
+        ensureFunctionOption(functionOptions, "Деловой стиль текста", "TEXT_REPHRASE_FORMAL");
+        ensureFunctionOption(functionOptions, "Генерация описания проекта", "PROJECT_DESCRIPTION_GENERATE");
+        ensureFunctionOption(functionOptions, "Краткое описание проекта", "PROJECT_SHORT_DESCRIPTION_GENERATE");
+        ensureFunctionOption(functionOptions, "Генерация логотипа проекта", "PROJECT_LOGO_GENERATE");
 
         functionLookup.setOptionsMap(functionOptions);
         functionLookup.setValue("");
@@ -411,18 +420,36 @@ public class UserAiDashboard extends Screen {
         }
         if (code == null) return "Прочее";
         switch (code) {
+            case "CANDIDATE_VACANCY_OUTREACH_DRAFT":
+                return "Предложение кандидату (Outreach)";
             case "CANDIDATE_VACANCY_MATCH_ANALYZE":
-                return "AI-подбор вакансий";
+                return "AI-подбор кандидатов и вакансий";
             case "SKILLS_EXTRACT_BACKGROUND":
                 return "Фоновое определение навыков";
             case "VACANCY_EXPLAIN_REQUIREMENTS":
                 return "Анализ требований вакансии";
             case "VACANCY_EXPLAIN_SIMPLIFIED_WEB":
                 return "Объяснение требований вакансии";
+            case "INTERVIEW_CONFIRMATION_TELEGRAM_MESSAGE":
+                return "Приглашение на интервью (Telegram)";
+            case "SMART_VACANCY_PARSE":
+                return "Парсинг вакансий";
+            case "SMART_CV_PARSE":
+                return "Парсинг резюме";
             case "LLM_CHAT":
                 return "Плавающий чат с ИИ";
             case "SKILLS_EXTRACT":
                 return "Извлечение навыков";
+            case "TEXT_FIX_TYPOS":
+                return "Исправление опечаток";
+            case "TEXT_REPHRASE_FORMAL":
+                return "Деловой стиль текста";
+            case "PROJECT_DESCRIPTION_GENERATE":
+                return "Описание проекта";
+            case "PROJECT_SHORT_DESCRIPTION_GENERATE":
+                return "Краткое описание проекта";
+            case "PROJECT_LOGO_GENERATE":
+                return "Логотип проекта";
             default:
                 return code;
         }
