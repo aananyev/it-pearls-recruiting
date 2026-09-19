@@ -56,8 +56,8 @@
         <item screen="hunttech_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="LIST_ALT"/>
     </menu>
     <menu id="application-hunting" icon="SEARCH" insertBefore="application-hadbook">
-        <item screen="hunttech_OpenPosition.browse" icon="BRIEFCASE"/>
-        <item screen="hunttech_OpenPositionReestr.browse" caption="Реестр открытых вакансий" icon="TABLE"/>
+        <!-- <item screen="hunttech_OpenPosition.browse" icon="BRIEFCASE"/> -->
+        <item screen="hunttech_OpenPositionReestr.browse" caption="Открытые вакансии" icon="TABLE"/>
         <item screen="hunttech_JobCandidate.browse" icon="USER"/>
         <item screen="hunttech_JobCandidateReestr.browse" caption="Реестр кандидатов" icon="USERS"/>
         <item screen="hunttech_CandidateCVReestr.browse" caption="Резюме кандидатов" icon="FILE_TEXT"/>
