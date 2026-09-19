@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Полноэкранный CUBA Dashboard показывает воронку по подпискам текущего рекрутера. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd"
+        caption="Воронка найма">
+    <!-- Рабочая область следует общему dashboard-контракту HuntTech без Edit-sidebar. -->
+    <layout expand="hiringFunnelDashboard" stylename="edit-workspace recruiter-dashboard-root">
+        <!-- JSON-модель Dashboard Add-on подключает независимый RefreshableWidget воронки. -->
+        <dashboard:dashboard id="hiringFunnelDashboard"
+                             jsonPath="com/company/hunttech/web/screens/recruiterdashboard/recruiter-funnel-dashboard.json"
+                             timerDelay="60"
+                             width="100%"
+                             height="100%"/>
+    </layout>
+</window>
