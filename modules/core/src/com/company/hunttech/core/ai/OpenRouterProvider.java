@@ -37,10 +37,67 @@ public class OpenRouterProvider extends AbstractOpenAiCompatibleProvider {
     }
 
     @Override
+    public AiProviderResponse executeTextWithTokens(String prompt, String systemContext, String apiKey,
+                                                    String modelName, Map<String, Object> options) {
+        String resolvedModel = resolveModelName(modelName);
+        try {
+            return super.executeTextWithTokens(prompt, systemContext, apiKey, resolvedModel, options);
+        } catch (RuntimeException e) {
+            if (shouldFallbackToPaid(resolvedModel, e)) {
+                String paidModel = stripFreeSuffix(resolvedModel);
+                log.warn("Бесплатный суточный лимит OpenRouter для модели {} исчерпан (429). Автоматический переход на платную модель {}",
+                        resolvedModel, paidModel);
+                return super.executeTextWithTokens(prompt, systemContext, apiKey, paidModel, options);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public AiProviderResponse executeTextStreaming(String prompt, String systemContext, String apiKey,
+                                                    String modelName, Map<String, Object> options,
+                                                    com.company.hunttech.service.AiStreamListener listener) {
+        String resolvedModel = resolveModelName(modelName);
+        try {
+            return super.executeTextStreaming(prompt, systemContext, apiKey, resolvedModel, options, listener);
+        } catch (RuntimeException e) {
+            if (shouldFallbackToPaid(resolvedModel, e)) {
+                String paidModel = stripFreeSuffix(resolvedModel);
+                log.warn("Бесплатный суточный лимит OpenRouter для стриминга модели {} исчерпан (429). Автоматический переход на платную модель {}",
+                        resolvedModel, paidModel);
+                return super.executeTextStreaming(prompt, systemContext, apiKey, paidModel, options, listener);
+            }
+            throw e;
+        }
+    }
+
+    private boolean shouldFallbackToPaid(String modelName, Throwable e) {
+        if (modelName == null || !modelName.endsWith(":free")) {
+            return false;
+        }
+        String msg = e.getMessage();
+        if (msg == null) {
+            return false;
+        }
+        return msg.contains("429")
+                || msg.contains("Rate limit exceeded")
+                || msg.contains("free-models-per-day")
+                || msg.contains("free_tier");
+    }
+
+    private String stripFreeSuffix(String modelName) {
+        return modelName.substring(0, modelName.length() - ":free".length());
+    }
+
+    @Override
     protected String resolveModelName(String modelName) {
         String resolved = super.resolveModelName(modelName);
         if (resolved != null) {
             String trimmed = resolved.trim();
+            if ("nemotron-3-ultra-550b-a55b".equalsIgnoreCase(trimmed)
+                    || "nvidia/nemotron-3-ultra-550b-a55b".equalsIgnoreCase(trimmed)) {
+                return "nvidia/nemotron-3-ultra-550b-a55b";
+            }
             if ("nemotron-3-ultra-550b".equalsIgnoreCase(trimmed)
                     || "nemotron-3-ultra-550b:free".equalsIgnoreCase(trimmed)
                     || "nvidia/nemotron-3-ultra-550b".equalsIgnoreCase(trimmed)

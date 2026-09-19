@@ -65,6 +65,8 @@ public class AIProviderCatalogTest {
         assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nvidia/nemotron-3-ultra-550b"));
         assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nvidia/nemotron-3-ultra-550b:free"));
         assertEquals("nvidia/nemotron-3-ultra-550b-a55b:free", provider.resolveModelName("nemotron-3-ultra-550b-a55b:free"));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b", provider.resolveModelName("nemotron-3-ultra-550b-a55b"));
+        assertEquals("nvidia/nemotron-3-ultra-550b-a55b", provider.resolveModelName("nvidia/nemotron-3-ultra-550b-a55b"));
         assertEquals("anthropic/claude-3.5-sonnet", provider.resolveModelName("anthropic/claude-3.5-sonnet"));
     }
 }
