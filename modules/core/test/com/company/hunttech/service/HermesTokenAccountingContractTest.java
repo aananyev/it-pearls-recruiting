@@ -2,6 +2,7 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.config.HunttechHermesConfig;
 import com.company.hunttech.config.HunttechHermesManagerConfig;
+import com.company.hunttech.core.ai.AiSecretService;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.service.dto.HermesChatResponse;
@@ -39,14 +40,22 @@ public class HermesTokenAccountingContractTest {
     private Configuration configuration;
     private Security security;
 
+    private AiSecretService aiSecretService;
+
     @Before
     public void setUp() {
         userAiQuotaService = mock(UserAiQuotaService.class);
+        when(userAiQuotaService.isAdminModel(any())).thenAnswer(inv -> {
+            String o = inv.getArgument(0);
+            return o == null || !"USER".equalsIgnoreCase(o.trim());
+        });
+
         dataManager = mock(DataManager.class);
         metadata = mock(Metadata.class);
         userSessionSource = mock(UserSessionSource.class);
         configuration = mock(Configuration.class);
         security = mock(Security.class);
+        aiSecretService = mock(AiSecretService.class);
 
         currentUser = new ExtUser();
         currentUser.setId(UUID.randomUUID());
@@ -102,6 +111,7 @@ public class HermesTokenAccountingContractTest {
         ReflectionTestUtils.setField(operatorService, "userSessionSource", userSessionSource);
         ReflectionTestUtils.setField(operatorService, "configuration", configuration);
         ReflectionTestUtils.setField(operatorService, "security", security);
+        ReflectionTestUtils.setField(operatorService, "aiSecretService", aiSecretService);
 
         // Квота исчерпана
         doThrow(new DevelopmentException(QUOTA_EXHAUSTED_MSG))
@@ -118,6 +128,18 @@ public class HermesTokenAccountingContractTest {
         verify(userAiQuotaService).checkQuotaAvailable(eq(currentUser.getId()), anyInt());
         // Проверяем, что списание не происходило
         verify(userAiQuotaService, never()).recordTokenConsumption(any(UUID.class), anyInt());
+    }
+
+    @Test
+    public void testIsAdminModel_credentialOwnerClassification() {
+        assertFalse(userAiQuotaService.isAdminModel("USER"));
+        assertFalse(userAiQuotaService.isAdminModel("user"));
+        assertFalse(userAiQuotaService.isAdminModel(" USER "));
+
+        assertTrue(userAiQuotaService.isAdminModel("ADMIN"));
+        assertTrue(userAiQuotaService.isAdminModel("CONTAINER_DEFAULT"));
+        assertTrue(userAiQuotaService.isAdminModel(null));
+        assertTrue(userAiQuotaService.isAdminModel(""));
     }
 
     @Test

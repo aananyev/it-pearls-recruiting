@@ -117,6 +117,8 @@ public class LlmChatServiceBean implements LlmChatService {
     private InterviewSchedulingActionService interviewSchedulingActionService;
     @Inject
     private SmartOpenPositionIngestService smartOpenPositionIngestService;
+    @Inject
+    private UserAiQuotaService userAiQuotaService;
     @Resource(name = "scheduler")
     private TaskScheduler scheduler;
 
@@ -1130,7 +1132,10 @@ public class LlmChatServiceBean implements LlmChatService {
                 + safeInt(period.getPendingTokens());
         int extraTokens = safeInt(period.getExtraTokens());
         long totalAllowed = isUnlimited ? -1L : ((long) safeInt(period.getQuotaTokens()) + extraTokens);
-        if (!isUnlimited && totalAllowed != -1L
+        boolean hasPersonal = userAiQuotaService != null &&
+                (userAiQuotaService.hasActivePersonalOverride(user.getId(), FUNCTION_CODE)
+                        || userAiQuotaService.hasActivePersonalModel(user.getId()));
+        if (!hasPersonal && !isUnlimited && totalAllowed != -1L
                 && ((long) used + estimatedTokens > totalAllowed)) {
             throw new DevelopmentException("Закончились доступные токены ИИ. Пожалуйста, обратитесь к администратору системы для пополнения квоты.");
         }
@@ -1165,8 +1170,15 @@ public class LlmChatServiceBean implements LlmChatService {
         LlmChatQuotaReservation reservation = dataManager.load(LlmChatQuotaReservation.class)
                 .id(context.reservationId).view("llm-chat-quota-reservation-view").one();
         period.setReservedTokens(Math.max(0, safeInt(period.getReservedTokens()) - context.reservedTokens));
-        period.setConsumedTokens(safeInt(period.getConsumedTokens()) + consumed);
-        reservation.setSettledTokens(consumed);
+
+        boolean isUserCredential = result.getCredentialOwner() == AiCredentialOwner.USER;
+        if (!isUserCredential) {
+            period.setConsumedTokens(safeInt(period.getConsumedTokens()) + consumed);
+            reservation.setSettledTokens(consumed);
+        } else {
+            reservation.setSettledTokens(0);
+        }
+
         reservation.setProviderRequestId(result.getProviderRequestId());
         boolean cancelled = "CANCEL_REQUESTED".equals(reservation.getStatus());
         reservation.setStatus(cancelled ? "CANCELLED" : (result.getTotalTokens() == null ? "ESTIMATED" : "SETTLED"));

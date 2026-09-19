@@ -1253,7 +1253,11 @@ public class LlmChatScreen extends Screen {
 
     private boolean ensureQuotaAvailable() {
         if (userAiQuotaService != null && userSession != null && userSession.getUser() != null) {
-            if (!userAiQuotaService.isQuotaAvailable(userSession.getUser().getId(), 1)) {
+            java.util.UUID userId = userSession.getUser().getId();
+            if (userAiQuotaService.hasActivePersonalModel(userId)) {
+                return true;
+            }
+            if (!userAiQuotaService.isQuotaAvailable(userId, 1)) {
                 showQuotaExhaustedError();
                 return false;
             }

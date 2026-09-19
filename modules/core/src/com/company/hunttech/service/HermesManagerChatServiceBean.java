@@ -6,6 +6,9 @@ import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.Project;
 import com.company.hunttech.entity.ai.LlmChatConversation;
 import com.company.hunttech.entity.ai.LlmChatMessage;
+import com.company.hunttech.core.ai.AiSecretService;
+import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.service.dto.HermesChatMessage;
 import com.company.hunttech.service.dto.HermesChatResponse;
 import com.company.hunttech.service.dto.HermesConnectionStatus;
@@ -39,10 +42,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -104,6 +109,92 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
     private UserSessionSource userSessionSource;
     @Inject
     private UserAiQuotaService userAiQuotaService;
+    @Inject
+    private AiSecretService aiSecretService;
+
+    private static class HermesExecutionCandidate {
+        private final String source; // "USER", "ADMIN"
+        private final String providerCode;
+        private final String modelName;
+        private final String apiKey;
+        private final String baseUrl;
+
+        public HermesExecutionCandidate(String source, String providerCode, String modelName,
+                                        String apiKey, String baseUrl) {
+            this.source = source;
+            this.providerCode = providerCode;
+            this.modelName = modelName;
+            this.apiKey = apiKey;
+            this.baseUrl = baseUrl;
+        }
+
+        public String getSource() { return source; }
+        public String getProviderCode() { return providerCode; }
+        public String getModelName() { return modelName; }
+        public String getApiKey() { return apiKey; }
+        public String getBaseUrl() { return baseUrl; }
+    }
+
+    private List<HermesExecutionCandidate> resolveExecutionCandidates(ExtUser currentUser) {
+        List<HermesExecutionCandidate> candidates = new ArrayList<>();
+        if (currentUser != null) {
+            try {
+                List<UserAiConfiguration> userConfigs = dataManager.load(UserAiConfiguration.class)
+                        .query("select c from hunttech_UserAiConfiguration c " +
+                                "where c.user.id = :userId and (c.isActive is null or c.isActive = true) " +
+                                "order by c.isPrimary desc, c.priority desc")
+                        .parameter("userId", currentUser.getId())
+                        .list();
+                for (UserAiConfiguration uc : userConfigs) {
+                    String apiKey = resolveUserApiKey(uc);
+                    if (apiKey != null && !apiKey.trim().isEmpty() && uc.getProviderCode() != null) {
+                        candidates.add(new HermesExecutionCandidate("USER", uc.getProviderCode().trim(),
+                                uc.getDefaultModelName(), apiKey.trim(), null));
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Ошибка загрузки пользовательских AI-конфигураций для Hermes-operator: {}", e.getMessage());
+            }
+        }
+
+        try {
+            List<AdminAiConfiguration> adminConfigs = dataManager.load(AdminAiConfiguration.class)
+                    .query("select c from hunttech_AdminAiConfiguration c " +
+                            "where (c.active is null or c.active = true) " +
+                            "order by c.priority desc")
+                    .list();
+            for (AdminAiConfiguration ac : adminConfigs) {
+                String apiKey = null;
+                if (ac.getApiKeyEncrypted() != null && !ac.getApiKeyEncrypted().trim().isEmpty() && aiSecretService != null) {
+                    try {
+                        apiKey = aiSecretService.decrypt(ac.getApiKeyEncrypted());
+                    } catch (Exception e) {
+                        log.warn("Не удалось расшифровать ключ AdminAiConfiguration: {}", e.getMessage());
+                    }
+                }
+                if (apiKey != null && !apiKey.trim().isEmpty() && ac.getProviderCode() != null) {
+                    candidates.add(new HermesExecutionCandidate("ADMIN", ac.getProviderCode().trim(),
+                            ac.getDefaultModelName(), apiKey.trim(), ac.getBaseApiUrl()));
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Ошибка загрузки административных AI-конфигураций для Hermes-operator: {}", e.getMessage());
+        }
+
+        candidates.add(new HermesExecutionCandidate("ADMIN", null, null, null, null));
+        return candidates;
+    }
+
+    private String resolveUserApiKey(UserAiConfiguration configuration) {
+        if (configuration.getApiKeyEncrypted() != null && !configuration.getApiKeyEncrypted().trim().isEmpty() && aiSecretService != null) {
+            try {
+                return aiSecretService.decrypt(configuration.getApiKeyEncrypted());
+            } catch (Exception e) {
+                log.warn("Не удалось расшифровать ключ UserAiConfiguration: {}", e.getMessage());
+            }
+        }
+        return configuration.getApiKey();
+    }
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -293,7 +384,9 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         long startTime = System.currentTimeMillis();
         String prompt = buildManagerPrompt(messageText.trim());
         int estimatedPromptTokens = estimateTokens(prompt);
-        if (userAiQuotaService != null) {
+
+        boolean hasPersonalModel = userAiQuotaService != null && userAiQuotaService.hasActivePersonalModel(currentUser.getId());
+        if (!hasPersonalModel && userAiQuotaService != null) {
             try {
                 userAiQuotaService.checkQuotaAvailable(currentUser.getId(), estimatedPromptTokens);
             } catch (DevelopmentException de) {
@@ -303,7 +396,7 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
                         currentUser.getLogin(), quotaErrorMsg);
                 String model = getManagerConfig() != null ? getManagerConfig().getProfile() : "hrm-operator";
                 logAiCall(currentUser, conversationId, duration, "hermes", model,
-                        "USER", estimatedPromptTokens, 0, estimatedPromptTokens, BigDecimal.ZERO, "USD",
+                        "ADMIN", estimatedPromptTokens, 0, estimatedPromptTokens, BigDecimal.ZERO, "USD",
                         "ERROR", quotaErrorMsg);
                 return HermesChatResponse.error(conversationId, quotaErrorMsg, duration);
             }
@@ -342,21 +435,45 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         userMsg.setCreateTs(new Date());
         dataManager.commit(userMsg);
 
-        String rawResponseText;
-        try {
-            rawResponseText = executeHermesCli(prompt);
-        } catch (Exception e) {
+        List<HermesExecutionCandidate> candidates = resolveExecutionCandidates(currentUser);
+        String rawResponseText = null;
+        HermesExecutionCandidate successfulCandidate = null;
+        Exception lastException = null;
+
+        for (int i = 0; i < candidates.size(); i++) {
+            HermesExecutionCandidate candidate = candidates.get(i);
+            try {
+                if (userAiQuotaService != null && userAiQuotaService.isAdminModel(candidate.getSource())) {
+                    userAiQuotaService.checkQuotaAvailable(currentUser.getId(), estimatedPromptTokens);
+                }
+                rawResponseText = executeHermesCli(prompt, candidate);
+                successfulCandidate = candidate;
+                break;
+            } catch (DevelopmentException de) {
+                lastException = de;
+                log.warn("[MANAGER_HERMES] Лимит токенов исчерпан для кандидата [{}]: {}", candidate.getSource(), de.getMessage());
+                break;
+            } catch (Exception e) {
+                lastException = e;
+                log.warn("[MANAGER_HERMES] Сбой при вызове кандидата #{}/{} [{}]: {}", i + 1, candidates.size(), candidate.getSource(), e.getMessage());
+            }
+        }
+
+        if (rawResponseText == null) {
             long duration = System.currentTimeMillis() - startTime;
-            log.error("[MANAGER_HERMES] Сбой при вызове Hermes Agent", e);
-            String errorMsg = "Ошибка связи с Hermes-контуром управления: " + e.getMessage();
+            String errorMsg = lastException instanceof DevelopmentException
+                    ? lastException.getMessage()
+                    : "Ошибка связи с Hermes-контуром управления: " + (lastException != null ? lastException.getMessage() : "нет ответа");
             saveAssistantMessage(conversation, errorMsg, nextSeq + 1);
 
             int promptTokens = estimateTokens(prompt);
             String model = getManagerConfig() != null ? getManagerConfig().getProfile() : "hrm-operator";
             AiCostCalculator.CostResult costResult = AiCostCalculator.calculateCost(
                     "hermes", model, promptTokens, 0);
+            String failOwner = (candidates != null && !candidates.isEmpty() && "USER".equalsIgnoreCase(candidates.get(candidates.size() - 1).getSource()))
+                    ? "USER" : "ADMIN";
             logAiCall(currentUser, conversationId, duration, "hermes", model,
-                    "USER", promptTokens, 0, promptTokens, costResult.getCost(), costResult.getCurrency(),
+                    failOwner, promptTokens, 0, promptTokens, costResult.getCost(), costResult.getCurrency(),
                     "ERROR", errorMsg);
 
             return HermesChatResponse.error(conversationId, errorMsg, duration);
@@ -382,18 +499,23 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
         int completionTokens = estimateTokens(processedResponseText);
         int totalTokens = promptTokens + completionTokens;
 
-        String providerCode = "hermes";
-        String modelName = getManagerConfig() != null ? getManagerConfig().getProfile() : "hrm-operator";
+        String providerCode = (successfulCandidate != null && successfulCandidate.getProviderCode() != null)
+                ? successfulCandidate.getProviderCode() : "hermes";
+        String modelName = (successfulCandidate != null && successfulCandidate.getModelName() != null)
+                ? successfulCandidate.getModelName() : (getManagerConfig() != null ? getManagerConfig().getProfile() : "hrm-operator");
+        String credentialOwner = (successfulCandidate != null && "USER".equalsIgnoreCase(successfulCandidate.getSource()))
+                ? "USER" : "ADMIN";
+
         AiCostCalculator.CostResult costResult = AiCostCalculator.calculateCost(
                 providerCode, modelName, promptTokens, completionTokens);
 
-        // Списываем токены
+        // Списываем токены только если использовалась административная модель
         if (userAiQuotaService != null && totalTokens > 0) {
-            userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalTokens);
+            userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalTokens, credentialOwner);
         }
 
         // Логируем в AiCallLog
-        logAiCall(currentUser, conversationId, duration, providerCode, modelName, "USER",
+        logAiCall(currentUser, conversationId, duration, providerCode, modelName, credentialOwner,
                 promptTokens, completionTokens, totalTokens, costResult.getCost(), costResult.getCurrency(),
                 "SUCCESS", null);
 
@@ -646,14 +768,60 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
     }
 
     private String executeHermesCli(String prompt) throws Exception {
+        return executeHermesCli(prompt, null);
+    }
+
+    private String executeHermesCli(String prompt, HermesExecutionCandidate candidate) throws Exception {
         HunttechHermesManagerConfig config = getManagerConfig();
         List<String> command = new ArrayList<>();
+
+        Map<String, String> envVars = new HashMap<>();
+        if (candidate != null && candidate.getApiKey() != null && !candidate.getApiKey().isEmpty()) {
+            String provider = candidate.getProviderCode() != null
+                    ? candidate.getProviderCode().toLowerCase(Locale.ROOT) : "";
+            switch (provider) {
+                case "deepseek":
+                    envVars.put("DEEPSEEK_API_KEY", candidate.getApiKey());
+                    if (candidate.getBaseUrl() != null && !candidate.getBaseUrl().isEmpty()) {
+                        envVars.put("DEEPSEEK_BASE_URL", candidate.getBaseUrl());
+                    }
+                    break;
+                case "openai":
+                    envVars.put("OPENAI_API_KEY", candidate.getApiKey());
+                    if (candidate.getBaseUrl() != null && !candidate.getBaseUrl().isEmpty()) {
+                        envVars.put("OPENAI_BASE_URL", candidate.getBaseUrl());
+                    }
+                    break;
+                case "openrouter":
+                    envVars.put("OPENROUTER_API_KEY", candidate.getApiKey());
+                    break;
+                case "anthropic":
+                    envVars.put("ANTHROPIC_API_KEY", candidate.getApiKey());
+                    break;
+                default:
+                    String normalized = provider.toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9_]", "");
+                    if (!normalized.isEmpty()) {
+                        envVars.put(normalized + "_API_KEY", candidate.getApiKey());
+                    }
+                    break;
+            }
+        }
 
         List<String> hermesArgs = new ArrayList<>();
         hermesArgs.add("hermes");
         hermesArgs.add("-p");
         hermesArgs.add(config.getProfile());
         hermesArgs.add("chat");
+
+        if (candidate != null && candidate.getProviderCode() != null && !candidate.getProviderCode().isEmpty()) {
+            hermesArgs.add("--provider");
+            hermesArgs.add(candidate.getProviderCode());
+        }
+        if (candidate != null && candidate.getModelName() != null && !candidate.getModelName().isEmpty()) {
+            hermesArgs.add("-m");
+            hermesArgs.add(candidate.getModelName());
+        }
+
         hermesArgs.add("--query-file");
         hermesArgs.add("-");
         hermesArgs.add("--oneshot");
@@ -677,6 +845,9 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
 
             StringBuilder remoteCmd = new StringBuilder();
             remoteCmd.append("docker exec -i");
+            for (Map.Entry<String, String> entry : envVars.entrySet()) {
+                remoteCmd.append(" -e ").append(entry.getKey()).append("=").append(shellEscape(entry.getValue()));
+            }
             remoteCmd.append(" ").append(shellEscape(config.getContainerName()));
             for (String arg : hermesArgs) {
                 remoteCmd.append(" ").append(shellEscape(arg));
@@ -686,11 +857,19 @@ public class HermesManagerChatServiceBean implements HermesManagerChatService {
             command.add("docker");
             command.add("exec");
             command.add("-i");
+            for (Map.Entry<String, String> entry : envVars.entrySet()) {
+                command.add("-e");
+                command.add(entry.getKey() + "=" + entry.getValue());
+            }
             command.add(config.getContainerName());
             command.addAll(hermesArgs);
         }
 
-        log.info("[MANAGER_HERMES] Запуск процесса Hermes CLI (timeout={}s): {}", config.getTimeoutSeconds(), String.join(" ", command));
+        List<String> maskedCommand = new ArrayList<>();
+        for (String part : command) {
+            maskedCommand.add(part.replaceAll("(?i)(key=)('[^']*'|[^'\\s]+)", "$1***"));
+        }
+        log.info("[MANAGER_HERMES] Запуск процесса Hermes CLI (timeout={}s): {}", config.getTimeoutSeconds(), String.join(" ", maskedCommand));
 
         long cliStart = System.currentTimeMillis();
         ProcessBuilder pb = new ProcessBuilder(command);

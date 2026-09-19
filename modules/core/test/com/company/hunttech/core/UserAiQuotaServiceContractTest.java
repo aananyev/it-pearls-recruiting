@@ -324,4 +324,47 @@ public class UserAiQuotaServiceContractTest {
         assertTrue(llmChatScreen.contains("MSG_QUOTA_EXHAUSTED"));
         assertTrue(llmChatScreen.contains("userAiQuotaService.isQuotaAvailable"));
     }
+
+    /**
+     * Test 10 — Единый алгоритм тарификации: разделение персональных ("USER") и административных ("ADMIN") моделей
+     */
+    @Test
+    public void test10_unifiedTokenAccountingContracts() throws IOException {
+        String quotaInterface = source("modules/global/src/com/company/hunttech/service/UserAiQuotaService.java");
+        String quotaBean = source("modules/core/src/com/company/hunttech/service/UserAiQuotaServiceBean.java");
+        String hermesChat = source("modules/core/src/com/company/hunttech/service/HermesChatServiceBean.java");
+        String hermesManager = source("modules/core/src/com/company/hunttech/service/HermesManagerChatServiceBean.java");
+        String llmChat = source("modules/core/src/com/company/hunttech/service/LlmChatServiceBean.java");
+        String aiExecution = source("modules/core/src/com/company/hunttech/service/AiExecutionServiceBean.java");
+        String llmChatScreen = source("modules/web/src/com/company/hunttech/web/screens/llmchat/LlmChatScreen.java");
+
+        // 1. Сигнатуры методов расширенного учета квот
+        assertTrue(quotaInterface.contains("recordTokenConsumption(UUID userId, int tokensUsed, String credentialOwner)"));
+        assertTrue(quotaInterface.contains("isAdminModel(String credentialOwner)"));
+        assertTrue(quotaInterface.contains("hasActivePersonalModel(UUID userId)"));
+        assertTrue(quotaInterface.contains("hasActivePersonalOverride(UUID userId, String functionCode)"));
+
+        // 2. Реализация в бине: пропуск списания для USER и списание для ADMIN
+        assertTrue(quotaBean.contains("isAdminModel(credentialOwner)"));
+        assertTrue(quotaBean.contains("!isAdminModel(credentialOwner)"));
+        assertTrue(quotaBean.contains("Списание токенов из квоты не производится"));
+
+        // 3. Hermes-viewer: проверка candidate и вызов recordTokenConsumption с credentialOwner
+        assertTrue(hermesChat.contains("userAiQuotaService.isAdminModel(candidate.getSource())"));
+        assertTrue(hermesChat.contains("userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalTokens, credentialOwner)"));
+
+        // 4. Hermes-operator: проверка candidate и вызов recordTokenConsumption с credentialOwner
+        assertTrue(hermesManager.contains("userAiQuotaService.isAdminModel(candidate.getSource())"));
+        assertTrue(hermesManager.contains("userAiQuotaService.recordTokenConsumption(currentUser.getId(), totalTokens, credentialOwner)"));
+
+        // 5. Прямые вызовы LLM (AiExecutionServiceBean): учет с передачей credentialOwner
+        assertTrue(aiExecution.contains("userAiQuotaService.recordTokenConsumption(currentUser.getId(), result.getTotalTokens()"));
+
+        // 6. Локальный чат (LlmChatServiceBean): списание только для non-USER
+        assertTrue(llmChat.contains("result.getCredentialOwner() == AiCredentialOwner.USER"));
+        assertTrue(llmChat.contains("!isUserCredential"));
+
+        // 7. Экран чата (LlmChatScreen): проверка наличия личной модели перед блокировкой по квоте
+        assertTrue(llmChatScreen.contains("userAiQuotaService.hasActivePersonalModel(userId)"));
+    }
 }

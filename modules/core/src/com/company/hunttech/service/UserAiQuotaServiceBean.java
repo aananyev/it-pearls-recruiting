@@ -550,7 +550,24 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
     }
 
     @Override
+    public boolean isAdminModel(String credentialOwner) {
+        if (credentialOwner == null || credentialOwner.trim().isEmpty()) {
+            return true;
+        }
+        return !"USER".equalsIgnoreCase(credentialOwner.trim());
+    }
+
+    @Override
     public void recordTokenConsumption(UUID userId, int tokensUsed) {
+        recordTokenConsumption(userId, tokensUsed, "ADMIN");
+    }
+
+    @Override
+    public void recordTokenConsumption(UUID userId, int tokensUsed, String credentialOwner) {
+        if (!isAdminModel(credentialOwner)) {
+            log.debug("recordTokenConsumption: вызов выполнен через личную модель пользователя (owner={}). Списание токенов из квоты не производится.", credentialOwner);
+            return;
+        }
         if (userId == null || tokensUsed <= 0) {
             return;
         }
@@ -603,11 +620,53 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
                 tx.commit();
             }
 
-            log.info("Списано {} токенов пользователя {} (ID: {}) в периоде {}",
-                    tokensUsed, user.getLogin(), userId, periodStart);
+            log.info("Списано {} токенов пользователя {} (ID: {}) в периоде {} (модель: {})",
+                    tokensUsed, user.getLogin(), userId, periodStart, credentialOwner);
         } catch (Exception ex) {
             log.error("Сбой при списании токенов пользователя {} (ID: {}): {}",
                     user.getLogin(), userId, ex.getMessage(), ex);
+        }
+    }
+
+    @Override
+    public boolean hasActivePersonalModel(UUID userId) {
+        if (userId == null) {
+            return false;
+        }
+        try {
+            Long count = dataManager.loadValue(
+                    "select count(c) from hunttech_UserAiConfiguration c " +
+                            "where c.user.id = :userId and (c.isActive is null or c.isActive = true)",
+                    Long.class)
+                    .parameter("userId", userId)
+                    .optional()
+                    .orElse(0L);
+            return count != null && count > 0;
+        } catch (Exception e) {
+            log.warn("Ошибка проверки наличия персональных моделей пользователя: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean hasActivePersonalOverride(UUID userId, String functionCode) {
+        if (userId == null || functionCode == null) {
+            return false;
+        }
+        try {
+            Long count = dataManager.loadValue(
+                    "select count(o) from hunttech_UserAiFunctionOverride o " +
+                            "where o.user.id = :userId and o.aiFunction.code = :functionCode and o.enabled = true " +
+                            "and (o.userAiConfiguration.isActive is null or o.userAiConfiguration.isActive = true)",
+                    Long.class)
+                    .parameter("userId", userId)
+                    .parameter("functionCode", functionCode)
+                    .optional()
+                    .orElse(0L);
+            return count != null && count > 0;
+        } catch (Exception e) {
+            log.warn("Ошибка проверки персонального оверрайда функции {}: {}", functionCode, e.getMessage());
+            return false;
         }
     }
 }

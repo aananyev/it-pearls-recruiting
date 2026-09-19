@@ -95,4 +95,42 @@ public interface UserAiQuotaService {
      * @param tokensUsed количество фактически израсходованных токенов (prompt + completion)
      */
     void recordTokenConsumption(UUID userId, int tokensUsed);
+
+    /**
+     * Проверяет, является ли модель административной (ADMIN / CONTAINER_DEFAULT).
+     * Если true - модель корпоративная/административная и её вызовы тарифицируются в квоте пользователя.
+     * Если false (USER) - модель личная, вызовы регистрируются в статистике (AiCallLog), но не списываются из квоты.
+     *
+     * @param credentialOwner владелец учетных данных ("ADMIN", "USER", etc.)
+     * @return true если модель административная
+     */
+    boolean isAdminModel(String credentialOwner);
+
+    /**
+     * Списывает фактически израсходованные токены пользователя в счет квоты текущего месяца,
+     * ТОЛЬКО если использовалась административная модель (credentialOwner != "USER").
+     * Если использовалась личная модель пользователя (credentialOwner == "USER"), списание пропускается.
+     *
+     * @param userId идентификатор пользователя
+     * @param tokensUsed количество фактически израсходованных токенов (prompt + completion)
+     * @param credentialOwner владелец модели ("ADMIN", "USER", etc.)
+     */
+    void recordTokenConsumption(UUID userId, int tokensUsed, String credentialOwner);
+
+    /**
+     * Проверяет, настроены ли у пользователя активные личные модели ИИ (UserAiConfiguration).
+     *
+     * @param userId идентификатор пользователя
+     * @return true если у пользователя есть активная конфигурация личной модели
+     */
+    boolean hasActivePersonalModel(UUID userId);
+
+    /**
+     * Проверяет, настроен ли у пользователя активный личный оверрайд (UserAiFunctionOverride) для конкретной AI-функции.
+     *
+     * @param userId идентификатор пользователя
+     * @param functionCode код AI-функции
+     * @return true если для функции настроено и включено личное замещение
+     */
+    boolean hasActivePersonalOverride(UUID userId, String functionCode);
 }
