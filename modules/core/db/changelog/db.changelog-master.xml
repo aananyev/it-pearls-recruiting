@@ -262,4 +262,12 @@
     <include file="260919-1-addCandidateVacancyMatchAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Candidate Skills Enrichment: таблица аудита и состояний анализа HUNTTECH_CANDIDATE_CV_SKILL_ANALYSIS -->
+    <include file="260919-2-createCandidateCvSkillAnalysisTable.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Candidate Skills Enrichment: Seed AI-функции SKILLS_EXTRACT_BACKGROUND (FREE_ONLY) -->
+    <include file="260919-3-seedSkillsExtractBackgroundAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

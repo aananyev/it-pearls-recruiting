@@ -97,17 +97,27 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
         return analyze(sourceText, LEVEL_TERTIARY);
     }
 
-    private SkillAnalysisResult analyze(String sourceText, String skillLevel) {
+    @Override
+    public SkillAnalysisResult analyzeWithFunction(String sourceText, String skillLevel, String functionCode, boolean allowDictionaryFallback) {
         String normalizedText = validateAndNormalize(sourceText);
+        String effectiveFunctionCode = functionCode != null && !functionCode.trim().isEmpty()
+                ? functionCode.trim() : FUNCTION_SKILLS_EXTRACT;
         try {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put(PARAM_SOURCE_TEXT, normalizedText);
             context.put(PARAM_SKILL_LEVEL, skillLevel);
-            context.put("callerSource", "SkillAnalysisService (" + skillLevel + ")");
-            AiExecutionResult execution = aiExecutionService.executeText(FUNCTION_SKILLS_EXTRACT, context);
+            context.put("callerSource", "SkillAnalysisService (" + skillLevel + " / " + effectiveFunctionCode + ")");
+            AiExecutionResult execution = aiExecutionService.executeText(effectiveFunctionCode, context);
             List<SkillTree> matched = matchAgainstDictionary(parseSkillNames(execution.getText()));
             return SkillAnalysisResult.of(matched, execution);
         } catch (RuntimeException e) {
+            if (!allowDictionaryFallback) {
+                // В фоновом режиме (FREE_ONLY) падение AI нельзя маскировать словарным поиском —
+                // воркер должен корректно зафиксировать ошибку и запланировать RETRY с backoff
+                log.warn("AI-анализ навыков (функция {}, уровень {}) завершился ошибкой без fallback: {}",
+                        effectiveFunctionCode, skillLevel, e.toString());
+                throw e;
+            }
             // AI недоступен (функция не активна, нет credentials, ошибка провайдера) —
             // бесшовный классический fallback: прямой словарный поиск в тексте.
             // Метаданные AI-выполнения не заполняются — экран не показывает
@@ -119,6 +129,10 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
                             SkillNameMatcher.matchText(loadDictionary(), normalizedText)),
                     null);
         }
+    }
+
+    private SkillAnalysisResult analyze(String sourceText, String skillLevel) {
+        return analyzeWithFunction(sourceText, skillLevel, FUNCTION_SKILLS_EXTRACT, true);
     }
 
     /**

@@ -44,6 +44,15 @@ public class CandidateSkill extends StandardEntity {
     @Column(name = "PRIORITY")
     protected Integer priority;
 
+    /** Источник определения навыка (AI или MANUAL) */
+    @Column(name = "SOURCE_TYPE", length = 16)
+    protected String sourceType;
+
+    /** Резюме, из которого был извлечен навык */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SOURCE_CV_ID")
+    protected CandidateCV sourceCv;
+
     public JobCandidate getCandidate() {
         return candidate;
     }
@@ -66,5 +75,21 @@ public class CandidateSkill extends StandardEntity {
 
     public void setPriority(CandidateSkillPriority priority) {
         this.priority = priority == null ? null : priority.getId();
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public CandidateCV getSourceCv() {
+        return sourceCv;
+    }
+
+    public void setSourceCv(CandidateCV sourceCv) {
+        this.sourceCv = sourceCv;
     }
 }

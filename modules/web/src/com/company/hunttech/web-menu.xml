@@ -131,6 +131,8 @@
               caption="mainMsg://menu_config.hunttech_VacancyPromptTemplate.browse" icon="FILE_TEXT_O"/>
         <item screen="hunttech_AiCallLog.browse"
               caption="mainMsg://menu_config.hunttech_AiCallLog.browse" icon="HISTORY"/>
+        <item screen="hunttech_CandidateSkillsEnrichmentMonitoring"
+              caption="mainMsg://menu_config.hunttech_CandidateSkillsEnrichmentMonitoring" icon="MAGIC"/>
         <item screen="hunttech_LlmChatQuotaReconciliation.browse"
               caption="mainMsg://menu_config.hunttech_LlmChatQuotaReconciliation.browse" icon="CHECK"/>
     </menu>

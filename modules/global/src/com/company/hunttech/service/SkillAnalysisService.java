@@ -52,6 +52,11 @@ public interface SkillAnalysisService {
     String FUNCTION_SKILLS_EXTRACT = "SKILLS_EXTRACT";
 
     /**
+     * Стабильный код фоновой AI-функции извлечения навыков (FREE_ONLY).
+     */
+    String FUNCTION_SKILLS_EXTRACT_BACKGROUND = "SKILLS_EXTRACT_BACKGROUND";
+
+    /**
      * Параметр prompt-шаблона: анализируемый текст.
      */
     String PARAM_SOURCE_TEXT = "sourceText";
@@ -96,4 +101,15 @@ public interface SkillAnalysisService {
      * (редко встречающиеся, не ключевые). Если третьестепенных навыков нет — пустой список.
      */
     SkillAnalysisResult analyzeTertiary(String sourceText);
+
+    /**
+     * Анализирует текст с возможностью выбора функции AI и управления fallback.
+     *
+     * @param sourceText               исходный текст
+     * @param skillLevel               уровень навыков (ALL, MAIN, SECONDARY, TERTIARY)
+     * @param functionCode             код функции AI (например SKILLS_EXTRACT или SKILLS_EXTRACT_BACKGROUND)
+     * @param allowDictionaryFallback  разрешен ли fallback на словарный поиск при ошибке AI (в фоне false)
+     * @return результат анализа
+     */
+    SkillAnalysisResult analyzeWithFunction(String sourceText, String skillLevel, String functionCode, boolean allowDictionaryFallback);
 }

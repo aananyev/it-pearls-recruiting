@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://monitoringCaption"
+        messagesPack="com.company.hunttech.web.screens.candidateskillsenrichment">
+    <data>
+        <collection id="analysesDc"
+                    class="com.company.hunttech.entity.CandidateCvSkillAnalysis"
+                    view="candidateCvSkillAnalysis-browse-view">
+            <loader id="analysesDl">
+                <query>
+                    <![CDATA[select e from hunttech_CandidateCvSkillAnalysis e order by e.processingStartedAt desc nulls last, e.createTs desc]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="false"/>
+        <timer id="refreshTimer" delay="60000" repeating="true"/>
+    </facets>
+    <layout stylename="ai-dashboard-root" expand="mainScroll" spacing="true">
+        <scrollBox id="mainScroll" width="100%" height="100%" spacing="true" stylename="ai-scrollbox">
+
+            <!-- Верхний баннер и панель управления воркером -->
+            <vbox id="headerCard" width="100%" spacing="true" stylename="ai-header-card card-surface">
+                <hbox width="100%" spacing="true" alignment="MIDDLE_LEFT">
+                    <vbox spacing="false" width="100%" expand="monitoringSubtitle">
+                        <hbox spacing="true" alignment="MIDDLE_LEFT">
+                            <label value="msg://monitoringTitle" stylename="ai-page-title bold"/>
+                            <label id="workerStatusBadge" value="ВЫКЛЮЧЕН" stylename="ai-chip-badge"/>
+                            <label id="workerRunStateBadge" value="ОСТАНОВЛЕН" stylename="ai-chip-badge badge-admin"/>
+                        </hbox>
+                        <label id="monitoringSubtitle" value="msg://monitoringSubtitleText" stylename="ai-page-subtitle"/>
+                    </vbox>
+                    <hbox spacing="true" alignment="MIDDLE_RIGHT">
+                        <button id="startWorkerBtn" caption="msg://btnStartWorker" icon="PLAY" stylename="primary ai-action-btn"/>
+                        <button id="stopWorkerBtn" caption="msg://btnStopWorker" icon="STOP" stylename="danger ai-action-btn"/>
+                        <button id="runOnceBtn" caption="msg://btnRunOnce" icon="STEP_FORWARD" stylename="ai-secondary-btn"/>
+                        <button id="refreshKpiBtn" caption="msg://btnRefresh" icon="REFRESH" stylename="ai-secondary-btn"/>
+                    </hbox>
+                </hbox>
+            </vbox>
+
+            <!-- Сетка карточек KPI -->
+            <hbox id="kpiPanel" width="100%" spacing="true" stylename="ai-kpi-grid">
+                <!-- Карточка 1: Прогресс базы резюме -->
+                <vbox id="progressCard" width="100%" stylename="ai-kpi-card kpi-blue" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://kpiProgressTitle" stylename="kpi-title" width="100%"/>
+                        <label value="📊" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="kpiProgressValueLabel" value="0 из 0 CV (0%)" stylename="kpi-value"/>
+                    <progressBar id="kpiProgressBar" width="100%" stylename="ai-progress-bar"/>
+                    <label id="kpiProgressSubLabel" value="Ожидает анализа: 0" stylename="kpi-sub"/>
+                </vbox>
+
+                <!-- Карточка 2: Скорость и расчетный ETA -->
+                <vbox id="speedCard" width="100%" stylename="ai-kpi-card kpi-purple" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://kpiSpeedTitle" stylename="kpi-title" width="100%"/>
+                        <label value="⚡" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="kpiSpeedValueLabel" value="0 CV/час" stylename="kpi-value"/>
+                    <label id="kpiEtaSubLabel" value="Ориентировочный ETA: расчет..." stylename="kpi-sub"/>
+                </vbox>
+
+                <!-- Карточка 3: Динамика обработки (сегодня / 24ч / 7д) -->
+                <vbox id="volumeCard" width="100%" stylename="ai-kpi-card kpi-green" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://kpiVolumeTitle" stylename="kpi-title" width="100%"/>
+                        <label value="📈" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="kpiProcessedTodayLabel" value="Сегодня: +0 CV" stylename="kpi-value"/>
+                    <label id="kpiVolumeSubLabel" value="За 24ч: 0 | За 7 дней: 0" stylename="kpi-sub"/>
+                </vbox>
+
+                <!-- Карточка 4: Ошибки, ретраи и устаревшие -->
+                <vbox id="errorsCard" width="100%" stylename="ai-kpi-card kpi-orange" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://kpiErrorsTitle" stylename="kpi-title" width="100%"/>
+                        <label value="⚠️" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="kpiErrorsValueLabel" value="Ошибок: 0 | В повторе: 0" stylename="kpi-value"/>
+                    <label id="kpiStaleSubLabel" value="Устарело (STALE): 0" stylename="kpi-sub"/>
+                </vbox>
+
+                <!-- Карточка 5: AI-токены за сегодня -->
+                <vbox id="tokensCard" width="100%" stylename="ai-kpi-card" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://kpiTokensTitle" stylename="kpi-title" width="100%"/>
+                        <label value="🤖" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="kpiTokensValueLabel" value="0 токенов" stylename="kpi-value"/>
+                    <label id="kpiTokensSubLabel" value="Запросов сегодня: 0" stylename="kpi-sub"/>
+                </vbox>
+            </hbox>
+
+            <!-- Панель фильтров истории -->
+            <vbox id="tableSectionCard" width="100%" spacing="true" stylename="card-surface" expand="analysesTable">
+                <hbox width="100%" spacing="true" alignment="MIDDLE_LEFT">
+                    <label value="msg://historyTableTitle" stylename="h2 bold" width="100%"/>
+                    <hbox spacing="true" alignment="MIDDLE_RIGHT">
+                        <radioButtonGroup id="statusFilterGroup" orientation="horizontal"/>
+                        <textField id="candidateSearchField" placeholder="msg://searchCandidatePlaceholder" width="220px"/>
+                    </hbox>
+                </hbox>
+
+                <!-- Командный тулбар таблицы -->
+                <buttonsPanel id="buttonsPanel" alwaysVisible="true">
+                    <button id="viewDeltaBtn" caption="msg://btnViewDelta" icon="EYE" stylename="primary"/>
+                    <button id="retryErrorBtn" caption="msg://btnRetry" icon="REFRESH"/>
+                    <button id="openCandidateBtn" caption="msg://btnOpenCandidate" icon="USER"/>
+                    <button id="refreshTableBtn" caption="msg://btnRefreshTable" icon="REPEAT"/>
+                </buttonsPanel>
+
+                <!-- Таблица аудита и истории -->
+                <dataGrid id="analysesTable"
+                          width="100%"
+                          height="420px"
+                          dataContainer="analysesDc"
+                          selectionMode="SINGLE">
+                    <columns>
+                        <column id="processingStartedAt" property="processingStartedAt" caption="msg://colStartedAt" width="150px"/>
+                        <column id="candidate" property="candidate.fullName" caption="msg://colCandidate" width="220px"/>
+                        <column id="candidateCvDate" caption="msg://colCvDate" width="110px"/>
+                        <column id="status" caption="msg://colStatus" width="130px"/>
+                        <column id="skillsFoundCount" property="skillsFoundCount" caption="msg://colFound" width="90px"/>
+                        <column id="skillsAddedCount" property="skillsAddedCount" caption="msg://colAdded" width="90px"/>
+                        <column id="skillsUpdatedCount" property="skillsUpdatedCount" caption="msg://colUpdated" width="90px"/>
+                        <column id="providerAndModel" caption="msg://colModel" width="180px"/>
+                        <column id="totalTokens" property="totalTokens" caption="msg://colTokens" width="90px"/>
+                        <column id="durationMs" property="durationMs" caption="msg://colDuration" width="90px"/>
+                        <column id="retryCount" property="retryCount" caption="msg://colRetry" width="80px"/>
+                        <column id="lastError" property="lastError" caption="msg://colError" minimumWidth="200px"/>
+                    </columns>
+                    <rowsCount/>
+                </dataGrid>
+            </vbox>
+
+        </scrollBox>
+    </layout>
+</window>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://dialogCaption"
+        messagesPack="com.company.hunttech.web.screens.candidateskillsenrichment">
+    <layout width="780px" height="600px" spacing="true" expand="scrollArea">
+        <vbox id="infoBanner" spacing="false" width="100%" stylename="card-surface" margin="false,false,true,false">
+            <label id="candidateNameLabel" stylename="h2 bold"/>
+            <label id="metaInfoLabel" stylename="subheading"/>
+        </vbox>
+
+        <scrollBox id="scrollArea" width="100%" height="100%" spacing="true">
+            <!-- Секция ADDED -->
+            <vbox id="addedBox" width="100%" spacing="true" stylename="card-surface">
+                <hbox width="100%" alignment="MIDDLE_LEFT">
+                    <label value="msg://addedTitle" stylename="bold h3" width="100%"/>
+                    <label id="addedBadge" value="0" stylename="ai-chip-badge badge-green"/>
+                </hbox>
+                <flowBox id="addedFlow" width="100%" spacing="true"/>
+            </vbox>
+
+            <!-- Секция UPDATED -->
+            <vbox id="updatedBox" width="100%" spacing="true" stylename="card-surface">
+                <hbox width="100%" alignment="MIDDLE_LEFT">
+                    <label value="msg://updatedTitle" stylename="bold h3" width="100%"/>
+                    <label id="updatedBadge" value="0" stylename="ai-chip-badge badge-blue"/>
+                </hbox>
+                <flowBox id="updatedFlow" width="100%" spacing="true"/>
+            </vbox>
+
+            <!-- Секция UNCHANGED -->
+            <vbox id="unchangedBox" width="100%" spacing="true" stylename="card-surface">
+                <hbox width="100%" alignment="MIDDLE_LEFT">
+                    <label value="msg://unchangedTitle" stylename="bold h3" width="100%"/>
+                    <label id="unchangedBadge" value="0" stylename="ai-chip-badge"/>
+                </hbox>
+                <flowBox id="unchangedFlow" width="100%" spacing="true"/>
+            </vbox>
+
+            <!-- Секция SKIPPED / Ошибки -->
+            <vbox id="skippedBox" width="100%" spacing="true" stylename="card-surface">
+                <hbox width="100%" alignment="MIDDLE_LEFT">
+                    <label value="msg://skippedTitle" stylename="bold h3" width="100%"/>
+                    <label id="skippedBadge" value="0" stylename="ai-chip-badge badge-orange"/>
+                </hbox>
+                <flowBox id="skippedFlow" width="100%" spacing="true"/>
+            </vbox>
+        </scrollBox>
+
+        <hbox width="100%" spacing="true" alignment="MIDDLE_RIGHT">
+            <button id="closeBtn" caption="msg://btnClose" icon="CLOSE" stylename="primary"/>
+        </hbox>
+    </layout>
+</window>

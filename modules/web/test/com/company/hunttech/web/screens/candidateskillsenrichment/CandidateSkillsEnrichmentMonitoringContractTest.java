@@ -1,0 +1,109 @@
+package com.company.hunttech.web.screens.candidateskillsenrichment;
+
+import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.nio.file.Files;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Контрактные тесты экрана мониторинга фонового определения навыков.
+ */
+class CandidateSkillsEnrichmentMonitoringContractTest {
+
+    private File resolveFile(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            return file;
+        }
+        if (path.startsWith("modules/web/")) {
+            File subFile = new File(path.substring("modules/web/".length()));
+            if (subFile.exists()) {
+                return subFile;
+            }
+        }
+        return file;
+    }
+
+    private Document parseXml(File file) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(false);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.parse(file);
+    }
+
+    @Test
+    void testMonitoringScreenXmlStructure() throws Exception {
+        File xmlFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/candidateskillsenrichment/candidate-skills-enrichment-monitoring.xml");
+        assertTrue(xmlFile.exists(), "candidate-skills-enrichment-monitoring.xml должен существовать");
+
+        Document doc = parseXml(xmlFile);
+
+        // 1. Проверка наличия DataGrid таблицы истории
+        NodeList tables = doc.getElementsByTagName("dataGrid");
+        boolean tableFound = false;
+        for (int i = 0; i < tables.getLength(); i++) {
+            Element el = (Element) tables.item(i);
+            if ("analysesTable".equals(el.getAttribute("id"))) {
+                tableFound = true;
+                assertEquals("analysesDc", el.getAttribute("dataContainer"));
+                break;
+            }
+        }
+        assertTrue(tableFound, "analysesTable должен присутствовать с привязкой к analysesDc");
+
+        // 2. Проверка KPI панели
+        NodeList hboxes = doc.getElementsByTagName("hbox");
+        boolean kpiFound = false;
+        for (int i = 0; i < hboxes.getLength(); i++) {
+            Element el = (Element) hboxes.item(i);
+            if ("kpiPanel".equals(el.getAttribute("id"))) {
+                kpiFound = true;
+                break;
+            }
+        }
+        assertTrue(kpiFound, "kpiPanel должен присутствовать в XML");
+
+        // 3. Проверка кнопок управления воркером
+        NodeList buttons = doc.getElementsByTagName("button");
+        boolean startBtn = false, stopBtn = false, runOnceBtn = false;
+        for (int i = 0; i < buttons.getLength(); i++) {
+            Element el = (Element) buttons.item(i);
+            String id = el.getAttribute("id");
+            if ("startWorkerBtn".equals(id)) startBtn = true;
+            if ("stopWorkerBtn".equals(id)) stopBtn = true;
+            if ("runOnceBtn".equals(id)) runOnceBtn = true;
+        }
+        assertTrue(startBtn, "startWorkerBtn должен присутствовать");
+        assertTrue(stopBtn, "stopWorkerBtn должен присутствовать");
+        assertTrue(runOnceBtn, "runOnceBtn должен присутствовать");
+    }
+
+    @Test
+    void testDeltaDialogXmlStructure() throws Exception {
+        File xmlFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/candidateskillsenrichment/candidate-skill-delta-dialog.xml");
+        assertTrue(xmlFile.exists(), "candidate-skill-delta-dialog.xml должен существовать");
+
+        Document doc = parseXml(xmlFile);
+        NodeList flowBoxes = doc.getElementsByTagName("flowBox");
+        boolean added = false, updated = false, unchanged = false, skipped = false;
+        for (int i = 0; i < flowBoxes.getLength(); i++) {
+            Element el = (Element) flowBoxes.item(i);
+            String id = el.getAttribute("id");
+            if ("addedFlow".equals(id)) added = true;
+            if ("updatedFlow".equals(id)) updated = true;
+            if ("unchangedFlow".equals(id)) unchanged = true;
+            if ("skippedFlow".equals(id)) skipped = true;
+        }
+        assertTrue(added, "addedFlow должен присутствовать");
+        assertTrue(updated, "updatedFlow должен присутствовать");
+        assertTrue(unchanged, "unchangedFlow должен присутствовать");
+        assertTrue(skipped, "skippedFlow должен присутствовать");
+    }
+}
