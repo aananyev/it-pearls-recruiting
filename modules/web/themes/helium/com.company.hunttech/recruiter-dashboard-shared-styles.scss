@@ -246,4 +246,284 @@
       border-radius: 7px !important;
     }
   }
+
+  // Операционные dashboard-апплеты рекрутера используют только локальный namespace.
+  .recruiter-dashboard-root .recruiter-dashboard-widget {
+    min-width: 0 !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-dashboard-subtitle {
+    margin: -4px 0 4px;
+    color: $recruiter-dashboard-muted !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kpi-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .recruiter-dashboard-root .recruiter-kpi-card {
+    box-sizing: border-box;
+    min-width: 150px;
+    flex: 1 1 150px;
+    padding: 12px 14px;
+    background: mix($v-app-background-color, $v-panel-background-color, 32%);
+    border: 1px solid $recruiter-dashboard-subtle-border;
+    border-left: 3px solid $recruiter-dashboard-accent;
+    border-radius: 8px;
+  }
+
+  .recruiter-dashboard-root .recruiter-kpi-value {
+    color: mix($v-font-color, $v-panel-background-color, 94%) !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    line-height: 28px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kpi-caption {
+    margin-top: 2px;
+    color: $recruiter-dashboard-muted !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kpi-blue { border-left-color: #3b82f6; }
+  .recruiter-dashboard-root .recruiter-kpi-violet { border-left-color: #8b5cf6; }
+  .recruiter-dashboard-root .recruiter-kpi-green { border-left-color: #22a06b; }
+  .recruiter-dashboard-root .recruiter-kpi-muted { border-left-color: rgba($v-font-color, 0.34); }
+
+  .recruiter-dashboard-root .recruiter-dashboard-inner-card {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    padding: 14px 16px;
+    background: mix($v-app-background-color, $v-panel-background-color, 24%);
+    border: 1px solid $recruiter-dashboard-subtle-border;
+    border-radius: 8px;
+  }
+
+  .recruiter-dashboard-root .recruiter-dashboard-section-title {
+    color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 20px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-dashboard-empty {
+    box-sizing: border-box;
+    width: 100% !important;
+    padding: 16px;
+    color: $recruiter-dashboard-muted !important;
+    text-align: center;
+    background: mix($v-app-background-color, $v-panel-background-color, 28%);
+    border: 1px dashed $recruiter-dashboard-border;
+    border-radius: 7px;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-board {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+    width: 100% !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-column {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    padding: 10px;
+    background: mix($v-app-background-color, $v-panel-background-color, 38%);
+    border: 1px solid $recruiter-dashboard-subtle-border;
+    border-top: 3px solid rgba($v-font-color, 0.28);
+    border-radius: 8px;
+  }
+
+  .recruiter-dashboard-root .recruiter-stage-new { border-top-color: #64748b; }
+  .recruiter-dashboard-root .recruiter-stage-recruiter { border-top-color: #3b82f6; }
+  .recruiter-dashboard-root .recruiter-stage-client { border-top-color: #f59e0b; }
+  .recruiter-dashboard-root .recruiter-stage-client-interview { border-top-color: #8b5cf6; }
+  .recruiter-dashboard-root .recruiter-stage-offer { border-top-color: #22a06b; }
+  .recruiter-dashboard-root .recruiter-stage-outcome { border-top-color: #ef4444; }
+  .recruiter-dashboard-root .recruiter-stage-reserve { border-top-color: $recruiter-dashboard-accent; }
+
+  .recruiter-dashboard-root .recruiter-kanban-column-header {
+    box-sizing: border-box;
+    min-height: 32px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid $recruiter-dashboard-subtle-border;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-column-title {
+    color: mix($v-font-color, $v-panel-background-color, 92%) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-counter {
+    box-sizing: border-box;
+    min-width: 26px;
+    padding: 2px 7px;
+    color: mix($v-font-color, $v-panel-background-color, 92%) !important;
+    text-align: center;
+    background: rgba($recruiter-dashboard-accent, 0.14);
+    border-radius: 12px;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-card {
+    box-sizing: border-box;
+    padding: 10px 12px;
+    background: $v-panel-background-color;
+    border: 1px solid $recruiter-dashboard-subtle-border;
+    border-radius: 7px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  }
+
+  .recruiter-dashboard-root .recruiter-candidate-link {
+    color: mix($v-font-color, $v-panel-background-color, 96%) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-vacancy,
+  .recruiter-dashboard-root .recruiter-kanban-interaction,
+  .recruiter-dashboard-root .recruiter-kanban-date {
+    margin-top: 3px;
+    color: $recruiter-dashboard-muted !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-interaction {
+    color: mix($recruiter-dashboard-accent, $v-font-color, 58%) !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-content {
+    align-items: stretch;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-row {
+    padding: 3px 0;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-caption {
+    color: mix($v-font-color, $v-panel-background-color, 84%) !important;
+    font-size: 12px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-value {
+    color: mix($v-font-color, $v-panel-background-color, 94%) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-track {
+    box-sizing: border-box;
+    height: 10px;
+    margin-top: 4px;
+    background: rgba($v-font-color, 0.08);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-bar {
+    display: block;
+    min-height: 10px;
+    background: $recruiter-dashboard-accent;
+    border-radius: 5px;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-bar.recruiter-stage-new { background: #64748b; }
+  .recruiter-dashboard-root .recruiter-funnel-bar.recruiter-stage-recruiter { background: #3b82f6; }
+  .recruiter-dashboard-root .recruiter-funnel-bar.recruiter-stage-client { background: #f59e0b; }
+  .recruiter-dashboard-root .recruiter-funnel-bar.recruiter-stage-client-interview { background: #8b5cf6; }
+  .recruiter-dashboard-root .recruiter-funnel-bar.recruiter-stage-offer { background: #22a06b; }
+  .recruiter-dashboard-root .recruiter-funnel-bar.recruiter-stage-outcome { background: #ef4444; }
+
+  .recruiter-dashboard-root .recruiter-funnel-table-header,
+  .recruiter-dashboard-root .recruiter-reserve-table-header {
+    padding: 8px 10px;
+    background: mix($v-app-background-color, $v-panel-background-color, 55%);
+    border-bottom: 1px solid $recruiter-dashboard-border;
+    border-radius: 6px 6px 0 0;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-vacancy-row,
+  .recruiter-dashboard-root .recruiter-reserve-row {
+    box-sizing: border-box;
+    min-height: 42px;
+    padding: 9px 10px;
+    border-bottom: 1px solid $recruiter-dashboard-subtle-border;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-vacancy-row:hover,
+  .recruiter-dashboard-root .recruiter-reserve-row:hover {
+    background: rgba($recruiter-dashboard-accent, 0.06);
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-cell,
+  .recruiter-dashboard-root .recruiter-reserve-cell,
+  .recruiter-dashboard-root .recruiter-reserve-header-cell {
+    min-width: 0 !important;
+    color: $recruiter-dashboard-muted !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-funnel-main-cell {
+    color: mix($v-font-color, $v-panel-background-color, 94%) !important;
+    font-weight: 700 !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-reserve-header-cell {
+    color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+    font-weight: 700 !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-reserve-match {
+    box-sizing: border-box;
+    padding: 3px 7px;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-align: center;
+    border-radius: 12px;
+  }
+
+  .recruiter-dashboard-root .recruiter-reserve-match-positive {
+    color: #18794e !important;
+    background: rgba(34, 160, 107, 0.12);
+  }
+
+  .recruiter-dashboard-root .recruiter-reserve-match-empty {
+    color: $recruiter-dashboard-muted !important;
+    background: rgba($v-font-color, 0.06);
+  }
+
+  @media (max-width: 1366px) {
+    .recruiter-dashboard-root .recruiter-kanban-board {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .recruiter-dashboard-root .recruiter-funnel-content {
+      display: block !important;
+    }
+
+    .recruiter-dashboard-root .recruiter-funnel-content > .v-slot {
+      width: 100% !important;
+      margin-bottom: 10px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .recruiter-dashboard-root .recruiter-kanban-board {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recruiter-dashboard-root .recruiter-kpi-card {
+      min-width: calc(50% - 8px);
+    }
+  }
+
 }
