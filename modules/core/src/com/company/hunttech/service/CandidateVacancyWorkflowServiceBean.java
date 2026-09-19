@@ -83,7 +83,7 @@ public class CandidateVacancyWorkflowServiceBean implements CandidateVacancyWork
                 .query("select e from hunttech_IteractionList e where e.candidate.id = :candId and e.vacancy.id = :vacId order by e.dateIteraction desc")
                 .parameter("candId", candidateId)
                 .parameter("vacId", vacancyId)
-                .view("iteractionList-full-view")
+                .view("iteractionList-view")
                 .list();
 
         if (!existingList.isEmpty()) {
@@ -158,7 +158,7 @@ public class CandidateVacancyWorkflowServiceBean implements CandidateVacancyWork
                 .query("select e from hunttech_IteractionList e where e.candidate.id = :candId and e.vacancy.id = :vacId order by e.dateIteraction desc")
                 .parameter("candId", candidateId)
                 .parameter("vacId", vacancyId)
-                .view("iteractionList-full-view")
+                .view("iteractionList-view")
                 .optional()
                 .orElse(null);
     }

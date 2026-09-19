@@ -1295,7 +1295,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
         CandidateVacancyMatchScreen matchScreen = screenBuilders.screen(this)
                 .withScreenClass(CandidateVacancyMatchScreen.class)
-                .withOpenMode(OpenMode.NEW_TAB)
+                .withOpenMode(OpenMode.DIALOG)
                 .build();
         matchScreen.setOpenPosition(selected);
         matchScreen.show();

@@ -512,7 +512,7 @@ public class CandidateVacancyMatchScreen extends Screen {
 
         if (count > 1) {
             bulkTakeIntoWorkBtn.setVisible(true);
-            bulkTakeIntoWorkBtn.setCaption("Взять выбранных в работу (" + count + ")");
+            bulkTakeIntoWorkBtn.setCaption("Взять выбранных (" + count + ")");
             takeIntoWorkBtn.setEnabled(false);
             createInteractionBtn.setEnabled(false);
             outreachDraftBtn.setEnabled(false);
@@ -947,7 +947,7 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     private void openInteraction(UUID interactionId) {
         if (interactionId == null) return;
-        IteractionList it = dataManager.load(IteractionList.class).id(interactionId).view("iteractionList-full-view").optional().orElse(null);
+        IteractionList it = dataManager.load(IteractionList.class).id(interactionId).view("iteractionList-view").optional().orElse(null);
         if (it != null) {
             screenBuilders.editor(IteractionList.class, this)
                     .withScreenClass(IteractionListEdit.class)

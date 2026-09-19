@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql-condition.xsd"
         caption="msg://userDashboardCaption"
         messagesPack="com.company.hunttech.web.screens.aidashboard">
     <data>
@@ -8,7 +9,13 @@
                     class="com.company.hunttech.entity.ai.AiCallLog"
                     view="ai-call-log-browse-view">
             <loader id="recentCallsDl">
-                <query><![CDATA[select e from hunttech_AiCallLog e where e.user = :currentUser and (:functionCode is null or e.functionCode = :functionCode) order by e.callTime desc]]></query>
+                <query><![CDATA[select e from hunttech_AiCallLog e where e.user = :currentUser order by e.callTime desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.functionCode = :functionCode</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
             </loader>
         </collection>
     </data>
