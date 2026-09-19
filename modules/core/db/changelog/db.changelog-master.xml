@@ -282,4 +282,8 @@
     <include file="260919-6-seedCandidateVacancyOutreachDraftAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- OpenRouter: Актуализация приоритета подключения OpenRouter и пользовательских квот -->
+    <include file="260919-7-updateOpenRouterFallbackAndUserPriority.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
