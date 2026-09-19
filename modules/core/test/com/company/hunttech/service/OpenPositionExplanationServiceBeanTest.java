@@ -202,4 +202,58 @@ public class OpenPositionExplanationServiceBeanTest {
         assertTrue(prompt.contains("Senior Java Разработчик"));
         assertTrue(prompt.contains("Предыдущий черновой текст"));
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetLatestExplanationFound() {
+        OpenPositionAiExplanationLog mockLog = new OpenPositionAiExplanationLog();
+        mockLog.setId(UUID.randomUUID());
+        mockLog.setOpenPosition(testPosition);
+        mockLog.setExplanationType("STANDARD");
+        mockLog.setServiceType("AI_EXECUTION_SERVICE");
+        mockLog.setModelName("deepseek/deepseek-chat");
+        mockLog.setProviderCode("deepseek");
+        mockLog.setResponseContent("Ранее сохраненный текст объяснения требований.");
+        mockLog.setStatus("SUCCESS");
+        mockLog.setTotalTokens(650);
+        mockLog.setDurationMs(1200L);
+        mockLog.setCallTime(new java.util.Date());
+
+        FluentLoader.ByQuery<OpenPositionAiExplanationLog, UUID> queryLoader = mock(FluentLoader.ByQuery.class);
+        FluentLoader<OpenPositionAiExplanationLog, UUID> entityLoader = mock(FluentLoader.class);
+        when(dataManager.load(OpenPositionAiExplanationLog.class)).thenReturn(entityLoader);
+        when(entityLoader.query(anyString())).thenReturn(queryLoader);
+        when(queryLoader.parameter(anyString(), any())).thenReturn(queryLoader);
+        when(queryLoader.view(anyString())).thenReturn(queryLoader);
+        when(queryLoader.maxResults(1)).thenReturn(queryLoader);
+        when(queryLoader.optional()).thenReturn(java.util.Optional.of(mockLog));
+
+        OpenPositionExplanationResult result = service.getLatestExplanation(testPositionId, null);
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertTrue(result.isFromCache());
+        assertEquals("STANDARD", result.getExplanationType());
+        assertEquals("deepseek/deepseek-chat", result.getModelName());
+        assertEquals("Ранее сохраненный текст объяснения требований.", result.getExplanationText());
+        assertEquals(Integer.valueOf(650), result.getTotalTokens());
+        assertNotNull(result.getCallTime());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetLatestExplanationNotFound() {
+        FluentLoader.ByQuery<OpenPositionAiExplanationLog, UUID> queryLoader = mock(FluentLoader.ByQuery.class);
+        FluentLoader<OpenPositionAiExplanationLog, UUID> entityLoader = mock(FluentLoader.class);
+        when(dataManager.load(OpenPositionAiExplanationLog.class)).thenReturn(entityLoader);
+        when(entityLoader.query(anyString())).thenReturn(queryLoader);
+        when(queryLoader.parameter(anyString(), any())).thenReturn(queryLoader);
+        when(queryLoader.view(anyString())).thenReturn(queryLoader);
+        when(queryLoader.maxResults(1)).thenReturn(queryLoader);
+        when(queryLoader.optional()).thenReturn(java.util.Optional.empty());
+
+        OpenPositionExplanationResult result = service.getLatestExplanation(testPositionId, "STANDARD");
+
+        org.junit.Assert.assertNull(result);
+    }
 }

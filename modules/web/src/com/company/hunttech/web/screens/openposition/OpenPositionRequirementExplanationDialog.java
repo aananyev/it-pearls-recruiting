@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 /**
@@ -91,6 +92,25 @@ public class OpenPositionRequirementExplanationDialog extends Screen {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         updateHeaderInfo();
+        loadOrGenerateExplanation();
+    }
+
+    private void loadOrGenerateExplanation() {
+        if (openPositionId == null) {
+            showError("Не указан идентификатор вакансии.");
+            return;
+        }
+
+        // 1. Проверяем, было ли ранее сохранено объяснение для этой вакансии в базе данных
+        OpenPositionExplanationResult cached = openPositionExplanationService.getLatestExplanation(openPositionId, null);
+        if (cached != null && cached.isSuccess() && cached.getExplanationText() != null
+                && !cached.getExplanationText().trim().isEmpty()) {
+            boolean isSimplified = "SIMPLIFIED_ANALOGY".equals(cached.getExplanationType());
+            handleExplanationResult(cached, isSimplified);
+            return;
+        }
+
+        // 2. Если ранее не вызывалось - запускаем стандартную генерацию через LLM
         startStandardExplanation();
     }
 
@@ -204,15 +224,31 @@ public class OpenPositionRequirementExplanationDialog extends Screen {
         String model = result.getModelName() != null ? result.getModelName() : "default";
         String provider = result.getProviderCode() != null ? result.getProviderCode() : "ai";
 
+        String cachePrefix = "";
+        if (result.isFromCache()) {
+            String dateFormatted = result.getCallTime() != null
+                    ? new SimpleDateFormat("dd.MM.yyyy HH:mm").format(result.getCallTime())
+                    : "ранее";
+            cachePrefix = String.format("<span style='color: #059669; font-weight: bold;'>💾 Сохранено в базе (%s)</span> &nbsp;|&nbsp; ", dateFormatted);
+        }
+
         String meta = String.format(
-                "💡 <b>Режим:</b> %s &nbsp;|&nbsp; <b>Модель:</b> %s (%s) &nbsp;|&nbsp; <b>Токены:</b> %d &nbsp;|&nbsp; <b>Время:</b> %.1f с",
-                escapeHtml(serviceTitle), escapeHtml(model), escapeHtml(provider), tokens, sec);
+                "%s💡 <b>Режим:</b> %s &nbsp;|&nbsp; <b>Модель:</b> %s (%s) &nbsp;|&nbsp; <b>Токены:</b> %d &nbsp;|&nbsp; <b>Время:</b> %.1f с",
+                cachePrefix, escapeHtml(serviceTitle), escapeHtml(model), escapeHtml(provider), tokens, sec);
 
         metaInfoLabel.setValue(meta);
+        copyTextBtn.setEnabled(true);
+
+        String caption = result.isFromCache()
+                ? "Объяснение требований"
+                : (isSimplified ? "Житейское объяснение готово" : "Объяснение требований готово");
+        String desc = result.isFromCache()
+                ? "Загружено из базы данных (ранее сгенерировано)"
+                : "Сгенерировано моделью " + model + " за " + String.format("%.1f", sec) + " с";
 
         notifications.create(Notifications.NotificationType.TRAY)
-                .withCaption(isSimplified ? "Житейское объяснение готово" : "Объяснение требований готово")
-                .withDescription("Сгенерировано моделью " + model + " за " + String.format("%.1f", sec) + " с")
+                .withCaption(caption)
+                .withDescription(desc)
                 .show();
     }
 

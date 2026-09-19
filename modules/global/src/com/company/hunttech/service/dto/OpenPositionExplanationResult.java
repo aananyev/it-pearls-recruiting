@@ -21,6 +21,8 @@ public class OpenPositionExplanationResult implements Serializable {
     private Integer totalTokens;
     private UUID logId;
     private String errorMessage;
+    private boolean fromCache;
+    private java.util.Date callTime;
 
     public OpenPositionExplanationResult() {
     }
@@ -157,5 +159,21 @@ public class OpenPositionExplanationResult implements Serializable {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public boolean isFromCache() {
+        return fromCache;
+    }
+
+    public void setFromCache(boolean fromCache) {
+        this.fromCache = fromCache;
+    }
+
+    public java.util.Date getCallTime() {
+        return callTime;
+    }
+
+    public void setCallTime(java.util.Date callTime) {
+        this.callTime = callTime;
     }
 }

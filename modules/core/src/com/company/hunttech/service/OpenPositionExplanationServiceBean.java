@@ -8,6 +8,7 @@ import com.company.hunttech.entity.ai.OpenPositionAiExplanationLog;
 import com.company.hunttech.service.dto.OpenPositionExplanationResult;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FluentLoader;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.core.global.View;
@@ -213,6 +214,59 @@ public class OpenPositionExplanationServiceBean implements OpenPositionExplanati
 
             return OpenPositionExplanationResult.error("Ошибка вызова Hermes: " + ex.getMessage(),
                     "SIMPLIFIED_ANALOGY", "HERMES_HRM_VIEWER", duration);
+        }
+    }
+
+    @Override
+    public OpenPositionExplanationResult getLatestExplanation(UUID openPositionId, String explanationType) {
+        if (openPositionId == null) {
+            return null;
+        }
+
+        try {
+            String queryStr = "select e from hunttech_OpenPositionAiExplanationLog e " +
+                    "where e.openPosition.id = :opId and e.status = 'SUCCESS' " +
+                    (explanationType != null ? "and e.explanationType = :expType " : "") +
+                    "order by e.callTime desc";
+
+            FluentLoader.ByQuery<OpenPositionAiExplanationLog, UUID> query = dataManager.load(OpenPositionAiExplanationLog.class)
+                    .query(queryStr)
+                    .parameter("opId", openPositionId);
+
+            if (explanationType != null) {
+                query.parameter("expType", explanationType);
+            }
+
+            OpenPositionAiExplanationLog logEntry = query.view(View.LOCAL)
+                    .maxResults(1)
+                    .optional()
+                    .orElse(null);
+
+            if (logEntry == null || logEntry.getResponseContent() == null || logEntry.getResponseContent().trim().isEmpty()) {
+                return null;
+            }
+
+            OpenPositionExplanationResult result = OpenPositionExplanationResult.success(
+                    logEntry.getResponseContent(),
+                    logEntry.getExplanationType(),
+                    logEntry.getServiceType(),
+                    logEntry.getModelName(),
+                    logEntry.getProviderCode(),
+                    logEntry.getDurationMs(),
+                    logEntry.getPromptTokens(),
+                    logEntry.getCompletionTokens(),
+                    logEntry.getTotalTokens(),
+                    logEntry.getId()
+            );
+            result.setFromCache(true);
+            result.setCallTime(logEntry.getCallTime());
+            log.info("getLatestExplanation: найдено ранее сгенерированное объяснение в БД для вакансии id={}, logId={}, type={}, time={}",
+                    openPositionId, logEntry.getId(), logEntry.getExplanationType(), logEntry.getCallTime());
+            return result;
+        } catch (Exception e) {
+            log.error("getLatestExplanation: сбой поиска сохраненного объяснения для вакансии id={}: {}",
+                    openPositionId, e.getMessage(), e);
+            return null;
         }
     }
 

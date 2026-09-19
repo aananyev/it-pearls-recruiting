@@ -5,15 +5,21 @@
 
 ---
 
-## 2. Архитектура и два контура выполнения
+## 2. Архитектура, кэширование и контуры выполнения
 
 ```mermaid
 flowchart TD
     User([Рекрутер / Сорсер]) -->|Клик «Объяснить требования»| BrowseScreen[OpenPositionReestrBrowse]
     BrowseScreen -->|Открытие диалога 960x720| Dialog[OpenPositionRequirementExplanationDialog]
     
+    Dialog -->|1. Проверка истории в БД| CacheCheck[OpenPositionExplanationService.getLatestExplanation]
+    CacheCheck -->|Чтение последней SUCCESS записи| AuditLog[(HUNTTECH_OP_AI_EXPLANATION_LOG\nOpenPositionAiExplanationLog)]
+    
+    AuditLog -->|Запись найдена| DisplaySaved[Мгновенный вывод из базы данных\nбез вызова LLM и расхода токенов]
+    AuditLog -->|Запись не найдена или клик «Повторить»| RunLLM[Запуск LLM через BackgroundTask]
+    
     subgraph "Контур 1: Стандартный анализ AI"
-        Dialog -->|Вызов 1| ServiceStd[OpenPositionExplanationService.explainRequirements]
+        RunLLM -->|Вызов стандартного анализа| ServiceStd[OpenPositionExplanationService.explainRequirements]
         ServiceStd --> CoreAi[AiExecutionService.executeText]
         CoreAi --> FuncConfig1[(HUNTTECH_AI_FUNCTION_CONFIGURATION\nVACANCY_EXPLAIN_REQUIREMENTS)]
         CoreAi --> ProviderLLM[DeepSeek / OpenAI / Anthropic]
@@ -26,9 +32,15 @@ flowchart TD
         HermesViewer --> LLMModel[deepseek/deepseek-chat]
     end
 
-    ServiceStd --> AuditLog[(HUNTTECH_OP_AI_EXPLANATION_LOG\nOpenPositionAiExplanationLog)]
-    ServiceSimp --> AuditLog
+    ServiceStd -->|Сохранение нового результата| AuditLog
+    ServiceSimp -->|Сохранение нового результата| AuditLog
 ```
+
+### Алгоритм работы (Экономия токенов и защита от повторных вызовов):
+1. **Проверка в базе данных:** при открытии окна вызывается метод `getLatestExplanation(openPositionId, null)`.
+2. **Если результат уже существует:** он немедленно отображается в рабочей области диалога с отметкой `💾 Сохранено в базе (ДД.ММ.ГГГГ ЧЧ:ММ)`, исключая лишние затраты бюджета токенов и сетевые задержки.
+3. **Если результат отсутствует:** автоматически инициируется стандартный вызов нейросети с индикатором загрузки, а результат персистится в `OpenPositionAiExplanationLog`.
+4. **Принудительное обновление:** рекрутер в любой момент может принудительно перезапустить анализ по кнопкам «Повторить анализ» или «Расскажи еще понятнее».
 
 ### Контур 1: Стандартный вызов через `AiExecutionService`
 - **Код AI-функции в БД:** `VACANCY_EXPLAIN_REQUIREMENTS`
@@ -80,10 +92,11 @@ flowchart TD
 
 2. **Диалоговое окно объяснения требований (`open-position-requirement-explanation-dialog.xml` / `OpenPositionRequirementExplanationDialog.java`):**
    - Размер: 960×720px, модальное, resizable.
+   - **Интеллектуальная предзагрузка:** при открытии проверяет ранее сохраненные результаты в БД через `getLatestExplanation`. При обнаружении сохраненного ответа мгновенно отображает текст с бейджем `💾 Сохранено в базе (ДД.ММ.ГГГГ ЧЧ:ММ)` без расхода токенов и задержек сети.
    - Сверху расположена акцентная кнопка **«Расскажи еще понятнее»** (`explainSimplifiedBtn`, иконка `MAGIC`), а также кнопки «Повторить анализ», «Копировать» в буфер обмена и «Закрыть».
-   - Индикатор фонового прогресса (`BackgroundTask`) исключает блокировку пользовательского интерфейса.
+   - Индикатор фонового прогресса (`BackgroundTask`) отображается только при активной генерации новой версии.
    - Текст ответа автоматически преобразуется из Markdown в аккуратный HTML со структурированными заголовками, списками и подсветкой кода.
-   - В нижней плашке отображаются модель, провайдер, токены, время выполнения и режим генерации.
+   - В нижней плашке отображаются статус кэширования, модель, провайдер, токены, время выполнения и режим генерации.
 
 ---
 
