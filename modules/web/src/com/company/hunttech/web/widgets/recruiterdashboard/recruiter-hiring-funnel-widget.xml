@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Dashboard-апплет строит воронку по вакансиям, на которые подписан текущий рекрутер. -->
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <!-- Корневая карточка наследует геометрию общего dashboard-контракта HuntTech. -->
+    <layout stylename="widget-border recruiter-dashboard-widget recruiter-funnel-widget"
+            spacing="true"
+            width="100%"
+            height="100%">
+        <!-- Заголовок и период не смешиваются с бизнес-данными. -->
+        <vbox id="headerBox" spacing="false" width="100%">
+            <!-- Основной заголовок воронки. -->
+            <label value="Воронка найма" stylename="widget-table-header"/>
+            <!-- Контроллер показывает фактический период и источник вакансий. -->
+            <label id="periodLabel" stylename="recruiter-dashboard-subtitle"/>
+        </vbox>
+        <!-- KPI дают быстрый обзор подписок и поздних стадий процесса. -->
+        <hbox id="kpiBar" width="100%" spacing="true" stylename="recruiter-kpi-bar"/>
+        <!-- Две карточки разделяют общую воронку и детализацию по вакансиям. -->
+        <hbox id="contentRow" width="100%" spacing="true" stylename="recruiter-funnel-content">
+            <!-- Левая секция показывает агрегированную воронку достигнутых этапов. -->
+            <vbox id="aggregateCard" width="38%" spacing="true" stylename="recruiter-dashboard-inner-card">
+                <!-- Заголовок агрегата. -->
+                <label value="Общая воронка" stylename="recruiter-dashboard-section-title"/>
+                <!-- Полосы создаются контроллером пропорционально максимальному этапу. -->
+                <vbox id="aggregateFunnel" width="100%" spacing="true"/>
+            </vbox>
+            <!-- Правая секция сравнивает этапы всех подписанных вакансий. -->
+            <vbox id="vacancyCard" width="62%" spacing="true" stylename="recruiter-dashboard-inner-card">
+                <!-- Заголовок таблицы вакансий. -->
+                <label value="Вакансии в работе" stylename="recruiter-dashboard-section-title"/>
+                <!-- Строки вакансий и их stage-counts создаются bulk-данными без per-row запросов. -->
+                <vbox id="vacancyRows" width="100%" spacing="false"/>
+            </vbox>
+        </hbox>
+    </layout>
+</fragment>

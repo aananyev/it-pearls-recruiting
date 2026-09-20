@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Dashboard-апплет показывает текущие кейсы рекрутера как Kanban без изменения IteractionList. -->
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <!-- Корневая карточка использует общий visual contract recruiter-dashboard-root. -->
+    <layout stylename="widget-border recruiter-dashboard-widget recruiter-kanban-widget"
+            spacing="true"
+            width="100%"
+            height="100%">
+        <!-- Заголовок объясняет назначение операционного представления. -->
+        <vbox id="headerBox" spacing="false" width="100%">
+            <!-- Основной заголовок апплета. -->
+            <label value="Кандидаты в работе" stylename="widget-table-header"/>
+            <!-- Период и число найденных кейсов заполняются контроллером после bulk-загрузки. -->
+            <label id="periodLabel" stylename="recruiter-dashboard-subtitle"/>
+        </vbox>
+        <!-- KPI-панель показывает распределение текущих кейсов по ключевым этапам. -->
+        <hbox id="kpiBar" width="100%" spacing="true" stylename="recruiter-kpi-bar"/>
+        <!-- CSS-grid обеспечивает адаптивные колонки Kanban без глобального horizontal scroll. -->
+        <cssLayout id="kanbanBoard" width="100%" stylename="recruiter-kanban-board"/>
+    </layout>
+</fragment>

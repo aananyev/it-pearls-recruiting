@@ -1,0 +1,76 @@
+{
+  "title": "Воронка найма",
+  "code": "recruiter-funnel-dashboard",
+  "visualModel": {
+    "children": [
+      {
+        "className": "com.haulmont.addon.dashboard.model.visualmodel.ResponsiveLayout",
+        "data": {
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "areas": [
+            {
+              "component": {
+                "className": "com.haulmont.addon.dashboard.model.visualmodel.WidgetLayout",
+                "data": {
+                  "widget": {
+                    "showWidgetCaption": false,
+                    "widgetId": "recruiterHiringFunnel",
+                    "caption": "Воронка найма",
+                    "name": "Воронка найма",
+                    "description": null,
+                    "parameters": [],
+                    "widgetFields": [],
+                    "frameId": "hunttech_RecruiterHiringFunnelWidget",
+                    "createdBy": "system",
+                    "id": "22222222-2222-4222-8222-222222222221"
+                  },
+                  "children": [],
+                  "weight": 1,
+                  "expand": null,
+                  "styleName": null,
+                  "width": 100,
+                  "height": 100,
+                  "widthUnit": "%",
+                  "heightUnit": "%",
+                  "id": "22222222-2222-4222-8222-222222222222"
+                }
+              },
+              "order": 1,
+              "xs": 12,
+              "sm": 12,
+              "md": 12,
+              "lg": 12,
+              "id": "22222222-2222-4222-8222-222222222223"
+            }
+          ],
+          "children": [],
+          "weight": 1,
+          "expand": null,
+          "styleName": "recruiter-dashboard-responsive",
+          "width": 100,
+          "height": 100,
+          "widthUnit": "%",
+          "heightUnit": "%",
+          "id": "22222222-2222-4222-8222-222222222224"
+        }
+      }
+    ],
+    "weight": 1,
+    "expand": null,
+    "styleName": null,
+    "width": 100,
+    "height": 100,
+    "widthUnit": "%",
+    "heightUnit": "%",
+    "id": "22222222-2222-4222-8222-222222222225"
+  },
+  "parameters": [],
+  "isAvailableForAllUsers": true,
+  "createdBy": "system",
+  "timerDelay": 60,
+  "assistantBeanName": null,
+  "id": "22222222-2222-4222-8222-222222222226"
+}
