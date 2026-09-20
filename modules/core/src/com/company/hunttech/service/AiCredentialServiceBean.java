@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -199,12 +201,17 @@ public class AiCredentialServiceBean implements AiCredentialService {
 
         long startTime = System.currentTimeMillis();
         try {
+            Map<String, Object> options = new HashMap<>();
+            options.put("temperature", 0.0);
+            if (isConfigured(baseApiUrl)) {
+                options.put("baseApiUrl", baseApiUrl.trim());
+            }
             String response = provider.generateText(
                     "Ответь одним словом: ok",
                     "Тест подключения HRM HuntTech.",
                     apiKey,
                     resolvedModel,
-                    Collections.<String, Object>singletonMap("temperature", 0.0));
+                    options);
             long latencyMs = System.currentTimeMillis() - startTime;
             if (!isConfigured(response)) {
                 return AiConnectionTestResult.fail(

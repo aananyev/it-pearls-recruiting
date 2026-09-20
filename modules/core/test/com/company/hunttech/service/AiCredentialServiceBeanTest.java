@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -185,6 +186,21 @@ public class AiCredentialServiceBeanTest {
                 .thenReturn("ok");
 
         AiConnectionTestResult result = service.testConnection("gigachat", "GigaChat", "", "enc:saved-secret", null);
+
+        assertTrue(result.isSuccess());
+        assertEquals("SUCCESS", result.getStatus());
+    }
+
+    @Test
+    public void testConnectionPassesBaseApiUrlInOptions() {
+        AIProvider provider = mock(AIProvider.class);
+        when(aiProviderRegistry.getProvider("openrouter")).thenReturn(provider);
+        when(provider.generateText(anyString(), anyString(), eq("sk-key"), eq("custom-model"), argThat(map ->
+                "http://127.0.0.1:8119/api/v1/chat/completions".equals(map.get("baseApiUrl"))
+        ))).thenReturn("ok");
+
+        AiConnectionTestResult result = service.testConnection(
+                "openrouter", "custom-model", "sk-key", null, "http://127.0.0.1:8119/api/v1/chat/completions");
 
         assertTrue(result.isSuccess());
         assertEquals("SUCCESS", result.getStatus());
