@@ -13,127 +13,212 @@
             </view>
             <loader id="vacancyPromptTemplatesDl">
                 <query>
-                    <![CDATA[select e from hunttech_VacancyPromptTemplate e]]>
+                    <![CDATA[select e from hunttech_VacancyPromptTemplate e order by e.name]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="900"/>
-    <layout spacing="false"
-            stylename="browse-screen-layout edit-screen-layout"
+    <dialogMode height="760"
+                width="1280"/>
+    <layout expand="splitMainLayout"
+            spacing="false"
+            margin="false"
             width="100%"
-            height="100%">
-        <split id="split"
-               orientation="horizontal"
-               pos="312px"
-               min="260px"
-               max="420px"
-               width="100%"
-               height="100%">
-            <!-- Сайдбар 312px -->
+            height="100%"
+            stylename="vacancy-prompt-template-editor browse-screen-layout edit-screen-layout job-candidate-editor">
+        <hbox id="splitMainLayout"
+              width="100%"
+              height="100%"
+              spacing="true"
+              expand="workspaceBox"
+              stylename="job-candidate-main-layout edit-screen-layout">
+
+            <!-- ЛЕВЫЙ САЙДБАР (312px на 100% высоты) -->
             <vbox id="detailPane"
-                  stylename="job-candidate-sidebar edit-sidebar"
-                  width="100%"
+                  width="312px"
                   height="100%"
-                  spacing="false"
-                  margin="false">
+                  spacing="true"
+                  margin="false"
+                  stylename="edit-sidebar job-candidate-sidebar">
                 <scrollBox id="sidebarScroll"
                            width="100%"
                            height="100%"
-                           spacing="true"
+                           orientation="vertical"
                            stylename="sidebar-scrollbox">
-                    <vbox id="sidebarIdentity"
-                          stylename="edit-sidebar-identity"
-                          width="100%"
-                          spacing="true"
-                          align="TOP_CENTER">
-                        <ovalImage id="sidebarAvatar"
-                                   width="120px"
-                                   height="120px"
-                                   ovalWidth="120px"
-                                   ovalHeight="120px"
-                                   stylename="ovaFallbackImage"
-                                   align="MIDDLE_CENTER"
-                                   scaleMode="SCALE_DOWN">
-                            <theme path="icons/ai/vacancy-prompt-template.png"/>
-                        </ovalImage>
-                        <label id="sidebarSubtitle"
-                               value="msg://sidebarSubtitle"
-                               stylename="edit-sidebar-subtitle"
-                               align="MIDDLE_CENTER"/>
-                        <label id="sidebarTitle"
-                               value="msg://selectTemplatePrompt"
-                               stylename="edit-sidebar-title label-candidate-name"
-                               align="MIDDLE_CENTER"/>
-                        <label id="sidebarCode"
-                               stylename="label-candidate-position"
-                               align="MIDDLE_CENTER"
-                               visible="false"/>
-                        <label id="sidebarTemperatureBadge"
-                               stylename="candidate-badge badge-neutral"
-                               align="MIDDLE_CENTER"
-                               visible="false"/>
-                    </vbox>
+                    <vbox width="100%" spacing="true">
 
-                    <vbox id="quickActions"
-                          width="100%"
-                          spacing="true"
-                          visible="false">
-                        <button id="openCardBtn"
-                                caption="msg://openCardBtn"
-                                icon="EDIT_ACTION"
-                                width="100%"
-                                stylename="primary"/>
-                    </vbox>
+                        <!-- Шапка профиля: Аватар 120px + 4 уровня типографики -->
+                        <vbox id="profileHeader"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER"
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="sidebarAvatar"
+                                              width="120px"
+                                              height="120px"
+                                              ovalWidth="120px"
+                                              ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar ovaFallbackImage"
+                                              fallbackThemePath="icons/ai/vacancy-prompt-template.png"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label id="sidebarTitle"
+                                       value="msg://selectTemplatePrompt"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="sidebarSubtitle"
+                                       value="msg://sidebarSubtitle"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="sidebarCode"
+                                       value=""
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"
+                                       visible="false"/>
+                                <label id="sidebarTemperatureBadge"
+                                       value=""
+                                       stylename="candidate-badge badge-neutral template-temperature-badge"
+                                       align="MIDDLE_CENTER"
+                                       visible="false"/>
+                            </vbox>
+                        </vbox>
 
-                    <vbox id="sidebarDetails"
-                          stylename="edit-card sidebar-section"
-                          width="100%"
-                          spacing="true"
-                          visible="false">
-                        <label value="msg://parametersSection"
-                               stylename="h4"/>
-                        <vbox spacing="false">
-                            <label value="msg://templateTemperatureCaption"
-                                   stylename="bold"/>
-                            <label id="sidebarTemperatureVal"/>
+                        <!-- Кнопка быстрого перехода в карточку -->
+                        <vbox id="quickActions"
+                              width="100%"
+                              spacing="true"
+                              stylename="edit-sidebar-summary"
+                              visible="false">
+                            <button id="openCardBtn"
+                                    caption="msg://openCardBtn"
+                                    icon="EDIT_ACTION"
+                                    stylename="primary candidate-btn"
+                                    width="100%"/>
                         </vbox>
-                        <vbox spacing="false">
-                            <label value="msg://aiRole.caption"
-                                   stylename="bold"/>
-                            <label id="sidebarSystemContextVal"/>
+
+                        <!-- Секция: Параметры -->
+                        <vbox id="parametersCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation"
+                              visible="false">
+                            <label value="msg://parametersSection"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title vacancy-prompt-template-navigation-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="parametersGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="msg://templateCodeCaption" stylename="bold"/>
+                                        <label id="sidebarCodeVal" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://templateTemperatureCaption" stylename="bold"/>
+                                        <label id="sidebarTemperatureVal" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
                         </vbox>
-                        <vbox spacing="false">
+
+                        <!-- Секция: Роль ИИ -->
+                        <vbox id="roleCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation"
+                              visible="false">
+                            <label value="msg://systemContextSection"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title vacancy-prompt-template-navigation-title"
+                                   align="MIDDLE_CENTER"/>
+                            <label id="sidebarSystemContextVal"
+                                   width="100%"
+                                   value="-"
+                                   stylename="edit-help candidate-sidebar-city template-snippet-box"/>
+                        </vbox>
+
+                        <!-- Секция: Основная задача -->
+                        <vbox id="taskCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation"
+                              visible="false">
                             <label value="msg://promptPreviewSection"
-                                   stylename="bold"/>
-                            <label id="sidebarPromptTextVal"/>
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title vacancy-prompt-template-navigation-title"
+                                   align="MIDDLE_CENTER"/>
+                            <label id="sidebarPromptTextVal"
+                                   width="100%"
+                                   value="-"
+                                   stylename="edit-help candidate-sidebar-city template-snippet-box"/>
                         </vbox>
+
+                        <!-- Нижний фиксированный спейсер 16px -->
+                        <vbox id="sidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+
+                        <!-- Нейтральная подсказка -->
+                        <label value="msg://templateSidebarHint"
+                               stylename="edit-sidebar-hint"
+                               width="100%"/>
                     </vbox>
-
-                    <vbox id="sidebarBottomSpacer"
-                          height="16px"/>
-
-                    <label value="msg://templateSidebarHint"
-                           stylename="edit-sidebar-hint"
-                           width="100%"/>
                 </scrollBox>
             </vbox>
 
-            <!-- Основная таблица -->
-            <vbox id="mainContent"
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox"
                   width="100%"
                   height="100%"
                   spacing="true"
+                  stylename="edit-workspace candidate-reestr-workspace"
                   expand="tableCard"
-                  stylename="edit-workspace">
+                  margin="true,true,true,false">
+
+                <!-- Командный тулбар -->
+                <hbox id="browseActions"
+                      spacing="true"
+                      width="100%"
+                      stylename="candidate-filter-bar edit-card edit-toolbar">
+                    <button id="createBtn"
+                            action="vacancyPromptTemplatesTable.create"
+                            stylename="primary candidate-btn"
+                            icon="PLUS"/>
+                    <button id="editBtn"
+                            action="vacancyPromptTemplatesTable.edit"
+                            stylename="secondary candidate-btn"
+                            icon="EDIT_ACTION"/>
+                    <button id="removeBtn"
+                            action="vacancyPromptTemplatesTable.remove"
+                            stylename="secondary candidate-btn"
+                            icon="REMOVE"/>
+                    <button id="refreshBtn"
+                            action="vacancyPromptTemplatesTable.refresh"
+                            icon="REFRESH"/>
+                </hbox>
+
+                <!-- Generic Filter -->
                 <filter id="filter"
                         applyTo="vacancyPromptTemplatesTable"
                         dataLoader="vacancyPromptTemplatesDl"
                         collapsable="true"
-                        collapsed="true">
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
                     <properties include=".*"/>
                 </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard"
                       width="100%"
                       height="100%"
@@ -156,21 +241,16 @@
                             <column id="temperature" width="120px"/>
                         </columns>
                         <rowsCount/>
-                        <buttonsPanel id="buttonsPanel"
-                                      alwaysVisible="true">
-                            <button id="createBtn" action="vacancyPromptTemplatesTable.create" stylename="primary" icon="PLUS"/>
-                            <button id="editBtn" action="vacancyPromptTemplatesTable.edit" icon="EDIT_ACTION"/>
-                            <button id="removeBtn" action="vacancyPromptTemplatesTable.remove" icon="REMOVE"/>
-                            <button id="refreshBtn" action="vacancyPromptTemplatesTable.refresh" icon="REFRESH"/>
-                        </buttonsPanel>
                     </groupTable>
                 </vbox>
+
                 <hbox id="lookupActions" spacing="true" visible="false">
                     <button action="lookupSelectAction"/>
                     <button action="lookupCancelAction"/>
                 </hbox>
             </vbox>
-        </split>
+        </hbox>
     </layout>
 </window>
+
 

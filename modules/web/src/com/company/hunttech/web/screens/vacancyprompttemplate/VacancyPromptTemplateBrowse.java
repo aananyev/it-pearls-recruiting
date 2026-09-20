@@ -25,6 +25,8 @@ public class VacancyPromptTemplateBrowse extends StandardLookup<VacancyPromptTem
     @Inject
     private Label<String> sidebarTitle;
     @Inject
+    private Label<String> sidebarSubtitle;
+    @Inject
     private Label<String> sidebarCode;
     @Inject
     private Label<String> sidebarTemperatureBadge;
@@ -32,12 +34,21 @@ public class VacancyPromptTemplateBrowse extends StandardLookup<VacancyPromptTem
     private VBoxLayout quickActions;
     @Inject
     private Button openCardBtn;
+
     @Inject
-    private VBoxLayout sidebarDetails;
+    private VBoxLayout parametersCard;
+    @Inject
+    private Label<String> sidebarCodeVal;
     @Inject
     private Label<String> sidebarTemperatureVal;
+
+    @Inject
+    private VBoxLayout roleCard;
     @Inject
     private Label<String> sidebarSystemContextVal;
+
+    @Inject
+    private VBoxLayout taskCard;
     @Inject
     private Label<String> sidebarPromptTextVal;
 
@@ -59,17 +70,25 @@ public class VacancyPromptTemplateBrowse extends StandardLookup<VacancyPromptTem
     private void updateSidebar(VacancyPromptTemplate template) {
         if (template == null) {
             sidebarTitle.setValue(messages.getMessage(getClass(), "selectTemplatePrompt"));
+            sidebarSubtitle.setValue(messages.getMessage(getClass(), "sidebarSubtitle"));
             sidebarCode.setVisible(false);
             sidebarTemperatureBadge.setVisible(false);
             quickActions.setVisible(false);
-            sidebarDetails.setVisible(false);
+            parametersCard.setVisible(false);
+            roleCard.setVisible(false);
+            taskCard.setVisible(false);
         } else {
-            sidebarTitle.setValue(template.getName() != null ? template.getName() : "—");
+            String name = template.getName();
+            sidebarTitle.setValue(name != null && !name.trim().isEmpty() ? name : "—");
+            sidebarSubtitle.setValue(messages.getMessage(getClass(), "sidebarSubtitle"));
+
             if (template.getCode() != null) {
                 sidebarCode.setValue(template.getCode());
                 sidebarCode.setVisible(true);
+                sidebarCodeVal.setValue(template.getCode());
             } else {
                 sidebarCode.setVisible(false);
+                sidebarCodeVal.setValue("—");
             }
 
             if (template.getTemperature() != null) {
@@ -83,20 +102,24 @@ public class VacancyPromptTemplateBrowse extends StandardLookup<VacancyPromptTem
 
             String sysCtx = template.getSystemContext();
             if (sysCtx != null && !sysCtx.trim().isEmpty()) {
-                sidebarSystemContextVal.setValue(sysCtx.length() > 120 ? sysCtx.substring(0, 117) + "..." : sysCtx);
+                sidebarSystemContextVal.setValue(sysCtx);
+                roleCard.setVisible(true);
             } else {
                 sidebarSystemContextVal.setValue("—");
+                roleCard.setVisible(false);
             }
 
             String prompt = template.getPromptText();
             if (prompt != null && !prompt.trim().isEmpty()) {
-                sidebarPromptTextVal.setValue(prompt.length() > 160 ? prompt.substring(0, 157) + "..." : prompt);
+                sidebarPromptTextVal.setValue(prompt.length() > 280 ? prompt.substring(0, 277) + "..." : prompt);
+                taskCard.setVisible(true);
             } else {
                 sidebarPromptTextVal.setValue("—");
+                taskCard.setVisible(false);
             }
 
             quickActions.setVisible(true);
-            sidebarDetails.setVisible(true);
+            parametersCard.setVisible(true);
         }
     }
 

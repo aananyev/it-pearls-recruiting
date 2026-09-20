@@ -62,6 +62,68 @@
       white-space: normal !important;
     }
 
+    // Аватар и визуальный блок в sidebar
+    .edit-sidebar .job-candidate-avatar,
+    .edit-sidebar .ovaFallbackImage {
+      box-sizing: border-box;
+      border: 2px solid rgba(255, 177, 27, 0.40) !important;
+      border-radius: 50% !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    // Бейдж температуры
+    .template-temperature-badge,
+    .v-label-template-temperature-badge {
+      display: inline-block !important;
+      width: auto !important;
+      padding: 3px 12px !important;
+      margin-top: 4px !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      line-height: 18px !important;
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.14) !important;
+      border: 1px solid rgba(255, 177, 27, 0.38) !important;
+      border-radius: 14px !important;
+    }
+
+    // Сниппет-бокс для текста промпта и роли ИИ
+    .template-snippet-box,
+    .v-label-template-snippet-box {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      padding: 8px 10px !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+      color: rgba(248, 250, 252, 0.90) !important;
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 6px !important;
+      white-space: pre-wrap !important;
+      word-break: break-word !important;
+    }
+
+    // Сетка параметров внутри темного сайдбара
+    .edit-sidebar .edit-sidebar-summary {
+      box-sizing: border-box;
+      width: 100% !important;
+      padding: 4px 6px !important;
+
+      .v-label {
+        font-size: 13px !important;
+        line-height: 20px !important;
+        color: rgba(248, 250, 252, 0.92) !important;
+      }
+
+      .bold,
+      .v-label-bold {
+        font-weight: 600 !important;
+        color: rgba(248, 250, 252, 0.65) !important;
+      }
+    }
+
     // Каноническая label-навигация в тёмной sidebar (эталон IteractionListEdit).
     .label-navigation {
       box-sizing: border-box;

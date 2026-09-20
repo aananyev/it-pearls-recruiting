@@ -32,68 +32,109 @@
                 <scrollBox id="vacancyPromptTemplateSidebarScroll"
                            width="100%"
                            height="100%"
-                           spacing="true"
+                           orientation="vertical"
                            stylename="sidebar-scrollbox">
-                    <vbox id="vacancyPromptTemplateIdentity"
-                          stylename="edit-sidebar-identity"
-                          width="100%"
-                          spacing="true"
-                          align="TOP_CENTER">
-                        <ovalImage id="vacancyPromptTemplateLogoImage"
-                                   width="120px"
-                                   height="120px"
-                                   ovalWidth="120px"
-                                   ovalHeight="120px"
-                                   stylename="ovaFallbackImage"
-                                   align="MIDDLE_CENTER"
-                                   scaleMode="SCALE_DOWN">
-                            <theme path="icons/ai/vacancy-prompt-template.png"/>
-                        </ovalImage>
-                        <label value="msg://sidebarSubtitle"
-                               stylename="edit-sidebar-subtitle"
-                               align="MIDDLE_CENTER"
-                               width="100%"/>
-                        <label id="vacancyPromptTemplateSidebarTitle"
-                               dataContainer="vacancyPromptTemplateDc"
-                               property="name"
-                               stylename="edit-sidebar-title label-candidate-name"
-                               align="MIDDLE_CENTER"
-                               width="100%"/>
-                        <label id="vacancyPromptTemplateSidebarCode"
-                               dataContainer="vacancyPromptTemplateDc"
-                               property="code"
-                               stylename="label-candidate-position"
-                               align="MIDDLE_CENTER"
+                    <vbox width="100%" spacing="true">
+
+                        <!-- Шапка профиля: Аватар 120px + 4 уровня типографики -->
+                        <vbox id="vacancyPromptTemplateProfileHeader"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER"
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="vacancyPromptTemplateLogoImage"
+                                              width="120px"
+                                              height="120px"
+                                              ovalWidth="120px"
+                                              ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar ovaFallbackImage"
+                                              scaleMode="SCALE_DOWN"
+                                              fallbackThemePath="icons/ai/vacancy-prompt-template.png"/>
+                            <vbox width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label id="vacancyPromptTemplateSidebarTitle"
+                                       dataContainer="vacancyPromptTemplateDc"
+                                       property="name"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       align="MIDDLE_CENTER"
+                                       width="100%"/>
+                                <label value="msg://sidebarSubtitle"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       align="MIDDLE_CENTER"
+                                       width="100%"/>
+                                <label id="vacancyPromptTemplateSidebarCode"
+                                       dataContainer="vacancyPromptTemplateDc"
+                                       property="code"
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       align="MIDDLE_CENTER"
+                                       width="100%"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Label-навигация разделов -->
+                        <vbox id="vacancyPromptTemplateNavigation"
+                              stylename="label-navigation"
+                              width="100%"
+                              spacing="false">
+                            <label value="msg://navSections"
+                                   stylename="label-nav-title vacancy-prompt-template-navigation-title"
+                                   width="100%"/>
+                            <button id="vacancyPromptTemplateMainNav"
+                                    caption="msg://mainSection"
+                                    stylename="borderless label-nav-item label-nav-item-active"
+                                    width="100%"
+                                    invoke="focusMainSection"/>
+                            <button id="vacancyPromptTemplatePromptNav"
+                                    caption="msg://promptSection"
+                                    stylename="borderless label-nav-item"
+                                    width="100%"
+                                    invoke="focusPromptSection"/>
+                        </vbox>
+
+                        <!-- Сводка параметров в сайдбаре Edit -->
+                        <vbox id="vacancyPromptTemplateSummarySection"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://parametersSection"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title vacancy-prompt-template-navigation-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="vacancyPromptTemplateSummaryGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="msg://templateCodeCaption" stylename="bold"/>
+                                        <label id="summaryCodeVal" dataContainer="vacancyPromptTemplateDc" property="code" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://templateTemperatureCaption" stylename="bold"/>
+                                        <label id="summaryTempVal" dataContainer="vacancyPromptTemplateDc" property="temperature" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Фиксированный спейсер отступа 16px -->
+                        <vbox id="vacancyPromptTemplateSidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+
+                        <!-- Нейтральная подсказка -->
+                        <label value="msg://templateSidebarHint"
+                               stylename="edit-sidebar-hint"
                                width="100%"/>
                     </vbox>
-
-                    <vbox id="vacancyPromptTemplateNavigation"
-                          stylename="label-navigation"
-                          width="100%"
-                          spacing="false">
-                        <label value="msg://navSections"
-                               stylename="label-nav-title vacancy-prompt-template-navigation-title"
-                               width="100%"/>
-                        <button id="vacancyPromptTemplateMainNav"
-                                caption="msg://mainSection"
-                                stylename="borderless label-nav-item label-nav-item-active"
-                                width="100%"
-                                invoke="focusMainSection"/>
-                        <button id="vacancyPromptTemplatePromptNav"
-                                caption="msg://promptSection"
-                                stylename="borderless label-nav-item"
-                                width="100%"
-                                invoke="focusPromptSection"/>
-                    </vbox>
-
-                    <vbox id="vacancyPromptTemplateSidebarSpacer"
-                          height="16px"/>
-
-                    <label value="msg://templateSidebarHint"
-                           stylename="edit-sidebar-hint"
-                           width="100%"/>
                 </scrollBox>
             </vbox>
+
 
             <!-- Правая рабочая область -->
             <vbox id="vacancyPromptTemplateWorkspace"
