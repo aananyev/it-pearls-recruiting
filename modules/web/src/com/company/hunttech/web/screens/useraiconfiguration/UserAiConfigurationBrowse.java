@@ -8,8 +8,11 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -28,18 +31,96 @@ public class UserAiConfigurationBrowse extends StandardLookup<UserAiConfiguratio
     @Inject
     private Button testBtn;
     @Inject
+    private Button openEditCardBtn;
+    @Inject
+    private Label<String> detailTitle;
+    @Inject
+    private Label<String> detailSubtitle;
+    @Inject
+    private Label<String> detailPrimaryBadge;
+    @Inject
+    private Label<String> detailActive;
+    @Inject
+    private Label<String> detailUser;
+    @Inject
+    private Label<String> detailPriority;
+    @Inject
+    private Label<String> detailContext;
+    @Inject
+    private Label<String> detailRetries;
+    @Inject
+    private Label<String> detailProvider;
+    @Inject
+    private Label<String> detailModel;
+    @Inject
     private Notifications notifications;
     @Inject
     private DataManager dataManager;
     @Inject
     private BackgroundWorker backgroundWorker;
+    @Inject
+    private Messages messages;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Subscribe
     public void onInit(InitEvent event) {
         testBtn.setEnabled(false);
-        userAiConfigurationsTable.addSelectionListener(e ->
-                testBtn.setEnabled(!userAiConfigurationsTable.getSelected().isEmpty()));
+        openEditCardBtn.setEnabled(false);
+
+        userAiConfigurationsTable.addSelectionListener(e -> {
+            UserAiConfiguration selected = userAiConfigurationsTable.getSingleSelected();
+            boolean hasSelection = selected != null;
+            testBtn.setEnabled(hasSelection);
+            openEditCardBtn.setEnabled(hasSelection);
+            updateSidebar(selected);
+        });
+
+        openEditCardBtn.addClickListener(clickEvent -> openSelectedEditor());
     }
+
+    private void updateSidebar(UserAiConfiguration selected) {
+        if (selected != null) {
+            String login = selected.getUser() != null ? selected.getUser().getLogin() : "";
+            detailTitle.setValue(!login.isEmpty() ? login : messages.getMessage(getClass(), "sidebarSubtitle"));
+            detailSubtitle.setValue(selected.getProviderCode() != null ? selected.getProviderCode() : "-");
+
+            boolean isPrimary = Boolean.TRUE.equals(selected.getIsPrimary());
+            detailPrimaryBadge.setValue(isPrimary ? ("★ " + messages.getMessage(getClass(), "primaryBadge")) : messages.getMessage(getClass(), "nonPrimaryBadge"));
+
+            boolean isActive = Boolean.TRUE.equals(selected.getIsActive());
+            detailActive.setValue(isActive ? ("🟢 " + messages.getMessage(getClass(), "statusActive")) : ("⚪ " + messages.getMessage(getClass(), "statusInactive")));
+            detailUser.setValue(login.isEmpty() ? "-" : login);
+            detailPriority.setValue(selected.getPriority() != null ? String.valueOf(selected.getPriority()) : "0");
+            detailContext.setValue(selected.getMaxContextTokens() != null ? String.valueOf(selected.getMaxContextTokens()) : "-");
+            detailRetries.setValue(selected.getMaxRetries() != null ? String.valueOf(selected.getMaxRetries()) : "3");
+
+            detailProvider.setValue(selected.getProviderCode() != null ? selected.getProviderCode() : "-");
+            detailModel.setValue(selected.getDefaultModelName() != null ? selected.getDefaultModelName() : "-");
+        } else {
+            detailTitle.setValue(messages.getMessage(getClass(), "sidebarDefaultTitle"));
+            detailSubtitle.setValue(messages.getMessage(getClass(), "sidebarSubtitle"));
+            detailPrimaryBadge.setValue("");
+            detailActive.setValue("-");
+            detailUser.setValue("-");
+            detailPriority.setValue("-");
+            detailContext.setValue("-");
+            detailRetries.setValue("-");
+            detailProvider.setValue("-");
+            detailModel.setValue("-");
+        }
+    }
+
+    private void openSelectedEditor() {
+        UserAiConfiguration selected = userAiConfigurationsTable.getSingleSelected();
+        if (selected != null) {
+            screenBuilders.editor(userAiConfigurationsTable)
+                    .editEntity(selected)
+                    .withScreenClass(UserAiConfigurationEdit.class)
+                    .show();
+        }
+    }
+
 
     public void onTestBtnClick() {
         UserAiConfiguration selected = userAiConfigurationsTable.getSingleSelected();

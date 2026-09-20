@@ -1,122 +1,268 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit корпоративного AI-подключения: secret вводится unbound-полем и не показывается после сохранения.
-     Правки 2026-08-12 — только presentation-слой: caption полей, edit-form-control, полоса-заголовок
-     навигации; data/binding/loaders/actions не менялись. -->
+<!-- Edit корпоративного AI-подключения: двухпанельная композиция Split-View 312px
+     по общему контракту Edit-экранов HRM HuntTech (hunttech-edit-screen-design).
+     Secret вводится unbound-полем и шифруется middleware-сервисом. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="providerCodeField"
         messagesPack="com.company.hunttech.web.screens.adminaiconfiguration">
-    <!-- Edit-graph содержит ciphertext для сохранения прежнего значения, но UI к property не привязывается. -->
     <data>
-        <!-- Системная edited-сущность корпоративного подключения с полным edit-view. -->
         <instance id="adminConfigurationDc"
                   class="com.company.hunttech.entity.ai.AdminAiConfiguration"
                   view="admin-ai-configuration-edit-view">
-            <!-- Стандартный editor-loader по id открытой записи. -->
             <loader/>
         </instance>
     </data>
-    <!-- Полноэкранная модальная Edit-форма по общему контракту Edit-экранов HRM HuntTech. -->
     <dialogMode width="100%" height="100%" modal="true"/>
-    <!-- Корневой layout формы: локальный namespace admin-ai-configuration-editor + shared-контракт. -->
-    <layout stylename="admin-ai-configuration-editor" expand="mainLayout" spacing="false" width="100%" height="100%">
-        <!-- Двухпанельная композиция: sidebar с контекстом и workspace с карточками ввода. -->
-        <hbox id="mainLayout" stylename="edit-screen-layout" expand="workspace" spacing="false" width="100%" height="100%">
-            <!-- Sidebar не содержит secret/status internals, только контекст подключения. -->
-            <vbox id="sidebar" stylename="edit-sidebar" width="312px" height="100%" spacing="true" expand="sidebarSpacer">
-                <!-- Identity текущего корпоративного подключения. -->
-                <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Тематическая HuntTech-иллюстрация корпоративного AI-подключения; fallback без привязки к данным. -->
-                    <ovalImage id="adminAiConfigurationLogoImage"
-                               width="176px"
-                               height="176px"
-                               ovalWidth="176px"
-                               ovalHeight="176px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               scaleMode="SCALE_DOWN">
-                        <theme path="icons/ai/admin-ai-configuration.png"/>
-                    </ovalImage>
-                    <!-- Кнопки управления логотипом нейросети (BLOB) -->
-                    <hbox id="logoControls" width="100%" spacing="true" align="MIDDLE_CENTER">
-                        <upload id="logoUploadField"
-                                fileStoragePutMode="MANUAL"
-                                align="MIDDLE_CENTER"
-                                showFileName="false"
-                                showClearButton="false"
-                                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                                permittedExtensions=".png,.jpg,.jpeg,.webp,.svg"
-                                fileSizeLimit="15728640"
-                                uploadButtonCaption="msg://adminLogoUpload.caption"
-                                uploadButtonIcon="font-icon:UPLOAD"/>
-                        <button id="clearLogoBtn"
-                                icon="font-icon:TRASH"
-                                description="msg://adminLogoClear.caption"
-                                stylename="borderless"
-                                invoke="onClearLogoClick"/>
-                    </hbox>
-                    <!-- Название подключения читается из edit-контейнера (свойство name). -->
-                    <label dataContainer="adminConfigurationDc" property="name" stylename="edit-sidebar-title" width="100%"/>
-                    <!-- Подпись типа системной записи. -->
-                    <label value="Корпоративное AI-подключение" stylename="edit-sidebar-subtitle" width="100%"/>
-                </vbox>
-                <!-- Обязательная label-навигация по разделам формы (фокус, без изменения данных). -->
-                <vbox id="navigation" stylename="label-navigation" width="100%" spacing="false">
-                    <!-- Заголовок «Разделы»: полоса-заголовок с inset-линиями (контракт §4.1);
-                         локальный класс admin-ai-configuration-navigation-title поверх label-nav-title. -->
-                    <label value="Разделы" stylename="label-nav-title admin-ai-configuration-navigation-title" width="100%"/>
-                    <!-- Пункт «Основное» активен по умолчанию и фокусирует первое поле. -->
-                    <button id="mainNav" caption="Основное" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
-                    <!-- Пункт «Подключение» фокусирует model/endpoint metadata. -->
-                    <button id="connectionNav" caption="Подключение" stylename="borderless label-nav-item" width="100%" invoke="focusConnectionSection"/>
-                    <!-- Пункт «Безопасность» фокусирует поле замены secret. -->
-                    <button id="securityNav" caption="Безопасность" stylename="borderless label-nav-item" width="100%" invoke="focusSecuritySection"/>
-                </vbox>
-                <!-- Spacer прижимает подсказку к нижней границе sidebar. -->
-                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
-                <!-- Явная подсказка о необратимом отображении secret: данные не меняет. -->
-                <label value="Сохранённый API-ключ никогда не показывается. Пустое поле ключа при редактировании означает «оставить прежний»."
-                       stylename="edit-sidebar-hint" width="100%"/>
+    <layout stylename="admin-ai-configuration-editor job-candidate-editor edit-screen-layout"
+            expand="mainLayout"
+            spacing="false"
+            margin="false"
+            width="100%"
+            height="100%">
+        <hbox id="mainLayout"
+              stylename="job-candidate-main-layout edit-screen-layout"
+              expand="workspace"
+              spacing="false"
+              width="100%"
+              height="100%">
+            <!-- Левая контекстная панель 312px: аватар 120px, загрузка BLOB-логотипа, реквизиты, навигация -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar job-candidate-sidebar"
+                  width="312px"
+                  height="100%"
+                  spacing="true"
+                  margin="false">
+                <scrollBox id="sidebarScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical">
+                    <vbox id="sidebarContent"
+                          width="100%"
+                          spacing="true">
+                        <!-- Шапка профиля с превью логотипа 120px -->
+                        <vbox id="identity"
+                              stylename="edit-sidebar-visual job-candidate-profile-header"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER">
+                            <image id="adminAiConfigurationLogoImage"
+                                   width="120px"
+                                   height="120px"
+                                   align="TOP_CENTER"
+                                   stylename="job-candidate-avatar"
+                                   scaleMode="SCALE_DOWN"/>
+                            <!-- Кнопки управления логотипом нейросети (BLOB) -->
+                            <hbox id="logoControls"
+                                  width="100%"
+                                  spacing="true"
+                                  align="MIDDLE_CENTER">
+                                <upload id="logoUploadField"
+                                        fileStoragePutMode="MANUAL"
+                                        align="MIDDLE_CENTER"
+                                        showFileName="false"
+                                        showClearButton="false"
+                                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                        permittedExtensions=".png,.jpg,.jpeg,.webp,.svg"
+                                        fileSizeLimit="15728640"
+                                        uploadButtonCaption="msg://adminLogoUpload.caption"
+                                        uploadButtonIcon="font-icon:UPLOAD"/>
+                                <button id="clearLogoBtn"
+                                        icon="font-icon:TRASH"
+                                        description="msg://adminLogoClear.caption"
+                                        stylename="borderless"
+                                        invoke="onClearLogoClick"/>
+                            </hbox>
+                            <!-- 4 уровня типографики шапки профиля -->
+                            <vbox id="identityTexts"
+                                  width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label dataContainer="adminConfigurationDc"
+                                       property="name"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label dataContainer="adminConfigurationDc"
+                                       property="providerCode"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label value="msg://sidebarSubtitle"
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Label-навигация по разделам формы -->
+                        <vbox id="navigation"
+                              stylename="label-navigation job-candidate-navigation"
+                              width="100%"
+                              spacing="false">
+                            <label value="Разделы"
+                                   stylename="label-nav-title admin-ai-configuration-navigation-title"
+                                   width="100%"/>
+                            <button id="mainNav"
+                                    caption="Основное"
+                                    stylename="borderless label-nav-item label-nav-item-active"
+                                    width="100%"
+                                    invoke="focusMainSection"/>
+                            <button id="connectionNav"
+                                    caption="Подключение"
+                                    stylename="borderless label-nav-item"
+                                    width="100%"
+                                    invoke="focusConnectionSection"/>
+                            <button id="securityNav"
+                                    caption="Безопасность"
+                                    stylename="borderless label-nav-item"
+                                    width="100%"
+                                    invoke="focusSecuritySection"/>
+                        </vbox>
+
+                        <!-- Сводка параметров подключения -->
+                        <vbox id="termsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://termsTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Провайдер:" stylename="bold"/>
+                                        <label dataContainer="adminConfigurationDc" property="providerCode"/>
+                                    </row>
+                                    <row>
+                                        <label value="Модель:" stylename="bold"/>
+                                        <label dataContainer="adminConfigurationDc" property="defaultModelName"/>
+                                    </row>
+                                    <row>
+                                        <label value="Приоритет:" stylename="bold"/>
+                                        <label dataContainer="adminConfigurationDc" property="priority"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Контекстная подсказка о безопасности ключа -->
+                        <label value="Сохранённый API-ключ никогда не показывается. Пустое поле ключа при редактировании означает «оставить прежний»."
+                               stylename="edit-sidebar-hint"
+                               width="100%"/>
+
+                        <!-- Нижний спейсер 16px -->
+                        <vbox id="sidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
             </vbox>
-            <!-- Рабочая область корпоративного credential editor. -->
-            <vbox id="workspace" stylename="edit-workspace" expand="workspaceScroll" width="100%" height="100%" spacing="false">
-                <!-- Toolbar с заголовком и пояснением роли corporate credential. -->
-                <hbox id="toolbar" stylename="edit-toolbar" width="100%" spacing="true">
-                    <!-- Текстовый блок toolbar. -->
+
+            <!-- Правая рабочая область: toolbar, секции с адаптивной шириной и footer-actions -->
+            <vbox id="workspace"
+                  stylename="edit-workspace candidate-reestr-workspace"
+                  expand="workspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком и пояснением -->
+                <hbox id="toolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
                     <vbox id="toolbarText" width="100%" spacing="false">
-                        <!-- Заголовок карточки. -->
                         <label value="Корпоративное AI-подключение" stylename="edit-toolbar-title"/>
-                        <!-- Объяснение роли системного credential. -->
                         <label value="Системный provider/model и защищённый API credential" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-                <!-- Прокручиваемая область карточек рабочей области. -->
-                <scrollBox id="workspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
-                    <!-- Поток карточек рабочей области. -->
-                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
-                        <!-- Карточка «Основное»: базовые реквизиты подключения. -->
-                        <groupBox id="mainSection" caption="Основное" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Человекочитаемое название подключения; обязательное поле. -->
-                            <textField id="nameField" dataContainer="adminConfigurationDc" property="name" required="true" width="100%" stylename="edit-form-control" caption="msg://adminName.caption"/>
-                            <!-- Registry provider code из контролируемого каталога провайдеров; обязателен. -->
-                            <lookupField id="providerCodeField" dataContainer="adminConfigurationDc" property="providerCode" required="true" width="100%" stylename="edit-form-control" caption="msg://adminProviderCode.caption"/>
-                            <!-- Active state, который resolver проверяет перед вызовом. -->
-                            <checkBox id="activeField" dataContainer="adminConfigurationDc" property="active" caption="msg://adminActive.caption"/>
-                            <!-- Признак бесплатной модели без списания платных токенов. -->
-                            <checkBox id="freeModelField" dataContainer="adminConfigurationDc" property="freeModel" caption="msg://adminFreeModel.caption" description="msg://adminFreeModel.description"/>
-                            <!-- Priority зарезервирован для выбора/резервирования подключений. -->
-                            <textField id="priorityField" dataContainer="adminConfigurationDc" property="priority" width="100%" stylename="edit-form-control" caption="msg://adminPriority.caption"/>
+
+                <!-- Прокручиваемая область контента рабочей области -->
+                <scrollBox id="workspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <vbox id="sections"
+                          stylename="edit-workspace-content"
+                          width="100%"
+                          spacing="true">
+                        <!-- Аккордеон-секция «Основное» -->
+                        <groupBox id="mainSection"
+                                  caption="Основное"
+                                  stylename="edit-accordion-section"
+                                  showAsPanel="true"
+                                  collapsable="true"
+                                  collapsed="false"
+                                  width="100%"
+                                  spacing="true">
+                            <textField id="nameField"
+                                       dataContainer="adminConfigurationDc"
+                                       property="name"
+                                       required="true"
+                                       width="100%"
+                                       maxWidth="560px"
+                                       stylename="edit-form-control"
+                                       caption="msg://adminName.caption"/>
+                            <lookupField id="providerCodeField"
+                                         dataContainer="adminConfigurationDc"
+                                         property="providerCode"
+                                         required="true"
+                                         width="320px"
+                                         stylename="edit-form-control"
+                                         caption="msg://adminProviderCode.caption"/>
+                            <checkBox id="activeField"
+                                      dataContainer="adminConfigurationDc"
+                                      property="active"
+                                      width="100%"
+                                      caption="msg://adminActive.caption"/>
+                            <checkBox id="freeModelField"
+                                      dataContainer="adminConfigurationDc"
+                                      property="freeModel"
+                                      width="100%"
+                                      caption="msg://adminFreeModel.caption"
+                                      description="msg://adminFreeModel.description"/>
+                            <textField id="priorityField"
+                                       dataContainer="adminConfigurationDc"
+                                       property="priority"
+                                       width="160px"
+                                       stylename="edit-form-control"
+                                       caption="msg://adminPriority.caption"/>
                         </groupBox>
-                        <!-- Карточка «Подключение»: default-модель и опциональная gateway metadata. -->
-                        <groupBox id="connectionSection" caption="Подключение" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <textField id="defaultModelNameField" dataContainer="adminConfigurationDc" property="defaultModelName" width="100%" stylename="edit-form-control" caption="msg://adminDefaultModelName.caption"/>
-                            <!-- Размер контекста (токенов); максимум 10 000. -->
-                            <textField id="maxContextTokensField" dataContainer="adminConfigurationDc" property="maxContextTokens" width="100%" stylename="edit-form-control" caption="msg://adminMaxContextTokens.caption" description="msg://adminMaxContextTokens.description"/>
-                            <!-- Количество обращений к модели до переключения на fallback -->
+
+                        <!-- Аккордеон-секция «Подключение» -->
+                        <groupBox id="connectionSection"
+                                  caption="Подключение"
+                                  stylename="edit-accordion-section"
+                                  showAsPanel="true"
+                                  collapsable="true"
+                                  collapsed="false"
+                                  width="100%"
+                                  spacing="true">
+                            <textField id="defaultModelNameField"
+                                       dataContainer="adminConfigurationDc"
+                                       property="defaultModelName"
+                                       width="100%"
+                                       maxWidth="480px"
+                                       stylename="edit-form-control"
+                                       caption="msg://adminDefaultModelName.caption"/>
+                            <textField id="maxContextTokensField"
+                                       dataContainer="adminConfigurationDc"
+                                       property="maxContextTokens"
+                                       width="160px"
+                                       stylename="edit-form-control"
+                                       caption="msg://adminMaxContextTokens.caption"
+                                       description="msg://adminMaxContextTokens.description"/>
                             <textField id="maxRetriesField"
                                        dataContainer="adminConfigurationDc"
                                        property="maxRetries"
-                                       width="100%"
+                                       width="160px"
                                        stylename="edit-form-control"
                                        inputPrompt="3"
                                        caption="msg://adminMaxRetries.caption"
@@ -126,21 +272,47 @@
                                     <max value="10" message="msg://maxRetriesValidationMax"/>
                                 </validators>
                             </textField>
-                            <!-- Опциональный base URL; vendor adapter может игнорировать его до отдельной поддержки. -->
-                            <textField id="baseApiUrlField" dataContainer="adminConfigurationDc" property="baseApiUrl" width="100%" stylename="edit-form-control" caption="msg://adminBaseApiUrl.caption"/>
-                            <!-- Read-only результат последней проверки подключения. -->
-                            <textField id="lastTestStatusField" dataContainer="adminConfigurationDc" property="lastTestStatus" editable="false" width="100%" stylename="edit-form-control" caption="msg://adminLastTestStatus.caption"/>
-                            <!-- Read-only безопасная диагностика последней ошибки без provider message. -->
-                            <textArea id="lastErrorField" dataContainer="adminConfigurationDc" property="lastError" editable="false" width="100%" rows="2" stylename="edit-form-control" caption="msg://adminLastError.caption"/>
+                            <textField id="baseApiUrlField"
+                                       dataContainer="adminConfigurationDc"
+                                       property="baseApiUrl"
+                                       width="100%"
+                                       maxWidth="560px"
+                                       stylename="edit-form-control"
+                                       caption="msg://adminBaseApiUrl.caption"/>
+                            <textField id="lastTestStatusField"
+                                       dataContainer="adminConfigurationDc"
+                                       property="lastTestStatus"
+                                       editable="false"
+                                       width="220px"
+                                       stylename="edit-form-control"
+                                       caption="msg://adminLastTestStatus.caption"/>
+                            <textArea id="lastErrorField"
+                                      dataContainer="adminConfigurationDc"
+                                      property="lastError"
+                                      editable="false"
+                                      width="100%"
+                                      rows="3"
+                                      stylename="edit-form-control"
+                                      caption="msg://adminLastError.caption"/>
                         </groupBox>
-                        <!-- Карточка «Безопасность»: ввод нового secret намеренно unbound от property сущности. -->
-                        <groupBox id="securitySection" caption="Безопасность" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Новый plaintext существует только в компоненте до middleware-шифрования;
-                                 без property=, чтобы ciphertext никогда не попадал в UI. -->
-                            <passwordField id="apiKeyInput" caption="msg://adminNewApiKey.caption" secret="true" width="100%" stylename="edit-form-control"/>
-                            <!-- Пояснение заменяет запрещённую функцию «показать ключ». -->
-                            <label value="Введите значение только для создания или замены ключа. Существующий ключ не загружается в это поле." width="100%"/>
-                            <!-- Проверка соединения с введённым или сохранённым ключом -->
+
+                        <!-- Аккордеон-секция «Безопасность» -->
+                        <groupBox id="securitySection"
+                                  caption="Безопасность"
+                                  stylename="edit-accordion-section"
+                                  showAsPanel="true"
+                                  collapsable="true"
+                                  collapsed="false"
+                                  width="100%"
+                                  spacing="true">
+                            <passwordField id="apiKeyInput"
+                                           caption="msg://adminNewApiKey.caption"
+                                           secret="true"
+                                           width="100%"
+                                           maxWidth="500px"
+                                           stylename="edit-form-control"/>
+                            <label value="Введите значение только для создания или замены ключа. Существующий ключ не загружается в это поле."
+                                   width="100%"/>
                             <button id="testConnectionBtn"
                                     caption="msg://testConnectionBtn.caption"
                                     icon="font-icon:CHECK"
@@ -149,17 +321,16 @@
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Нижняя панель штатных editor-actions: сохранить и отменить (вне прокручиваемого контента). -->
-                <!-- Кнопки прижаты в правый нижний угол по эталону IteractionListEdit: expand-спейсер + AUTO-группа MIDDLE_RIGHT. -->
-                <hbox id="editActions" stylename="edit-footer-actions" width="100%" expand="editActionsSpacer" align="MIDDLE_RIGHT">
-                    <!-- Спейсер заполняет свободную ширину footer и выталкивает группу кнопок к правому краю. -->
+
+                <!-- Нижняя панель действий: Сохранить и Отменить -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      expand="editActionsSpacer"
+                      align="MIDDLE_RIGHT">
                     <vbox id="editActionsSpacer" width="100%" height="1px"/>
-                    <!-- Группа кнопок с фиксированной шириной: визуальный порядок Save → Cancel, как у эталона;
-                         spacing=true даёт межкнопочный зазор v-spacing 10px (эталон IteractionListEdit). -->
                     <hbox id="editActionsGroup" width="AUTO" align="MIDDLE_RIGHT" spacing="true">
-                        <!-- Commit и закрытие редактора (middleware-шифрование выполняется в onBeforeCommitChanges). -->
                         <button action="windowCommitAndClose" stylename="admin-ai-configuration-primary-action"/>
-                        <!-- Закрытие без сохранения изменений. -->
                         <button action="windowClose" stylename="admin-ai-configuration-secondary-action"/>
                     </hbox>
                 </hbox>

@@ -7,7 +7,10 @@
     <data readOnly="true">
         <collection id="vacancyPromptTemplatesDc"
                     class="com.company.hunttech.entity.VacancyPromptTemplate">
-            <view extends="vacancyPromptTemplate-browse-view"/>
+            <view extends="vacancyPromptTemplate-browse-view">
+                <property name="systemContext"/>
+                <property name="promptText"/>
+            </view>
             <loader id="vacancyPromptTemplatesDl">
                 <query>
                     <![CDATA[select e from hunttech_VacancyPromptTemplate e]]>
@@ -17,45 +20,157 @@
     </data>
     <dialogMode height="600"
                 width="900"/>
-    <layout expand="tableCard"
-            spacing="true"
-            stylename="browse-screen-layout edit-screen-layout">
-        <filter id="filter"
-                applyTo="vacancyPromptTemplatesTable"
-                dataLoader="vacancyPromptTemplatesDl"
-                collapsable="true"
-                collapsed="true">
-            <properties include=".*"/>
-        </filter>
-        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="vacancyPromptTemplatesTable" stylename="edit-card candidate-table-card">
-            <groupTable id="vacancyPromptTemplatesTable"
-                        width="100%"
-                        height="100%"
-                        dataContainer="vacancyPromptTemplatesDc">
-                <actions>
-                    <action id="create" type="create"/>
-                    <action id="edit" type="edit"/>
-                    <action id="remove" type="remove"/>
-                    <action id="refresh" type="refresh"/>
-                </actions>
-                <columns>
-                    <column id="code" width="220px"/>
-                    <column id="name" minimumWidth="250px"/>
-                    <column id="temperature" width="120px"/>
-                </columns>
-                <rowsCount/>
-                <buttonsPanel id="buttonsPanel"
-                              alwaysVisible="true">
-                    <button id="createBtn" action="vacancyPromptTemplatesTable.create" stylename="primary" icon="PLUS"/>
-                    <button id="editBtn" action="vacancyPromptTemplatesTable.edit" icon="EDIT_ACTION"/>
-                    <button id="removeBtn" action="vacancyPromptTemplatesTable.remove" icon="REMOVE"/>
-                    <button id="refreshBtn" action="vacancyPromptTemplatesTable.refresh" icon="REFRESH"/>
-                </buttonsPanel>
-            </groupTable>
-        </vbox>
-        <hbox id="lookupActions" spacing="true" visible="false">
-            <button action="lookupSelectAction"/>
-            <button action="lookupCancelAction"/>
-        </hbox>
+    <layout spacing="false"
+            stylename="browse-screen-layout edit-screen-layout"
+            width="100%"
+            height="100%">
+        <split id="split"
+               orientation="horizontal"
+               pos="312px"
+               min="260px"
+               max="420px"
+               width="100%"
+               height="100%">
+            <!-- Сайдбар 312px -->
+            <vbox id="detailPane"
+                  stylename="job-candidate-sidebar edit-sidebar"
+                  width="100%"
+                  height="100%"
+                  spacing="false"
+                  margin="false">
+                <scrollBox id="sidebarScroll"
+                           width="100%"
+                           height="100%"
+                           spacing="true"
+                           stylename="sidebar-scrollbox">
+                    <vbox id="sidebarIdentity"
+                          stylename="edit-sidebar-identity"
+                          width="100%"
+                          spacing="true"
+                          align="TOP_CENTER">
+                        <ovalImage id="sidebarAvatar"
+                                   width="120px"
+                                   height="120px"
+                                   ovalWidth="120px"
+                                   ovalHeight="120px"
+                                   stylename="ovaFallbackImage"
+                                   align="MIDDLE_CENTER"
+                                   scaleMode="SCALE_DOWN">
+                            <theme path="icons/ai/vacancy-prompt-template.png"/>
+                        </ovalImage>
+                        <label id="sidebarSubtitle"
+                               value="msg://sidebarSubtitle"
+                               stylename="edit-sidebar-subtitle"
+                               align="MIDDLE_CENTER"/>
+                        <label id="sidebarTitle"
+                               value="msg://selectTemplatePrompt"
+                               stylename="edit-sidebar-title label-candidate-name"
+                               align="MIDDLE_CENTER"/>
+                        <label id="sidebarCode"
+                               stylename="label-candidate-position"
+                               align="MIDDLE_CENTER"
+                               visible="false"/>
+                        <label id="sidebarTemperatureBadge"
+                               stylename="candidate-badge badge-neutral"
+                               align="MIDDLE_CENTER"
+                               visible="false"/>
+                    </vbox>
+
+                    <vbox id="quickActions"
+                          width="100%"
+                          spacing="true"
+                          visible="false">
+                        <button id="openCardBtn"
+                                caption="msg://openCardBtn"
+                                icon="EDIT_ACTION"
+                                width="100%"
+                                stylename="primary"/>
+                    </vbox>
+
+                    <vbox id="sidebarDetails"
+                          stylename="edit-card sidebar-section"
+                          width="100%"
+                          spacing="true"
+                          visible="false">
+                        <label value="msg://parametersSection"
+                               stylename="h4"/>
+                        <vbox spacing="false">
+                            <label value="msg://templateTemperatureCaption"
+                                   stylename="bold"/>
+                            <label id="sidebarTemperatureVal"/>
+                        </vbox>
+                        <vbox spacing="false">
+                            <label value="msg://aiRole.caption"
+                                   stylename="bold"/>
+                            <label id="sidebarSystemContextVal"/>
+                        </vbox>
+                        <vbox spacing="false">
+                            <label value="msg://promptPreviewSection"
+                                   stylename="bold"/>
+                            <label id="sidebarPromptTextVal"/>
+                        </vbox>
+                    </vbox>
+
+                    <vbox id="sidebarBottomSpacer"
+                          height="16px"/>
+
+                    <label value="msg://templateSidebarHint"
+                           stylename="edit-sidebar-hint"
+                           width="100%"/>
+                </scrollBox>
+            </vbox>
+
+            <!-- Основная таблица -->
+            <vbox id="mainContent"
+                  width="100%"
+                  height="100%"
+                  spacing="true"
+                  expand="tableCard"
+                  stylename="edit-workspace">
+                <filter id="filter"
+                        applyTo="vacancyPromptTemplatesTable"
+                        dataLoader="vacancyPromptTemplatesDl"
+                        collapsable="true"
+                        collapsed="true">
+                    <properties include=".*"/>
+                </filter>
+                <vbox id="tableCard"
+                      width="100%"
+                      height="100%"
+                      spacing="false"
+                      expand="vacancyPromptTemplatesTable"
+                      stylename="edit-card candidate-table-card">
+                    <groupTable id="vacancyPromptTemplatesTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="vacancyPromptTemplatesDc">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="code" width="220px"/>
+                            <column id="name" minimumWidth="260px"/>
+                            <column id="temperature" width="120px"/>
+                        </columns>
+                        <rowsCount/>
+                        <buttonsPanel id="buttonsPanel"
+                                      alwaysVisible="true">
+                            <button id="createBtn" action="vacancyPromptTemplatesTable.create" stylename="primary" icon="PLUS"/>
+                            <button id="editBtn" action="vacancyPromptTemplatesTable.edit" icon="EDIT_ACTION"/>
+                            <button id="removeBtn" action="vacancyPromptTemplatesTable.remove" icon="REMOVE"/>
+                            <button id="refreshBtn" action="vacancyPromptTemplatesTable.refresh" icon="REFRESH"/>
+                        </buttonsPanel>
+                    </groupTable>
+                </vbox>
+                <hbox id="lookupActions" spacing="true" visible="false">
+                    <button action="lookupSelectAction"/>
+                    <button action="lookupCancelAction"/>
+                </hbox>
+            </vbox>
+        </split>
     </layout>
 </window>
+

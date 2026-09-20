@@ -1,157 +1,210 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit-экран справочника «Формы собственности»: двухпанельная композиция по общему
-     контракту Edit-экранов HRM HuntTech. Сохраняет исходный data binding (ownershupDc) и actions. -->
+<!-- Edit-экран справочника «Формы собственности»: двухпанельная композиция Split-View 312px
+     по общему контракту Edit-экранов HRM HuntTech (hunttech-edit-screen-design). Сохраняет binding и actions. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="shortTypeField"
-        messagesPack="com.company.hunttech.web.screens.ownershup" icon="icons/icons/wf-user-group-button.png">
-    <!-- Секция данных: корневой контейнер формы собственности. -->
+        messagesPack="com.company.hunttech.web.screens.ownershup"
+        icon="icons/icons/wf-user-group-button.png">
     <data>
-        <!-- Корневой контейнер формы собственности; view _local покрывает оба поля формы. -->
         <instance id="ownershupDc"
                   class="com.company.hunttech.entity.Ownershup"
                   view="_local">
-            <!-- Штатный загрузчик контейнера (берёт id из editor). -->
             <loader/>
         </instance>
     </data>
-    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
     <dialogMode height="100%" width="100%" modal="true"/>
-    <!-- Корневой layout формы: локальный namespace ownershup-editor + общий контракт Edit-экранов. -->
-    <layout stylename="ownershup-editor"
+    <layout stylename="ownershup-editor job-candidate-editor edit-screen-layout"
             expand="mainLayout"
             spacing="false"
+            margin="false"
             width="100%"
             height="100%">
-        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
         <hbox id="mainLayout"
-              stylename="edit-screen-layout"
+              stylename="job-candidate-main-layout edit-screen-layout"
               expand="workspace"
               spacing="false"
               width="100%"
               height="100%">
-            <!-- Левая контекстная панель 270px: фирменный логотип, идентификация,
-                 label-навигация и подсказка (контракт §4.2). -->
+            <!-- Левая контекстная панель 312px: аватар 120px, идентификация, label-навигация, реквизиты -->
             <vbox id="sidebar"
-                  stylename="edit-sidebar"
-                  width="270px"
+                  stylename="edit-sidebar job-candidate-sidebar"
+                  width="312px"
                   height="100%"
                   spacing="true"
-                  expand="sidebarSpacer">
-                <!-- Визуальный блок sidebar: круглая иллюстрация формы собственности
-                     (без привязки к данным — загрузка изображения формой не предусмотрена). -->
-                <vbox id="visual"
-                      stylename="edit-sidebar-visual"
-                      width="100%"
-                      spacing="true"
-                      align="MIDDLE_CENTER">
-                    <ovalImage id="ownershupLogoImage"
-                               width="176px"
-                               height="176px"
-                               ovalWidth="176px"
-                               ovalHeight="176px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               scaleMode="SCALE_DOWN"
-                               stylename="dictionary-logo-image">
-                        <theme path="icons/dictionaries/ownershup.png"/>
-                    </ovalImage>
-                </vbox>
-                <!-- Блок идентификации: тип записи и полное название формы собственности. -->
-                <vbox id="identity"
-                      stylename="edit-sidebar-identity"
-                      width="100%"
-                      spacing="true">
-                    <!-- Подпись типа записи. -->
-                    <label value="Форма собственности"
-                           stylename="edit-sidebar-subtitle"
-                           width="100%"/>
-                    <!-- Полное название (свойство longType), живое из ownershupDc. -->
-                    <label id="sidebarTitle"
-                           dataContainer="ownershupDc"
-                           property="longType"
-                           stylename="edit-sidebar-title"
-                           width="100%"/>
-                </vbox>
-                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
-                <vbox id="navigation"
-                      stylename="label-navigation"
-                      width="100%"
-                      spacing="false">
-                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
-                    <label value="Разделы"
-                           stylename="label-nav-title dictionary-navigation-title"
-                           width="100%"/>
-                    <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
-                    <button id="mainNav"
-                            caption="Основные данные"
-                            stylename="borderless label-nav-item label-nav-item-active"
-                            width="100%"
-                            invoke="focusMainSection"/>
-                </vbox>
-                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
-                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
-                <!-- Нейтральная подсказка о роли справочника в HRM HuntTech. -->
-                <label value="Форма собственности определяет организационно-правовой статус компании в HRM HuntTech."
-                       stylename="edit-sidebar-hint"
-                       width="100%"/>
+                  margin="false">
+                <scrollBox id="sidebarScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical">
+                    <vbox id="sidebarContent"
+                          width="100%"
+                          spacing="true">
+                        <!-- Визуальный блок шапки: круглая иллюстрация 120px -->
+                        <vbox id="visual"
+                              stylename="edit-sidebar-visual job-candidate-profile-header"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER">
+                            <ovaFallbackImage id="ownershupLogoImage"
+                                              width="120px"
+                                              height="120px"
+                                              ovalWidth="120px"
+                                              ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              fallbackThemePath="icons/briefcase.png"
+                                              scaleMode="SCALE_DOWN"/>
+                            <!-- Блок идентификации: тип записи и краткое/полное название -->
+                            <vbox id="identity"
+                                  stylename="edit-sidebar-identity"
+                                  width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER">
+                                <label id="sidebarSubtitle"
+                                       value="msg://sidebarSubtitle"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="sidebarTitle"
+                                       dataContainer="ownershupDc"
+                                       property="shortType"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Вертикальная label-навигация по разделам формы -->
+                        <vbox id="navigation"
+                              stylename="label-navigation job-candidate-navigation"
+                              width="100%"
+                              spacing="false">
+                            <label value="Разделы"
+                                   stylename="label-nav-title dictionary-navigation-title"
+                                   width="100%"/>
+                            <button id="mainNav"
+                                    caption="msg://mainNav.caption"
+                                    stylename="borderless label-nav-item label-nav-item-active"
+                                    width="100%"
+                                    invoke="focusMainSection"/>
+                        </vbox>
+
+                        <!-- Сводка реквизитов формы собственности -->
+                        <vbox id="termsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://termsTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="msg://shortTypeCaption" stylename="bold"/>
+                                        <label id="sideShortType" dataContainer="ownershupDc" property="shortType"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://longTypeCaption" stylename="bold"/>
+                                        <label id="sideLongType" dataContainer="ownershupDc" property="longType"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Контекстная подсказка -->
+                        <label value="Форма собственности определяет организационно-правовой статус компании в HRM HuntTech."
+                               stylename="edit-sidebar-hint"
+                               width="100%"/>
+
+                        <!-- Нижний спейсер 16px -->
+                        <vbox id="sidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
             </vbox>
-            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+
+            <!-- Правая рабочая область: toolbar, секции с адаптивной шириной и footer-actions -->
             <vbox id="workspace"
-                  stylename="edit-workspace"
+                  stylename="edit-workspace candidate-reestr-workspace"
                   expand="workspaceScroll"
                   width="100%"
                   height="100%"
                   spacing="false">
-                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <!-- Toolbar с заголовком карточки и пояснением -->
                 <hbox id="toolbar"
                       stylename="edit-toolbar"
                       width="100%"
                       spacing="true">
-                    <!-- Текстовый блок toolbar: заголовок и описание. -->
                     <vbox id="toolbarText" width="100%" spacing="false">
                         <label value="Карточка формы собственности" stylename="edit-toolbar-title"/>
                         <label value="Краткое и полное наименование формы собственности" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-                <!-- Прокручиваемая область контента рабочей области. -->
+
+                <!-- Прокручиваемая область контента рабочей области -->
                 <scrollBox id="workspaceScroll"
                            stylename="edit-workspace-scroll"
                            width="100%"
                            height="100%">
-                    <!-- Поток карточек рабочей области. -->
-                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
-                        <!-- Карточка «Основные данные»: реквизиты формы собственности. -->
+                    <vbox id="sections"
+                          stylename="edit-workspace-content"
+                          width="100%"
+                          spacing="true">
+                        <!-- Аккордеон-секция «Основные данные»: реквизиты формы собственности -->
                         <groupBox id="mainSection"
                                   caption="Основные данные"
-                                  stylename="edit-card"
+                                  stylename="edit-accordion-section"
                                   showAsPanel="true"
+                                  collapsable="true"
+                                  collapsed="false"
                                   width="100%"
                                   spacing="true">
-                            <!-- Форма с полями, привязанными к ownershupDc. -->
                             <form id="form" dataContainer="ownershupDc" width="100%">
                                 <column width="100%">
-                                    <!-- Краткое наименование формы собственности. -->
-                                    <textField id="shortTypeField" property="shortType" caption="msg://msgShortType" width="100%" stylename="edit-form-control"/>
-                                    <!-- Полное наименование формы собственности. -->
-                                    <textField id="longTypeField" property="longType" caption="msg://msgLongType" width="100%" stylename="edit-form-control"/>
+                                    <!-- Краткое наименование с адаптивной шириной -->
+                                    <textField id="shortTypeField"
+                                               property="shortType"
+                                               caption="msg://msgShortType"
+                                               width="100%"
+                                               maxWidth="260px"
+                                               stylename="edit-form-control"/>
+                                    <!-- Полное наименование с адаптивной шириной -->
+                                    <textField id="longTypeField"
+                                               property="longType"
+                                               caption="msg://msgLongType"
+                                               width="100%"
+                                               maxWidth="560px"
+                                               stylename="edit-form-control"/>
                                 </column>
                             </form>
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%"
-                      expand="actionsSpacer" align="MIDDLE_RIGHT">
-                    <!-- Spacer прижимает кнопки к правому краю. -->
+
+                <!-- Нижняя панель штатных действий: сохранить и отменить -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      spacing="true"
+                      width="100%"
+                      expand="actionsSpacer"
+                      align="MIDDLE_RIGHT">
                     <vbox id="actionsSpacer" width="100%" height="1px"/>
-                    <!-- Сохранить и закрыть (штатный action editor-а). -->
-                    <button id="commitAndCloseBtn" action="windowCommitAndClose"
+                    <button id="commitAndCloseBtn"
+                            action="windowCommitAndClose"
                             stylename="c-primary-action"/>
-                    <!-- Отменить изменения и закрыть. -->
-                    <button id="closeBtn" action="windowClose"/>
+                    <button id="closeBtn"
+                            action="windowClose"/>
                 </hbox>
             </vbox>
         </hbox>
     </layout>
 </window>
+

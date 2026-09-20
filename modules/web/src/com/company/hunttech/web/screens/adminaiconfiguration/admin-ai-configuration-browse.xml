@@ -1,90 +1,256 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Системный Browse корпоративных AI-подключений; API_KEY_ENCRYPTED отсутствует в view и таблице. -->
+<!-- Browse корпоративных AI-подключений: двухпанельная композиция Split-View 312px
+     по стандарту HRM HuntTech (hunttech-browse-screen-design). API_KEY_ENCRYPTED отсутствует в view и таблице. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
         focusComponent="adminConfigurationsTable"
         messagesPack="com.company.hunttech.web.screens.adminaiconfiguration">
-    <!-- Safe data graph для административного мониторинга подключений. -->
     <data>
-        <!-- Browse container загружает только безопасные status/model/provider поля. -->
         <collection id="adminConfigurationsDc"
                     class="com.company.hunttech.entity.ai.AdminAiConfiguration"
                     view="admin-ai-configuration-browse-view">
-            <!-- Loader сортирует активные подключения по приоритету. -->
             <loader id="adminConfigurationsDl">
-                <!-- Никакого обращения к API_KEY_ENCRYPTED в JPQL нет. -->
                 <query><![CDATA[select e from hunttech_AdminAiConfiguration e order by e.active desc, e.priority desc, e.name]]></query>
             </loader>
         </collection>
     </data>
-    <!-- Административный диалог достаточной ширины для статусов. -->
-    <dialogMode width="1100" height="700"/>
-    <!-- Локальный browse namespace. -->
-    <layout stylename="browse-screen-layout edit-screen-layout admin-ai-configuration-browse" expand="tableCard" spacing="true">
-        <!-- Фильтр работает по safe view. -->
-        <filter id="filter" dataLoader="adminConfigurationsDl" applyTo="adminConfigurationsTable"
-                collapsable="true" collapsed="true">
-            <!-- Стандартные фильтруемые свойства CUBA. -->
-            <properties include=".*" exclude="apiKeyEncrypted"/>
-        </filter>
-        <!-- Toolbar: CRUD + middleware connection test. -->
-        <hbox id="browseActions" spacing="true" stylename="edit-toolbar">
-            <!-- Создание корпоративного подключения. -->
-            <button id="createBtn" action="adminConfigurationsTable.create" stylename="primary" icon="PLUS"/>
-            <!-- Редактирование выбранного подключения. -->
-            <button id="editBtn" action="adminConfigurationsTable.edit" icon="EDIT_ACTION"/>
-            <!-- Удаление только неиспользуемой записи. -->
-            <button id="removeBtn" action="adminConfigurationsTable.remove" icon="REMOVE"/>
-            <!-- Обновление списка. -->
-            <button id="refreshBtn" action="adminConfigurationsTable.refresh" icon="REFRESH"/>
-            <!-- Тест по id выполняется в core без передачи secret в Web Client. -->
-            <button id="testBtn" caption="Проверить подключение" icon="CHECK" invoke="testSelectedConnection"/>
-        </hbox>
-        <!-- Safe DataGrid корпоративных подключений в карточке-контейнере. -->
-        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="adminConfigurationsTable" stylename="edit-card candidate-table-card">
-            <dataGrid id="adminConfigurationsTable" width="100%" height="100%" dataContainer="adminConfigurationsDc">
-                <!-- Стандартные CRUD actions. -->
-                <actions>
-                    <!-- Create открывает защищённый editor. -->
-                    <action id="create" type="create"/>
-                    <!-- Edit открывает защищённый editor. -->
-                    <action id="edit" type="edit"/>
-                    <!-- Remove учитывает FK от AI-функций. -->
-                    <action id="remove" type="remove"/>
-                    <action id="refresh" type="refresh"/>
-                </actions>
-                <!-- Только безопасные операционные сведения. -->
-                <columns>
-                    <!-- Имя подключения. -->
-                    <column property="name" minimumWidth="200px"/>
-                    <!-- Provider registry code. -->
-                    <column property="providerCode" width="130px"/>
-                    <!-- Default model. -->
-                    <column property="defaultModelName" width="220px"/>
-                    <!-- Active state. -->
-                    <column property="active" width="100px"/>
-                    <!-- Бесплатная модель. -->
-                    <column property="freeModel" width="110px"/>
-                    <!-- Routing priority metadata. -->
-                    <column property="priority" width="100px"/>
-                    <!-- Лимит контекста. -->
-                    <column property="maxContextTokens" width="140px"/>
-                    <!-- Количество обращений до fallback. -->
-                    <column property="maxRetries" width="130px"/>
-                    <!-- Последний test status. -->
-                    <column property="lastTestStatus" width="140px"/>
-                    <!-- Время последнего теста. -->
-                    <column property="lastTestAt" width="160px"/>
-                </columns>
-                <rowsCount/>
-            </dataGrid>
-        </vbox>
-        <!-- Скрытые lookup actions сохраняют StandardLookup contract. -->
-        <hbox id="lookupActions" spacing="true" visible="false">
-            <!-- Выбрать запись в lookup mode. -->
-            <button action="lookupSelectAction"/>
-            <!-- Отменить lookup. -->
-            <button action="lookupCancelAction"/>
+    <dialogMode width="1280" height="780"/>
+    <layout expand="splitMainLayout"
+            spacing="false"
+            margin="false"
+            width="100%"
+            height="100%"
+            stylename="browse-screen-layout edit-screen-layout admin-ai-configuration-browse job-candidate-editor">
+        <hbox id="splitMainLayout"
+              width="100%"
+              height="100%"
+              spacing="true"
+              expand="workspaceBox"
+              stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px на 100% высоты) -->
+            <vbox id="detailPane"
+                  width="312px"
+                  height="100%"
+                  spacing="true"
+                  margin="false"
+                  stylename="edit-sidebar job-candidate-sidebar">
+                <scrollBox id="detailScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical">
+                    <vbox id="sidebarInnerBox"
+                          width="100%"
+                          spacing="true">
+                        <!-- Шапка профиля с превью логотипа BLOB/Theme -->
+                        <vbox id="profileHeader"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER"
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <image id="logoPreview"
+                                   width="120px"
+                                   height="120px"
+                                   align="TOP_CENTER"
+                                   stylename="job-candidate-avatar"
+                                   scaleMode="SCALE_DOWN"/>
+                            <vbox id="identityBox"
+                                  width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label id="detailTitle"
+                                       value="msg://sidebarDefaultTitle"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle"
+                                       value="msg://sidebarSubtitle"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="detailModelBadge"
+                                       value=""
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn"
+                                    caption="msg://openEditCardBtn"
+                                    icon="EDIT_ACTION"
+                                    stylename="primary"
+                                    enabled="false"
+                                    width="100%"/>
+                            <button id="testBtn"
+                                    caption="msg://testConnectionBtn.caption"
+                                    icon="CHECK"
+                                    invoke="testSelectedConnection"
+                                    enabled="false"
+                                    width="100%"/>
+                        </vbox>
+
+                        <!-- Статус и лимиты -->
+                        <vbox id="statusCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://statusTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="statusGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Активно:" stylename="bold"/>
+                                        <label id="detailActive" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Тариф:" stylename="bold"/>
+                                        <label id="detailFree" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Приоритет:" stylename="bold"/>
+                                        <label id="detailPriority" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Контекст:" stylename="bold"/>
+                                        <label id="detailContext" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Ретраи:" stylename="bold"/>
+                                        <label id="detailRetries" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Проверка:" stylename="bold"/>
+                                        <label id="detailLastStatus" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Параметры подключения -->
+                        <vbox id="termsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://termsTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Провайдер:" stylename="bold"/>
+                                        <label id="detailProvider" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Модель:" stylename="bold"/>
+                                        <label id="detailModel" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Нижний спейсер 16px -->
+                        <vbox id="detailSidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox"
+                  width="100%"
+                  height="100%"
+                  spacing="true"
+                  stylename="edit-workspace candidate-reestr-workspace"
+                  expand="tableCard"
+                  margin="true,true,true,false">
+                <!-- Главный командный тулбар -->
+                <hbox id="browseActions"
+                      spacing="true"
+                      width="100%"
+                      stylename="candidate-filter-bar edit-card edit-toolbar">
+                    <button id="createBtn"
+                            action="adminConfigurationsTable.create"
+                            stylename="primary"
+                            icon="PLUS"/>
+                    <button id="editBtn"
+                            action="adminConfigurationsTable.edit"
+                            icon="EDIT_ACTION"/>
+                    <button id="removeBtn"
+                            action="adminConfigurationsTable.remove"
+                            icon="REMOVE"/>
+                    <button id="refreshBtn"
+                            action="adminConfigurationsTable.refresh"
+                            icon="REFRESH"/>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        dataLoader="adminConfigurationsDl"
+                        applyTo="adminConfigurationsTable"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*" exclude="apiKeyEncrypted"/>
+                </filter>
+
+                <!-- Safe DataGrid корпоративных подключений в карточке-контейнере -->
+                <vbox id="tableCard"
+                      width="100%"
+                      height="100%"
+                      spacing="false"
+                      expand="adminConfigurationsTable"
+                      stylename="edit-card candidate-table-card">
+                    <dataGrid id="adminConfigurationsTable"
+                              width="100%"
+                              height="100%"
+                              dataContainer="adminConfigurationsDc">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column property="name" minimumWidth="200px"/>
+                            <column property="providerCode" width="130px"/>
+                            <column property="defaultModelName" width="220px"/>
+                            <column property="active" width="100px"/>
+                            <column property="freeModel" width="110px"/>
+                            <column property="priority" width="100px"/>
+                            <column property="maxContextTokens" width="140px"/>
+                            <column property="maxRetries" width="130px"/>
+                            <column property="lastTestStatus" width="140px"/>
+                            <column property="lastTestAt" width="160px"/>
+                        </columns>
+                        <rowsCount/>
+                    </dataGrid>
+                </vbox>
+
+                <hbox id="lookupActions" spacing="true" visible="false">
+                    <button action="lookupSelectAction"/>
+                    <button action="lookupCancelAction"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
+

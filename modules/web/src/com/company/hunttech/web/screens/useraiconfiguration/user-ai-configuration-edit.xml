@@ -1,120 +1,210 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit персональной AI-конфигурации пользователя: перестройка 2026-08-12 из legacy-диалога 450px
-     в двухпанельную композицию по общему контракту Edit-экранов HRM HuntTech (образец —
-     vacancy-prompt-template-edit.xml). Сохранены все id полей, property, dataContainer,
-     loaders и actions; добавлены caption, edit-form-control и полоса-заголовок навигации.
-     Java-контроллер не изменён (focus-методов нет — пункты навигации display-only). -->
+<!-- Edit персональной AI-конфигурации пользователя: двухпанельная композиция Split-View 312px
+     по общему контракту Edit-экранов HRM HuntTech (hunttech-edit-screen-design). -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://userAiConfigurationEdit.caption"
         focusComponent="providerCodeField"
         messagesPack="com.company.hunttech.web.screens.useraiconfiguration">
-    <!-- Секция данных: единственный edit-контейнер персональной конфигурации. -->
     <data>
-        <!-- Редактируемая персональная AI-конфигурация с полным edit-view. -->
         <instance id="userAiConfigurationDc"
                   class="com.company.hunttech.entity.UserAiConfiguration"
                   view="userAiConfiguration-edit-view">
-            <!-- Стандартный editor-loader по id открытой записи. -->
             <loader/>
         </instance>
     </data>
-    <!-- Полноэкранный модальный editor соответствует сложным Edit-формам HRM HuntTech
-         (было: диалог 450×AUTO c forceDialog). -->
     <dialogMode width="100%" height="100%" modal="true"/>
-    <!-- Корневой layout формы: локальный namespace user-ai-configuration-editor + shared-контракт. -->
-    <layout stylename="user-ai-configuration-editor"
+    <layout stylename="user-ai-configuration-editor job-candidate-editor edit-screen-layout"
             expand="mainLayout"
             spacing="false"
+            margin="false"
             width="100%"
             height="100%">
-        <!-- Двухпанельная композиция: постоянная sidebar слева и расширяемая рабочая область справа. -->
-        <hbox id="mainLayout" stylename="edit-screen-layout" expand="workspace" spacing="false" width="100%" height="100%">
-            <!-- Левая контекстная панель 270px: identity → label-навигация → spacer → hint. -->
-            <vbox id="sidebar" stylename="edit-sidebar" width="270px" height="100%" spacing="true" expand="sidebarSpacer">
-                <!-- Блок идентификации: тип записи и живой provider из контейнера. -->
-                <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Тематическая HuntTech-иллюстрация персонального AI-подключения; fallback без привязки к данным. -->
-                    <ovalImage id="userAiConfigurationLogoImage"
-                               width="176px"
-                               height="176px"
-                               ovalWidth="176px"
-                               ovalHeight="176px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               scaleMode="SCALE_DOWN">
-                        <theme path="icons/ai/user-ai-configuration.png"/>
-                    </ovalImage>
-                    <!-- Подпись типа записи. -->
-                    <label value="Персональная AI-конфигурация" stylename="edit-sidebar-subtitle" width="100%"/>
-                    <!-- Живой provider-код конфигурации из edit-контейнера (свойство providerCode). -->
-                    <label dataContainer="userAiConfigurationDc" property="providerCode" stylename="edit-sidebar-title" width="100%"/>
-                </vbox>
-                <!-- Обязательная label-навигация по разделам формы (display-only: у контроллера нет focus-методов). -->
-                <vbox id="navigation" stylename="label-navigation" width="100%" spacing="false">
-                    <!-- Заголовок «Разделы»: полоса-заголовок с inset-линиями (контракт §4.1);
-                         локальный класс user-ai-configuration-navigation-title поверх label-nav-title. -->
-                    <label value="Разделы" stylename="label-nav-title user-ai-configuration-navigation-title" width="100%"/>
-                    <!-- Fallback-пункт «Основное» обозначает первую карточку формы (некликабельный label). -->
-                    <label value="Основное" stylename="label-nav-item label-nav-item-active" width="100%"/>
-                    <!-- Fallback-пункт «Безопасность» обозначает карточку API-ключа (некликабельный label). -->
-                    <label value="Безопасность" stylename="label-nav-item" width="100%"/>
-                </vbox>
-                <!-- Spacer прижимает подсказку к нижней границе sidebar. -->
-                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
-                <!-- Контекстная подсказка о роли персонального ключа: данные не меняет. -->
-                <label value="Ключ используется только для ваших замещений AI-функций; корпоративные подключения настраивает администратор."
-                       stylename="edit-sidebar-hint" width="100%"/>
+        <hbox id="mainLayout"
+              stylename="job-candidate-main-layout edit-screen-layout"
+              expand="workspace"
+              spacing="false"
+              width="100%"
+              height="100%">
+            <!-- Левая контекстная панель 312px: аватар 120px, идентификация, навигация, реквизиты -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar job-candidate-sidebar"
+                  width="312px"
+                  height="100%"
+                  spacing="true"
+                  margin="false">
+                <scrollBox id="sidebarScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical">
+                    <vbox id="sidebarContent"
+                          width="100%"
+                          spacing="true">
+                        <!-- Блок визуализации и идентификации: аватар 120px -->
+                        <vbox id="identity"
+                              stylename="edit-sidebar-visual job-candidate-profile-header"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER">
+                            <ovaFallbackImage id="userAiConfigurationLogoImage"
+                                              width="120px"
+                                              height="120px"
+                                              ovalWidth="120px"
+                                              ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              fallbackThemePath="icons/ai/user-ai-configuration.png"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox id="identityTexts"
+                                  width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label dataContainer="userAiConfigurationDc"
+                                       property="providerCode"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label dataContainer="userAiConfigurationDc"
+                                       property="defaultModelName"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label value="msg://sidebarSubtitle"
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Label-навигация по разделам формы -->
+                        <vbox id="navigation"
+                              stylename="label-navigation job-candidate-navigation"
+                              width="100%"
+                              spacing="false">
+                            <label value="Разделы"
+                                   stylename="label-nav-title user-ai-configuration-navigation-title"
+                                   width="100%"/>
+                            <button id="mainNav"
+                                    caption="msg://navMain"
+                                    stylename="borderless label-nav-item label-nav-item-active"
+                                    width="100%"
+                                    invoke="focusMainSection"/>
+                            <button id="securityNav"
+                                    caption="msg://navSecurity"
+                                    stylename="borderless label-nav-item"
+                                    width="100%"
+                                    invoke="focusSecuritySection"/>
+                        </vbox>
+
+                        <!-- Сводка параметров подключения -->
+                        <vbox id="termsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://termsTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Провайдер:" stylename="bold"/>
+                                        <label dataContainer="userAiConfigurationDc" property="providerCode"/>
+                                    </row>
+                                    <row>
+                                        <label value="Модель:" stylename="bold"/>
+                                        <label dataContainer="userAiConfigurationDc" property="defaultModelName"/>
+                                    </row>
+                                    <row>
+                                        <label value="Приоритет:" stylename="bold"/>
+                                        <label dataContainer="userAiConfigurationDc" property="priority"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Контекстная подсказка -->
+                        <label value="Ключ используется только для ваших замещений AI-функций; корпоративные подключения настраивает администратор."
+                               stylename="edit-sidebar-hint"
+                               width="100%"/>
+
+                        <!-- Нижний спейсер 16px -->
+                        <vbox id="sidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
             </vbox>
-            <!-- Правая рабочая область: toolbar, прокручиваемые карточки и footer. -->
-            <vbox id="workspace" stylename="edit-workspace" expand="workspaceScroll" width="100%" height="100%" spacing="false">
-                <!-- Toolbar с заголовком и пояснением формы. -->
-                <hbox id="toolbar" stylename="edit-toolbar" width="100%" spacing="true">
-                    <!-- Текстовый блок toolbar. -->
+
+            <!-- Правая рабочая область: toolbar, секции с адаптивной шириной и footer-actions -->
+            <vbox id="workspace"
+                  stylename="edit-workspace candidate-reestr-workspace"
+                  expand="workspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком и пояснением формы -->
+                <hbox id="toolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
                     <vbox id="toolbarText" width="100%" spacing="false">
-                        <!-- Заголовок рабочей области. -->
                         <label value="Персональная AI-конфигурация" stylename="edit-toolbar-title"/>
-                        <!-- Пояснение: личный provider, модель и API-ключ. -->
                         <label value="Личный провайдер, модель по умолчанию и API-ключ" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-                <!-- Прокручиваемая область карточек рабочей области. -->
-                <scrollBox id="workspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
-                    <!-- Поток карточек рабочей области. -->
-                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
-                        <!-- Карточка «Основное»: провайдер, модель по умолчанию и признак активности. -->
-                        <groupBox id="mainSection" caption="Основное" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Провайдер выбирается из общего каталога AiProviderCatalog; обязателен. -->
+
+                <!-- Прокручиваемая область карточек рабочей области -->
+                <scrollBox id="workspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <vbox id="sections"
+                          stylename="edit-workspace-content"
+                          width="100%"
+                          spacing="true">
+                        <!-- Аккордеон-секция «Основное» -->
+                        <groupBox id="mainSection"
+                                  caption="msg://navMain"
+                                  stylename="edit-accordion-section"
+                                  showAsPanel="true"
+                                  collapsable="true"
+                                  collapsed="false"
+                                  width="100%"
+                                  spacing="true">
                             <lookupField id="providerCodeField"
                                          dataContainer="userAiConfigurationDc"
                                          property="providerCode"
                                          required="true"
-                                         width="100%"
+                                         width="320px"
                                          stylename="edit-form-control"
                                          caption="msg://userProviderCode.caption"/>
-                            <!-- Модель по умолчанию подставляется автоматически при выборе провайдера (Java). -->
                             <textField id="defaultModelNameField"
                                        dataContainer="userAiConfigurationDc"
                                        property="defaultModelName"
                                        width="100%"
+                                       maxWidth="480px"
                                        stylename="edit-form-control"
                                        caption="msg://userDefaultModelName.caption"/>
-                            <!-- Признак основной нейросети (используется первой). -->
                             <checkBox id="isPrimaryField"
                                       dataContainer="userAiConfigurationDc"
                                       property="isPrimary"
                                       width="100%"
                                       caption="msg://userIsPrimary.caption"/>
-                            <!-- Признак активности конфигурации. -->
                             <checkBox id="isActiveField"
                                       dataContainer="userAiConfigurationDc"
                                       property="isActive"
                                       width="100%"
                                       caption="msg://userIsActive.caption"/>
-                            <!-- Количество обращений к модели до fallback -->
                             <textField id="maxRetriesField"
                                        dataContainer="userAiConfigurationDc"
                                        property="maxRetries"
-                                       width="100%"
+                                       width="160px"
                                        stylename="edit-form-control"
                                        inputPrompt="3"
                                        caption="msg://userMaxRetries.caption"
@@ -124,31 +214,36 @@
                                     <max value="10" message="msg://maxRetriesValidationMax"/>
                                 </validators>
                             </textField>
-                            <!-- Приоритет в очереди перебора нейросетей. -->
                             <textField id="priorityField"
                                        dataContainer="userAiConfigurationDc"
                                        property="priority"
-                                       width="100%"
+                                       width="160px"
                                        stylename="edit-form-control"
                                        caption="msg://userPriority.caption"/>
-                            <!-- Размер контекста (токенов); максимум 10 000. -->
                             <textField id="maxContextTokensField"
                                        dataContainer="userAiConfigurationDc"
                                        property="maxContextTokens"
-                                       width="100%"
+                                       width="160px"
                                        stylename="edit-form-control"
                                        caption="msg://userMaxContextTokens.caption"
                                        description="msg://userMaxContextTokens.description"/>
                         </groupBox>
-                        <!-- Карточка «Безопасность»: персональный API-ключ (secret-поле). -->
-                        <groupBox id="securitySection" caption="Безопасность" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- API-ключ хранится только у пользователя и отображается как secret. -->
+
+                        <!-- Аккордеон-секция «Безопасность» -->
+                        <groupBox id="securitySection"
+                                  caption="msg://navSecurity"
+                                  stylename="edit-accordion-section"
+                                  showAsPanel="true"
+                                  collapsable="true"
+                                  collapsed="false"
+                                  width="100%"
+                                  spacing="true">
                             <passwordField id="apiKeyField"
                                            secret="true"
                                            width="100%"
+                                           maxWidth="500px"
                                            stylename="edit-form-control"
                                            caption="msg://userApiKey.caption"/>
-                            <!-- Проверка соединения с введённым или сохранённым ключом -->
                             <button id="testConnectionBtn"
                                     caption="msg://testConnectionBtn.caption"
                                     icon="font-icon:CHECK"
@@ -157,14 +252,21 @@
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Нижняя панель штатных editor-actions: сохранить и отменить. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
-                    <!-- Spacer прижимает группу кнопок к правому краю footer. -->
-                    <vbox id="editActionsSpacer" width="100%"/>
-                    <!-- Сохранить и закрыть (штатный action editor-а). -->
-                    <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-                    <!-- Отменить изменения и закрыть. -->
-                    <button id="closeBtn" action="windowClose"/>
+
+                <!-- Нижняя панель штатных действий: сохранить и отменить -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      expand="editActionsSpacer"
+                      align="MIDDLE_RIGHT">
+                    <vbox id="editActionsSpacer" width="100%" height="1px"/>
+                    <hbox id="editActionsGroup" width="AUTO" align="MIDDLE_RIGHT" spacing="true">
+                        <button id="commitAndCloseBtn"
+                                action="windowCommitAndClose"
+                                stylename="c-primary-action"/>
+                        <button id="closeBtn"
+                                action="windowClose"/>
+                    </hbox>
                 </hbox>
             </vbox>
         </hbox>
