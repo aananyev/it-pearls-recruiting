@@ -298,4 +298,8 @@
     <include file="260920-2-migrateCorporateAiConfigurations.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AI Control Plane: Фиксация URL шлюза OpenRouter Nemotron и привязка фонового анализа -->
+    <include file="260920-3-setOpenRouterGatewayBaseApiUrl.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
