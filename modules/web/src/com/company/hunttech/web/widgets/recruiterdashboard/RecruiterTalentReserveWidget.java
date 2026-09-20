@@ -12,7 +12,7 @@ import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.LinkButton;
 import com.haulmont.cuba.gui.components.VBoxLayout;
-import com.haulmont.cuba.gui.screen.AfterInitEvent;
+import com.haulmont.cuba.gui.screen.ScreenFragment.InitEvent;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -63,7 +63,7 @@ public class RecruiterTalentReserveWidget extends ScreenFragment implements Refr
     private Label<String> periodLabel;
 
     @Subscribe
-    public void onAfterInit(AfterInitEvent event) {
+    public void onInit(InitEvent event) {
         reload();
     }
 
