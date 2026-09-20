@@ -3,6 +3,7 @@ package com.company.hunttech.web.screens.adminaiconfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.service.AiCredentialService;
 import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
@@ -104,7 +105,11 @@ public class AdminAiConfigurationBrowse extends StandardLookup<AdminAiConfigurat
             detailProvider.setValue(selected.getProviderCode() != null ? selected.getProviderCode() : "-");
             detailModel.setValue(selected.getDefaultModelName() != null ? selected.getDefaultModelName() : "-");
 
-            updateLogoPreview(selected.getLogoImage());
+            if (PersistenceHelper.isLoaded(selected, "logoImage")) {
+                updateLogoPreview(selected.getLogoImage());
+            } else {
+                setDefaultLogo();
+            }
         } else {
             detailTitle.setValue(messages.getMessage(getClass(), "sidebarDefaultTitle"));
             detailSubtitle.setValue(messages.getMessage(getClass(), "sidebarSubtitle"));

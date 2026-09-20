@@ -7,8 +7,10 @@
         messagesPack="com.company.hunttech.web.screens.adminaiconfiguration">
     <data>
         <collection id="adminConfigurationsDc"
-                    class="com.company.hunttech.entity.ai.AdminAiConfiguration"
-                    view="admin-ai-configuration-browse-view">
+                    class="com.company.hunttech.entity.ai.AdminAiConfiguration">
+            <view extends="admin-ai-configuration-browse-view">
+                <property name="logoImage"/>
+            </view>
             <loader id="adminConfigurationsDl">
                 <query><![CDATA[select e from hunttech_AdminAiConfiguration e order by e.active desc, e.priority desc, e.name]]></query>
             </loader>
