@@ -675,4 +675,42 @@ public class AiExecutionServiceBeanTest {
         when(profileLoader.query(anyString()).parameter(anyString(), any()).view(anyString()).optional())
                 .thenReturn(java.util.Optional.of(profile));
     }
+
+    @Test
+    public void freeOnlyMode_filtersNonFreeAdminConfigurations() {
+        AdminAiConfiguration paidAdmin = new AdminAiConfiguration();
+        paidAdmin.setProviderCode("paid-provider");
+        paidAdmin.setDefaultModelName("paid-model");
+        paidAdmin.setActive(true);
+        paidAdmin.setFreeModel(false);
+        paidAdmin.setApiKeyEncrypted("secret-paid");
+        function.setAdminConfiguration(paidAdmin);
+
+        AdminAiConfiguration freeAdmin = new AdminAiConfiguration();
+        freeAdmin.setProviderCode("free-provider");
+        freeAdmin.setDefaultModelName("free-model");
+        freeAdmin.setActive(true);
+        freeAdmin.setFreeModel(true);
+        freeAdmin.setApiKeyEncrypted("secret-free");
+
+        AIProvider freeProviderMock = mock(AIProvider.class);
+        when(providerRegistry.getProvider("free-provider")).thenReturn(freeProviderMock);
+        when(freeProviderMock.executeTextWithTokens(anyString(), anyString(), anyString(), anyString(), any()))
+                .thenReturn(AiProviderResponse.ofText("Free answer", 10, 20, 30));
+        when(aiSecretService.decrypt("secret-free")).thenReturn("decrypted-free");
+
+        FluentLoader adminLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(dataManager.load(AdminAiConfiguration.class)).thenReturn(adminLoader);
+        when(adminLoader.query(anyString()).view(anyString()).list())
+                .thenReturn(Collections.singletonList(freeAdmin));
+
+        Map<String, Object> context = new java.util.HashMap<>();
+        context.put("vacancyName", "Java Developer");
+        context.put("freeOnly", true);
+
+        AiExecutionResult result = service.executeText(FUNCTION_CODE, context);
+        assertNotNull(result);
+        assertEquals("free-provider", result.getProviderCode());
+        assertEquals("free-model", result.getModelName());
+    }
 }

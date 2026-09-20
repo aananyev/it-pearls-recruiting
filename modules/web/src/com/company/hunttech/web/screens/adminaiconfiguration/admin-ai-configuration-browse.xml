@@ -63,6 +63,8 @@
                     <column property="defaultModelName" width="220px"/>
                     <!-- Active state. -->
                     <column property="active" width="100px"/>
+                    <!-- Бесплатная модель. -->
+                    <column property="freeModel" width="110px"/>
                     <!-- Routing priority metadata. -->
                     <column property="priority" width="100px"/>
                     <!-- Лимит контекста. -->

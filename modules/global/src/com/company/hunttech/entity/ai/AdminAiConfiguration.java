@@ -8,6 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -75,6 +76,29 @@ public class AdminAiConfiguration extends StandardEntity {
     @Min(1)
     @Column(name = "MAX_RETRIES")
     private Integer maxRetries = 3;
+
+    @Lob
+    @Column(name = "LOGO_IMAGE")
+    protected byte[] logoImage;
+
+    @Column(name = "IS_FREE_MODEL")
+    protected Boolean freeModel = false;
+
+    public byte[] getLogoImage() {
+        return logoImage;
+    }
+
+    public void setLogoImage(byte[] logoImage) {
+        this.logoImage = logoImage;
+    }
+
+    public Boolean getFreeModel() {
+        return freeModel;
+    }
+
+    public void setFreeModel(Boolean freeModel) {
+        this.freeModel = freeModel;
+    }
 
     public Integer getMaxRetries() {
         return maxRetries;

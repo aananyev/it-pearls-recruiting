@@ -13,10 +13,12 @@
         <property name="lastError"/>
         <property name="maxContextTokens"/>
         <property name="maxRetries"/>
+        <property name="freeModel"/>
     </view>
     <!-- Edit-view включает шифротекст только для сохранения существующего значения; UI его не отображает. -->
     <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-edit-view" extends="admin-ai-configuration-browse-view">
         <property name="apiKeyEncrypted"/>
+        <property name="logoImage"/>
     </view>
     <!-- Core-only view используется credential/execution services непосредственно перед внешним вызовом. -->
     <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-secret-view" extends="admin-ai-configuration-edit-view"/>
