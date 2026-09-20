@@ -294,4 +294,8 @@
     <include file="260920-1-addLogoAndFreeModelToAdminAiConfig.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AI Control Plane: Миграция корпоративных подключений B.AI и привязка функции SKILLS_EXTRACT_BACKGROUND -->
+    <include file="260920-2-migrateCorporateAiConfigurations.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
