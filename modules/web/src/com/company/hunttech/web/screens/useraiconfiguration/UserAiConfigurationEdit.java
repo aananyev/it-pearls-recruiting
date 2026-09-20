@@ -9,6 +9,7 @@ import com.haulmont.cuba.core.global.FluentLoader;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.TextField;
@@ -51,9 +52,32 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
     private Notifications notifications;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private Button mainNav;
+    @Inject
+    private Button securityNav;
 
     private User parentUser;
     private String lastAutomaticallyAppliedModel;
+
+    public void focusMainSection() {
+        providerCodeField.focus();
+        setActiveNavigation(mainNav);
+    }
+
+    public void focusSecuritySection() {
+        apiKeyField.focus();
+        setActiveNavigation(securityNav);
+    }
+
+    private void setActiveNavigation(Button activeButton) {
+        if (mainNav != null && securityNav != null) {
+            mainNav.removeStyleName("label-nav-item-active");
+            securityNav.removeStyleName("label-nav-item-active");
+            activeButton.addStyleName("label-nav-item-active");
+        }
+    }
+
 
     public void setParentUser(User parentUser) {
         this.parentUser = parentUser;

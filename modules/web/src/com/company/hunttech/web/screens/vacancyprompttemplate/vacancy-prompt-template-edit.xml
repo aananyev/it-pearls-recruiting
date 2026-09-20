@@ -1,195 +1,229 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit-экран шаблона промпта: двухпанельная композиция по общему контракту
-     Edit-экранов HRM HuntTech. Сохраняет исходный data binding (vacancyPromptTemplateDc),
-     view, loaders и штатные actions сохранения. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://vacancyPromptTemplateEdit.caption"
         focusComponent="codeField"
         messagesPack="com.company.hunttech.web.screens.vacancyprompttemplate">
-    <!-- Секция данных: корневой контейнер шаблона промпта с исходным view и lifecycle. -->
     <data>
         <instance id="vacancyPromptTemplateDc"
                   class="com.company.hunttech.entity.VacancyPromptTemplate"
                   view="vacancyPromptTemplate-edit-view">
-            <!-- Штатный загрузчик контейнера (без собственного запроса — берёт id из editor). -->
             <loader/>
         </instance>
     </data>
-    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
     <dialogMode height="100%" width="100%" modal="true"/>
-    <!-- Корневой layout формы: локальный namespace vacancy-prompt-template-editor +
-         общий контракт Edit-экранов. -->
     <layout stylename="vacancy-prompt-template-editor"
             expand="vacancyPromptTemplateMainLayout"
             spacing="false"
             width="100%"
             height="100%">
-        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
         <hbox id="vacancyPromptTemplateMainLayout"
               stylename="edit-screen-layout"
               expand="vacancyPromptTemplateWorkspace"
               spacing="false"
               width="100%"
               height="100%">
-            <!-- Левая контекстная панель 270px: идентификация, label-навигация, подсказка. -->
+            <!-- Сайдбар 312px -->
             <vbox id="vacancyPromptTemplateSidebar"
-                  stylename="edit-sidebar"
-                  width="270px"
+                  stylename="job-candidate-sidebar edit-sidebar"
+                  width="312px"
                   height="100%"
-                  spacing="true"
-                  expand="vacancyPromptTemplateSidebarSpacer">
-                <!-- Блок идентификации: тип записи и название шаблона из контейнера. -->
-                <vbox id="vacancyPromptTemplateIdentity"
-                      stylename="edit-sidebar-identity"
-                      width="100%"
-                      spacing="true">
-                    <!-- Тематическая HuntTech-иллюстрация шаблона промпта; fallback без привязки к данным. -->
-                    <ovalImage id="vacancyPromptTemplateLogoImage"
-                               width="176px"
-                               height="176px"
-                               ovalWidth="176px"
-                               ovalHeight="176px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               scaleMode="SCALE_DOWN">
-                        <theme path="icons/ai/vacancy-prompt-template.png"/>
-                    </ovalImage>
-                    <!-- Подпись типа записи. -->
-                    <label value="Шаблон промпта"
-                           stylename="edit-sidebar-subtitle"
-                           width="100%"/>
-                    <!-- Название шаблона (свойство name), живое из vacancyPromptTemplateDc. -->
-                    <label id="vacancyPromptTemplateSidebarTitle"
-                           dataContainer="vacancyPromptTemplateDc"
-                           property="name"
-                           stylename="edit-sidebar-title"
-                           width="100%"/>
-                </vbox>
-                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
-                <vbox id="vacancyPromptTemplateNavigation"
-                      stylename="label-navigation"
-                      width="100%"
-                      spacing="false">
-                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
-                    <label value="Разделы"
-                           stylename="label-nav-title vacancy-prompt-template-navigation-title"
-                           width="100%"/>
-                    <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
-                    <button id="vacancyPromptTemplateMainNav"
-                            caption="Основные данные"
-                            stylename="borderless label-nav-item label-nav-item-active"
-                            width="100%"
-                            invoke="focusMainSection"/>
-                    <!-- Пункт «Текст промпта» — фокусирует поле системного контекста. -->
-                    <button id="vacancyPromptTemplatePromptNav"
-                            caption="Текст промпта"
-                            stylename="borderless label-nav-item"
-                            width="100%"
-                            invoke="focusPromptSection"/>
-                </vbox>
-                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
-                <vbox id="vacancyPromptTemplateSidebarSpacer" stylename="edit-sidebar-spacer"/>
-                <!-- Нейтральная подсказка о роли шаблона в AI-стандартизации вакансий. -->
-                <label value="Шаблон задаёт роль и основную задачу ИИ при работе с вакансиями."
-                       stylename="edit-sidebar-hint"
-                       width="100%"/>
+                  spacing="false"
+                  margin="false">
+                <scrollBox id="vacancyPromptTemplateSidebarScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical"
+                           stylename="sidebar-scrollbox">
+                    <vbox width="100%" spacing="true">
+
+                        <!-- Шапка профиля: Аватар 120px + 4 уровня типографики -->
+                        <vbox id="vacancyPromptTemplateProfileHeader"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER"
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="vacancyPromptTemplateLogoImage"
+                                              width="120px"
+                                              height="120px"
+                                              ovalWidth="120px"
+                                              ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar ovaFallbackImage"
+                                              scaleMode="SCALE_DOWN"
+                                              fallbackThemePath="icons/ai/vacancy-prompt-template.png"/>
+                            <vbox width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label id="vacancyPromptTemplateSidebarTitle"
+                                       dataContainer="vacancyPromptTemplateDc"
+                                       property="name"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       align="MIDDLE_CENTER"
+                                       width="100%"/>
+                                <label value="msg://sidebarSubtitle"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       align="MIDDLE_CENTER"
+                                       width="100%"/>
+                                <label id="vacancyPromptTemplateSidebarCode"
+                                       dataContainer="vacancyPromptTemplateDc"
+                                       property="code"
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       align="MIDDLE_CENTER"
+                                       width="100%"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Label-навигация разделов -->
+                        <vbox id="vacancyPromptTemplateNavigation"
+                              stylename="label-navigation"
+                              width="100%"
+                              spacing="false">
+                            <label value="msg://navSections"
+                                   stylename="label-nav-title vacancy-prompt-template-navigation-title"
+                                   width="100%"/>
+                            <button id="vacancyPromptTemplateMainNav"
+                                    caption="msg://mainSection"
+                                    stylename="borderless label-nav-item label-nav-item-active"
+                                    width="100%"
+                                    invoke="focusMainSection"/>
+                            <button id="vacancyPromptTemplatePromptNav"
+                                    caption="msg://promptSection"
+                                    stylename="borderless label-nav-item"
+                                    width="100%"
+                                    invoke="focusPromptSection"/>
+                        </vbox>
+
+                        <!-- Сводка параметров в сайдбаре Edit -->
+                        <vbox id="vacancyPromptTemplateSummarySection"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://parametersSection"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title vacancy-prompt-template-navigation-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="vacancyPromptTemplateSummaryGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="msg://templateCodeCaption" stylename="bold"/>
+                                        <label id="summaryCodeVal" dataContainer="vacancyPromptTemplateDc" property="code" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://templateTemperatureCaption" stylename="bold"/>
+                                        <label id="summaryTempVal" dataContainer="vacancyPromptTemplateDc" property="temperature" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Фиксированный спейсер отступа 16px -->
+                        <vbox id="vacancyPromptTemplateSidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+
+                        <!-- Нейтральная подсказка -->
+                        <label value="msg://templateSidebarHint"
+                               stylename="edit-sidebar-hint"
+                               width="100%"/>
+                    </vbox>
+                </scrollBox>
             </vbox>
-            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+
+
+            <!-- Правая рабочая область -->
             <vbox id="vacancyPromptTemplateWorkspace"
                   stylename="edit-workspace"
                   expand="vacancyPromptTemplateWorkspaceScroll"
                   width="100%"
                   height="100%"
                   spacing="false">
-                <!-- Toolbar с заголовком карточки и пояснением. -->
                 <hbox id="vacancyPromptTemplateToolbar"
                       stylename="edit-toolbar"
                       width="100%"
                       spacing="true">
-                    <!-- Текстовый блок toolbar: заголовок и описание. -->
                     <vbox id="vacancyPromptTemplateToolbarText" width="100%" spacing="false">
-                        <label value="Карточка шаблона" stylename="edit-toolbar-title"/>
-                        <label value="Основные реквизиты и текст промпта" stylename="edit-toolbar-description"/>
+                        <label value="msg://vacancyPromptTemplateEdit.caption" stylename="edit-toolbar-title"/>
+                        <label value="msg://templateSidebarHint" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-                <!-- Прокручиваемая область контента рабочей области. -->
+
                 <scrollBox id="vacancyPromptTemplateWorkspaceScroll"
                            stylename="edit-workspace-scroll"
                            width="100%"
-                           height="100%">
-                    <!-- Поток карточек рабочей области. -->
+                           height="100%"
+                           margin="false">
                     <vbox id="vacancyPromptTemplateSections" width="100%" spacing="true">
-                        <!-- Карточка «Основные данные»: код, название и температура шаблона. -->
+                        <!-- Секция «Основные данные» -->
                         <groupBox id="vacancyPromptTemplateMainSection"
-                                  caption="Основные данные"
-                                  stylename="edit-card"
-                                  showAsPanel="true"
+                                  caption="msg://mainSection"
+                                  collapsable="true"
+                                  stylename="edit-card edit-accordion-section"
                                   width="100%"
                                   spacing="true">
-                            <!-- Форма шаблона с полями, привязанными к vacancyPromptTemplateDc. -->
                             <form id="vacancyPromptTemplateForm" dataContainer="vacancyPromptTemplateDc" width="100%">
                                 <column width="100%">
-                                    <!-- Уникальный технический код шаблона (используется в бэкенде). -->
                                     <textField id="codeField"
                                                property="code"
                                                caption="msg://templateCodeCaption"
                                                description="msg://VacancyPromptTemplate.code.description"
-                                               width="100%"
+                                               width="280px"
                                                stylename="edit-form-control"/>
-                                    <!-- Человекочитаемое название шаблона. -->
                                     <textField id="nameField"
                                                property="name"
                                                caption="msg://templateName.caption"
                                                description="msg://templateNameDescription"
                                                width="100%"
                                                stylename="edit-form-control"/>
-                                    <!-- Уровень креативности ИИ (0.0–1.0). -->
                                     <textField id="temperatureField"
                                                property="temperature"
                                                caption="msg://templateTemperatureCaption"
                                                description="msg://VacancyPromptTemplate.temperature.description"
-                                               width="100%"
+                                               width="140px"
                                                stylename="edit-form-control"/>
                                 </column>
                             </form>
                         </groupBox>
-                        <!-- Карточка «Текст промпта»: системный контекст и основная задача ИИ. -->
+
+                        <!-- Секция «Текст промпта» -->
                         <groupBox id="vacancyPromptTemplatePromptSection"
-                                  caption="Текст промпта"
-                                  stylename="edit-card"
-                                  showAsPanel="true"
+                                  caption="msg://promptSection"
+                                  collapsable="true"
+                                  stylename="edit-card edit-accordion-section"
                                   width="100%"
                                   spacing="true">
-                            <!-- Роль, которую принимает ИИ при выполнении промпта. -->
                             <textArea id="systemContextField"
                                       caption="msg://aiRole.caption"
                                       description="msg://aiRoleDescription"
                                       dataContainer="vacancyPromptTemplateDc"
                                       property="systemContext"
                                       width="100%"
-                                      rows="5"
-                                      height="120px"
+                                      rows="4"
+                                      height="110px"
                                       stylename="edit-form-control"/>
-                            <!-- Основная задача ИИ: подробное описание требуемого результата. -->
                             <textArea id="promptTextField"
                                       caption="msg://mainTask.caption"
                                       description="msg://mainTaskDescription"
                                       dataContainer="vacancyPromptTemplateDc"
                                       property="promptText"
                                       width="100%"
-                                      rows="15"
+                                      rows="14"
+                                      height="240px"
                                       stylename="edit-form-control"/>
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
+
+                <!-- Нижний тулбар действий -->
                 <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
-                    <!-- Spacer прижимает кнопки к правому краю. -->
                     <vbox id="vacancyPromptTemplateActionsSpacer" width="100%"/>
-                    <!-- Сохранить и закрыть (штатный action editor-а). -->
-                    <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-                    <!-- Отменить изменения и закрыть. -->
-                    <button id="closeBtn" action="windowClose"/>
+                    <button id="commitAndCloseBtn" action="windowCommitAndClose" stylename="primary" icon="CHECK"/>
+                    <button id="closeBtn" action="windowClose" icon="BAN"/>
                 </hbox>
             </vbox>
         </hbox>

@@ -14,6 +14,7 @@
         <property name="maxContextTokens"/>
         <property name="maxRetries"/>
         <property name="freeModel"/>
+        <property name="logoImage"/>
     </view>
     <!-- Edit-view включает шифротекст только для сохранения существующего значения; UI его не отображает. -->
     <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-edit-view" extends="admin-ai-configuration-browse-view">

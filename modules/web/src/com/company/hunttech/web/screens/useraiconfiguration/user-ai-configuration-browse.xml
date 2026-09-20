@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Browse мониторинга персональных AI-ключей: двухпанельная композиция Split-View 312px
+     по стандарту HRM HuntTech (hunttech-browse-screen-design). -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
-        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://userAiConfigurationBrowse.caption"
         focusComponent="userAiConfigurationsTable"
         messagesPack="com.company.hunttech.web.screens.useraiconfiguration">
@@ -10,55 +11,244 @@
             <view extends="userAiConfiguration-browse-view"/>
             <loader id="userAiConfigurationsDl">
                 <query>
-                    <![CDATA[select e from hunttech_UserAiConfiguration e]]>
+                    <![CDATA[select e from hunttech_UserAiConfiguration e order by e.isActive desc, e.priority desc]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="1000"/>
-    <layout expand="tableCard"
-            spacing="true"
-            stylename="browse-screen-layout edit-screen-layout">
-        <filter id="filter"
-                applyTo="userAiConfigurationsTable"
-                dataLoader="userAiConfigurationsDl"
-                collapsable="true"
-                collapsed="true">
-            <properties include=".*"/>
-        </filter>
-        <hbox id="buttonsPanel" spacing="true" stylename="edit-toolbar">
-            <button id="createBtn" action="userAiConfigurationsTable.create" stylename="primary" icon="PLUS"/>
-            <button id="editBtn" action="userAiConfigurationsTable.edit" icon="EDIT_ACTION"/>
-            <button id="removeBtn" action="userAiConfigurationsTable.remove" icon="REMOVE"/>
-            <button id="refreshBtn" action="userAiConfigurationsTable.refresh" icon="REFRESH"/>
-            <button id="testBtn" caption="Тест AI" invoke="onTestBtnClick" icon="CHECK"/>
-        </hbox>
-        <vbox id="tableCard" width="100%" height="100%" spacing="false" expand="userAiConfigurationsTable" stylename="edit-card candidate-table-card">
-            <table id="userAiConfigurationsTable"
-                   width="100%"
-                   height="100%"
-                   dataContainer="userAiConfigurationsDc">
-                <actions>
-                    <action id="create" type="create"/>
-                    <action id="edit" type="edit"/>
-                    <action id="remove" type="remove"/>
-                    <action id="refresh" type="refresh"/>
-                </actions>
-                <columns>
-                    <column id="user.login" width="180px"/>
-                    <column id="providerCode" width="140px"/>
-                    <column id="isActive" width="100px"/>
-                    <column id="maxContextTokens" width="140px"/>
-                    <column id="maxRetries" width="130px"/>
-                    <column id="defaultModelName" minimumWidth="220px"/>
-                </columns>
-                <rowsCount/>
-            </table>
-        </vbox>
-        <hbox id="lookupActions" spacing="true" visible="false">
-            <button action="lookupSelectAction"/>
-            <button action="lookupCancelAction"/>
+    <dialogMode height="760" width="1240"/>
+    <layout expand="splitMainLayout"
+            spacing="false"
+            margin="false"
+            width="100%"
+            height="100%"
+            stylename="browse-screen-layout edit-screen-layout job-candidate-editor">
+        <hbox id="splitMainLayout"
+              width="100%"
+              height="100%"
+              spacing="true"
+              expand="workspaceBox"
+              stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px на 100% высоты) -->
+            <vbox id="detailPane"
+                  width="312px"
+                  height="100%"
+                  spacing="true"
+                  margin="false"
+                  stylename="edit-sidebar job-candidate-sidebar">
+                <scrollBox id="detailScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical">
+                    <vbox id="sidebarInnerBox"
+                          width="100%"
+                          spacing="true">
+                        <!-- Шапка профиля -->
+                        <vbox id="profileHeader"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER"
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic"
+                                              width="120px"
+                                              height="120px"
+                                              ovalWidth="120px"
+                                              ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              fallbackThemePath="icons/ai/user-ai-configuration.png"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox id="identityBox"
+                                  width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label id="detailTitle"
+                                       value="msg://sidebarDefaultTitle"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle"
+                                       value="msg://sidebarSubtitle"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="detailPrimaryBadge"
+                                       value=""
+                                       stylename="edit-help candidate-sidebar-city bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn"
+                                    caption="msg://openEditCardBtn"
+                                    icon="EDIT_ACTION"
+                                    stylename="primary"
+                                    enabled="false"
+                                    width="100%"/>
+                            <button id="testBtn"
+                                    caption="msg://testAiBtn"
+                                    invoke="onTestBtnClick"
+                                    icon="CHECK"
+                                    enabled="false"
+                                    width="100%"/>
+                        </vbox>
+
+                        <!-- Статус и параметры -->
+                        <vbox id="statusCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://statusTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="statusGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Статус:" stylename="bold"/>
+                                        <label id="detailActive" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Пользователь:" stylename="bold"/>
+                                        <label id="detailUser" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Приоритет:" stylename="bold"/>
+                                        <label id="detailPriority" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Контекст:" stylename="bold"/>
+                                        <label id="detailContext" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Ретраи:" stylename="bold"/>
+                                        <label id="detailRetries" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Детали подключения -->
+                        <vbox id="termsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://termsTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="Провайдер:" stylename="bold"/>
+                                        <label id="detailProvider" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Модель:" stylename="bold"/>
+                                        <label id="detailModel" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Нижний спейсер 16px -->
+                        <vbox id="detailSidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox"
+                  width="100%"
+                  height="100%"
+                  spacing="true"
+                  stylename="edit-workspace candidate-reestr-workspace"
+                  expand="tableCard"
+                  margin="true,true,true,false">
+                <!-- Главный командный тулбар -->
+                <hbox id="buttonsPanel"
+                      spacing="true"
+                      width="100%"
+                      stylename="candidate-filter-bar edit-card edit-toolbar">
+                    <button id="createBtn"
+                            action="userAiConfigurationsTable.create"
+                            stylename="primary"
+                            icon="PLUS"/>
+                    <button id="editBtn"
+                            action="userAiConfigurationsTable.edit"
+                            icon="EDIT_ACTION"/>
+                    <button id="removeBtn"
+                            action="userAiConfigurationsTable.remove"
+                            icon="REMOVE"/>
+                    <button id="refreshBtn"
+                            action="userAiConfigurationsTable.refresh"
+                            icon="REFRESH"/>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="userAiConfigurationsTable"
+                        dataLoader="userAiConfigurationsDl"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard"
+                      width="100%"
+                      height="100%"
+                      spacing="false"
+                      expand="userAiConfigurationsTable"
+                      stylename="edit-card candidate-table-card">
+                    <table id="userAiConfigurationsTable"
+                           width="100%"
+                           height="100%"
+                           dataContainer="userAiConfigurationsDc">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="user.login" width="180px"/>
+                            <column id="providerCode" width="140px"/>
+                            <column id="isActive" width="100px"/>
+                            <column id="isPrimary" width="120px"/>
+                            <column id="maxContextTokens" width="140px"/>
+                            <column id="maxRetries" width="130px"/>
+                            <column id="defaultModelName" minimumWidth="220px"/>
+                        </columns>
+                        <rowsCount/>
+                    </table>
+                </vbox>
+
+                <hbox id="lookupActions" spacing="true" visible="false">
+                    <button action="lookupSelectAction"/>
+                    <button action="lookupCancelAction"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
+

@@ -1,51 +1,201 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Browse справочника «Формы собственности»: Split-View композиция 312px по контракту
+     HRM HuntTech (hunttech-browse-screen-design). Сохраняет исходные id компонентов и binding. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
         focusComponent="ownershupsTable"
-        messagesPack="com.company.hunttech.web.screens.ownershup" icon="icons/icons/wf-user-group-button.png">
+        messagesPack="com.company.hunttech.web.screens.ownershup"
+        icon="icons/icons/wf-user-group-button.png">
     <data readOnly="true">
         <collection id="ownershupsDc"
                     class="com.company.hunttech.entity.Ownershup"
                     view="_local">
             <loader id="ownershupsDl">
                 <query>
-                    <![CDATA[select e from hunttech_Ownershup e]]>
+                    <![CDATA[select e from hunttech_Ownershup e order by e.shortType]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="ownershupsTable"
-            spacing="true">
-        <filter id="filter"
-                applyTo="ownershupsTable"
-                dataLoader="ownershupsDl">
-            <properties include=".*"/>
-        </filter>
-        <groupTable id="ownershupsTable"
-                    width="100%"
-                    dataContainer="ownershupsDc">
-            <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
-                <action id="remove" type="remove"/>
-            </actions>
-            <columns>
-                <column id="shortType"/>
-                <column id="longType"/>
-            </columns>
-            <rowsCount/>
-            <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
-                <button id="createBtn" action="ownershupsTable.create"/>
-                <button id="editBtn" action="ownershupsTable.edit"/>
-                <button id="removeBtn" action="ownershupsTable.remove"/>
-            </buttonsPanel>
-        </groupTable>
-        <hbox id="lookupActions" spacing="true" visible="false">
-            <button action="lookupSelectAction"/>
-            <button action="lookupCancelAction"/>
+    <dialogMode height="750" width="1200"/>
+    <layout expand="splitMainLayout"
+            spacing="false"
+            margin="false"
+            width="100%"
+            height="100%"
+            stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout"
+              width="100%"
+              height="100%"
+              spacing="true"
+              expand="workspaceBox"
+              stylename="job-candidate-main-layout edit-screen-layout">
+            <!-- ЛЕВЫЙ САЙДБАР (312px на 100% высоты) -->
+            <vbox id="detailPane"
+                  width="312px"
+                  height="100%"
+                  spacing="true"
+                  margin="false"
+                  stylename="edit-sidebar job-candidate-sidebar">
+                <scrollBox id="detailScroll"
+                           width="100%"
+                           height="100%"
+                           orientation="vertical">
+                    <vbox id="sidebarInnerBox"
+                          width="100%"
+                          spacing="true">
+                        <!-- Шапка профиля -->
+                        <vbox id="profileHeader"
+                              width="100%"
+                              spacing="true"
+                              align="TOP_CENTER"
+                              stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic"
+                                              width="120px"
+                                              height="120px"
+                                              ovalWidth="120px"
+                                              ovalHeight="120px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              fallbackThemePath="icons/briefcase.png"
+                                              scaleMode="SCALE_DOWN"/>
+                            <vbox id="identityBox"
+                                  width="100%"
+                                  spacing="false"
+                                  align="MIDDLE_CENTER"
+                                  stylename="edit-sidebar-identity">
+                                <label id="detailTitle"
+                                       value="msg://sidebarDefaultTitle"
+                                       stylename="edit-sidebar-title h2 candidate-sidebar-fullname bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle"
+                                       value="msg://sidebarSubtitle"
+                                       stylename="edit-sidebar-subtitle h4 candidate-sidebar-position bold"
+                                       width="100%"
+                                       align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn"
+                                    caption="msg://openEditCardBtn"
+                                    icon="EDIT_ACTION"
+                                    stylename="primary"
+                                    enabled="false"
+                                    width="100%"/>
+                        </vbox>
+
+                        <!-- Условия и реквизиты -->
+                        <vbox id="termsCard"
+                              width="100%"
+                              spacing="true"
+                              stylename="job-candidate-navigation label-navigation">
+                            <label value="msg://termsTitle"
+                                   width="100%"
+                                   stylename="label-nav-title job-candidate-section-title"
+                                   align="MIDDLE_CENTER"/>
+                            <grid id="termsGrid"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <label value="msg://shortTypeCaption" stylename="bold"/>
+                                        <label id="detailShortType" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="msg://longTypeCaption" stylename="bold"/>
+                                        <label id="detailLongType" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Нижний спейсер 16px -->
+                        <vbox id="detailSidebarSpacer"
+                              width="100%"
+                              height="16px"
+                              stylename="edit-sidebar-spacer"/>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox"
+                  width="100%"
+                  height="100%"
+                  spacing="true"
+                  stylename="edit-workspace candidate-reestr-workspace"
+                  expand="tableCard"
+                  margin="true,true,true,false">
+                <!-- Главный командный тулбар -->
+                <hbox id="tableFilterBar"
+                      width="100%"
+                      spacing="true"
+                      stylename="candidate-filter-bar edit-card edit-toolbar">
+                    <button id="createBtn"
+                            action="ownershupsTable.create"
+                            stylename="primary"
+                            icon="PLUS"/>
+                    <button id="editBtn"
+                            action="ownershupsTable.edit"
+                            icon="EDIT_ACTION"/>
+                    <button id="removeBtn"
+                            action="ownershupsTable.remove"
+                            icon="REMOVE"/>
+                    <button id="refreshBtn"
+                            action="ownershupsTable.refresh"
+                            icon="REFRESH"/>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="ownershupsTable"
+                        dataLoader="ownershupsDl"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard"
+                      width="100%"
+                      height="100%"
+                      spacing="false"
+                      stylename="edit-card candidate-table-card"
+                      expand="ownershupsTable">
+                    <groupTable id="ownershupsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="ownershupsDc">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="shortType"/>
+                            <column id="longType"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
+
+                <hbox id="lookupActions"
+                      spacing="true"
+                      visible="false">
+                    <button action="lookupSelectAction"/>
+                    <button action="lookupCancelAction"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
