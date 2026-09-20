@@ -57,6 +57,30 @@
           color: #7e22ce !important;
           border-color: #e9d5ff !important;
         }
+
+        &.badge-green {
+          background: #dcfce7 !important;
+          color: #15803d !important;
+          border-color: #bbf7d0 !important;
+        }
+
+        &.badge-blue {
+          background: #e0f2fe !important;
+          color: #0369a1 !important;
+          border-color: #bae6fd !important;
+        }
+
+        &.badge-orange {
+          background: #fef3c7 !important;
+          color: #b45309 !important;
+          border-color: #fde68a !important;
+        }
+
+        &.badge-red {
+          background: #fee2e2 !important;
+          color: #b91c1c !important;
+          border-color: #fecaca !important;
+        }
       }
     }
 
@@ -111,29 +135,23 @@
       }
     }
 
-    /* KPI Cards Grid & Containment */
+        /* KPI Cards Grid & Containment - Responsive */
     .ai-kpi-grid {
       display: flex !important;
-      flex-direction: row !important;
+      flex-flow: row wrap !important;
       width: 100% !important;
       margin-top: 8px !important;
       margin-bottom: 12px !important;
       box-sizing: border-box !important;
+      gap: 12px !important;
 
       > .v-slot {
-        flex: 1 1 0% !important;
-        width: 25% !important;
-        min-width: 0 !important;
+        flex: 1 1 190px !important;
+        min-width: 180px !important;
+        max-width: 100% !important;
+        width: auto !important;
         box-sizing: border-box !important;
-        padding: 0 6px !important;
-
-        &:first-child {
-          padding-left: 0 !important;
-        }
-
-        &:last-child {
-          padding-right: 0 !important;
-        }
+        padding: 0 !important;
       }
     }
 
@@ -278,7 +296,7 @@
     }
 
     /* Chart & Table Surfaces */
-    .ai-chart-card,
+        .ai-chart-card,
     .ai-table-card {
       width: 100% !important;
       background: #ffffff !important;
@@ -287,47 +305,63 @@
       padding: 16px 20px !important;
       box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
       box-sizing: border-box !important;
-      overflow: hidden !important;
+      margin-top: 8px !important;
 
       .ai-card-header {
         color: #1e293b !important;
-        font-size: 14px !important;
+        font-size: 15px !important;
         font-weight: 700 !important;
-        padding-bottom: 8px !important;
-        border-bottom: 1px solid #f1f5f9 !important;
-        margin-bottom: 8px !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 4px !important;
         display: block !important;
         width: 100% !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
       }
+
+      .ai-table-filter-bar {
+        display: flex !important;
+        flex-flow: row wrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin-bottom: 8px !important;
+      }
     }
 
-    /* Dashboard Tables */
+    /* Dashboard Tables & DataGrids */
     .ai-dashboard-table {
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
-      overflow: hidden;
+      width: 100% !important;
 
-      .v-table-header-wrap {
+      .v-table-header-wrap,
+      .v-grid-header {
         background: #f8fafc !important;
         border-bottom: 1px solid #e2e8f0 !important;
       }
 
-      .v-table-header {
+      .v-table-header,
+      .v-grid-header .v-grid-cell {
         font-weight: 700 !important;
         color: #475569 !important;
         font-size: 12px !important;
       }
 
       .v-table-row,
-      .v-table-row-odd {
+      .v-table-row-odd,
+      .v-grid-row {
         transition: background-color 0.15s ease !important;
 
         &:hover {
           background-color: #f1f5f9 !important;
         }
+      }
+
+      .v-grid-cell {
+        vertical-align: middle !important;
       }
     }
   }
