@@ -21,9 +21,9 @@
         <scrollBox id="mainScroll" width="100%" height="100%" spacing="true" stylename="ai-scrollbox">
 
             <!-- Верхний баннер и панель управления воркером -->
-            <vbox id="headerCard" width="100%" spacing="true" stylename="ai-header-card card-surface">
-                <hbox width="100%" spacing="true" alignment="MIDDLE_LEFT">
-                    <vbox spacing="false" width="100%" expand="monitoringSubtitle">
+            <vbox id="headerCard" width="100%" spacing="true" stylename="ai-header-card">
+                <hbox id="headerRow" width="100%" spacing="true" alignment="MIDDLE_LEFT" stylename="ai-header-row">
+                    <vbox id="titleBox" spacing="false" width="100%" expand="monitoringSubtitle" stylename="ai-header-title-box">
                         <hbox spacing="true" alignment="MIDDLE_LEFT">
                             <label value="msg://monitoringTitle" stylename="ai-page-title bold"/>
                             <label id="workerStatusBadge" value="ВЫКЛЮЧЕН" stylename="ai-chip-badge"/>
@@ -31,7 +31,7 @@
                         </hbox>
                         <label id="monitoringSubtitle" value="msg://monitoringSubtitleText" stylename="ai-page-subtitle"/>
                     </vbox>
-                    <hbox spacing="true" alignment="MIDDLE_RIGHT">
+                    <hbox id="headerActionsBox" spacing="true" alignment="MIDDLE_RIGHT" stylename="ai-header-actions-box">
                         <checkBox id="freeOnlyCheckBox"
                                   caption="msg://chkFreeOnly"
                                   description="msg://chkFreeOnlyDescription"
@@ -44,7 +44,7 @@
                 </hbox>
             </vbox>
 
-            <!-- Сетка карточек KPI -->
+            <!-- Сетка карточек KPI (адаптивный flex-контейнер) -->
             <hbox id="kpiPanel" width="100%" spacing="true" stylename="ai-kpi-grid">
                 <!-- Карточка 1: Прогресс базы резюме -->
                 <vbox id="progressCard" width="100%" stylename="ai-kpi-card kpi-blue" spacing="false">
@@ -98,11 +98,12 @@
                 </vbox>
             </hbox>
 
-            <!-- Панель фильтров истории -->
-            <vbox id="tableSectionCard" width="100%" spacing="true" stylename="card-surface" expand="analysesTable">
-                <hbox width="100%" spacing="true" alignment="MIDDLE_LEFT">
-                    <label value="msg://historyTableTitle" stylename="h2 bold" width="100%"/>
-                    <hbox spacing="true" alignment="MIDDLE_RIGHT">
+            <!-- Карточка таблицы аудита и истории -->
+            <vbox id="tableSectionCard" width="100%" spacing="true" stylename="ai-table-card">
+                <!-- Верхняя строка фильтра таблицы (адаптивная) -->
+                <hbox id="tableFilterRow" width="100%" spacing="true" alignment="MIDDLE_LEFT" stylename="ai-table-filter-bar">
+                    <label value="msg://historyTableTitle" stylename="ai-card-header h2 bold" width="100%"/>
+                    <hbox id="filterControlsBox" spacing="true" alignment="MIDDLE_RIGHT">
                         <radioButtonGroup id="statusFilterGroup" orientation="horizontal"/>
                         <textField id="candidateSearchField" placeholder="msg://searchCandidatePlaceholder" width="220px"/>
                     </hbox>
@@ -116,25 +117,26 @@
                     <button id="refreshTableBtn" caption="msg://btnRefreshTable" icon="REPEAT"/>
                 </buttonsPanel>
 
-                <!-- Таблица аудита и истории -->
+                <!-- Таблица аудита и истории: надежная видимая высота в ScrollBox -->
                 <dataGrid id="analysesTable"
                           width="100%"
-                          height="420px"
+                          height="520px"
+                          stylename="ai-dashboard-table"
                           dataContainer="analysesDc"
                           selectionMode="SINGLE">
                     <columns>
-                        <column id="processingStartedAt" property="processingStartedAt" caption="msg://colStartedAt" width="150px"/>
-                        <column id="candidate" property="candidate.fullName" caption="msg://colCandidate" width="220px"/>
-                        <column id="candidateCvDate" caption="msg://colCvDate" width="110px"/>
-                        <column id="status" caption="msg://colStatus" width="130px"/>
-                        <column id="skillsFoundCount" property="skillsFoundCount" caption="msg://colFound" width="90px"/>
-                        <column id="skillsAddedCount" property="skillsAddedCount" caption="msg://colAdded" width="90px"/>
-                        <column id="skillsUpdatedCount" property="skillsUpdatedCount" caption="msg://colUpdated" width="90px"/>
+                        <column id="processingStartedAt" property="processingStartedAt" caption="msg://colStartedAt" width="145px"/>
+                        <column id="candidate" property="candidate.fullName" caption="msg://colCandidate" width="210px"/>
+                        <column id="candidateCvDate" caption="msg://colCvDate" width="105px"/>
+                        <column id="status" caption="msg://colStatus" width="135px"/>
+                        <column id="skillsFoundCount" property="skillsFoundCount" caption="msg://colFound" width="85px"/>
+                        <column id="skillsAddedCount" property="skillsAddedCount" caption="msg://colAdded" width="85px"/>
+                        <column id="skillsUpdatedCount" property="skillsUpdatedCount" caption="msg://colUpdated" width="85px"/>
                         <column id="providerAndModel" caption="msg://colModel" width="180px"/>
-                        <column id="totalTokens" property="totalTokens" caption="msg://colTokens" width="90px"/>
-                        <column id="durationMs" property="durationMs" caption="msg://colDuration" width="90px"/>
-                        <column id="retryCount" property="retryCount" caption="msg://colRetry" width="80px"/>
-                        <column id="lastError" property="lastError" caption="msg://colError" minimumWidth="200px"/>
+                        <column id="totalTokens" property="totalTokens" caption="msg://colTokens" width="95px"/>
+                        <column id="durationMs" property="durationMs" caption="msg://colDuration" width="85px"/>
+                        <column id="retryCount" property="retryCount" caption="msg://colRetry" width="75px"/>
+                        <column id="lastError" property="lastError" caption="msg://colError" minimumWidth="200px" expandRatio="1"/>
                     </columns>
                     <rowsCount/>
                 </dataGrid>

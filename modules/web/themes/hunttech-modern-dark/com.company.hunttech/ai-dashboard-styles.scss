@@ -58,6 +58,30 @@
           color: #c4b5fd !important;
           border-color: rgba(167, 139, 250, 0.3) !important;
         }
+
+        &.badge-green {
+          background: rgba(16, 185, 129, 0.15) !important;
+          color: #34d399 !important;
+          border-color: rgba(16, 185, 129, 0.3) !important;
+        }
+
+        &.badge-blue {
+          background: rgba(59, 130, 246, 0.15) !important;
+          color: #60a5fa !important;
+          border-color: rgba(59, 130, 246, 0.3) !important;
+        }
+
+        &.badge-orange {
+          background: rgba(245, 158, 11, 0.15) !important;
+          color: #fbbf24 !important;
+          border-color: rgba(245, 158, 11, 0.3) !important;
+        }
+
+        &.badge-red {
+          background: rgba(239, 68, 68, 0.15) !important;
+          color: #f87171 !important;
+          border-color: rgba(239, 68, 68, 0.3) !important;
+        }
       }
     }
 
@@ -113,28 +137,23 @@
       }
     }
 
-    /* KPI Cards Grid & Containment */
+        /* KPI Cards Grid & Containment - Responsive */
     .ai-kpi-grid {
       display: flex !important;
-      flex-direction: row !important;
+      flex-flow: row wrap !important;
       width: 100% !important;
       margin-top: 8px !important;
       margin-bottom: 12px !important;
       box-sizing: border-box !important;
+      gap: 12px !important;
 
       > .v-slot {
-        flex: 1 1 0% !important;
-        min-width: 0 !important;
+        flex: 1 1 190px !important;
+        min-width: 180px !important;
+        max-width: 100% !important;
+        width: auto !important;
         box-sizing: border-box !important;
-        padding: 0 6px !important;
-
-        &:first-child {
-          padding-left: 0 !important;
-        }
-
-        &:last-child {
-          padding-right: 0 !important;
-        }
+        padding: 0 !important;
       }
     }
 
@@ -279,7 +298,7 @@
     }
 
     /* Chart & Table Surfaces */
-    .ai-chart-card,
+        .ai-chart-card,
     .ai-table-card {
       width: 100% !important;
       background: $ht-gray !important;
@@ -288,47 +307,63 @@
       padding: 16px 20px !important;
       box-shadow: 0 3px 12px $ht-shadow !important;
       box-sizing: border-box !important;
-      overflow: hidden !important;
+      margin-top: 8px !important;
 
       .ai-card-header {
         color: $ht-dark !important;
-        font-size: 14px !important;
+        font-size: 15px !important;
         font-weight: 700 !important;
-        padding-bottom: 8px !important;
-        border-bottom: 1px solid $ht-border-subtle !important;
-        margin-bottom: 8px !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 4px !important;
         display: block !important;
         width: 100% !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
       }
+
+      .ai-table-filter-bar {
+        display: flex !important;
+        flex-flow: row wrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin-bottom: 8px !important;
+      }
     }
 
-    /* Dashboard Tables */
+    /* Dashboard Tables & DataGrids */
     .ai-dashboard-table {
       border: 1px solid $ht-border-subtle !important;
       border-radius: 8px !important;
-      overflow: hidden;
+      width: 100% !important;
 
-      .v-table-header-wrap {
+      .v-table-header-wrap,
+      .v-grid-header {
         background: $ht-black !important;
         border-bottom: 1px solid $ht-border-subtle !important;
       }
 
-      .v-table-header {
+      .v-table-header,
+      .v-grid-header .v-grid-cell {
         font-weight: 700 !important;
         color: $ht-muted !important;
         font-size: 12px !important;
       }
 
       .v-table-row,
-      .v-table-row-odd {
+      .v-table-row-odd,
+      .v-grid-row {
         transition: background-color 0.15s ease !important;
 
         &:hover {
           background-color: rgba($ht-red, 0.03) !important;
         }
+      }
+
+      .v-grid-cell {
+        vertical-align: middle !important;
       }
     }
   }
