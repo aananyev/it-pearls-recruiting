@@ -37,6 +37,24 @@
                                scaleMode="SCALE_DOWN">
                         <theme path="icons/ai/admin-ai-configuration.png"/>
                     </ovalImage>
+                    <!-- Кнопки управления логотипом нейросети (BLOB) -->
+                    <hbox id="logoControls" width="100%" spacing="true" align="MIDDLE_CENTER">
+                        <upload id="logoUploadField"
+                                fileStoragePutMode="MANUAL"
+                                align="MIDDLE_CENTER"
+                                showFileName="false"
+                                showClearButton="false"
+                                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                permittedExtensions=".png,.jpg,.jpeg,.webp,.svg"
+                                fileSizeLimit="15728640"
+                                uploadButtonCaption="msg://adminLogoUpload.caption"
+                                uploadButtonIcon="font-icon:UPLOAD"/>
+                        <button id="clearLogoBtn"
+                                icon="font-icon:TRASH"
+                                description="msg://adminLogoClear.caption"
+                                stylename="borderless"
+                                invoke="onClearLogoClick"/>
+                    </hbox>
                     <!-- Название подключения читается из edit-контейнера (свойство name). -->
                     <label dataContainer="adminConfigurationDc" property="name" stylename="edit-sidebar-title" width="100%"/>
                     <!-- Подпись типа системной записи. -->
@@ -84,6 +102,8 @@
                             <lookupField id="providerCodeField" dataContainer="adminConfigurationDc" property="providerCode" required="true" width="100%" stylename="edit-form-control" caption="msg://adminProviderCode.caption"/>
                             <!-- Active state, который resolver проверяет перед вызовом. -->
                             <checkBox id="activeField" dataContainer="adminConfigurationDc" property="active" caption="msg://adminActive.caption"/>
+                            <!-- Признак бесплатной модели без списания платных токенов. -->
+                            <checkBox id="freeModelField" dataContainer="adminConfigurationDc" property="freeModel" caption="msg://adminFreeModel.caption" description="msg://adminFreeModel.description"/>
                             <!-- Priority зарезервирован для выбора/резервирования подключений. -->
                             <textField id="priorityField" dataContainer="adminConfigurationDc" property="priority" width="100%" stylename="edit-form-control" caption="msg://adminPriority.caption"/>
                         </groupBox>

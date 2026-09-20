@@ -290,4 +290,8 @@
     <include file="260919-8-addAiRetryAndConnectionAttemptsFields.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AI Control Plane: Добавление логотипа (BLOB) и признака бесплатной модели в AdminAiConfiguration -->
+    <include file="260920-1-addLogoAndFreeModelToAdminAiConfig.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

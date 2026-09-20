@@ -5,13 +5,19 @@ import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.service.AiConnectionTestResult;
 import com.company.hunttech.service.AiCredentialService;
+import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.ContentMode;
+import com.haulmont.cuba.gui.components.FileUploadField;
+import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.PasswordField;
+import com.haulmont.cuba.gui.components.StreamResource;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.ThemeResource;
+import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.StandardEditor.BeforeCommitChangesEvent;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.StandardEditor.InitEntityEvent;
@@ -21,8 +27,15 @@ import com.haulmont.cuba.gui.screen.StandardEditor;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.gui.upload.FileUploadingAPI;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
 @UiController("hunttech_AdminAiConfiguration.edit")
@@ -30,6 +43,7 @@ import java.util.Date;
 @EditedEntityContainer("adminConfigurationDc")
 @LoadDataBeforeShow
 public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(AdminAiConfigurationEdit.class);
 
     @Inject
     private LookupField<String> providerCodeField;
@@ -53,6 +67,12 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
     private Button connectionNav;
     @Inject
     private Button securityNav;
+    @Inject
+    private Image adminAiConfigurationLogoImage;
+    @Inject
+    private FileUploadField logoUploadField;
+    @Inject
+    private FileUploadingAPI fileUploadingAPI;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -65,8 +85,66 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
     public void onInitEntity(InitEntityEvent<AdminAiConfiguration> event) {
         event.getEntity().setActive(true);
         event.getEntity().setPriority(0);
+        if (event.getEntity().getFreeModel() == null) {
+            event.getEntity().setFreeModel(false);
+        }
         if (event.getEntity().getMaxRetries() == null) {
             event.getEntity().setMaxRetries(3);
+        }
+    }
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        updateLogoPreview();
+    }
+
+    @Subscribe("logoUploadField")
+    public void onLogoUploadFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        File file = fileUploadingAPI.getFile(logoUploadField.getFileId());
+        if (file != null) {
+            try {
+                byte[] bytes = FileUtils.readFileToByteArray(file);
+                if (bytes != null && bytes.length > 0) {
+                    getEditedEntity().setLogoImage(bytes);
+                    updateLogoPreview();
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Логотип загружен")
+                            .show();
+                }
+            } catch (IOException ex) {
+                log.error("Не удалось прочитать загруженный файл логотипа: {}", ex.getMessage());
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption("Ошибка загрузки")
+                        .withDescription("Не удалось прочитать файл логотипа.")
+                        .show();
+            } finally {
+                try {
+                    fileUploadingAPI.deleteFile(logoUploadField.getFileId());
+                } catch (FileStorageException ignored) {
+                }
+            }
+        }
+    }
+
+    public void onClearLogoClick() {
+        getEditedEntity().setLogoImage(null);
+        updateLogoPreview();
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Логотип удален")
+                .show();
+    }
+
+    private void updateLogoPreview() {
+        if (adminAiConfigurationLogoImage == null) {
+            return;
+        }
+        byte[] logoBytes = getEditedEntity() != null ? getEditedEntity().getLogoImage() : null;
+        if (logoBytes != null && logoBytes.length > 0) {
+            adminAiConfigurationLogoImage.setSource(StreamResource.class)
+                    .setStreamSupplier(() -> new ByteArrayInputStream(logoBytes));
+        } else {
+            adminAiConfigurationLogoImage.setSource(ThemeResource.class)
+                    .setPath("icons/ai/admin-ai-configuration.png");
         }
     }
 

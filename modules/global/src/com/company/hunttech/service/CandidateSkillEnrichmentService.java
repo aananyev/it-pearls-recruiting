@@ -72,4 +72,14 @@ public interface CandidateSkillEnrichmentService {
      * Запускает один цикл фоновой обработки немедленно (для тестирования или ручного триггера).
      */
     void runWorkerCycleNow();
+
+    /**
+     * Возвращает признак использования только бесплатных нейросетей.
+     */
+    boolean isFreeOnly();
+
+    /**
+     * Устанавливает признак использования только бесплатных нейросетей.
+     */
+    void setFreeOnly(boolean freeOnly);
 }

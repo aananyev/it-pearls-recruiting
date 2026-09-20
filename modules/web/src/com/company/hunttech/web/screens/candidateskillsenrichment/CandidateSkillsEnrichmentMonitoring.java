@@ -48,11 +48,13 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
     @Inject
     private UiComponents uiComponents;
 
-    // Header badges
+    // Header badges and settings
     @Inject
     private Label<String> workerStatusBadge;
     @Inject
     private Label<String> workerRunStateBadge;
+    @Inject
+    private CheckBox freeOnlyCheckBox;
 
     // KPI labels
     @Inject
@@ -214,13 +216,17 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
         try {
             CandidateSkillsEnrichmentKpiDto kpi = enrichmentService.getKpiMetrics();
 
-            // Воркер
+            // Воркер и настройки
             boolean enabled = kpi.isWorkerEnabled();
             workerStatusBadge.setValue(enabled ? "СЛУЖБА ВКЛЮЧЕНА" : "СЛУЖБА ВЫКЛЮЧЕНА");
             workerStatusBadge.setStyleName(enabled ? "ai-chip-badge badge-green" : "ai-chip-badge badge-red");
 
             workerRunStateBadge.setValue(kpi.getWorkerStatus());
             workerRunStateBadge.setStyleName(enabled ? "ai-chip-badge badge-blue" : "ai-chip-badge");
+
+            if (freeOnlyCheckBox != null) {
+                freeOnlyCheckBox.setValue(enrichmentService.isFreeOnly());
+            }
 
             // Прогресс базы
             long total = kpi.getTotalEligibleCvCount();
@@ -322,6 +328,18 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
     @Subscribe("refreshTimer")
     public void onRefreshTimerTimerAction(com.haulmont.cuba.gui.components.Timer.TimerActionEvent event) {
         refreshDashboard(false);
+    }
+
+    @Subscribe("freeOnlyCheckBox")
+    public void onFreeOnlyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (!isInitialized) return;
+        boolean val = Boolean.TRUE.equals(event.getValue());
+        enrichmentService.setFreeOnly(val);
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption(val ? "Режим: только бесплатные нейросети" : "Режим: все доступные нейросети")
+                .withDescription(val ? "Фоновый воркер будет обращаться исключительно к моделям с бесплатным тарифом"
+                        : "Разрешено использование корпоративных моделей с тарификацией")
+                .show();
     }
 
     @Subscribe("startWorkerBtn")

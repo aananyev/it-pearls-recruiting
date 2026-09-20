@@ -112,4 +112,16 @@ public interface SkillAnalysisService {
      * @return результат анализа
      */
     SkillAnalysisResult analyzeWithFunction(String sourceText, String skillLevel, String functionCode, boolean allowDictionaryFallback);
+
+    /**
+     * Анализирует текст с возможностью выбора функции AI, управления словарным fallback и флагом бесплатных моделей.
+     *
+     * @param sourceText               исходный текст
+     * @param skillLevel               уровень навыков (ALL, MAIN, SECONDARY, TERTIARY)
+     * @param functionCode             код функции AI (например SKILLS_EXTRACT или SKILLS_EXTRACT_BACKGROUND)
+     * @param allowDictionaryFallback  разрешен ли fallback на словарный поиск при ошибке AI (в фоне false)
+     * @param freeOnly                 признак использования только бесплатных нейросетей
+     * @return результат анализа
+     */
+    SkillAnalysisResult analyzeWithFunction(String sourceText, String skillLevel, String functionCode, boolean allowDictionaryFallback, boolean freeOnly);
 }

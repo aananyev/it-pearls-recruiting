@@ -116,7 +116,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
-        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function);
+        boolean freeOnly = isFreeOnlyRequested(context);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly);
 
         CallAttemptsTracker tracker = new CallAttemptsTracker();
         AiExecutionResult result;
@@ -194,7 +195,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String effectiveSystemPrompt = appendRuntimeContext(userContext.effectiveSystemPrompt, context);
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
-        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function);
+        boolean freeOnly = isFreeOnlyRequested(context);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly);
         CallAttemptsTracker tracker = new CallAttemptsTracker();
 
         AtomicBoolean emitted = new AtomicBoolean(false);
@@ -277,7 +279,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
 
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
-        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function);
+        boolean freeOnly = isFreeOnlyRequested(context);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly);
         CallAttemptsTracker tracker = new CallAttemptsTracker();
 
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
@@ -468,15 +471,38 @@ public class AiExecutionServiceBean implements AiExecutionService {
         return candidates;
     }
 
+    private boolean isFreeOnlyRequested(Map<String, Object> context) {
+        if (context == null) {
+            return false;
+        }
+        Object val = context.get("freeOnly");
+        if (val instanceof Boolean) {
+            return (Boolean) val;
+        }
+        if (val instanceof String) {
+            return Boolean.parseBoolean((String) val);
+        }
+        return false;
+    }
+
     private List<AdminExecutionCandidate> resolveAdminExecutionCandidates(AiFunctionConfiguration function) {
+        return resolveAdminExecutionCandidates(function, false);
+    }
+
+    private List<AdminExecutionCandidate> resolveAdminExecutionCandidates(AiFunctionConfiguration function, boolean freeOnly) {
         List<AdminExecutionCandidate> candidates = new ArrayList<>();
         Set<UUID> seenIds = new HashSet<>();
 
         AdminAiConfiguration configuredAdmin = function != null ? function.getAdminConfiguration() : null;
         if (isUsableAdminConfiguration(configuredAdmin)) {
-            candidates.add(new AdminExecutionCandidate(configuredAdmin, function.getAdminModelName()));
-            if (configuredAdmin.getId() != null) {
-                seenIds.add(configuredAdmin.getId());
+            if (!freeOnly || Boolean.TRUE.equals(configuredAdmin.getFreeModel())) {
+                candidates.add(new AdminExecutionCandidate(configuredAdmin, function.getAdminModelName()));
+                if (configuredAdmin.getId() != null) {
+                    seenIds.add(configuredAdmin.getId());
+                }
+            } else {
+                log.info("Основная конфигурация AI [{}] не является бесплатной, отбираются бесплатные альтернативы (freeOnly=true)",
+                        configuredAdmin.getName());
             }
         }
 
@@ -484,8 +510,11 @@ public class AiExecutionServiceBean implements AiExecutionService {
             com.haulmont.cuba.core.global.FluentLoader<AdminAiConfiguration, UUID> loader =
                     dataManager != null ? dataManager.load(AdminAiConfiguration.class) : null;
             if (loader != null) {
+                String queryStr = freeOnly
+                        ? "select c from hunttech_AdminAiConfiguration c where c.active = true and c.freeModel = true order by c.priority desc, c.createTs asc"
+                        : "select c from hunttech_AdminAiConfiguration c where c.active = true order by c.priority desc, c.createTs asc";
                 List<AdminAiConfiguration> loaded = loader
-                        .query("select c from hunttech_AdminAiConfiguration c where c.active = true order by c.priority desc, c.createTs asc")
+                        .query(queryStr)
                         .view("admin-ai-configuration-secret-view")
                         .list();
                 if (loaded != null) {
@@ -608,7 +637,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                              CallAttemptsTracker tracker) {
         if (candidates == null || candidates.isEmpty()) {
             throw new DevelopmentException(
-                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
+                    "Для AI-функции «" + function.getCode() + "» не настроено подходящее активное корпоративное подключение (проверьте активность и признак бесплатной модели).");
         }
         RuntimeException lastException = null;
         for (int i = 0; i < candidates.size(); i++) {
@@ -741,7 +770,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                                   CallAttemptsTracker tracker) {
         if (candidates == null || candidates.isEmpty()) {
             throw new DevelopmentException(
-                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
+                    "Для AI-функции «" + function.getCode() + "» не настроено подходящее активное корпоративное подключение (проверьте активность и признак бесплатной модели).");
         }
         RuntimeException lastException = null;
         for (int i = 0; i < candidates.size(); i++) {

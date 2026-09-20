@@ -32,6 +32,10 @@
                         <label id="monitoringSubtitle" value="msg://monitoringSubtitleText" stylename="ai-page-subtitle"/>
                     </vbox>
                     <hbox spacing="true" alignment="MIDDLE_RIGHT">
+                        <checkBox id="freeOnlyCheckBox"
+                                  caption="msg://chkFreeOnly"
+                                  description="msg://chkFreeOnlyDescription"
+                                  align="MIDDLE_RIGHT"/>
                         <button id="startWorkerBtn" caption="msg://btnStartWorker" icon="PLAY" stylename="primary ai-action-btn"/>
                         <button id="stopWorkerBtn" caption="msg://btnStopWorker" icon="STOP" stylename="danger ai-action-btn"/>
                         <button id="runOnceBtn" caption="msg://btnRunOnce" icon="STEP_FORWARD" stylename="ai-secondary-btn"/>

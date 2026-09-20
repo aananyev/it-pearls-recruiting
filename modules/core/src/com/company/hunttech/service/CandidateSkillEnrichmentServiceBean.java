@@ -103,8 +103,8 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
         }
 
         // 2. Вызов AI через SkillAnalysisService (ВНЕ транзакции БД!)
-        boolean freeOnly = configuration.getConfig(HunttechSkillsEnrichmentConfig.class).getFreeOnly();
-        boolean allowFallback = !isBackground || !freeOnly; // В фоне строгий FREE_ONLY, для ручного режима сохраняем словарный fallback
+        boolean freeOnly = isBackground && configuration.getConfig(HunttechSkillsEnrichmentConfig.class).getFreeOnly();
+        boolean allowFallback = !isBackground || !freeOnly; // В фоне при FREE_ONLY строгий запрет fallback на словарный поиск
         SkillAnalysisResult mainResult = null;
         SkillAnalysisResult secondaryResult = null;
         SkillAnalysisResult tertiaryResult = null;
@@ -112,16 +112,16 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
         AiExecutionResult aiExecution = null;
 
         try {
-            mainResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_MAIN, effectiveFunctionCode, allowFallback);
-            secondaryResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_SECONDARY, effectiveFunctionCode, allowFallback);
-            tertiaryResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_TERTIARY, effectiveFunctionCode, allowFallback);
+            mainResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_MAIN, effectiveFunctionCode, allowFallback, freeOnly);
+            secondaryResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_SECONDARY, effectiveFunctionCode, allowFallback, freeOnly);
+            tertiaryResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_TERTIARY, effectiveFunctionCode, allowFallback, freeOnly);
 
             List<SkillTree> mainSkills = mainResult.getSkills() != null ? mainResult.getSkills() : Collections.emptyList();
             List<SkillTree> secondarySkills = secondaryResult.getSkills() != null ? secondaryResult.getSkills() : Collections.emptyList();
             List<SkillTree> tertiarySkills = tertiaryResult.getSkills() != null ? tertiaryResult.getSkills() : Collections.emptyList();
 
             if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
-                allResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_ALL, effectiveFunctionCode, allowFallback);
+                allResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_ALL, effectiveFunctionCode, allowFallback, freeOnly);
                 mainSkills = allResult.getSkills() != null ? allResult.getSkills() : Collections.emptyList();
             }
 
@@ -631,5 +631,17 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
         if (enrichmentWorker != null) {
             enrichmentWorker.runWorkerTickSafe();
         }
+    }
+
+    @Override
+    public boolean isFreeOnly() {
+        return configuration.getConfig(HunttechSkillsEnrichmentConfig.class).getFreeOnly();
+    }
+
+    @Override
+    public void setFreeOnly(boolean freeOnly) {
+        HunttechSkillsEnrichmentConfig cfg = configuration.getConfig(HunttechSkillsEnrichmentConfig.class);
+        cfg.setFreeOnly(freeOnly);
+        log.info("Режим «Только бесплатные нейросети» переключен: freeOnly={}", freeOnly);
     }
 }

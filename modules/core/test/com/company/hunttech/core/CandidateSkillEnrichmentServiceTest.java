@@ -99,7 +99,7 @@ public class CandidateSkillEnrichmentServiceTest {
         CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, null, true);
 
         assertFalse("Результат для пустого CV должен быть неуспешным", result.isSuccess());
-        verify(mockSkillAnalysisService, never()).analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean());
+        verify(mockSkillAnalysisService, never()).analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean());
         verify(mockDataManager).commit(mockAnalysis);
         assertEquals("Статус должен быть SKIPPED", CandidateCvAnalysisStatus.SKIPPED, mockAnalysis.getStatus());
     }
@@ -117,7 +117,8 @@ public class CandidateSkillEnrichmentServiceTest {
         CandidateCvSkillAnalysis mockAnalysis = new CandidateCvSkillAnalysis();
         when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(mockAnalysis);
 
-        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), eq(false)))
+        when(mockConfig.getFreeOnly()).thenReturn(true);
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), eq(false), eq(true)))
                 .thenThrow(new RuntimeException("429 Too Many Requests: Rate limit reached"));
 
         CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT_BACKGROUND", true);
@@ -143,5 +144,14 @@ public class CandidateSkillEnrichmentServiceTest {
         assertEquals("Попытка 2: задержка 5 минут", 5L, b2);
         assertEquals("Попытка 3: задержка 15 минут", 15L, b3);
         assertEquals("Попытка 4+: задержка 60 минут", 60L, b4);
+    }
+
+    @Test
+    public void testFreeOnlyToggle() {
+        when(mockConfig.getFreeOnly()).thenReturn(true);
+        assertTrue("Должен возвращать true из конфигурации", service.isFreeOnly());
+
+        service.setFreeOnly(false);
+        verify(mockConfig).setFreeOnly(false);
     }
 }
