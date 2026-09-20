@@ -62,6 +62,11 @@
         <item screen="hunttech_JobCandidateReestr.browse" caption="Кандидаты" icon="USERS"/>
         <item screen="hunttech_CandidateCVReestr.browse" caption="Резюме кандидатов" icon="FILE_TEXT"/>
         <item screen="hunttech_IteractionListReestr.browse" caption="Реестр взаимодействий" icon="COMMENTS"/>
+        <menu id="recruiter-dashboards" caption="Дашборды рекрутера" icon="DASHBOARD">
+            <item screen="hunttech_RecruiterKanbanDashboard" caption="Кандидаты в работе — Kanban" icon="COLUMNS"/>
+            <item screen="hunttech_RecruiterFunnelDashboard" caption="Воронка найма" icon="FILTER"/>
+            <item screen="hunttech_RecruiterReserveDashboard" caption="Кадровый резерв" icon="SHIELD"/>
+        </menu>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
         <item screen="hunttech_ProjectReestr.browse" caption="Проекты заказчиков" icon="TH"/>
