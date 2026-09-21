@@ -1,5 +1,5 @@
 {
-  "title": "Кандидаты в работе — Kanban",
+  "title": "Kanban",
   "code": "recruiter-kanban-dashboard",
   "visualModel": {
     "children": [
@@ -18,8 +18,8 @@
                   "widget": {
                     "showWidgetCaption": false,
                     "widgetId": "recruiterCandidateKanban",
-                    "caption": "Кандидаты в работе — Kanban",
-                    "name": "Кандидаты в работе — Kanban",
+                    "caption": "Kanban",
+                    "name": "Kanban",
                     "description": null,
                     "parameters": [],
                     "widgetFields": [],

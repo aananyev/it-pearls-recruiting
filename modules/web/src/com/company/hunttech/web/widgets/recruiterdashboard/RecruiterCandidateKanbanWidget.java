@@ -31,7 +31,7 @@ import java.util.Map;
 
 @UiController("hunttech_RecruiterCandidateKanbanWidget")
 @UiDescriptor("recruiter-candidate-kanban-widget.xml")
-@DashboardWidget(name = "Рекрутер: кандидаты в работе — Kanban")
+@DashboardWidget(name = "Kanban")
 public class RecruiterCandidateKanbanWidget extends ScreenFragment implements RefreshableWidget {
 
     private static final int PERIOD_DAYS = 30;
