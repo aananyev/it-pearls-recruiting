@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260921-1-routeCandidateVacancyMatchToDeepSeek" author="antigravity" dbms="postgresql">
+        <!-- Fail deployment when schema or routing prerequisites are not ready; do not silently skip this migration. -->
+        <preConditions onFail="HALT" onError="HALT">
+            <sqlCheck expectedResult="1">
+                SELECT CASE WHEN
+                    to_regclass('public.hunttech_admin_ai_configuration') IS NOT NULL
+                    AND to_regclass('public.hunttech_ai_function_configuration') IS NOT NULL
+                    THEN 1 ELSE 0 END
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM HUNTTECH_ADMIN_AI_CONFIGURATION
+                WHERE PROVIDER_CODE = 'deepseek'
+                  AND DELETE_TS IS NULL
+                  AND IS_ACTIVE = TRUE
+                  AND API_KEY_ENCRYPTED IS NOT NULL
+                  AND DEFAULT_MODEL_NAME IS NOT NULL
+            </sqlCheck>
+            <!-- Keep Nemotron aligned with v_expected_source_model in the canonical forward SQL and rollback script. -->
+<sqlCheck expectedResult="1">
+                SELECT CASE WHEN
+                    (SELECT COUNT(*)
+                       FROM HUNTTECH_AI_FUNCTION_CONFIGURATION f
+                       JOIN HUNTTECH_ADMIN_AI_CONFIGURATION a ON a.ID = f.ADMIN_CONFIGURATION_ID
+                      WHERE f.CODE = 'CANDIDATE_VACANCY_MATCH_ANALYZE'
+                        AND f.DELETE_TS IS NULL
+                        AND f.IS_ACTIVE = TRUE
+                        AND f.VERSION IS NOT NULL
+                        AND f.ADMIN_MODEL_NAME = 'nvidia/nemotron-3-ultra-550b-a55b:free'
+                        AND a.PROVIDER_CODE = 'openrouter'
+                        AND a.DELETE_TS IS NULL) = 1
+                    OR ((SELECT COUNT(*)
+                           FROM HUNTTECH_AI_FUNCTION_CONFIGURATION f
+                           JOIN HUNTTECH_ADMIN_AI_CONFIGURATION a ON a.ID = f.ADMIN_CONFIGURATION_ID
+                          WHERE f.CODE = 'CANDIDATE_VACANCY_MATCH_ANALYZE'
+                            AND f.DELETE_TS IS NULL
+                            AND f.IS_ACTIVE = TRUE
+                            AND f.VERSION IS NOT NULL
+                            AND f.ADMIN_MODEL_NAME = a.DEFAULT_MODEL_NAME
+                            AND a.PROVIDER_CODE = 'deepseek'
+                            AND a.DELETE_TS IS NULL
+                            AND a.IS_ACTIVE = TRUE
+                            AND a.API_KEY_ENCRYPTED IS NOT NULL) = 1
+                        AND NOT EXISTS (
+                            SELECT 1
+                              FROM HUNTTECH_AI_FUNCTION_CONFIGURATION f
+                              JOIN HUNTTECH_ADMIN_AI_CONFIGURATION a ON a.ID = f.ADMIN_CONFIGURATION_ID
+                             WHERE f.CODE = 'CANDIDATE_VACANCY_MATCH_ANALYZE'
+                               AND f.DELETE_TS IS NULL
+                               AND f.IS_ACTIVE = TRUE
+                               AND f.VERSION IS NOT NULL
+                               AND a.PROVIDER_CODE = 'openrouter'
+                               AND a.DELETE_TS IS NULL))
+                    THEN 1 ELSE 0 END
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="../update/postgres/26/260921-1-routeCandidateVacancyMatchToDeepSeek.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+                 stripComments="true"/>
+        <rollback>
+            <sqlFile path="260921-1-routeCandidateVacancyMatchToDeepSeek-rollback.sql"
+                     relativeToChangelogFile="true"
+                     splitStatements="false"
+                     stripComments="true"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

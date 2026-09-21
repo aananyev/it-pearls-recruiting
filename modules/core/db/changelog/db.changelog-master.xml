@@ -302,7 +302,11 @@
     <include file="260920-3-setOpenRouterGatewayBaseApiUrl.xml"
              relativeToChangelogFile="true"/>
 
-    <!-- Фоновое определение навыков: Добавление поля PRIORITY для приоритетной очереди рекрутеров -->
+    <!-- AI Control Plane: восстановление подбора вакансий через корпоративный DeepSeek -->
+    <include file="260921-1-routeCandidateVacancyMatchToDeepSeek.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- Сервис фонового анализа навыков: приоритет задач от рекрутера -->
     <include file="260921-2-addPriorityToCandidateCvSkillAnalysis.xml"
              relativeToChangelogFile="true"/>
 
