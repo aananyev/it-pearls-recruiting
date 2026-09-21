@@ -119,7 +119,11 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
                 log.error("Не удалось безопасно обработать загруженный логотип", ex);
                 notifications.create(Notifications.NotificationType.ERROR)
                         .withCaption("Ошибка загрузки")
-                        .withDescription("Выберите корректное изображение PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до 20 МБ.")
+                    .withDescription("Выберите PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до "
+                            + (SidebarImageNormalizationService.MAX_INPUT_BYTES / (1024 * 1024))
+                            + " МБ и разрешением до "
+                            + (SidebarImageNormalizationService.MAX_PIXELS / 1_000_000L)
+                            + " млн пикселей.")
                         .show();
             } finally {
                 try {

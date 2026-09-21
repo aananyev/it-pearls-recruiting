@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Iterator;
@@ -21,6 +22,7 @@ import java.util.zip.CRC32;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class SidebarImageNormalizationServiceBeanTest {
@@ -101,6 +103,20 @@ public class SidebarImageNormalizationServiceBeanTest {
         ProcessedImage result = service.normalize(withExifOrientation(jpeg, 6), "phone.jpg");
 
         assertPng(result, 60, 120);
+    }
+
+    @Test
+    public void jpegExifScannerSkipsFillBytesBeforeApp1Marker() throws Exception {
+        byte[] jpeg = withExifOrientation(image("jpg", 120, 60, false), 6);
+        Method scanner = SidebarImageNormalizationServiceBean.class
+                .getDeclaredMethod("findJpegExifSegment", byte[].class);
+        scanner.setAccessible(true);
+
+        byte[] exifSegment = (byte[]) scanner.invoke(new SidebarImageNormalizationServiceBean(), jpeg);
+
+        assertNotNull(exifSegment);
+        assertArrayEquals("Exif\0\0".getBytes(StandardCharsets.US_ASCII),
+                java.util.Arrays.copyOf(exifSegment, 6));
     }
 
     @Test
@@ -219,6 +235,7 @@ public class SidebarImageNormalizationServiceBeanTest {
         try (DataOutputStream data = new DataOutputStream(output)) {
             data.write(jpeg, 0, 2); // SOI
             data.writeByte(0xff);
+            data.writeByte(0xff); // JPEG marker fill byte
             data.writeByte(0xe1);
             data.writeShort(34); // APP1 length includes its two-byte length field
             data.write("Exif\0\0".getBytes(StandardCharsets.US_ASCII));

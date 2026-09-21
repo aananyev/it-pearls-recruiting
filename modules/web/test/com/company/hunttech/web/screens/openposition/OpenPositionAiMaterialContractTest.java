@@ -41,6 +41,9 @@ public class OpenPositionAiMaterialContractTest {
         assertTrue(java.contains("Заменить существующий текст?"));
         assertTrue(java.contains("Заменить и генерировать"));
         assertTrue(java.contains("new BackgroundTask<Integer, AiExecutionResult>(120, this)"));
+        assertTrue(materialFlow.contains("resolveVacancyDescription(commentHtml, positionId, !commentLoaded)"));
+        assertFalse(materialFlow.contains("dataManager.reload"),
+                "Unfetched vacancy description must not trigger a UI-thread reload");
         assertTrue(java.contains("AiOperationNotifier.showStarted(notifications"));
         assertTrue(java.contains("AiOperationNotifier.showProgress(this"));
         assertTrue(java.contains("AiOperationNotifier.show(notifications, result"));
@@ -49,6 +52,8 @@ public class OpenPositionAiMaterialContractTest {
         assertTrue(materialFlow.contains("sourceButton.setEnabled(false)"));
         assertTrue(materialFlow.contains("restoreMaterialButtonState(materialType, sourceButton, targetField)"));
         assertFalse(materialFlow.contains("ex.getMessage()"));
+        assertTrue(java.contains("dataManager.load(OpenPosition.class)"));
+        assertTrue(java.contains("throw new MissingVacancyDescriptionException()"));
     }
 
     private String read(String relativePath) throws Exception {

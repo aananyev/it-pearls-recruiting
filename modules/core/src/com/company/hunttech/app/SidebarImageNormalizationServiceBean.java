@@ -37,7 +37,7 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
      * Large rasters are drawn directly into the <=512 ARGB target, so no second
      * full-size ARGB copy is allocated.
      */
-    static final long MAX_PIXELS = 25_000_000L;
+    static final long MAX_PIXELS = SidebarImageNormalizationService.MAX_PIXELS;
 
     @Override
     public ProcessedImage normalize(byte[] data, String fileName) {
@@ -89,7 +89,8 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
             throw new DevelopmentException("Файл изображения пуст.");
         }
         if (data.length > MAX_INPUT_BYTES) {
-            throw new DevelopmentException("Размер изображения превышает 20 МБ.");
+            throw new DevelopmentException("Размер изображения превышает "
+                    + (MAX_INPUT_BYTES / (1024 * 1024)) + " МБ.");
         }
     }
 
@@ -128,6 +129,12 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
             if ((data[cursor] & 0xff) != 0xff) {
                 cursor++;
                 continue;
+            }
+            // Пропускаем дополнительные 0xFF перед маркером JPEG, чтобы корректно читать EXIF.
+            while (cursor + 1 < data.length
+                    && (data[cursor] & 0xff) == 0xff
+                    && (data[cursor + 1] & 0xff) == 0xff) {
+                cursor++;
             }
             int marker = data[cursor + 1] & 0xff;
             cursor += 2;

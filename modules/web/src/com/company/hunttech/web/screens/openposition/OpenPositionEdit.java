@@ -1005,23 +1005,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void startVacancyMaterialGeneration(VacancyMaterialType materialType,
                                                 RichTextArea targetField,
                                                 Button sourceButton) {
-        String description;
-        try {
-            description = resolveVacancyDescription();
-        } catch (RuntimeException ex) {
-            showMaterialError(materialType, false);
+        OpenPosition position = getEditedEntity();
+        boolean commentLoaded = PersistenceHelper.isNew(position)
+                || PersistenceHelper.isLoaded(position, "comment");
+        String commentHtml = commentLoaded ? position.getComment() : null;
+        UUID positionId = position.getId();
+        if (commentLoaded && !hasVisibleText(commentHtml)) {
+            showMissingVacancyDescriptionWarning();
             return;
         }
-        if (description == null || description.isEmpty()) {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("Описание вакансии не заполнено")
-                    .withDescription("Заполните описание вакансии перед генерацией материала.")
-                    .show();
-            return;
-        }
-
-        Map<String, Object> context = new LinkedHashMap<>();
-        context.put("description", description);
 
         sourceButton.setEnabled(false);
         AiOperationNotifier.showStarted(notifications, materialStartedCaption(materialType), null);
@@ -1031,6 +1023,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 new BackgroundTask<Integer, AiExecutionResult>(120, this) {
                     @Override
                     public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        String description = resolveVacancyDescription(commentHtml, positionId, !commentLoaded);
+                        if (description == null || description.isEmpty()) {
+                            throw new MissingVacancyDescriptionException();
+                        }
+                        Map<String, Object> context = new LinkedHashMap<>();
+                        context.put("description", description);
                         return hrmAiService.generateVacancyMaterial(materialType, context);
                     }
 
@@ -1051,7 +1049,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     public boolean handleException(Exception ex) {
                         AiOperationNotifier.closeProgress(progressDialog);
                         restoreMaterialButtonState(materialType, sourceButton, targetField);
-                        showMaterialError(materialType, false);
+                        if (ex instanceof MissingVacancyDescriptionException) {
+                            showMissingVacancyDescriptionWarning();
+                        } else {
+                            showMaterialError(materialType, false);
+                        }
                         return true;
                     }
 
@@ -1066,19 +1068,32 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         backgroundWorker.handle(task).execute();
     }
 
-    /** Возвращает актуальное описание, не читая unfetched LOB у detached entity. */
-    private String resolveVacancyDescription() {
-        OpenPosition position = getEditedEntity();
-        String html;
-        if (PersistenceHelper.isNew(position) || PersistenceHelper.isLoaded(position, "comment")) {
-            html = position.getComment();
-        } else {
-            OpenPosition reloaded = dataManager.reload(position, ViewBuilder.of(OpenPosition.class)
-                    .add("comment")
-                    .build());
+    /**
+     * Возвращает описание без чтения unfetched LOB у detached entity. Узкий DB reload
+     * вызывается только из BackgroundTask.run, чтобы запрос не блокировал UI-поток.
+     */
+    private String resolveVacancyDescription(String loadedHtml, UUID positionId, boolean reload) {
+        String html = loadedHtml;
+        if (reload) {
+            OpenPosition reloaded = dataManager.load(OpenPosition.class)
+                    .id(positionId)
+                    .view(ViewBuilder.of(OpenPosition.class)
+                            .add("comment")
+                            .build())
+                    .one();
             html = reloaded.getComment();
         }
         return html == null ? null : Jsoup.parse(html).text().trim();
+    }
+
+    private void showMissingVacancyDescriptionWarning() {
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption("Описание вакансии не заполнено")
+                .withDescription("Заполните описание вакансии перед генерацией материала.")
+                .show();
+    }
+
+    private static class MissingVacancyDescriptionException extends RuntimeException {
     }
 
     private boolean hasVisibleText(String html) {

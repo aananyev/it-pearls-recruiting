@@ -162,7 +162,11 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
             appUI.getNotifications()
                     .create(Notifications.NotificationType.ERROR)
                     .withCaption("Изображение не загружено")
-                    .withDescription("Выберите корректное изображение PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до 20 МБ.")
+                    .withDescription("Выберите PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до "
+                            + (SidebarImageNormalizationService.MAX_INPUT_BYTES / (1024 * 1024))
+                            + " МБ и разрешением до "
+                            + (SidebarImageNormalizationService.MAX_PIXELS / 1_000_000L)
+                            + " млн пикселей.")
                     .show();
         }
         getComposition().markAsDirty();

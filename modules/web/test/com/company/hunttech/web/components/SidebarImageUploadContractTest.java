@@ -51,6 +51,9 @@ public class SidebarImageUploadContractTest {
         assertTrue(java.contains("APPLICATION_ICON_PROPERTY"));
         assertFalse(java.contains("ProjectLogoImageProcessingService"));
         assertFalse(java.contains("При любой ошибке обработки сохраняем исходный файл"));
+        assertTrue(java.contains("SidebarImageNormalizationService.MAX_PIXELS"),
+                "Ошибка upload должна объяснять лимит пикселей вместе с лимитом размера файла");
+        assertTrue(java.contains("SidebarImageNormalizationService.MAX_INPUT_BYTES"));
     }
 
     @Test
@@ -104,6 +107,7 @@ public class SidebarImageUploadContractTest {
         assertTrue(adminJava.contains("sidebarImageNormalizationService.normalize(bytes, event.getFileName())"));
         assertTrue(adminJava.contains("getEditedEntity().setLogoImage(processed.getData())"));
         assertFalse(adminJava.contains("getEditedEntity().setLogoImage(bytes)"));
+        assertTrue(adminJava.contains("SidebarImageNormalizationService.MAX_PIXELS"));
     }
 
     @Test

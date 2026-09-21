@@ -13,5 +13,7 @@ public interface SidebarImageNormalizationService {
 
     int MAX_INPUT_BYTES = 20 * 1024 * 1024;
 
+    long MAX_PIXELS = 25_000_000L;
+
     ProcessedImage normalize(byte[] data, String fileName);
 }

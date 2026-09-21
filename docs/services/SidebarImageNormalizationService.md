@@ -86,4 +86,5 @@ Rollback приложения — возврат предыдущей верси
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-22 | Общие byte/pixel limits вынесены в service API; upload-ошибки показывают оба ограничения, JPEG EXIF scanner пропускает marker fill bytes. |
 | 2026-09-21 | Создан безопасный общий PNG pipeline для 16 graphics controls (15 FileDescriptor + Admin AI BLOB adapter); зафиксированы WebP/TIFF runtime support, JPEG EXIF Orientation, лимиты 20 MiB/25 млн пикселей, no-fallback, сохранение прежнего preview, исключение main-screen background/documents и production-safe verification/rollback. |
