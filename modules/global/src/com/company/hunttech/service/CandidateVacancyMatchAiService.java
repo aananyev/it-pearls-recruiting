@@ -1,6 +1,7 @@
 package com.company.hunttech.service;
 
 import com.company.hunttech.dto.CandidateVacancyMatchReport;
+import com.company.hunttech.dto.CandidateVacancyMatchProgress;
 
 import java.util.UUID;
 
@@ -48,6 +49,25 @@ public interface CandidateVacancyMatchAiService {
      * @return структурированный отчёт с ранжированным списком подходящих вакансий
      */
     CandidateVacancyMatchReport matchVacanciesForCandidate(UUID candidateId);
+
+    /**
+     * Выполняет анализ с идентификатором операции, по которому web-клиент может
+     * получать фактический прогресс завершения аналитических чанков.
+     *
+     * @param candidateId уникальный идентификатор кандидата
+     * @param operationId заранее созданный идентификатор операции; при {@code null}
+     *                    сервис создаёт внутренний идентификатор
+     * @return итоговый структурированный отчёт
+     */
+    CandidateVacancyMatchReport matchVacanciesForCandidate(UUID candidateId, UUID operationId);
+
+    /**
+     * Возвращает последний потокобезопасный снимок прогресса операции.
+     *
+     * @param operationId идентификатор, переданный в метод запуска
+     * @return снимок прогресса или {@code null}, если операция неизвестна либо её TTL истёк
+     */
+    CandidateVacancyMatchProgress getVacancyMatchProgress(UUID operationId);
 
     /**
      * Выполняет интеллектуальный подбор наиболее подходящих кандидатов для выбранной открытой вакансии (Этап 2 и Этап 3).

@@ -4,6 +4,8 @@
 
 | Документ | Краткое описание |
 | -------- | ---------------- |
+| [CandidateVacancyMatchAiService.md](CandidateVacancyMatchAiService.md) | AI-сопоставление кандидата с открытыми вакансиями и фактический прогресс анализа |
+| [CandidateSkillEnrichmentService.md](CandidateSkillEnrichmentService.md) | Стандартное извлечение и фиксация навыков кандидата с проверкой актуальности по датам |
 | [ProjectAiService.md](ProjectAiService.md) | Domain facade AI-обработки описания проекта через AI Control Plane |
 | [AiExecutionService.md](AiExecutionService.md) | Единый resolver/execution layer AI-функций HRM HuntTech |
 | [AiCredentialService.md](AiCredentialService.md) | Защищённое управление корпоративными AI credentials |
@@ -17,6 +19,8 @@
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-21 | Добавлен контракт проверки актуальности навыков кандидата по датам резюме и записей навыков |
+| 2026-09-21 | Добавлена спецификация `CandidateVacancyMatchAiService`: polling прогресса по завершённым AI-пакетам и ETA |
 | 2026-08-12 | Добавлен `ProjectAiService` для административно управляемой AI-обработки описания проекта |
 | 2026-08-12 | Добавлен `HrmAiService` как compatibility facade над `AiExecutionService` |
 | 2026-08-12 | Добавлены `AiExecutionService` и `AiCredentialService` AI Control Plane |

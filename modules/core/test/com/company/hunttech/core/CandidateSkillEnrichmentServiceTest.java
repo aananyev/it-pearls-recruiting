@@ -131,6 +131,42 @@ public class CandidateSkillEnrichmentServiceTest {
     }
 
     @Test
+    public void testScanAndEnrich_ForceScanBypassesFreshHashGuard() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Анна Иванова");
+
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Java, Spring, PostgreSQL");
+
+        CandidateCvSkillAnalysis existingAnalysis = new CandidateCvSkillAnalysis();
+        existingAnalysis.setStatus(CandidateCvAnalysisStatus.FRESH);
+        existingAnalysis.setCvContentHash(service.calculateNormalizedCvHash(cv.getTextCV()));
+        existingAnalysis.setSkillsConfigurationVersion(1);
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class)
+                .query(anyString())
+                .parameter("cvId", cv.getId())
+                .view("candidateCvSkillAnalysis-browse-view")
+                .optional()).thenReturn(Optional.of(existingAnalysis));
+        when(mockDataManager.load(CandidateSkill.class)
+                .query(anyString())
+                .parameter("candidateId", candidate.getId())
+                .view("candidateSkill-view")
+                .list()).thenReturn(Collections.emptyList());
+
+        SkillAnalysisResult noSkills = SkillAnalysisResult.of(Collections.emptyList(), null);
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(noSkills);
+
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, null, false, true);
+
+        assertTrue("Принудительная актуализация должна пройти стандартный pipeline", result.isSuccess());
+        verify(mockSkillAnalysisService, times(4))
+                .analyzeWithFunction(anyString(), anyString(), eq(SkillAnalysisService.FUNCTION_SKILLS_EXTRACT), eq(true), eq(false));
+    }
+
+    @Test
     public void testBackoffIntervals_Exponential() throws Exception {
         java.lang.reflect.Method method = CandidateSkillEnrichmentServiceBean.class.getDeclaredMethod("calculateBackoffMinutes", int.class);
         method.setAccessible(true);

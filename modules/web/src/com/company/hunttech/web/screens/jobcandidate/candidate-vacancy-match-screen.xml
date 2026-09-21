@@ -2,25 +2,29 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="Результаты AI-подбора"
         focusComponent="matchesTable">
-    <dialogMode width="1300px" height="850px" modal="true" resizable="true"/>
+    <dialogMode width="1100px" height="780px" modal="true" resizable="true"/>
     <data>
         <collection id="matchesDc" class="com.company.hunttech.entity.CandidateVacancyMatchItem"/>
     </data>
+    <facets>
+        <!-- Обработчик контроллера опрашивает backend snapshot без блокировки UI thread. -->
+        <timer id="analysisProgressTimer" delay="1000" autostart="false" repeating="true"/>
+    </facets>
 
-    <layout expand="mainSplit" spacing="true" width="100%" height="100%">
-        <!-- Верхняя карточка объекта анализа и статуса -->
-        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" stylename="well" margin="true">
-            <vbox expand="statusHBox" spacing="false" width="100%">
-                <vbox spacing="false" width="100%">
-                    <label id="mainTitleLabel" value="Объект анализа: —" stylename="h2 bold" width="100%"/>
-                    <label id="subTitleLabel" value="" stylename="h4 text-muted" width="100%"/>
-                </vbox>
-                <hbox id="statusHBox" spacing="true" align="MIDDLE_LEFT" width="100%">
-                    <progressBar id="analysisProgressBar" indeterminate="true" visible="false" width="220px"/>
-                    <label id="statusLabel" value="Подготовка данных..." stylename="bold text-muted" align="MIDDLE_LEFT"/>
-                </hbox>
+    <layout expand="mainSplit" spacing="true" width="100%" height="100%"
+            stylename="candidate-vacancy-match-root">
+        <!-- Компактный контекст объекта подбора и постоянные действия окна. -->
+        <hbox id="analysisHeader" width="100%" spacing="true" align="MIDDLE_LEFT"
+              expand="analysisContextBox"
+              stylename="candidate-vacancy-match-header">
+            <vbox id="analysisContextBox" spacing="false" width="100%"
+                  stylename="candidate-vacancy-match-context">
+                <label id="mainTitleLabel" value="Объект анализа: —"
+                       stylename="candidate-vacancy-match-title" width="100%"/>
+                <label id="subTitleLabel" value=""
+                       stylename="candidate-vacancy-match-subtitle" width="100%"/>
             </vbox>
-            <hbox spacing="true" align="MIDDLE_RIGHT">
+            <hbox spacing="true" align="MIDDLE_RIGHT" stylename="candidate-vacancy-match-window-actions">
                 <button id="refreshAnalysisBtn"
                         caption="Повторить AI-анализ"
                         icon="font-icon:MAGIC"
@@ -32,63 +36,113 @@
             </hbox>
         </hbox>
 
+        <!-- Статус проверки навыков не смешивается с прогрессом подбора вакансий. -->
+        <hbox id="skillRefreshStatusBox" width="100%" spacing="true" align="MIDDLE_LEFT"
+              expand="skillRefreshStatusLabel"
+              stylename="candidate-vacancy-match-skill-status">
+            <label value="Навыки кандидата" stylename="candidate-vacancy-match-status-caption"/>
+            <label id="skillRefreshStatusLabel"
+                   value="Проверяем актуальность навыков..."
+                   width="100%"
+                   stylename="candidate-vacancy-match-status-text"/>
+        </hbox>
+
+        <!-- Операционный прогресс: этап, процент и ETA относятся только к выполнению задачи. -->
+        <vbox id="analysisProgressPanel" width="100%" spacing="true"
+              stylename="candidate-vacancy-match-progress-card">
+            <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="analysisPhaseLabel">
+                <label id="analysisPhaseLabel" value="Подготовка данных" width="100%"
+                       stylename="candidate-vacancy-match-progress-title"/>
+                <label id="analysisStepsLabel" value="Шаг 1 из 3"
+                       stylename="candidate-vacancy-match-progress-step-count"/>
+                <label id="analysisPercentLabel" value="0%"
+                       stylename="candidate-vacancy-match-progress-percent"/>
+            </hbox>
+            <progressBar id="analysisProgressBar" indeterminate="false" visible="false" width="100%"
+                         stylename="candidate-vacancy-match-progress-bar"/>
+            <hbox id="analysisStepsBox" width="100%" spacing="true"
+                  stylename="candidate-vacancy-match-steps">
+                <label id="progressStepSkillsLabel" value="1  Навыки" width="32%"
+                       stylename="candidate-vacancy-match-step candidate-vacancy-match-step-active"/>
+                <label id="progressStepVacanciesLabel" value="2  Открытые вакансии" width="32%"
+                       stylename="candidate-vacancy-match-step"/>
+                <label id="progressStepAiLabel" value="3  AI-сопоставление" width="32%"
+                       stylename="candidate-vacancy-match-step"/>
+            </hbox>
+            <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="statusLabel">
+                <label id="statusLabel" value="Подготовка данных..." width="100%"
+                       stylename="candidate-vacancy-match-progress-status"/>
+                <label id="analysisEtaLabel" value="Осталось: рассчитываем"
+                       stylename="candidate-vacancy-match-progress-eta"/>
+            </hbox>
+        </vbox>
+
         <!-- Основная двухпанельная область SplitPanel -->
-        <split id="mainSplit" orientation="horizontal" splitterPosition="58" width="100%" height="100%">
-            <!-- Левая панель: Таблица сопоставления и действия рекрутера -->
-            <vbox expand="matchesTable" spacing="true" width="100%" height="100%" margin="false,true,false,false">
-                <!-- Строка 1: Основные действия рекрутера -->
-                <hbox spacing="true" width="100%" align="MIDDLE_LEFT">
-                    <button id="takeIntoWorkBtn"
-                            caption="Взять в работу"
-                            icon="font-icon:CHECK"
-                            stylename="primary"
-                            enabled="false"/>
-                    <button id="createInteractionBtn"
-                            caption="Взаимодействие"
-                            description="Создать взаимодействие с кандидатом"
-                            icon="font-icon:COMMENTS"
-                            enabled="false"/>
-                    <button id="outreachDraftBtn"
-                            caption="Предложение (AI)"
-                            description="Подготовить Outreach-предложение"
-                            icon="font-icon:MAGIC"
-                            enabled="false"/>
-                    <button id="openEntityBtn"
-                            caption="Открыть"
-                            icon="EXTERNAL_LINK"
-                            enabled="false"/>
+        <split id="mainSplit" orientation="horizontal" splitterPosition="64" width="100%" height="100%"
+               stylename="candidate-vacancy-match-workspace">
+            <!-- Левая панель: результаты поиска и рабочие действия рекрутера. -->
+            <vbox expand="matchesTable" spacing="true" width="100%" height="100%"
+                  margin="false,true,false,false" stylename="candidate-vacancy-match-results-pane">
+                <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="resultsTitleLabel"
+                      stylename="candidate-vacancy-match-section-header">
+                    <label id="resultsTitleLabel" value="Подходящие открытые вакансии" width="100%"
+                           stylename="candidate-vacancy-match-section-title"/>
+                    <label id="countLabel" value="Найдено совпадений: 0"
+                           stylename="candidate-vacancy-match-count" align="MIDDLE_RIGHT"/>
                 </hbox>
 
-                <!-- Строка 2: Решения и групповые действия -->
-                <hbox spacing="true" width="100%" align="MIDDLE_LEFT">
-                    <button id="bulkTakeIntoWorkBtn"
-                            caption="Взять выбранных"
-                            icon="font-icon:USERS"
-                            stylename="friendly"
-                            visible="false"/>
-                    <button id="postponeBtn"
-                            caption="Отложить"
-                            icon="font-icon:CLOCK_O"
-                            enabled="false"/>
-                    <button id="rejectBtn"
-                            caption="Не подходит"
-                            icon="font-icon:TIMES"
-                            stylename="danger"
-                            enabled="false"/>
-                </hbox>
-
-                <!-- Строка 3: Фильтр по статусу решения и счётчик -->
-                <hbox spacing="true" width="100%" align="MIDDLE_LEFT">
-                    <label value="Фильтр по решению:" align="MIDDLE_LEFT" stylename="bold"/>
-                    <lookupField id="decisionFilter" width="200px" nullOptionVisible="false"/>
-                    <label id="countLabel" value="Найдено совпадений: 0" stylename="bold" align="MIDDLE_RIGHT" width="100%"/>
-                </hbox>
+                <vbox spacing="true" width="100%" stylename="candidate-vacancy-match-actions-card">
+                    <hbox spacing="true" width="100%" align="MIDDLE_LEFT">
+                        <button id="takeIntoWorkBtn"
+                                caption="Взять в работу"
+                                icon="font-icon:CHECK"
+                                stylename="primary"
+                                enabled="false"/>
+                        <button id="createInteractionBtn"
+                                caption="Взаимодействие"
+                                description="Создать взаимодействие с кандидатом"
+                                icon="font-icon:COMMENTS"
+                                enabled="false"/>
+                        <button id="outreachDraftBtn"
+                                caption="Предложение (AI)"
+                                description="Подготовить Outreach-предложение"
+                                icon="font-icon:MAGIC"
+                                enabled="false"/>
+                    </hbox>
+                    <hbox spacing="true" width="100%" align="MIDDLE_LEFT">
+                        <button id="bulkTakeIntoWorkBtn"
+                                caption="Взять выбранных"
+                                icon="font-icon:USERS"
+                                stylename="friendly"
+                                visible="false"/>
+                        <button id="openEntityBtn"
+                                caption="Открыть"
+                                icon="EXTERNAL_LINK"
+                                enabled="false"/>
+                        <button id="postponeBtn"
+                                caption="Отложить"
+                                icon="font-icon:CLOCK_O"
+                                enabled="false"/>
+                        <button id="rejectBtn"
+                                caption="Не подходит"
+                                icon="font-icon:TIMES"
+                                stylename="danger"
+                                enabled="false"/>
+                    </hbox>
+                    <hbox spacing="true" width="100%" align="MIDDLE_LEFT"
+                          stylename="candidate-vacancy-match-filter-row">
+                        <label value="Решение рекрутера:" align="MIDDLE_LEFT"
+                               stylename="candidate-vacancy-match-filter-caption"/>
+                        <lookupField id="decisionFilter" width="220px" nullOptionVisible="false"/>
+                    </hbox>
+                </vbox>
 
                 <table id="matchesTable"
                        dataContainer="matchesDc"
                        width="100%"
                        height="100%"
-                       multiselect="true">
+                       multiselect="true"
+                       stylename="candidate-vacancy-match-table">
                     <columns>
                         <column id="score" caption="AI Score" width="90px" align="CENTER"/>
                         <column id="recruiterDecisionDisplay" caption="Решение рекрутера" width="150px"/>
@@ -104,88 +158,124 @@
                 </table>
             </vbox>
 
-            <!-- Правая панель: Детальная аналитическая карточка -->
-            <scrollBox id="detailsScrollBox" width="100%" height="100%" spacing="true" margin="false,false,false,true">
-                <vbox spacing="true" width="100%" stylename="well" margin="true">
-                    <label id="detailTitle" value="Выберите строку из списка слева" stylename="h3 bold" width="100%"/>
-                    <label id="detailMeta" value="" stylename="text-muted" width="100%"/>
+            <!-- Правая панель: прокручиваемые детали AI-оценки выбранного совпадения. -->
+            <scrollBox id="detailsScrollBox" width="100%" height="100%" spacing="true"
+                       margin="false,false,false,true" stylename="candidate-vacancy-match-details-scroll">
+                <vbox spacing="true" width="100%" stylename="candidate-vacancy-match-details-card">
+                    <label id="detailTitle" value="Выберите строку из списка слева"
+                           stylename="candidate-vacancy-match-detail-title" width="100%"/>
+                    <label id="detailMeta" value=""
+                           stylename="candidate-vacancy-match-detail-meta" width="100%"/>
 
                     <!-- Быстрые действия рекрутера в карточке -->
-                    <hbox id="quickActionsBox" spacing="true" width="100%" visible="false">
-                        <button id="quickTakeBtn" caption="Взять в работу" icon="font-icon:CHECK" stylename="primary"/>
-                        <button id="quickInteractionBtn" caption="Взаимодействие" icon="font-icon:COMMENTS"/>
-                        <button id="quickOutreachBtn" caption="Предложение" icon="font-icon:MAGIC"/>
-                        <button id="quickPostponeBtn" caption="Отложить" icon="font-icon:CLOCK_O"/>
-                        <button id="quickRejectBtn" caption="Не подходит" icon="font-icon:TIMES" stylename="danger"/>
+                    <hbox id="quickActionsBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-quick-actions">
+                        <vbox spacing="true" width="49%">
+                            <button id="quickTakeBtn" width="100%" caption="Взять в работу"
+                                    icon="font-icon:CHECK" stylename="primary"/>
+                            <button id="quickInteractionBtn" width="100%" caption="Взаимодействие"
+                                    icon="font-icon:COMMENTS"/>
+                            <button id="quickOutreachBtn" width="100%" caption="Предложение"
+                                    icon="font-icon:MAGIC"/>
+                        </vbox>
+                        <vbox spacing="true" width="49%">
+                            <button id="quickPostponeBtn" width="100%" caption="Отложить"
+                                    icon="font-icon:CLOCK_O"/>
+                            <button id="quickRejectBtn" width="100%" caption="Не подходит"
+                                    icon="font-icon:TIMES" stylename="danger"/>
+                        </vbox>
                     </hbox>
 
                     <!-- Статус решения рекрутера в карточке -->
-                    <vbox id="recruiterDecisionBox" spacing="false" width="100%" visible="false" stylename="card">
-                        <label value="РЕШЕНИЕ РЕКРУТЕРА" stylename="bold" width="100%"/>
+                    <vbox id="recruiterDecisionBox" spacing="false" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section candidate-vacancy-match-decision-section">
+                        <label value="РЕШЕНИЕ РЕКРУТЕРА"
+                               stylename="candidate-vacancy-match-detail-caption" width="100%"/>
                         <label id="recruiterDecisionTextLabel" value="—" stylename="h4" width="100%"/>
-                        <label id="recruiterCommentTextLabel" value="" stylename="text-muted" width="100%"/>
+                        <label id="recruiterCommentTextLabel" value=""
+                               stylename="candidate-vacancy-match-detail-meta" width="100%"/>
                     </vbox>
 
-                    <!-- Индикаторы суб-оценок -->
-                    <vbox id="scoresBox" spacing="true" width="100%" visible="false">
-                        <label value="ОЦЕНКА СООТВЕТСТВИЯ ПО ИЗМЕРЕНИЯМ" stylename="h4 bold" width="100%"/>
-                        <grid spacing="true" width="100%">
-                            <columns count="4"/>
+                    <!-- Score совпадения визуально отделён от операционного прогресса выше. -->
+                    <vbox id="scoresBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section candidate-vacancy-match-score-section">
+                        <label value="AI SCORE СООТВЕТСТВИЯ"
+                               stylename="candidate-vacancy-match-detail-caption" width="100%"/>
+                        <grid spacing="true" width="100%" stylename="candidate-vacancy-match-score-grid">
+                            <columns count="2"/>
                             <rows>
                                 <row>
                                     <label value="Должность и роль:" stylename="bold"/>
                                     <label id="roleFitLabel" value="—"/>
+                                </row>
+                                <row>
                                     <label value="Ключевые навыки:" stylename="bold"/>
                                     <label id="skillsFitLabel" value="—"/>
                                 </row>
                                 <row>
                                     <label value="Опыт и грейд:" stylename="bold"/>
                                     <label id="experienceFitLabel" value="—"/>
+                                </row>
+                                <row>
                                     <label value="Предпочтения и условия:" stylename="bold"/>
                                     <label id="preferencesFitLabel" value="—"/>
                                 </row>
                                 <row>
                                     <label value="Предметная область:" stylename="bold"/>
                                     <label id="domainFitLabel" value="—"/>
-                                    <label value="Итоговый Score:" stylename="bold"/>
-                                    <label id="totalScoreLabel" value="—" stylename="h3 bold"/>
+                                </row>
+                                <row>
+                                    <label value="Итоговый AI Score:" stylename="bold"/>
+                                    <label id="totalScoreLabel" value="—"
+                                           stylename="candidate-vacancy-match-total-score"/>
                                 </row>
                             </rows>
                         </grid>
                     </vbox>
 
                     <!-- Блок: Почему стоит предложить -->
-                    <vbox id="reasonsBox" spacing="true" width="100%" visible="false">
-                        <label value="ПОЧЕМУ СТОИТ ПРЕДЛОЖИТЬ" stylename="h4 bold" width="100%"/>
+                    <vbox id="reasonsBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section">
+                        <label value="ПОЧЕМУ СТОИТ ПРЕДЛОЖИТЬ"
+                               stylename="candidate-vacancy-match-detail-caption" width="100%"/>
                         <label id="reasonsLabel" htmlEnabled="true" width="100%"/>
                     </vbox>
 
                     <!-- Блок: Совпадающие навыки -->
-                    <vbox id="matchedSkillsBox" spacing="true" width="100%" visible="false">
-                        <label value="СОВПАДАЮЩИЕ НАВЫКИ И ПОДТВЕРЖДЕНИЯ" stylename="h4 bold" width="100%"/>
+                    <vbox id="matchedSkillsBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section">
+                        <label value="СОВПАДАЮЩИЕ НАВЫКИ И ПОДТВЕРЖДЕНИЯ"
+                               stylename="candidate-vacancy-match-detail-caption" width="100%"/>
                         <label id="matchedSkillsDetailLabel" htmlEnabled="true" width="100%"/>
                     </vbox>
 
                     <!-- Блок: Критические требования и пробелы -->
-                    <vbox id="missingReqsBox" spacing="true" width="100%" visible="false">
-                        <label value="НЕПОДТВЕРЖДЕННЫЕ ТРЕБОВАНИЯ И ПРОБЕЛЫ" stylename="h4 bold" width="100%"/>
+                    <vbox id="missingReqsBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section">
+                        <label value="НЕПОДТВЕРЖДЕННЫЕ ТРЕБОВАНИЯ И ПРОБЕЛЫ"
+                               stylename="candidate-vacancy-match-detail-caption" width="100%"/>
                         <label id="missingReqsLabel" htmlEnabled="true" width="100%"/>
                     </vbox>
 
                     <!-- Блок: Риски и зоны сомнений -->
-                    <vbox id="risksBox" spacing="true" width="100%" visible="false">
-                        <label value="РИСКИ И ЗОНЫ ВНИМАНИЯ" stylename="h4 bold" width="100%"/>
+                    <vbox id="risksBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section">
+                        <label value="РИСКИ И ЗОНЫ ВНИМАНИЯ"
+                               stylename="candidate-vacancy-match-detail-caption" width="100%"/>
                         <label id="risksLabel" htmlEnabled="true" width="100%"/>
                     </vbox>
 
                     <!-- Блок: Итоговое экспертное заключение AI -->
-                    <vbox id="summaryBox" spacing="true" width="100%" visible="false">
-                        <label value="ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ AI" stylename="h4 bold" width="100%"/>
+                    <vbox id="summaryBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section">
+                        <label value="ЭКСПЕРТНОЕ ЗАКЛЮЧЕНИЕ AI"
+                               stylename="candidate-vacancy-match-detail-caption" width="100%"/>
                         <label id="summaryTextLabel" htmlEnabled="true" width="100%"/>
                     </vbox>
 
                     <!-- Метаданные AI вызова -->
-                    <vbox id="aiMetaBox" spacing="false" width="100%" visible="false">
+                    <vbox id="aiMetaBox" spacing="false" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-ai-meta">
                         <label id="aiMetaLabel" value="" stylename="text-muted small" width="100%"/>
                     </vbox>
                 </vbox>

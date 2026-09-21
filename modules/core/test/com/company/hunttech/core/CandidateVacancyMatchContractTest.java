@@ -1,6 +1,7 @@
 package com.company.hunttech.core;
 
 import com.company.hunttech.service.CandidateVacancyMatchAiService;
+import com.company.hunttech.dto.CandidateVacancyMatchProgress;
 import org.junit.Test;
 
 import java.io.File;
@@ -9,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.lang.reflect.Method;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +34,28 @@ public class CandidateVacancyMatchContractTest {
     public void testFunctionCodeConstant() {
         assertEquals("CANDIDATE_VACANCY_MATCH_ANALYZE", CandidateVacancyMatchAiService.FUNCTION_CODE);
         assertEquals("hunttech_CandidateVacancyMatchAiService", CandidateVacancyMatchAiService.NAME);
+    }
+
+    @Test
+    public void testProgressPollingApiContract() throws NoSuchMethodException {
+        Method matchingMethod = CandidateVacancyMatchAiService.class.getMethod(
+                "matchVacanciesForCandidate", UUID.class, UUID.class);
+        assertEquals(com.company.hunttech.dto.CandidateVacancyMatchReport.class, matchingMethod.getReturnType());
+
+        Method progressMethod = CandidateVacancyMatchAiService.class.getMethod(
+                "getVacancyMatchProgress", UUID.class);
+        assertEquals(CandidateVacancyMatchProgress.class, progressMethod.getReturnType());
+    }
+
+    @Test
+    public void testOpenVacancyQueryContract() throws IOException {
+        Path beanPath = projectRoot().resolve(
+                "modules/core/src/com/company/hunttech/service/CandidateVacancyMatchAiServiceBean.java");
+        String bean = new String(Files.readAllBytes(beanPath), StandardCharsets.UTF_8);
+        assertTrue("JPQL должен включать false и legacy null",
+                bean.contains("e.openClose = false or e.openClose is null"));
+        assertTrue("После загрузки должна сохраняться защитная фильтрация openClose != true",
+                bean.contains("filter(CandidateVacancyMatchAiServiceBean::isOpenVacancy)"));
     }
 
     @Test
