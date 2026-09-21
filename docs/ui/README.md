@@ -10,6 +10,7 @@
 | `JobCandidateTestScreens` | [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) | Пять экспериментальных эскизов (тестовых окон) для просмотра кандидатов |
 | `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме с постоянной live-sidebar кандидата, сопроводительным письмом, деревом навыков, фотографией и файлами без изменения lazy-init |
 | `CandidateVacancyMatchScreen` | [CandidateVacancyMatchScreen_Spec.md](CandidateVacancyMatchScreen_Spec.md) | Диалог «Подобрать вакансию»: актуализация навыков, прогресс AI-подбора, результаты и детали соответствия |
+| `hunttech_RotatingCandidate.browse` | [hunttech_RotatingCandidate.browse_Spec.md](hunttech_RotatingCandidate.browse_Spec.md) | Рабочая таблица взаимодействий кандидатов с периодом «За месяц» по умолчанию |
 | `OpenPositionEditPreview` | [OpenPositionEditPreview_Spec.md](OpenPositionEditPreview_Spec.md) | Изолированный preview новой компоновки вакансии без замены legacy-экрана и изменения бизнес-логики |
 | `ExtUserEdit` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) | Администрирование профиля пользователя, ролей, замещений, email и AI в общем Edit-контракте |
 | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
@@ -90,6 +91,7 @@ Living-документация экранов, окон, фрагментов �
 | Test Screens / Sketches | `hunttech_JobCandidateTest*.browse` | [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) |
 | Vacancy match dialog | `hunttech_CandidateVacancyMatch` | [CandidateVacancyMatchScreen_Spec.md](CandidateVacancyMatchScreen_Spec.md) |
 | Browse (реестр) | `hunttech_JobCandidateReestr.browse` | Реестр кандидатов Split-View: таблица (фото, ФИО+метки, должность, город, компания, навыки, статус) и профильный сайдбар; метки пользователя выводятся в колонке «Кандидат» справа |
+| Рабочий список | `hunttech_RotatingCandidate.browse` | [hunttech_RotatingCandidate.browse_Spec.md](hunttech_RotatingCandidate.browse_Spec.md) |
 
 ### CandidateCV
 
@@ -262,6 +264,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-21 | Добавлена спецификация `hunttech_RotatingCandidate.browse`: документирован дефолтный месячный период и отличие рабочего списка от Dashboard Add-on Kanban. |
 | 2026-08-28 | Исправлен `scaleMode` с `SCALE_TO_FIT` на `SCALE_DOWN` (валидное значение enum Image.ScaleMode в CUBA 7.3) в реестрах `hunttech_IteractionListReestr.browse` и `hunttech_CandidateCVReestr.browse` |
 | 2026-08-25 | В каталог добавлена спецификация реестра проектов `hunttech_ProjectReestr.browse`: Split-View таблица + профильный сайдбар (312px), фильтры реестра, ИТ-генерация краткого описания, блок описания по алгоритму владельца |
 | 2026-08-20 | Редизайн выпадающих меню `PopupButton` («Действия», «Метки») в стиле Halo и реестре кандидатов: парящие пункты, карточка с тенью `0 10px 25px`, синхронизация по 7 темам |
