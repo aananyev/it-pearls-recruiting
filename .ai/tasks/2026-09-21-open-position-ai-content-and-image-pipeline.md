@@ -1,12 +1,12 @@
 # Задача: AI-материалы вакансии и единый image pipeline sidebar
 
 **Дата:** 2026-09-21
-**Статус:** `IN_PROGRESS`
+**Статус:** `WAITING_FOR_HERMES`
 **Проект:** HRM HuntTech
 **Репозиторий:** `aananyev/it-pearls-recruiting`
 **BASE_SHA:** `9d89522112010a41845e941c3da0b864fc5ab3ad`
 **Ветка:** `agent/open-position-ai-content-and-image-pipeline`
-**PR:** не создан
+**PR:** Draft #261 — https://github.com/aananyev/it-pearls-recruiting/pull/261
 
 ## Цель
 
@@ -43,13 +43,14 @@
 - [x] Реализовать вертикальные TDD-срезы backend и frontend.
 - [x] Синхронизировать `docs/` и историю изменений.
 - [x] Выполнить локальные проверки, automated QA и code review; OCR не запускался, поскольку доступный OCR CLI отправляет кодовый diff внешней модели.
-- [ ] Commit, push, Draft PR в `master`.
-- [ ] Передать точный HEAD Hermes и установить `WAITING_FOR_HERMES`.
+- [x] Commit и push в `agent/open-position-ai-content-and-image-pipeline`.
+- [x] Создать Draft PR #261 в `master`.
+- [x] Подготовить Hermes-инструкцию с точным HEAD; ждать явного согласия перед запуском внешней проверки.
 
 ## Текущий шаг
 
-Подготовка commit/push и Draft PR. Локальные проверки: core 43/43, web 6/6, `:app-web:compileJava`, `AllXmlScreensIntegrityTest`, XML lint и `git diff --check` — PASS; локальный code review P1=0/P2=0/P3=1; QA P1=0/P2=0. `ScreenViewIntegrityTest` локально блокируется отсутствующим `modules/core/test/com/company/hunttech/context.xml` и передаётся Hermes.
+Draft PR #261 открыт. Локальные проверки: core 43/43, web 6/6, `:app-web:compileJava`, `AllXmlScreensIntegrityTest`, XML lint и `git diff --check` — PASS; локальный code review P1=0/P2=0/P3=1; QA P1=0/P2=0. `ScreenViewIntegrityTest` локально блокируется отсутствующим `modules/core/test/com/company/hunttech/context.xml` и включён в Hermes-инструкцию.
 
 ## Следующий шаг
 
-После PR передать Hermes полный PR HEAD для `ScreenViewIntegrityTest` (ожидание 8/8), `clean assemble`, local deploy, HTTP 200, runtime logs, AI/Smart/image smoke и performance-проверок. Production и merge запрещены.
+После явного согласия передать Hermes полный PR HEAD для `ScreenViewIntegrityTest` (ожидание 8/8), `clean assemble`, local deploy, HTTP 200, runtime logs, AI/Smart/image smoke и performance-проверок. Production и merge запрещены.
