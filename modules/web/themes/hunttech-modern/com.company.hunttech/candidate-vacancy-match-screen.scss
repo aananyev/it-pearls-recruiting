@@ -408,7 +408,7 @@
       display: flex !important;
       flex-direction: column !important;
       overflow-x: hidden !important;
-      overflow-y: auto !important;
+      overflow-y: hidden !important;
     }
 
     .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-first-container,
@@ -419,10 +419,10 @@
       bottom: auto !important;
       left: auto !important;
       width: 100% !important;
-      min-height: 180px !important;
+      min-height: 0 !important;
       height: auto !important;
       flex: 1 1 50% !important;
-      overflow: auto !important;
+      overflow: hidden !important;
     }
 
     .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-second-container {
