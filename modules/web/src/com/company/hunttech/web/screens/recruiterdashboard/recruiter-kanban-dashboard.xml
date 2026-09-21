@@ -2,7 +2,7 @@
 <!-- Полноэкранный CUBA Dashboard собирает Kanban-апплет из classpath JSON-модели. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd"
-        caption="Кандидаты в работе — Kanban">
+        caption="Kanban">
     <!-- Рабочая область сохраняет локальный recruiter-dashboard-root и штатный Dashboard lifecycle. -->
     <layout expand="candidateKanbanDashboard" stylename="edit-workspace recruiter-dashboard-root">
         <!-- Dashboard Add-on загружает версионируемую JSON-композицию без зависимости от persistent DB model. -->

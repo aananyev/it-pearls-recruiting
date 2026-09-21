@@ -297,7 +297,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         recruterLookupPickerField.setOptionsList(userDc.getItems());
 //        setPositionsFieldFilter();
 
-        daysIntervalRadioButtonsGroup.setValue(2);
+        // Месячный период не скрывает рабочие кейсы, если у кандидата не было взаимодействий за последнюю неделю.
+        daysIntervalRadioButtonsGroup.setValue(3);
         recruterRadioButtonsGroup.setValue(1);
         openOrCloseCaseRadioButtonsGroup.setValue(0);
 

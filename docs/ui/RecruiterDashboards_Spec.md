@@ -2,13 +2,13 @@
 
 ## Business & Context Intro
 
-Набор из трёх полноэкранных Dashboard Add-on экранов даёт рекрутеру отдельные рабочие представления для текущих кандидатов, воронки найма и кадрового резерва. Реализация следует общей UI/UX-концепции HRM HuntTech и существующему контракту `recruiter-dashboard-root`.
+Набор из трёх полноэкранных Dashboard Add-on экранов даёт рекрутеру отдельные рабочие представления для текущих кандидатов, воронки найма и кадрового резерва. Kanban доступен как «Подбор → Дашборды рекрутера → Kanban». Старый список «Кандидаты в работе» в разделе «HR-мастер» остаётся отдельным экраном с фильтрами и таблицей. Реализация следует общей UI/UX-концепции HRM HuntTech и существующему контракту `recruiter-dashboard-root`.
 
 ## UI Context & Navigation
 
 Меню «Подбор → Дашборды рекрутера»:
 
-- `hunttech_RecruiterKanbanDashboard` — «Кандидаты в работе — Kanban»;
+- `hunttech_RecruiterKanbanDashboard` — «Kanban»;
 - `hunttech_RecruiterFunnelDashboard` — «Воронка найма»;
 - `hunttech_RecruiterReserveDashboard` — «Кадровый резерв».
 
@@ -99,5 +99,6 @@ Visual smoke: 1366×768, 1920×1080, 1920×1200; все семь тем; horizon
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-21 | В меню, заголовке экрана и составе виджета название дашборда сокращено до «Kanban». |
 | 2026-09-21 | Исправлена загрузка признаков этапа для Kanban и воронки: добавлен специализированный view и контрактный тест против `Unfetched Attribute Access`. |
 | 2026-09-19 | Добавлены три Dashboard Add-on экрана: Kanban кандидатов, воронка найма и кадровый резерв; добавлены applet widgets, stage normalization и единый HuntTech visual contract. |
