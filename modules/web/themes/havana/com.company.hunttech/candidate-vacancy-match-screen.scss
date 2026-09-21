@@ -25,6 +25,11 @@
   .candidate-vacancy-match-root .v-slot-mainSplit {
     min-width: 0 !important;
     min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  .candidate-vacancy-match-root > .v-expand {
+    flex: 1 1 0% !important;
   }
 
   .candidate-vacancy-match-header,
@@ -57,14 +62,22 @@
   .candidate-vacancy-match-progress-footer > .v-expand,
   .candidate-vacancy-match-section-header > .v-expand {
     box-sizing: border-box !important;
+    flex: 1 1 0% !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .candidate-vacancy-match-header > .v-expand,
+  .candidate-vacancy-match-skill-status > .v-expand,
+  .candidate-vacancy-match-progress-head > .v-expand,
+  .candidate-vacancy-match-progress-footer > .v-expand,
+  .candidate-vacancy-match-section-header > .v-expand {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 8px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
   }
 
   .candidate-vacancy-match-header > .v-slot,
@@ -318,7 +331,14 @@
 
   .candidate-vacancy-match-details-scroll {
     overflow-x: hidden !important;
+    overflow-y: hidden !important;
+  }
+
+  .candidate-vacancy-match-details-scroll > .c-scrollbox-content,
+  .candidate-vacancy-match-details-scroll > .v-scrollable {
+    overflow-x: hidden !important;
     overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   .candidate-vacancy-match-details-card {
@@ -402,13 +422,13 @@
 
   }
 
-  // At narrow widths stack the panes while keeping both independently scrollable.
+  // На узкой ширине стек панелей прокручивается целиком, а внутренние области сохраняют свой scroll.
   @media (max-width: 1000px) {
     .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal {
       display: flex !important;
       flex-direction: column !important;
       overflow-x: hidden !important;
-      overflow-y: hidden !important;
+      overflow-y: auto !important;
     }
 
     .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-first-container,
@@ -419,10 +439,10 @@
       bottom: auto !important;
       left: auto !important;
       width: 100% !important;
-      min-height: 0 !important;
+      min-height: 180px !important;
       height: auto !important;
       flex: 1 1 50% !important;
-      overflow: hidden !important;
+      overflow: auto !important;
     }
 
     .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-second-container {
