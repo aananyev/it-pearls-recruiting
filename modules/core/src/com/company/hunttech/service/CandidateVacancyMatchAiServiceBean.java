@@ -2,6 +2,7 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.dto.CandidateAiSummary;
 import com.company.hunttech.dto.CandidateVacancyMatchReport;
+import com.company.hunttech.dto.CandidateVacancyMatchProgress;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.CandidateSkillPriority;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +39,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
     private static final int MAX_RESUME_TEXT_CHARS = 20000;
     private static final int MAX_ADDITIONAL_SNIPPETS_CHARS = 5000;
     private static final int FALLBACK_BASE_EXPERIENCE_FIT = 10;
+    private static final long PROGRESS_TTL_MILLIS = 60L * 60L * 1000L;
 
     @Inject
     private DataManager dataManager;
@@ -47,9 +51,41 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
     private CandidateVacancyWorkflowService workflowService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ConcurrentMap<UUID, MatchProgressState> progressStates = new ConcurrentHashMap<>();
 
     @Override
     public CandidateVacancyMatchReport matchVacanciesForCandidate(UUID candidateId) {
+        return matchVacanciesForCandidate(candidateId, UUID.randomUUID());
+    }
+
+    @Override
+    public CandidateVacancyMatchReport matchVacanciesForCandidate(UUID candidateId, UUID operationId) {
+        cleanupExpiredProgress();
+        UUID effectiveOperationId = operationId != null ? operationId : UUID.randomUUID();
+        MatchProgressState progress = new MatchProgressState(effectiveOperationId, System.currentTimeMillis());
+        progressStates.put(effectiveOperationId, progress);
+
+        try {
+            CandidateVacancyMatchReport report = doMatchVacanciesForCandidate(candidateId, progress);
+            progress.finish(report.isSuccess(), report.getStatusMessage());
+            return report;
+        } catch (RuntimeException e) {
+            progress.finish(false, "Подбор прерван из-за ошибки обработки.");
+            throw e;
+        }
+    }
+
+    @Override
+    public CandidateVacancyMatchProgress getVacancyMatchProgress(UUID operationId) {
+        if (operationId == null) {
+            return null;
+        }
+        cleanupExpiredProgress();
+        MatchProgressState progress = progressStates.get(operationId);
+        return progress != null ? progress.snapshot(System.currentTimeMillis()) : null;
+    }
+
+    private CandidateVacancyMatchReport doMatchVacanciesForCandidate(UUID candidateId, MatchProgressState progress) {
         if (candidateId == null) {
             CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
             emptyReport.setSuccess(false);
@@ -107,7 +143,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
         // Строгая фильтрация: гарантируем, что используются ТОЛЬКО открытые вакансии (openClose != true)
         openPositions = openPositions.stream()
-                .filter(op -> !Boolean.TRUE.equals(op.getOpenClose()))
+                .filter(CandidateVacancyMatchAiServiceBean::isOpenVacancy)
                 .collect(Collectors.toList());
 
         if (openPositions.isEmpty()) {
@@ -126,6 +162,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
         // 6. Батчинг вакансий на чанки
         List<List<OpenPosition>> chunks = splitIntoChunks(openPositions);
+        progress.beginAnalysis(openPositions.size(), chunks.size());
         log.info("AI matching for candidate {}: {} open positions split into {} chunks",
                 candidate.getFullName(), openPositions.size(), chunks.size());
 
@@ -148,14 +185,16 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
         for (int i = 0; i < chunks.size(); i++) {
             List<OpenPosition> chunk = chunks.get(i);
+            progress.startChunk(i + 1, chunk.size());
             String vacanciesJson = buildVacanciesJson(chunk);
 
-            Map<String, Object> context = new HashMap<>();
+            Map<String, Object> context = new LinkedHashMap<>();
             context.put(PARAM_CANDIDATE_PROFILE, candidateProfile);
             context.put(PARAM_CANDIDATE_SKILLS, candidateSkillsText);
             context.put(PARAM_CANDIDATE_RESUME_TEXT, candidateResumeText);
             context.put(PARAM_VACANCIES_JSON, vacanciesJson);
 
+            boolean chunkSucceeded = false;
             try {
                 AiExecutionResult aiResult = aiExecutionService.executeText(FUNCTION_CODE, context);
                 if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
@@ -164,10 +203,13 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                     if (!parsedItems.isEmpty()) {
                         allItems.addAll(parsedItems);
                         anyAiSuccess = true;
+                        chunkSucceeded = true;
                     }
                 }
             } catch (Exception e) {
                 log.warn("Failed AI execution for candidate-vacancy chunk {}/{}: {}", i + 1, chunks.size(), e.getMessage());
+            } finally {
+                progress.completeChunk(chunk.size(), chunkSucceeded);
             }
         }
 
@@ -421,7 +463,11 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         }
     }
 
-    private Comparator<CandidateVacancyMatchItem> getComparator() {
+    static boolean isOpenVacancy(OpenPosition openPosition) {
+        return openPosition != null && !Boolean.TRUE.equals(openPosition.getOpenClose());
+    }
+
+    Comparator<CandidateVacancyMatchItem> getComparator() {
         return (i1, i2) -> {
             // 1. score DESC
             int c1 = Integer.compare(i2.getScore() != null ? i2.getScore() : 0, i1.getScore() != null ? i1.getScore() : 0);
@@ -837,5 +883,126 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             return s.substring(start, end + 1).trim();
         }
         return s;
+    }
+
+    /**
+     * Удаляет завершённые и забытые операции, чтобы polling-контракт не создавал
+     * неограниченный in-memory кэш. Снимки нужны только во время работы экрана и
+     * ещё один час после её завершения.
+     */
+    private void cleanupExpiredProgress() {
+        long now = System.currentTimeMillis();
+        progressStates.entrySet().removeIf(entry -> now - entry.getValue().getLastUpdatedAt() > PROGRESS_TTL_MILLIS);
+    }
+
+    /**
+     * Синхронизированное состояние одной операции. Все наружные чтения получают
+     * отдельный DTO, поэтому web-поток не наблюдает частично обновлённые счётчики.
+     */
+    static final class MatchProgressState {
+        private final UUID operationId;
+        private final long startedAt;
+        private long analysisStartedAt;
+        private long lastUpdatedAt;
+        private String phase = "PREPARING";
+        private String statusMessage = "Подготовка данных кандидата и открытых вакансий.";
+        private int totalVacancies;
+        private int processedVacancies;
+        private int totalChunks;
+        private int completedChunks;
+        private int failedChunks;
+        private boolean completed;
+        private boolean success;
+
+        MatchProgressState(UUID operationId, long startedAt) {
+            this.operationId = operationId;
+            this.startedAt = startedAt;
+            this.lastUpdatedAt = startedAt;
+        }
+
+        synchronized void beginAnalysis(int totalVacancies, int totalChunks) {
+            this.totalVacancies = Math.max(0, totalVacancies);
+            this.totalChunks = Math.max(0, totalChunks);
+            this.analysisStartedAt = System.currentTimeMillis();
+            this.lastUpdatedAt = analysisStartedAt;
+            this.phase = "ANALYZING";
+            this.statusMessage = "Подготовлено вакансий: " + this.totalVacancies
+                    + ". Аналитических пакетов: " + this.totalChunks + ".";
+        }
+
+        synchronized void startChunk(int chunkNumber, int chunkSize) {
+            lastUpdatedAt = System.currentTimeMillis();
+            phase = "ANALYZING";
+            statusMessage = "AI анализирует пакет " + chunkNumber + " из " + totalChunks
+                    + " (вакансий в пакете: " + Math.max(0, chunkSize) + ").";
+        }
+
+        synchronized void completeChunk(int chunkSize, boolean chunkSucceeded) {
+            completedChunks = Math.min(totalChunks, completedChunks + 1);
+            processedVacancies = Math.min(totalVacancies, processedVacancies + Math.max(0, chunkSize));
+            if (!chunkSucceeded) {
+                failedChunks++;
+            }
+            lastUpdatedAt = System.currentTimeMillis();
+            phase = completedChunks < totalChunks ? "ANALYZING" : "FINALIZING";
+            statusMessage = "Обработано вакансий: " + processedVacancies + " из " + totalVacancies
+                    + "; завершено пакетов: " + completedChunks + " из " + totalChunks
+                    + (failedChunks > 0 ? "; пакетов с ошибкой: " + failedChunks : "") + ".";
+        }
+
+        synchronized void finish(boolean success, String finalStatusMessage) {
+            this.success = success;
+            this.completed = true;
+            this.lastUpdatedAt = System.currentTimeMillis();
+            this.phase = success ? (failedChunks > 0 ? "COMPLETED_WITH_WARNINGS" : "COMPLETED") : "FAILED";
+            if (finalStatusMessage != null && !finalStatusMessage.trim().isEmpty()) {
+                this.statusMessage = finalStatusMessage;
+            } else if (success && failedChunks > 0) {
+                this.statusMessage = "Подбор завершён. Часть аналитических пакетов обработана с ошибкой: " + failedChunks + ".";
+            } else if (success) {
+                this.statusMessage = "Подбор вакансий завершён.";
+            }
+        }
+
+        synchronized CandidateVacancyMatchProgress snapshot(long now) {
+            CandidateVacancyMatchProgress snapshot = new CandidateVacancyMatchProgress();
+            snapshot.setOperationId(operationId);
+            snapshot.setPhase(phase);
+            snapshot.setStatusMessage(statusMessage);
+            snapshot.setTotalVacancies(totalVacancies);
+            snapshot.setProcessedVacancies(processedVacancies);
+            snapshot.setTotalChunks(totalChunks);
+            snapshot.setCompletedChunks(completedChunks);
+            snapshot.setFailedChunks(failedChunks);
+            snapshot.setElapsedMillis(Math.max(0L, now - startedAt));
+            snapshot.setEstimatedRemainingMillis(estimateRemainingMillis(now));
+            snapshot.setProgressPercent(calculateProgressPercent());
+            snapshot.setCompleted(completed);
+            snapshot.setSuccess(success);
+            return snapshot;
+        }
+
+        synchronized long getLastUpdatedAt() {
+            return lastUpdatedAt;
+        }
+
+        private int calculateProgressPercent() {
+            if (completed) {
+                return 100;
+            }
+            if (totalVacancies <= 0 || processedVacancies <= 0) {
+                return 0;
+            }
+            return Math.min(99, (int) (((long) processedVacancies * 100L) / totalVacancies));
+        }
+
+        private Long estimateRemainingMillis(long now) {
+            if (completed || completedChunks <= 0 || totalChunks <= completedChunks || analysisStartedAt <= 0L) {
+                return completed ? 0L : null;
+            }
+            long analysisElapsed = Math.max(0L, now - analysisStartedAt);
+            long averageChunkMillis = analysisElapsed / completedChunks;
+            return averageChunkMillis * (totalChunks - completedChunks);
+        }
     }
 }

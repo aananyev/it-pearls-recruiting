@@ -1,13 +1,17 @@
 package com.company.hunttech.web.screens.jobcandidate;
 
 import com.company.hunttech.dto.CandidateVacancyMatchReport;
+import com.company.hunttech.dto.CandidateVacancyMatchProgress;
 import com.company.hunttech.entity.CandidateVacancyMatchItem;
+import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.service.CandidateSkillEnrichmentService;
 import com.company.hunttech.service.CandidateVacancyMatchAiService;
 import com.company.hunttech.service.CandidateVacancyWorkflowService;
+import com.company.hunttech.service.dto.CandidateSkillsScanResult;
 import com.company.hunttech.service.dto.BulkTakeIntoWorkResult;
 import com.company.hunttech.service.dto.TakeIntoWorkResult;
 import com.company.hunttech.web.screens.candidatevacancymatch.CandidateOutreachDraftDialog;
@@ -22,6 +26,7 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
@@ -39,7 +44,7 @@ import java.util.stream.Collectors;
  */
 @UiController("hunttech_CandidateVacancyMatch")
 @UiDescriptor("candidate-vacancy-match-screen.xml")
-@DialogMode(width = "1300px", height = "850px", modal = true, resizable = true)
+@DialogMode(width = "1100px", height = "780px", modal = true, resizable = true)
 public class CandidateVacancyMatchScreen extends Screen {
 
     private static final Logger log = LoggerFactory.getLogger(CandidateVacancyMatchScreen.class);
@@ -49,14 +54,40 @@ public class CandidateVacancyMatchScreen extends Screen {
         VACANCY_TO_CANDIDATES
     }
 
+    private enum CandidateAnalysisStage {
+        CHECKING_SKILLS,
+        REFRESHING_SKILLS,
+        LOADING_VACANCIES,
+        MATCHING_VACANCIES
+    }
+
+    private static class CandidateAnalysisOutcome {
+        private final CandidateVacancyMatchReport report;
+        private final CandidateSkillsScanResult skillScanResult;
+        private final String skillStatus;
+
+        private CandidateAnalysisOutcome(CandidateVacancyMatchReport report,
+                                         CandidateSkillsScanResult skillScanResult,
+                                         String skillStatus) {
+            this.report = report;
+            this.skillScanResult = skillScanResult;
+            this.skillStatus = skillStatus;
+        }
+    }
+
     private Mode mode = Mode.CANDIDATE_TO_VACANCIES;
     private JobCandidate candidate;
     private OpenPosition openPosition;
     private CandidateVacancyMatchReport currentReport;
     private List<CandidateVacancyMatchItem> allReportItems = new ArrayList<>();
+    private UUID currentMatchOperationId;
+    private long analysisStartedAtMillis;
 
     @Inject
     private CandidateVacancyMatchAiService candidateVacancyMatchAiService;
+
+    @Inject
+    private CandidateSkillEnrichmentService candidateSkillEnrichmentService;
 
     @Inject
     private CandidateVacancyWorkflowService workflowService;
@@ -94,6 +125,36 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     @Inject
     private ProgressBar analysisProgressBar;
+
+    @Inject
+    private Timer analysisProgressTimer;
+
+    @Inject
+    private HBoxLayout skillRefreshStatusBox;
+
+    @Inject
+    private Label<String> skillRefreshStatusLabel;
+
+    @Inject
+    private Label<String> analysisPhaseLabel;
+
+    @Inject
+    private Label<String> analysisStepsLabel;
+
+    @Inject
+    private Label<String> analysisPercentLabel;
+
+    @Inject
+    private Label<String> analysisEtaLabel;
+
+    @Inject
+    private Label<String> progressStepSkillsLabel;
+
+    @Inject
+    private Label<String> progressStepVacanciesLabel;
+
+    @Inject
+    private Label<String> progressStepAiLabel;
 
     @Inject
     private Label<String> statusLabel;
@@ -382,11 +443,179 @@ public class CandidateVacancyMatchScreen extends Screen {
     }
 
     private void startAnalysis() {
-        setBusy(true, "AI анализирует профили и формирует ранжированные рекомендации...");
         matchesDc.getMutableItems().clear();
         allReportItems.clear();
+        currentReport = null;
         clearDetailsPane();
         updateToolbarActionsState();
+
+        if (mode == Mode.CANDIDATE_TO_VACANCIES && candidate != null) {
+            startCandidateVacancyAnalysis();
+        } else {
+            startVacancyCandidateAnalysis();
+        }
+    }
+
+    private void startCandidateVacancyAnalysis() {
+        currentMatchOperationId = UUID.randomUUID();
+        analysisStartedAtMillis = System.currentTimeMillis();
+        skillRefreshStatusBox.setVisible(true);
+        skillRefreshStatusLabel.setValue("Проверяем даты резюме и навыков кандидата...");
+        setCandidateProgress(CandidateAnalysisStage.CHECKING_SKILLS, 0, "Проверка актуальности навыков");
+        analysisProgressTimer.start();
+
+        // Подробный прогресс уже встроен в это диалоговое окно: отдельный общий spinner скрыл бы
+        // текущий этап, процент, количество пакетов и оценку оставшегося времени.
+        AiOperationNotifier.showStarted(notifications,
+                "Запущен AI-подбор вакансий для кандидата…",
+                "Сначала проверим актуальность навыков, затем сравним профиль с открытыми вакансиями.");
+
+        final JobCandidate candidateForAnalysis = candidate;
+        final UUID candidateId = candidate.getId();
+        BackgroundTask<CandidateAnalysisStage, CandidateAnalysisOutcome> task =
+                new BackgroundTask<CandidateAnalysisStage, CandidateAnalysisOutcome>(600, this) {
+                    @Override
+                    public CandidateAnalysisOutcome run(TaskLifeCycle<CandidateAnalysisStage> taskLifeCycle) throws Exception {
+                        CandidateSkillsScanResult scanResult = null;
+                        String skillStatus;
+
+                        taskLifeCycle.publish(CandidateAnalysisStage.CHECKING_SKILLS);
+                        CandidateCV latestCv = dataManager.load(CandidateCV.class)
+                                .query("select e from hunttech_CandidateCV e " +
+                                        "where e.candidate.id = :candidateId and e.textCV is not null " +
+                                        "and length(trim(e.textCV)) > 0 order by e.datePost desc, e.createTs desc")
+                                .parameter("candidateId", candidateId)
+                                .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "createTs", "updateTs"))
+                                .maxResults(1)
+                                .optional()
+                                .orElse(null);
+
+                        if (latestCv == null) {
+                            skillStatus = "Нет резюме с распознанным текстом; поиск продолжится по данным профиля.";
+                        } else {
+                            Date latestCvTimestamp = latestUpdateTimestamp(latestCv.getCreateTs(), latestCv.getUpdateTs());
+                            Date latestSkillTimestamp = dataManager.loadValue(
+                                            "select max(coalesce(e.updateTs, e.createTs)) " +
+                                                    "from hunttech_CandidateSkill e where e.candidate.id = :candidateId", Date.class)
+                                    .parameter("candidateId", candidateId)
+                                    .optional()
+                                    .orElse(null);
+
+                            boolean skillsAreStale = latestSkillTimestamp == null
+                                    || (latestCvTimestamp != null && latestCvTimestamp.after(latestSkillTimestamp));
+                            if (!skillsAreStale) {
+                                skillStatus = "Навыки актуальны: их последняя запись не старше изменения резюме.";
+                            } else {
+                                taskLifeCycle.publish(CandidateAnalysisStage.REFRESHING_SKILLS);
+                                try {
+                                    // Используется стандартная функция извлечения навыков, но только если
+                                    // последнее резюме новее последней записи навыков или навыков ещё нет.
+                                    scanResult = candidateSkillEnrichmentService.scanAndEnrich(
+                                            candidateForAnalysis, latestCv, null, false, true);
+                                    if (scanResult.isSuccess()) {
+                                        skillStatus = buildSkillRefreshStatus(scanResult);
+                                    } else {
+                                        skillStatus = "Не удалось обновить навыки; подбор использует сохранённые данные. "
+                                                + safeText(scanResult.getRawError());
+                                    }
+                                } catch (Exception ex) {
+                                    log.warn("Could not refresh skills before vacancy matching for candidate {}", candidateId, ex);
+                                    skillStatus = "Не удалось обновить навыки; подбор использует сохранённые данные.";
+                                }
+                            }
+                        }
+
+                        taskLifeCycle.publish(CandidateAnalysisStage.LOADING_VACANCIES);
+                        taskLifeCycle.publish(CandidateAnalysisStage.MATCHING_VACANCIES);
+                        CandidateVacancyMatchReport report = candidateVacancyMatchAiService
+                                .matchVacanciesForCandidate(candidateId, currentMatchOperationId);
+                        return new CandidateAnalysisOutcome(report, scanResult, skillStatus);
+                    }
+
+                    @Override
+                    public void progress(List<CandidateAnalysisStage> changes) {
+                        if (changes == null || changes.isEmpty()) {
+                            return;
+                        }
+                        CandidateAnalysisStage stage = changes.get(changes.size() - 1);
+                        switch (stage) {
+                            case CHECKING_SKILLS:
+                                skillRefreshStatusLabel.setValue("Проверяем даты последнего резюме и навыков...");
+                                setCandidateProgress(stage, 0, "Проверка актуальности навыков");
+                                break;
+                            case REFRESHING_SKILLS:
+                                skillRefreshStatusLabel.setValue("Резюме новее навыков — запускаем стандартный AI-анализ навыков...");
+                                setCandidateProgress(stage, 0, "Обновляем навыки по резюме");
+                                break;
+                            case LOADING_VACANCIES:
+                                setCandidateProgress(stage, 15, "Подготавливаем открытые вакансии");
+                                break;
+                            case MATCHING_VACANCIES:
+                                setCandidateProgress(stage, 15, "Сопоставляем профиль с требованиями вакансий");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void done(CandidateAnalysisOutcome outcome) {
+                        stopAnalysisProgressTimer();
+                        setBusy(false, null);
+                        if (outcome != null && outcome.skillStatus != null) {
+                            skillRefreshStatusLabel.setValue(outcome.skillStatus);
+                        }
+                        setCandidateProgressComplete();
+                        if (outcome != null && outcome.report != null && outcome.report.getAiExecutionResult() == null
+                                && outcome.skillScanResult != null && outcome.skillScanResult.getAiExecution() != null) {
+                            AiOperationNotifier.show(notifications, outcome.skillScanResult.getAiExecution(),
+                                    "Навыки кандидата обновлены", outcome.skillStatus);
+                        }
+                        handleReport(outcome != null ? outcome.report : null);
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        stopAnalysisProgressTimer();
+                        setBusy(false, null);
+                        analysisProgressBar.setVisible(true);
+                        analysisProgressBar.setIndeterminate(false);
+                        statusLabel.setValue("Подбор не завершён за отведённое время. Можно повторить анализ.");
+                        analysisPhaseLabel.setValue("Время ожидания истекло");
+                        analysisEtaLabel.setValue("Осталось: оценка недоступна");
+                        log.error("Timeout during candidate-vacancy matching for candidate {}", candidateId);
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        stopAnalysisProgressTimer();
+                        setBusy(false, null);
+                        analysisProgressBar.setVisible(true);
+                        analysisProgressBar.setIndeterminate(false);
+                        log.error("Error during candidate-vacancy matching for candidate {}", candidateId, ex);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка AI-подбора")
+                                .withDescription("Не удалось выполнить анализ: " + ex.getMessage())
+                                .show();
+                        statusLabel.setValue("Ошибка при выполнении AI-анализа. Сохранённые навыки не изменены.");
+                        analysisPhaseLabel.setValue("Не удалось завершить подбор");
+                        analysisEtaLabel.setValue("Осталось: оценка недоступна");
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
+    }
+
+    private void startVacancyCandidateAnalysis() {
+        skillRefreshStatusBox.setVisible(false);
+        setBusy(true, "AI анализирует профили и формирует ранжированные рекомендации...");
+        analysisProgressBar.setIndeterminate(true);
+        analysisPhaseLabel.setValue("Анализ кандидатов");
+        analysisStepsLabel.setValue("Выполняется AI-сопоставление");
+        analysisPercentLabel.setValue("…");
+        analysisEtaLabel.setValue("Осталось: оценивается");
 
         BackgroundTask<Integer, CandidateVacancyMatchReport> task =
                 new BackgroundTask<Integer, CandidateVacancyMatchReport>(240, this) {
@@ -409,12 +638,17 @@ public class CandidateVacancyMatchScreen extends Screen {
                     @Override
                     public void done(CandidateVacancyMatchReport report) {
                         setBusy(false, null);
+                        analysisProgressBar.setIndeterminate(false);
+                        analysisProgressBar.setValue(1.0);
+                        analysisPercentLabel.setValue("100%");
+                        analysisEtaLabel.setValue("Осталось: 0");
                         handleReport(report);
                     }
 
                     @Override
                     public boolean handleTimeoutException() {
                         setBusy(false, null);
+                        analysisProgressBar.setIndeterminate(false);
                         log.error("Timeout during candidate-vacancy matching");
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Превышено время AI-подбора")
@@ -427,6 +661,7 @@ public class CandidateVacancyMatchScreen extends Screen {
                     @Override
                     public boolean handleException(Exception ex) {
                         setBusy(false, null);
+                        analysisProgressBar.setIndeterminate(false);
                         log.error("Error during candidate-vacancy matching", ex);
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Ошибка AI-подбора")
@@ -438,6 +673,152 @@ public class CandidateVacancyMatchScreen extends Screen {
                 };
 
         backgroundWorker.handle(task).execute();
+    }
+
+    private void setCandidateProgress(CandidateAnalysisStage stage, int percent, String status) {
+        analysisProgressBar.setVisible(true);
+        analysisProgressBar.setIndeterminate(stage == CandidateAnalysisStage.CHECKING_SKILLS
+                || stage == CandidateAnalysisStage.REFRESHING_SKILLS);
+        analysisProgressBar.setValue(Math.max(0, Math.min(100, percent)) / 100.0);
+        analysisPercentLabel.setValue(percent + "%");
+        analysisEtaLabel.setValue(stage == CandidateAnalysisStage.CHECKING_SKILLS
+                || stage == CandidateAnalysisStage.REFRESHING_SKILLS
+                || stage == CandidateAnalysisStage.LOADING_VACANCIES
+                ? "Осталось: оценка после первого AI-пакета" : "Осталось: рассчитываем");
+        analysisPhaseLabel.setValue(status);
+        analysisStepsLabel.setValue(formatStepCount(stage));
+        statusLabel.setValue(status);
+        updateProgressStepStyles(stage);
+    }
+
+    private String formatStepCount(CandidateAnalysisStage stage) {
+        switch (stage) {
+            case CHECKING_SKILLS:
+            case REFRESHING_SKILLS:
+                return "Этап 1 из 3";
+            case LOADING_VACANCIES:
+                return "Этап 2 из 3";
+            case MATCHING_VACANCIES:
+                return "Этап 3 из 3";
+            default:
+                return "Этап 1 из 3";
+        }
+    }
+
+    private void updateProgressStepStyles(CandidateAnalysisStage stage) {
+        boolean skillsActive = stage == CandidateAnalysisStage.CHECKING_SKILLS
+                || stage == CandidateAnalysisStage.REFRESHING_SKILLS;
+        boolean vacanciesActive = stage == CandidateAnalysisStage.LOADING_VACANCIES;
+        setProgressStepActive(progressStepSkillsLabel,
+                skillsActive || vacanciesActive || stage == CandidateAnalysisStage.MATCHING_VACANCIES);
+        setProgressStepActive(progressStepVacanciesLabel,
+                vacanciesActive || stage == CandidateAnalysisStage.MATCHING_VACANCIES);
+        setProgressStepActive(progressStepAiLabel, stage == CandidateAnalysisStage.MATCHING_VACANCIES);
+    }
+
+    private void setProgressStepActive(Label<String> stepLabel, boolean active) {
+        stepLabel.removeStyleName("candidate-vacancy-match-step-active");
+        if (active) {
+            stepLabel.addStyleName("candidate-vacancy-match-step-active");
+        }
+    }
+
+    @Subscribe("analysisProgressTimer")
+    public void onAnalysisProgressTimer(Timer.TimerActionEvent event) {
+        if (currentMatchOperationId == null || mode != Mode.CANDIDATE_TO_VACANCIES) {
+            return;
+        }
+        try {
+            CandidateVacancyMatchProgress progress = candidateVacancyMatchAiService
+                    .getVacancyMatchProgress(currentMatchOperationId);
+            if (progress == null) {
+                long elapsedSeconds = Math.max(0, (System.currentTimeMillis() - analysisStartedAtMillis) / 1000);
+                analysisEtaLabel.setValue("Прошло: " + formatDuration(elapsedSeconds * 1000)
+                        + " · Осталось: оценивается");
+                return;
+            }
+
+            boolean matchingStarted = progress.getTotalVacancies() > 0 && progress.getTotalChunks() > 0;
+            if (!matchingStarted) {
+                setCandidateProgress(CandidateAnalysisStage.LOADING_VACANCIES, 15,
+                        "Загружаем открытые вакансии и готовим контекст кандидата");
+                statusLabel.setValue(progress.getStatusMessage());
+                return;
+            }
+
+            int percent = 15 + (int) Math.round(progress.getProgressPercent() * 0.85);
+            percent = Math.max(15, Math.min(99, percent));
+            analysisProgressBar.setIndeterminate(false);
+            analysisProgressBar.setValue(percent / 100.0);
+            analysisPercentLabel.setValue(percent + "%");
+            analysisPhaseLabel.setValue("AI-сопоставление вакансий " + progress.getCompletedChunks()
+                    + " из " + progress.getTotalChunks());
+            analysisStepsLabel.setValue("Этап 3 из 3 · " + progress.getProcessedVacancies()
+                    + " из " + progress.getTotalVacancies() + " вакансий");
+            statusLabel.setValue(progress.getStatusMessage());
+            updateProgressStepStyles(CandidateAnalysisStage.MATCHING_VACANCIES);
+            Long remainingMillis = progress.getEstimatedRemainingMillis();
+            analysisEtaLabel.setValue(remainingMillis == null
+                    ? "Прошло: " + formatDuration(progress.getElapsedMillis()) + " · Осталось: оценивается"
+                    : "Прошло: " + formatDuration(progress.getElapsedMillis())
+                    + " · Осталось: примерно " + formatDuration(remainingMillis));
+        } catch (Exception ex) {
+            // Не прерываем AI-операцию, если очередной снимок прогресса временно недоступен.
+            log.debug("Could not poll candidate-vacancy match progress", ex);
+        }
+    }
+
+    @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+        stopAnalysisProgressTimer();
+    }
+
+    private void stopAnalysisProgressTimer() {
+        if (analysisProgressTimer != null) {
+            analysisProgressTimer.stop();
+        }
+    }
+
+    private void setCandidateProgressComplete() {
+        analysisProgressBar.setVisible(true);
+        analysisProgressBar.setIndeterminate(false);
+        analysisProgressBar.setValue(1.0);
+        analysisPercentLabel.setValue("100%");
+        analysisStepsLabel.setValue("Этап 3 из 3 · завершено");
+        analysisPhaseLabel.setValue("Подбор завершён");
+        analysisEtaLabel.setValue("Осталось: 0");
+        statusLabel.setValue("Подготовлен отчёт по открытым вакансиям.");
+    }
+
+    private Date latestUpdateTimestamp(Date createdAt, Date updatedAt) {
+        if (createdAt == null) return updatedAt;
+        if (updatedAt == null) return createdAt;
+        return updatedAt.after(createdAt) ? updatedAt : createdAt;
+    }
+
+    private String buildSkillRefreshStatus(CandidateSkillsScanResult result) {
+        int added = result.getAddedSkills() != null ? result.getAddedSkills().size() : 0;
+        int updated = result.getUpdatedSkills() != null ? result.getUpdatedSkills().size() : 0;
+        int unchanged = result.getUnchangedSkills() != null ? result.getUnchangedSkills().size() : 0;
+        if (added == 0 && updated == 0 && unchanged == 0) {
+            return "Проверка навыков завершена; изменения не требуются.";
+        }
+        return String.format("Навыки актуализированы: новых — %d, обновлено — %d, без изменений — %d.",
+                added, updated, unchanged);
+    }
+
+    private String safeText(String value) {
+        return value == null || value.trim().isEmpty() ? "" : value.trim();
+    }
+
+    private String formatDuration(long millis) {
+        long seconds = Math.max(0, millis / 1000);
+        if (seconds < 60) {
+            return seconds + " сек";
+        }
+        long minutes = seconds / 60;
+        long remainingSeconds = seconds % 60;
+        return remainingSeconds == 0 ? minutes + " мин" : minutes + " мин " + remainingSeconds + " сек";
     }
 
     private void setBusy(boolean busy, String message) {

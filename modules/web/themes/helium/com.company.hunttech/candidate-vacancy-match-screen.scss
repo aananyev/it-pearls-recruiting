@@ -1,0 +1,306 @@
+/*
+ * Локальная компоновка диалога AI-подбора вакансии.
+ * Все правила ограничены корнем candidate-vacancy-match-root.
+ */
+@mixin candidate-vacancy-match-screen-theme {
+  $candidate-vacancy-match-accent: #ffb11b;
+  $candidate-vacancy-match-border: rgba($v-font-color, 0.16);
+  $candidate-vacancy-match-muted: mix($v-font-color, $v-panel-background-color, 62%);
+  $candidate-vacancy-match-soft: mix($v-app-background-color, $v-panel-background-color, 52%);
+
+  .candidate-vacancy-match-root,
+  .candidate-vacancy-match-root .v-widget,
+  .candidate-vacancy-match-root .v-slot {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  .candidate-vacancy-match-root {
+    padding: 2px;
+    overflow: hidden;
+  }
+
+  .candidate-vacancy-match-header,
+  .candidate-vacancy-match-progress-card,
+  .candidate-vacancy-match-actions-card,
+  .candidate-vacancy-match-details-card {
+    width: 100%;
+    padding: 12px 14px;
+    color: $v-font-color;
+    background: $v-panel-background-color;
+    border: 1px solid $candidate-vacancy-match-border;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  }
+
+  .candidate-vacancy-match-title {
+    height: auto !important;
+    color: mix($v-font-color, $v-panel-background-color, 92%);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 24px;
+    white-space: normal;
+  }
+
+  .candidate-vacancy-match-subtitle,
+  .candidate-vacancy-match-detail-meta {
+    height: auto !important;
+    color: $candidate-vacancy-match-muted !important;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: normal;
+  }
+
+  .candidate-vacancy-match-window-actions .v-button,
+  .candidate-vacancy-match-actions-card .v-button {
+    min-height: 34px;
+  }
+
+  .candidate-vacancy-match-skill-status {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba($candidate-vacancy-match-accent, 0.08);
+    border: 1px solid rgba($candidate-vacancy-match-accent, 0.28);
+    border-radius: 6px;
+  }
+
+  .candidate-vacancy-match-status-caption {
+    color: mix($candidate-vacancy-match-accent, $v-font-color, 74%);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .candidate-vacancy-match-status-text,
+  .candidate-vacancy-match-progress-status {
+    height: auto !important;
+    color: mix($v-font-color, $v-panel-background-color, 82%);
+    font-size: 13px;
+    line-height: 18px;
+    white-space: normal;
+  }
+
+  .candidate-vacancy-match-progress-card {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .candidate-vacancy-match-progress-title,
+  .candidate-vacancy-match-section-title,
+  .candidate-vacancy-match-detail-title {
+    height: auto !important;
+    color: mix($v-font-color, $v-panel-background-color, 92%);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 21px;
+    white-space: normal;
+  }
+
+  .candidate-vacancy-match-progress-percent {
+    color: $candidate-vacancy-match-accent;
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .candidate-vacancy-match-progress-step-count {
+    color: $candidate-vacancy-match-muted;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .candidate-vacancy-match-progress-bar {
+    width: 100% !important;
+    min-height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .candidate-vacancy-match-progress-bar .v-progressbar-indicator {
+    background: $candidate-vacancy-match-accent;
+  }
+
+  .candidate-vacancy-match-steps .candidate-vacancy-match-step {
+    height: auto !important;
+    padding: 5px 8px;
+    color: $candidate-vacancy-match-muted;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    text-align: center;
+    white-space: normal;
+    background: $candidate-vacancy-match-soft;
+    border: 1px solid rgba($v-font-color, 0.10);
+    border-radius: 5px;
+  }
+
+  .candidate-vacancy-match-steps .candidate-vacancy-match-step-active {
+    color: mix($candidate-vacancy-match-accent, $v-font-color, 78%);
+    background: rgba($candidate-vacancy-match-accent, 0.12);
+    border-color: rgba($candidate-vacancy-match-accent, 0.42);
+  }
+
+  .candidate-vacancy-match-progress-eta,
+  .candidate-vacancy-match-count {
+    height: auto !important;
+    color: $candidate-vacancy-match-muted;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .candidate-vacancy-match-workspace,
+  .candidate-vacancy-match-results-pane,
+  .candidate-vacancy-match-details-scroll {
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
+  .candidate-vacancy-match-section-header {
+    padding: 2px 0;
+  }
+
+  .candidate-vacancy-match-actions-card {
+    padding: 10px 12px;
+    background: $candidate-vacancy-match-soft;
+    box-shadow: none;
+  }
+
+  .candidate-vacancy-match-filter-caption {
+    color: $candidate-vacancy-match-muted;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .candidate-vacancy-match-table {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border: 1px solid $candidate-vacancy-match-border;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .candidate-vacancy-match-table .v-table-header-wrap {
+    font-size: 12px;
+    font-weight: 700;
+    background: $candidate-vacancy-match-soft;
+  }
+
+  .candidate-vacancy-match-details-scroll {
+    overflow-x: hidden !important;
+  }
+
+  .candidate-vacancy-match-details-card {
+    padding: 14px;
+    box-shadow: none;
+  }
+
+  .candidate-vacancy-match-quick-actions > .v-spacing {
+    width: 8px !important;
+  }
+
+  .candidate-vacancy-match-quick-actions .v-button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .candidate-vacancy-match-detail-section {
+    width: 100%;
+    padding: 10px 12px;
+    background: $candidate-vacancy-match-soft;
+    border: 1px solid rgba($v-font-color, 0.11);
+    border-radius: 6px;
+  }
+
+  .candidate-vacancy-match-score-section {
+    border-left: 3px solid $candidate-vacancy-match-accent;
+  }
+
+  .candidate-vacancy-match-decision-section {
+    border-left: 3px solid mix(#2e9f62, $v-font-color, 74%);
+  }
+
+  .candidate-vacancy-match-detail-caption {
+    height: auto !important;
+    color: $candidate-vacancy-match-muted;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    letter-spacing: 0.03em;
+    white-space: normal;
+  }
+
+  .candidate-vacancy-match-score-grid {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .candidate-vacancy-match-total-score {
+    color: $candidate-vacancy-match-accent;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .candidate-vacancy-match-detail-section .v-label {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .candidate-vacancy-match-ai-meta {
+    padding-top: 8px;
+    border-top: 1px solid rgba($v-font-color, 0.10);
+  }
+
+  @media (max-width: 1180px) {
+    .candidate-vacancy-match-header,
+    .candidate-vacancy-match-progress-card,
+    .candidate-vacancy-match-actions-card,
+    .candidate-vacancy-match-details-card {
+      padding: 9px 10px;
+    }
+
+    .candidate-vacancy-match-actions-card .v-button {
+      font-size: 12px;
+    }
+
+    .candidate-vacancy-match-steps .candidate-vacancy-match-step {
+      padding-right: 4px;
+      padding-left: 4px;
+    }
+  }
+
+  // На узком viewport стандартный SplitPanel превращается в вертикальный стек.
+  @media (max-width: 1000px) {
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-first-container,
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-second-container {
+      position: relative !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+      width: 100% !important;
+    }
+
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-first-container {
+      height: 420px !important;
+    }
+
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-second-container {
+      height: 360px !important;
+      margin-top: 12px;
+    }
+
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-hsplitter {
+      display: none !important;
+    }
+  }
+}

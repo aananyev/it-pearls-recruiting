@@ -46,6 +46,12 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
 
     @Override
     public CandidateSkillsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode, boolean isBackground) {
+        return scanAndEnrich(candidate, cv, aiFunctionCode, isBackground, false);
+    }
+
+    @Override
+    public CandidateSkillsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode,
+                                                  boolean isBackground, boolean forceScan) {
         long startTime = System.currentTimeMillis();
         CandidateSkillsScanResult result = new CandidateSkillsScanResult();
 
@@ -84,10 +90,12 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
 
         Integer configVersion = loadFunctionVersion(effectiveFunctionCode);
 
-        // 1. Проверяем, не является ли CV уже актуальным (FRESH)
+        // Быстрый внешний критерий (например, даты CV и навыков) может явно признать
+        // данные устаревшими даже при совпавшем тексте; forceScan отключает только этот ранний выход.
         CandidateCvSkillAnalysis existingAnalysis = loadAnalysisRecord(cv.getId());
         if (existingAnalysis != null && existingAnalysis.getStatus() == CandidateCvAnalysisStatus.FRESH) {
-            if (Objects.equals(existingAnalysis.getCvContentHash(), contentHash)
+            if (!forceScan
+                    && Objects.equals(existingAnalysis.getCvContentHash(), contentHash)
                     && Objects.equals(existingAnalysis.getSkillsConfigurationVersion(), configVersion)) {
                 log.info("CV кандидата {} (CV ID: {}) уже проанализировано актуальной версией AI (хэш совпадает), повторный вызов пропущен",
                         candidate.getFullName(), cv.getId());

@@ -54,6 +54,14 @@ public interface CandidateSkillEnrichmentService {
     CandidateSkillsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode, boolean isBackground);
 
     /**
+     * Выполняет стандартный AI-анализ навыков, при необходимости обходя внутреннюю
+     * проверку хэша и версии функции. Применяется только когда внешний бизнес-критерий
+     * явно признал навыки устаревшими.
+     */
+    CandidateSkillsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode,
+                                            boolean isBackground, boolean forceScan);
+
+    /**
      * Вычисляет SHA-256 хеш нормализованного текста резюме для отслеживания изменений.
      *
      * @param rawCvText исходный текст (HTML или raw text)
