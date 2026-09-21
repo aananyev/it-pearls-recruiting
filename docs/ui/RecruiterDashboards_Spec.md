@@ -26,7 +26,10 @@
 
 ### Kanban
 
-Источник: `hunttech_IteractionList`, view `iteractionList-edit-view`.
+Источник: `hunttech_IteractionList`, узкий view
+`recruiter-dashboard-iteraction-list-view`. Он загружает кандидата, вакансию и
+все признаки `Iteraction`, используемые при нормализации этапа. Это исключает
+обращение к detached-атрибутам при отрисовке Kanban.
 
 Последний кейс определяется по максимальному `numberIteraction` для recruiter+candidate+vacancy. Кандидат не сворачивается до одного глобального статуса: один человек может находиться на разных стадиях по разным вакансиям.
 
@@ -35,7 +38,7 @@
 Источники:
 
 - `hunttech_RecrutiesTasks` / `recrutiesTasks-view`;
-- `hunttech_IteractionList` / `iteractionList-edit-view`.
+- `hunttech_IteractionList` / `recruiter-dashboard-iteraction-list-view`.
 
 Воронка считает уникальный ключ candidate+vacancy на каждом достигнутом этапе.
 
@@ -96,4 +99,5 @@ Visual smoke: 1366×768, 1920×1080, 1920×1200; все семь тем; horizon
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-21 | Исправлена загрузка признаков этапа для Kanban и воронки: добавлен специализированный view и контрактный тест против `Unfetched Attribute Access`. |
 | 2026-09-19 | Добавлены три Dashboard Add-on экрана: Kanban кандидатов, воронка найма и кадровый резерв; добавлены applet widgets, stage normalization и единый HuntTech visual contract. |

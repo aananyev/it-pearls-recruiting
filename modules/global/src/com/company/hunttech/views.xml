@@ -1035,6 +1035,29 @@
         <property name="calendarSyncState"/>
         <property name="addToCalendar"/>
     </view>
+    <!-- Узкий view для Kanban и воронки рекрутера: содержит только поля, которые
+         читают виджеты, включая признаки нормализации этапа. -->
+    <view entity="hunttech_IteractionList" name="recruiter-dashboard-iteraction-list-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="vacancy" view="_minimal">
+            <property name="vacansyName"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="signOurInterviewAssigned"/>
+            <property name="signOurInterview"/>
+            <property name="signClientInterview"/>
+            <property name="signSendToClient"/>
+            <property name="signPersonalReserve"/>
+            <property name="signPersonalReservePut"/>
+            <property name="signStartCase"/>
+            <property name="signEndCase"/>
+        </property>
+    </view>
     <view entity="hunttech_IteractionList" name="iteractionList-simple-browse-view" extends="_minimal">
         <property name="numberIteraction"/>
         <property name="dateIteraction"/>

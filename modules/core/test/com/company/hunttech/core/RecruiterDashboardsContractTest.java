@@ -34,6 +34,30 @@ public class RecruiterDashboardsContractTest {
     }
 
     @Test
+    public void kanbanAndFunnelLoadAllStageAttributesInDedicatedView() throws IOException {
+        String views = source("modules/global/src/com/company/hunttech/views.xml");
+        int viewStart = views.indexOf("name=\"recruiter-dashboard-iteraction-list-view\"");
+        assertTrue("Отсутствует view дашборда рекрутера", viewStart >= 0);
+        int viewEnd = views.indexOf("</view>", viewStart);
+        String dashboardView = views.substring(viewStart, viewEnd);
+
+        for (String attribute : new String[]{
+                "iterationName", "signOurInterviewAssigned", "signOurInterview",
+                "signClientInterview", "signSendToClient", "signPersonalReserve",
+                "signPersonalReservePut", "signStartCase", "signEndCase"}) {
+            assertTrue("В dashboard-view отсутствует " + attribute,
+                    dashboardView.contains("name=\"" + attribute + "\""));
+        }
+
+        assertTrue(source("modules/web/src/com/company/hunttech/web/widgets/recruiterdashboard/"
+                + "RecruiterCandidateKanbanWidget.java")
+                .contains(".view(\"recruiter-dashboard-iteraction-list-view\")"));
+        assertTrue(source("modules/web/src/com/company/hunttech/web/widgets/recruiterdashboard/"
+                + "RecruiterHiringFunnelWidget.java")
+                .contains(".view(\"recruiter-dashboard-iteraction-list-view\")"));
+    }
+
+    @Test
     public void menuContainsRecruiterDashboardGroup() throws IOException {
         String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
         assertTrue(menu.contains("id=\"recruiter-dashboards\""));

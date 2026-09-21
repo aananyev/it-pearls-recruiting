@@ -75,7 +75,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
                 .query(QUERY_LATEST_CASES)
                 .parameter("recrutier", userSession.getUser())
                 .parameter("startDate", daysAgo(PERIOD_DAYS))
-                .view("iteractionList-edit-view")
+                .view("recruiter-dashboard-iteraction-list-view")
                 .list();
 
         Map<RecruiterDashboardStage, List<IteractionList>> grouped =

@@ -98,7 +98,7 @@ public class RecruiterHiringFunnelWidget extends ScreenFragment implements Refre
                 .parameter("recrutier", userSession.getUser())
                 .parameter("vacancies", vacancies)
                 .parameter("startDate", daysAgo(PERIOD_DAYS))
-                .view("iteractionList-edit-view")
+                .view("recruiter-dashboard-iteraction-list-view")
                 .list();
 
         Map<RecruiterDashboardStage, Set<String>> aggregate = new EnumMap<>(RecruiterDashboardStage.class);
