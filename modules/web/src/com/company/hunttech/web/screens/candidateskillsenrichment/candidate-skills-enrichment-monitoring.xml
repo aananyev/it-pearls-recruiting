@@ -8,7 +8,7 @@
                     view="candidateCvSkillAnalysis-browse-view">
             <loader id="analysesDl">
                 <query>
-                    <![CDATA[select e from hunttech_CandidateCvSkillAnalysis e order by e.processingStartedAt desc nulls last, e.createTs desc]]>
+                    <![CDATA[select e from hunttech_CandidateCvSkillAnalysis e order by (case when e.status in (10, 20) then 0 else 1 end), coalesce(e.priority, 0) desc, e.createTs desc, e.processingStartedAt desc nulls last]]>
                 </query>
             </loader>
         </collection>
@@ -125,6 +125,7 @@
                           dataContainer="analysesDc"
                           selectionMode="SINGLE">
                     <columns>
+                        <column id="priority" caption="msg://colPriority" width="115px"/>
                         <column id="processingStartedAt" property="processingStartedAt" caption="msg://colStartedAt" width="145px"/>
                         <column id="candidate" property="candidate.fullName" caption="msg://colCandidate" width="210px"/>
                         <column id="candidateCvDate" caption="msg://colCvDate" width="105px"/>

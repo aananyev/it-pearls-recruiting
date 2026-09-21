@@ -82,6 +82,16 @@ public class CandidateSkillsEnrichmentWorker {
     }
 
     /**
+     * Немедленно инициирует шаг обработки очереди воркером в пуле потоков,
+     * не дожидаясь очередного планового 10-секундного тика.
+     */
+    public void triggerImmediateProcessing() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.execute(this::runWorkerTickSafe);
+        }
+    }
+
+    /**
      * Безопасная обертка для периодического тика воркера.
      */
     public void runWorkerTickSafe() {
@@ -179,6 +189,47 @@ public class CandidateSkillsEnrichmentWorker {
         try (Transaction tx = persistence.createTransaction()) {
             EntityManager em = persistence.getEntityManager();
 
+            // 0. Срочные задачи от рекрутеров (создание кандидата / подгрузка резюме с priority >= PRIORITY_HIGH)
+            List<Object[]> priorityCandidates = em.createQuery(
+                    "select a.id, a.candidate.id, a.candidateCv.id, c.fullName " +
+                            "from hunttech_CandidateCvSkillAnalysis a " +
+                            "join a.candidate c " +
+                            "where a.status = :naStatus and coalesce(a.priority, 0) >= :highPriority " +
+                            "order by a.priority desc, a.createTs asc")
+                    .setParameter("naStatus", CandidateCvAnalysisStatus.NOT_ANALYZED.getId())
+                    .setParameter("highPriority", CandidateSkillEnrichmentService.PRIORITY_HIGH)
+                    .setMaxResults(batchSize)
+                    .getResultList();
+
+            for (Object[] row : priorityCandidates) {
+                UUID analysisId = (UUID) row[0];
+                UUID candidateId = (UUID) row[1];
+                UUID cvId = (UUID) row[2];
+                String name = (String) row[3];
+
+                int updated = em.createQuery(
+                        "update hunttech_CandidateCvSkillAnalysis a " +
+                                "set a.status = :procStatus, a.processingStartedAt = :now " +
+                                "where a.id = :id and a.status = :expectedStatus")
+                        .setParameter("procStatus", CandidateCvAnalysisStatus.PROCESSING.getId())
+                        .setParameter("now", new Date())
+                        .setParameter("id", analysisId)
+                        .setParameter("expectedStatus", CandidateCvAnalysisStatus.NOT_ANALYZED.getId())
+                        .executeUpdate();
+
+                if (updated > 0) {
+                    tx.commit();
+                    NextTaskToProcess task = new NextTaskToProcess();
+                    task.candidateId = candidateId;
+                    task.candidateCvId = cvId;
+                    task.candidateFullName = name;
+                    task.initialStatus = CandidateCvAnalysisStatus.NOT_ANALYZED;
+                    log.info("CandidateSkillsEnrichmentWorker захватил ВЫСОКОПРИОРИТЕТНУЮ задачу кандидата {} (CV ID: {})",
+                            name, cvId);
+                    return task;
+                }
+            }
+
             // 1. Сначала ищем резюме в статусе RETRY, у которых наступило время повтора nextRetryAt <= now
             List<Object[]> retryCandidates = em.createQuery(
                     "select a.id, a.candidate.id, a.candidateCv.id, c.fullName " +
@@ -257,15 +308,16 @@ public class CandidateSkillsEnrichmentWorker {
                 }
             }
 
-            // 3. Ищем резюме в статусе NOT_ANALYZED (запись уже создана, но ожидает анализа)
+            // 3. Ищем резюме в статусе NOT_ANALYZED (запись уже создана, но ожидает анализа, обычный приоритет < PRIORITY_HIGH)
             List<Object[]> notAnalyzedList = em.createQuery(
                     "select a.id, a.candidate.id, a.candidateCv.id, c.fullName " +
                             "from hunttech_CandidateCvSkillAnalysis a " +
                             "join a.candidate c " +
                             "join a.candidateCv cv " +
-                            "where a.status = :naStatus " +
+                            "where a.status = :naStatus and coalesce(a.priority, 0) < :highPriority " +
                             "order by cv.datePost desc")
                     .setParameter("naStatus", CandidateCvAnalysisStatus.NOT_ANALYZED.getId())
+                    .setParameter("highPriority", CandidateSkillEnrichmentService.PRIORITY_HIGH)
                     .setMaxResults(batchSize)
                     .getResultList();
 

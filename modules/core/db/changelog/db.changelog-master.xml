@@ -302,4 +302,8 @@
     <include file="260920-3-setOpenRouterGatewayBaseApiUrl.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Фоновое определение навыков: Добавление поля PRIORITY для приоритетной очереди рекрутеров -->
+    <include file="260921-2-addPriorityToCandidateCvSkillAnalysis.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

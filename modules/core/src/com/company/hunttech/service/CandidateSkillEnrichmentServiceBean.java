@@ -276,6 +276,7 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
         analysis.setRetryCount(0);
         analysis.setNextRetryAt(null);
         analysis.setLastError(null);
+        analysis.setPriority(CandidateSkillEnrichmentService.PRIORITY_DEFAULT);
         analysis.setAiFunctionCode(functionCode);
 
         if (aiExecution != null) {
@@ -432,16 +433,90 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
     }
 
     @Override
+    public void enqueueCandidateCvPriority(UUID candidateCvId) {
+        enqueueCandidateCv(candidateCvId, PRIORITY_HIGH);
+    }
+
+    @Override
+    public void enqueueCandidateCv(UUID candidateCvId, int priority) {
+        if (candidateCvId == null) return;
+
+        CandidateCV cv = dataManager.load(CandidateCV.class)
+                .id(candidateCvId)
+                .view("candidateCV-llm-view")
+                .optional()
+                .orElse(null);
+
+        if (cv == null || cv.getCandidate() == null) {
+            log.warn("Не удалось поставить CV ID: {} в очередь фонового анализа навыков: CV или кандидат не найден", candidateCvId);
+            return;
+        }
+
+        String rawText = cv.getTextCV();
+        if (rawText == null || rawText.trim().isEmpty()) {
+            markCvAnalysisStatus(cv.getCandidate(), cv, CandidateCvAnalysisStatus.SKIPPED, "Текст резюме пуст", null, 0);
+            log.info("CV ID: {} помечено SKIPPED (пустой текст)", candidateCvId);
+            return;
+        }
+
+        String currentHash = calculateNormalizedCvHash(rawText);
+        CandidateCvSkillAnalysis analysis = loadAnalysisRecord(candidateCvId);
+
+        if (analysis == null) {
+            analysis = metadata.create(CandidateCvSkillAnalysis.class);
+            analysis.setCandidate(cv.getCandidate());
+            analysis.setCandidateCv(cv);
+            analysis.setStatus(CandidateCvAnalysisStatus.NOT_ANALYZED);
+            analysis.setPriority(priority);
+            analysis.setRetryCount(0);
+            analysis.setNextRetryAt(new Date());
+            analysis.setLastError(null);
+            analysis.setCvContentHash(currentHash);
+            dataManager.commit(analysis);
+            log.info("CV ID: {} кандидата {} успешно поставлено в очередь фонового анализа (приоритет: {})",
+                    candidateCvId, cv.getCandidate().getFullName(), priority);
+        } else {
+            // Если уже FRESH и текст не менялся, повторный анализ не требуется
+            if (analysis.getStatus() == CandidateCvAnalysisStatus.FRESH
+                    && Objects.equals(analysis.getCvContentHash(), currentHash)) {
+                log.info("CV ID: {} кандидата {} уже имеет актуальный статус FRESH с тем же хэшем, пропуск",
+                        candidateCvId, cv.getCandidate().getFullName());
+                return;
+            }
+
+            // Иначе переводим в NOT_ANALYZED с заданным приоритетом
+            analysis.setStatus(CandidateCvAnalysisStatus.NOT_ANALYZED);
+            analysis.setPriority(priority);
+            analysis.setRetryCount(0);
+            analysis.setNextRetryAt(new Date());
+            analysis.setLastError(null);
+            analysis.setCvContentHash(currentHash);
+            dataManager.commit(analysis);
+            log.info("CV ID: {} кандидата {} обновлено в очереди фонового анализа (статус: NOT_ANALYZED, приоритет: {})",
+                    candidateCvId, cv.getCandidate().getFullName(), priority);
+        }
+
+        // Немедленное пробуждение воркера для скорейшего определения навыков
+        if (enrichmentWorker != null) {
+            enrichmentWorker.triggerImmediateProcessing();
+        }
+    }
+
+    @Override
     public void reprocessCv(UUID candidateCvId) {
         if (candidateCvId == null) return;
         CandidateCvSkillAnalysis analysis = loadAnalysisRecord(candidateCvId);
         if (analysis != null) {
             analysis.setStatus(CandidateCvAnalysisStatus.NOT_ANALYZED);
+            analysis.setPriority(PRIORITY_HIGH);
             analysis.setRetryCount(0);
             analysis.setNextRetryAt(new Date());
             analysis.setLastError(null);
             dataManager.commit(analysis);
-            log.info("CV ID: {} вручную отправлено на повторный AI-анализ", candidateCvId);
+            log.info("CV ID: {} вручную отправлено на повторный AI-анализ с приоритетом {}", candidateCvId, PRIORITY_HIGH);
+            if (enrichmentWorker != null) {
+                enrichmentWorker.triggerImmediateProcessing();
+            }
         }
     }
 

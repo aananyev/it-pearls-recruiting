@@ -90,7 +90,7 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
     private boolean isInitialized = false;
 
     private static final List<String> FILTER_PARAM_NAMES = Arrays.asList(
-            "search", "today", "errStatus", "retryStatus", "past24h", "staleStatus", "freshStatus"
+            "search", "today", "errStatus", "retryStatus", "past24h", "staleStatus", "freshStatus", "queuedStatuses"
     );
 
     @Subscribe
@@ -109,6 +109,7 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
     private void initStatusFilterOptions() {
         Map<String, String> options = new LinkedHashMap<>();
         options.put("Все", "ALL");
+        options.put("В очереди", "QUEUED");
         options.put("Сегодня", "TODAY");
         options.put("Ошибки", "ERROR");
         options.put("В повторе", "RETRY");
@@ -120,6 +121,28 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
     }
 
     private void initTableColumnRenderers() {
+        // Рендерер приоритета в очереди
+        DataGrid.Column priorityCol = analysesTable.addGeneratedColumn("priority",
+                new DataGrid.ColumnGenerator<CandidateCvSkillAnalysis, String>() {
+                    @Override
+                    public String getValue(DataGrid.ColumnGeneratorEvent<CandidateCvSkillAnalysis> event) {
+                        CandidateCvSkillAnalysis item = event.getItem();
+                        int p = item.getPriority() != null ? item.getPriority() : 0;
+                        if (p >= CandidateSkillEnrichmentService.PRIORITY_HIGH) {
+                            return "<span class=\"ai-chip-badge badge-orange bold\">⚡ СРОЧНО</span>";
+                        }
+                        return "<span class=\"ai-chip-badge\">Обычный</span>";
+                    }
+
+                    @Override
+                    public Class<String> getType() {
+                        return String.class;
+                    }
+                });
+        if (priorityCol != null) {
+            priorityCol.setRenderer(analysesTable.createRenderer(DataGrid.HtmlRenderer.class));
+        }
+
         // Рендерер статуса с красивыми цветными HTML-бейджами
         DataGrid.Column statusCol = analysesTable.addGeneratedColumn("status",
                 new DataGrid.ColumnGenerator<CandidateCvSkillAnalysis, String>() {
@@ -129,6 +152,12 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
                         CandidateCvAnalysisStatus st = item.getStatus();
                         if (st == null) return "—";
                         switch (st) {
+                            case NOT_ANALYZED:
+                                int prio = item.getPriority() != null ? item.getPriority() : 0;
+                                if (prio >= CandidateSkillEnrichmentService.PRIORITY_HIGH) {
+                                    return "<span class=\"ai-chip-badge badge-purple bold\">⚡ В ОЧЕРЕДИ</span>";
+                                }
+                                return "<span class=\"ai-chip-badge badge-purple\">⏳ В ОЧЕРЕДИ</span>";
                             case FRESH:
                                 return "<span class=\"ai-chip-badge badge-green\">✓ FRESH</span>";
                             case PROCESSING:
@@ -278,6 +307,15 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
         }
 
         switch (filterValue) {
+            case "QUEUED":
+                // В очереди: новые ожидания анализа, устаревшие и запланированные повторы (согласно KPI панели)
+                jpql.append("and e.status in :queuedStatuses ");
+                params.put("queuedStatuses", Arrays.asList(
+                        CandidateCvAnalysisStatus.NOT_ANALYZED.getId(),
+                        CandidateCvAnalysisStatus.STALE.getId(),
+                        CandidateCvAnalysisStatus.RETRY.getId()
+                ));
+                break;
             case "TODAY":
                 Calendar cal = Calendar.getInstance();
                 cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -312,7 +350,7 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
                 break;
         }
 
-        jpql.append("order by e.processingStartedAt desc nulls last, e.createTs desc");
+        jpql.append("order by (case when e.status in (10, 20) then 0 else 1 end), coalesce(e.priority, 0) desc, e.createTs desc, e.processingStartedAt desc nulls last");
 
         for (String p : FILTER_PARAM_NAMES) {
             analysesDl.removeParameter(p);

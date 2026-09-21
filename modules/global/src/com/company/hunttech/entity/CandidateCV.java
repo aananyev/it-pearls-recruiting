@@ -25,6 +25,7 @@ import java.util.List;
         @Index(name = "IDX_HUNTTECH_CANDIDATE_C_V_OWNER_DATE", columnList = "OWNER_ID, DATE_POST")
 })
 @Entity(name = "hunttech_CandidateCV")
+@PublishEntityChangedEvents
 public class CandidateCV extends StandardEntity {
     private static final long serialVersionUID = 7346397128043882179L;
 

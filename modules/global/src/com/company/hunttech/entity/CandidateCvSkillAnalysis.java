@@ -19,7 +19,8 @@ import java.util.Date;
         @Index(name = "IDX_CAND_CV_SKILL_ANALYSIS_STATUS", columnList = "STATUS"),
         @Index(name = "IDX_CAND_CV_SKILL_ANALYSIS_CAND", columnList = "CANDIDATE_ID"),
         @Index(name = "IDX_CAND_CV_SKILL_ANALYSIS_NEXT_RETRY", columnList = "NEXT_RETRY_AT"),
-        @Index(name = "IDX_CAND_CV_SKILL_ANALYSIS_STARTED", columnList = "PROCESSING_STARTED_AT")
+        @Index(name = "IDX_CAND_CV_SKILL_ANALYSIS_STARTED", columnList = "PROCESSING_STARTED_AT"),
+        @Index(name = "IDX_CAND_CV_SKILL_ANALYSIS_PRIORITY", columnList = "STATUS, PRIORITY, CREATE_TS")
 }, uniqueConstraints = {
         @UniqueConstraint(name = "IDX_CAND_CV_SKILL_ANALYSIS_UNQ_CV", columnNames = {"CANDIDATE_CV_ID", "DELETE_TS"})
 })
@@ -137,6 +138,10 @@ public class CandidateCvSkillAnalysis extends StandardEntity {
     @Lob
     @Column(name = "DELTA_DETAILS_JSON")
     protected String deltaDetailsJson;
+
+    /** Приоритет в очереди обработки (0 = обычный фоновый, 100 = высокий приоритет по действию рекрутера) */
+    @Column(name = "PRIORITY")
+    protected Integer priority = 0;
 
     public JobCandidate getCandidate() {
         return candidate;
@@ -336,5 +341,13 @@ public class CandidateCvSkillAnalysis extends StandardEntity {
 
     public void setDeltaDetailsJson(String deltaDetailsJson) {
         this.deltaDetailsJson = deltaDetailsJson;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 }

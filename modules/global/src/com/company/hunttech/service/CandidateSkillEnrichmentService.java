@@ -22,6 +22,25 @@ public interface CandidateSkillEnrichmentService {
 
     String NAME = "hunttech_CandidateSkillEnrichmentService";
 
+    int PRIORITY_DEFAULT = 0;
+    int PRIORITY_HIGH = 100;
+
+    /**
+     * Ставит резюме кандидата в приоритетную очередь фонового анализа с наивысшим приоритетом (PRIORITY_HIGH = 100)
+     * и немедленно инициирует шаг воркера (сценарий: создание кандидата или загрузка нового резюме).
+     *
+     * @param candidateCvId идентификатор CandidateCV
+     */
+    void enqueueCandidateCvPriority(UUID candidateCvId);
+
+    /**
+     * Регистрирует резюме кандидата в очереди фонового анализа навыков с заданным приоритетом.
+     *
+     * @param candidateCvId идентификатор CandidateCV
+     * @param priority      приоритет в очереди (0 = фоновый, >=100 = экспресс)
+     */
+    void enqueueCandidateCv(UUID candidateCvId, int priority);
+
     /**
      * Выполняет анализ навыков резюме кандидата, сохраняет новые/обновленные CandidateSkill
      * и фиксирует состояние CandidateCvSkillAnalysis.

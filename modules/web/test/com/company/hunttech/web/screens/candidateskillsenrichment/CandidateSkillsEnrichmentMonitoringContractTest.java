@@ -83,6 +83,24 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
         assertTrue(startBtn, "startWorkerBtn должен присутствовать");
         assertTrue(stopBtn, "stopWorkerBtn должен присутствовать");
         assertTrue(runOnceBtn, "runOnceBtn должен присутствовать");
+
+        // 4. Проверка наличия колонки priority в analysesTable
+        NodeList columns = doc.getElementsByTagName("column");
+        boolean priorityColFound = false;
+        for (int i = 0; i < columns.getLength(); i++) {
+            Element col = (Element) columns.item(i);
+            if ("priority".equals(col.getAttribute("id"))) {
+                priorityColFound = true;
+                break;
+            }
+        }
+        assertTrue(priorityColFound, "Колонка priority должна присутствовать в analysesTable");
+
+        // 5. Проверка сортировки с приоритетом в analysesDl
+        NodeList queries = doc.getElementsByTagName("query");
+        assertTrue(queries.getLength() > 0, "Запрос analysesDl должен присутствовать");
+        String queryText = queries.item(0).getTextContent();
+        assertTrue(queryText.contains("priority"), "Запрос analysesDl должен учитывать priority");
     }
 
     @Test
