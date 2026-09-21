@@ -1,15 +1,10 @@
 package com.company.hunttech.web.gui.components;
 
 import com.company.hunttech.app.ProcessedImage;
-import com.company.hunttech.app.ProjectLogoImageProcessingService;
-import com.company.hunttech.config.HunttechProjectLogoConfig;
-import com.company.hunttech.service.AiExecutionResult;
-import com.company.hunttech.web.util.AiOperationNotifier;
+import com.company.hunttech.app.SidebarImageNormalizationService;
+import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.components.FileUploadField;
-import com.haulmont.cuba.gui.components.data.ValueSource;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.gui.components.WebFileUploadField;
 import org.apache.commons.io.IOUtils;
@@ -23,304 +18,177 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Загрузчик файлов, который перед записью в файловое хранилище обрабатывает изображение
- * логотипа проекта ({@code Project.projectLogo}), логотипа компании
- * ({@code Company.fileCompanyLogo}) или фотографии кандидата
- * ({@code JobCandidate.fileImageFace}): конвертация в PNG, ресайз до 300x300, удаление
- * белого фона, вписывание в круг (подробности — {@link ProjectLogoImageProcessingService}).
+ * Общий upload-компонент sidebar/profile изображений.
  *
- * <p>Компонент зарегистрирован в {@code cuba-ui-component.xml} под именем {@code upload},
- * поэтому бесшовно заменяет стандартный {@link WebFileUploadField} во всех экранах без
- * правки их XML. Обработка выполняется ТОЛЬКО для полей, привязанных к свойству
- * {@code projectLogo} сущности {@code com.company.hunttech.entity.Project},
- * {@code fileCompanyLogo} сущности {@code com.company.hunttech.entity.Company} или
- * {@code fileImageFace} сущности {@code com.company.hunttech.entity.JobCandidate}; все
- * остальные загрузки ведут себя точно так же, как стандартный компонент.</p>
- *
- * <p>Если фотография кандидата ({@code fileImageFace}) реально обработана нейросетью
- * (rembg/AI удалили фон), пользователю показывается исчезающая TRAY-нотификация
- * «Фотография обработана с помощью AI» (стандартный механизм CUBA). Для логотипов
- * нотификация не показывается — там фон может быть удалён классическим flood-fill.</p>
- *
- * <p>Точка перехвата — {@link #saveFile(FileDescriptor)} в режиме
- * {@link FileStoragePutMode#IMMEDIATE}: к этому моменту файл уже принят во временное
- * хранилище ({@code FileUploadingAPI}), но ещё не сохранён в {@code FileStorage}.</p>
+ * <p>Для известных image-binding содержимое проверяется middleware-сервисом по
+ * фактическому raster codec, безопасно уменьшается и всегда сохраняется как PNG.
+ * Невалидное изображение не попадает в FileStorage и не заменяет прежнее значение
+ * поля. Остальные file upload bindings сохраняют стандартное поведение CUBA.</p>
  */
 public class WebProjectLogoFileUploadField extends WebFileUploadField {
 
     private static final Logger log = LoggerFactory.getLogger(WebProjectLogoFileUploadField.class);
 
-    /**
-     * Имя свойства сущности Project, для которого выполняется обработка логотипа.
-     */
     private static final String PROJECT_LOGO_PROPERTY = "projectLogo";
-
-    /**
-     * Имя свойства сущности Company, для которого выполняется обработка логотипа.
-     */
     private static final String COMPANY_LOGO_PROPERTY = "fileCompanyLogo";
-
-    /**
-     * Имя свойства сущности City, для которого выполняется обработка герба.
-     */
     private static final String CITY_EMBLEM_PROPERTY = "fileCityEmblem";
-
-    /**
-     * Имя свойства сущности Region, для которого выполняется обработка герба.
-     */
     private static final String REGION_EMBLEM_PROPERTY = "fileRegionEmblem";
-
-    /**
-     * Имя свойства сущности JobCandidate, для которого выполняется обработка фотографии.
-     */
     private static final String CANDIDATE_PHOTO_PROPERTY = "fileImageFace";
+    private static final String POSITION_ICON_PROPERTY = "filePositionIcon";
+    private static final String SKILL_LOGO_PROPERTY = "fileImageLogo";
+    private static final String COUNTRY_FLAG_PROPERTY = "fileFlag";
+    private static final String SOCIAL_NETWORK_LOGO_PROPERTY = "logo";
+    private static final String OFFICIAL_PHOTO_PROPERTY = "officialPhoto";
+    private static final String USER_AVATAR_PROPERTY = "userAvatar";
+    private static final String APPLICATION_LOGO_PROPERTY = "applicationLogo";
+    private static final String APPLICATION_ICON_PROPERTY = "applicationIcon";
 
-    /**
-     * Дескриптор после обработки: возвращается из {@link #getFileDescriptor()}, чтобы
-     * превью в экране и последующий коммит использовали обработанный файл (PNG).
-     */
+    /** Дескриптор PNG, который должен получить binding после успешной нормализации. */
     private FileDescriptor processedDescriptor;
-
-    /**
-     * Флаг последней загрузки: фон изображения удалён нейросетью (rembg/AI-функция).
-     * Выставляется в {@link #processLogo(FileDescriptor, ProcessingMode)} и используется
-     * для уведомления пользователя об AI-обработке фотографии кандидата.
-     */
-    private boolean processedByAi;
-
-    /**
-     * Метаданные платного AI-выполнения (модель, провайдер, собственник API), если фон
-     * логотипа удалён AI-функцией {@code PROJECT_LOGO_IMAGE_GENERATE}; {@code null} для
-     * локального rembg/классического конвейера. Используется для нотификации «какая
-     * модель что сделала + чей API» (контракт HRM_HuntTech_AI_User_Notification_Contract).
-     */
-    private AiExecutionResult processedAiExecution;
+    /** Не даёт parent succeeded-listener подменить preview отклонённым original-файлом. */
+    private boolean uploadRejected;
 
     @Override
     protected void saveFile(FileDescriptor fileDescriptor) {
-        // Сбрасываем кэш обработанного дескриптора при каждой новой загрузке.
         processedDescriptor = null;
-        processedByAi = false;
-        processedAiExecution = null;
-        // Обрабатываем только изображения (логотипы проекта/компании, фото кандидата);
-        // остальные загрузки — стандартное поведение.
-        ProcessingMode mode = resolveProcessingMode();
-        if (mode != ProcessingMode.NONE && fileDescriptor != null) {
-            try {
-                FileDescriptor processed = processLogo(fileDescriptor, mode);
-                if (processed != null) {
-                    processedDescriptor = processed;
-                    super.saveFile(processed);
-                    // Принудительная перерисовка виджета загрузки: клиентский RPC
-                    // continueUploading() (снимает блокировку jquery-file-upload после
-                    // загрузки) для legacy-компонента CubaFileUpload отправляется в браузер
-                    // ТОЛЬКО при paint. Без этого повторный клик по кнопке «Загрузить»
-                    // не открывает диалог выбора файла (повторная загрузка невозможна).
-                    getComposition().markAsDirty();
-                    if (mode == ProcessingMode.CANDIDATE_PHOTO && processedByAi) {
-                        showAiProcessedNotification();
-                    } else if (mode == ProcessingMode.LOGO && processedAiExecution != null) {
-                        showLogoAiProcessedNotification();
-                    }
-                    return;
-                }
-            } catch (Exception e) {
-                // При любой ошибке обработки сохраняем исходный файл — загрузка не должна ломаться.
-                log.warn("Не удалось обработать логотип id={}: {}", fileDescriptor.getId(), e.toString(), e);
-            }
+        if (!isSidebarImageBinding()) {
+            super.saveFile(fileDescriptor);
+            return;
         }
-        super.saveFile(fileDescriptor);
+        if (fileDescriptor == null) {
+            rejectImageUpload(null, null);
+            return;
+        }
+
+        try {
+            FileDescriptor normalized = normalizeImage(fileDescriptor);
+            processedDescriptor = normalized;
+            super.saveFile(normalized);
+            // Повторная загрузка должна оставаться доступной после client RPC succeeded.
+            getComposition().markAsDirty();
+        } catch (Exception ex) {
+            rejectImageUpload(fileDescriptor, ex);
+        }
     }
 
-    /**
-     * Сбрасывает кэш обработанного дескриптора в момент начала новой загрузки.
-     *
-     * <p>Родительский succeeded-листенер вызывает {@code saveFile(getFileDescriptor())},
-     * причём {@link #getFileDescriptor()} вычисляется ДО входа в {@link #saveFile}.
-     * Без сброса здесь вторая (и последующие) загрузки логотипа в том же экране
-     * получали бы дескриптор ПЕРВОЙ загрузки (тот же UUID): повторный
-     * {@code putFileIntoStorage} на уже существующий файл не сохранялся,
-     * {@code setValue} не обновлял контейнер, и превью/алгоритм не срабатывали.</p>
-     */
+    /** Сбрасывает cached descriptor до вычисления getFileDescriptor() для новой загрузки. */
     @Override
     protected OutputStream receiveUpload(String fileName, String MIMEType) {
         processedDescriptor = null;
-        processedByAi = false;
-        processedAiExecution = null;
+        uploadRejected = false;
         return super.receiveUpload(fileName, MIMEType);
     }
 
-    /**
-     * Возвращает обработанный дескриптор (PNG), если логотип уже был трансформирован,
-     * иначе — стандартный дескриптор загруженного файла.
-     */
     @Override
     public FileDescriptor getFileDescriptor() {
-        if (processedDescriptor != null) {
-            return processedDescriptor;
+        if (uploadRejected) {
+            return getValue();
         }
-        return super.getFileDescriptor();
+        return processedDescriptor != null ? processedDescriptor : super.getFileDescriptor();
     }
 
     /**
-     * Режим обработки поля загрузки: какой конвейер применять к изображению.
+     * CUBA fires upload-succeeded after saveFile returns even when our validation rejected the image.
+     * Suppression prevents downstream listeners from treating the previous descriptor as a new upload.
      */
-    private enum ProcessingMode {
-        /** Обычная загрузка без обработки (поле не привязано к обрабатываемому свойству). */
-        NONE,
-        /** Логотип проекта/компании — классический конвейер (flood-fill, круг). */
-        LOGO,
-        /** Фото кандидата — щадящий режим (только нейросеть rembg + ресайз, без flood-fill). */
-        CANDIDATE_PHOTO
-    }
-
-    /**
-     * Определяет режим обработки по привязке поля: {@code projectLogo} у Project
-     * или {@code fileCompanyLogo} у Company — {@link ProcessingMode#LOGO};
-     * {@code fileImageFace} у JobCandidate — {@link ProcessingMode#CANDIDATE_PHOTO}.
-     */
-    private ProcessingMode resolveProcessingMode() {
-        ValueSource<FileDescriptor> valueSource = getValueSource();
-        if (valueSource instanceof ContainerValueSource) {
-            ContainerValueSource<?, ?> containerSource = (ContainerValueSource<?, ?>) valueSource;
-            String property = containerSource.getMetaPropertyPath().getMetaProperty().getName();
-            if (PROJECT_LOGO_PROPERTY.equals(property)
-                    || COMPANY_LOGO_PROPERTY.equals(property)
-                    || CITY_EMBLEM_PROPERTY.equals(property)
-                    || REGION_EMBLEM_PROPERTY.equals(property)) {
-                return ProcessingMode.LOGO;
-            }
-            if (CANDIDATE_PHOTO_PROPERTY.equals(property)) {
-                return ProcessingMode.CANDIDATE_PHOTO;
-            }
+    @Override
+    protected void fireFileUploadSucceed(String fileName, long contentLength) {
+        if (uploadRejected && isSidebarImageBinding()) {
+            return;
         }
-        return ProcessingMode.NONE;
+        super.fireFileUploadSucceed(fileName, contentLength);
     }
 
     /**
-     * Читает принятый во временное хранилище файл, обрабатывает его сервисом
-     * {@link ProjectLogoImageProcessingService} и перезаписывает временный файл
-     * обработанными байтами. Возвращает дескриптор с актуальными именем/расширением/размером.
-     *
-     * @return обработанный дескриптор, или {@code null}, если файл не является изображением
-     *         (обработка не требуется)
+     * Делегирует декодирование middleware, затем заменяет временный upload-файл
+     * нормализованными PNG-байтами, сохраняя прежнюю FileDescriptor-модель.
      */
-    private FileDescriptor processLogo(FileDescriptor fileDescriptor, ProcessingMode mode) throws IOException {
-        showAiProcessingStartedNotification(mode);
-
-        ProjectLogoImageProcessingService service =
-                beanLocator.get(ProjectLogoImageProcessingService.NAME);
-
+    private FileDescriptor normalizeImage(FileDescriptor fileDescriptor) throws IOException {
         File tempFile = fileUploading.getFile(getFileId());
+        if (tempFile == null) {
+            throw new IOException("Temporary upload file is unavailable");
+        }
+
         byte[] originalBytes;
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             originalBytes = IOUtils.toByteArray(inputStream);
         }
 
-        ProcessedImage processed = service.process(originalBytes, fileDescriptor.getName(),
-                mode == ProcessingMode.CANDIDATE_PHOTO);
-        if (!processed.isProcessed()) {
-            return null;
+        SidebarImageNormalizationService service =
+                beanLocator.get(SidebarImageNormalizationService.NAME);
+        ProcessedImage processed = service.normalize(originalBytes, fileDescriptor.getName());
+        if (processed == null || !processed.isProcessed() || processed.getData() == null) {
+            throw new IOException("Sidebar image normalization returned no PNG data");
         }
-        processedByAi = processed.isAiProcessed();
-        processedAiExecution = processed.getAiExecution();
 
-        // Перезаписываем временный файл обработанными байтами — дальше стандартный конвейер
-        // (putFileIntoStorage + commit) сохранит именно обработанное изображение.
         try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
             outputStream.write(processed.getData());
         }
 
-        // Обновляем метаданные дескриптора под новый формат (PNG).
-        String newName = processed.getName() + "." + processed.getExtension();
-        fileDescriptor.setName(newName);
-        fileDescriptor.setExtension(processed.getExtension());
+        String normalizedName = processed.getName() + ".png";
+        fileDescriptor.setName(normalizedName);
+        fileDescriptor.setExtension("png");
         fileDescriptor.setSize((long) processed.getData().length);
-
-        log.debug("Изображение обработано: {} -> {} ({} байт)",
-                fileDescriptor.getId(), newName, processed.getData().length);
+        fileName = normalizedName;
         return fileDescriptor;
     }
 
     /**
-     * Показывает исчезающую нотификацию о НАЧАЛЕ AI-обработки изображения
-     * («AI-нотификации 2 раза» — при старте и по завершении, контракт
-     * HRM_HuntTech_AI_User_Notification_Contract).
-     *
-     * <p>Показывается только когда соответствующий нейросетевой этап включён
-     * конфигом: платная AI-функция логотипа ({@code hunttech.projectLogo.ai.enabled})
-     * или локальный rembg для фото кандидата ({@code hunttech.projectLogo.rembg.enabled}).
-     * При классическом конвейере (flood-fill) нотификация не показывается.</p>
+     * Удаляет отвергнутый temporary upload и оставляет текущее bound-значение без
+     * изменений. Исходник намеренно не передаётся в super.saveFile().
      */
-    private void showAiProcessingStartedNotification(ProcessingMode mode) {
-        HunttechProjectLogoConfig config = beanLocator.get(HunttechProjectLogoConfig.class);
-        String caption;
-        String detail;
-        if (mode == ProcessingMode.LOGO) {
-            if (!config.getAiProcessingEnabled()) {
-                return;
+    private void rejectImageUpload(FileDescriptor fileDescriptor, Exception cause) {
+        processedDescriptor = null;
+        uploadRejected = true;
+        FileDescriptor currentValue = getValue();
+        fileName = currentValue == null ? null : currentValue.getName();
+        try {
+            if (getFileId() != null) {
+                fileUploading.deleteFile(getFileId());
             }
-            caption = "Запущена AI-обработка логотипа…";
-            detail = null; // по умолчанию — обещание итоговой нотификации с моделью и собственником API
-        } else if (mode == ProcessingMode.CANDIDATE_PHOTO) {
-            if (!config.getRembgEnabled()) {
-                return;
-            }
-            caption = "Запущена AI-обработка фотографии…";
-            detail = "Фон будет удалён автоматически нейросетью";
+        } catch (Exception cleanupError) {
+            log.warn("Не удалось удалить отклонённый временный image upload", cleanupError);
+        }
+
+        if (cause == null) {
+            log.warn("Отклонён пустой sidebar image upload");
         } else {
-            return;
+            log.warn("Отклонён небезопасный sidebar image upload id={}",
+                    fileDescriptor == null ? null : fileDescriptor.getId(), cause);
         }
+
         AppUI appUI = AppUI.getCurrent();
-        if (appUI == null) {
-            log.debug("AppUI недоступен, нотификация о старте AI-обработки не показана");
-            return;
+        if (appUI != null) {
+            appUI.getNotifications()
+                    .create(Notifications.NotificationType.ERROR)
+                    .withCaption("Изображение не загружено")
+                    .withDescription("Выберите корректное изображение PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до 20 МБ.")
+                    .show();
         }
-        AiOperationNotifier.showStarted(appUI.getNotifications(), caption, detail);
+        getComposition().markAsDirty();
     }
 
-    /**
-     * Показывает исчезающую (TRAY) нотификацию о том, что фотография кандидата
-     * обработана нейросетью: фон удалён автоматически (rembg/u2net или AI-функция).
-     *
-     * <p>Вызывается только для {@link ProcessingMode#CANDIDATE_PHOTO} при реальном
-     * нейросетевом удалении фона — для логотипов обработка может быть классической
-     * (flood-fill), и утверждение «обработано с помощью AI» было бы некорректным.
-     * Нотификация исчезает автоматически (стандартный механизм CUBA, TRAY).</p>
-     */
-    private void showAiProcessedNotification() {
-        AppUI appUI = AppUI.getCurrent();
-        if (appUI == null) {
-            log.debug("AppUI недоступен, нотификация об AI-обработке не показана");
-            return;
+    /** Определяет только image-specific bindings; документы и вложения не затрагиваются. */
+    private boolean isSidebarImageBinding() {
+        // DatasourceComponent.getMetaProperty() одинаково поддерживает современный
+        // ContainerValueSource и legacy DatasourceValueSource (ExtUser/settings).
+        MetaProperty metaProperty = getMetaProperty();
+        if (metaProperty == null) {
+            return false;
         }
-        appUI.getNotifications()
-                .create(Notifications.NotificationType.TRAY)
-                .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                .withCaption("Фотография обработана с помощью AI")
-                .withDescription("Фон удалён автоматически нейросетью")
-                .show();
-    }
-
-    /**
-     * Показывает исчезающую нотификацию, когда фон логотипа удалён платной
-     * AI-функцией {@code PROJECT_LOGO_IMAGE_GENERATE}: пользователю сообщается,
-     * какая модель выполнила обработку и чей API использован (корпоративный
-     * администратора или личный пользователя) — контракт пользовательской нотификации.
-     *
-     * <p>Вызывается только для {@link ProcessingMode#LOGO} при реальном применении
-     * AI-функции (метаданные {@link #processedAiExecution} заполнены). Для локального
-     * rembg и классического flood-fill нотификация не показывается — утверждение
-     * «обработано AI-функцией» было бы некорректным.</p>
-     */
-    private void showLogoAiProcessedNotification() {
-        AppUI appUI = AppUI.getCurrent();
-        if (appUI == null || processedAiExecution == null) {
-            log.debug("AppUI недоступен или нет метаданных AI-выполнения, нотификация не показана");
-            return;
-        }
-        AiOperationNotifier.show(appUI.getNotifications(), processedAiExecution,
-                "Логотип обработан с помощью AI",
-                "Фон удалён автоматически нейросетью");
+        String property = metaProperty.getName();
+        return PROJECT_LOGO_PROPERTY.equals(property)
+                || COMPANY_LOGO_PROPERTY.equals(property)
+                || CITY_EMBLEM_PROPERTY.equals(property)
+                || REGION_EMBLEM_PROPERTY.equals(property)
+                || CANDIDATE_PHOTO_PROPERTY.equals(property)
+                || POSITION_ICON_PROPERTY.equals(property)
+                || SKILL_LOGO_PROPERTY.equals(property)
+                || COUNTRY_FLAG_PROPERTY.equals(property)
+                || SOCIAL_NETWORK_LOGO_PROPERTY.equals(property)
+                || OFFICIAL_PHOTO_PROPERTY.equals(property)
+                || USER_AVATAR_PROPERTY.equals(property)
+                || APPLICATION_LOGO_PROPERTY.equals(property)
+                || APPLICATION_ICON_PROPERTY.equals(property);
     }
 }

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -211,15 +212,13 @@ public class AiUserNotificationContractTest {
         assertTrue("CandidateCVEdit не добавляет модель/собственника API в итоговую нотификацию",
                 candidateCv.contains("AiOperationNotifier.buildDescription(aiExecution, statsDescription)"));
 
-        // Загрузка изображений: старт только при включённом нейросетевом этапе.
-        assertTrue("WebProjectLogoFileUploadField не показывает стартовую нотификацию",
-                uploadField.contains("AiOperationNotifier.showStarted(appUI.getNotifications(), caption, detail)"));
-        assertTrue("Старт логотипа не завязан на hunttech.projectLogo.ai.enabled",
-                uploadField.contains("config.getAiProcessingEnabled()"));
-        assertTrue("Старт фото не завязан на hunttech.projectLogo.rembg.enabled",
-                uploadField.contains("config.getRembgEnabled()"));
-        assertTrue("WebProjectLogoFileUploadField не показывает итоговую нотификацию",
-                uploadField.contains("AiOperationNotifier.show(appUI.getNotifications(), processedAiExecution"));
+        // Image uploads use deterministic normalization, so they do not emit AI notifications.
+        assertTrue("Sidebar upload не использует единый normalizer",
+                uploadField.contains("SidebarImageNormalizationService.NAME"));
+        assertFalse("Sidebar upload не должен вызывать AI notifier",
+                uploadField.contains("AiOperationNotifier"));
+        assertFalse("Sidebar upload не должен читать настройки AI/rembg",
+                uploadField.contains("config.getAiProcessingEnabled()") || uploadField.contains("config.getRembgEnabled()"));
     }
 
     @Test
@@ -292,9 +291,11 @@ public class AiUserNotificationContractTest {
         assertTrue("CandidateCVEdit нотификация не исчезающая (5 с)",
                 candidateCv.contains("withHideDelayMs(5000)"));
 
-        // Загрузка логотипа: нотификация при реальном применении AI-функции.
-        assertTrue("WebProjectLogoFileUploadField не использует AiOperationNotifier",
-                uploadField.contains("AiOperationNotifier.show(appUI.getNotifications(), processedAiExecution"));
+        // Обработка sidebar image deterministic и не заявляет об AI-выполнении.
+        assertTrue("Sidebar image upload не использует общий normalizer",
+                uploadField.contains("service.normalize(originalBytes, fileDescriptor.getName())"));
+        assertFalse("Sidebar image upload не должен показывать AI-нотификацию",
+                uploadField.contains("AiOperationNotifier"));
     }
 
     private int countOccurrences(String text, String needle) {

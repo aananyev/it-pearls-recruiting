@@ -66,6 +66,9 @@
                             showFileName="false"
                             dropZone="visual"
                             showClearButton="true"
+                            accept="image/png,image/jpeg,image/gif,image/bmp,image/vnd.wap.wbmp,image/webp,image/tiff"
+                            permittedExtensions=".png,.jpg,.jpeg,.gif,.bmp,.wbmp,.webp,.tif,.tiff"
+                            fileSizeLimit="20971520"
                             property="logo"/>
                 </vbox>
                 <!-- Блок идентификации: тип записи и название соцсети из контейнера. -->

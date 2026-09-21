@@ -1,6 +1,6 @@
 # ProjectLogoImageProcessingService (`hunttech_ProjectLogoImageProcessingService`)
 
-> Серверная обработка логотипа проекта, загружаемого пользователем в форме ProjectEdit: локальный rembg-этап (бесплатная нейросеть u2net на сервере приложения) и AI-удаление фона (capability IMAGE_GENERATION) с детерминированным классическим fallback, ресайз, вписывание в круг.
+> Legacy-сервис художественной обработки логотипа: локальный rembg, AI-удаление фона и классический fallback. С 2026-09-21 общий upload sidebar/profile изображений использует отдельный нейтральный `SidebarImageNormalizationService`; этот сервис не является текущим обязательным pre-storage pipeline ProjectEdit.
 
 **Связанные документы:** [AI_INTEGRATION](../integrations/ai/AI_INTEGRATION.md) · [Project Edit Spec](../screens/project/hunttech_Project.edit_Spec.md) · [ImageProcessingService](file-storage/ImageProcessingService.md) (фото профиля)
 
@@ -10,28 +10,30 @@
 
 ### Назначение и Бизнес-смысл (What & Why)
 
-Рекрутёры прикрепляют к проекту логотип — изображение компании/продукта в произвольном формате (JPEG, PNG, GIF, BMP, WebP). Логотип отображается в круглом аватаре `ovaFallbackImage` в списках и карточках. Без нормализации файл может быть тяжёлым, а прямоугольное изображение с белым фоном выглядит чужеродно в круглом аватаре (белые углы, обрезка контента по краям круга). **ProjectLogoImageProcessingService** приводит любой загруженный логотип к единому виду: PNG с прозрачным фоном, максимум 300×300, содержимое вписано в круг. С 13.08.2026 фон удаляет нейросеть (AI-функция `PROJECT_LOGO_IMAGE_GENERATE`); с 14.08.2026 первым шагом AI-конвейера стал локальный rembg (бесплатная нейросеть u2net, развёрнутая на сервере приложения — данные не покидают сервер и не требуют API-ключей), а классический конвейер остаётся автоматическим fallback — загрузка никогда не прерывается недоступностью ИИ.
+Исторически сервис приводил логотип к PNG с прозрачным фоном, максимум 300×300, и вписывал содержимое в круг с rembg/AI/flood-fill fallback. Этот художественный контракт меняет фон и canvas, поэтому он не подходит для общей безопасной загрузки, где обязательны сохранение пропорций/alpha, отсутствие crop/stretch и отказ вместо сохранения недекодируемого original. Текущий общий upload-контракт описан в [SidebarImageNormalizationService](SidebarImageNormalizationService.md); legacy-сервис сохраняется как отдельная специализированная возможность и для совместимости существующего API.
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
 | Точка вызова | Роль |
 |--------------|------|
-| `ProjectEdit` (вкладка «Основное», sidebar) | Пользователь загружает логотип через кастомный upload-компонент |
-| `WebProjectLogoFileUploadField` | Web-компонент (зарегистрирован в `cuba-ui-component.xml` как `upload`); перехватывает `saveFile()` в режиме IMMEDIATE и вызывает сервис |
-| `web-spring.xml` | Регистрирует интерфейс в `WebRemoteProxyBeanCreator` — web-контекст получает CUBA service proxy `hunttech_ProjectLogoImageProcessingService` |
+| Legacy API / специализированный вызов | Явный вызов `ProjectLogoImageProcessingService` сохраняет rembg/AI/flood-fill поведение |
+| `ProjectEdit` и общий `WebProjectLogoFileUploadField` | С 2026-09-21 используют `SidebarImageNormalizationService`, а не этот сервис |
+| `web-spring.xml` | Legacy proxy может сохраняться для совместимости; общий upload дополнительно регистрирует `hunttech_SidebarImageNormalizationService` |
 
 Сервис входит в AI Control Plane: AI-этап маршрутизируется через `AiExecutionService.executeImage` (стабильный function code `PROJECT_LOGO_IMAGE_GENERATE`, capability `IMAGE_GENERATION`, политики `USER_OVERRIDE_ALLOWED`/`FALLBACK_TO_ADMIN`, корпоративные credentials из `AdminAiConfiguration`). Промпт и модель администратор меняет в «Управление AI → Функции AI» без выпуска кода.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-- **Загрузка логотипа** → `WebProjectLogoFileUploadField.saveFile` → `beanLocator.get(ProjectLogoImageProcessingService.NAME)` (proxy) → `process(data, fileName)` (режим логотипа) или `process(data, fileName, true)` для фото кандидата (`JobCandidate.fileImageFace`).
+Ниже зафиксирован legacy-контракт при **явном** вызове сервиса. Автоматический upload Project/Company/City/Region/JobCandidate/CandidateCV/Person ему больше не делегирует.
+
+- **Явный legacy-вызов** → клиент получает proxy `ProjectLogoImageProcessingService.NAME` → `process(data, fileName)` (режим логотипа) или `process(data, fileName, true)` (исторический щадящий режим фото). Общий upload-компонент эту цепочку больше не запускает.
 - **Фото кандидата (щадящий режим)**: фон удаляется ТОЛЬКО нейросетью rembg/u2net (обучен на людях); при недоступности rembg фон сохраняется — конвертация в PNG + ресайз без искажения пропорций; классический flood-fill и вписывание в круг НЕ применяются (съедают светлые участки человека — кожу, белую одежду, блики); AI-функция `PROJECT_LOGO_IMAGE_GENERATE` (логотипная) для фото не вызывается.
 - **rembg-этап** (если `hunttech.projectLogo.rembg.enabled=true`): первый шаг AI-конвейера — POST `{url}/api/remove` (multipart, поле `file`) на локальный сервер приложения; u2net возвращает PNG с прозрачным фоном без внешних API и ключей. Недоступен (сервис лежит, таймаут, HTTP-ошибка) → платный AI-этап (логотипы) либо «без удаления фона» (фото кандидата).
 - **AI-этап** (если `hunttech.projectLogo.ai.enabled=true`): функция `PROJECT_LOGO_IMAGE_GENERATE` получает изображение и возвращает PNG с прозрачным фоном (OpenAI `images/edits`, модель `gpt-image-2`).
 - **AI недоступен** (функция не активна, нет credentials, таймаут/ошибка провайдера) → лог `warn` + классический конвейер: удаление белого фона по порогу 235 (`removeAllWhite=true` — включая замкнутые полости внутри букв) и серого фона (насыщенность ≤ 30, яркость ≥ 40 — фон-градиенты типа логотипа SSP), плавный край белого фона (EDGE_SOFTNESS 24), серый фон — полностью прозрачный.
 - **Детерминированный финал** (всегда): ARGB → ресайз до 300px → обрезка по содержимому → квадратный канвас со стороной = диагонали/0.95 → PNG.
 - **Не-растровый файл** или пустые данные → исходные байты, `processed=false`.
-- **Ошибка обработки** → компонент логирует `warn` и сохраняет исходный файл — загрузка не прерывается.
+- **Ошибка legacy-обработки** → сервис/явный клиент применяет собственный исторический error contract. Это не разрешает общему sidebar upload сохранять исходник: его текущий контракт — жёсткий reject с сохранением прежнего значения.
 
 ---
 
@@ -44,7 +46,7 @@
 | DTO результата | `modules/global/src/com/company/hunttech/app/ProcessedImage.java` (общий с `ImageProcessingService`) |
 | Конфигурация | `modules/global/src/com/company/hunttech/config/HunttechProjectLogoConfig.java` |
 | AI-функция | `AiFunctionConfiguration` code `PROJECT_LOGO_IMAGE_GENERATE`, capability `IMAGE_GENERATION` |
-| Web-компонент | `modules/web/src/com/company/hunttech/web/gui/components/WebProjectLogoFileUploadField.java` |
+| Исторический web-клиент | `modules/web/src/com/company/hunttech/web/gui/components/WebProjectLogoFileUploadField.java` (с 2026-09-21 вызывает другой сервис) |
 | Реестр web proxy | `modules/web/src/com/company/hunttech/web-spring.xml` |
 | CUBA service name | `hunttech_ProjectLogoImageProcessingService` |
 
@@ -93,9 +95,10 @@ ProcessedImage process(byte[] data, String fileName);
 
 DTO реализует `Serializable` — обязательная часть удалённого контракта web ↔ core.
 
-Нотификация: `WebProjectLogoFileUploadField` показывает исчезающую TRAY-нотификацию
-(5 с) при реальном применении AI-функции логотипа (`aiExecution != null`) и при
-rembg-обработке фото кандидата (без собственника API — локальная нейросеть, не внешний API).
+Исторический web-клиент показывал TRAY-нотификацию по `aiExecution`. Текущий
+`WebProjectLogoFileUploadField` вызывает детерминированный `SidebarImageNormalizationService`
+и не показывает AI-нотификацию; metadata остаются частью legacy DTO только для явных
+потребителей этого сервиса.
 
 ## 4. Правила обработки (rembg → AI → классика)
 
@@ -113,7 +116,7 @@ AI-контекст функции: `sourceFileName` (имя загруженн�
 
 ### `WebProjectLogoFileUploadField`
 
-Цепочка: `saveFile` → `processLogo` → `beanLocator.get(ProjectLogoImageProcessingService.NAME)` → `process(data, fileName)` → при `processed=true` — `descriptor.setExtension`, `setSize`, перезапись файла в `FileStorageService`. При ошибке — `warn` и сохранение исходного файла.
+Историческая цепочка `saveFile → ProjectLogoImageProcessingService.process` заменена общим контрактом `saveFile → SidebarImageNormalizationService.normalize`. В частности, автоматический fallback «при ошибке сохранить исходный файл» для image-binding запрещён: invalid input отклоняется, а прежний bound `FileDescriptor`/preview сохраняется. Legacy API этого сервиса не удалён, но новый общий upload-компонент его не вызывает.
 
 ## 6. Тестирование
 
@@ -159,6 +162,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-21 | Общий Project/sidebar image upload переведён на нейтральный `SidebarImageNormalizationService`; legacy rembg/AI/flood-fill сервис сохранён отдельно, но `WebProjectLogoFileUploadField` больше не вызывает его и не сохраняет original при ошибке. |
 | 2026-08-16 | Контракт пользовательской нотификации: `ProcessedImage` несёт `aiExecution` (модель, провайдер, собственник API) при реальном применении AI-функции; `WebProjectLogoFileUploadField` показывает исчезающую нотификацию «Логотип обработан с помощью AI» с моделью/собственником API |
 | 2026-08-15 | **Щадящий режим для фото кандидата** (`JobCandidate.fileImageFace`): новый метод `process(data, fileName, candidatePhoto)`. Для фото людей классический flood-fill/вписывание в круг НЕ применяются (съедали светлые участки — кожу, белую одежду, блики): фон удаляется только нейросетью rembg/u2net (обучен на людях), при недоступности — фон сохраняется (конвертация PNG + ресайз, пропорции не искажаются); AI-функция `PROJECT_LOGO_IMAGE_GENERATE` (логотипная) для фото не используется. Логотипы (`projectLogo`, `fileCompanyLogo`) — прежний конвейер. Фикс повторной загрузки в `WebProjectLogoFileUploadField`: `getComposition().markAsDirty()` после `saveFile` — legacy RPC `continueUploading()` отправляется только при paint, без этого клик по кнопке «Загрузить» после первой загрузки не открывал диалог выбора файла. Тесты: `testCandidatePhotoKeepsLightShirtAndBody`, `testCandidatePhotoKeepsWhiteCavityInsideBody`, `testCandidatePhotoKeepsOriginalAspectRatio` |
 | 2026-08-14 | Локальный rembg-этап — первый шаг AI-конвейера: бесплатная нейросеть u2net на сервере приложения (`POST {rembgUrl}/api/remove`, multipart `file`) удаляет фон до платного AI-этапа; недоступность rembg (сервис лежит, таймаут, HTTP-ошибка) → платный AI → классика; конфиг `hunttech.projectLogo.rembg.{enabled,url,timeoutMs}`; тест `ProjectLogoRembgServiceBeanTest` (встроенный `HttpServer`-заглушка, 3 сценария); сервер развёрнут на проде `hr.hunttech.ru` (systemd rembg.service, 127.0.0.1:7000) |

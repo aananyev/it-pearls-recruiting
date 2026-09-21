@@ -55,9 +55,13 @@ public class PersonEdit extends StandardEditor<Person> {
 
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        FileDescriptor descriptor = fileImageFaceUpload.getFileDescriptor();
+        if (descriptor == null) {
+            return;
+        }
         try {
             personPic.setSource(personPic.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(fileImageFaceUpload.getFileDescriptor()));
+                    .setFileDescriptor(descriptor));
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }

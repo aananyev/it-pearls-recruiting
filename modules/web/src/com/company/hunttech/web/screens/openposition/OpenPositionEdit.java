@@ -4,9 +4,11 @@ import com.company.hunttech.UiNotificationEvent;
 import com.company.hunttech.core.*;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.GetRoleService;
+import com.company.hunttech.service.HrmAiService;
 import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.service.VacancyMaterialType;
 import com.company.hunttech.web.StandartRegistrationForWork;
 import com.company.hunttech.web.StandartPriorityVacancy;
 import com.company.hunttech.web.screens.position.PositionEdit;
@@ -56,12 +58,14 @@ import java.util.Calendar;
  * Контроллер формы редактирования позиции (вакансии) HRM HuntTech
  * ({@code hunttech_OpenPosition.edit}).
  *
- * <p>Форма содержит 12 вкладок: «О вакансии» (идентификаторы, проект/компания/город,
+ * <p>Форма содержит вкладки: «О вакансии» (идентификаторы, проект/компания/город,
  * настройки команды, приоритет, зарплата, количество персонала, аккордеон описаний),
  * «Трудовые соглашения», «Оплата» (схемы комиссий ресурсера/рекрутера), «Описание
  * должности» (опыт, RU/EN/стандартное описание, «кто этот парень»), «Файлы»,
- * «Тестовое задание», «Памятка к собеседованию», «Шаблон письма», «Навыки»,
- * «Новости», «Согласование» (BPM) и «Комментарии».</p>
+ * «Тестовое задание», «Памятка к собеседованию», «План собеседования», «Карта поиска»,
+ * «Чекл-лист собеседования», «Шаблон письма», «Навыки», «Новости», «Согласование»
+ * (BPM) и «Комментарии». Три vacancy-материала генерируются через единый HrmAiService
+ * и остаются несохранёнными до штатного сохранения edit screen.</p>
  *
  * <p>Тяжёлые LOB-поля (comment, commentEn, exercise, templateLetter, memoForInterview,
  * LOB-описания типа позиции) и коллекции вкладок не входят в edit-view: они догружаются
@@ -210,6 +214,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Inject
     private RichTextArea interviewChecklistRichTextArea;
+    @Inject
+    private Button generateInterviewPlanBtn;
+    @Inject
+    private Button generateSearchMapBtn;
+    @Inject
+    private Button generateInterviewChecklistBtn;
+    @Inject
+    private HrmAiService hrmAiService;
     @Inject
     private LookupPickerField<Project> projectNameField;
     @Inject
@@ -604,6 +616,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         }
 
+        refreshSelectedMaterialButton(tabName);
+
         // BPM-инициализация вкладки «Согласование» выполняется и для новых позиций
         // (фрагмент действий процесса показывает стартовое состояние), поэтому вызов
         // не ограничен guard'ом на сохранённую сущность.
@@ -936,6 +950,253 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .add("interviewChecklist")
                 .build());
         getEditedEntity().setInterviewChecklist(reloaded.getInterviewChecklist());
+    }
+
+    @Subscribe("generateInterviewPlanBtn")
+    public void onGenerateInterviewPlanBtnClick(Button.ClickEvent event) {
+        generateVacancyMaterial(VacancyMaterialType.INTERVIEW_PLAN,
+                interviewPlanRichTextArea, generateInterviewPlanBtn);
+    }
+
+    @Subscribe("generateSearchMapBtn")
+    public void onGenerateSearchMapBtnClick(Button.ClickEvent event) {
+        generateVacancyMaterial(VacancyMaterialType.SEARCH_MAP,
+                searchMapRichTextArea, generateSearchMapBtn);
+    }
+
+    @Subscribe("generateInterviewChecklistBtn")
+    public void onGenerateInterviewChecklistBtnClick(Button.ClickEvent event) {
+        generateVacancyMaterial(VacancyMaterialType.CHECKLIST,
+                interviewChecklistRichTextArea, generateInterviewChecklistBtn);
+    }
+
+    /**
+     * Единый UI-flow генерации vacancy-материалов. Текущее значение RichTextArea
+     * остаётся неизменным до успешного завершения фонового AI-вызова.
+     */
+    private void generateVacancyMaterial(VacancyMaterialType materialType,
+                                         RichTextArea targetField,
+                                         Button sourceButton) {
+        if (!isMaterialLoaded(materialType) || !targetField.isEditable() || !targetField.isEnabled()) {
+            return;
+        }
+
+        Runnable startGeneration = () -> startVacancyMaterialGeneration(materialType, targetField, sourceButton);
+        if (!hasVisibleText(targetField.getValue())) {
+            startGeneration.run();
+            return;
+        }
+
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withCaption("Заменить существующий текст?")
+                .withMessage("В разделе «" + materialSectionTitle(materialType)
+                        + "» уже есть текст. После генерации он будет заменён. Продолжить?")
+                .withActions(
+                        new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                .withCaption("Заменить и генерировать")
+                                .withHandler(e -> startGeneration.run()),
+                        new DialogAction(DialogAction.Type.CANCEL)
+                                .withCaption("Отмена")
+                                .withHandler(e -> sourceButton.focus()))
+                .show();
+    }
+
+    /** Выполняет проверенный AI-вызов в фоне, не сохраняя edit screen автоматически. */
+    private void startVacancyMaterialGeneration(VacancyMaterialType materialType,
+                                                RichTextArea targetField,
+                                                Button sourceButton) {
+        String description;
+        try {
+            description = resolveVacancyDescription();
+        } catch (RuntimeException ex) {
+            showMaterialError(materialType, false);
+            return;
+        }
+        if (description == null || description.isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Описание вакансии не заполнено")
+                    .withDescription("Заполните описание вакансии перед генерацией материала.")
+                    .show();
+            return;
+        }
+
+        Map<String, Object> context = new LinkedHashMap<>();
+        context.put("description", description);
+
+        sourceButton.setEnabled(false);
+        AiOperationNotifier.showStarted(notifications, materialStartedCaption(materialType), null);
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, materialProgressText(materialType));
+
+        BackgroundTask<Integer, AiExecutionResult> task =
+                new BackgroundTask<Integer, AiExecutionResult>(120, this) {
+                    @Override
+                    public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        return hrmAiService.generateVacancyMaterial(materialType, context);
+                    }
+
+                    @Override
+                    public void done(AiExecutionResult result) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        restoreMaterialButtonState(materialType, sourceButton, targetField);
+                        if (result == null || !hasVisibleText(result.getText())) {
+                            showMaterialError(materialType, false);
+                            return;
+                        }
+                        targetField.setValue(result.getText());
+                        AiOperationNotifier.show(notifications, result,
+                                materialSuccessCaption(materialType), null);
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        restoreMaterialButtonState(materialType, sourceButton, targetField);
+                        showMaterialError(materialType, false);
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        restoreMaterialButtonState(materialType, sourceButton, targetField);
+                        showMaterialError(materialType, true);
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
+    }
+
+    /** Возвращает актуальное описание, не читая unfetched LOB у detached entity. */
+    private String resolveVacancyDescription() {
+        OpenPosition position = getEditedEntity();
+        String html;
+        if (PersistenceHelper.isNew(position) || PersistenceHelper.isLoaded(position, "comment")) {
+            html = position.getComment();
+        } else {
+            OpenPosition reloaded = dataManager.reload(position, ViewBuilder.of(OpenPosition.class)
+                    .add("comment")
+                    .build());
+            html = reloaded.getComment();
+        }
+        return html == null ? null : Jsoup.parse(html).text().trim();
+    }
+
+    private boolean hasVisibleText(String html) {
+        return html != null && !Jsoup.parse(html).text().trim().isEmpty();
+    }
+
+    private void refreshSelectedMaterialButton(String tabName) {
+        if ("tabInterviewPlan".equals(tabName)) {
+            restoreMaterialButtonState(VacancyMaterialType.INTERVIEW_PLAN,
+                    generateInterviewPlanBtn, interviewPlanRichTextArea);
+        } else if ("tabSearchMap".equals(tabName)) {
+            restoreMaterialButtonState(VacancyMaterialType.SEARCH_MAP,
+                    generateSearchMapBtn, searchMapRichTextArea);
+        } else if ("tabInterviewChecklist".equals(tabName)) {
+            restoreMaterialButtonState(VacancyMaterialType.CHECKLIST,
+                    generateInterviewChecklistBtn, interviewChecklistRichTextArea);
+        }
+    }
+
+    private void restoreMaterialButtonState(VacancyMaterialType materialType,
+                                            Button sourceButton,
+                                            RichTextArea targetField) {
+        sourceButton.setEnabled(isMaterialLoaded(materialType)
+                && targetField.isEnabled()
+                && targetField.isEditable());
+    }
+
+    private boolean isMaterialLoaded(VacancyMaterialType materialType) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            return true;
+        }
+        switch (materialType) {
+            case INTERVIEW_PLAN:
+                return interviewPlanLoaded;
+            case SEARCH_MAP:
+                return searchMapLoaded;
+            case CHECKLIST:
+                return interviewChecklistLoaded;
+            default:
+                return false;
+        }
+    }
+
+    private void showMaterialError(VacancyMaterialType materialType, boolean timeout) {
+        String description = timeout
+                ? "Генерация " + materialAccusative(materialType)
+                    + " заняла слишком много времени. Текущий текст сохранён. Повторите попытку."
+                : "Не удалось сгенерировать " + materialAccusative(materialType)
+                    + ". Текущий текст сохранён. Повторите попытку позже.";
+        notifications.create(Notifications.NotificationType.ERROR)
+                .withCaption("Ошибка AI-генерации")
+                .withDescription(description)
+                .show();
+    }
+
+    private String materialSectionTitle(VacancyMaterialType materialType) {
+        switch (materialType) {
+            case CHECKLIST:
+                return "Чеклист";
+            case SEARCH_MAP:
+                return "Карта поиска";
+            case INTERVIEW_PLAN:
+                return "План собеседования";
+            default:
+                throw new IllegalArgumentException("Unsupported material type");
+        }
+    }
+
+    private String materialAccusative(VacancyMaterialType materialType) {
+        switch (materialType) {
+            case CHECKLIST:
+                return "чеклист";
+            case SEARCH_MAP:
+                return "карту поиска";
+            case INTERVIEW_PLAN:
+                return "план собеседования";
+            default:
+                throw new IllegalArgumentException("Unsupported material type");
+        }
+    }
+
+    private String materialStartedCaption(VacancyMaterialType materialType) {
+        switch (materialType) {
+            case CHECKLIST:
+                return "AI генерирует чеклист…";
+            case SEARCH_MAP:
+                return "AI генерирует карту поиска…";
+            case INTERVIEW_PLAN:
+                return "AI генерирует план собеседования…";
+            default:
+                throw new IllegalArgumentException("Unsupported material type");
+        }
+    }
+
+    private String materialProgressText(VacancyMaterialType materialType) {
+        switch (materialType) {
+            case CHECKLIST:
+                return "Генерируется чеклист для оценки кандидата…";
+            case SEARCH_MAP:
+                return "Генерируется карта поиска…";
+            case INTERVIEW_PLAN:
+                return "Генерируется план собеседования…";
+            default:
+                throw new IllegalArgumentException("Unsupported material type");
+        }
+    }
+
+    private String materialSuccessCaption(VacancyMaterialType materialType) {
+        switch (materialType) {
+            case CHECKLIST:
+                return "Чеклист сгенерирован";
+            case SEARCH_MAP:
+                return "Карта поиска сгенерирована";
+            case INTERVIEW_PLAN:
+                return "План собеседования сгенерирован";
+            default:
+                throw new IllegalArgumentException("Unsupported material type");
+        }
     }
 
     /** Lazy-загрузка шаблона сопроводительного письма при первом открытии вкладки. */
@@ -2169,6 +2430,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 ? Jsoup.parse(templateLetterRichTextArea.getValue()).wholeText() : null;
         startVacansyName = vacansyNameField.getValue();
         screenFullyLoaded = true;
+        restoreMaterialButtonState(VacancyMaterialType.INTERVIEW_PLAN,
+                generateInterviewPlanBtn, interviewPlanRichTextArea);
+        restoreMaterialButtonState(VacancyMaterialType.SEARCH_MAP,
+                generateSearchMapBtn, searchMapRichTextArea);
+        restoreMaterialButtonState(VacancyMaterialType.CHECKLIST,
+                generateInterviewChecklistBtn, interviewChecklistRichTextArea);
         initClosedVacancyTimerFacet();
         // Визуальная синхронизация label-навигации sidebar при открытии: вкладка по умолчанию —
         // «Вакансия» → показывается набор её разделов с активным первым пунктом «Наименование»;

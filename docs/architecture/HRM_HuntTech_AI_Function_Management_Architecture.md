@@ -296,6 +296,14 @@ AiResponse execute(String functionCode, Map<String, Object> context);
 
 Допустимо сохранять узкие domain facade-сервисы (`AiProjectService`, `AiVacancyService`, `AiInterviewQuestionService`), если они отвечают только за подготовку бизнес-контекста и делегируют выбор prompt/provider/key/model в `AiExecutionService`.
 
+#### 5.2.1. Типизированные материалы вакансии
+
+`HrmAiService.generateVacancyMaterial(VacancyMaterialType, context)` — единый domain facade для `CHECKLIST`, `SEARCH_MAP` и `INTERVIEW_PLAN`. Маппинг типов на стабильные codes `VACANCY_CHECKLIST`, `VACANCY_SEARCH_MAP`, `VACANCY_INTERVIEW_PLAN` находится только в middleware-фасаде; `OpenPositionEdit` и Smart Vacancy Creation не выбирают function code, provider, model или credential самостоятельно.
+
+Все три функции имеют capability `TEXT_GENERATION`, policy `USER_OVERRIDE_ALLOWED` и fallback `FALLBACK_TO_ADMIN`. Системные prompt устанавливаются Liquibase migrations `260921-3`…`260921-5`; runtime получает описание через `${description}` и не читает локальные prompt-файлы. Update ограничен migration-owned, не изменёнными администратором строками первой версии; отсутствующий code создаётся отдельным idempotent insert. Поэтому пользовательские override и административные prompt/model/policy сохраняют приоритет.
+
+UI использует полный `AiExecutionResult` для стандартной нотификации модели/provider/credential owner. Smart Vacancy Creation использует payload того же результата, но при недоступности отдельной функции сохраняет непрерывность процесса через локальный детерминированный fallback.
+
 ### 5.3. `AIProviderRegistry`
 
 Существующий Strategy-подход сохраняется:
@@ -567,5 +575,6 @@ AI в HRM HuntTech не должен ранжировать, оценивать 
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-21 | Зафиксирован типизированный vacancy material facade, общая маршрутизация Edit/Smart Vacancy Creation и защищённые prompt migrations `VACANCY_CHECKLIST`, `VACANCY_SEARCH_MAP`, `VACANCY_INTERVIEW_PLAN` |
 | 2026-08-12 | Создана целевая архитектура AI Control Plane: AI-функции, корпоративные и пользовательские credentials, per-function override, resolver/fallback, требования Browse/Edit и оценка интеграции ProjectEdit |
 | 2026-08-12 | Структура меню «Управление AI» приведена к фактическим заголовкам пунктов (исправлены captions `menu_config.*` в `web-menu.xml` и messages) |

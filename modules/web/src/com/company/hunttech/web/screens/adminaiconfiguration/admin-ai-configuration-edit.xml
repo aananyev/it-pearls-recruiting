@@ -62,9 +62,9 @@
                                         align="MIDDLE_CENTER"
                                         showFileName="false"
                                         showClearButton="false"
-                                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                                        permittedExtensions=".png,.jpg,.jpeg,.webp,.svg"
-                                        fileSizeLimit="15728640"
+                                        accept="image/png,image/jpeg,image/gif,image/bmp,image/vnd.wap.wbmp,image/webp,image/tiff"
+                                        permittedExtensions=".png,.jpg,.jpeg,.gif,.bmp,.wbmp,.webp,.tif,.tiff"
+                                        fileSizeLimit="20971520"
                                         uploadButtonCaption="msg://adminLogoUpload.caption"
                                         uploadButtonIcon="font-icon:UPLOAD"/>
                                 <button id="clearLogoBtn"

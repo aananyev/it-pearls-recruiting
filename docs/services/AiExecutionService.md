@@ -8,7 +8,9 @@
 
 ### UI Context & Navigation
 
-Сервис не имеет собственного экрана. Его конфигурация управляется через «Управление AI» → «Функции AI», «Корпоративные AI-подключения» и «Мои замещения AI-функций». Legacy vacancy-фасад `HrmAiService` уже маршрутизирует рабочие генерации через этот сервис; изменение не-AI бизнес-экранов в текущем PR не выполняется.
+Сервис не имеет собственного экрана. Его конфигурация управляется через «Управление AI» → «Функции AI», «Корпоративные AI-подключения» и «Мои замещения AI-функций». Vacancy-фасад `HrmAiService` маршрутизирует через него ручную генерацию в `OpenPositionEdit`; Smart Vacancy Creation всегда выполняет через тот же facade все три dedicated material-функции, сохраняя parsed/deterministic fallback на случай ошибки или пустого ответа.
+
+Для материалов вакансии `HrmAiService.generateVacancyMaterial(VacancyMaterialType, context)` является единым business entry point. `CHECKLIST`, `SEARCH_MAP`, `INTERVIEW_PLAN` централизованно отображаются в `VACANCY_CHECKLIST`, `VACANCY_SEARCH_MAP`, `VACANCY_INTERVIEW_PLAN`; вызывающая сторона получает полный `AiExecutionResult`, включая модель, provider и владельца API.
 
 ### Behavior Summary
 
@@ -19,6 +21,7 @@
 - override отсутствует / `ADMIN_ONLY` → используется corporate provider;
 - secret корпоративного подключения → расшифровывается в core непосредственно перед `AIProvider.generateText`;
 - `HrmAiService` legacy providerCode → не влияет на route и не может обойти policy.
+- `generateVacancyMaterial(type, context)` → тип централизованно сопоставляется стабильному `VACANCY_*` code → используется тот же resolver/policy для Edit и Smart Vacancy Creation.
 
 ## API
 
@@ -68,6 +71,24 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 
 `HrmAiServiceBean` больше не содержит JPQL к `UserAiConfiguration`/`VacancyPromptTemplate` для рабочих методов. `STANDARDIZE_VACANCY` и legacy template codes становятся function codes. Liquibase переносит существующие vacancy templates в `AiFunctionConfiguration`.
 
+## Материалы вакансии и prompt migrations
+
+| Бизнес-тип | Function code | Prompt migration | Policy |
+|---|---|---|---|
+| `CHECKLIST` | `VACANCY_CHECKLIST` | `260921-3-vacancy-checklist-prompt` | `USER_OVERRIDE_ALLOWED` / `FALLBACK_TO_ADMIN` |
+| `SEARCH_MAP` | `VACANCY_SEARCH_MAP` | `260921-4-vacancy-search-map-prompt` | `USER_OVERRIDE_ALLOWED` / `FALLBACK_TO_ADMIN` |
+| `INTERVIEW_PLAN` | `VACANCY_INTERVIEW_PLAN` | `260921-5-vacancy-interview-plan-prompt` | `USER_OVERRIDE_ALLOWED` / `FALLBACK_TO_ADMIN` |
+
+Авторитетные системные prompt встроены в PostgreSQL migration; runtime не читает внешние или локальные filesystem paths. Фактическое описание вакансии передаётся отдельным context key `description` и подставляется в `PROMPT_TEMPLATE` `${description}`. Существующие административные правки защищены: migration обновляет только запись нужного `CODE`, созданную миграцией, не изменённую администратором (`CREATED_BY='migration'`, `UPDATED_BY` отсутствует либо `migration`) и с `CONFIGURATION_VERSION <= 1`; после штатного update версия становится не ниже 2. Если code отсутствует, выполняется idempotent `INSERT ... WHERE NOT EXISTS` со стабильным UUID.
+
+### Production-safe runbook (без выполнения production в рамках задачи)
+
+1. **Precheck:** сделать и проверить backup таблицы `HUNTECH_AI_FUNCTION_CONFIGURATION`; зафиксировать row count и полный снимок строк трёх `VACANCY_*` codes с `ID`, `CREATED_BY`, `UPDATED_BY`, `CONFIGURATION_VERSION`, policy, model/provider и prompt hashes.
+2. **Apply:** применить Liquibase changelog `260921-3`, затем `260921-4`, затем `260921-5` штатным deployment-процессом. Ручной запуск SQL вне Liquibase не требуется.
+3. **Verify:** для каждого code должна существовать ровно одна активная запись `TEXT_GENERATION`; проверить стабильный ID/code, `${description}`, `USER_OVERRIDE_ALLOWED`, `FALLBACK_TO_ADMIN`, `IS_ACTIVE=true`, а также отсутствие изменений во всех посторонних AI-функциях. Для ранее администраторской записи prompt/model/policy должны остаться прежними.
+4. **Smoke:** выполнить по одному тестовому вызову каждого типа через AI Control Plane и убедиться, что `AiExecutionResult` содержит payload/model/provider/credential owner, а `AiCallLog` фиксирует правильный function code без secret.
+5. **Rollback:** остановить дальнейшие вызовы, деактивировав только новые migration-owned записи, либо восстановить три строки из проверенного backup. Не удалять пользовательские override и не откатывать всю таблицу без отдельного решения. После rollback повторно проверить row count, уникальность codes и доступность остальных AI-функций.
+
 ## Ограничения первого этапа
 
 `executeText` поддерживает TEXT_GENERATION, TEXT_ANALYSIS, TEXT_TRANSFORMATION и DOCUMENT_ANALYSIS. `VISION`, `IMAGE_GENERATION`, `EMBEDDING`, `AUDIO_TRANSCRIPTION` присутствуют в модели, но требуют отдельных typed adapters.
@@ -76,6 +97,7 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-21 | Добавлен типизированный единый контракт генерации материалов вакансии с возвратом `AiExecutionResult`; зарегистрированы три защищённые prompt migrations и production-safe precheck/backup/verification/rollback |
 | 2026-08-16 | Добавлено сквозное логирование всех обращений к AI в `AiCallLog`, парсинг токенов (OpenAI, DeepSeek, Anthropic) и автоматический расчет стоимости запросов `AiCostCalculator`. |
 | 2026-08-16 | Контракт пользовательской нотификации: методы возвращают `AiExecutionResult` (payload + модель, провайдер, собственник API `AiCredentialOwner.ADMIN/USER`) — см. HRM_HuntTech_AI_User_Notification_Contract |
 | 2026-08-12 | Подключён `HrmAiService` как совместимый vacancy-фасад; provider selection из legacy API исключён |

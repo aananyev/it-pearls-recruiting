@@ -85,6 +85,9 @@
                             showFileName="false"
                             dropZone="personVisual"
                             showClearButton="true"
+                            accept="image/png,image/jpeg,image/gif,image/bmp,image/vnd.wap.wbmp,image/webp,image/tiff"
+                            permittedExtensions=".png,.jpg,.jpeg,.gif,.bmp,.wbmp,.webp,.tif,.tiff"
+                            fileSizeLimit="20971520"
                             property="fileImageFace"/>
                 </vbox>
                 <!-- Блок идентификации: имя человека из контейнера (живое значение, по центру). -->

@@ -1,7 +1,5 @@
 package com.company.hunttech.web.screens.extsettingswindow;
 
-import com.company.hunttech.app.ImageProcessingService;
-import com.company.hunttech.config.HunttechImageConfig;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.AiConsentPolicy;
@@ -14,7 +12,6 @@ import com.company.hunttech.dto.yandex.*;
 import com.company.hunttech.service.dto.avatar.ResolvedAvatarInfo;
 import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
 import com.company.hunttech.web.util.AiOperationNotifier;
-import com.company.hunttech.web.util.AvatarImageUploadHelper;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -53,8 +50,6 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Inject private DataManager dataManager;
     @Inject private FileLoader fileLoader;
     @Inject private FileStorageService fileStorageService;
-    private ImageProcessingService imageProcessingService;
-    @Inject private HunttechImageConfig hunttechImageConfig;
     private UserAiContextService userAiContextService;
     @Inject private UserAvatarManagementService userAvatarManagementService;
     @Inject private HrmAiService hrmAiService;
@@ -129,7 +124,6 @@ public class ExtSettingsWindow extends SettingsWindow {
          * Middleware-сервисы разрешаются по стабильным CUBA service name. В web-контексте
          * это возвращает удалённые proxy, а не пытается получить core-Spring-бин по типу.
          */
-        imageProcessingService = (ImageProcessingService) AppBeans.get(ImageProcessingService.NAME);
         userAiContextService = (UserAiContextService) AppBeans.get(UserAiContextService.NAME);
 
         currentUser = (ExtUser) userSessionSource.getUserSession().getUser();
@@ -427,16 +421,15 @@ public class ExtSettingsWindow extends SettingsWindow {
             log.warn("User avatar upload did not produce a FileDescriptor");
             return;
         }
-        FileDescriptor newAvatar = processUploadedAvatar(uploaded);
         if (userAvatarManagementService != null) {
-            userAvatarManagementService.applyUserPersonalAvatar(user, newAvatar);
+            userAvatarManagementService.applyUserPersonalAvatar(user, uploaded);
         } else {
             FileDescriptor oldAvatar = user.getUserAvatar();
-            removeStoredFileIfUnreferenced(oldAvatar, user.getOfficialPhoto(), newAvatar);
-            user.setUserAvatar(newAvatar);
+            removeStoredFileIfUnreferenced(oldAvatar, user.getOfficialPhoto(), uploaded);
+            user.setUserAvatar(uploaded);
         }
         if (userSettings != null) {
-            userSettings.setFileImageFace(newAvatar);
+            userSettings.setFileImageFace(uploaded);
         }
         refreshProfilePhoto();
     }
@@ -454,13 +447,6 @@ public class ExtSettingsWindow extends SettingsWindow {
             userSettings.setFileImageFace(null);
         }
         refreshProfilePhoto();
-    }
-
-    private FileDescriptor processUploadedAvatar(FileDescriptor descriptor) {
-        log.debug("Processing user avatar upload with limits targetImageSize={}, targetImageFormat={}",
-                hunttechImageConfig.getTargetImageSize(), hunttechImageConfig.getTargetImageFormat());
-        return AvatarImageUploadHelper.processUploadedImage(
-                descriptor, fileLoader, fileStorageService, dataManager, imageProcessingService, log);
     }
 
     private void removeStoredFileIfUnreferenced(FileDescriptor oldFile,
