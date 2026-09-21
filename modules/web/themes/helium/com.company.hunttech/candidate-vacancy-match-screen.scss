@@ -22,7 +22,7 @@
 
   .candidate-vacancy-match-root > .v-expand,
   .candidate-vacancy-match-root > .v-expand > .v-slot,
-  .candidate-vacancy-match-root .v-slot-candidate-vacancy-match-workspace {
+  .candidate-vacancy-match-root .v-slot-mainSplit {
     min-width: 0 !important;
     min-height: 0 !important;
   }
@@ -113,11 +113,11 @@
     display: none !important;
   }
 
-  .candidate-vacancy-match-header .v-slot-candidate-vacancy-match-context {
+  .candidate-vacancy-match-header .v-slot-analysisContextBox {
     flex: 1 1 420px !important;
   }
 
-  .candidate-vacancy-match-header .v-slot-candidate-vacancy-match-window-actions {
+  .candidate-vacancy-match-header .v-slot-windowActionsBox {
     flex: 0 1 auto !important;
   }
 
@@ -126,10 +126,10 @@
     flex: 0 1 auto !important;
   }
 
-  .candidate-vacancy-match-skill-status .v-slot-candidate-vacancy-match-status-text,
-  .candidate-vacancy-match-progress-head .v-slot-candidate-vacancy-match-progress-title,
-  .candidate-vacancy-match-progress-footer .v-slot-candidate-vacancy-match-progress-status,
-  .candidate-vacancy-match-section-header .v-slot-candidate-vacancy-match-section-title {
+  .candidate-vacancy-match-skill-status .v-slot-skillRefreshStatusLabel,
+  .candidate-vacancy-match-progress-head .v-slot-analysisPhaseLabel,
+  .candidate-vacancy-match-progress-footer .v-slot-statusLabel,
+  .candidate-vacancy-match-section-header .v-slot-resultsTitleLabel {
     flex: 1 1 280px !important;
   }
 
@@ -400,8 +400,41 @@
       padding-left: 4px;
     }
 
+  }
+
+  // At narrow widths stack the panes while keeping both independently scrollable.
+  @media (max-width: 1000px) {
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal {
+      display: flex !important;
+      flex-direction: column !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-first-container,
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-second-container {
+      position: relative !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      min-height: 180px !important;
+      height: auto !important;
+      flex: 1 1 50% !important;
+      overflow: auto !important;
+    }
+
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-second-container {
+      margin-top: 12px !important;
+    }
+
+    .candidate-vacancy-match-root .candidate-vacancy-match-workspace.v-splitpanel-horizontal > .v-splitpanel-hsplitter {
+      display: none !important;
+    }
+
     .candidate-vacancy-match-window-actions,
-    .candidate-vacancy-match-header .v-slot-candidate-vacancy-match-window-actions {
+    .candidate-vacancy-match-header .v-slot-windowActionsBox {
       width: 100% !important;
       flex: 1 1 100% !important;
       justify-content: flex-start !important;

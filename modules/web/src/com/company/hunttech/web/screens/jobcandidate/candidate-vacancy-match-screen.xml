@@ -25,7 +25,7 @@
                 <label id="subTitleLabel" value=""
                        stylename="candidate-vacancy-match-subtitle" width="100%"/>
             </vbox>
-            <hbox spacing="true" align="MIDDLE_RIGHT" height="AUTO"
+            <hbox id="windowActionsBox" spacing="true" align="MIDDLE_RIGHT" height="AUTO"
                   stylename="candidate-vacancy-match-window-actions">
                 <button id="refreshAnalysisBtn"
                         caption="Повторить AI-анализ"
