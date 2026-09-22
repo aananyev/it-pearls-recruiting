@@ -12,6 +12,9 @@ afterEvaluate {
     }
 
     updateDbTask.doFirst {
+        if (!updateDbTask.dbPassword?.toString()?.trim()) {
+            throw new GradleException('updateDb requires a non-empty database password before baseline SQL runs')
+        }
         if (project.hasProperty('skipLegacyCubaBaseline')) {
             logger.lifecycle('Baseline исторических CUBA scripts отключён через -PskipLegacyCubaBaseline')
             return

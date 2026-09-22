@@ -1130,12 +1130,13 @@ parse_args "$@"
 VALIDATE_PROFILE_ARGS=(--profile PRODUCTION)
 if [[ "$CHECK_CONFIG" -eq 0 && "$SKIP_DB_UPDATE" -eq 0 ]]; then
     resolve_db_update_password
+    [[ -n "${DB_UPDATE_PASSWORD:-}" ]] || { echo "Refusing PRODUCTION: database update password is empty" >&2; exit 1; }
     VALIDATE_PROFILE_ARGS+=(--require-password)
 fi
 (
     export HUNTTECH_DB_PROFILE=PRODUCTION
     if [[ "$CHECK_CONFIG" -eq 0 && "$SKIP_DB_UPDATE" -eq 0 ]]; then
-        export HUNTTECH_DB_PASSWORD_PRESENT=1
+        export HUNTTECH_PRODUCTION_DB_PASSWORD="$DB_UPDATE_PASSWORD"
     fi
     bash "${current_catalog}/scripts/validate-db-profile.sh" "${VALIDATE_PROFILE_ARGS[@]}" >/dev/null
 )

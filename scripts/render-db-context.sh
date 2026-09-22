@@ -41,7 +41,6 @@ done
 [[ -n "$PROFILE" && -n "$OUTPUT" ]] || { usage >&2; exit 2; }
 db_profile_resolve "$PROFILE"
 db_profile_require_password
-export HUNTTECH_DB_PASSWORD="${!DB_PROFILE_PASSWORD_VAR}"
 
 xml_escape() {
     printf '%s' "$1" | sed \

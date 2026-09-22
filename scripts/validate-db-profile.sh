@@ -40,10 +40,7 @@ done
 [[ -n "$PROFILE" ]] || { usage >&2; exit 2; }
 db_profile_resolve "$PROFILE"
 if [[ "$REQUIRE_PASSWORD" == true ]]; then
-    if [[ -z "${HUNTTECH_PRODUCTION_DB_PASSWORD:-}" && "${HUNTTECH_DB_PASSWORD_PRESENT:-}" != 1 ]]; then
-        db_profile_error 'PRODUCTION password must be supplied outside Git' >&2
-        exit 20
-    fi
+    db_profile_require_password || exit 20
 fi
 
 if [[ "$PROFILE" == "PRODUCTION" ]]; then
