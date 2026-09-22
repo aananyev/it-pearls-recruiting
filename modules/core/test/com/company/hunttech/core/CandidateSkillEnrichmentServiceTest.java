@@ -209,7 +209,7 @@ public class CandidateSkillEnrichmentServiceTest {
     }
 
     @Test
-    public void testScanAndEnrich_SavesActualAiExecutionMetadata() {
+    public void testScanAndEnrich_SavesActualDeepSeekExecutionMetadata() {
         JobCandidate candidate = new JobCandidate();
         candidate.setId(UUID.randomUUID());
         candidate.setFullName("Мария Смирнова");

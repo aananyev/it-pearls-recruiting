@@ -167,6 +167,13 @@ public class CandidateVacancyMatchContractTest {
                 "modules/web/src/com/company/hunttech/web/screens/jobcandidate/candidate-vacancy-match-screen.xml");
         String xml = new String(Files.readAllBytes(xmlPath), StandardCharsets.UTF_8);
 
+        assertTrue("Диалог CandidateVacancyMatch должен использовать размеры viewport",
+                xml.contains("<dialogMode width=\"95vw\" height=\"90vh\""));
+        Path controllerPath = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/jobcandidate/CandidateVacancyMatchScreen.java");
+        String controller = new String(Files.readAllBytes(controllerPath), StandardCharsets.UTF_8);
+        assertTrue("@DialogMode должен совпадать с XML, иначе он переопределит размеры диалога",
+                controller.contains("@DialogMode(width = \"95vw\", height = \"90vh\""));
         assertTrue(xml.contains("stylename=\"candidate-vacancy-match-root\""));
         assertTrue(xml.contains("dataContainer=\"matchesDc\""));
         assertTrue(xml.contains("id=\"analysisProgressTimer\""));
@@ -192,6 +199,13 @@ public class CandidateVacancyMatchContractTest {
                     scss.contains(".candidate-vacancy-match-header > .v-slot"));
             assertFalse(theme + ": запрещено подменять CUBA expand-layout через общий flex",
                     scss.contains(".candidate-vacancy-match-root > .v-expand {\n    flex:"));
+            assertTrue(theme + ": details ScrollBox root должен оставаться прокручиваемым",
+                    scss.contains(".candidate-vacancy-match-details-scroll {\n    overflow-x: hidden !important;\n    overflow-y: auto !important;"));
+            assertFalse(theme + ": вложенный ScrollBox не должен перехватывать вертикальную прокрутку",
+                    scss.contains(".candidate-vacancy-match-details-scroll > .c-scrollbox-content"));
+            assertTrue(theme + ": кнопки действий должны занимать слот и переносить подпись на узком экране",
+                    scss.contains(".candidate-vacancy-match-action-row .v-button {\n      min-width: 0 !important;\n      width: 100% !important;")
+                            && scss.contains("white-space: normal !important;"));
             if (reference == null) {
                 reference = scss;
             } else {

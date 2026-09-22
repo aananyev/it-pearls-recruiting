@@ -120,6 +120,18 @@ public class SidebarImageNormalizationServiceBeanTest {
     }
 
     @Test
+    public void jpegExifScannerRejectsDanglingFillBytesAtEndOfInput() throws Exception {
+        Method scanner = SidebarImageNormalizationServiceBean.class
+                .getDeclaredMethod("findJpegExifSegment", byte[].class);
+        scanner.setAccessible(true);
+
+        byte[] truncated = new byte[]{(byte) 0xff, (byte) 0xd8,
+                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
+
+        assertEquals(null, scanner.invoke(new SidebarImageNormalizationServiceBean(), truncated));
+    }
+
+    @Test
     public void pixelLimitAllowsFiveThousandSquareButRejectsLargerImages() {
         assertEquals(25_000_000L, SidebarImageNormalizationServiceBean.MAX_PIXELS);
     }

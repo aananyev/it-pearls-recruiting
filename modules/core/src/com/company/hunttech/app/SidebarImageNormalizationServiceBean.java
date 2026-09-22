@@ -1,6 +1,5 @@
 package com.company.hunttech.app;
 
-import com.haulmont.cuba.core.global.DevelopmentException;
 import net.coobird.thumbnailator.util.exif.ExifFilterUtils;
 import net.coobird.thumbnailator.util.exif.ExifUtils;
 import net.coobird.thumbnailator.util.exif.Orientation;
@@ -77,26 +76,28 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
             } finally {
                 reader.dispose();
             }
-        } catch (DevelopmentException e) {
+        } catch (InvalidImageInputException e) {
+            throw e;
+        } catch (ImageProcessingException e) {
             throw e;
         } catch (IOException | RuntimeException e) {
-            throw new DevelopmentException("Не удалось безопасно декодировать изображение.", e);
+            throw new ImageProcessingException("Не удалось безопасно декодировать изображение.", e);
         }
     }
 
     private void validateInput(byte[] data) {
         if (data == null || data.length == 0) {
-            throw new DevelopmentException("Файл изображения пуст.");
+            throw new InvalidImageInputException("Файл изображения пуст.");
         }
         if (data.length > MAX_INPUT_BYTES) {
-            throw new DevelopmentException("Размер изображения превышает "
+            throw new InvalidImageInputException("Размер изображения превышает "
                     + (MAX_INPUT_BYTES / (1024 * 1024)) + " МБ.");
         }
     }
 
     private void validateDimensions(int width, int height) {
         if (width <= 0 || height <= 0 || (long) width * height > MAX_PIXELS) {
-            throw new DevelopmentException("Разрешение изображения превышает безопасный предел.");
+            throw new InvalidImageInputException("Разрешение изображения превышает безопасный предел.");
         }
     }
 
@@ -125,7 +126,7 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
             return null;
         }
         int cursor = 2;
-        while (cursor + 4 <= data.length) {
+        while (cursor + 1 < data.length) {
             if ((data[cursor] & 0xff) != 0xff) {
                 cursor++;
                 continue;
@@ -135,6 +136,9 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
                     && (data[cursor] & 0xff) == 0xff
                     && (data[cursor + 1] & 0xff) == 0xff) {
                 cursor++;
+            }
+            if (cursor + 1 >= data.length) {
+                return null;
             }
             int marker = data[cursor + 1] & 0xff;
             cursor += 2;
@@ -205,7 +209,7 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
     private byte[] writePng(BufferedImage image) throws IOException {
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
         if (!writers.hasNext()) {
-            throw new DevelopmentException("PNG encoder недоступен в runtime.");
+            throw new ImageProcessingException("PNG encoder недоступен в runtime.");
         }
         ImageWriter writer = writers.next();
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -237,7 +241,7 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
         return dot > 0 ? safe.substring(0, dot) : safe;
     }
 
-    private DevelopmentException invalidImage() {
-        return new DevelopmentException("Файл не является поддерживаемым растровым изображением.");
+    private InvalidImageInputException invalidImage() {
+        return new InvalidImageInputException("Файл не является поддерживаемым растровым изображением.");
     }
 }
