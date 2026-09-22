@@ -506,7 +506,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
 
         try {
             HttpResult res = sendHttp("REPORT", url, token, reportXml, "application/xml; charset=utf-8", headers);
-            if (res.statusCode == 207 || res.statusCode == 200) {
+            if (res.statusCode == HTTP_MULTI_STATUS || res.statusCode == 200) {
                 events = parseCaldavResponseXml(res.body, calendarDisplayName, calendarPath, timeZone);
             } else {
                 log.warn("CalDAV REPORT для {} вернул HTTP {}, переключаемся на PROPFIND", url, res.statusCode);
@@ -519,7 +519,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                         "  </d:prop>\n" +
                         "</d:propfind>";
                 HttpResult propRes = sendHttp("PROPFIND", url, token, propfindXml, "application/xml; charset=utf-8", Collections.singletonMap("Depth", "1"));
-                if (propRes.statusCode == 207 || propRes.statusCode == 200) {
+                if (propRes.statusCode == HTTP_MULTI_STATUS || propRes.statusCode == 200) {
                     events = parseCaldavResponseXml(propRes.body, calendarDisplayName, calendarPath, timeZone);
                 }
             }
