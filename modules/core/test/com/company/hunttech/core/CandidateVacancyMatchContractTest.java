@@ -167,6 +167,8 @@ public class CandidateVacancyMatchContractTest {
                 "modules/web/src/com/company/hunttech/web/screens/jobcandidate/candidate-vacancy-match-screen.xml");
         String xml = new String(Files.readAllBytes(xmlPath), StandardCharsets.UTF_8);
 
+        assertTrue("Диалог CandidateVacancyMatch должен быть адаптивным",
+                xml.contains("<dialogMode width=\"100%\" height=\"100%\""));
         assertTrue(xml.contains("stylename=\"candidate-vacancy-match-root\""));
         assertTrue(xml.contains("dataContainer=\"matchesDc\""));
         assertTrue(xml.contains("id=\"analysisProgressTimer\""));
