@@ -119,4 +119,5 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-22 | Markdown-рендерер чата расширен: таблицы без внешних `|`, экранированные `\\|` внутри ячеек и безопасная конвертация в HTML сохраняются для всех трёх контуров чата. |
 | 2026-09-17 | Привилегированные Local/Manager Hermes tabs переведены в fail-closed режим; зарегистрированы CUBA specific permissions; manager write controls заблокированы до production discovery и CUBA-mediated gateway. |

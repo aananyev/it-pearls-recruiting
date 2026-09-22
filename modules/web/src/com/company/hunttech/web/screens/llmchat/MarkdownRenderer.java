@@ -356,8 +356,12 @@ public class MarkdownRenderer {
             String rawLine = lines[i];
             String trimmed = rawLine.trim();
 
-            // Check if line is part of a Markdown table: "| a | b |"
-            if (isTableRow(trimmed)) {
+            // Check if line is part of a Markdown table. Markdown allows both
+            // pipe-delimited rows ("| a | b |") and rows without outer pipes
+            // ("a | b"). A table starts only when the following line is the
+            // delimiter row, which prevents ordinary prose containing a pipe
+            // from being rendered as a table.
+            if (isMarkdownTableStart(lines, i) || (inTable && isTableRow(trimmed))) {
                 if (!inTable) {
                     // Close other open block structures
                     if (inUnorderedList) { out.append("</ul>\n"); inUnorderedList = false; }
@@ -891,8 +895,17 @@ public class MarkdownRenderer {
         return escaped;
     }
 
+    private static boolean isMarkdownTableStart(String[] lines, int index) {
+        if (lines == null || index < 0 || index + 1 >= lines.length) {
+            return false;
+        }
+        String header = lines[index] != null ? lines[index].trim() : "";
+        String delimiter = lines[index + 1] != null ? lines[index + 1].trim() : "";
+        return isTableRow(header) && isTableDelimiterRow(delimiter);
+    }
+
     private static boolean isTableRow(String line) {
-        return line.startsWith("|") && line.endsWith("|") && line.length() > 2;
+        return line != null && countUnescapedPipes(line) >= 1 && !line.trim().isEmpty();
     }
 
     private static String renderTable(List<String> rows) {
@@ -936,19 +949,68 @@ public class MarkdownRenderer {
         if (row == null) {
             return false;
         }
-        return row.trim().matches("^\\|(\\s*:?-+:?\\s*\\|)+$");
+        String normalized = row.trim();
+        if (normalized.startsWith("|")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.endsWith("|")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        String[] columns = normalized.split("\\|", -1);
+        if (columns.length < 2) {
+            return false;
+        }
+        for (String column : columns) {
+            if (!column.trim().matches(":?-+:?")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static List<String> splitCells(String row) {
         List<String> cells = new ArrayList<>();
-        String[] parts = row.split("\\|");
-        for (int i = 1; i < parts.length; i++) {
-            if (i == parts.length - 1 && parts[i].trim().isEmpty() && row.endsWith("|")) {
-                continue;
+        if (row == null) {
+            return cells;
+        }
+
+        String normalized = row.trim();
+        boolean hasLeadingPipe = normalized.startsWith("|");
+        boolean hasTrailingPipe = normalized.endsWith("|")
+                && !normalized.endsWith("\\|");
+        StringBuilder cell = new StringBuilder();
+        for (int i = 0; i < normalized.length(); i++) {
+            char current = normalized.charAt(i);
+            if (current == '\\' && i + 1 < normalized.length() && normalized.charAt(i + 1) == '|') {
+                cell.append('|');
+                i++;
+            } else if (current == '|') {
+                cells.add(cell.toString().trim());
+                cell.setLength(0);
+            } else {
+                cell.append(current);
             }
-            cells.add(parts[i].trim());
+        }
+        if (cell.length() > 0 || !hasTrailingPipe) {
+            cells.add(cell.toString().trim());
+        }
+        if (hasLeadingPipe && !cells.isEmpty() && cells.get(0).isEmpty()) {
+            cells.remove(0);
+        }
+        if (hasTrailingPipe && !cells.isEmpty() && cells.get(cells.size() - 1).isEmpty()) {
+            cells.remove(cells.size() - 1);
         }
         return cells;
+    }
+
+    private static int countUnescapedPipes(String line) {
+        int count = 0;
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) == '|' && (i == 0 || line.charAt(i - 1) != '\\')) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static String escapeHtml(String s) {
