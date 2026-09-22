@@ -1,5 +1,6 @@
 package com.company.hunttech.web.screens.candidateskillsenrichment;
 
+import com.company.hunttech.entity.CandidateCvSkillAnalysis;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -101,6 +102,17 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
         assertTrue(queries.getLength() > 0, "Запрос analysesDl должен присутствовать");
         String queryText = queries.item(0).getTextContent();
         assertTrue(queryText.contains("priority"), "Запрос analysesDl должен учитывать priority");
+
+        NodeList collections = doc.getElementsByTagName("collection");
+        boolean browseViewFound = false;
+        for (int i = 0; i < collections.getLength(); i++) {
+            Element collection = (Element) collections.item(i);
+            if ("analysesDc".equals(collection.getAttribute("id"))) {
+                browseViewFound = "candidateCvSkillAnalysis-browse-view".equals(collection.getAttribute("view"));
+                break;
+            }
+        }
+        assertTrue(browseViewFound, "analysesDc должен загружать metadata через browse-view");
     }
 
     @Test
@@ -123,5 +135,23 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
         assertTrue(updated, "updatedFlow должен присутствовать");
         assertTrue(unchanged, "unchangedFlow должен присутствовать");
         assertTrue(skipped, "skippedFlow должен присутствовать");
+    }
+
+    @Test
+    void testProviderModelRendererShowsActualMetadataAndFallbackSeparately() {
+        CandidateCvSkillAnalysis ai = new CandidateCvSkillAnalysis();
+        ai.setProviderCode("deepseek");
+        ai.setModelName("deepseek-v4-flash");
+        assertEquals("deepseek / deepseek-v4-flash", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(ai));
+
+        CandidateCvSkillAnalysis fallback = new CandidateCvSkillAnalysis();
+        fallback.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_DICTIONARY_FALLBACK);
+        assertEquals("Fallback: справочник", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(fallback));
+
+        CandidateCvSkillAnalysis incomplete = new CandidateCvSkillAnalysis();
+        incomplete.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE);
+        incomplete.setProviderCode("deepseek");
+        assertEquals("AI: deepseek / модель недоступна",
+                CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(incomplete));
     }
 }

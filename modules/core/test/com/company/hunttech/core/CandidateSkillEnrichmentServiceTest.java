@@ -1,6 +1,7 @@
 package com.company.hunttech.core;
 
 import com.company.hunttech.config.HunttechSkillsEnrichmentConfig;
+import com.company.hunttech.entity.ai.AiCapability;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.*;
 import com.company.hunttech.service.dto.CandidateSkillsEnrichmentKpiDto;
@@ -144,6 +145,36 @@ public class CandidateSkillEnrichmentServiceTest {
         assertEquals("Попытка 2: задержка 5 минут", 5L, b2);
         assertEquals("Попытка 3: задержка 15 минут", 15L, b3);
         assertEquals("Попытка 4+: задержка 60 минут", 60L, b4);
+    }
+
+    @Test
+    public void testScanAndEnrich_SavesActualAiExecutionMetadata() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Мария Смирнова");
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Java, Spring, PostgreSQL");
+
+        CandidateCvSkillAnalysis analysis = new CandidateCvSkillAnalysis();
+        when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(analysis);
+        when(mockDataManager.load(CandidateSkill.class).query(anyString()).parameter("candidateId", candidate.getId())
+                .view("candidateSkill-view").list()).thenReturn(Collections.emptyList());
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class).query(anyString()).parameter("cvId", cv.getId())
+                .view("candidateCvSkillAnalysis-browse-view").optional()).thenReturn(Optional.empty());
+
+        AiExecutionResult execution = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
+                "deepseek-v4-flash", "deepseek", AiCredentialOwner.ADMIN, "[]", 1, 2, 3);
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), execution));
+
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI, analysis.getExecutionSource());
+        assertEquals("deepseek", analysis.getProviderCode());
+        assertEquals("deepseek-v4-flash", analysis.getModelName());
+        verify(mockDataManager, atLeastOnce()).commit(analysis);
     }
 
     @Test

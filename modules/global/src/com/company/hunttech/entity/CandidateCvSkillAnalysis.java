@@ -29,6 +29,10 @@ import java.util.Date;
 public class CandidateCvSkillAnalysis extends StandardEntity {
     private static final long serialVersionUID = 4819284729104820194L;
 
+    public static final String EXECUTION_SOURCE_AI = "AI";
+    public static final String EXECUTION_SOURCE_AI_METADATA_INCOMPLETE = "AI_METADATA_INCOMPLETE";
+    public static final String EXECUTION_SOURCE_DICTIONARY_FALLBACK = "DICTIONARY_FALLBACK";
+
     /** Кандидат */
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -93,6 +97,10 @@ public class CandidateCvSkillAnalysis extends StandardEntity {
     /** Имя AI-модели */
     @Column(name = "MODEL_NAME", length = 128)
     protected String modelName;
+
+    /** Фактический источник результата: AI, неполные AI metadata или словарный fallback. */
+    @Column(name = "EXECUTION_SOURCE", length = 32)
+    protected String executionSource;
 
     /** Использованная AI-функция */
     @Column(name = "AI_FUNCTION_CODE", length = 64)
@@ -253,6 +261,14 @@ public class CandidateCvSkillAnalysis extends StandardEntity {
 
     public void setModelName(String modelName) {
         this.modelName = modelName;
+    }
+
+    public String getExecutionSource() {
+        return executionSource;
+    }
+
+    public void setExecutionSource(String executionSource) {
+        this.executionSource = executionSource;
     }
 
     public String getAiFunctionCode() {
