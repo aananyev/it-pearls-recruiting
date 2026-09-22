@@ -2,14 +2,15 @@
 
 ## Статус
 
-`IN_PROGRESS` — 2026-09-22
+`COMPLETE` — 2026-09-22
 
 ## Git-контекст
 
 - Проект: HRM HuntTech
 - Base SHA: `10567c422`
 - Рабочая ветка: `agent/candidate-vacancy-match-ai-diagnostics`
-- PR: будет создан после проверки точного SHA
+- PR: #263, merge commit `350f2647a69f5a202b68030d27e2caf6d12309a7`
+- Final feature SHA: `6fea97bdff9da97604cf3a4c5b87c35a7c647aa7`
 
 ## Цель
 
@@ -55,3 +56,10 @@
 - Java backend developer: исправление resolver и tests.
 - QA: независимая проверка негативных и fallback-сценариев.
 - DevOps/Hermes: exact SHA, migration status, local deploy/restart, logs and smoke.
+
+## Финальная проверка
+
+- `app-core-0.692-SNAPSHOT.jar`, локальный updateDb/deploy/restart — PASS.
+- `/hrm/` HTTP 200, widgetset ready и endpoint — PASS.
+- Core/contract/migration/screen tests: `24/24`, `11/11`, `2/2`, `8/8` — PASS.
+- AI provider credentials остаются операционным блокером: DeepSeek/OpenRouter не расшифровываются, B.AI отвечает 403/429. Код fallback при этом продолжает маршрут и фиксирует причину в безопасных логах.
