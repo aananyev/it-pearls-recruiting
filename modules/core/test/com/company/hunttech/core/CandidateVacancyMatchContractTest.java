@@ -59,6 +59,24 @@ public class CandidateVacancyMatchContractTest {
     }
 
     @Test
+    public void testAiCallsCarrySafeCorrelationContext() throws IOException {
+        Path beanPath = projectRoot().resolve(
+                "modules/core/src/com/company/hunttech/service/CandidateVacancyMatchAiServiceBean.java");
+        String bean = new String(Files.readAllBytes(beanPath), StandardCharsets.UTF_8);
+
+        assertTrue("Прямой подбор должен передавать callerSource",
+                bean.contains("CandidateVacancyMatch:candidate-to-vacancies"));
+        assertTrue("Обратный подбор должен передавать callerSource",
+                bean.contains("CandidateVacancyMatch:vacancy-to-candidates"));
+        assertTrue("Каждый AI-вызов должен передавать requestId",
+                bean.contains("context.put(\"requestId\""));
+        assertTrue("Прямой подбор должен связывать requestId с operation id",
+                bean.contains("progress.getOperationId()"));
+        assertTrue("Обратный подбор должен использовать JPQL alias e для текста резюме",
+                bean.contains("length(trim(e.textCV)) > 0"));
+    }
+
+    @Test
     public void testSeedMigrationPostgres() throws IOException {
         Path root = projectRoot();
         Path sqlPath = root.resolve("modules/core/db/update/postgres/26/260919-1-addCandidateVacancyMatchAiFunction.sql");

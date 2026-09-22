@@ -12,11 +12,13 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Меню **Управление AI** → «Мониторинг ключей пользователей». Только просмотр (без create/edit/remove). Редактирование — через `sec$User.edit` / `UserAiConfigurationEdit`.
+Меню **Управление AI** → «Мониторинг ключей пользователей». Создание из реестра открывает `UserAiConfigurationEdit` и назначает владельцем пользователя текущей сессии до commit.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-При открытии загружается read-only список всех `hunttech_UserAiConfiguration` с фильтром. API-ключ исключён из browse-view.
+- Открытие экрана → загружается список всех `hunttech_UserAiConfiguration` без API-ключа.
+- Нажатие «Создать» → текущая сессия содержит пользователя → новый объект получает `user` до открытия редактора.
+- Сохранение без владельца → защитная проверка редактора → commit блокируется до обращения к БД.
 
 ---
 
@@ -27,7 +29,7 @@
 | **@UiController** | `hunttech_UserAiConfiguration.browse` |
 | **Java-класс** | `com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationBrowse` |
 | **XML-дескриптор** | `user-ai-configuration-browse.xml` |
-| **Базовый класс** | `StandardLookup` (без CRUD actions) |
+| **Базовый класс** | `StandardLookup` |
 | **Меню** | `web-menu.xml` → `aiAdministration` → `hunttech_UserAiConfiguration.browse` |
 
 ---
@@ -39,7 +41,7 @@
 | **Entity** | `UserAiConfiguration` |
 | **View** | `userAiConfiguration-browse-view` (без `apiKey`) |
 | **Nested paths** | `user.login` (user `_minimal`) |
-| **Data containers** | `userAiConfigurationsDc` (readOnly) |
+| **Data containers** | `userAiConfigurationsDc` |
 | **Loader** | `userAiConfigurationsDl` |
 
 ### JPQL
@@ -59,19 +61,21 @@ select e from hunttech_UserAiConfiguration e
 | Связь | Экран | Способ открытия |
 |-------|-------|-----------------|
 | Родитель | `aiAdministration` (menu) | menu |
-| Редактирование ключей | `hunttech_UserAiConfiguration.edit` | модаль из ExtUser edit |
+| Создание/редактирование | `hunttech_UserAiConfiguration.edit` | из реестра, ExtUser edit или личных настроек |
 
 ---
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-Read-only browse; стандартная загрузка `@LoadDataBeforeShow`.
+Стандартная загрузка `@LoadDataBeforeShow`. Создание выполнено отдельным обработчиком, поскольку generic CUBA create-action не знает бизнес-владельца обязательной связи.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-CRUD-кнопки отсутствуют (мониторинг).
+- `Создать` — создаёт персональную конфигурацию владельца текущей сессии.
+- `Редактировать`, `Удалить`, `Обновить` — штатные действия таблицы.
+- `Открыть карточку`, `Тест AI` — действия выбранной конфигурации.
 
 ---
 
@@ -86,4 +90,5 @@ CRUD-кнопки отсутствуют (мониторинг).
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-22 | BL-2026-021: generic create-action заменён владельческим сценарием; `user` назначается из текущей сессии до commit |
 | 2026-06-27 | Создание read-only browse для мониторинга AI-конфигураций без apiKey в view |

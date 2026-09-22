@@ -1,6 +1,7 @@
 package com.company.hunttech.core;
 
 import com.company.hunttech.config.HunttechSkillsEnrichmentConfig;
+import com.company.hunttech.entity.ai.AiCapability;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.*;
 import com.company.hunttech.service.dto.CandidateSkillsEnrichmentKpiDto;
@@ -115,7 +116,14 @@ public class CandidateSkillEnrichmentServiceTest {
         cv.setTextCV("Опыт: Java, Kafka");
 
         CandidateCvSkillAnalysis mockAnalysis = new CandidateCvSkillAnalysis();
-        when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(mockAnalysis);
+        mockAnalysis.setProviderCode("previous-provider");
+        mockAnalysis.setModelName("previous-model");
+        mockAnalysis.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI);
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class)
+                .query(anyString())
+                .parameter("cvId", cv.getId())
+                .view("candidateCvSkillAnalysis-browse-view")
+                .optional()).thenReturn(Optional.of(mockAnalysis));
 
         when(mockConfig.getFreeOnly()).thenReturn(true);
         when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), eq(false), eq(true)))
@@ -128,6 +136,40 @@ public class CandidateSkillEnrichmentServiceTest {
         assertEquals("Попытка должна стать 1", Integer.valueOf(1), mockAnalysis.getRetryCount());
         assertNotNull("Должно быть выставлено время следующего повтора", mockAnalysis.getNextRetryAt());
         assertTrue("Время повтора должно быть в будущем", mockAnalysis.getNextRetryAt().after(new Date()));
+        assertEquals("Ошибка не должна затирать provider успешного вызова", "previous-provider", mockAnalysis.getProviderCode());
+        assertEquals("Ошибка не должна затирать model успешного вызова", "previous-model", mockAnalysis.getModelName());
+        assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI, mockAnalysis.getExecutionSource());
+    }
+
+    @Test
+    public void testScanAndEnrich_FinalErrorPreservesPreviousSuccessfulMetadata() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Сергей Орлов");
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Опыт: Java, Kafka");
+        CandidateCvSkillAnalysis existingAnalysis = new CandidateCvSkillAnalysis();
+        existingAnalysis.setProviderCode("previous-provider");
+        existingAnalysis.setModelName("previous-model");
+        existingAnalysis.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI);
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class)
+                .query(anyString())
+                .parameter("cvId", cv.getId())
+                .view("candidateCvSkillAnalysis-browse-view")
+                .optional()).thenReturn(Optional.of(existingAnalysis));
+        when(mockConfig.getFreeOnly()).thenReturn(true);
+        when(mockConfig.getMaxRetries()).thenReturn(1);
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), eq(false), eq(true)))
+                .thenThrow(new RuntimeException("Provider unavailable"));
+
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT_BACKGROUND", true);
+
+        assertFalse(result.isSuccess());
+        assertEquals(CandidateCvAnalysisStatus.ERROR, existingAnalysis.getStatus());
+        assertEquals("previous-provider", existingAnalysis.getProviderCode());
+        assertEquals("previous-model", existingAnalysis.getModelName());
+        assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI, existingAnalysis.getExecutionSource());
     }
 
     @Test
@@ -164,6 +206,86 @@ public class CandidateSkillEnrichmentServiceTest {
         assertTrue("Принудительная актуализация должна пройти стандартный pipeline", result.isSuccess());
         verify(mockSkillAnalysisService, times(4))
                 .analyzeWithFunction(anyString(), anyString(), eq(SkillAnalysisService.FUNCTION_SKILLS_EXTRACT), eq(true), eq(false));
+    }
+
+    @Test
+    public void testScanAndEnrich_SavesActualAiExecutionMetadata() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Мария Смирнова");
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Java, Spring, PostgreSQL");
+        CandidateCvSkillAnalysis mockAnalysis = new CandidateCvSkillAnalysis();
+        when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(mockAnalysis);
+        when(mockDataManager.load(CandidateSkill.class).query(anyString()).parameter("candidateId", candidate.getId()).view("candidateSkill-view").list())
+                .thenReturn(Collections.emptyList());
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class).query(anyString()).parameter("cvId", cv.getId()).view("candidateCvSkillAnalysis-browse-view").optional())
+                .thenReturn(Optional.empty());
+        AiExecutionResult execution = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
+                "test-model", "test-provider", AiCredentialOwner.ADMIN, "[]", 1, 2, 3);
+        SkillAnalysisResult aiResult = SkillAnalysisResult.of(Collections.emptyList(), execution);
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(aiResult);
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT", false);
+        assertTrue(result.isSuccess());
+        assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI, mockAnalysis.getExecutionSource());
+        assertEquals("test-provider", mockAnalysis.getProviderCode());
+        assertEquals("test-model", mockAnalysis.getModelName());
+        verify(mockDataManager, atLeastOnce()).commit(mockAnalysis);
+    }
+
+    @Test
+    public void testScanAndEnrich_PersistsPartialAiMetadataWithoutInventingMissingValue() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Ольга Соколова");
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Java, Spring, PostgreSQL");
+        CandidateCvSkillAnalysis mockAnalysis = new CandidateCvSkillAnalysis();
+        when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(mockAnalysis);
+        when(mockDataManager.load(CandidateSkill.class).query(anyString()).parameter("candidateId", candidate.getId()).view("candidateSkill-view").list())
+                .thenReturn(Collections.emptyList());
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class).query(anyString()).parameter("cvId", cv.getId()).view("candidateCvSkillAnalysis-browse-view").optional())
+                .thenReturn(Optional.empty());
+        AiExecutionResult execution = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
+                "  ", " actual-provider ", AiCredentialOwner.ADMIN, "[]", 1, 2, 3);
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), execution));
+
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE, mockAnalysis.getExecutionSource());
+        assertEquals("actual-provider", mockAnalysis.getProviderCode());
+        assertNull("Отсутствующая модель не должна подменяться текущей конфигурацией", mockAnalysis.getModelName());
+    }
+
+    @Test
+    public void testScanAndEnrich_DictionaryFallbackDoesNotInventAiMetadata() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Анна Петрова");
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Java, Spring, PostgreSQL");
+        CandidateCvSkillAnalysis mockAnalysis = new CandidateCvSkillAnalysis();
+        when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(mockAnalysis);
+        when(mockDataManager.load(CandidateSkill.class).query(anyString()).parameter("candidateId", candidate.getId()).view("candidateSkill-view").list())
+                .thenReturn(Collections.emptyList());
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class).query(anyString()).parameter("cvId", cv.getId()).view("candidateCvSkillAnalysis-browse-view").optional())
+                .thenReturn(Optional.empty());
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), null));
+
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_DICTIONARY_FALLBACK, mockAnalysis.getExecutionSource());
+        assertNull(mockAnalysis.getProviderCode());
+        assertNull(mockAnalysis.getModelName());
+        verify(mockDataManager, atLeastOnce()).commit(mockAnalysis);
     }
 
     @Test

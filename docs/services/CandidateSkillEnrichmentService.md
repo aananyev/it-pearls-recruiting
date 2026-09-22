@@ -43,3 +43,17 @@ CandidateSkillsScanResult scanAndEnrich(
 | Дата | Изменение |
 |---|---|
 | 2026-09-21 | Добавлен принудительный вызов стандартного анализа навыков для timestamp-критерия устаревания; обычные callers сохраняют прежний hash/version guard |
+
+## Metadata выполнения и колонка «Провайдер / Модель»
+
+После успешного запуска запись `CandidateCvSkillAnalysis` сохраняет фактические `providerCode` и `modelName` из `AiExecutionResult`. Эти значения относятся к конкретному вызову и не являются текущей настройкой AI.
+
+`executionSource` фиксирует семантику результата:
+
+- `AI` — хотя бы один уровень анализа выполнен AI с полными provider/model metadata;
+- `AI_METADATA_INCOMPLETE` — AI вернул неполные metadata;
+- `DICTIONARY_FALLBACK` — навыки получены словарным fallback без AI-вызова.
+
+Fallback отображается как «Fallback: справочник», а старые записи с пустыми metadata — как «Метаданные недоступны». Повторный запуск с ошибкой или статусом `RETRY` не затирает metadata последнего успешного вызова. Таблица мониторинга перезагружает `analysesDl`, поэтому renderer читает сохранённые поля из `candidateCvSkillAnalysis-browse-view`.
+
+Добавление `EXECUTION_SOURCE` выполняется миграцией `260922-1-addExecutionSourceToCandidateCvSkillAnalysis`.

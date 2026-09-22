@@ -135,6 +135,7 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
 
             aiExecution = firstNonNullExecution(mainResult, secondaryResult, tertiaryResult, allResult);
             result.setAiExecution(aiExecution);
+            String executionSource = resolveExecutionSource(mainResult, secondaryResult, tertiaryResult, allResult);
 
             // 3. Расчет дельты изменений и сохранение CandidateSkill (в короткой транзакции)
             applySkillsDelta(candidate, cv, mainSkills, secondarySkills, tertiarySkills, isBackground, result);
@@ -143,7 +144,8 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
             result.setDurationMs(System.currentTimeMillis() - startTime);
 
             // 4. Сохранение статуса FRESH и аудита в CandidateCvSkillAnalysis
-            saveSuccessAnalysisRecord(candidate, cv, contentHash, configVersion, effectiveFunctionCode, aiExecution, result);
+            saveSuccessAnalysisRecord(candidate, cv, contentHash, configVersion, effectiveFunctionCode,
+                    aiExecution, executionSource, result);
 
             log.info("Успешно завершен AI-анализ навыков кандидата {} (CV ID: {}): обнаружено={}, добавлено={}, обновлено={}",
                     candidate.getFullName(), cv.getId(), result.getTotalDetected(), result.getAddedSkills().size(), result.getUpdatedSkills().size());
@@ -267,6 +269,7 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
     private void saveSuccessAnalysisRecord(JobCandidate candidate, CandidateCV cv, String contentHash,
                                            Integer configVersion, String functionCode,
                                            AiExecutionResult aiExecution,
+                                           String executionSource,
                                            CandidateSkillsScanResult scanResult) {
         CandidateCvSkillAnalysis analysis = loadAnalysisRecord(cv.getId());
         if (analysis == null) {
@@ -285,14 +288,22 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
         analysis.setNextRetryAt(null);
         analysis.setLastError(null);
         analysis.setPriority(CandidateSkillEnrichmentService.PRIORITY_DEFAULT);
+        analysis.setExecutionSource(executionSource);
         analysis.setAiFunctionCode(functionCode);
 
         if (aiExecution != null) {
-            analysis.setProviderCode(aiExecution.getProviderCode());
-            analysis.setModelName(aiExecution.getModelName());
+            analysis.setProviderCode(normalizeMetadata(aiExecution.getProviderCode()));
+            analysis.setModelName(normalizeMetadata(aiExecution.getModelName()));
             analysis.setPromptTokens(aiExecution.getPromptTokens());
             analysis.setCompletionTokens(aiExecution.getCompletionTokens());
             analysis.setTotalTokens(aiExecution.getTotalTokens());
+        } else {
+            // A dictionary fallback is successful enrichment, but has no AI usage.
+            analysis.setProviderCode(null);
+            analysis.setModelName(null);
+            analysis.setPromptTokens(null);
+            analysis.setCompletionTokens(null);
+            analysis.setTotalTokens(null);
         }
 
         analysis.setSkillsFoundCount(scanResult.getTotalDetected());
@@ -404,12 +415,51 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
 
     private AiExecutionResult firstNonNullExecution(SkillAnalysisResult... results) {
         if (results == null) return null;
+        AiExecutionResult first = null;
         for (SkillAnalysisResult r : results) {
             if (r != null && r.getAiExecution() != null) {
-                return r.getAiExecution();
+                AiExecutionResult execution = r.getAiExecution();
+                if (first == null) {
+                    first = execution;
+                }
+                if (hasText(execution.getProviderCode()) && hasText(execution.getModelName())) {
+                    return execution;
+                }
             }
         }
-        return null;
+        return first;
+    }
+
+    private String resolveExecutionSource(SkillAnalysisResult... results) {
+        boolean hasFallback = false;
+        boolean hasIncompleteAiMetadata = false;
+        if (results != null) {
+            for (SkillAnalysisResult result : results) {
+                if (result == null) {
+                    continue;
+                }
+                AiExecutionResult execution = result.getAiExecution();
+                if (execution == null) {
+                    hasFallback = true;
+                } else if (!hasText(execution.getProviderCode()) || !hasText(execution.getModelName())) {
+                    hasIncompleteAiMetadata = true;
+                } else {
+                    return CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI;
+                }
+            }
+        }
+        if (hasIncompleteAiMetadata) {
+            return CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE;
+        }
+        return hasFallback ? CandidateCvSkillAnalysis.EXECUTION_SOURCE_DICTIONARY_FALLBACK : null;
+    }
+
+    private String normalizeMetadata(String value) {
+        return hasText(value) ? value.trim() : null;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
     @Override

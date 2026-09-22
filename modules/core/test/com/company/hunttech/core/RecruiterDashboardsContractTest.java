@@ -58,12 +58,56 @@ public class RecruiterDashboardsContractTest {
     }
 
     @Test
-    public void menuContainsRecruiterDashboardGroup() throws IOException {
+    public void menuContainsUnifiedTopLevelDashboardGroup() throws IOException {
         String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
-        assertTrue(menu.contains("id=\"recruiter-dashboards\""));
-        assertTrue(menu.contains("hunttech_RecruiterKanbanDashboard"));
-        assertTrue(menu.contains("hunttech_RecruiterFunnelDashboard"));
-        assertTrue(menu.contains("hunttech_RecruiterReserveDashboard"));
+        String dashboards = menuSection(menu, "application-dashboards");
+
+        assertEquals(1, occurrences(menu, "id=\"application-dashboards\""));
+        assertTrue(dashboards.contains("caption=\"Дашборды\""));
+        assertTrue(dashboards.contains("icon=\"DASHBOARD\""));
+        assertEquals(5, occurrences(dashboards, "screen=\""));
+
+        assertDashboardItem(menu, dashboards, "hunttech_RecruiterKanbanDashboard", "Kanban", "COLUMNS");
+        assertDashboardItem(menu, dashboards, "hunttech_RecruiterFunnelDashboard", "Воронка найма", "FILTER");
+        assertDashboardItem(menu, dashboards, "hunttech_RecruiterReserveDashboard", "Кадровый резерв", "SHIELD");
+        assertDashboardItem(menu, dashboards, "hunttech_AdminAiDashboard",
+                "mainMsg://menu_config.hunttech_AdminAiDashboard", "DASHBOARD");
+        assertDashboardItem(menu, dashboards, "hunttech_UserAiDashboard",
+                "mainMsg://menu_config.hunttech_UserAiDashboard", "PIE_CHART");
+
+        String messagesRu = source("modules/web/src/com/company/hunttech/web/messages_ru.properties");
+        assertTrue(messagesRu.contains("menu_config.hunttech_AdminAiDashboard=Дашборд аналитики AI"));
+        assertTrue(messagesRu.contains("menu_config.hunttech_UserAiDashboard=Моя статистика AI"));
+
+        assertFalse(menu.contains("id=\"recruiter-dashboards\""));
+        assertFalse(menu.contains("caption=\"Дашборды рекрутера\""));
+        assertFalse(menuSection(menu, "application-hunting").contains("Dashboard"));
+        assertFalse("Persistent recruiting-dashboard остаётся стартовым и не добавляется в меню",
+                menu.contains("screen=\"recruiting-dashboard\""));
+    }
+
+    @Test
+    public void aiAdministrationKeepsConfigurationLogsAndTechnicalScreens() throws IOException {
+        String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
+        String aiAdministration = menuSection(menu, "aiAdministration");
+
+        for (String screenId : new String[]{
+                "hunttech_LlmChatScreen",
+                "hunttech_AiFunctionConfiguration.reestr",
+                "hunttech_AiFunctionConfiguration.browse",
+                "hunttech_AdminAiConfiguration.browse",
+                "hunttech_UserAiConfiguration.browse",
+                "hunttech_UserAiFunctionOverride.browse",
+                "hunttech_VacancyPromptTemplate.browse",
+                "hunttech_AiCallLog.browse",
+                "hunttech_CandidateSkillsEnrichmentMonitoring",
+                "hunttech_LlmChatQuotaReconciliation.browse"}) {
+            assertEquals("В Управлении AI должен ровно один раз сохраниться экран " + screenId,
+                    1, occurrences(aiAdministration, "screen=\"" + screenId + "\""));
+        }
+
+        assertFalse(aiAdministration.contains("hunttech_AdminAiDashboard"));
+        assertFalse(aiAdministration.contains("hunttech_UserAiDashboard"));
     }
 
     @Test
@@ -100,6 +144,38 @@ public class RecruiterDashboardsContractTest {
         assertTrue(java.contains("@DashboardWidget"));
         assertTrue(java.contains("implements RefreshableWidget"));
         assertTrue(java.contains("@UiController(\"" + frameId + "\")"));
+    }
+
+    private void assertDashboardItem(String menu, String dashboards, String screenId,
+                                     String caption, String icon) {
+        assertEquals("Dashboard screen ID должен встречаться в меню ровно один раз: " + screenId,
+                1, occurrences(menu, "screen=\"" + screenId + "\""));
+        int itemStart = dashboards.indexOf("<item screen=\"" + screenId + "\"");
+        assertTrue("В группе Дашборды отсутствует " + screenId, itemStart >= 0);
+        int itemEnd = dashboards.indexOf("/>", itemStart);
+        assertTrue("Не найден конец menu item для " + screenId, itemEnd > itemStart);
+        String item = dashboards.substring(itemStart, itemEnd);
+        assertTrue("Не сохранён caption для " + screenId, item.contains("caption=\"" + caption + "\""));
+        assertTrue("Не сохранена icon для " + screenId, item.contains("icon=\"" + icon + "\""));
+        assertFalse("Не должен появиться новый openType у " + screenId, item.contains("openType="));
+    }
+
+    private String menuSection(String menu, String menuId) {
+        int start = menu.indexOf("<menu id=\"" + menuId + "\"");
+        assertTrue("Не найден menu node " + menuId, start >= 0);
+        int end = menu.indexOf("</menu>", start);
+        assertTrue("Не найден конец menu node " + menuId, end > start);
+        return menu.substring(start, end);
+    }
+
+    private int occurrences(String source, String value) {
+        int count = 0;
+        int from = 0;
+        while ((from = source.indexOf(value, from)) >= 0) {
+            count++;
+            from += value.length();
+        }
+        return count;
     }
 
     private String source(String relativePath) throws IOException {

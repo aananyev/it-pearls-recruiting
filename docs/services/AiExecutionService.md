@@ -19,9 +19,22 @@
 - `USER_OVERRIDE_ALLOWED` → при наличии валидного override вызывается personal provider;
 - ошибка personal provider + `FALLBACK_TO_ADMIN` → выполняется corporate provider;
 - override отсутствует / `ADMIN_ONLY` → используется corporate provider;
-- secret корпоративного подключения → расшифровывается в core непосредственно перед `AIProvider.generateText`;
+- secret корпоративного подключения → расшифровывается в core непосредственно перед вызовом provider; ошибка расшифровки изолируется в рамках одного admin-кандидата и передаёт управление следующему кандидату;
 - `HrmAiService` legacy providerCode → не влияет на route и не может обойти policy.
 - `generateVacancyMaterial(type, context)` → тип централизованно сопоставляется стабильному `VACANCY_*` code → используется тот же resolver/policy для Edit и Smart Vacancy Creation.
+
+### Диагностика маршрута и fallback
+
+Каждый вызов может передавать `requestId` и `callerSource` в контексте. Для функции
+`CANDIDATE_VACANCY_MATCH_ANALYZE` operation id экрана используется как correlation id.
+Middleware пишет безопасные поля `functionCode`, `requestId`, provider, model,
+configuration UUID, номер кандидата и попытки, стадию (`credential_decrypt` или
+`provider_call`), техническую категорию ошибки и действие (`retry`/`next_candidate`).
+
+Ключи, ciphertext, authorization headers, CV и необработанные ответы провайдера в
+route log не попадают. Категория `credential_decrypt` означает только пропуск текущей конфигурации;
+оно не должно останавливать перебор корпоративных кандидатов. Если все кандидаты
+исчерпаны, пользователь получает финальную ошибку или честный rule-based fallback.
 
 ## API
 
@@ -98,6 +111,7 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 | Дата | Изменение |
 |---|---|
 | 2026-09-21 | Добавлен типизированный единый контракт генерации материалов вакансии с возвратом `AiExecutionResult`; зарегистрированы три защищённые prompt migrations и production-safe precheck/backup/verification/rollback |
+| 2026-09-22 | Изолирована ошибка расшифровки admin credential для text/streaming/image; добавлены correlation id и безопасная трассировка кандидатов маршрута. |
 | 2026-08-16 | Добавлено сквозное логирование всех обращений к AI в `AiCallLog`, парсинг токенов (OpenAI, DeepSeek, Anthropic) и автоматический расчет стоимости запросов `AiCostCalculator`. |
 | 2026-08-16 | Контракт пользовательской нотификации: методы возвращают `AiExecutionResult` (payload + модель, провайдер, собственник API `AiCredentialOwner.ADMIN/USER`) — см. HRM_HuntTech_AI_User_Notification_Contract |
 | 2026-08-12 | Подключён `HrmAiService` как совместимый vacancy-фасад; provider selection из legacy API исключён |

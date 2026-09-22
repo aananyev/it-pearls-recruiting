@@ -114,7 +114,10 @@ public class IteractionListVisualAlignmentTest {
         assertTrue(partial.contains(".iteraction-list-primary-picker"));
         assertTrue(partial.contains(".iteraction-list-result-section"));
         assertTrue(partial.contains(".iteraction-list-service-card .c-datefield-layout"));
-        assertTrue(partial.contains("flex: 0 0 56px;"));
+        assertTrue(partial.contains("flex: 0 0 72px;"));
+        assertTrue(partial.contains("padding: 0 10px !important;"));
+        assertTrue(partial.contains(".c-timefield:focus"));
+        assertTrue(partial.contains(".c-timefield-error"));
         assertTrue(partial.contains("min-height: 61px !important;"));
         assertTrue(partial.contains(".iteraction-list-subscription-filter > label"));
         assertTrue(partial.contains("padding: 0 0 0 28px !important;"));

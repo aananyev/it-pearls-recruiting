@@ -317,5 +317,8 @@
              relativeToChangelogFile="true"/>
     <include file="260921-5-vacancy-interview-plan-prompt.xml"
              relativeToChangelogFile="true"/>
+    <!-- Сервис фонового анализа навыков: явный источник результата для AI/fallback -->
+    <include file="260922-1-addExecutionSourceToCandidateCvSkillAnalysis.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
