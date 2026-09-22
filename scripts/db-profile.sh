@@ -33,6 +33,10 @@ db_profile_validate_port() {
         db_profile_error "${name} must be a TCP port"
         return 1
     fi
+    if (( ${#value} > 5 )); then
+        db_profile_error "${name} must be a TCP port"
+        return 1
+    fi
     local decimal_value=$((10#$value))
     if (( decimal_value < 1 || decimal_value > 65535 )); then
         db_profile_error "${name} must be a TCP port"
@@ -59,7 +63,7 @@ db_profile_normalize_host() {
 db_profile_test_host_is_forbidden() {
     local host
     host="$(db_profile_normalize_host "$1")"
-    [[ "$host" =~ (^|\.)0[0-9] ]] && return 0
+    [[ "$host" == 0.* || "$host" =~ (^|\.)0[0-9] ]] && return 0
     [[ "$host" == "192.168.1.135" ||
        "$host" == "127.0.0.1" || "$host" == 127.* ||
        "$host" == "localhost" || "$host" == localhost.* ||

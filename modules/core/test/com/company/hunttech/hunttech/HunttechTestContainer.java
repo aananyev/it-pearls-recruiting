@@ -75,14 +75,18 @@ public class HunttechTestContainer extends TestContainer {
             if (comparisonHost.startsWith("[") && comparisonHost.endsWith("]")) {
                 comparisonHost = comparisonHost.substring(1, comparisonHost.length() - 1);
             }
-            if (comparisonHost.matches("(^|\\.)0[0-9].*")) {
+            if (comparisonHost.startsWith("0.") || comparisonHost.matches(".*\\.0[0-9].*")) {
                 throw new IllegalStateException("TEST profile must not use ambiguous leading-zero host notation");
+            }
+            if (!comparisonHost.matches("[a-z0-9._:-]+")) {
+                throw new IllegalStateException("TEST profile host contains unsupported characters");
             }
             if (comparisonHost.equals("192.168.1.135") || comparisonHost.equals("127.0.0.1")
                     || comparisonHost.startsWith("127.") || comparisonHost.equals("localhost")
                     || comparisonHost.startsWith("localhost.") || comparisonHost.equals("::1")
                     || comparisonHost.startsWith("::ffff:127.") || comparisonHost.equals("0.0.0.0")
-                    || comparisonHost.equals("0:0:0:0:0:0:0:1") || comparisonHost.matches("[0-9]+")) {
+                    || comparisonHost.startsWith("0.") || comparisonHost.equals("0:0:0:0:0:0:0:1")
+                    || comparisonHost.equals("::ffff:7f00:1") || comparisonHost.matches("[0-9]+")) {
                 throw new IllegalStateException("TEST profile must use an explicitly separate database host");
             }
             dbUrl = jdbcUrl(testHost,

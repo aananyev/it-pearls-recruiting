@@ -9,8 +9,8 @@
               name="jdbc/CubaDS"
               password="${env.HUNTTECH_DB_PASSWORD}"
               type="javax.sql.DataSource"
-              url="jdbc:postgresql://127.0.0.1:5432/hunttech"
-              username="cuba"/>
+              url="${env.HUNTTECH_DB_JDBC_URL}"
+              username="${env.HUNTTECH_DB_USER}"/>
     <!-- Database connection-->
 
 </Context>

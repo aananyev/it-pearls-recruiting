@@ -8,8 +8,8 @@
       maxIdle="2"
       maxWaitMillis="5000"
       driverClassName="org.postgresql.Driver"
-      url="jdbc:postgresql://127.0.0.1:5432/hunttech"
-      username="cuba"
+      url="${env.HUNTTECH_DB_JDBC_URL}"
+      username="${env.HUNTTECH_DB_USER}"
       password="${env.HUNTTECH_DB_PASSWORD}"/>
 
     <!-- Switch off session serialization -->

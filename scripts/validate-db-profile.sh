@@ -44,6 +44,10 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
         printf 'Refusing PRODUCTION: ripgrep (rg) is required for artifact scan\n' >&2
         exit 23
     }
+    if ! rg -P '' /dev/null >/dev/null 2>&1; then
+        printf 'Refusing PRODUCTION: ripgrep with PCRE2 support is required for artifact scan\n' >&2
+        exit 23
+    fi
 
     # Production artifacts must never carry the remote work DB or an ambiguous
     # localhost fallback in a JNDI JDBC URL.
@@ -52,11 +56,23 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
             printf 'Refusing PRODUCTION: mandatory config is missing: %s\n' "$config_file" >&2
             exit 24
         }
-        if rg -n -i -P 'jdbc:postgresql://(192\.168\.1\.135|localhost|0\.0\.0\.0|\[::1\]|127\.(?!0\.0\.1(?:[:/"[:space:]]|$)))([:/"[:space:]]|$)' "$config_file" >/dev/null; then
+        scan_status=0
+        rg -n -i -P 'jdbc:postgresql://(192\.168\.1\.135|localhost|0\.0\.0\.0|\[::1\]|127\.(?!0\.0\.1(?:[:/"[:space:]]|$)))([:/"[:space:]]|$)' "$config_file" >/dev/null || scan_status=$?
+        if ((scan_status >= 2)); then
+            printf 'Refusing PRODUCTION: unable to scan %s for unsafe JDBC hosts\n' "$config_file" >&2
+            exit 25
+        fi
+        if ((scan_status == 0)); then
             printf 'Refusing PRODUCTION: unsafe JDBC host found in %s\n' "$config_file" >&2
             exit 21
         fi
-        if rg -n -P 'password="(?:[^"$]|\$(?!\{))[^\"]*"|^cuba\.dataSource\.password=(?:[^$]|\$(?!\{)).*$' "$config_file" >/dev/null; then
+        scan_status=0
+        rg -n -P 'password="(?:[^"$]|\$(?!\{))[^\"]*"|^cuba\.dataSource\.password=(?:[^$]|\$(?!\{)).*$' "$config_file" >/dev/null || scan_status=$?
+        if ((scan_status >= 2)); then
+            printf 'Refusing PRODUCTION: unable to scan %s for hardcoded passwords\n' "$config_file" >&2
+            exit 25
+        fi
+        if ((scan_status == 0)); then
             printf 'Refusing PRODUCTION: hardcoded datasource password found in %s\n' "$config_file" >&2
             exit 22
         fi

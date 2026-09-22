@@ -222,9 +222,10 @@ configure(coreModule) {
         dbName = configuredDb.name
         dbms = 'postgres'
         dbUser = configuredDb.user
-        dbPassword = System.getenv(configuredDb.passwordEnv) ?: ''
+        def passwordValue = System.getenv(configuredDb.passwordEnv)?.trim()
+        dbPassword = passwordValue ?: ''
         doFirst {
-            if (!System.getenv(configuredDb.passwordEnv)) {
+            if (!passwordValue) {
                 throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
             }
         }
@@ -235,9 +236,10 @@ configure(coreModule) {
         dbName = configuredDb.name
         dbms = 'postgres'
         dbUser = configuredDb.user
-        dbPassword = System.getenv(configuredDb.passwordEnv) ?: ''
+        def passwordValue = System.getenv(configuredDb.passwordEnv)?.trim()
+        dbPassword = passwordValue ?: ''
         doFirst {
-            if (!System.getenv(configuredDb.passwordEnv)) {
+            if (!passwordValue) {
                 throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
             }
         }
