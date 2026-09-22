@@ -310,4 +310,8 @@
     <include file="260921-2-addPriorityToCandidateCvSkillAnalysis.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AI: фиксация фактического источника результата анализа навыков -->
+    <include file="260922-1-addExecutionSourceToCandidateCvSkillAnalysis.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
