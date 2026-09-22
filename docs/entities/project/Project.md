@@ -9,7 +9,7 @@
 
 ### Назначение и Бизнес-смысл (What & Why)
 
-Сущность `Project` — проект/контракт клиента в HRM HuntTech: название, логотип, департамент компании, владелец (Person). Каждая вакансия `OpenPosition` обязательно привязана к проекту (`projectName`).
+Сущность `Project` — проект/контракт клиента в HRM HuntTech: название, логотип, департамент компании, владелец (Person). Каждая вакансия `OpenPosition` обязательно привязана к проекту (`projectName`). Логотип хранится прежним `FileDescriptor`, но новый upload перед сохранением безопасно нормализуется общим sidebar image pipeline.
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
@@ -17,7 +17,7 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Browse без LOB descriptions в основном SELECT; nested `projectOwner` и `projectDepartment` в `openPosition-browse-view`; lazy exists для описаний проекта/компании в OpenPositionBrowse.
+Browse без LOB descriptions в основном SELECT; nested `projectOwner` и `projectDepartment` в `openPosition-browse-view`; lazy exists для описаний проекта/компании в OpenPositionBrowse. В ProjectEdit валидный raster-логотип преобразуется в PNG ≤512×512 без upscale/crop/stretch; invalid upload не заменяет текущее поле/preview.
 
 ---
 
@@ -89,6 +89,7 @@ HSQL получил обычные составные аналоги этих и
 - **Edit Java:** lazy load LOB и коллекции `openPosition` по вкладкам (`ProjectEdit`); вакансии — отдельный `CollectionLoader` с JPQL `where e.projectName = :project`, без привязки к `property="openPosition"` на instance (избегает unfetched при `@LoadDataBeforeShow`)
 - **Edit Java:** новый несохранённый проект не выполняет запрос открытых вакансий, потому что связанных строк ещё не может быть
 - **Edit AI «Кратко»:** кнопка «Кратко» во вкладке «Описание проекта» генерирует `shortDescription` (sidebar-раздел «Коротко») через `ProjectAiService.generateShortDescription` → `PROJECT_SHORT_DESCRIPTION_GENERATE`; генерация сокращена в 4 раза (одно предложение, `MAX_TOKENS` 125, миграция 260814-3), затем увеличена в 2 раза (два предложения, `MAX_TOKENS` 250, миграция 260814-4); кнопка disabled без текста описания, раздел sidebar скрыт при пустом `shortDescription`; sidebar-порядок: идентификация (только название, подпись «Проект» удалена) → «Разделы» → «Коротко», заголовок «Коротко» — полоса как у «Разделы», при переполнении sidebar скроллится тонким скроллбаром
+- **Edit logo upload:** `projectLogo` проходит через общий `SidebarImageNormalizationService`: actual ImageIO decode PNG/JPEG/GIF/BMP/WBMP/WebP/TIFF, JPEG EXIF Orientation, лимиты 20 MiB/25 млн пикселей, первый кадр GIF, PNG bounding box 512×512 с сохранением пропорций/alpha и без увеличения. Original не сохраняется при отказе; прежнее значение/preview остаётся. Структура сущности и FileStorage не менялись.
 - **Loaders:** `companyDepartament-picker-view` + `cacheable`, `person-picker-view` + `cacheable`
 
 ---
@@ -152,6 +153,7 @@ HSQL получил обычные составные аналоги этих и
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-21 | Без изменения entity/schema и storage-модели: upload `projectLogo` переведён на общий безопасный PNG pipeline ≤512×512 с WebP/TIFF и JPEG EXIF Orientation; invalid input не заменяет прежний FileDescriptor/preview. |
 | 2026-08-14 | ProjectEdit: исправлена строка дат — shared `.v-slot-edit-form-control { width: 100% !important }` перебивал expandRatio (50/50), «Дата окончания проекта» выталкивалась за границу; слоты растягиваются Vaadin-инлайном (7 тем) |
 | 2026-08-14 | ProjectEdit: AI-генерация «Кратко» увеличена в 2 раза (два предложения вместо одного, `MAX_TOKENS` 125→250, миграция 260814-4); из sidebar убрана подпись типа записи «Проект»; sidebar скроллится при переполнении (тонкий скроллбар, SCSS 7 тем) |
 | 2026-08-14 | ProjectEdit sidebar: блок «Коротко» перенесён после навигации «Разделы»; заголовок «Коротко» — полоса-заголовок как у «Разделы» (`label-nav-title project-editor-short-description-title`); AI-генерация «Кратко» сокращена в 4 раза (одно предложение, `MAX_TOKENS` 500→125; seed 260814-2 + миграция 260814-3); убрана подсказка «PDF, DOCX или TXT до 10 МБ…», кнопки «Загрузить описание»/«Кратко» выровнены вправо |

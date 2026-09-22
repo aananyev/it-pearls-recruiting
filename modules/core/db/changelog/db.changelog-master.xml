@@ -310,4 +310,15 @@
     <include file="260921-2-addPriorityToCandidateCvSkillAnalysis.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Канонические материалы вакансии: точные prompt из утверждённых vacancy-opening references. -->
+    <include file="260921-3-vacancy-checklist-prompt.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260921-4-vacancy-search-map-prompt.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260921-5-vacancy-interview-plan-prompt.xml"
+             relativeToChangelogFile="true"/>
+    <!-- Сервис фонового анализа навыков: явный источник результата для AI/fallback -->
+    <include file="260922-1-addExecutionSourceToCandidateCvSkillAnalysis.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

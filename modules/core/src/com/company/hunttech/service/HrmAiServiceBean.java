@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -56,8 +57,39 @@ public class HrmAiServiceBean implements HrmAiService {
     }
 
     @Override
+    public AiExecutionResult generateVacancyMaterial(VacancyMaterialType materialType,
+                                                     Map<String, Object> context) {
+        if (materialType == null) {
+            throw new DevelopmentException("Не выбран тип материала вакансии.");
+        }
+        Object description = context == null ? null : context.get("description");
+        if (description == null || !isConfigured(String.valueOf(description))) {
+            throw new DevelopmentException("Описание вакансии для AI-генерации не заполнено.");
+        }
+
+        // Mapping сосредоточен в одном месте, чтобы screen и smart creation не могли
+        // разойтись по functionCode и случайно использовать разные системные prompt.
+        String functionCode;
+        switch (materialType) {
+            case CHECKLIST:
+                functionCode = FUNCTION_VACANCY_CHECKLIST;
+                break;
+            case SEARCH_MAP:
+                functionCode = FUNCTION_VACANCY_SEARCH_MAP;
+                break;
+            case INTERVIEW_PLAN:
+                functionCode = FUNCTION_VACANCY_INTERVIEW_PLAN;
+                break;
+            default:
+                throw new DevelopmentException("Неподдерживаемый тип материала вакансии: " + materialType);
+        }
+
+        return aiExecutionService.executeText(functionCode, context);
+    }
+
+    @Override
     public String generateVacancyArtifact(String standardizedDescription, String functionCode) {
-        Map<String, Object> ctx = new java.util.HashMap<>();
+        Map<String, Object> ctx = new LinkedHashMap<>();
         ctx.put("description", standardizedDescription);
         ctx.put("callerSource", "HrmAiService (generateVacancyArtifact: " + functionCode + ")");
         return aiExecutionService.executeText(functionCode, ctx).getText();

@@ -40,7 +40,7 @@
                     <!-- OvaFallbackImage читает userDs.officialPhoto и показывает fallback при отсутствии файла (размер 176×176 — эталон JobCandidateEdit). -->
                     <ovaFallbackImage id="userPic" width="176px" height="176px" ovalWidth="176px" ovalHeight="176px" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" datasource="userDs" property="officialPhoto" fallbackThemePath="icons/no-programmer.jpeg" stylename="ext-user-editor-avatar job-candidate-avatar"/>
                     <!-- Upload сохраняет прежние datasource/property и immediate file-storage contract. -->
-                    <upload id="officialPhotoUpload" fileStoragePutMode="IMMEDIATE" datasource="userDs" align="BOTTOM_CENTER" showFileName="false" dropZone="dropZone" showClearButton="true" property="officialPhoto"/>
+                    <upload id="officialPhotoUpload" fileStoragePutMode="IMMEDIATE" datasource="userDs" align="BOTTOM_CENTER" showFileName="false" dropZone="dropZone" showClearButton="true" accept="image/png,image/jpeg,image/gif,image/bmp,image/vnd.wap.wbmp,image/webp,image/tiff" permittedExtensions=".png,.jpg,.jpeg,.gif,.bmp,.wbmp,.webp,.tif,.tiff" fileSizeLimit="20971520" property="officialPhoto"/>
                 </vbox>
                 <!-- Identity-блок показывает основное имя пользователя и его login без дублирования полей справа. -->
                 <vbox id="profileLabelsVBox" spacing="false" align="TOP_CENTER" width="100%" stylename="edit-sidebar-identity">

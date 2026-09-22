@@ -6,6 +6,18 @@
 > **Реализация**: `SmartOpenPositionIngestServiceBean.java`  
 > **Экран загрузки**: `SmartOpenPositionUploadScreen.java` (`smart-open-position-upload-screen.xml`)  
 
+## Назначение и бизнес-смысл (What & Why)
+
+Smart Vacancy Creation создаёт вакансию из исходного текста и теперь использует тот же типизированный `HrmAiService`, что и ручная генерация в карточке: чеклист стандартизирует оценку кандидатов, карта поиска даёт рекрутеру стратегию сорсинга, план собеседования стандартизирует подготовку и проведение интервью. Это исключает разные prompt/function mappings в smart и edit-сценариях.
+
+## UI Context & Navigation
+
+`Реестр открытых вакансий → Умная загрузка → Умное создание вакансии`. Preview и подтверждение остаются в текущем web-экране; middleware формирует DTO и сохраняет `OpenPosition` штатным `CommitContext`.
+
+## Behavior Summary
+
+`Исходный текст → VACANCY_SMART_PARSE_JSON формирует основную карточку → для каждого из трёх материалов VacancyMaterialType определяет dedicated AI-функцию → AiExecutionService выполняет запрос → результат записывается в DTO → при недоступности функции сохраняется достаточный parsed-материал либо применяется детерминированный builder → после подтверждения создаётся OpenPosition.`
+
 ---
 
 ## 1. Архитектурная модель сервиса
@@ -104,6 +116,18 @@ public class SmartOpenPositionParsedData implements Serializable {
 
 ## 4. AI-промпт извлечения параметров вакансии
 
+Материалы вакансии используют отдельные функции `VACANCY_CHECKLIST`, `VACANCY_SEARCH_MAP`, `VACANCY_INTERVIEW_PLAN`. Их системные prompt устанавливаются миграциями `260921-3`…`260921-5`; приложение не читает prompt-файлы с filesystem. Контекст строится из `SmartOpenPositionParsedData`, поэтому detached getters `OpenPosition` не читаются и риск `Cannot get unfetched attribute` не создаётся.
+
+Prompt migrations защищают административную конфигурацию: update разрешён только для строки нужного code, созданной migration, не изменённой администратором и имеющей `CONFIGURATION_VERSION <= 1`; иначе запись сохраняется без изменений. Отсутствующий code создаётся idempotent insert со стабильным UUID. Smart Vacancy Creation всегда вызывает каждую из трёх dedicated-функций. Если отдельная функция отсутствует, недоступна, вернула пустой результат или завершилась ошибкой, сохраняется достаточный материал из `VACANCY_SMART_PARSE_JSON`; если parsed-материал пуст/слишком короток, используется детерминированный builder. Ошибка одного материала не отменяет остальные вызовы и создание вакансии.
+
+Production-safe порядок (в рамках задачи не выполняется):
+
+1. До применения сделать проверенный backup `HUNTECH_AI_FUNCTION_CONFIGURATION`, сохранить row count и снимок трёх `VACANCY_*` codes, включая ownership/version и hashes prompt.
+2. Применить changelog `260921-3` → `260921-4` → `260921-5` штатным Liquibase-процессом.
+3. Проверить ровно по одной активной `TEXT_GENERATION` строке на code, `${description}` в template, policy `USER_OVERRIDE_ALLOWED` / `FALLBACK_TO_ADMIN`, неизменность административных и посторонних функций.
+4. Выполнить smart preview и подтвердить три dedicated-вызова независимо от наличия parsed-материалов: при доступном AI три поля получают dedicated-результаты; при искусственной недоступности достаточный parsed-материал сохраняется, а отсутствующий/короткий заменяется детерминированным fallback; preview не прерывается.
+5. Для rollback деактивировать только новые migration-owned строки либо восстановить три записи из backup; пользовательские override не удалять. Повторно проверить row count, уникальность codes и работу остальных AI-функций.
+
 Системный промпт (`AI Function: SMART_VACANCY_PARSE`):
 
 ```
@@ -171,3 +195,11 @@ public class SmartOpenPositionParsedData implements Serializable {
 ### 5.3 Кнопки сохранения
 - **«Создать вакансию и проект»** — коммит созданной вакансии и открытие карточки `OpenPositionEdit` в реестре.
 - **«Привязать к существующему проекту»** — выбор другого проекта из справочника перед сохранением.
+
+---
+
+## История изменений
+
+| Дата | Изменение |
+|---|---|
+| 2026-09-21 | Smart Vacancy Creation всегда переиспользует типизированный `HrmAiService.generateVacancyMaterial` для чеклиста, карты поиска и плана собеседования; parsed-материал и deterministic builder образуют fallback, сохранены DTO-only context/Data View Integrity и production-safe prompt migration runbook. |

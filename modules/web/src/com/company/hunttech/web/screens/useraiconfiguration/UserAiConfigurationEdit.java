@@ -118,6 +118,20 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        /*
+         * Владелец является обязательной бизнес-связью и должен быть установлен
+         * вызывающим экраном до commit. Эта защита не позволяет альтернативному
+         * пути открытия редактора превратить ошибку UI в нарушение DB constraint.
+         */
+        if (getEditedEntity().getUser() == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Не удалось определить владельца AI-конфигурации")
+                    .withDescription("Закройте форму и создайте подключение из карточки пользователя или личных настроек.")
+                    .show();
+            event.preventCommit();
+            return;
+        }
+
         Integer retries = getEditedEntity().getMaxRetries();
         if (retries == null || retries < 1) {
             getEditedEntity().setMaxRetries(3);

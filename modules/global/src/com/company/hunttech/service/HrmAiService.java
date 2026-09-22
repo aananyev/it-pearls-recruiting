@@ -2,6 +2,8 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.entity.UserAiConfiguration;
 
+import java.util.Map;
+
 /**
  * AI-фасад HRM HuntTech для vacancy-сценариев и проверки пользовательских подключений.
  *
@@ -43,6 +45,20 @@ public interface HrmAiService {
      * Генерирует План продающего собеседования через функцию VACANCY_INTERVIEW_PLAN.
      */
     String generateInterviewPlan(String vacancyText);
+
+    /**
+     * Генерирует выбранный материал вакансии через один типизированный entry point.
+     *
+     * <p>Тип материала здесь намеренно отделён от технического functionCode: экран и
+     * комплексный smart-сценарий передают бизнес-намерение, а сервис централизованно
+     * выбирает системную AI-функцию. Полный {@link AiExecutionResult} сохраняет
+     * метаданные модели, провайдера и владельца API для штатной нотификации.</p>
+     *
+     * @param materialType тип требуемого материала
+     * @param context контекст вакансии для prompt template; обязан содержать description
+     */
+    AiExecutionResult generateVacancyMaterial(VacancyMaterialType materialType,
+                                              Map<String, Object> context);
 
     /**
      * Генерирует vacancy-артефакт через AI-функцию с переданным стабильным кодом.

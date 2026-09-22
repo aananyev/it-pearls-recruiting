@@ -207,13 +207,7 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
                 new DataGrid.ColumnGenerator<CandidateCvSkillAnalysis, String>() {
                     @Override
                     public String getValue(DataGrid.ColumnGeneratorEvent<CandidateCvSkillAnalysis> event) {
-                        CandidateCvSkillAnalysis item = event.getItem();
-                        String prov = item.getProviderCode() != null ? item.getProviderCode() : "";
-                        String mod = item.getModelName() != null ? item.getModelName() : "";
-                        if (prov.isEmpty() && mod.isEmpty()) {
-                            return "—";
-                        }
-                        return (prov + " " + mod).trim();
+                        return formatProviderAndModel(event.getItem());
                     }
 
                     @Override
@@ -232,6 +226,40 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
 
     public void refreshDashboard() {
         refreshDashboard(true);
+    }
+
+    static String formatProviderAndModel(CandidateCvSkillAnalysis item) {
+        if (item == null) {
+            return "Метаданные недоступны";
+        }
+        if (CandidateCvSkillAnalysis.EXECUTION_SOURCE_DICTIONARY_FALLBACK.equals(item.getExecutionSource())) {
+            return "Fallback: справочник";
+        }
+        String provider = trimToEmpty(item.getProviderCode());
+        String model = trimToEmpty(item.getModelName());
+        if (CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE.equals(item.getExecutionSource())) {
+            if (provider.isEmpty() && model.isEmpty()) {
+                return "AI: метаданные неполные";
+            }
+            return "AI: "
+                    + (provider.isEmpty() ? "провайдер недоступен" : provider)
+                    + " / "
+                    + (model.isEmpty() ? "модель недоступна" : model);
+        }
+        if (provider.isEmpty() && model.isEmpty()) {
+            return "Метаданные недоступны";
+        }
+        if (provider.isEmpty()) {
+            return model;
+        }
+        if (model.isEmpty()) {
+            return provider;
+        }
+        return provider + " / " + model;
+    }
+
+    private static String trimToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 
     public void refreshDashboard(boolean userInitiated) {

@@ -1,6 +1,8 @@
 package com.company.hunttech.web.screens.adminaiconfiguration;
 
 import com.company.hunttech.ai.AiProviderCatalog;
+import com.company.hunttech.app.ProcessedImage;
+import com.company.hunttech.app.SidebarImageNormalizationService;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.ai.AdminAiConfiguration;
 import com.company.hunttech.service.AiConnectionTestResult;
@@ -35,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 @UiController("hunttech_AdminAiConfiguration.edit")
@@ -73,6 +74,8 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
     private FileUploadField logoUploadField;
     @Inject
     private FileUploadingAPI fileUploadingAPI;
+    @Inject
+    private SidebarImageNormalizationService sidebarImageNormalizationService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -105,17 +108,22 @@ public class AdminAiConfigurationEdit extends StandardEditor<AdminAiConfiguratio
             try {
                 byte[] bytes = FileUtils.readFileToByteArray(file);
                 if (bytes != null && bytes.length > 0) {
-                    getEditedEntity().setLogoImage(bytes);
+                    ProcessedImage processed = sidebarImageNormalizationService.normalize(bytes, event.getFileName());
+                    getEditedEntity().setLogoImage(processed.getData());
                     updateLogoPreview();
                     notifications.create(Notifications.NotificationType.TRAY)
                             .withCaption("Логотип загружен")
                             .show();
                 }
-            } catch (IOException ex) {
-                log.error("Не удалось прочитать загруженный файл логотипа: {}", ex.getMessage());
+            } catch (Exception ex) {
+                log.error("Не удалось безопасно обработать загруженный логотип", ex);
                 notifications.create(Notifications.NotificationType.ERROR)
                         .withCaption("Ошибка загрузки")
-                        .withDescription("Не удалось прочитать файл логотипа.")
+                    .withDescription("Выберите PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до "
+                            + (SidebarImageNormalizationService.MAX_INPUT_BYTES / (1024 * 1024))
+                            + " МБ и разрешением до "
+                            + (SidebarImageNormalizationService.MAX_PIXELS / 1_000_000L)
+                            + " млн пикселей.")
                         .show();
             } finally {
                 try {

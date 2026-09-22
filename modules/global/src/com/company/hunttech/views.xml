@@ -1690,6 +1690,9 @@
     <view entity="hunttech_LlmChatPendingAction" name="llmChatPendingAction-view" extends="_local"/>
 
     <view entity="hunttech_CandidateCvSkillAnalysis" name="candidateCvSkillAnalysis-browse-view" extends="_local">
+        <property name="providerCode"/>
+        <property name="modelName"/>
+        <property name="executionSource"/>
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
         </property>

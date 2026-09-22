@@ -42,7 +42,7 @@ configurations.all {
 cuba {
     artifact {
               group = 'com.company.hunttech'
-              version = '0.693'
+              version = '0.694'
               isSnapshot = true
           }
     tomcat {
@@ -164,6 +164,9 @@ configure(coreModule) {
         // Персонализация AI: unit-тест AiExecutionServiceBeanTest с Mockito-моками (план §9.1).
         testCompile 'org.mockito:mockito-core:3.12.4'
         testCompile 'org.springframework:spring-test:5.3.29'
+        // Normalization runs in middleware; the ImageIO WebP reader must be in app-core,
+        // not only in the web JVM where upload components live.
+        compile 'com.twelvemonkeys.imageio:imageio-webp:3.13.1'
     }
 
     task cleanConf(description: 'Cleans up conf directory', type: Delete) {

@@ -16,6 +16,8 @@
 английском, тестовое задание, памятка к собеседованию, шаблон сопроводительного письма, дерево навыков, файлы, новости и комментарии-рейтинги. Форма интегрирована с BPM-согласованием и
 рассылкой уведомлений (email/Telegram) подписчикам при открытии/закрытии позиции.
 
+Во вкладках «Чеклист», «Карта поиска» и «План собеседования» рекрутер может сформировать соответствующий материал через единый типизированный vacancy AI-сервис. Экран передаёт бизнес-тип материала и описание вакансии, а AI Control Plane выбирает системную функцию, prompt, provider, модель и credential. Результат остаётся обычным изменением текущей карточки и сохраняется только штатной кнопкой сохранения формы.
+
 Визуальный редизайн 2026-08-05 привёл форму к общему UI API Edit-экранов HRM HuntTech
 (`HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md`): двухпанельная композиция
 «тёмный sidebar → рабочая область», единые `edit-*` / `label-*` stylename, эталонная
@@ -43,6 +45,10 @@ views, loaders, JPQL, actions, invoke, required/visible/enabled и Java-конт
 - Изменение проекта/компании/типа позиции → каскадная подстановка (департаменты, город, описания, название вакансии).
 - Сохранение → валидация вилки зарплаты и уникальности `vacansyID` → сбор подписчиков и уведомления (email/Telegram) → после коммита синхронизация дочерних позиций.
 - Приоритет → авто-дата закрытия +7 дней; таймер 60 с обновляет обратный отсчёт и автозакрывает вакансию.
+- Открытие вкладки AI-материала → соответствующий LOB догружается узким view → только после успешной загрузки и при доступном редактировании становится активна кнопка «Генерировать».
+- Нажатие «Генерировать» при непустом материале → запрашивается подтверждение замены; отмена не вызывает AI и не меняет поле.
+- Подтверждённая генерация → старый текст остаётся в поле до успешного ответа → фоновая задача с таймаутом 120 секунд вызывает `HrmAiService.generateVacancyMaterial(...)` → успешный результат записывается только в выбранный RichTextArea/DataContext без автосохранения.
+- Ошибка, пустой ответ или таймаут → progress закрывается, кнопка восстанавливается, текущий текст сохраняется, пользователю показывается безопасное сообщение без технических деталей.
 - Визуальный слой не запускает loaders, не меняет `*Loaded`-флаги, не создаёт новые бизнес-значения и не перехватывает lifecycle.
 
 ---
@@ -73,7 +79,7 @@ views, loaders, JPQL, actions, invoke, required/visible/enabled и Java-конт
   с `withOpenPositionCheckBox=true`), `companyDepartamentsLc` (только при выборе компании). Без защиты CUBA игнорировал бы не заданный параметр JPQL-условия и выбирал ВСЕ строки
   таблицы при каждом открытии формы.
 - Facets: `timer closedVacancyTimer` (delay 60000, autostart=false, repeating) — автозакрытие по `closingDate`.
-- Lazy-догрузка LOB: `loadPositionWithDescriptionLobs` (reload с view на LOB-поля) по вкладкам; `loadJobDescriptionTab` (вкладка «Описание должности») — `comment`/`commentEn` + LOB-описания типа позиции.
+- Lazy-догрузка LOB: `loadPositionWithDescriptionLobs` (reload с view на LOB-поля) по вкладкам; `loadJobDescriptionTab` (вкладка «Описание должности») — `comment`/`commentEn` + LOB-описания типа позиции. Кнопки AI-материалов остаются disabled до флагов `interviewChecklistLoaded` / `searchMapLoaded` / `interviewPlanLoaded`; описание берётся из загруженного `comment`, а если LOB ещё не загружен — узкий view читается внутри `BackgroundTask`, без блокировки UI-потока и без unfetched getter.
 - Все `dataContainer`, `property`, `optionsContainer`, `required`, validators, actions и `invoke` сохранены без изменений (см. §7).
 
 ## 3. Иерархия и взаимосвязь форм (Form Hierarchy)
@@ -135,6 +141,7 @@ views, loaders, JPQL, actions, invoke, required/visible/enabled и Java-конт
 - `scanJDButton` → `addShortDescription` — извлечение короткого описания; `rescanSkills` → `rescanJobDescription` — пересборка навыков.
 - `addOpenPositionNewsButton` → `addOpenPositionNewsButton` — создание новости.
 - `subscribePositionButton` → `subscribePosition` — подписка рекрутёра.
+- `generateInterviewChecklistBtn`, `generateSearchMapBtn`, `generateInterviewPlanBtn` → общий handler с `VacancyMaterialType` (`CHECKLIST`, `SEARCH_MAP`, `INTERVIEW_PLAN`). Непустое поле требует подтверждения «Заменить и генерировать»; отмена завершает сценарий до AI-вызова. Во время фоновой операции кнопка-инициатор disabled, показываются штатные start/progress/result AI-нотификации; результат меняет только соответствующее поле в текущем `DataContext`.
 - `windowCommitAndCloseButton` → `windowCommitAndClose` (сохранить и закрыть); `windowCloseButton` → закрыть без сохранения.
 - Чекбоксы вкладок: `needExerciseCheckBox`, `needMemoCheckBox`, `needLetterCheckBox` — показывают/блокируют редакторы; `openClosePositionCheckBox` (скрыт) → `disableEnableFields`;
 `signDraftCheckBox` → черновик.
@@ -245,6 +252,8 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
 `tabPayments` остаётся скрытой технической вкладкой (инвариант `@Named("tabSheetOpenPosition.tabPayments")`).
 
 ### 6.4. Остальные вкладки
+
+Во вкладках «Чеклист», «Карта поиска» и «План собеседования» над существующим RichTextArea добавлена одинаковая компактная action-row с выровненной вправо кнопкой «Генерировать». Sidebar, порядок вкладок, редакторы, footer и локальные стили не перестраивались; новый SCSS не добавлялся.
 
 - **Описание должности**: контейнер вкладки — vbox `jobDescriptionVBox` (stylename `edit-workspace-scroll` + `open-position-editor-tab-content`, `expand="descriptionsAccordionHBox"`; ранее scrollBox — в прокручиваемом контейнере `height="100%"` аккордеона не резолвился, редактор держался на min-height): `workExperienceGroupBox` (collapsed=true), hbox `descriptionsAccordionHBox` (`height="100%"`) → аккордеон `openPositionAccordion` (4 RichTextArea → `edit-form-control` + `open-position-editor-richtext-variant5`) растягивается на оставшуюся высоту вкладки,
 ряд `shortDescriptionHBox` (`shortDescriptionTextArea` + `scanJDButton`).
@@ -379,6 +388,8 @@ other screens: UNCHANGED
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-22 | Узкий reload LOB `comment` для генерации AI-материалов перенесён в фоновую задачу; пустое описание возвращает предупреждение, а UI-поток не ждёт DB-запрос. |
+| 2026-09-21 | Вкладки «Чеклист», «Карта поиска» и «План собеседования»: добавлена единая AI-генерация через `HrmAiService.generateVacancyMaterial` и AI Control Plane. Зафиксированы lazy/Data View Integrity, подтверждение замены, background timeout 120 с, сохранение старого текста при cancel/error/timeout, запись успешного результата только в текущий `DataContext` и отсутствие автосохранения; компоновка sidebar не изменена. |
 | 2026-09-03 | Правая часть `OpenPositionEdit`: по требованиям аналитика и UI/UX-дизайнера закреплён адаптивный containment для `tabSheetOpenPosition` и вкладок с RichTextArea, включая «Шаблон сопроводительного письма». Контент вкладок считает padding внутри ширины (`box-sizing: border-box`), ограничен `min-width: 0 / max-width: 100%`, горизонтальный overflow правой области скрыт, вертикальная прокрутка сохранена; стандартный внешний отступ content-вкладки — 16px справа/слева (`padding: 14px 16px 18px`). Для RichTextArea дополнительно покрыт реальный GWT toolbar (`.gwt-RichTextToolbar`, `div.gwt-PushButton`, `div.gwt-ToggleButton`), чтобы панель редактора не выталкивала вкладку вправо. Sidebar, XML, Java, размеры и компоновка sidebar не менялись; добавлен контракт `rightTabsAndRichTextEditorsStayWithinWorkspace` |
 | 2026-08-13 | Вкладка «Описание должности»: аккордеон `openPositionAccordion` с RichTextArea растягивается на **оставшуюся высоту вкладки** (требование пользователя). Контейнер вкладки заменён со scrollBox на vbox `jobDescriptionVBox` (`edit-workspace-scroll` + `open-position-editor-tab-content`, `expand="descriptionsAccordionHBox"`; в прокручиваемом ScrollBox `height="100%"` аккордеона не резолвился — редактор держался на min-height 360/260px); hbox `descriptionsAccordionHBox` получил `height="100%"`. SCSS во всех 7 темах (sha256=1): `min-height` секции аккордеона 360px → 120px и RichTextArea внутри секции 260px → 120px (иначе на экранах ≤ ~900px жёсткие минимумы выталкивали контент за границу вкладки), добавлен `overflow-y: auto` для `.open-position-editor .v-verticallayout.edit-workspace-scroll` (страховка прокрутки при малых высотах окна). CDP-проверка: fullscreen 1920×1080 — аккордеон 474px (было 360), редактор 372px (было 260), не шире экрана (right 1918 < 1920); окно 1280×720 — аккордеон сжат по остатку (120px), контент влезает. Java и бизнес-логика не менялись; `OpenPositionEditLayoutContractTest` / `OpenPositionScreenDocumentationTest` / `ScreenViewIntegrityTest` PASS |
 | 2026-08-11 | Sidebar: блок **«Средний рейтинг вакансии»** (`openPositionRatingBox`, stylename `open-position-editor-status`) — звёздный рейтинг 1:1 с блоком «Рейтинг» в sidebar JobCandidateEdit (`statusRatingRow`): подпись `openPositionRatingCaptionLabel` (msgAvgRating, капшн `open-position-editor-sidebar-caption` 10.5px/700 uppercase, width 100%) + `openPositionRatingLabel` (h3, пустой — звёзды рисует CSS `:before`). Вертикальная компоновка (капшн сверху, звёзды строкой ниже) — длинная подпись «Средний рейтинг вакансии» не влезает в одну строку со звёздами в sidebar (наезд v-expand при expandRatio 1/2, исправлено после CDP-проверки). Подпись и звёзды центрированы по горизонтали относительно sidebar (text-align: center контейнера, требование пользователя). Методика (как в JobCandidateEdit `setRatingLabel`/`loadAverageRating`): среднее арифметическое `rating` всех взаимодействий `hunttech_IteractionList` по текущей вакансии — JPQL `avg(e.rating + 1)` по `e.vacancy.id`, округление `Math.round`; Java `refreshSidebarRating()` (вызов из `refreshSidebarInfoCard`, presentation-only). SCSS `.open-position-editor-status` + классы `open-position-rating-red-1…blue-5`/`-empty` (19px/700 #ffb11b, line-height 30px, content ★/☆) во всех 7 темах (md5=1); блок расположен под Images (`openPositionEditorLogoBox`) и identity, до пары «Статус+Приоритет». Preview-XML: скрытая заглушка `openPositionRatingLabel` (контракт @Inject). Контрактные тесты `sidebarRatingBlockMirrorsJobCandidateEdit` + `sidebarRatingScssMirrorsJobCandidateStatusInAllThemes`; business-логика и view не менялись |

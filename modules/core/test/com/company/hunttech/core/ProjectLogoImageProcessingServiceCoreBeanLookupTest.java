@@ -45,13 +45,18 @@ public class ProjectLogoImageProcessingServiceCoreBeanLookupTest {
     }
 
     @Test
-    public void uploadComponentResolvesServiceByNameNotByClass() throws IOException {
+    public void uploadComponentResolvesSidebarNormalizerByNameNotByClass() throws IOException {
         String component = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/gui/components/WebProjectLogoFileUploadField.java");
+        String webSpring = readProjectFile("modules/web/src/com/company/hunttech/web-spring.xml");
 
-        assertTrue(component.contains("beanLocator.get(ProjectLogoImageProcessingService.NAME)"));
+        assertTrue(webSpring.contains(
+                "key=\"hunttech_SidebarImageNormalizationService\"\n"
+                        + "                       value=\"com.company.hunttech.app.SidebarImageNormalizationService\""));
+        assertTrue(component.contains("beanLocator.get(SidebarImageNormalizationService.NAME)"));
         assertFalse(component.contains("AppBeans.get(ProjectLogoImageProcessingService.class)"));
         assertFalse(component.contains("@Inject private ProjectLogoImageProcessingService"));
+        assertFalse(component.contains("ProjectLogoImageProcessingService.NAME"));
     }
 
     @Test

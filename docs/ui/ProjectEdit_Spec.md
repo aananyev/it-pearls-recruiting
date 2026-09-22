@@ -6,6 +6,8 @@ Cross-links: [Project](../entities/project/Project.md) · [Project AI upload arc
 
 `ProjectEdit` редактирует проект HRM HuntTech: его наименование, владельца, департамент, даты, чаты, описание, вакансии и шаблон сопроводительного письма. Вкладка «Описание проекта» дополнена безопасным upload-сценарием: пользователь может загрузить PDF, DOCX или TXT с исходным описанием, а AI приводит текст к административно управляемому формату.
 
+Загрузка логотипа в sidebar использует общий безопасный raster pipeline HRM HuntTech: фактическое содержимое декодируется на middleware, нормализуется в PNG не более 512×512 без увеличения и без изменения пропорций. Это отдельный image-контракт и не затрагивает загрузку PDF/DOCX/TXT с описанием проекта.
+
 Кнопка «Кратко» в той же строке генерирует из описания краткое описание сути проекта (два предложения — генерация в 2 раза больше изначальной редакции) в поле сущности `shortDescription`; sidebar-раздел «Коротко» показывает его, если значение не пустое.
 
 Ключевой принцип после внедрения AI Control Plane: экран проекта не содержит системный prompt, не выбирает AI-провайдера, модель или API-ключ. Экран знает только бизнес-функции `PROJECT_DESCRIPTION_GENERATE` и `PROJECT_SHORT_DESCRIPTION_GENERATE` через `ProjectAiService`; содержание prompt и маршрутизация управляются администратором.
@@ -28,6 +30,9 @@ Cross-links: [Project](../entities/project/Project.md) · [Project AI upload arc
 - во вкладке «Описание проекта» нажать «Кратко» → текст описания есть → AI генерирует краткое описание (два предложения — в 2 раза больше изначальной редакции) → результат записывается в `shortDescription` и сразу появляется в sidebar-разделе «Коротко»;
 - нажать «Кратко» при пустом описании → кнопка disabled (текст отсутствует → генерация невозможна);
 - AI-функция/credential недоступны при генерации «Кратко» → `shortDescription` не меняется, пользователь получает предупреждение.
+- загрузить допустимое raster-изображение в sidebar → фактический codec подтверждён → первый кадр нормализован в PNG с сохранением пропорций/alpha и записан через прежние `FileDescriptor`/FileStorage → preview обновлён;
+- загрузить поддельный, повреждённый, слишком большой или недекодируемый image-файл → upload отклонён без fallback на original → прежний `projectLogo` и preview сохранены, пользователь получает понятную ошибку;
+- загрузка документов описания проекта → продолжает использовать собственный PDF/DOCX/TXT-контракт и не проходит через sidebar image pipeline.
 
 ## 1. Точка вызова и контекст
 
@@ -51,6 +56,8 @@ AI-upload и «Кратко» не читают незагруженные gette
 
 ## 3. Upload-контракт
 
+### 3.1. Документ с описанием проекта
+
 Поддерживаемые форматы:
 
 | Формат | Извлечение |
@@ -62,6 +69,16 @@ AI-upload и «Кратко» не читают незагруженные gette
 Максимальный размер upload: 10 MiB. Legacy `.doc` не принимается.
 
 Файл используется только как транспорт. После извлечения текста `FileDescriptor`/FileStorage очищаются; документ не становится частью `Project` и не создаёт новый бизнес-справочник.
+
+### 3.2. Логотип проекта в sidebar
+
+- UI принимает PNG, JPG/JPEG, GIF, BMP, WBMP, WebP и TIFF размером до 20 MiB; MIME/extension-фильтр помогает пользователю, но не является проверкой безопасности.
+- `WebProjectLogoFileUploadField` распознаёт image-binding `Project.projectLogo` и передаёт временные байты в `SidebarImageNormalizationService` до записи в FileStorage.
+- Middleware проверяет фактический ImageIO codec и metadata до полного decode, ограничивает изображение 25 000 000 пикселей, читает первый кадр GIF, применяет JPEG EXIF Orientation, сохраняет alpha и уменьшает в bounding box 512×512 без upscale, crop или растягивания. WebP reader закреплён в app-core, TIFF поддерживается reader используемого JDK 11.
+- Результат всегда имеет PNG-байты, имя/extension `.png` и сохраняется существующей моделью `FileDescriptor`/FileStorage. Entity/schema, sidebar layout и геометрия preview не меняются.
+- При любом отказе original-файл не передаётся в стандартный `saveFile`: прежнее bound-значение и preview остаются активными, временный файл удаляется.
+
+Тот же общий контракт применяется к 16 graphics controls системы: 15 FileDescriptor bindings (включая Company, City, Region, JobCandidate, CandidateCV, Person, Position, SkillTree, Country, SocialNetworkType, ExtUser `officialPhoto`/`userAvatar`, ApplicationSetup logo/icon) и Admin AI logo BLOB adapter. Специализированный main-screen background и документы/CV/вложения общего назначения сохраняют собственные upload flows.
 
 ## 4. AI Control Plane
 
@@ -180,6 +197,7 @@ ProjectAiService.generateShortDescription(projectName, descriptionText)
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-21 | Логотип проекта подключён к общему `SidebarImageNormalizationService`: PNG/JPEG/GIF/BMP/WBMP/WebP/TIFF, EXIF Orientation, лимиты 20 MiB/25 млн пикселей, PNG ≤512×512 без upscale/crop/stretch с сохранением пропорций/alpha и первым кадром GIF. Invalid upload не сохраняется и не заменяет прежний preview; FileDescriptor/FileStorage и layout sidebar не изменены. |
 | 2026-08-16 | «AI-нотификации 2 раза»: стартовые TRAY-нотификации «Кратко» и AI-обработки описания переведены на контрактный `AiOperationNotifier.showStarted(...)` (исчезающая, 5 с, обещание итоговой нотификации с моделью и собственником API) |
 | 2026-08-16 | Контракт пользовательской нотификации: нотификации «Кратко» и AI-обработки описания показывают модель и собственника API (`AiOperationNotifier`, исчезающая TRAY, 5 с); `ProjectAiService` возвращает `AiExecutionResult` (текст + метаданные) |
 | 2026-08-14 | Исправлен рендер строки дат: shared `edit-screen-shared-styles` задавал `.v-slot-edit-form-control { width: 100% !important }`, перебивая Vaadin-инлайн `width: 50%` от `box.expandRatio` — поле «Дата окончания проекта» выталкивалось за правую границу окна и не было видно. Слоты переведены на растяжение Vaadin-инлайном (без `width: 100% !important`, 7 тем); строка дат получила смысловой XML-комментарий; контрактный тест защищает от регрессии |

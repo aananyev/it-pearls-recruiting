@@ -21,7 +21,9 @@
 
 **Browse:** при открытии — фильтры «только открытые» и «только моя подписка»; пакетная подготовка данных для колонок; раскрытие строки с фрагментом и кнопками; закрытие вакансии может массово завершить взаимодействия с кандидатами «на рассмотрении».
 
-**Edit:** много вкладок с ленивой загрузкой LOB и коллекций; автогенерация имени вакансии; проверка дубликатов и vacansyID; shortDescription ≤ 250 символов; уведомления и Telegram при открытии/закрытии.
+**Edit:** много вкладок с ленивой загрузкой LOB и коллекций; автогенерация имени вакансии; AI-генерация чеклиста, карты поиска и плана собеседования через единый vacancy facade; проверка дубликатов и vacansyID; shortDescription ≤ 250 символов; уведомления и Telegram при открытии/закрытии.
+
+**Smart Vacancy Creation:** для каждого создания всегда вызываются три dedicated AI-функции через тот же типизированный `HrmAiService`. При ошибке или пустом ответе достаточный parsed-материал сохраняется как первый fallback; если его нет, применяется прежний детерминированный builder.
 
 ---
 
@@ -41,6 +43,7 @@
 |------|-----------|
 | `comment`, `commentEn` | lazy reload при первом открытии вкладки «Описание должности» (`loadJobDescriptionTab`) |
 | `templateLetter`, `exercise`, `memoForInterview` | lazy reload по вкладкам |
+| `interviewChecklist`, `searchMap`, `interviewPlan` | lazy reload по вкладкам; AI-кнопка активируется только после загрузки соответствующего LOB |
 
 ---
 
@@ -92,6 +95,7 @@
 |--------|---------|
 | Вкладки | Lazy LOB/collections при первом выборе; label-навигация sidebar — набор пунктов активной вкладки (`syncSidebarNavigation`, 11 наборов `openPosition*TabNavigation`), клик по пункту фокусирует первый элемент блока ввода; вкладка «Комментарии» — лента из `commentsOpenPositionDc` + feedback-итераций (`iteractionList-view`), подпись «кандидат / должность» null-safe; sidebar-пара 50/50 «Статус вакансии»/«Приоритет» (`vacancyStateSummary`) обновляется из edited-объекта (`refreshSidebarStatus`/`refreshSidebarPriority`) |
 | Название вакансии | При открытии — значение `vacansyName` из сущности без изменений (обработчик смены грейда игнорирует событие привязки, `isUserOriginated=false` — иначе «<Грейд> null» затирал бы сохранённое название); при действиях пользователя каскады: смена грейда → префикс названия, тип позиции/проект/город → генерация (`generatePositionName*`/`generateVacancyName`), кнопка «Генерировать» → полная перегенерация |
+| Материалы вакансии | «Генерировать» во вкладках чеклиста/карты поиска/плана собеседования → при непустом значении подтверждение замены → общий `HrmAiService.generateVacancyMaterial` в background 120 с → успех меняет только выбранное поле в текущем DataContext; cancel/error/timeout сохраняют прежнее значение; автокоммита нет |
 | Сохранение | sync skills + laborAgreement; дубликат имени/vacansyID; shortDescription ≤ 250 |
 | После save | OpenPositionNews; Telegram (ошибка не блокирует) |
 
@@ -127,6 +131,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-21 | Без изменения entity/schema: существующие LOB `interviewChecklist`, `searchMap`, `interviewPlan` получили единый AI-generation lifecycle в OpenPositionEdit; Smart Vacancy Creation всегда вызывает три typed-функции, используя parsed/deterministic fallback при сбое; зафиксированы lazy/Data View Integrity и explicit save. |
 | 2026-08-13 | OpenPositionEdit: вкладка «Описание должности» — аккордеон `openPositionAccordion` (RichTextArea `comment`/`commentEn`/`standartDescription`/`whoIsThisGuy`) растягивается на оставшуюся высоту вкладки (требование пользователя): контейнер вкладки scrollBox → vbox `jobDescriptionVBox` (`expand="descriptionsAccordionHBox"`), SCSS во всех 7 темах — min-height секции/редактора 360/260px → 120px + `overflow-y: auto` страховка. Только UI-компоновка; entity, views, lazy-логика `loadJobDescriptionTab`, бизнес-логика не менялись; контрактные тесты PASS. CDP: fullscreen 1920×1080 — аккордеон 474px (было 360), редактор 372px (было 260), не шире экрана |
 | 2026-08-11 | OpenPositionEdit/Preview: исправлен `IllegalStateException: Cannot get unfetched attribute [laborAgreement]` при сохранении вакансии с открытой вкладкой «Трудовой договор». Регрессия 2026-08-10: в `syncLaborAgreementToEntity`/`syncSkillsListToEntity` замена `dataContext.merge(reloaded)` на прямой сеттер — woven-сеттер коллекции читает getter для change detection, а атрибута нет в fetch group контейнера (detached `openPosition-edit-view`) → падение при коммите. Фикс: коллекции `laborAgreement`/`skillsList` задекларированы inline-свойствами в view контейнера `openPositionDc` обоих XML (edit + preview); ensure-методы reload+setter удалены как ловушка. Общий `openPosition-edit-view` не менялся (он nested в job-candidate-edit.xml — коллекции там раздули бы граф). Тесты: OpenPositionEditDetachedObjectTest 6/6 (новый контракт inline-декларации), ScreenViewIntegrityTest 8/8, LayoutContract 20/20, OptionsIntegrity 5/5 PASS |
 | 2026-08-10 | OpenPositionEdit: устранён главный N+1 открытия формы — cacheable-загрузчики крупных справочников-опций (`companyNamesLc` ~5 660 компаний, `positionTypesLc` ~188, `citiesDl` ~293) отключены (cacheable="true" → обычный loader): CUBA entity cache при выборке списка выполнял точечный find() по ID для каждой строки (~5 658 SELECT Company + ~188 Position + ~93 City на открытие, 7-9 с). Замер до/после: SQL при открытии 6 215 → 216 (Company 5 658 → 1), время открытия 9-14 с → 2.7-3.1 с (p50, прогретые; 1-е после рестарта ~6 с; остаток — UIDL ~2.2 МБ: сериализация ~6 000 опций компаний/городов/позиций). Добавлен тест-класс `OpenPositionEditOptionsIntegrityTest` (5 тестов: view опций декларируют fileCompanyLogo/projectLogo — защита от UNFETCHED в optionImageProvider; список компаний грузится без lazy; XML формы не содержит cacheable на крупных loaders — регрессия find-цикла). Вид/компоновка/бизнес-логика не менялись; 39 профильных тестов PASS |

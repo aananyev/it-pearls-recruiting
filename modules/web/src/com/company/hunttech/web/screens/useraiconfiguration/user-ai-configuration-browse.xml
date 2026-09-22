@@ -189,7 +189,8 @@
                       width="100%"
                       stylename="candidate-filter-bar edit-card edit-toolbar">
                     <button id="createBtn"
-                            action="userAiConfigurationsTable.create"
+                            caption="msg://createBtn.caption"
+                            invoke="onCreateBtnClick"
                             stylename="primary"
                             icon="PLUS"/>
                     <button id="editBtn"
@@ -225,7 +226,6 @@
                            height="100%"
                            dataContainer="userAiConfigurationsDc">
                         <actions>
-                            <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
                             <action id="refresh" type="refresh"/>
@@ -251,4 +251,3 @@
         </hbox>
     </layout>
 </window>
-

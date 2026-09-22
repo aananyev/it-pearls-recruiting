@@ -63,7 +63,10 @@
                                 align="BOTTOM_CENTER"
                                 showFileName="false"
                                 dropZone="dropZone"
-                                showClearButton="true"/>
+                                showClearButton="true"
+                                accept="image/png,image/jpeg,image/gif,image/bmp,image/vnd.wap.wbmp,image/webp,image/tiff"
+                                permittedExtensions=".png,.jpg,.jpeg,.gif,.bmp,.wbmp,.webp,.tif,.tiff"
+                                fileSizeLimit="20971520"/>
                     </vbox>
                     <vbox id="dropIconZone"
                           spacing="true"
@@ -100,7 +103,10 @@
                                 align="BOTTOM_CENTER"
                                 showFileName="false"
                                 dropZone="dropIconZone"
-                                showClearButton="true"/>
+                                showClearButton="true"
+                                accept="image/png,image/jpeg,image/gif,image/bmp,image/vnd.wap.wbmp,image/webp,image/tiff"
+                                permittedExtensions=".png,.jpg,.jpeg,.gif,.bmp,.wbmp,.webp,.tif,.tiff"
+                                fileSizeLimit="20971520"/>
                     </vbox>
                 </hbox>
                 <checkBox id="telegramBotStartCheckBox"

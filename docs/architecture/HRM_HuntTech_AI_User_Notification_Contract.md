@@ -39,6 +39,7 @@ credentials), и единую форму их показа в UI.
 | `ProjectAiService` | `processUploadedDescription`, `generateShortDescription` | `AiExecutionResult` | пробрасываются от `AiExecutionService` |
 | `SkillAnalysisService` | `analyzeAll/Main/Secondary/Tertiary` | `SkillAnalysisResult` (`skills` + `aiExecution`) | `aiExecution` — при AI-анализе; `null` при классическом fallback |
 | `ProjectLogoImageProcessingService` | `process` | `ProcessedImage` (+ `aiExecution`) | только когда фон удалён AI-функцией `PROJECT_LOGO_IMAGE_GENERATE` |
+| `HrmAiService` | `generateVacancyMaterial` | `AiExecutionResult` | материалы вакансии: функция, модель, провайдер, собственник API |
 | `HrmAiService` (legacy) | `standardizeVacancyDescription`, `generateVacancyArtifact` | `String` | **сознательное исключение**: методы возвращают `String` для внешних потребителей (боты); метаданные доступны на уровне вызываемого `AiExecutionService` |
 | `HrmAiService` — диагностика | `testConnection` | `AiExecutionResult` | модель, провайдер, собственник = личный ключ пользователя (`USER`) |
 
@@ -49,8 +50,9 @@ credentials), и единую форму их показа в UI.
 | `ProjectEdit` — кнопка «Кратко» | `PROJECT_SHORT_DESCRIPTION_GENERATE` | «Краткое описание проекта сгенерировано» + модель + собственник API |
 | `ProjectEdit` — загрузка описания | `PROJECT_DESCRIPTION_GENERATE` | «Описание проекта обработано ИИ» + модель + собственник API |
 | `CandidateCVEdit` — «Сканировать навыки» | `SKILLS_EXTRACT` | «Статистика анализа навыков» + модель + собственник API (добавляются в ту же исчезающую нотификацию) |
-| `WebProjectLogoFileUploadField` — логотип | `PROJECT_LOGO_IMAGE_GENERATE` | «Логотип обработан с помощью AI» + модель + собственник API |
-| `WebProjectLogoFileUploadField` — фото кандидата | локальный rembg/u2net (не API) | «Фотография обработана с помощью AI» — без собственника API (локальная нейросеть, не внешний API) |
+| `OpenPositionEdit` — «Чеклист» | `VACANCY_CHECKLIST` | «Чеклист сгенерирован» + модель + провайдер + собственник API |
+| `OpenPositionEdit` — «Карта поиска» | `VACANCY_SEARCH_MAP` | «Карта поиска сгенерирована» + модель + провайдер + собственник API |
+| `OpenPositionEdit` — «План собеседования» | `VACANCY_INTERVIEW_PLAN` | «План собеседования сгенерирован» + модель + провайдер + собственник API |
 | `UserAiConfigurationBrowse` — «Проверить подключение» | `TEST_CONNECTION` (реальный AI-вызов) | «AI-подключение успешно» + модель + провайдер + собственник API (личный ключ пользователя) |
 | `ExtSettingsWindow` — «Проверить подключение» | `TEST_CONNECTION` (реальный AI-вызов) | «Подключение к API нейросети успешно проверено» + модель + провайдер + собственник API (личный ключ пользователя) |
 
@@ -83,11 +85,12 @@ credentials), и единую форму их показа в UI.
                                     │
         ┌───────────────────────────┼───────────────────────────────┐
         ▼                           ▼                               ▼
-ProjectAiService            SkillAnalysisService            ProjectLogoImageProcessing
-  (пробрасывает)            SkillAnalysisResult{             ProcessedImage{ aiExecution }
-  AiExecutionResult         skills, aiExecution }                    │
-        │                           │                                 ▼
-        ▼                           ▼                        WebProjectLogoFileUploadField
+ProjectAiService            SkillAnalysisService              HrmAiService
+  (пробрасывает)            SkillAnalysisResult{             generateVacancyMaterial
+  AiExecutionResult         skills, aiExecution }             → AiExecutionResult
+        │                           │                                 │
+        ▼                           ▼                                 ▼
+   ProjectEdit               CandidateCVEdit                 OpenPositionEdit
    ProjectEdit               CandidateCVEdit                       │
         │                           │                               ▼
         └───────────┬───────────────┴───────────────┬─────────── AiOperationNotifier (web)
@@ -122,10 +125,9 @@ ProjectAiService            SkillAnalysisService            ProjectLogoImageProc
 | Описание («какая модель») | `Модель: <modelName> · Провайдер: <providerCode>` |
 | Собственник API | `Собственник API: корпоративный (администратора)` для `ADMIN`; `Собственник API: личный (пользователя)` для `USER` |
 
-Стартовая нотификация для загрузки изображений показывается только когда
-включён соответствующий нейросетевой этап (`hunttech.projectLogo.ai.enabled` —
-логотип, `hunttech.projectLogo.rembg.enabled` — фото кандидата); при чисто
-классическом конвейере (flood-fill) стартовая нотификация не показывается.
+Общий sidebar/profile image upload использует детерминированный
+`SidebarImageNormalizationService` и не запускает AI/rembg, поэтому не показывает
+стартовую или итоговую AI-нотификацию. См. исключение и полный upload-контракт в §4.2.
 
 **Порядок показа.** Стартовая нотификация и «крутилка» должны появляться СРАЗУ
 в ответ на действие пользователя, поэтому AI-операции выполняются в фоне
@@ -175,21 +177,21 @@ AI-операция → закрытие «крутилки» → итогова
 
 ### 4.2. Исключение: загрузка изображений (upload-конвейер)
 
-`WebProjectLogoFileUploadField` (логотип проекта/компании, фото кандидата)
+`WebProjectLogoFileUploadField` (15 FileDescriptor graphics controls) и отдельный
+Admin AI logo BLOB adapter
 **не использует «крутилку»**: обработка изображения выполняется внутри
 стандартного конвейера загрузки CUBA (`saveFile` → родительский
 `afterUpload`), асинхронный перенос на `BackgroundTask` невозможен без
 переделки самого конвейера (родитель завершает обработку загрузки сразу
 после возврата из `saveFile`). Клиент во время загрузки файла уже видит
-собственный индикатор прогресса. Для этого компонента действуют правила:
-
-- стартовая нотификация — только при включённом нейросетевом этапе
-  (логотип: `hunttech.projectLogo.ai.enabled`, фото:
-  `hunttech.projectLogo.rembg.enabled`); при чисто классическом конвейере
-  (flood-fill) стартовая нотификация не показывается;
-- итоговая нотификация — только при реальном нейросетевом удалении фона
-  (AI-функция логотипа: с блоком модель/собственник; локальный rembg: без
-  собственника — не внешний API).
+собственный индикатор прогресса. С 2026-09-21 компонент вызывает детерминированный
+`SidebarImageNormalizationService`, а не AI/rembg pipeline: стартовая и итоговая
+AI-нотификации не показываются. Успех отображается обновлением штатного preview;
+ошибка декодирования показывает обычную ERROR-нотификацию и сохраняет прежний preview.
+Записи истории за 2026-08 ниже фиксируют прежнее поведение upload-компонента; оно
+заменено детерминированным контрактом этого раздела с 2026-09-21.
+Специализированный `mainScreenBackgroundUpload` не входит в этот normalizer/AI-контракт:
+он сохраняет отдельный background pipeline 2560×1440 и собственные уведомления.
 
 Пример отображаемого текста итоговой нотификации:
 
@@ -256,8 +258,10 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 - `SkillAnalysisService`: методы возвращают `SkillAnalysisResult`
   (`getSkills()` + `getAiExecution()`); `getAiExecution() == null` при классическом
   fallback — экран в этом случае не добавляет блок «модель/собственник API».
-- `ProjectLogoImageProcessingService` → `ProcessedImage.getAiExecution()` заполнен
-  только при реальном применении AI-функции `PROJECT_LOGO_IMAGE_GENERATE`.
+- legacy `ProjectLogoImageProcessingService` → `ProcessedImage.getAiExecution()` заполнен
+  только при явном применении AI-функции `PROJECT_LOGO_IMAGE_GENERATE`; общий upload его не вызывает.
+- `HrmAiService.generateVacancyMaterial` возвращает `AiExecutionResult`; три операции
+  `OpenPositionEdit` показывают metadata модели/провайдера/собственника API.
 - `HrmAiService` (legacy, для ботов): рабочие методы возвращают `String`; контракт
   метаданных соблюдается вызываемым `AiExecutionService`.
 - `HrmAiService.testConnection` (диагностика): возвращает `AiExecutionResult` с
@@ -271,8 +275,7 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 
 1. в момент старта операции вызвать
    `AiOperationNotifier.showStarted(notifications, caption, detail)` —
-   исчезающая нотификация «начало обработки» (для загрузки изображений —
-   только при включённом нейросетевом этапе);
+   исчезающая нотификация «начало обработки»;
 2. показать «крутилку» `AiOperationNotifier.showProgress(this, message)` и
    выполнить AI-операцию в фоне (`BackgroundTask`) — эталонный паттерн §4.1
    (исключение — upload-конвейер §4.2);
@@ -295,13 +298,12 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 - enum `AiCredentialOwner` с `ADMIN` и `USER`;
 - простановку собственника в обоих путях бина (source-проверки);
 - проброс метаданных фасадами `ProjectAiService` / `SkillAnalysisService`;
-- legacy-контракт `HrmAiService` (`String`);
+- legacy-методы `HrmAiService` (`String`) и typed `generateVacancyMaterial` (`AiExecutionResult`);
 - нотификацию: TRAY, BOTTOM_RIGHT, автоскрытие 5 с, подписи «Модель», «Провайдер»,
   «Собственник API: корпоративный (администратора) / личный (пользователя)»;
-- «AI-нотификации 2 раза»: `showStarted` во всех экранах + обещание итоговой
-  нотификации; старт загрузки изображений завязан на флаги
-  `getAiProcessingEnabled()`/`getRembgEnabled()`;
-- подключение нотификации в `ProjectEdit`, `CandidateCVEdit`, `WebProjectLogoFileUploadField`;
+- «AI-нотификации 2 раза»: `showStarted` во всех AI-экранах + обещание итоговой нотификации;
+- подключение нотификации в `ProjectEdit`, `CandidateCVEdit` и трёх material-операциях `OpenPositionEdit`;
+- отсутствие AI-нотификаций у 16 детерминированных graphics uploads;
 - семантику fallback: `SkillAnalysisServiceBean` возвращает `aiExecution == null`
   при классическом поиске.
 
@@ -312,6 +314,7 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-21 | Добавлены AI-нотификации трёх материалов OpenPositionEdit через полный `AiExecutionResult`; 16 graphics controls переведены на детерминированный normalizer и исключены из AI-нотификаций, main-screen background сохранён как специализированное исключение. |
 | 2026-08-16 | **Эталонный паттерн вызова (§4.1)**: за эталон принят `CandidateCVEdit.scanCandidateSkills` («Сканировать навыки») — нотификация о старте → «крутилка» → фоновая AI-операция (`BackgroundTask`) → закрытие «крутилки» → итоговая нотификация. Все AI-операции приведены к паттерну: `ProjectEdit` (краткое описание, обработка описания — добавлены «крутилка» и `handleTimeoutException`), `UserAiConfigurationBrowse` и `ExtSettingsWindow` (`testConnection` переведён с синхронного вызова на `BackgroundTask` 60 с со стартовой нотификацией и «крутилкой»). Загрузка изображений (`WebProjectLogoFileUploadField`) зафиксирована как сознательное исключение (§4.2): upload-конвейер CUBA не переводится на `BackgroundTask`, «крутилки» нет |
 | 2026-08-16 | AI-текстовые функции переведены на фоновое выполнение (`BackgroundTask`) с модальным диалогом «крутилка» (`AiProgressDialog`; `AiOperationNotifier.showProgress`/`closeProgress`): стартовая нотификация показывается сразу (до «крутилки»), итоговая — по завершении с кратким отчётом. Затронуты `CandidateCVEdit` (анализ навыков, умное форматирование) и `OpenPositionEdit` (AI-анализ требований); `ProjectEdit` уже работал асинхронно. Синхронные AI-вызовы на UI-потоке недопустимы: обе нотификации приходили одной пачкой в конце запроса |
 | 2026-08-16 | Аудит всех AI-вызовов: `testConnection` (реальный AI-вызов в экранах «Управление AI») переведён на контракт — `HrmAiService.testConnection` возвращает `AiExecutionResult` (модель, провайдер, собственник = личный ключ `USER`); `UserAiConfigurationBrowse` и `ExtSettingsWindow` показывают исчезающую TRAY-нотификацию `AiOperationNotifier.show(...)`; §2.3: диагностика исключена из «вне области» |
