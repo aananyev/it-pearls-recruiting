@@ -53,10 +53,10 @@ chmod +x scripts/setup-local-postgres.sh
 ./scripts/setup-local-postgres.sh
 ```
 
-Или вручную от суперпользователя `postgres`:
+Или вручную от суперпользователя `postgres` с паролем, заданным вне Git:
 
 ```sql
-CREATE USER cuba WITH PASSWORD 'cuba' CREATEDB;
+CREATE USER cuba WITH PASSWORD '<внешний-секрет>' CREATEDB;
 CREATE DATABASE HuntTech OWNER cuba ENCODING 'UTF8';
 ```
 

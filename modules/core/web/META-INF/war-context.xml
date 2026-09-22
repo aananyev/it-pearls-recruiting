@@ -10,7 +10,7 @@
       driverClassName="org.postgresql.Driver"
       url="jdbc:postgresql://127.0.0.1:5432/hunttech"
       username="cuba"
-      password="${HUNTTECH_DB_PASSWORD}"/>
+      password="${env.HUNTTECH_DB_PASSWORD}"/>
 
     <!-- Switch off session serialization -->
     <Manager pathname=""/>

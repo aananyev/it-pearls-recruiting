@@ -81,7 +81,7 @@ def postgres = 'org.postgresql:postgresql:42.2.9'
 
 def configuredDbProfile = System.getenv('HUNTTECH_DB_PROFILE') ?: 'LOCAL'
 def dbProfileSettings = [
-    LOCAL     : [host: '192.168.1.135', port: System.getenv('HUNTTECH_LOCAL_DB_PORT') ?: '5432',
+    LOCAL     : [host: System.getenv('HUNTTECH_LOCAL_DB_HOST') ?: '192.168.1.135', port: System.getenv('HUNTTECH_LOCAL_DB_PORT') ?: '5432',
                  name: System.getenv('HUNTTECH_LOCAL_DB_NAME') ?: 'hunttech',
                  user: System.getenv('HUNTTECH_LOCAL_DB_USER') ?: 'cuba', passwordEnv: 'HUNTTECH_LOCAL_DB_PASSWORD'],
     TEST      : [host: System.getenv('HUNTTECH_TEST_DB_HOST'), port: System.getenv('HUNTTECH_TEST_DB_PORT'),
@@ -95,12 +95,14 @@ if (!dbProfileSettings.containsKey(configuredDbProfile)) {
     throw new GradleException("Unknown HUNTTECH_DB_PROFILE: ${configuredDbProfile}")
 }
 def configuredDb = dbProfileSettings[configuredDbProfile]
-if (configuredDb.values().any { it == null || it.toString().trim().isEmpty() }) {
+if (['host', 'port', 'name', 'user'].any { key -> configuredDb[key] == null || configuredDb[key].toString().trim().isEmpty() }) {
     throw new GradleException("HUNTTECH_DB_PROFILE=${configuredDbProfile} requires explicit database settings")
 }
 if (configuredDbProfile == 'TEST') {
-    def testHost = configuredDb.host.toString().trim().toLowerCase(Locale.ROOT)
-    if (['192.168.1.135', '127.0.0.1', 'localhost', '::1'].contains(testHost)) {
+    def testHost = configuredDb.host.toString().trim().toLowerCase(Locale.ROOT).replaceFirst('\\.$', '')
+    if (testHost == '192.168.1.135' || testHost == '127.0.0.1' || testHost.startsWith('127.') ||
+            testHost == 'localhost' || testHost.startsWith('localhost.') || testHost == '::1' ||
+            testHost == '0.0.0.0' || testHost ==~ /[0-9]+/) {
         throw new GradleException('HUNTTECH_DB_PROFILE=TEST requires a separate non-local database host')
     }
 }

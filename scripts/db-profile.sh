@@ -49,6 +49,23 @@ db_profile_validate_host() {
     fi
 }
 
+db_profile_normalize_host() {
+    local value="$1"
+    value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+    value="${value%.}"
+    printf '%s' "$value"
+}
+
+db_profile_test_host_is_forbidden() {
+    local host
+    host="$(db_profile_normalize_host "$1")"
+    [[ "$host" == "192.168.1.135" ||
+       "$host" == "127.0.0.1" || "$host" == 127.* ||
+       "$host" == "localhost" || "$host" == localhost.* ||
+       "$host" == "::1" || "$host" == "0.0.0.0" ||
+       "$host" =~ ^[0-9]+$ ]]
+}
+
 db_profile_resolve() {
     local profile="${1:-${HUNTTECH_DB_PROFILE:-}}"
 
@@ -86,12 +103,7 @@ db_profile_resolve() {
             DB_PROFILE_PORT="$HUNTTECH_TEST_DB_PORT"
             DB_PROFILE_DATABASE="$HUNTTECH_TEST_DB_NAME"
             DB_PROFILE_USER="$HUNTTECH_TEST_DB_USER"
-            local test_host_lower
-            test_host_lower="$(printf '%s' "$DB_PROFILE_HOST" | tr '[:upper:]' '[:lower:]')"
-            if [[ "$test_host_lower" == "192.168.1.135" ||
-                  "$test_host_lower" == "127.0.0.1" ||
-                  "$test_host_lower" == "localhost" ||
-                  "$test_host_lower" == "::1" ]]; then
+            if db_profile_test_host_is_forbidden "$DB_PROFILE_HOST"; then
                 db_profile_error "TEST must use an explicitly separate database host"
                 return 1
             fi

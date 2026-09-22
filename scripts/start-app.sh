@@ -5,14 +5,6 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-# Стандартный рабочий профиль — общая рабочая PostgreSQL. Локальный PostgreSQL
-# не является неявным fallback и не запускается этим скриптом.
-# shellcheck source=db-profile.sh
-source "$ROOT/scripts/db-profile.sh"
-HUNTTECH_DB_PROFILE="${HUNTTECH_DB_PROFILE:-LOCAL}"
-db_profile_resolve "$HUNTTECH_DB_PROFILE"
-db_profile_require_password
-
 # ==============================================================================
 # СЕРИАЛИЗАЦИЯ ЛОКАЛЬНОГО ДЕПЛОЯ (протокол 3 агентов, 2026-08-15)
 # Один деплой/рестарт в один момент времени: flock-mutex + проверки git/gradle.
@@ -53,6 +45,15 @@ while [ $# -gt 0 ]; do
             ;;
     esac
 done
+
+# Стандартный рабочий профиль — общая рабочая PostgreSQL. Локальный PostgreSQL
+# не является неявным fallback и не запускается этим скриптом.
+# shellcheck source=db-profile.sh
+source "$ROOT/scripts/db-profile.sh"
+export HUNTTECH_DB_PROFILE="${HUNTTECH_DB_PROFILE:-LOCAL}"
+db_profile_resolve "$HUNTTECH_DB_PROFILE"
+db_profile_require_password
+export HUNTTECH_DB_PASSWORD="${!DB_PROFILE_PASSWORD_VAR}"
 
 mkdir -p "$(dirname "$DEPLOY_LOG")"
 
@@ -267,6 +268,10 @@ ensure_port_free_for_restart() {
 }
 
 ensure_postgres() {
+  if ! command -v pg_isready >/dev/null 2>&1; then
+    log "Ошибка: клиент pg_isready не найден — установите postgresql-client для проверки доступности PostgreSQL."
+    exit 1
+  fi
   if command -v pg_isready >/dev/null 2>&1 && \
      pg_isready -q -h "$DB_PROFILE_HOST" -p "$DB_PROFILE_PORT" \
        -d "$DB_PROFILE_DATABASE" -U "$DB_PROFILE_USER" 2>/dev/null; then

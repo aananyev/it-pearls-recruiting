@@ -7,7 +7,7 @@
               maxTotal="20"
               maxWaitMillis="5000"
               name="jdbc/CubaDS"
-              password="${HUNTTECH_DB_PASSWORD}"
+              password="${env.HUNTTECH_DB_PASSWORD}"
               type="javax.sql.DataSource"
               url="jdbc:postgresql://127.0.0.1:5432/hunttech"
               username="cuba"/>

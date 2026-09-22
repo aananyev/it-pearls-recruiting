@@ -48,7 +48,10 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
     # Production artifacts must never carry the remote work DB or an ambiguous
     # localhost fallback in a JNDI JDBC URL.
     while IFS= read -r config_file; do
-        [[ -f "$config_file" ]] || continue
+        [[ -f "$config_file" ]] || {
+            printf 'Refusing PRODUCTION: mandatory config is missing: %s\n' "$config_file" >&2
+            exit 24
+        }
         if rg -n -i 'jdbc:postgresql://(192\.168\.1\.135|localhost)([:/"[:space:]]|$)' "$config_file" >/dev/null; then
             printf 'Refusing PRODUCTION: unsafe JDBC host found in %s\n' "$config_file" >&2
             exit 21
@@ -63,7 +66,6 @@ ${ROOT}/modules/core/web/META-INF/jetty-env.xml
 ${ROOT}/modules/core/web/META-INF/war-context.xml
 ${ROOT}/modules/core/src/app.properties
 ${ROOT}/modules/core/src/com/company/hunttech/app.properties
-${ROOT}/deploy/tomcat/webapps/hrm-core/META-INF/context.xml
 EOF
 fi
 

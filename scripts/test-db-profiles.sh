@@ -9,6 +9,12 @@ failures=0
 pass() { printf 'PASS %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; failures=$((failures + 1)); }
 
+if command -v rg >/dev/null 2>&1; then
+    pass 'ripgrep is available for security scans'
+else
+    fail 'ripgrep is required for security scans'
+fi
+
 if db_profile_resolve LOCAL && [[ "$DB_PROFILE_HOST" == "192.168.1.135" ]]; then
     pass 'LOCAL resolves to 192.168.1.135'
 else
@@ -101,12 +107,6 @@ if HUNTTECH_LOCAL_DB_PASSWORD='p<&"' \
     pass 'rendered context uses profile host, escapes password, and is mode 600'
 else
     fail 'rendered context contract failed'
-fi
-
-if command -v rg >/dev/null 2>&1; then
-    pass 'ripgrep is available for security scans'
-else
-    fail 'ripgrep is required for security scans'
 fi
 
 if rg -n 'password="cuba"|^cuba\.dataSource\.password=cuba$' \

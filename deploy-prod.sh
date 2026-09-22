@@ -34,12 +34,6 @@ BACKUPLOG=deploy-prod.log
 LOG="${CWD}/${BACKUPLOG}"
 CONFIG_FILE="${current_catalog}/hunttech.conf"
 
-# Fail-fast до SSH, backup, остановки Tomcat или любой другой production-операции.
-# Production datasource обязан оставаться на loopback IPv4; localhost и рабочий
-# PostgreSQL никогда не принимаются как неявный fallback.
-HUNTTECH_DB_PROFILE=PRODUCTION \
-  bash "${current_catalog}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
-
 DEFAULT_DB_SERVER="hr.hunttech.ru"
 DB_SERVER="$DEFAULT_DB_SERVER"
 DB_USER="replica"
@@ -1129,6 +1123,12 @@ main_deploy() {
 # --- main ---
 load_or_create_config
 parse_args "$@"
+
+# Fail-fast до SSH, backup, остановки Tomcat или любой другой production-операции.
+# Production datasource обязан оставаться на loopback IPv4; localhost и рабочий
+# PostgreSQL никогда не принимаются как неявный fallback.
+HUNTTECH_DB_PROFILE=PRODUCTION \
+  bash "${current_catalog}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
 
 if [ "$CHECK_CONFIG" -eq 1 ]; then
     : >"$LOG"

@@ -33,8 +33,9 @@ public class HunttechTestContainer extends TestContainer {
     }
 
     /**
-     * Reads JDBC settings from Tomcat context.xml — the same {@code HuntTech} database as local dev.
-     * Integration tests that commit entities must clean up after themselves (see {@link TestEntityTracker}).
+     * Reads the JDBC driver from context.xml and resolves the database profile from
+     * environment variables. Integration tests never use PRODUCTION and must clean
+     * up entities they create (see {@link TestEntityTracker}).
      */
     private void initDbProperties() {
         File contextXmlFile = new File("modules/core/web/META-INF/context.xml");
@@ -54,14 +55,29 @@ public class HunttechTestContainer extends TestContainer {
             throw new IllegalStateException("Integration tests cannot use the PRODUCTION database profile");
         }
         if ("LOCAL".equals(profile)) {
+            String localHost = envOrDefault("HUNTTECH_LOCAL_DB_HOST", "192.168.1.135");
+            if (!"192.168.1.135".equals(localHost)) {
+                throw new IllegalStateException("LOCAL profile host must be 192.168.1.135");
+            }
             dbUrl = jdbcUrl(
-                    envOrDefault("HUNTTECH_LOCAL_DB_HOST", "192.168.1.135"),
+                    localHost,
                     envOrDefault("HUNTTECH_LOCAL_DB_PORT", "5432"),
                     envOrDefault("HUNTTECH_LOCAL_DB_NAME", "hunttech"));
             dbUser = envOrDefault("HUNTTECH_LOCAL_DB_USER", "cuba");
             dbPassword = requiredEnv("HUNTTECH_LOCAL_DB_PASSWORD");
         } else if ("TEST".equals(profile)) {
-            dbUrl = jdbcUrl(requiredEnv("HUNTTECH_TEST_DB_HOST"),
+            String testHost = requiredEnv("HUNTTECH_TEST_DB_HOST");
+            String normalizedTestHost = testHost.toLowerCase(Locale.ROOT);
+            if (normalizedTestHost.endsWith(".")) {
+                normalizedTestHost = normalizedTestHost.substring(0, normalizedTestHost.length() - 1);
+            }
+            if (normalizedTestHost.equals("192.168.1.135") || normalizedTestHost.equals("127.0.0.1")
+                    || normalizedTestHost.startsWith("127.") || normalizedTestHost.equals("localhost")
+                    || normalizedTestHost.startsWith("localhost.") || normalizedTestHost.equals("::1")
+                    || normalizedTestHost.equals("0.0.0.0") || normalizedTestHost.matches("[0-9]+")) {
+                throw new IllegalStateException("TEST profile must use an explicitly separate database host");
+            }
+            dbUrl = jdbcUrl(testHost,
                     requiredEnv("HUNTTECH_TEST_DB_PORT"),
                     requiredEnv("HUNTTECH_TEST_DB_NAME"));
             dbUser = requiredEnv("HUNTTECH_TEST_DB_USER");
