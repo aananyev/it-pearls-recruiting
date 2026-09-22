@@ -5,6 +5,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Стандартный рабочий профиль — общая рабочая PostgreSQL. Локальный PostgreSQL
+# не является неявным fallback и не запускается этим скриптом.
+# shellcheck source=db-profile.sh
+source "$ROOT/scripts/db-profile.sh"
+HUNTTECH_DB_PROFILE="${HUNTTECH_DB_PROFILE:-LOCAL}"
+db_profile_resolve "$HUNTTECH_DB_PROFILE"
+db_profile_require_password
+
 # ==============================================================================
 # СЕРИАЛИЗАЦИЯ ЛОКАЛЬНОГО ДЕПЛОЯ (протокол 3 агентов, 2026-08-15)
 # Один деплой/рестарт в один момент времени: flock-mutex + проверки git/gradle.
@@ -259,20 +267,14 @@ ensure_port_free_for_restart() {
 }
 
 ensure_postgres() {
-  if command -v pg_isready >/dev/null 2>&1 && pg_isready -q 2>/dev/null; then
-    log "PostgreSQL: готов (pg_isready)."
+  if command -v pg_isready >/dev/null 2>&1 && \
+     pg_isready -q -h "$DB_PROFILE_HOST" -p "$DB_PROFILE_PORT" \
+       -d "$DB_PROFILE_DATABASE" -U "$DB_PROFILE_USER" 2>/dev/null; then
+    log "PostgreSQL: готов (profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST port=$DB_PROFILE_PORT database=$DB_PROFILE_DATABASE)."
     return 0
   fi
-  log "PostgreSQL не отвечает — запуск ./start-postgres11.sh start ..."
-  ./start-postgres11.sh start
-  for _ in $(seq 1 30); do
-    if pg_isready -q 2>/dev/null; then
-      log "PostgreSQL: готов."
-      return 0
-    fi
-    sleep 1
-  done
-  log "Ошибка: PostgreSQL не поднялся за 30 с. Проверьте ./start-postgres11.sh status"
+  log "Ошибка: PostgreSQL profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST port=$DB_PROFILE_PORT database=$DB_PROFILE_DATABASE недоступен."
+  log "Локальный PostgreSQL не запускается автоматически; проверьте VPN/firewall/pg_hba и профиль."
   exit 1
 }
 
@@ -415,6 +417,11 @@ clean_deployment
 
 log "Чистая сборка и deploy без запуска тестов... (каталог: $BUILD_DIR)"
 ( cd "$BUILD_DIR" && ./gradlew clean deploy -x test )
+
+log "Рендерю JNDI datasource для profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST (секрет не выводится)..."
+bash "$ROOT/scripts/render-db-context.sh" \
+  --profile "$HUNTTECH_DB_PROFILE" \
+  --output "$ROOT/deploy/tomcat/webapps/hrm-core/META-INF/context.xml"
 
 # app_home и JVM-параметры задаются после deploy, чтобы их не затронула очистка.
 ensure_local_app_properties

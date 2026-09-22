@@ -79,6 +79,26 @@ repositories {
 
 def postgres = 'org.postgresql:postgresql:42.2.9'
 
+def configuredDbProfile = System.getenv('HUNTTECH_DB_PROFILE') ?: 'LOCAL'
+def dbProfileSettings = [
+    LOCAL     : [host: '192.168.1.135', port: System.getenv('HUNTTECH_LOCAL_DB_PORT') ?: '5432',
+                 name: System.getenv('HUNTTECH_LOCAL_DB_NAME') ?: 'hunttech',
+                 user: System.getenv('HUNTTECH_LOCAL_DB_USER') ?: 'cuba', passwordEnv: 'HUNTTECH_LOCAL_DB_PASSWORD'],
+    TEST      : [host: System.getenv('HUNTTECH_TEST_DB_HOST'), port: System.getenv('HUNTTECH_TEST_DB_PORT'),
+                 name: System.getenv('HUNTTECH_TEST_DB_NAME'), user: System.getenv('HUNTTECH_TEST_DB_USER'),
+                 passwordEnv: 'HUNTTECH_TEST_DB_PASSWORD'],
+    PRODUCTION: [host: '127.0.0.1', port: System.getenv('HUNTTECH_PRODUCTION_DB_PORT') ?: '5432',
+                 name: System.getenv('HUNTTECH_PRODUCTION_DB_NAME') ?: 'hunttech',
+                 user: System.getenv('HUNTTECH_PRODUCTION_DB_USER') ?: 'cuba', passwordEnv: 'HUNTTECH_PRODUCTION_DB_PASSWORD']
+]
+if (!dbProfileSettings.containsKey(configuredDbProfile)) {
+    throw new GradleException("Unknown HUNTTECH_DB_PROFILE: ${configuredDbProfile}")
+}
+def configuredDb = dbProfileSettings[configuredDbProfile]
+if (configuredDb.values().any { it == null || it.toString().trim().isEmpty() }) {
+    throw new GradleException("HUNTTECH_DB_PROFILE=${configuredDbProfile} requires explicit database settings")
+}
+
 configure([globalModule, coreModule, webModule, guiModule, webToolkitModule]) {
     apply(plugin: 'java')
     apply(plugin: 'maven')
@@ -179,19 +199,29 @@ configure(coreModule) {
     }
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
-        host = '127.0.0.1:5432'
-        dbName = 'hunttech'
+        host = "${configuredDb.host}:${configuredDb.port}"
+        dbName = configuredDb.name
         dbms = 'postgres'
-        dbUser = 'cuba'
-        dbPassword = 'cuba'
+        dbUser = configuredDb.user
+        dbPassword = System.getenv(configuredDb.passwordEnv) ?: ''
+        doFirst {
+            if (!System.getenv(configuredDb.passwordEnv)) {
+                throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
+            }
+        }
     }
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
-        host = '127.0.0.1:5432'
-        dbName = 'hunttech'
+        host = "${configuredDb.host}:${configuredDb.port}"
+        dbName = configuredDb.name
         dbms = 'postgres'
-        dbUser = 'cuba'
-        dbPassword = 'cuba'
+        dbUser = configuredDb.user
+        dbPassword = System.getenv(configuredDb.passwordEnv) ?: ''
+        doFirst {
+            if (!System.getenv(configuredDb.passwordEnv)) {
+                throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
+            }
+        }
     }
 }
 

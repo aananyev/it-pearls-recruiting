@@ -72,6 +72,17 @@ Runbook описывает подготовку и последующий без
 - External callbacks disabled.
 - User access disabled.
 - New application connects only to `hunttech`.
+- Production JNDI `jdbc/CubaDS` must resolve only to `127.0.0.1`; `192.168.1.135`
+  and `localhost` are forbidden. Run the repository guard before any SSH,
+  backup, WAR transfer or Tomcat action:
+
+  ```bash
+  HUNTTECH_DB_PROFILE=PRODUCTION \
+    bash scripts/validate-db-profile.sh --profile PRODUCTION
+  ```
+
+- The JNDI password is supplied from the production secret store only. It is
+  never copied into Git, WAR source, logs or the deployment report.
 - Old `/app` continues to use only `itpearls` until stopped for final migration.
 
 ## Commands for stage 1 verification
@@ -106,6 +117,8 @@ Stop immediately if:
 - target database is not `hunttech`;
 - any command would modify `itpearls` during stage 1;
 - any script requires secrets in Git.
+- effective production JDBC host is not exactly `127.0.0.1`;
+- a production script sees `localhost`, `192.168.1.135` or an unknown profile.
 
 ## Stage 1 verdict
 

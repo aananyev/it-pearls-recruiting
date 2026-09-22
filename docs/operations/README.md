@@ -5,6 +5,7 @@
 | Документ | Краткое описание |
 | -------- | ---------------- |
 | [local-database.md](local-development/local-database.md) | Локальная PostgreSQL для HRM HuntTech |
+| [database-profiles.md](database-profiles.md) | Явные LOCAL/TEST/PRODUCTION профили и datasource guard |
 
 ## Рабочие runbook-и в deployment
 
@@ -13,4 +14,3 @@ Production-материалы оставлены на исходных путя�
 - [database-migration](../../deployment/database-migration/)
 - [production-deployment/runbooks](../../deployment/production-deployment/runbooks/)
 - [production-deployment/reports](../../deployment/production-deployment/reports/)
-
