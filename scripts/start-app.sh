@@ -454,12 +454,32 @@ configure_tomcat_db_environment() {
 }
 configure_tomcat_db_environment
 
+# Tomcat 9.0.38 does not consistently expand ${env.*} in JNDI resources when
+# launched by Gradle. Materialize the resolved values only in the ignored local
+# runtime descriptor; the tracked template remains secret-free.
+materialize_tomcat_db_context() {
+  local context="$ROOT/deploy/tomcat/webapps/hrm-core/META-INF/context.xml"
+  HUNTTECH_DB_PASSWORD="${!DB_PROFILE_PASSWORD_VAR}" \
+  HUNTTECH_DB_JDBC_URL="$(db_profile_jdbc_url)" \
+  HUNTTECH_DB_USER="$DB_PROFILE_USER" \
+  python3 - "$context" <<'PY'
+import os
+from pathlib import Path
+path = Path(__import__('sys').argv[1])
+text = path.read_text()
+for key in ('HUNTTECH_DB_PASSWORD', 'HUNTTECH_DB_JDBC_URL', 'HUNTTECH_DB_USER'):
+    text = text.replace('${env.' + key + '}', os.environ[key])
+path.write_text(text)
+PY
+}
+materialize_tomcat_db_context
+
 # app_home и JVM-параметры задаются после deploy, чтобы их не затронула очистка.
 ensure_local_app_properties
 configure_jvm_diagnostics
 
 log "Запуск Tomcat..."
-with_profile_env ./gradlew start --no-daemon
+with_profile_env "$ROOT/deploy/tomcat/bin/startup.sh"
 
 log "URL: $APP_URL"
 wait_for_http
