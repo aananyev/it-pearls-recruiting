@@ -198,6 +198,9 @@ public class CandidateVacancyMatchContractTest {
                     scss.contains(".candidate-vacancy-match-details-scroll {\n    overflow-x: hidden !important;\n    overflow-y: auto !important;"));
             assertFalse(theme + ": вложенный ScrollBox не должен перехватывать вертикальную прокрутку",
                     scss.contains(".candidate-vacancy-match-details-scroll > .c-scrollbox-content"));
+            assertTrue(theme + ": кнопки действий должны занимать слот и переносить подпись на узком экране",
+                    scss.contains(".candidate-vacancy-match-action-row .v-button {\n      min-width: 0 !important;\n      width: 100% !important;")
+                            && scss.contains("white-space: normal !important;"));
             if (reference == null) {
                 reference = scss;
             } else {
