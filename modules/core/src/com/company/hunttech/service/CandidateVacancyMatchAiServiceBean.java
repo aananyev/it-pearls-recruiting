@@ -343,7 +343,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         for (JobCandidate cand : candidates) {
             candidateSequence++;
             List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
-                    .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(cv.textCV)) > 0 order by e.datePost desc, e.createTs desc")
+                    .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(e.textCV)) > 0 order by e.datePost desc, e.createTs desc")
                     .parameter("candId", cand.getId())
                     .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy"))
                     .list();

@@ -72,6 +72,8 @@ public class CandidateVacancyMatchContractTest {
                 bean.contains("context.put(\"requestId\""));
         assertTrue("Прямой подбор должен связывать requestId с operation id",
                 bean.contains("progress.getOperationId()"));
+        assertTrue("Обратный подбор должен использовать JPQL alias e для текста резюме",
+                bean.contains("length(trim(e.textCV)) > 0"));
     }
 
     @Test
