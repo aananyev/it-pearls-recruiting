@@ -193,6 +193,8 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             context.put(PARAM_CANDIDATE_SKILLS, candidateSkillsText);
             context.put(PARAM_CANDIDATE_RESUME_TEXT, candidateResumeText);
             context.put(PARAM_VACANCIES_JSON, vacanciesJson);
+            context.put("callerSource", "CandidateVacancyMatch:candidate-to-vacancies");
+            context.put("requestId", progress.getOperationId() + "-chunk-" + (i + 1));
 
             boolean chunkSucceeded = false;
             try {
@@ -335,8 +337,11 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
         AiExecutionResult lastAiResult = null;
         boolean anyAiSuccess = false;
+        UUID reverseOperationId = UUID.randomUUID();
+        int candidateSequence = 0;
 
         for (JobCandidate cand : candidates) {
+            candidateSequence++;
             List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
                     .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(cv.textCV)) > 0 order by e.datePost desc, e.createTs desc")
                     .parameter("candId", cand.getId())
@@ -358,6 +363,8 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             context.put(PARAM_CANDIDATE_SKILLS, candidateSkillsText);
             context.put(PARAM_CANDIDATE_RESUME_TEXT, candidateResumeText);
             context.put(PARAM_VACANCIES_JSON, vacanciesJson);
+            context.put("callerSource", "CandidateVacancyMatch:vacancy-to-candidates");
+            context.put("requestId", reverseOperationId + "-candidate-" + candidateSequence);
 
             CandidateVacancyMatchItem matchedItem = null;
             try {
@@ -984,6 +991,10 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
         synchronized long getLastUpdatedAt() {
             return lastUpdatedAt;
+        }
+
+        UUID getOperationId() {
+            return operationId;
         }
 
         private int calculateProgressPercent() {
