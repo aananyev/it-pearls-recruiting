@@ -1,5 +1,7 @@
 <Context>
 
+    <!-- Requires -Dorg.apache.tomcat.util.digester.PROPERTY_SOURCE=org.apache.tomcat.util.digester.EnvironmentPropertySource. -->
+
     <!-- Switch off session serialization -->
     <Manager pathname=""/>
     <Resource driverClassName="org.postgresql.Driver"
@@ -7,10 +9,10 @@
               maxTotal="20"
               maxWaitMillis="5000"
               name="jdbc/CubaDS"
-              password="cuba"
+              password="${env.HUNTTECH_DB_PASSWORD}"
               type="javax.sql.DataSource"
-              url="jdbc:postgresql://127.0.0.1:5432/hunttech"
-              username="cuba"/>
+              url="${env.HUNTTECH_DB_JDBC_URL}"
+              username="${env.HUNTTECH_DB_USER}"/>
     <!-- Database connection-->
 
 </Context>

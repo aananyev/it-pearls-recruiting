@@ -1124,6 +1124,23 @@ main_deploy() {
 load_or_create_config
 parse_args "$@"
 
+# Fail-fast до SSH, backup, остановки Tomcat или любой другой production-операции.
+# Production datasource обязан оставаться на loopback IPv4; localhost и рабочий
+# PostgreSQL никогда не принимаются как неявный fallback.
+VALIDATE_PROFILE_ARGS=(--profile PRODUCTION)
+if [[ "$CHECK_CONFIG" -eq 0 && "$SKIP_DB_UPDATE" -eq 0 ]]; then
+    resolve_db_update_password
+    [[ -n "${DB_UPDATE_PASSWORD:-}" ]] || { echo "Refusing PRODUCTION: database update password is empty" >&2; exit 1; }
+    VALIDATE_PROFILE_ARGS+=(--require-password)
+fi
+(
+    export HUNTTECH_DB_PROFILE=PRODUCTION
+    if [[ "$CHECK_CONFIG" -eq 0 && "$SKIP_DB_UPDATE" -eq 0 ]]; then
+        export HUNTTECH_PRODUCTION_DB_PASSWORD="$DB_UPDATE_PASSWORD"
+    fi
+    bash "${current_catalog}/scripts/validate-db-profile.sh" "${VALIDATE_PROFILE_ARGS[@]}" >/dev/null
+)
+
 if [ "$CHECK_CONFIG" -eq 1 ]; then
     : >"$LOG"
     log_action "INFO" "Запуск deploy-prod.sh --check-config"

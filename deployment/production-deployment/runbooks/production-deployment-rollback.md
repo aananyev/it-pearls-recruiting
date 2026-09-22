@@ -22,6 +22,9 @@ Rollback отличается до и после появления пользо
 4. Проверить, что `/app` подключается к `itpearls`.
 5. Выполнить smoke test старого приложения.
 6. Сохранить `/hrm` и `hunttech` для анализа.
+7. Вернуть предыдущий проверенный production JNDI context из secret store и
+   подтвердить его effective host до повторного запуска. Не брать пароль или
+   полный JDBC URL из Git, логов или shell history.
 
 Подготовленный guard:
 
@@ -62,3 +65,5 @@ CONFIRMED_NO_HRM_USER_WRITES=yes HRM_DEPLOY_APPROVED=yes \
 - Files are readable.
 - Scheduled jobs are not duplicated.
 - No two active writers exist.
+- Effective datasource host is confirmed as `127.0.0.1` before `/hrm` restart;
+  `localhost` and `192.168.1.135` are rejected by the production guard.

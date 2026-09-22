@@ -11,6 +11,8 @@ export JRE_HOME="$JAVA_HOME"
 # Default for local Tomcat: $CATALINA_BASE/../app_home
 APP_HOME="${APP_HOME:-$CATALINA_BASE/../app_home}"
 CATALINA_OPTS="-Xmx2048m -Dfile.encoding=UTF-8 -Dapp.home=\"$APP_HOME\""
+# Allow Tomcat Context descriptors to resolve ${env.NAME} from the process environment.
+CATALINA_OPTS="$CATALINA_OPTS -Dorg.apache.tomcat.util.digester.PROPERTY_SOURCE=org.apache.tomcat.util.digester.EnvironmentPropertySource"
 
 CATALINA_OPTS="$CATALINA_OPTS -Dcom.sun.management.jmxremote"
 

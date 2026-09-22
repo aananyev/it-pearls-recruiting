@@ -32,6 +32,9 @@ HRM_WAR="$1"
 CORE_WAR="$2"
 require_file "${HRM_WAR}"
 require_file "${CORE_WAR}"
+REPO_ROOT="$(cd "${DEPLOYMENT_ROOT}/../.." && pwd)"
+export HUNTTECH_DB_PROFILE=PRODUCTION
+bash "${REPO_ROOT}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
 REMOTE_HOST="${REMOTE_HOST:-hr.hunttech.ru}"
 log "Deploy /hrm and /hrm-core disabled artifacts; /app is not deleted or overwritten."
 run_cmd scp "${HRM_WAR}" "${REMOTE_HOST}:/tmp/hrm.war"

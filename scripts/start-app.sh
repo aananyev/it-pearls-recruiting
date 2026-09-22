@@ -46,6 +46,27 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+# Стандартный рабочий профиль — общая рабочая PostgreSQL. Локальный PostgreSQL
+# не является неявным fallback и не запускается этим скриптом.
+# shellcheck source=db-profile.sh
+source "$ROOT/scripts/db-profile.sh"
+export HUNTTECH_DB_PROFILE="${HUNTTECH_DB_PROFILE:-LOCAL}"
+if [[ "$HUNTTECH_DB_PROFILE" == "PRODUCTION" ]]; then
+  echo "❌ Локальный start-app.sh блокирует профиль PRODUCTION; используйте отдельный production runbook." >&2
+  exit 1
+fi
+db_profile_resolve "$HUNTTECH_DB_PROFILE"
+db_profile_require_password
+
+with_profile_env() (
+  local profile_password="${!DB_PROFILE_PASSWORD_VAR}"
+  export "$DB_PROFILE_PASSWORD_VAR=$profile_password"
+  export HUNTTECH_DB_PASSWORD="$profile_password"
+  export HUNTTECH_DB_JDBC_URL="$(db_profile_jdbc_url)"
+  export HUNTTECH_DB_USER="$DB_PROFILE_USER"
+  "$@"
+)
+
 mkdir -p "$(dirname "$DEPLOY_LOG")"
 
 # shlock (macOS): lock-файл с PID оболочки-владельца; stale-лок после kill -9
@@ -259,20 +280,18 @@ ensure_port_free_for_restart() {
 }
 
 ensure_postgres() {
-  if command -v pg_isready >/dev/null 2>&1 && pg_isready -q 2>/dev/null; then
-    log "PostgreSQL: готов (pg_isready)."
+  if ! command -v pg_isready >/dev/null 2>&1; then
+    log "Ошибка: клиент pg_isready не найден — установите postgresql-client для проверки доступности PostgreSQL."
+    exit 1
+  fi
+  if command -v pg_isready >/dev/null 2>&1 && \
+     pg_isready -q -h "$DB_PROFILE_HOST" -p "$DB_PROFILE_PORT" \
+       -d "$DB_PROFILE_DATABASE" -U "$DB_PROFILE_USER" 2>/dev/null; then
+    log "PostgreSQL: готов (profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST port=$DB_PROFILE_PORT database=$DB_PROFILE_DATABASE)."
     return 0
   fi
-  log "PostgreSQL не отвечает — запуск ./start-postgres11.sh start ..."
-  ./start-postgres11.sh start
-  for _ in $(seq 1 30); do
-    if pg_isready -q 2>/dev/null; then
-      log "PostgreSQL: готов."
-      return 0
-    fi
-    sleep 1
-  done
-  log "Ошибка: PostgreSQL не поднялся за 30 с. Проверьте ./start-postgres11.sh status"
+  log "Ошибка: PostgreSQL profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST port=$DB_PROFILE_PORT database=$DB_PROFILE_DATABASE не отвечает на проверку доступности."
+  log "Локальный PostgreSQL не запускается автоматически; проверьте VPN/firewall/pg_hba и профиль."
   exit 1
 }
 
@@ -329,6 +348,7 @@ configure_jvm_diagnostics() {
   # Параметры добавляются последними: диагностические значения имеют приоритет
   # над случайно оставшимися локальными -Xms/-Xmx.
   CATALINA_OPTS="${CATALINA_OPTS:-} \
+-Dorg.apache.tomcat.util.digester.PROPERTY_SOURCE=org.apache.tomcat.util.digester.EnvironmentPropertySource \
 -Xms${LOCAL_JAVA_XMS} \
 -Xmx${LOCAL_JAVA_XMX} \
 -XX:+HeapDumpOnOutOfMemoryError \
@@ -409,19 +429,24 @@ log "Gradle stop (ошибки игнорируются)..."
 # к ещё отсутствующей колонке и сорвать открытие экранов после входа.
 # updateDb всегда из корня: миграции master == миграции ветки (guard без новых миграций).
 log "Применяю накопленные миграции CUBA к локальной PostgreSQL..."
-./gradlew updateDb --no-daemon --stacktrace
+with_profile_env ./gradlew updateDb --no-daemon --stacktrace
 
 clean_deployment
 
 log "Чистая сборка и deploy без запуска тестов... (каталог: $BUILD_DIR)"
 ( cd "$BUILD_DIR" && ./gradlew clean deploy -x test )
 
+log "Рендерю JNDI datasource для profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST (секрет не выводится)..."
+with_profile_env bash "$ROOT/scripts/render-db-context.sh" \
+  --profile "$HUNTTECH_DB_PROFILE" \
+  --output "$ROOT/deploy/tomcat/webapps/hrm-core/META-INF/context.xml"
+
 # app_home и JVM-параметры задаются после deploy, чтобы их не затронула очистка.
 ensure_local_app_properties
 configure_jvm_diagnostics
 
 log "Запуск Tomcat..."
-./gradlew start
+with_profile_env ./gradlew start --no-daemon
 
 log "URL: $APP_URL"
 wait_for_http
