@@ -35,6 +35,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
     private static final Logger log = LoggerFactory.getLogger(YandexIntegrationServiceBean.class);
 
     private static final int HTTP_TIMEOUT_MS = 15000;
+    private static final int HTTP_MULTI_STATUS = 207;
     private static final String DEFAULT_TIME_ZONE_SARATOV = "Europe/Saratov";
 
     @Inject
@@ -109,9 +110,12 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         try {
             if ("CALENDAR".equalsIgnoreCase(serviceType)) {
                 List<YandexCalendarInfoDto> calendars = discoverCalendarsInternal(config, token);
+                if (calendars.isEmpty()) {
+                    throw new CaldavRequestException(404);
+                }
                 boolean foundClient = calendars.stream().anyMatch(YandexCalendarInfoDto::isClientInterviewCalendar);
                 String msg = String.format("Календари доступны. Обнаружено %d календарей (в т.ч. 'Hunttech у заказчика': %s)",
-                        calendars.size(), foundClient ? "найден" : "не найден, будет создан или использован личный");
+                        calendars.size(), foundClient ? "найден" : "не найден");
                 config.setCalendarConnected(true);
                 config.setLastVerifiedAt(new Date());
                 config.setLastVerificationMessage(msg);
@@ -154,10 +158,45 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                     return YandexDiagnosticResult.error("AUTH", res.statusCode, "Неверный токен авторизации", res.body);
                 }
             }
+        } catch (CaldavRequestException ex) {
+            String message = calendarFailureMessage(ex.getStatusCode());
+            recordCalendarDiagnosticFailure(config, message);
+            log.warn("Ошибка проверки CalDAV: HTTP {} ({})", ex.getStatusCode(), message);
+            return YandexDiagnosticResult.error("CALENDAR", ex.getStatusCode(), message, null);
         } catch (Exception ex) {
+            if ("CALENDAR".equalsIgnoreCase(serviceType)) {
+                recordCalendarDiagnosticFailure(config, "Сетевая ошибка доступа к Яндекс.Календарю");
+                log.warn("Сетевая ошибка проверки CalDAV: {}", ex.getMessage());
+                return YandexDiagnosticResult.error("CALENDAR", 503,
+                        "Сетевая ошибка доступа к Яндекс.Календарю", null);
+            }
             log.error("Ошибка при проверке подключения к {}: {}", serviceType, ex.getMessage(), ex);
             return YandexDiagnosticResult.error(serviceType, 500, "Ошибка связи: " + ex.getMessage(), null);
         }
+    }
+
+    /**
+     * Фиксирует отрицательный результат диагностики, не сохраняя тело ответа Яндекса:
+     * оно может содержать служебные сведения и не требуется для пользовательского статуса.
+     */
+    private void recordCalendarDiagnosticFailure(UserYandexConfiguration config, String message) {
+        config.setCalendarConnected(false);
+        config.setLastVerifiedAt(new Date());
+        config.setLastVerificationMessage(message);
+        dataManager.commit(config);
+    }
+
+    private String calendarFailureMessage(int statusCode) {
+        if (statusCode == 401) {
+            return "OAuth-токен Яндекс недействителен или истёк";
+        }
+        if (statusCode == 403) {
+            return "Недостаточно прав OAuth для доступа к календарям";
+        }
+        if (statusCode == 404) {
+            return "CalDAV-календарь или учётная запись недоступны";
+        }
+        return "Ошибка CalDAV: HTTP " + statusCode;
     }
 
     @Override
@@ -793,6 +832,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                     "</d:propfind>";
 
             HttpResult propfindRes = sendHttp("PROPFIND", principalUrl, token, propfindBody, "application/xml; charset=utf-8", Collections.singletonMap("Depth", "0"));
+            requireSuccessfulCaldav(propfindRes);
 
             String homeSetPath = extractTagContent(propfindRes.body, "href");
             if (StringUtils.isBlank(homeSetPath)) {
@@ -810,6 +850,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                     "</d:propfind>";
 
             HttpResult listRes = sendHttp("PROPFIND", homeUrl, token, listBody, "application/xml; charset=utf-8", Collections.singletonMap("Depth", "1"));
+            requireSuccessfulCaldav(listRes);
 
             // Разбираем ответы
             Pattern responsePattern = Pattern.compile("<(?:\\w+:)?response>(.*?)</(?:\\w+:)?response>", Pattern.DOTALL);
@@ -828,22 +869,23 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                 }
             }
 
-            if (result.isEmpty()) {
-                // Фолбэк на стандартный путь календаря пользователя
-                String defaultPath = "/calendars/" + URLEncoder.encode(account, StandardCharsets.UTF_8.name()) + "/events/";
-                result.add(new YandexCalendarInfoDto("default", "Основной", defaultPath, true, false));
-                String clientPath = "/calendars/" + URLEncoder.encode(account, StandardCharsets.UTF_8.name()) + "/hunttech-client/";
-                result.add(new YandexCalendarInfoDto("client", UserYandexConfiguration.DEFAULT_CLIENT_CALENDAR_NAME, clientPath, false, true));
-            }
-
+        } catch (CaldavRequestException ex) {
+            throw ex;
         } catch (Exception ex) {
-            log.warn("Ошибка CalDAV discovery: {}", ex.getMessage());
-            // Фолбэк
-            String defaultPath = "/calendars/" + account + "/events/";
-            result.add(new YandexCalendarInfoDto("default", DEFAULT_PERSONAL_CALENDAR_NAME, defaultPath, true, false));
+            throw new IllegalStateException("Не удалось выполнить CalDAV discovery", ex);
         }
 
         return result;
+    }
+
+    /**
+     * CalDAV discovery должен отвечать 207 Multi-Status. Проверка кода до разбора XML
+     * исключает ложное состояние «подключено» при 401/403/404 и пустом error body.
+     */
+    private void requireSuccessfulCaldav(HttpResult result) {
+        if (result == null || result.statusCode != HTTP_MULTI_STATUS) {
+            throw new CaldavRequestException(result != null ? result.statusCode : 503);
+        }
     }
 
     private String resolveTargetCalendarPath(UserYandexConfiguration config, String token, YandexCalendarType calendarType, String customPath) {
@@ -1032,7 +1074,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         return null;
     }
 
-    private HttpResult sendHttp(String method, String urlStr, String token, String body, String contentType, Map<String, String> extraHeaders) throws Exception {
+    protected HttpResult sendHttp(String method, String urlStr, String token, String body, String contentType, Map<String, String> extraHeaders) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         setRequestMethodSafely(conn, method);
@@ -1333,13 +1375,26 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         }
     }
 
-    private static class HttpResult {
-        final int statusCode;
-        final String body;
+    protected static class HttpResult {
+        protected final int statusCode;
+        protected final String body;
 
-        HttpResult(int statusCode, String body) {
+        protected HttpResult(int statusCode, String body) {
             this.statusCode = statusCode;
             this.body = body;
+        }
+    }
+
+    private static class CaldavRequestException extends RuntimeException {
+        private final int statusCode;
+
+        private CaldavRequestException(int statusCode) {
+            super("CalDAV HTTP " + statusCode);
+            this.statusCode = statusCode;
+        }
+
+        private int getStatusCode() {
+            return statusCode;
         }
     }
 }
