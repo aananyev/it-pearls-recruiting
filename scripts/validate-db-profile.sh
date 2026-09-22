@@ -48,6 +48,11 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
         printf 'Refusing PRODUCTION: effective DB host is not 127.0.0.1\n' >&2
         exit 20
     }
+    if [[ -n "${HUNTTECH_DB_JDBC_URL:-}" &&
+          ! "$HUNTTECH_DB_JDBC_URL" =~ ^jdbc:postgresql://127\.0\.0\.1:[0-9]+/[A-Za-z0-9._-]+$ ]]; then
+        printf 'Refusing PRODUCTION: HUNTTECH_DB_JDBC_URL must target 127.0.0.1\n' >&2
+        exit 26
+    fi
 
     command -v rg >/dev/null 2>&1 || {
         printf 'Refusing PRODUCTION: ripgrep (rg) is required for artifact scan\n' >&2

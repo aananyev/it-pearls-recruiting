@@ -58,17 +58,14 @@ fi
 db_profile_resolve "$HUNTTECH_DB_PROFILE"
 db_profile_require_password
 
-with_profile_env() {
-  local rc=0
+with_profile_env() (
   local profile_password="${!DB_PROFILE_PASSWORD_VAR}"
   export "$DB_PROFILE_PASSWORD_VAR=$profile_password"
   export HUNTTECH_DB_PASSWORD="$profile_password"
   export HUNTTECH_DB_JDBC_URL="$(db_profile_jdbc_url)"
   export HUNTTECH_DB_USER="$DB_PROFILE_USER"
-  "$@" || rc=$?
-  unset HUNTTECH_DB_PASSWORD HUNTTECH_DB_JDBC_URL HUNTTECH_DB_USER "$DB_PROFILE_PASSWORD_VAR" profile_password
-  return "$rc"
-}
+  "$@"
+)
 
 mkdir -p "$(dirname "$DEPLOY_LOG")"
 

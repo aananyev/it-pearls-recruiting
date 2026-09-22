@@ -87,6 +87,11 @@ if (configuredDbProfile == 'PRODUCTION' && System.getenv('HUNTTECH_PRODUCTION_DB
         System.getenv('HUNTTECH_PRODUCTION_DB_HOST') != '127.0.0.1') {
     throw new GradleException('PRODUCTION host must be exactly 127.0.0.1')
 }
+def genericJdbcUrl = System.getenv('HUNTTECH_DB_JDBC_URL')
+if (configuredDbProfile == 'PRODUCTION' && genericJdbcUrl &&
+        !(genericJdbcUrl ==~ /jdbc:postgresql:\/\/127\.0\.0\.1:[0-9]+\/[A-Za-z0-9._-]+/)) {
+    throw new GradleException('HUNTTECH_DB_JDBC_URL must target 127.0.0.1 for PRODUCTION')
+}
 def dbProfileSettings = [
     LOCAL     : [host: System.getenv('HUNTTECH_LOCAL_DB_HOST') ?: '192.168.1.135', port: System.getenv('HUNTTECH_LOCAL_DB_PORT') ?: '5432',
                  name: System.getenv('HUNTTECH_LOCAL_DB_NAME') ?: 'hunttech',

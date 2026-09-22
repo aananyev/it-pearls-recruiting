@@ -23,7 +23,8 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --output)
-            OUTPUT="${2:-}"
+            [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+            OUTPUT="$2"
             shift 2
             ;;
         --help|-h)
@@ -40,10 +41,7 @@ done
 [[ -n "$PROFILE" && -n "$OUTPUT" ]] || { usage >&2; exit 2; }
 db_profile_resolve "$PROFILE"
 db_profile_require_password
-[[ -n "${HUNTTECH_DB_PASSWORD:-}" ]] || {
-    printf 'HUNTTECH_DB_PASSWORD must be supplied for the rendered JNDI context\n' >&2
-    exit 1
-}
+export HUNTTECH_DB_PASSWORD="${!DB_PROFILE_PASSWORD_VAR}"
 
 xml_escape() {
     printf '%s' "$1" | sed \
