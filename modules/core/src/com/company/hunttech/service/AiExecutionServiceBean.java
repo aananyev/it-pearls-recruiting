@@ -117,7 +117,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
         boolean freeOnly = isFreeOnlyRequested(context);
-        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly, requestId);
 
         CallAttemptsTracker tracker = new CallAttemptsTracker();
         AiExecutionResult result;
@@ -196,7 +196,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
         boolean freeOnly = isFreeOnlyRequested(context);
-        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly, requestId);
         CallAttemptsTracker tracker = new CallAttemptsTracker();
 
         AtomicBoolean emitted = new AtomicBoolean(false);
@@ -264,6 +264,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         long startTime = System.currentTimeMillis();
         String callerSource = context != null && context.get("callerSource") != null
                 ? String.valueOf(context.get("callerSource")) : null;
+        String requestId = requestIdFromContext(context);
 
         if (sourceImage == null || sourceImage.length == 0) {
             throw new DevelopmentException("Для AI-обработки изображения не переданы данные.");
@@ -280,7 +281,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
         UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
         List<UserExecutionCandidate> userCandidates = resolveUserExecutionCandidates(currentUser, userOverride, function);
         boolean freeOnly = isFreeOnlyRequested(context);
-        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly);
+        List<AdminExecutionCandidate> adminCandidates = resolveAdminExecutionCandidates(function, freeOnly, requestId);
         CallAttemptsTracker tracker = new CallAttemptsTracker();
 
         if (AiExecutionPolicy.USER_REQUIRED == policy) {
@@ -302,7 +303,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
                     }
                     tracker.markFallback();
-                    return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime, tracker);
+                    return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType,
+                            currentUser, callerSource, startTime, requestId, tracker);
                 }
                 saveAiCallLog(currentUser, function, null, null, "USER", prompt, null,
                         null, null, null, System.currentTimeMillis() - startTime, callerSource, "ERROR", userFailure.getMessage(),
@@ -314,7 +316,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
         if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY) {
             userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
         }
-        return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType, currentUser, callerSource, startTime, tracker);
+        return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType,
+                currentUser, callerSource, startTime, requestId, tracker);
     }
 
     private static class CallAttemptsTracker {
@@ -486,10 +489,16 @@ public class AiExecutionServiceBean implements AiExecutionService {
     }
 
     private List<AdminExecutionCandidate> resolveAdminExecutionCandidates(AiFunctionConfiguration function) {
-        return resolveAdminExecutionCandidates(function, false);
+        return resolveAdminExecutionCandidates(function, false, null);
     }
 
     private List<AdminExecutionCandidate> resolveAdminExecutionCandidates(AiFunctionConfiguration function, boolean freeOnly) {
+        return resolveAdminExecutionCandidates(function, freeOnly, null);
+    }
+
+    private List<AdminExecutionCandidate> resolveAdminExecutionCandidates(AiFunctionConfiguration function,
+                                                                          boolean freeOnly,
+                                                                          String requestId) {
         List<AdminExecutionCandidate> candidates = new ArrayList<>();
         Set<UUID> seenIds = new HashSet<>();
 
@@ -529,6 +538,13 @@ public class AiExecutionServiceBean implements AiExecutionService {
             log.warn("Не удалось загрузить список корпоративных AI-подключений: {}", e.getMessage());
         }
 
+        log.info("AI_ROUTE_RESOLVED functionCode={} requestId={} executionPolicy={} fallbackPolicy={} "
+                        + "freeOnly={} boundConfigId={} candidateCount={} candidates={}",
+                function != null ? function.getCode() : "none", safeRequestId(requestId),
+                function != null ? function.getExecutionPolicy() : null,
+                function != null ? function.getFallbackPolicy() : null,
+                freeOnly, safeConfigurationId(configuredAdmin), candidates.size(),
+                summarizeAdminCandidates(candidates));
         return candidates;
     }
 
@@ -652,10 +668,26 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     : (isSameAdminConfig(config, function.getAdminConfiguration()) && isConfigured(function.getAdminModelName())
                         ? function.getAdminModelName()
                         : config.getDefaultModelName());
-            String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+            String apiKey;
+            try {
+                apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+            } catch (RuntimeException credentialFailure) {
+                lastException = credentialFailure;
+                tracker.recordFailure();
+                log.warn("AI_ROUTE_FAILURE functionCode={} requestId={} provider={} model={} configId={} "
+                                + "candidateIndex={}/{} attempt=0/{} stage=credential_decrypt category={} action=next_candidate",
+                        function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                        safeConfigurationId(config), i + 1, candidates.size(), maxAttempts,
+                        safeErrorCategory(credentialFailure));
+                continue;
+            }
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
+                    log.info("AI_ROUTE_ATTEMPT functionCode={} requestId={} provider={} model={} configId={} "
+                                    + "candidateIndex={}/{} attempt={}/{} stage=provider_call",
+                            function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                            safeConfigurationId(config), i + 1, candidates.size(), attempt, maxAttempts);
                     AiProviderResponse response = executeProvider(config.getProviderCode(), apiKey, model,
                             function, prompt, effectiveSystemPrompt, requestId, config.getBaseApiUrl());
                     tracker.recordSuccess();
@@ -676,8 +708,11 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                 userContext, tracker);
                         throw e;
                     }
-                    log.warn("Попытка {}/{} вызова корпоративной AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
-                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    log.warn("AI_ROUTE_FAILURE functionCode={} requestId={} provider={} model={} configId={} "
+                                    + "candidateIndex={}/{} attempt={}/{} stage=provider_call category={} action={}",
+                            function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                            safeConfigurationId(config), i + 1, candidates.size(), attempt, maxAttempts,
+                            safeErrorCategory(e), attempt < maxAttempts ? "retry" : "next_candidate");
                     sleepBeforeRetry(attempt, maxAttempts);
                 }
             }
@@ -785,10 +820,26 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     : (isSameAdminConfig(config, function.getAdminConfiguration()) && isConfigured(function.getAdminModelName())
                         ? function.getAdminModelName()
                         : config.getDefaultModelName());
-            String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+            String apiKey;
+            try {
+                apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+            } catch (RuntimeException credentialFailure) {
+                lastException = credentialFailure;
+                tracker.recordFailure();
+                log.warn("AI_ROUTE_FAILURE functionCode={} requestId={} provider={} model={} configId={} "
+                                + "candidateIndex={}/{} attempt=0/{} stage=credential_decrypt category={} action=next_candidate",
+                        function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                        safeConfigurationId(config), i + 1, candidates.size(), maxAttempts,
+                        safeErrorCategory(credentialFailure));
+                continue;
+            }
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
+                    log.info("AI_ROUTE_ATTEMPT functionCode={} requestId={} provider={} model={} configId={} "
+                                    + "candidateIndex={}/{} attempt={}/{} stage=provider_stream",
+                            function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                            safeConfigurationId(config), i + 1, candidates.size(), attempt, maxAttempts);
                     AiProviderResponse response = executeProviderStreaming(config.getProviderCode(), apiKey, model,
                             function, prompt, effectiveSystemPrompt, requestId, listener, config.getBaseApiUrl());
                     tracker.recordSuccess();
@@ -809,8 +860,11 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                 userContext, tracker);
                         throw e;
                     }
-                    log.warn("Попытка {}/{} стриминг-вызова корпоративной AI-конфигурации [{}] ({}) завершилась ошибкой: {}",
-                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    log.warn("AI_ROUTE_FAILURE functionCode={} requestId={} provider={} model={} configId={} "
+                                    + "candidateIndex={}/{} attempt={}/{} stage=provider_stream category={} action={}",
+                            function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                            safeConfigurationId(config), i + 1, candidates.size(), attempt, maxAttempts,
+                            safeErrorCategory(e), attempt < maxAttempts ? "retry" : "next_candidate");
                     sleepBeforeRetry(attempt, maxAttempts);
                 }
             }
@@ -893,6 +947,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                                               User currentUser,
                                                               String callerSource,
                                                               long startTime,
+                                                              String requestId,
                                                               CallAttemptsTracker tracker) {
         if (candidates == null || candidates.isEmpty()) {
             throw new DevelopmentException(
@@ -908,11 +963,29 @@ public class AiExecutionServiceBean implements AiExecutionService {
             int maxAttempts = resolveAdminMaxRetries(config);
             String model = isConfigured(candidate.modelOverride)
                     ? candidate.modelOverride
-                    : (isConfigured(function.getAdminModelName()) ? function.getAdminModelName() : config.getDefaultModelName());
-            String apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+                    : (isSameAdminConfig(config, function.getAdminConfiguration()) && isConfigured(function.getAdminModelName())
+                        ? function.getAdminModelName()
+                        : config.getDefaultModelName());
+            String apiKey;
+            try {
+                apiKey = aiSecretService.decrypt(config.getApiKeyEncrypted());
+            } catch (RuntimeException credentialFailure) {
+                lastException = credentialFailure;
+                tracker.recordFailure();
+                log.warn("AI_ROUTE_FAILURE functionCode={} requestId={} provider={} model={} configId={} "
+                                + "candidateIndex={}/{} attempt=0/{} stage=credential_decrypt category={} action=next_candidate",
+                        function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                        safeConfigurationId(config), i + 1, candidates.size(), maxAttempts,
+                        safeErrorCategory(credentialFailure));
+                continue;
+            }
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
+                    log.info("AI_ROUTE_ATTEMPT functionCode={} requestId={} provider={} model={} configId={} "
+                                    + "candidateIndex={}/{} attempt={}/{} stage=provider_image",
+                            function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                            safeConfigurationId(config), i + 1, candidates.size(), attempt, maxAttempts);
                     byte[] image = executeProviderImage(config.getProviderCode(), apiKey, model, function,
                             prompt, sourceImage, sourceMimeType);
                     tracker.recordSuccess();
@@ -931,8 +1004,11 @@ public class AiExecutionServiceBean implements AiExecutionService {
                                 null, tracker);
                         throw e;
                     }
-                    log.warn("Попытка {}/{} вызова корпоративной генерации изображения [{}] ({}) завершилась ошибкой: {}",
-                            attempt, maxAttempts, config.getProviderCode(), model, e.getMessage());
+                    log.warn("AI_ROUTE_FAILURE functionCode={} requestId={} provider={} model={} configId={} "
+                                    + "candidateIndex={}/{} attempt={}/{} stage=provider_image category={} action={}",
+                            function.getCode(), safeRequestId(requestId), config.getProviderCode(), model,
+                            safeConfigurationId(config), i + 1, candidates.size(), attempt, maxAttempts,
+                            safeErrorCategory(e), attempt < maxAttempts ? "retry" : "next_candidate");
                     sleepBeforeRetry(attempt, maxAttempts);
                 }
             }
@@ -1310,6 +1386,71 @@ public class AiExecutionServiceBean implements AiExecutionService {
         }
         String requestId = ((String) context.get("requestId")).trim();
         return requestId.isEmpty() ? null : requestId;
+    }
+
+    private String safeRequestId(String requestId) {
+        return isConfigured(requestId) ? requestId : "none";
+    }
+
+    private String safeConfigurationId(AdminAiConfiguration configuration) {
+        return configuration != null && configuration.getId() != null
+                ? configuration.getId().toString()
+                : "none";
+    }
+
+    private String summarizeAdminCandidates(List<AdminExecutionCandidate> candidates) {
+        if (candidates == null || candidates.isEmpty()) {
+            return "[]";
+        }
+        StringBuilder summary = new StringBuilder("[");
+        for (int i = 0; i < candidates.size(); i++) {
+            if (i > 0) {
+                summary.append(',');
+            }
+            AdminExecutionCandidate candidate = candidates.get(i);
+            AdminAiConfiguration configuration = candidate.configuration;
+            String model = isConfigured(candidate.modelOverride)
+                    ? candidate.modelOverride
+                    : configuration.getDefaultModelName();
+            summary.append(i + 1)
+                    .append(':').append(configuration.getProviderCode())
+                    .append('/').append(model)
+                    .append('@').append(safeConfigurationId(configuration));
+        }
+        return summary.append(']').toString();
+    }
+
+    /** Возвращает ограниченную техническую категорию без текста ответа провайдера и credential. */
+    private String safeErrorCategory(Throwable failure) {
+        if (failure instanceof AiRequestCancelledException) {
+            return "cancelled";
+        }
+        String sanitized = AiSecuritySanitizer.sanitizeError(failure);
+        String normalized = sanitized == null ? "" : sanitized.toLowerCase();
+        if (normalized.contains("расшифров") || normalized.contains("decrypt")) {
+            return "credential_decrypt";
+        }
+        if (normalized.contains("http 401") || normalized.contains("authentication")) {
+            return "authentication";
+        }
+        if (normalized.contains("http 402") || normalized.contains("insufficient")
+                || normalized.contains("deposit required")) {
+            return "quota_or_payment";
+        }
+        if (normalized.contains("http 403") || normalized.contains("access denied")
+                || normalized.contains("access restricted")) {
+            return "access_denied";
+        }
+        if (normalized.contains("http 429") || normalized.contains("rate limit")) {
+            return "rate_limit";
+        }
+        if (normalized.contains("timeout") || normalized.contains("timed out")) {
+            return "timeout";
+        }
+        if (normalized.contains("connection") || normalized.contains("connect")) {
+            return "connection";
+        }
+        return "provider_error";
     }
 
     private void validateTextCapability(AiFunctionConfiguration function) {

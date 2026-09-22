@@ -23,6 +23,8 @@
 
 `ext-main-screen.xml` сохраняет стандартную `WorkArea` и в `initialLayout` размещает `mainDashboard` с кодом `recruiting-dashboard`. Открытие browse/edit-экранов из меню или виджета выполняется стандартными механизмами CUBA и не меняется визуальной задачей.
 
+`recruiting-dashboard` — стартовая persistent dashboard-модель главного экрана, а не menu screen. Она намеренно отсутствует в верхнеуровневом меню «Дашборды» (`application-dashboards`), где зарегистрированы только пять отдельных screen IDs: три операционных dashboard рекрутера и два dashboard аналитики AI.
+
 Путь настройки персонального изображения:
 
 ```text
@@ -236,6 +238,7 @@ Hermes проверяет точный HEAD PR:
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-22 | Зафиксировано разделение стартового persistent `recruiting-dashboard` и верхнеуровневого меню «Дашборды»: persistent model не добавляется в меню |
 | 2026-08-02 | `recruiting-dashboard` приведён к общему визуальному контракту Edit-форм через `edit-workspace recruiter-dashboard-root`; добавлен идентичный shared SCSS для семи тем без изменения persistent model, widgets и бизнес-логики |
 | 2026-07-29 | Fullscreen-геометрия `horizontalWrap`, `mainVBox` и `mainDashboard` закреплена в XML и контрактном тесте |
 | 2026-07-27 | Пользовательский фон закреплён как `StreamResource` с MIME и `data:` URI; системные `ThemeResource` не изменены |

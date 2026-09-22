@@ -221,3 +221,11 @@ AI Control Plane использует отдельный `ai-control-plane-views
 | 2026-08-12 | Vacancy runtime переведён на AI Control Plane; добавлены legacy migration, единый provider catalog и specific permission corporate credentials |
 | 2026-08-12 | Создана модель AI Control Plane: функции, corporate connections, per-function user overrides, resolver и AI UI |
 | 2026-08-12 | Исправлены заголовки пунктов меню «Управление AI»: явные captions для `AiFunctionConfiguration`, `AdminAiConfiguration`, `UserAiFunctionOverride` (вместо сырых ключей `menu-config.*`); ключи `menu_config.*` добавлены в EN/RU messages |
+
+## 12. Metadata фактического AI-вызова в анализе навыков
+
+`AiExecutionResult` — источник фактически использованных `providerCode` и `modelName`. При сохранении `CandidateCvSkillAnalysis` эти поля не должны заменяться текущей конфигурацией или моделью по умолчанию.
+
+Для анализа навыков поле `executionSource` отделяет реальный AI-вызов от словарного fallback и неполных metadata. Fallback не выдаётся за модель: мониторинг показывает «Fallback: справочник». Для исторических строк, созданных до появления metadata, используется «Метаданные недоступны» без ретроактивной подстановки провайдера или модели.
+
+При ошибке или `RETRY` metadata предыдущего успешного вызова сохраняются. После изменения view или entity обязательны проверки `ScreenViewIntegrityTest` и профильные regression tests CandidateSkillEnrichmentService.
