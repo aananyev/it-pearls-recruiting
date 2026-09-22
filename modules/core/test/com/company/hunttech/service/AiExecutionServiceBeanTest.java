@@ -30,6 +30,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -620,6 +622,158 @@ public class AiExecutionServiceBeanTest {
         assertEquals(Integer.valueOf(1), logged.getSuccessfulAttempts());
         assertEquals(Integer.valueOf(1), logged.getFailedAttempts());
         assertEquals(Integer.valueOf(0), logged.getModelSwitchCount());
+    }
+
+    @Test
+    public void adminConfiguration_withUndecryptableCredential_fallsBackToValidDeepSeek() {
+        function.setCode("CANDIDATE_VACANCY_MATCH_ANALYZE");
+        function.setExecutionPolicy(AiExecutionPolicy.ADMIN_ONLY);
+
+        AdminAiConfiguration undecryptable = function.getAdminConfiguration();
+        undecryptable.setId(UUID.randomUUID());
+        undecryptable.setName("Broken corporate route");
+        undecryptable.setProviderCode("openrouter");
+        undecryptable.setDefaultModelName("broken-model");
+        undecryptable.setApiKeyEncrypted("broken-secret");
+        undecryptable.setPriority(200);
+
+        AdminAiConfiguration deepSeek = new AdminAiConfiguration();
+        deepSeek.setId(UUID.randomUUID());
+        deepSeek.setName("DeepSeek fallback");
+        deepSeek.setProviderCode("deepseek");
+        deepSeek.setDefaultModelName("deepseek-v4-flash");
+        deepSeek.setApiKeyEncrypted("deepseek-secret");
+        deepSeek.setPriority(100);
+        deepSeek.setMaxRetries(1);
+        deepSeek.setActive(true);
+
+        FluentLoader adminLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(dataManager.load(AdminAiConfiguration.class)).thenReturn(adminLoader);
+        when(adminLoader.query(anyString()).view(anyString()).list())
+                .thenReturn(Arrays.asList(undecryptable, deepSeek));
+
+        AIProvider openRouterProvider = mock(AIProvider.class);
+        AIProvider deepSeekProvider = mock(AIProvider.class);
+        when(providerRegistry.getProvider("openrouter")).thenReturn(openRouterProvider);
+        when(providerRegistry.getProvider("deepseek")).thenReturn(deepSeekProvider);
+        when(aiSecretService.decrypt("broken-secret"))
+                .thenThrow(new DevelopmentException("Не удалось расшифровать корпоративный AI credential."));
+        when(aiSecretService.decrypt("deepseek-secret")).thenReturn("deepseek-key");
+        when(deepSeekProvider.executeTextWithTokens(anyString(), anyString(), eq("deepseek-key"),
+                eq("deepseek-v4-flash"), any()))
+                .thenReturn(AiProviderResponse.ofText("DeepSeek response", 20, 10, 30));
+
+        AiExecutionResult result = service.executeText("CANDIDATE_VACANCY_MATCH_ANALYZE",
+                Collections.singletonMap("vacancyName", "Java Developer"));
+
+        assertEquals("deepseek", result.getProviderCode());
+        assertEquals("deepseek-v4-flash", result.getModelName());
+        assertEquals("DeepSeek response", result.getText());
+        verify(openRouterProvider, never())
+                .executeTextWithTokens(anyString(), anyString(), anyString(), anyString(), any());
+        verify(deepSeekProvider, times(1))
+                .executeTextWithTokens(anyString(), anyString(), eq("deepseek-key"),
+                        eq("deepseek-v4-flash"), any());
+
+        ArgumentCaptor<CommitContext> commitCaptor = ArgumentCaptor.forClass(CommitContext.class);
+        verify(dataManager).commit(commitCaptor.capture());
+        AiCallLog logged = (AiCallLog) commitCaptor.getValue().getCommitInstances().iterator().next();
+        assertEquals(Integer.valueOf(2), logged.getAttemptsCount());
+        assertEquals(Integer.valueOf(1), logged.getSuccessfulAttempts());
+        assertEquals(Integer.valueOf(1), logged.getFailedAttempts());
+        assertEquals(Integer.valueOf(1), logged.getModelSwitchCount());
+        assertEquals(Boolean.TRUE, logged.getFallbackUsed());
+    }
+
+    @Test
+    public void adminStreaming_withUndecryptableCredential_fallsBackToValidDeepSeek() {
+        function.setCode("CANDIDATE_VACANCY_MATCH_ANALYZE");
+        function.setExecutionPolicy(AiExecutionPolicy.ADMIN_ONLY);
+
+        AdminAiConfiguration undecryptable = function.getAdminConfiguration();
+        undecryptable.setId(UUID.randomUUID());
+        undecryptable.setProviderCode("openrouter");
+        undecryptable.setDefaultModelName("broken-model");
+        undecryptable.setApiKeyEncrypted("broken-stream-secret");
+
+        AdminAiConfiguration deepSeek = new AdminAiConfiguration();
+        deepSeek.setId(UUID.randomUUID());
+        deepSeek.setProviderCode("deepseek");
+        deepSeek.setDefaultModelName("deepseek-v4-flash");
+        deepSeek.setApiKeyEncrypted("deepseek-stream-secret");
+        deepSeek.setMaxRetries(1);
+        deepSeek.setActive(true);
+
+        FluentLoader adminLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(dataManager.load(AdminAiConfiguration.class)).thenReturn(adminLoader);
+        when(adminLoader.query(anyString()).view(anyString()).list())
+                .thenReturn(Arrays.asList(undecryptable, deepSeek));
+
+        AIProvider deepSeekProvider = mock(AIProvider.class);
+        when(providerRegistry.getProvider("deepseek")).thenReturn(deepSeekProvider);
+        when(aiSecretService.decrypt("broken-stream-secret"))
+                .thenThrow(new DevelopmentException("Не удалось расшифровать корпоративный AI credential."));
+        when(aiSecretService.decrypt("deepseek-stream-secret")).thenReturn("deepseek-stream-key");
+        when(deepSeekProvider.supportsStreaming()).thenReturn(false);
+        when(deepSeekProvider.executeTextWithTokens(anyString(), anyString(), eq("deepseek-stream-key"),
+                eq("deepseek-v4-flash"), any()))
+                .thenReturn(AiProviderResponse.ofText("Stream fallback response", 20, 10, 30));
+
+        AtomicReference<String> streamedText = new AtomicReference<>();
+        AiExecutionResult result = service.executeTextStreaming("CANDIDATE_VACANCY_MATCH_ANALYZE",
+                Collections.singletonMap("vacancyName", "Java Developer"), streamedText::set);
+
+        assertEquals("deepseek", result.getProviderCode());
+        assertEquals("Stream fallback response", streamedText.get());
+        verify(deepSeekProvider, times(1))
+                .executeTextWithTokens(anyString(), anyString(), eq("deepseek-stream-key"),
+                        eq("deepseek-v4-flash"), any());
+    }
+
+    @Test
+    public void adminImage_withUndecryptableCredential_fallsBackToValidProvider() {
+        function.setCode("CANDIDATE_IMAGE_ANALYZE");
+        function.setCapability(AiCapability.IMAGE_GENERATION);
+        function.setExecutionPolicy(AiExecutionPolicy.ADMIN_ONLY);
+
+        AdminAiConfiguration undecryptable = function.getAdminConfiguration();
+        undecryptable.setId(UUID.randomUUID());
+        undecryptable.setProviderCode("openrouter");
+        undecryptable.setDefaultModelName("broken-image-model");
+        undecryptable.setApiKeyEncrypted("broken-image-secret");
+
+        AdminAiConfiguration imageProviderConfig = new AdminAiConfiguration();
+        imageProviderConfig.setId(UUID.randomUUID());
+        imageProviderConfig.setProviderCode("image-provider");
+        imageProviderConfig.setDefaultModelName("valid-image-model");
+        imageProviderConfig.setApiKeyEncrypted("valid-image-secret");
+        imageProviderConfig.setMaxRetries(1);
+        imageProviderConfig.setActive(true);
+
+        FluentLoader adminLoader = mock(FluentLoader.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
+        when(dataManager.load(AdminAiConfiguration.class)).thenReturn(adminLoader);
+        when(adminLoader.query(anyString()).view(anyString()).list())
+                .thenReturn(Arrays.asList(undecryptable, imageProviderConfig));
+
+        AIProvider imageProvider = mock(AIProvider.class);
+        when(providerRegistry.getProvider("image-provider")).thenReturn(imageProvider);
+        when(aiSecretService.decrypt("broken-image-secret"))
+                .thenThrow(new DevelopmentException("Не удалось расшифровать корпоративный AI credential."));
+        when(aiSecretService.decrypt("valid-image-secret")).thenReturn("valid-image-key");
+        byte[] expectedImage = new byte[]{9, 8, 7};
+        when(imageProvider.generateImage(anyString(), anyString(), eq("valid-image-key"),
+                eq("valid-image-model"), any(), any(), eq("image/png")))
+                .thenReturn(expectedImage);
+
+        AiExecutionResult result = service.executeImage("CANDIDATE_IMAGE_ANALYZE",
+                Collections.singletonMap("vacancyName", "Java Developer"),
+                new byte[]{1, 2, 3}, "image/png");
+
+        assertEquals("image-provider", result.getProviderCode());
+        assertEquals("valid-image-model", result.getModelName());
+        assertTrue(Arrays.equals(expectedImage, result.getImage()));
+        verify(imageProvider, times(1)).generateImage(anyString(), anyString(), eq("valid-image-key"),
+                eq("valid-image-model"), any(), any(), eq("image/png"));
     }
 
     @Test

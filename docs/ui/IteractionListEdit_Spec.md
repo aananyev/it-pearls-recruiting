@@ -134,7 +134,7 @@ Toolbar
 - `communicationMethodField`: расположен во второй строке `resultAccordionGrid` (colspan="2"), но ограничен `maxWidth="540px"`, что обеспечивает аккуратное отображение номера телефона, Telegram-ника или email без неестественного растяжения на всю ширину формы.
 - `commentField`: занимает 100% ширины рабочей области (`height="170px"`, `rows="7"`), обеспечивая удобный ввод развернутых заметок рекрутера.
 - `buttonsPanelCallAction` и динамические поля:
-  - `addDate`: ширина `220px`, сгруппирована в единый ряд `actionDateCalendarRow` вместе с плашкой календаря `calendarBox`.
+  - `addDate`: ширина `220px`, сгруппирована в единый ряд `actionDateCalendarRow` вместе с плашкой календаря `calendarBox`. Внутренняя time-часть составного CUBA DateField имеет ширину `72px`, высоту `38px`, формат `HH:mm`, шрифт `15px` и горизонтальный padding `10px`; ширина рассчитана как `44.96px` для `23:59` в 15px Verdana + `20px` padding + `2px` рамки + запас на caret/округление. Календарная кнопка (`25px` в runtime) остаётся в date-части и не входит в ширину time input.
   - `calendarBox` / `calendarInlineBox`: компактная плашка (`padding: 6px 12px`, border-radius 6px) с чекбоксом `addToCalendarCheckBox` и выпадающим списком календарей `calendarLookupField` (`width="280px"` со стилем `iteraction-calendar-lookup`).
   - `buttonCallAction`: `width="AUTO"`, `align="MIDDLE_LEFT"`, стилизована классом `iteraction-call-action-btn`.
   - `addInteger`: ширина `140px` (для кратких числовых значений).

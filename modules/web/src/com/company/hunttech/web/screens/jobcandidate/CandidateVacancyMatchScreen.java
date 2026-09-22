@@ -596,7 +596,7 @@ public class CandidateVacancyMatchScreen extends Screen {
                         log.error("Error during candidate-vacancy matching for candidate {}", candidateId, ex);
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Ошибка AI-подбора")
-                                .withDescription("Не удалось выполнить анализ: " + ex.getMessage())
+                                .withDescription("Не удалось выполнить анализ. Подробности записаны в журнале операции.")
                                 .show();
                         statusLabel.setValue("Ошибка при выполнении AI-анализа. Сохранённые навыки не изменены.");
                         analysisPhaseLabel.setValue("Не удалось завершить подбор");
@@ -665,7 +665,7 @@ public class CandidateVacancyMatchScreen extends Screen {
                         log.error("Error during candidate-vacancy matching", ex);
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Ошибка AI-подбора")
-                                .withDescription("Не удалось выполнить анализ: " + ex.getMessage())
+                                .withDescription("Не удалось выполнить анализ. Подробности записаны в журнале операции.")
                                 .show();
                         statusLabel.setValue("Ошибка при выполнении AI-анализа.");
                         return true;

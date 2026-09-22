@@ -429,18 +429,20 @@
       min-height: 38px !important;
     }
 
-    .iteraction-list-service-card .c-datefield-layout > .c-timefield-wrapper {
-      flex: 0 0 56px;
-      width: 56px !important;
-      min-width: 56px !important;
-      max-width: 56px !important;
+    .c-datefield-layout > .c-timefield-wrapper {
+      // HH:mm в 15px Verdana (~44.96px) + padding 20px + border 2px
+      // + запас под caret/округление: 72px. Кнопка календаря живёт в date-part.
+      flex: 0 0 72px;
+      width: 72px !important;
+      min-width: 72px !important;
+      max-width: 72px !important;
       height: 38px !important;
       min-height: 38px !important;
       margin: 0 0 0 6px !important;
     }
 
-    .iteraction-list-service-card .c-timefield-layout,
-    .iteraction-list-service-card .c-timefield {
+    .c-timefield-layout,
+    .c-timefield {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
@@ -448,6 +450,35 @@
       height: 38px !important;
       min-height: 38px !important;
       margin: 0 !important;
+    }
+
+    .c-timefield {
+      padding: 0 10px !important;
+      font-size: 15px !important;
+      font-weight: 400 !important;
+      line-height: 38px !important;
+      color: $v-font-color !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    .c-timefield:focus {
+      outline: 2px solid rgba($v-selection-color, 0.38) !important;
+      outline-offset: -1px;
+      border-color: $v-selection-color !important;
+      box-shadow: none !important;
+    }
+
+    .c-timefield-error {
+      border-color: #d9534f !important;
+    }
+
+    .iteraction-list-service-card .c-timefield {
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.24) !important;
     }
 
     .iteraction-list-vacancy-card .iteraction-list-sidebar-value,

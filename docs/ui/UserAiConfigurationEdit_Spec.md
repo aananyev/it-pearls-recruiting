@@ -12,7 +12,8 @@
 
 ### Behavior Summary
 
-- новая запись → пустая форма → пользователь выбирает провайдера и вводит ключ;
+- новая запись → вызывающий экран передал владельца → пользователь выбирает провайдера и вводит ключ;
+- сохранение → владелец отсутствует → commit блокируется с понятным сообщением до обращения к БД;
 - `apiKey` — секретное поле ввода (тип password), не выводится в browse;
 - `isActive` — чекбокс активности подключения;
 - save → стандартный DataContext commit.
@@ -31,7 +32,7 @@ Parent: UserAiConfiguration browse. Отдельных picker-форм нет (p
 
 ## 4. Behavior Model
 
-Lifecycle стандартный CUBA StandardEditor: Init → BeforeShow (bindings) → commit. Специфической Java-логики нет; навигация sidebar — display-only label-пункты.
+Lifecycle: Init → BeforeShow → BeforeCommitChanges → commit. `ExtUserEdit`, личные настройки и общий реестр назначают владельца до открытия/commit редактора. `BeforeCommitChanges` повторно проверяет обязательную бизнес-связь `user` и блокирует сохранение при её отсутствии. Поле аудита `createdBy` владельца не заменяет.
 
 ## 5. Actions & Buttons Logic
 
@@ -51,6 +52,7 @@ Sidebar-иллюстрация: `ovalImage` отображается 176×176 ч
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-22 | BL-2026-021: добавлена pre-commit защита от сохранения `UserAiConfiguration` без владельца; DB `NOT NULL`/FK не изменялись |
 | 2026-08-13 | Чекбоксы форм переведены на общие стили темы CUBA Platform (Valo): из локальных партиалов удалена кастомная стилизация квадратика/подписи — устранён наезд чекбокса на элементы под ним, выравнивание квадратика и подписи штатное (тема) |
 | 2026-08-13 | Фикс наложения шапок карточек в правой части формы: в shared-контракт `edit-screen-shared-styles.scss` (7 тем) добавлен сброс `margin-top: 0 !important` для `.edit-card > .v-panel-captionwrap` / `.c-groupbox-captionwrap` — базовое правило halo-темы выносило шапку панели на 50px вверх, шапки наезжали на соседние карточки и toolbar (эталон — open-position-editor) |
 | 2026-08-13 | Sidebar-иллюстрация переведена с `ovaFallbackImage` на `ovalImage` с прямым `<theme path="icons/ai/user-ai-configuration.png">` — отображение гарантировано без fallback-механики |

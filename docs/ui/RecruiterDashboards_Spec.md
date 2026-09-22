@@ -2,15 +2,19 @@
 
 ## Business & Context Intro
 
-Набор из трёх полноэкранных Dashboard Add-on экранов даёт рекрутеру отдельные рабочие представления для текущих кандидатов, воронки найма и кадрового резерва. Kanban доступен как «Подбор → Дашборды рекрутера → Kanban». Старый список «Кандидаты в работе» в разделе «HR-мастер» остаётся отдельным экраном с фильтрами и таблицей. Реализация следует общей UI/UX-концепции HRM HuntTech и существующему контракту `recruiter-dashboard-root`.
+Набор из трёх полноэкранных Dashboard Add-on экранов даёт рекрутеру отдельные рабочие представления для текущих кандидатов, воронки найма и кадрового резерва. Kanban доступен как «Дашборды → Kanban». Верхнеуровневый раздел объединяет эти экраны с двумя dashboard аналитики AI; старый список «Кандидаты в работе» в разделе «HR-мастер» остаётся отдельным экраном с фильтрами и таблицей. Реализация следует общей UI/UX-концепции HRM HuntTech и существующему контракту `recruiter-dashboard-root`.
 
 ## UI Context & Navigation
 
-Меню «Подбор → Дашборды рекрутера»:
+Верхнеуровневое меню `application-dashboards` — «Дашборды» (`DASHBOARD`) содержит ровно пять экранов:
 
 - `hunttech_RecruiterKanbanDashboard` — «Kanban»;
 - `hunttech_RecruiterFunnelDashboard` — «Воронка найма»;
-- `hunttech_RecruiterReserveDashboard` — «Кадровый резерв».
+- `hunttech_RecruiterReserveDashboard` — «Кадровый резерв»;
+- `hunttech_AdminAiDashboard` — «Дашборд аналитики AI»;
+- `hunttech_UserAiDashboard` — «Моя статистика AI».
+
+Старая вложенная группа `application-hunting → recruiter-dashboards` удалена. Dashboard items исключены из `aiAdministration`; в «Управлении AI» остаются LLM-чат, AI-конфигурация, логи и технические экраны. Перенос не меняет screen permissions: административный `hunttech_AdminAiDashboard` остаётся доступен только ролям с ранее выданным разрешением на экран.
 
 Каждый экран использует `dashboard:dashboard` с `jsonPath` и `timerDelay="60"`. JSON-модель хранится в исходниках и подключает собственный `@DashboardWidget`.
 
@@ -82,6 +86,8 @@ Matching v1 намеренно использует одинаковую `Positi
 
 Виджеты зарегистрированы через `@DashboardWidget`. Dashboard-композиции версионируются как JSON и загружаются через `jsonPath`, что является штатным механизмом add-on и не требует ручного изменения `dashboard_persistent_dashboard`.
 
+Persistent dashboard с кодом `recruiting-dashboard` не является отдельным menu screen и намеренно не добавляется в «Дашборды»: он остаётся стартовой dashboard-моделью `HrmMainScreen`. Верхнеуровневое меню содержит только пять явно перечисленных screen IDs.
+
 ## Verification
 
 Обязательные проверки перед merge:
@@ -99,6 +105,7 @@ Visual smoke: 1366×768, 1920×1080, 1920×1200; все семь тем; horizon
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-22 | Пять dashboard-экранов объединены в верхнеуровневом меню «Дашборды»; `recruiting-dashboard` зафиксирован как стартовый persistent dashboard, а не пункт меню. |
 | 2026-09-21 | В меню, заголовке экрана и составе виджета название дашборда сокращено до «Kanban». |
 | 2026-09-21 | Исправлена загрузка признаков этапа для Kanban и воронки: добавлен специализированный view и контрактный тест против `Unfetched Attribute Access`. |
 | 2026-09-19 | Добавлены три Dashboard Add-on экрана: Kanban кандидатов, воронка найма и кадровый резерв; добавлены applet widgets, stage normalization и единый HuntTech visual contract. |
