@@ -481,6 +481,19 @@
       border-color: rgba(255, 255, 255, 0.24) !important;
     }
 
+    // State borders must win over the service-card base border color.
+    .iteraction-list-service-card .c-timefield.c-timefield-error {
+      border-color: #d9534f !important;
+    }
+
+    .iteraction-list-service-card .c-timefield:focus {
+      border-color: $v-selection-color !important;
+    }
+
+    .iteraction-list-service-card .c-timefield.c-timefield-error:focus {
+      border-color: #d9534f !important;
+    }
+
     .iteraction-list-vacancy-card .iteraction-list-sidebar-value,
     .iteraction-list-vacancy-card .iteraction-list-sidebar-value *,
     .iteraction-list-vacancy-name-value,

@@ -54,6 +54,12 @@ public class SidebarImageUploadContractTest {
         assertTrue(java.contains("SidebarImageNormalizationService.MAX_PIXELS"),
                 "Ошибка upload должна объяснять лимит пикселей вместе с лимитом размера файла");
         assertTrue(java.contains("SidebarImageNormalizationService.MAX_INPUT_BYTES"));
+        assertTrue(java.contains("catch (InvalidImageInputException ex)"),
+                "Ошибки валидации изображения должны отличаться от внутренних ошибок storage/UI");
+        assertTrue(java.contains("rejectImageUpload(fileDescriptor, ex, false)"),
+                "Внутренняя ошибка upload не должна показываться как ошибка формата изображения");
+        assertTrue(java.contains("Прежнее изображение сохранено"),
+                "Внутренняя ошибка должна явно подтверждать сохранность прежнего значения");
     }
 
     @Test

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -35,6 +36,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
     private static final Logger log = LoggerFactory.getLogger(YandexIntegrationServiceBean.class);
 
     private static final int HTTP_TIMEOUT_MS = 15000;
+    private static final int HTTP_MULTI_STATUS = 207;
     private static final String DEFAULT_TIME_ZONE_SARATOV = "Europe/Saratov";
 
     @Inject
@@ -156,7 +158,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                 }
             }
         } catch (CalendarConnectionException ex) {
-            String message = "Ошибка календарного подключения: " + ex.getMessage();
+            String message = calendarFailureMessage(ex.getStatusCode());
             updateCalendarDiagnosticState(config, serviceType, false, message);
             log.warn("Диагностика календаря завершилась ошибкой: {}", ex.getMessage());
             return YandexDiagnosticResult.error(serviceType, ex.getStatusCode(), message, null);
@@ -181,6 +183,24 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         dataManager.commit(config);
     }
 
+    private String calendarFailureMessage(int statusCode) {
+        if (statusCode == 401) {
+            return "OAuth-токен Яндекс недействителен или истёк";
+        }
+        if (statusCode == 403) {
+            return "Недостаточно прав OAuth для доступа к календарям";
+        }
+        if (statusCode == 404) {
+            return "CalDAV-календарь или учётная запись недоступны";
+        }
+        if (statusCode == 503) {
+            return "Сетевая ошибка доступа к Яндекс.Календарю";
+        }
+        if (statusCode == 502) {
+            return "Сервис Яндекс.Календаря вернул некорректный ответ";
+        }
+        return "Ошибка CalDAV: HTTP " + statusCode;
+    }
     @Override
     public List<YandexCalendarInfoDto> discoverCalendars(UUID userId) {
         UserYandexConfiguration config = getOrCreateConfiguration(userId);
@@ -486,7 +506,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
 
         try {
             HttpResult res = sendHttp("REPORT", url, token, reportXml, "application/xml; charset=utf-8", headers);
-            if (res.statusCode == 207 || res.statusCode == 200) {
+            if (res.statusCode == HTTP_MULTI_STATUS || res.statusCode == 200) {
                 events = parseCaldavResponseXml(res.body, calendarDisplayName, calendarPath, timeZone);
             } else {
                 log.warn("CalDAV REPORT для {} вернул HTTP {}, переключаемся на PROPFIND", url, res.statusCode);
@@ -499,7 +519,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                         "  </d:prop>\n" +
                         "</d:propfind>";
                 HttpResult propRes = sendHttp("PROPFIND", url, token, propfindXml, "application/xml; charset=utf-8", Collections.singletonMap("Depth", "1"));
-                if (propRes.statusCode == 207 || propRes.statusCode == 200) {
+                if (propRes.statusCode == HTTP_MULTI_STATUS || propRes.statusCode == 200) {
                     events = parseCaldavResponseXml(propRes.body, calendarDisplayName, calendarPath, timeZone);
                 }
             }
@@ -880,7 +900,11 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                 if (ex instanceof CalendarConnectionException) {
                     throw (CalendarConnectionException) ex;
                 }
-                throw new CalendarConnectionException(503, "сетевая ошибка CalDAV");
+                log.error("Не удалось выполнить CalDAV discovery при диагностике подключения", ex);
+                if (ex instanceof IOException) {
+                    throw new CalendarConnectionException(503, "сетевая ошибка CalDAV");
+                }
+                throw new CalendarConnectionException(502, "некорректный ответ CalDAV");
             }
             log.warn("Ошибка CalDAV discovery: {}", ex.getMessage());
             // Фолбэк
