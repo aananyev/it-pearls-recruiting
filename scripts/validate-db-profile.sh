@@ -44,7 +44,7 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
         printf 'Refusing PRODUCTION: ripgrep (rg) is required for artifact scan\n' >&2
         exit 23
     }
-    if ! rg -P '' /dev/null >/dev/null 2>&1; then
+    if ! printf 'pcre2-probe\n' | rg -P 'pcre2-probe' >/dev/null 2>&1; then
         printf 'Refusing PRODUCTION: ripgrep with PCRE2 support is required for artifact scan\n' >&2
         exit 23
     fi
@@ -57,7 +57,7 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
             exit 24
         }
         scan_status=0
-        rg -n -i -P 'jdbc:postgresql://(192\.168\.1\.135|localhost|0\.0\.0\.0|\[::1\]|127\.(?!0\.0\.1(?:[:/"[:space:]]|$)))([:/"[:space:]]|$)' "$config_file" >/dev/null || scan_status=$?
+        rg -n -i -P 'jdbc:postgresql://(192\.168\.1\.135|localhost|0\.0\.0\.0|\[::1\]|127\.(?!0\.0\.1(?:[:/"[:space:]]|$))[0-9.]+)([:/"[:space:]]|$)' "$config_file" >/dev/null || scan_status=$?
         if ((scan_status >= 2)); then
             printf 'Refusing PRODUCTION: unable to scan %s for unsafe JDBC hosts\n' "$config_file" >&2
             exit 25

@@ -103,16 +103,17 @@ if (configuredDbProfile == 'TEST') {
     if (testHost == '192.168.1.135' || testHost == '127.0.0.1' || testHost.startsWith('127.') ||
             testHost == 'localhost' || testHost.startsWith('localhost.') || testHost == '::1' ||
             testHost == '0.0.0.0' || testHost == '0:0:0:0:0:0:0:1' ||
-            testHost ==~ /[0-9]+/ || testHost ==~ /.*(^|\\.)0[0-9].*/) {
+            testHost ==~ /[0-9]+/ || testHost.startsWith('0.') || testHost ==~ /.*(^|\.)0[0-9].*/) {
         throw new GradleException('HUNTTECH_DB_PROFILE=TEST requires a separate non-local database host')
     }
 }
 if (configuredDbProfile == 'LOCAL' && configuredDb.host.toString().trim() != '192.168.1.135') {
     throw new GradleException('HUNTTECH_DB_PROFILE=LOCAL host must be exactly 192.168.1.135')
 }
+def configuredPort = configuredDb.port.toString()
 if (!(configuredDb.host.toString() ==~ /[A-Za-z0-9._-]+/) ||
-        !(configuredDb.port.toString() ==~ /[0-9]+/) ||
-        configuredDb.port.toInteger() < 1 || configuredDb.port.toInteger() > 65535 ||
+        !(configuredPort ==~ /[0-9]{1,5}/) ||
+        (configuredPort ==~ /[0-9]{1,5}/ && (configuredPort.toInteger() < 1 || configuredPort.toInteger() > 65535)) ||
         !(configuredDb.name.toString() ==~ /[A-Za-z0-9._-]+/) ||
         !(configuredDb.user.toString() ==~ /[A-Za-z0-9._-]+/)) {
     throw new GradleException("HUNTTECH_DB_PROFILE=${configuredDbProfile} contains invalid connection settings")

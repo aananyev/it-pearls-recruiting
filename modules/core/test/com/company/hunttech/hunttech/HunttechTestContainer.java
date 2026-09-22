@@ -61,9 +61,9 @@ public class HunttechTestContainer extends TestContainer {
             }
             dbUrl = jdbcUrl(
                     localHost,
-                    envOrDefault("HUNTTECH_LOCAL_DB_PORT", "5432"),
-                    envOrDefault("HUNTTECH_LOCAL_DB_NAME", "hunttech"));
-            dbUser = envOrDefault("HUNTTECH_LOCAL_DB_USER", "cuba");
+                    validatedPort("HUNTTECH_LOCAL_DB_PORT", envOrDefault("HUNTTECH_LOCAL_DB_PORT", "5432")),
+                    validatedToken("HUNTTECH_LOCAL_DB_NAME", envOrDefault("HUNTTECH_LOCAL_DB_NAME", "hunttech")));
+            dbUser = validatedToken("HUNTTECH_LOCAL_DB_USER", envOrDefault("HUNTTECH_LOCAL_DB_USER", "cuba"));
             dbPassword = requiredEnv("HUNTTECH_LOCAL_DB_PASSWORD");
         } else if ("TEST".equals(profile)) {
             String testHost = requiredEnv("HUNTTECH_TEST_DB_HOST");
@@ -78,21 +78,21 @@ public class HunttechTestContainer extends TestContainer {
             if (comparisonHost.startsWith("0.") || comparisonHost.matches(".*\\.0[0-9].*")) {
                 throw new IllegalStateException("TEST profile must not use ambiguous leading-zero host notation");
             }
-            if (!comparisonHost.matches("[a-z0-9._:-]+")) {
+            if (!comparisonHost.matches("[a-z0-9._-]+")) {
                 throw new IllegalStateException("TEST profile host contains unsupported characters");
             }
             if (comparisonHost.equals("192.168.1.135") || comparisonHost.equals("127.0.0.1")
                     || comparisonHost.startsWith("127.") || comparisonHost.equals("localhost")
                     || comparisonHost.startsWith("localhost.") || comparisonHost.equals("::1")
                     || comparisonHost.startsWith("::ffff:127.") || comparisonHost.equals("0.0.0.0")
-                    || comparisonHost.startsWith("0.") || comparisonHost.equals("0:0:0:0:0:0:0:1")
+                    || comparisonHost.equals("0:0:0:0:0:0:0:1")
                     || comparisonHost.equals("::ffff:7f00:1") || comparisonHost.matches("[0-9]+")) {
                 throw new IllegalStateException("TEST profile must use an explicitly separate database host");
             }
-            dbUrl = jdbcUrl(testHost,
-                    requiredEnv("HUNTTECH_TEST_DB_PORT"),
-                    requiredEnv("HUNTTECH_TEST_DB_NAME"));
-            dbUser = requiredEnv("HUNTTECH_TEST_DB_USER");
+            dbUrl = jdbcUrl(comparisonHost,
+                    validatedPort("HUNTTECH_TEST_DB_PORT", requiredEnv("HUNTTECH_TEST_DB_PORT")),
+                    validatedToken("HUNTTECH_TEST_DB_NAME", requiredEnv("HUNTTECH_TEST_DB_NAME")));
+            dbUser = validatedToken("HUNTTECH_TEST_DB_USER", requiredEnv("HUNTTECH_TEST_DB_USER"));
             dbPassword = requiredEnv("HUNTTECH_TEST_DB_PASSWORD");
         } else {
             throw new IllegalStateException("Unknown HUNTTECH_DB_PROFILE: " + profile);
@@ -110,6 +110,28 @@ public class HunttechTestContainer extends TestContainer {
             throw new IllegalStateException(name + " must be supplied outside Git without newlines");
         }
         return value.trim();
+    }
+
+    private static String validatedToken(String name, String value) {
+        if (!value.matches("[A-Za-z0-9._-]+")) {
+            throw new IllegalStateException(name + " contains unsupported characters");
+        }
+        return value;
+    }
+
+    private static String validatedPort(String name, String value) {
+        if (!value.matches("[0-9]{1,5}")) {
+            throw new IllegalStateException(name + " must be a TCP port");
+        }
+        try {
+            int port = Integer.parseInt(value);
+            if (port < 1 || port > 65535) {
+                throw new IllegalStateException(name + " must be a TCP port");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(name + " must be a TCP port", e);
+        }
+        return value;
     }
 
     private static String jdbcUrl(String host, String port, String database) {
