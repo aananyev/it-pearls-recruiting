@@ -226,6 +226,30 @@ AI Control Plane использует отдельный `ai-control-plane-views
 
 `AiExecutionResult` — источник фактически использованных `providerCode` и `modelName`. При сохранении `CandidateCvSkillAnalysis` эти поля не должны заменяться текущей конфигурацией или моделью по умолчанию.
 
-Для анализа навыков поле `executionSource` отделяет реальный AI-вызов от словарного fallback и неполных metadata. Fallback не выдаётся за модель: мониторинг показывает «Fallback: справочник». Для исторических строк, созданных до появления metadata, используется «Метаданные недоступны» без ретроактивной подстановки провайдера или модели.
+Цепочка данных фиксирована:
 
-При ошибке или `RETRY` metadata предыдущего успешного вызова сохраняются. После изменения view или entity обязательны проверки `ScreenViewIntegrityTest` и профильные regression tests CandidateSkillEnrichmentService.
+```text
+AIProvider -> AiProviderResponse
+  -> AiExecutionService (effective provider/model)
+  -> AiExecutionResult
+  -> SkillAnalysisResult.aiExecution
+  -> CandidateSkillEnrichmentService (агрегация уровней)
+  -> CandidateCvSkillAnalysis
+  -> HUNTTECH_CANDIDATE_CV_SKILL_ANALYSIS
+  -> candidateCvSkillAnalysis-browse-view
+  -> analysesDl
+  -> CandidateSkillsEnrichmentMonitoring renderer
+```
+
+Граница dictionary fallback проходит вокруг внешнего вызова `AiExecutionService.executeText()`. Только отсутствие использованного `AiExecutionResult` у всех уровней означает `DICTIONARY_FALLBACK`. Если AI уже вернул результат, последующая ошибка парсинга, dictionary matching или persistence не может переклассифицировать этот вызов в fallback и должна обрабатываться как `RETRY/ERROR`.
+
+Mapping успешного результата:
+
+- полный `AiExecutionResult` -> `executionSource=AI`, фактические `PROVIDER_CODE`/`MODEL_NAME`, UI показывает `provider / model` (например `deepseek / deepseek-v4-flash`);
+- неполный `AiExecutionResult` -> `executionSource=AI_METADATA_INCOMPLETE`, известные поля сохраняются, UI явно пишет «модель не зафиксирована»/«провайдер не зафиксирован» и никогда не показывает dictionary fallback;
+- ни один AI-результат не использован, выполнен прямой словарный поиск -> `executionSource=DICTIONARY_FALLBACK`, UI показывает «Fallback: справочник»;
+- legacy-строка без provenance -> `NULL` metadata, UI показывает «Метаданные недоступны»; migration не backfill-ит её текущей моделью.
+
+Ручной scan, background worker, retry и повторный анализ используют один `CandidateSkillEnrichmentService`. Queue/retry/error обновляют operational state, но не очищают metadata последнего успешного анализа. Новая provenance записывается только после нового успешного результата. View `candidateCvSkillAnalysis-browse-view` загружает все три поля; renderer не выводит fallback по одному лишь отсутствию provider/model.
+
+После изменения service/entity/view обязательны профильные regression tests `CandidateSkillEnrichmentService`, renderer/contract и `ScreenViewIntegrityTest`.

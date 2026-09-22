@@ -147,9 +147,10 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
     @Test
     void testProviderModelRendererDistinguishesAiFallbackAndLegacyMetadata() {
         CandidateCvSkillAnalysis ai = new CandidateCvSkillAnalysis();
-        ai.setProviderCode("openrouter");
-        ai.setModelName("model-x");
-        assertEquals("openrouter / model-x", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(ai));
+        ai.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI);
+        ai.setProviderCode("deepseek");
+        ai.setModelName("deepseek-v4-flash");
+        assertEquals("deepseek / deepseek-v4-flash", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(ai));
 
         CandidateCvSkillAnalysis fallback = new CandidateCvSkillAnalysis();
         fallback.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_DICTIONARY_FALLBACK);
@@ -158,14 +159,19 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
         CandidateCvSkillAnalysis providerOnly = new CandidateCvSkillAnalysis();
         providerOnly.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE);
         providerOnly.setProviderCode("openrouter");
-        assertEquals("AI: openrouter / модель недоступна",
+        assertEquals("AI: openrouter / модель не зафиксирована",
                 CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(providerOnly));
 
         CandidateCvSkillAnalysis modelOnly = new CandidateCvSkillAnalysis();
         modelOnly.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE);
         modelOnly.setModelName("model-x");
-        assertEquals("AI: провайдер недоступен / model-x",
+        assertEquals("AI: провайдер не зафиксирован / model-x",
                 CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(modelOnly));
+
+        CandidateCvSkillAnalysis incomplete = new CandidateCvSkillAnalysis();
+        incomplete.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE);
+        assertEquals("AI: модель не зафиксирована",
+                CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(incomplete));
 
         CandidateCvSkillAnalysis legacy = new CandidateCvSkillAnalysis();
         assertEquals("Метаданные недоступны", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(legacy));
