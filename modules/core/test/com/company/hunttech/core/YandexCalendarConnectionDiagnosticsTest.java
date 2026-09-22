@@ -63,6 +63,17 @@ public class YandexCalendarConnectionDiagnosticsTest {
     }
 
     @Test
+    public void successfulDiscoveryAcceptsHttpOkResponses() {
+        service.enqueue(200, principalResponse("/calendars/calendar-test%40example.invalid/"));
+        service.enqueue(200, calendarListResponse());
+
+        YandexDiagnosticResult result = service.testConnection(UUID.randomUUID(), "CALENDAR");
+
+        assertTrue(result.isSuccess());
+        assertTrue(configuration.getCalendarConnected());
+    }
+
+    @Test
     public void expiredOrInvalidTokenReturnsUnauthorized() {
         service.enqueue(401, "Unauthorized");
 
@@ -82,7 +93,7 @@ public class YandexCalendarConnectionDiagnosticsTest {
 
         assertFalse(result.isSuccess());
         assertEquals(403, result.getHttpStatusCode());
-        assertTrue(result.getMessage().contains("HTTP 403"));
+        assertTrue(result.getMessage().contains("Недостаточно прав OAuth"));
         assertFalse(configuration.getCalendarConnected());
     }
 
@@ -94,7 +105,7 @@ public class YandexCalendarConnectionDiagnosticsTest {
 
         assertFalse(result.isSuccess());
         assertEquals(404, result.getHttpStatusCode());
-        assertTrue(result.getMessage().contains("HTTP 404"));
+        assertTrue(result.getMessage().contains("недоступны"));
         assertFalse(configuration.getCalendarConnected());
     }
 
@@ -118,10 +129,22 @@ public class YandexCalendarConnectionDiagnosticsTest {
 
         assertFalse(result.isSuccess());
         assertEquals(503, result.getHttpStatusCode());
-        assertEquals("Ошибка календарного подключения: сетевая ошибка CalDAV", result.getMessage());
+        assertEquals("Сетевая ошибка доступа к Яндекс.Календарю", result.getMessage());
         assertFalse(configuration.getCalendarConnected());
         assertFalse("Техническая причина не должна раскрывать секреты в details",
                 result.getDetails() != null && result.getDetails().contains("test-token"));
+    }
+
+    @Test
+    public void invalidCalDavResponseIsNotReportedAsNetworkFailure() {
+        service.failWith(new IllegalStateException("synthetic response parsing failure"));
+
+        YandexDiagnosticResult result = service.testConnection(UUID.randomUUID(), "CALENDAR");
+
+        assertFalse(result.isSuccess());
+        assertEquals(502, result.getHttpStatusCode());
+        assertEquals("Сервис Яндекс.Календаря вернул некорректный ответ", result.getMessage());
+        assertFalse(configuration.getCalendarConnected());
     }
 
     private static String principalResponse(String homePath) {
