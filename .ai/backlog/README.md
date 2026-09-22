@@ -70,3 +70,8 @@
 ## История
 
 - 2026-09-21 — создан backlog для отложенных идей HRM HuntTech.
+
+
+## Подпроекты
+
+- BL-2026-036 — [External Integration API Foundation](research/BL-2026-036-external-integration-api-foundation.md): общий контур API для внешних приложений; включает BL-2026-025–030.
