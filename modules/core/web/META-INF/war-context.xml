@@ -8,9 +8,9 @@
       maxIdle="2"
       maxWaitMillis="5000"
       driverClassName="org.postgresql.Driver"
-      url="${env.HUNTTECH_DB_JDBC_URL}"
-      username="${env.HUNTTECH_DB_USER}"
-      password="${env.HUNTTECH_DB_PASSWORD}"/>
+      url="${HUNTTECH_DB_JDBC_URL}"
+      username="${HUNTTECH_DB_USER}"
+      password="${HUNTTECH_DB_PASSWORD}"/>
 
     <!-- Switch off session serialization -->
     <Manager pathname=""/>

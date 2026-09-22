@@ -66,7 +66,7 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
             exit 24
         }
         scan_status=0
-        rg -n -i -P 'jdbc:postgresql://(192\.168\.1\.135|localhost|0\.0\.0\.0|\[::1\]|127\.(?!0\.0\.1(?:[:/"[:space:]]|$))[0-9.]+)([:/"[:space:]]|$)' "$config_file" >/dev/null || scan_status=$?
+        rg -n -i -P 'jdbc:postgresql://(192\.168\.1\.135|localhost|0\.0\.0\.0|\[::1\]|127\.(?!0\.0\.1(?:[:/"\x09\x20]|$))[0-9.]+)(?:[:/"\x09\x20]|$)' "$config_file" >/dev/null || scan_status=$?
         if ((scan_status >= 2)); then
             printf 'Refusing PRODUCTION: unable to scan %s for unsafe JDBC hosts\n' "$config_file" >&2
             exit 25

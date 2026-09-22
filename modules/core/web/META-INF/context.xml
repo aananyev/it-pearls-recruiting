@@ -7,10 +7,10 @@
               maxTotal="20"
               maxWaitMillis="5000"
               name="jdbc/CubaDS"
-              password="${env.HUNTTECH_DB_PASSWORD}"
+              password="${HUNTTECH_DB_PASSWORD}"
               type="javax.sql.DataSource"
-              url="${env.HUNTTECH_DB_JDBC_URL}"
-              username="${env.HUNTTECH_DB_USER}"/>
+              url="${HUNTTECH_DB_JDBC_URL}"
+              username="${HUNTTECH_DB_USER}"/>
     <!-- Database connection-->
 
 </Context>

@@ -57,9 +57,6 @@ if [[ "$HUNTTECH_DB_PROFILE" == "PRODUCTION" ]]; then
 fi
 db_profile_resolve "$HUNTTECH_DB_PROFILE"
 db_profile_require_password
-export "$DB_PROFILE_PASSWORD_VAR"
-export HUNTTECH_DB_JDBC_URL="$(db_profile_jdbc_url)"
-export HUNTTECH_DB_USER="$DB_PROFILE_USER"
 PROFILE_PASSWORD="${!DB_PROFILE_PASSWORD_VAR}"
 
 mkdir -p "$(dirname "$DEPLOY_LOG")"
@@ -423,7 +420,7 @@ log "Gradle stop (ошибки игнорируются)..."
 # к ещё отсутствующей колонке и сорвать открытие экранов после входа.
 # updateDb всегда из корня: миграции master == миграции ветки (guard без новых миграций).
 log "Применяю накопленные миграции CUBA к локальной PostgreSQL..."
-./gradlew updateDb --no-daemon --stacktrace
+env "$DB_PROFILE_PASSWORD_VAR=$PROFILE_PASSWORD" ./gradlew updateDb --no-daemon --stacktrace
 
 clean_deployment
 
@@ -431,7 +428,8 @@ log "Чистая сборка и deploy без запуска тестов... (
 ( cd "$BUILD_DIR" && ./gradlew clean deploy -x test )
 
 log "Рендерю JNDI datasource для profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST (секрет не выводится)..."
-bash "$ROOT/scripts/render-db-context.sh" \
+env "$DB_PROFILE_PASSWORD_VAR=$PROFILE_PASSWORD" HUNTTECH_DB_PASSWORD="$PROFILE_PASSWORD" \
+  bash "$ROOT/scripts/render-db-context.sh" \
   --profile "$HUNTTECH_DB_PROFILE" \
   --output "$ROOT/deploy/tomcat/webapps/hrm-core/META-INF/context.xml"
 
@@ -440,8 +438,9 @@ ensure_local_app_properties
 configure_jvm_diagnostics
 
 log "Запуск Tomcat..."
-HUNTTECH_DB_PASSWORD="$PROFILE_PASSWORD" ./gradlew start
-unset PROFILE_PASSWORD HUNTTECH_DB_JDBC_URL HUNTTECH_DB_USER "$DB_PROFILE_PASSWORD_VAR"
+env HUNTTECH_DB_PASSWORD="$PROFILE_PASSWORD" HUNTTECH_DB_JDBC_URL="$(db_profile_jdbc_url)" \
+  HUNTTECH_DB_USER="$DB_PROFILE_USER" ./gradlew start --no-daemon
+unset PROFILE_PASSWORD
 
 log "URL: $APP_URL"
 wait_for_http

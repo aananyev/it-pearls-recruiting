@@ -1127,8 +1127,8 @@ parse_args "$@"
 # Fail-fast до SSH, backup, остановки Tomcat или любой другой production-операции.
 # Production datasource обязан оставаться на loopback IPv4; localhost и рабочий
 # PostgreSQL никогда не принимаются как неявный fallback.
-HUNTTECH_DB_PROFILE=PRODUCTION \
-  bash "${current_catalog}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
+export HUNTTECH_DB_PROFILE=PRODUCTION
+bash "${current_catalog}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
 
 if [ "$CHECK_CONFIG" -eq 1 ]; then
     : >"$LOG"

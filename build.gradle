@@ -233,7 +233,7 @@ configure(coreModule) {
         def passwordValue = System.getenv(configuredDb.passwordEnv)?.trim()
         dbPassword = passwordValue ?: ''
         doFirst {
-            if (!passwordValue) {
+            if (!dbPassword?.toString()?.trim()) {
                 throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
             }
         }
@@ -247,7 +247,7 @@ configure(coreModule) {
         def passwordValue = System.getenv(configuredDb.passwordEnv)?.trim()
         dbPassword = passwordValue ?: ''
         doFirst {
-            if (!passwordValue) {
+            if (!dbPassword?.toString()?.trim()) {
                 throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
             }
         }

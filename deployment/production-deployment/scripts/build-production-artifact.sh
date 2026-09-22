@@ -12,6 +12,7 @@ usage() {
 parse_common_args "$@"
 require_approved_execute
 REPO_ROOT="$(cd "${DEPLOYMENT_ROOT}/../.." && pwd)"
-HUNTTECH_DB_PROFILE=PRODUCTION bash "${REPO_ROOT}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
+export HUNTTECH_DB_PROFILE=PRODUCTION
+bash "${REPO_ROOT}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
 log "Build task: ./gradlew clean buildWar"
 run_cmd bash -lc "cd '${REPO_ROOT}' && ./gradlew clean buildWar --console=plain"
