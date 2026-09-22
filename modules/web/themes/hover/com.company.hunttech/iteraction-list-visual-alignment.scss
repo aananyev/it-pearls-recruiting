@@ -490,6 +490,10 @@
       border-color: $v-selection-color !important;
     }
 
+    .iteraction-list-service-card .c-timefield.c-timefield-error:focus {
+      border-color: #d9534f !important;
+    }
+
     .iteraction-list-vacancy-card .iteraction-list-sidebar-value,
     .iteraction-list-vacancy-card .iteraction-list-sidebar-value *,
     .iteraction-list-vacancy-name-value,
