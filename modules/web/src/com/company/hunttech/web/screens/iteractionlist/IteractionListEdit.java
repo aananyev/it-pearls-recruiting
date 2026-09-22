@@ -723,9 +723,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         getEditedEntity().setCurrentPriority(vacancyFiels.getValue().getPriority());
         getEditedEntity().setCurrentOpenClose(vacancyFiels.getValue().getOpenClose());
 
-        if (addDate != null && addDate.isVisible() && calendarInitSuccess && addToCalendarCheckBox != null && addToCalendarCheckBox.isEnabled()) {
-            getEditedEntity().setAddToCalendar(addToCalendarCheckBox.getValue());
-            if (Boolean.TRUE.equals(addToCalendarCheckBox.getValue())) {
+        if (addDate != null && addDate.isVisible() && addToCalendarCheckBox != null) {
+            boolean calendarCanBeUsed = calendarInitSuccess
+                    && addToCalendarCheckBox.isEnabled()
+                    && calendarLookupField != null
+                    && calendarLookupField.getValue() != null;
+            boolean addToCalendar = calendarCanBeUsed
+                    && Boolean.TRUE.equals(addToCalendarCheckBox.getValue());
+            getEditedEntity().setAddToCalendar(addToCalendar);
+            if (addToCalendar) {
                 getEditedEntity().setCalendarId(calendarLookupField.getValue());
             }
         }
@@ -1935,26 +1941,56 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
+    private Map<String, String> buildCalendarOptions(List<YandexCalendarInfoDto> calendars) {
+        Map<String, String> optionsMap = new LinkedHashMap<>();
+        if (calendars == null) {
+            return optionsMap;
+        }
+        Set<String> paths = new HashSet<>();
+        for (YandexCalendarInfoDto calendar : calendars) {
+            String path = calendar.getPath();
+            if (path == null || path.trim().isEmpty() || !paths.add(path)) {
+                continue;
+            }
+            String displayName = calendar.getDisplayName();
+            if (displayName == null || displayName.trim().isEmpty()) {
+                displayName = path;
+            }
+            String uniqueName = displayName;
+            int suffix = 2;
+            while (optionsMap.containsKey(uniqueName)) {
+                uniqueName = displayName + " (" + suffix++ + ")";
+            }
+            optionsMap.put(uniqueName, path);
+        }
+        return optionsMap;
+    }
+
     private void initCalendarControls() {
         try {
             UUID currentUserId = userSession.getUser() != null ? userSession.getUser().getId() : null;
             List<YandexCalendarInfoDto> availableCalendars = yandexIntegrationService.getAvailableCalendars(currentUserId);
-            Map<String, String> optionsMap = new LinkedHashMap<>();
+            if (availableCalendars == null) {
+                availableCalendars = Collections.emptyList();
+            }
+            Map<String, String> optionsMap = buildCalendarOptions(availableCalendars);
             defaultCalendarPath = null;
 
             for (YandexCalendarInfoDto cal : availableCalendars) {
-                optionsMap.put(cal.getDisplayName(), cal.getPath());
                 if (cal.isDefault() && defaultCalendarPath == null) {
                     defaultCalendarPath = cal.getPath();
                 }
             }
-            if (defaultCalendarPath == null && !availableCalendars.isEmpty()) {
-                defaultCalendarPath = availableCalendars.get(0).getPath();
+            if (defaultCalendarPath != null && !optionsMap.containsValue(defaultCalendarPath)) {
+                defaultCalendarPath = null;
+            }
+            if (defaultCalendarPath == null && !optionsMap.isEmpty()) {
+                defaultCalendarPath = optionsMap.values().iterator().next();
             }
 
             calendarLookupField.setOptionsMap(optionsMap);
 
-            if (availableCalendars.isEmpty()) {
+            if (optionsMap.isEmpty()) {
                 addToCalendarCheckBox.setValue(false);
                 addToCalendarCheckBox.setEnabled(false);
                 addToCalendarCheckBox.setDescription(messageBundle.getMessage("msgNoCalendarsAvailable"));
@@ -1984,9 +2020,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             addToCalendarCheckBox.setValue(false);
             addToCalendarCheckBox.setEnabled(false);
             calendarLookupField.setEnabled(false);
-            if (calendarBox != null) {
-                calendarBox.setVisible(false);
-            }
+            addToCalendarCheckBox.setDescription(messageBundle.getMessage("msgCalendarControlsUnavailable"));
         }
     }
 
@@ -1996,7 +2030,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             if (visible && !calendarsLoaded) {
                 initCalendarControls();
             }
-            calendarBox.setVisible(visible && calendarInitSuccess);
+            calendarBox.setVisible(visible && calendarsLoaded);
             if (actionDateCalendarRow != null) {
                 actionDateCalendarRow.setVisible(visible);
             }
@@ -2015,20 +2049,32 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private void syncCalendarEventAfterCommit() {
         try {
             boolean isCalendarScenario = addDate != null && addDate.isVisible();
-            if (!isCalendarScenario) {
+            IteractionList entity = getEditedEntity();
+            boolean hasPersistedCalendarData = entity != null
+                    && (Boolean.TRUE.equals(entity.getAddToCalendar())
+                    || entity.getCalendarId() != null
+                    || entity.getCalendarEventId() != null);
+            boolean shouldAttemptCalendarSync = isCalendarScenario || hasPersistedCalendarData;
+            if (!shouldAttemptCalendarSync || entity == null) {
                 return;
             }
 
-            boolean shouldSync = Boolean.TRUE.equals(addToCalendarCheckBox.getValue())
-                    && addDate.getValue() != null;
+            boolean shouldSync = isCalendarScenario
+                    && calendarInitSuccess
+                    && addToCalendarCheckBox != null
+                    && addToCalendarCheckBox.isEnabled()
+                    && Boolean.TRUE.equals(addToCalendarCheckBox.getValue())
+                    && addDate.getValue() != null
+                    && calendarLookupField != null
+                    && calendarLookupField.getValue() != null;
 
-            String selectedCalendar = calendarLookupField.getValue();
+            String selectedCalendar = shouldSync ? calendarLookupField.getValue() : null;
             String userTz = userSession.getTimeZone() != null ? userSession.getTimeZone().getID() : null;
             UUID userId = userSession.getUser() != null ? userSession.getUser().getId() : null;
 
             YandexMeetingResult result = yandexIntegrationService.syncInteractionCalendarEvent(
                     userId,
-                    getEditedEntity().getId(),
+                    entity.getId(),
                     shouldSync,
                     selectedCalendar,
                     userTz

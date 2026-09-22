@@ -318,6 +318,7 @@
     <include file="260921-5-vacancy-interview-plan-prompt.xml"
              relativeToChangelogFile="true"/>
     <!-- Сервис фонового анализа навыков: явный источник результата для AI/fallback -->
+    <!-- AI: фиксация фактического источника результата анализа навыков -->
     <include file="260922-1-addExecutionSourceToCandidateCvSkillAnalysis.xml"
              relativeToChangelogFile="true"/>
 
