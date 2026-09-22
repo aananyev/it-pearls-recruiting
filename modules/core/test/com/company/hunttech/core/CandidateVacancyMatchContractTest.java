@@ -11,11 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.lang.reflect.Method;
-import java.util.UUID;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -161,29 +162,45 @@ public class CandidateVacancyMatchContractTest {
     }
 
     @Test
-    public void testResponsiveLayoutKeepsRowsCompactAndDetailsScrollable() throws IOException {
-        Path root = projectRoot();
+    public void testScreenLayoutKeepsLocalStyleRootAndStableBindings() throws IOException {
+        Path xmlPath = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/jobcandidate/candidate-vacancy-match-screen.xml");
+        String xml = new String(Files.readAllBytes(xmlPath), StandardCharsets.UTF_8);
+
+        assertTrue(xml.contains("stylename=\"candidate-vacancy-match-root\""));
+        assertTrue(xml.contains("dataContainer=\"matchesDc\""));
+        assertTrue(xml.contains("id=\"analysisProgressTimer\""));
+        assertTrue(xml.contains("id=\"mainSplit\""));
+        assertTrue(xml.contains("id=\"matchesTable\""));
+        assertTrue(xml.contains("id=\"refreshAnalysisBtn\""));
+        assertTrue(xml.contains("id=\"closeBtn\""));
+    }
+
+    @Test
+    public void testAllThemePartialsUseSameScreenScopedLayout() throws IOException {
         List<String> themes = Arrays.asList(
-                "halo", "havana", "helium", "hover", "hunttech-modern",
-                "hunttech-modern-dark", "hunttech-modern-light");
-        String canonical = null;
+                "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark",
+                "helium", "halo", "hover", "havana");
+        String reference = null;
+
         for (String theme : themes) {
-            Path scss = root.resolve("modules/web/themes/" + theme
+            Path scssPath = projectRoot().resolve("modules/web/themes/" + theme
                     + "/com.company.hunttech/candidate-vacancy-match-screen.scss");
-            String content = new String(Files.readAllBytes(scss), StandardCharsets.UTF_8);
-            if (canonical == null) {
-                canonical = content;
+            String scss = new String(Files.readAllBytes(scssPath), StandardCharsets.UTF_8);
+            assertTrue(theme + ": отсутствует локальный корень", scss.contains(".candidate-vacancy-match-root"));
+            assertFalse(theme + ": запрещено менять геометрию всех HBox slot-обёрток",
+                    scss.contains(".candidate-vacancy-match-header > .v-slot"));
+            assertFalse(theme + ": запрещено подменять CUBA expand-layout через общий flex",
+                    scss.contains(".candidate-vacancy-match-root > .v-expand {\n    flex:"));
+            assertTrue(theme + ": details ScrollBox root должен оставаться прокручиваемым",
+                    scss.contains(".candidate-vacancy-match-details-scroll {\n    overflow-x: hidden !important;\n    overflow-y: auto !important;"));
+            assertFalse(theme + ": вложенный ScrollBox не должен перехватывать вертикальную прокрутку",
+                    scss.contains(".candidate-vacancy-match-details-scroll > .c-scrollbox-content"));
+            if (reference == null) {
+                reference = scss;
             } else {
-                assertEquals("Все темы CandidateVacancyMatch должны иметь одинаковый layout-контракт",
-                        canonical, content);
+                assertEquals("SCSS partial тем должны быть идентичны", reference, scss);
             }
-            assertTrue(content.contains(".candidate-vacancy-match-header > .v-expand"));
-            assertTrue(content.contains("flex: 0 0 auto !important"));
-            assertTrue(content.contains(".candidate-vacancy-match-action-row"));
-            assertTrue(content.contains("gap: 8px !important"));
-            assertTrue(content.contains(".candidate-vacancy-match-details-scroll {\n    overflow-x: hidden !important;\n    overflow-y: auto !important;"));
-            assertTrue("ScrollBox root must not hide its own vertical scroll",
-                    !content.contains(".candidate-vacancy-match-details-scroll {\n    overflow-x: hidden !important;\n    overflow-y: hidden !important;"));
         }
     }
 }
