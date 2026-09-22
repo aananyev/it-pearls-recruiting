@@ -7,8 +7,16 @@
         <Arg>
             <New class="org.apache.commons.dbcp2.BasicDataSource">
                 <Set name="driverClassName">org.postgresql.Driver</Set>
-                <Set name="url">jdbc:postgresql://127.0.0.1:5432/hunttech</Set>
-                <Set name="username">cuba</Set>
+                <Set name="url">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>HUNTTECH_DB_JDBC_URL</Arg>
+                    </Call>
+                </Set>
+                <Set name="username">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>HUNTTECH_DB_USER</Arg>
+                    </Call>
+                </Set>
                 <Set name="password">
                     <Call class="java.lang.System" name="getenv">
                         <Arg>HUNTTECH_DB_PASSWORD</Arg>

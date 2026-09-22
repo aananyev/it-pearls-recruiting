@@ -71,14 +71,18 @@ public class HunttechTestContainer extends TestContainer {
             if (normalizedTestHost.endsWith(".")) {
                 normalizedTestHost = normalizedTestHost.substring(0, normalizedTestHost.length() - 1);
             }
-            if (normalizedTestHost.matches(".*(^|\\.)0[0-9].*")) {
+            String comparisonHost = normalizedTestHost;
+            if (comparisonHost.startsWith("[") && comparisonHost.endsWith("]")) {
+                comparisonHost = comparisonHost.substring(1, comparisonHost.length() - 1);
+            }
+            if (comparisonHost.matches("(^|\\.)0[0-9].*")) {
                 throw new IllegalStateException("TEST profile must not use ambiguous leading-zero host notation");
             }
-            if (normalizedTestHost.equals("192.168.1.135") || normalizedTestHost.equals("127.0.0.1")
-                    || normalizedTestHost.startsWith("127.") || normalizedTestHost.equals("localhost")
-                    || normalizedTestHost.startsWith("localhost.") || normalizedTestHost.equals("::1")
-                    || normalizedTestHost.startsWith("::ffff:127.") || normalizedTestHost.equals("0.0.0.0")
-                    || normalizedTestHost.matches("[0-9]+")) {
+            if (comparisonHost.equals("192.168.1.135") || comparisonHost.equals("127.0.0.1")
+                    || comparisonHost.startsWith("127.") || comparisonHost.equals("localhost")
+                    || comparisonHost.startsWith("localhost.") || comparisonHost.equals("::1")
+                    || comparisonHost.startsWith("::ffff:127.") || comparisonHost.equals("0.0.0.0")
+                    || comparisonHost.equals("0:0:0:0:0:0:0:1") || comparisonHost.matches("[0-9]+")) {
                 throw new IllegalStateException("TEST profile must use an explicitly separate database host");
             }
             dbUrl = jdbcUrl(testHost,

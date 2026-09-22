@@ -51,9 +51,13 @@ done
 # shellcheck source=db-profile.sh
 source "$ROOT/scripts/db-profile.sh"
 export HUNTTECH_DB_PROFILE="${HUNTTECH_DB_PROFILE:-LOCAL}"
+if [[ "$HUNTTECH_DB_PROFILE" == "PRODUCTION" ]]; then
+  echo "❌ Локальный start-app.sh блокирует профиль PRODUCTION; используйте отдельный production runbook." >&2
+  exit 1
+fi
 db_profile_resolve "$HUNTTECH_DB_PROFILE"
 db_profile_require_password
-export HUNTTECH_DB_PASSWORD="${!DB_PROFILE_PASSWORD_VAR}"
+PROFILE_PASSWORD="${!DB_PROFILE_PASSWORD_VAR}"
 
 mkdir -p "$(dirname "$DEPLOY_LOG")"
 
@@ -278,7 +282,7 @@ ensure_postgres() {
     log "PostgreSQL: готов (profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST port=$DB_PROFILE_PORT database=$DB_PROFILE_DATABASE)."
     return 0
   fi
-  log "Ошибка: PostgreSQL profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST port=$DB_PROFILE_PORT database=$DB_PROFILE_DATABASE недоступен."
+  log "Ошибка: PostgreSQL profile=$DB_PROFILE_NAME host=$DB_PROFILE_HOST port=$DB_PROFILE_PORT database=$DB_PROFILE_DATABASE не отвечает на проверку доступности."
   log "Локальный PostgreSQL не запускается автоматически; проверьте VPN/firewall/pg_hba и профиль."
   exit 1
 }
@@ -433,7 +437,8 @@ ensure_local_app_properties
 configure_jvm_diagnostics
 
 log "Запуск Tomcat..."
-./gradlew start
+HUNTTECH_DB_PASSWORD="$PROFILE_PASSWORD" ./gradlew start
+unset PROFILE_PASSWORD
 
 log "URL: $APP_URL"
 wait_for_http

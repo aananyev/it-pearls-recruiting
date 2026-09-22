@@ -59,6 +59,7 @@ db_profile_normalize_host() {
 db_profile_test_host_is_forbidden() {
     local host
     host="$(db_profile_normalize_host "$1")"
+    [[ "$host" =~ (^|\.)0[0-9] ]] && return 0
     [[ "$host" == "192.168.1.135" ||
        "$host" == "127.0.0.1" || "$host" == 127.* ||
        "$host" == "localhost" || "$host" == localhost.* ||

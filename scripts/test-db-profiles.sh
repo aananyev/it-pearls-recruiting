@@ -101,7 +101,7 @@ render_dir="$(mktemp -d)"
 trap 'rm -rf "$render_dir"' EXIT
 if HUNTTECH_LOCAL_DB_PASSWORD='p<&"' \
    bash "$ROOT/scripts/render-db-context.sh" --profile LOCAL --output "$render_dir/context.xml" >/dev/null 2>&1 &&
-   [[ "$(stat -f '%Lp' "$render_dir/context.xml" 2>/dev/null || stat -c '%a' "$render_dir/context.xml")" == "600" ]] &&
+   [[ "$(stat -f '%OLp' "$render_dir/context.xml" 2>/dev/null || stat -c '%a' "$render_dir/context.xml")" == "600" ]] &&
    rg -q 'jdbc:postgresql://192\.168\.1\.135:5432/hunttech' "$render_dir/context.xml" &&
    rg -q 'p&lt;&amp;&quot;' "$render_dir/context.xml"; then
     pass 'rendered context uses profile host, escapes password, and is mode 600'
