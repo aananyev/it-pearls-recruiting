@@ -1135,7 +1135,7 @@ fi
 (
     export HUNTTECH_DB_PROFILE=PRODUCTION
     if [[ "$CHECK_CONFIG" -eq 0 && "$SKIP_DB_UPDATE" -eq 0 ]]; then
-        export HUNTTECH_PRODUCTION_DB_PASSWORD="$DB_UPDATE_PASSWORD"
+        export HUNTTECH_DB_PASSWORD_PRESENT=1
     fi
     bash "${current_catalog}/scripts/validate-db-profile.sh" "${VALIDATE_PROFILE_ARGS[@]}" >/dev/null
 )

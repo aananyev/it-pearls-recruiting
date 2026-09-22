@@ -67,7 +67,8 @@ db_profile_test_host_is_forbidden() {
     [[ "$host" == "192.168.1.135" ||
        "$host" == "127.0.0.1" || "$host" == 127.* ||
        "$host" == "localhost" || "$host" == localhost.* ||
-       "$host" == "::1" || "$host" == "0.0.0.0" ||
+       "$host" == "[::1]" || "$host" == "::1" ||
+       "$host" == "0:0:0:0:0:0:0:1" || "$host" == "0.0.0.0" ||
        "$host" =~ ^[0-9]+$ ]]
 }
 

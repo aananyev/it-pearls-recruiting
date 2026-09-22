@@ -40,7 +40,10 @@ done
 [[ -n "$PROFILE" ]] || { usage >&2; exit 2; }
 db_profile_resolve "$PROFILE"
 if [[ "$REQUIRE_PASSWORD" == true ]]; then
-    db_profile_require_password || exit 20
+    if [[ -z "${HUNTTECH_PRODUCTION_DB_PASSWORD:-}" && "${HUNTTECH_DB_PASSWORD_PRESENT:-}" != 1 ]]; then
+        db_profile_error 'PRODUCTION password must be supplied outside Git' >&2
+        exit 20
+    fi
 fi
 
 if [[ "$PROFILE" == "PRODUCTION" ]]; then
@@ -89,8 +92,22 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
             printf 'Refusing PRODUCTION: unsafe JDBC host found in %s\n' "$config_file" >&2
             exit 21
         fi
+        jdbc_status=0
+        jdbc_urls="$(rg -o -i -P 'jdbc:postgresql://[^[:space:]"<]+' "$config_file" 2>/dev/null || jdbc_status=$?)"
+        if ((jdbc_status >= 2)); then
+            printf 'Refusing PRODUCTION: unable to inspect JDBC URLs in %s\n' "$config_file" >&2
+            exit 25
+        fi
+        if ((jdbc_status == 0)) && [[ -n "$jdbc_urls" ]]; then
+            while IFS= read -r jdbc_url; do
+                [[ "$jdbc_url" =~ ^jdbc:postgresql://127\.0\.0\.1:[0-9]+/[A-Za-z0-9._-]+$ ]] || {
+                    printf 'Refusing PRODUCTION: JDBC URL must target 127.0.0.1 in %s\n' "$config_file" >&2
+                    exit 21
+                }
+            done <<< "$jdbc_urls"
+        fi
         scan_status=0
-        rg -n -P 'password="(?:[^"$]|\$(?!\{))[^\"]*"|^cuba\.dataSource\.password=(?:[^$]|\$(?!\{)).*$' "$config_file" >/dev/null || scan_status=$?
+        rg -n -P 'password="(?:[^"$]|\$(?!\{))[^\"]*"|^cuba\.dataSource\.password=(?:[^$]|\$(?!\{)).*$|<Set name="password">[^$<][^<]*</Set>' "$config_file" >/dev/null || scan_status=$?
         if ((scan_status >= 2)); then
             printf 'Refusing PRODUCTION: unable to scan %s for hardcoded passwords\n' "$config_file" >&2
             exit 25
