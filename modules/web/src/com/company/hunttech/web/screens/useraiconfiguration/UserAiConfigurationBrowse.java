@@ -9,6 +9,7 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
@@ -62,6 +63,8 @@ public class UserAiConfigurationBrowse extends StandardLookup<UserAiConfiguratio
     private Messages messages;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private UserSessionSource userSessionSource;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -119,6 +122,22 @@ public class UserAiConfigurationBrowse extends StandardLookup<UserAiConfiguratio
                     .withScreenClass(UserAiConfigurationEdit.class)
                     .show();
         }
+    }
+
+    /**
+     * Создаёт персональное подключение из общего реестра от имени текущего
+     * пользователя. Стандартный create-action не передавал владельца в Edit и
+     * оставлял обязательный USER_ID пустым.
+     */
+    public void onCreateBtnClick() {
+        screenBuilders.editor(UserAiConfiguration.class, this)
+                .withScreenClass(UserAiConfigurationEdit.class)
+                .newEntity()
+                .withInitializer(configuration ->
+                        configuration.setUser(userSessionSource.getUserSession().getUser()))
+                .withAfterCloseListener(event -> getScreenData().loadAll())
+                .build()
+                .show();
     }
 
 
