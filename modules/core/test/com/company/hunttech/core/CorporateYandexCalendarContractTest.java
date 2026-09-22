@@ -270,4 +270,30 @@ public class CorporateYandexCalendarContractTest {
         assertTrue("План миграции должен содержать проверку post-migration verification", planContent.contains("Post-Migration Verification"));
         assertTrue("План миграции должен содержать план отката Rollback", planContent.contains("Rollback Plan"));
     }
+
+    @Test
+    public void testIteractionListEditKeepsCalendarBlockVisibleWhenCalendarLoadingFails() throws Exception {
+        String controller = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+
+        assertTrue("Список календарей должен строиться с устранением дублирующихся путей",
+                controller.contains("buildCalendarOptions(availableCalendars)"));
+        assertTrue("Блок календаря должен оставаться видимым после завершения загрузки",
+                controller.contains("calendarBox.setVisible(visible && calendarsLoaded)"));
+        assertFalse("Ошибка загрузки не должна скрывать календарный блок",
+                controller.contains("calendarBox.setVisible(false)"));
+        assertTrue("При недоступном календаре взаимодействие не должно сохранять публикацию",
+                controller.contains("setAddToCalendar(addToCalendar)"));
+    }
+
+    @Test
+    public void testIteractionListEditAttemptsToDisableOldCalendarEventAfterTypeChange() throws Exception {
+        String controller = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+
+        assertTrue("Синхронизация должна учитывать прежние данные календаря после смены типа",
+                controller.contains("shouldAttemptCalendarSync"));
+        assertTrue("Для не-календарного типа синхронизация должна передавать false",
+                controller.contains("boolean shouldSync = isCalendarScenario"));
+    }
 }
