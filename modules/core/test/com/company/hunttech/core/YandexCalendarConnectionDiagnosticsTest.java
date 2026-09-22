@@ -82,7 +82,7 @@ public class YandexCalendarConnectionDiagnosticsTest {
 
         assertFalse(result.isSuccess());
         assertEquals(403, result.getHttpStatusCode());
-        assertTrue(result.getMessage().contains("Недостаточно прав OAuth"));
+        assertTrue(result.getMessage().contains("HTTP 403"));
         assertFalse(configuration.getCalendarConnected());
     }
 
@@ -94,7 +94,7 @@ public class YandexCalendarConnectionDiagnosticsTest {
 
         assertFalse(result.isSuccess());
         assertEquals(404, result.getHttpStatusCode());
-        assertTrue(result.getMessage().contains("недоступны"));
+        assertTrue(result.getMessage().contains("доступных календарей"));
         assertFalse(configuration.getCalendarConnected());
     }
 
@@ -118,7 +118,7 @@ public class YandexCalendarConnectionDiagnosticsTest {
 
         assertFalse(result.isSuccess());
         assertEquals(503, result.getHttpStatusCode());
-        assertEquals("Сетевая ошибка доступа к Яндекс.Календарю", result.getMessage());
+        assertEquals("Ошибка календарного подключения: сетевая ошибка CalDAV", result.getMessage());
         assertFalse(configuration.getCalendarConnected());
         assertFalse("Техническая причина не должна раскрывать секреты в details",
                 result.getDetails() != null && result.getDetails().contains("test-token"));
