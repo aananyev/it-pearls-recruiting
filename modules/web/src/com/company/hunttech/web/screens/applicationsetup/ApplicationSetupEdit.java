@@ -2,6 +2,7 @@ package com.company.hunttech.web.screens.applicationsetup;
 
 import com.company.hunttech.core.ApplicationSetupService;
 import com.company.hunttech.core.TelegramBotService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
@@ -53,14 +54,18 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
 
     @Subscribe("applicationLogoField")
     public void onApplicationLogoFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        FileDescriptor descriptor = applicationLogoField.getFileDescriptor();
+        // Rejected image uploads still reach the CUBA success listener; keep the prior preview when no descriptor exists.
+        if (descriptor == null) {
+            return;
+        }
         try {
             applicationLogoFileImage.setVisible(true);
             applicationDefaultLogoFileImage.setVisible(false);
 
             FileDescriptorResource fileDescriptorResource =
                     applicationLogoFileImage.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(
-                                    applicationLogoField.getFileDescriptor());
+                            .setFileDescriptor(descriptor);
 
             applicationLogoFileImage.setSource(fileDescriptorResource);
         } catch (IllegalArgumentException e) {
@@ -80,14 +85,18 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
 
     @Subscribe("applicationIconField")
     public void onApplicationIconFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        FileDescriptor descriptor = applicationIconField.getFileDescriptor();
+        // Rejected image uploads still reach the CUBA success listener; keep the prior preview when no descriptor exists.
+        if (descriptor == null) {
+            return;
+        }
         try {
             applicationIconFileImage.setVisible(true);
             applicationDefaultIconFileImage.setVisible(false);
 
             FileDescriptorResource fileDescriptorResource =
                     applicationIconFileImage.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(
-                                    applicationIconField.getFileDescriptor());
+                            .setFileDescriptor(descriptor);
 
             applicationIconFileImage.setSource(fileDescriptorResource);
         } catch (IllegalArgumentException e) {

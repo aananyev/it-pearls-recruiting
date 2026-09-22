@@ -21,11 +21,10 @@
         <class>com.hunttech.hrm.web.components.WebOvaFallbackImage</class>
         <componentLoader>com.hunttech.hrm.web.loaders.OvaFallbackImageLoader</componentLoader>
     </component>
-    <!-- Загрузчик файлов с обработкой изображений (логотип проекта/компании, фотография
-         кандидата): регистрируется под стандартным именем upload, поэтому заменяет
-         WebFileUploadField во всех экранах без правки XML. Обработка выполняется только
-         для полей, привязанных к property="projectLogo" (Project),
-         property="fileCompanyLogo" (Company) или property="fileImageFace" (JobCandidate). -->
+    <!-- Общий безопасный raster-pipeline sidebar/profile/branding изображений:
+         нормализует только whitelist FileDescriptor properties из
+         WebProjectLogoFileUploadField. Документы и остальные file upload bindings
+         сохраняют стандартное поведение CUBA. -->
     <component>
         <name>upload</name>
         <class>com.company.hunttech.web.gui.components.WebProjectLogoFileUploadField</class>

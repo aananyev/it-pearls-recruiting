@@ -1,6 +1,7 @@
 package com.company.hunttech.web.screens.socialnetworktype;
 
 import com.company.hunttech.entity.SocialNetworkType;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.FileUploadField;
@@ -26,10 +27,14 @@ public class SocialNetworkTypeEdit extends StandardEditor<SocialNetworkType> {
 
     @Subscribe("snLogoFileUpload")
     public void onSnLogoFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        FileDescriptor descriptor = snLogoFileUpload.getFileDescriptor();
+        if (descriptor == null) {
+            return;
+        }
         try {
             FileDescriptorResource fileDescriptorResource =
                     snLogo.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(snLogoFileUpload.getFileDescriptor());
+                            .setFileDescriptor(descriptor);
 
             snLogo.setSource(fileDescriptorResource);
         } catch (IllegalArgumentException e) {

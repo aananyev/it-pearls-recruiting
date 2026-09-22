@@ -12,20 +12,24 @@
 
 Рекрутёры и HR загружают фотографии профиля через админский экран пользователя и через личные настройки. Без нормализации крупные файлы увеличивают объём хранилища, замедляют отрисовку аватаров в списках вакансий, комментариях и виджете «Моё фото». **ImageProcessingService** централизует правила: если изображение уже укладывается в лимит по пикселям — возвращается как есть; иначе — масштабируется и перекодируется в целевой формат (по умолчанию PNG).
 
+Сервис сохраняется как legacy resize/helper API. Он больше не является первым safety gate для `ExtUser.officialPhoto` или `ExtUser.userAvatar`: оба upload-контрола, как и остальные graphics controls, сначала проходят строгий [SidebarImageNormalizationService](../SidebarImageNormalizationService.md). `ExtSettingsWindow` после общей нормализации передаёт готовый descriptor напрямую в `UserAvatarManagementService`; legacy `ExtUserEdit` может дополнительно вызвать этот helper уже для нормализованного PNG.
+
 Обработка должна оставаться в middleware: она использует серверную конфигурацию, `ImageIO` и Thumbnailator. Перенос реализации в web-контроллер создал бы дублирование правил, зависимость web-модуля от библиотек обработки изображений и расхождение между административной и пользовательской загрузкой фотографий.
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
 | Точка вызова | Роль |
 |--------------|------|
-| `ExtUserEdit` | Администратор загружает `officialPhoto`; сервис инжектируется как зарегистрированный web-side middleware proxy |
-| `ExtSettingsWindow` | Пользователь загружает `userAvatar`; сервис получается через `AppBeans.get(ImageProcessingService.NAME)` |
+| `ExtUserEdit` | После общей fail-closed нормализации legacy listener может передать готовый `officialPhoto` в helper |
+| `ExtSettingsWindow` | `userAvatar` проходит общий normalizer; прямой вызов `ImageProcessingService` удалён |
 | `AvatarImageUploadHelper` | Общий web-слой: читает байты из `FileLoader`, вызывает сервис, при `processed=true` обновляет `FileDescriptor` и перезаписывает файл в хранилище |
 | `web-spring.xml` | Регистрирует интерфейс сервиса в `WebRemoteProxyBeanCreator`, чтобы web Spring context содержал proxy-bean `hunttech_ImageProcessingService` |
 
 Конфигурация лимитов доступна в UI через `HunttechImageConfig` (подсказки в upload-компонентах).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Следующие правила относятся к явному legacy-вызову `ImageProcessingService`, а не к обязательному контракту 16 graphics controls. Их fail-closed валидацию до сохранения обеспечивает `SidebarImageNormalizationService`.
 
 - **Запуск web-приложения** → `WebRemoteProxyBeanCreator` читает `remoteServices` → создаёт локальный proxy-bean `hunttech_ImageProcessingService`, направленный в middleware.
 - **Открытие `ExtSettingsWindow`** → контроллер получает зарегистрированный proxy через `AppBeans.get(ImageProcessingService.NAME)` → окно открывается без доступа к core Spring context.
@@ -146,8 +150,8 @@ DTO реализует `Serializable`; это обязательная част�
 
 ### Экраны
 
-- **ExtUserEdit** — обработка upload `officialPhoto`; зарегистрированный proxy позволяет сохранить существующую `@Inject ImageProcessingService`.
-- **ExtSettingsWindow** — upload `userAvatar` на `extUserDs`; сервис разрешается по `ImageProcessingService.NAME`, затем передаётся в тот же helper.
+- **ExtUserEdit** — общий upload-компонент сначала нормализует `officialPhoto`; существующий listener затем может передать уже безопасный PNG в legacy helper.
+- **ExtSettingsWindow** — общий upload-компонент нормализует `userAvatar`, затем descriptor применяется `UserAvatarManagementService` без повторной image processing.
 
 ---
 
@@ -192,6 +196,7 @@ Runtime smoke выполняется на одном точном SHA: откр�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-21 | Уточнена граница: 16 graphics controls, включая `ExtUser.officialPhoto/userAvatar`, проходят строгий `SidebarImageNormalizationService`; `ExtSettingsWindow` больше не вызывает legacy helper, а `ExtUserEdit` может применять его только после общей PNG-нормализации. |
 | 2026-07-25 | Исправлена регистрация remoting: `hunttech_ImageProcessingService` и `hunttech_UserAiContextService` добавлены в `WebRemoteProxyBeanCreator`; устранена причина `NoSuchBeanDefinitionException` при открытии `ExtSettingsWindow` |
 | 2026-07-25 | `ExtSettingsWindow` переведён с class-based `AppBeans` lookup на именованный CUBA service proxy `ImageProcessingService.NAME`; закреплены граница web/core и сериализуемый удалённый контракт |
 | 2026-06-29 | Дефолт `defaultFallbackImagePath`: `images/hunttech-placeholder.svg` (фирменный SVG в темах hover/halo) |

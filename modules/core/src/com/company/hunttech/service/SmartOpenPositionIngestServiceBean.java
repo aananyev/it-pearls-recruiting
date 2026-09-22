@@ -56,6 +56,8 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
     private FileLoader fileLoader;
     @Inject
     private AiExecutionService aiExecutionService;
+    @Inject
+    private HrmAiService hrmAiService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -797,24 +799,28 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
             data.setCommentEn(buildCommentEn(data, sourceText));
         }
 
-        // 3. Чек-лист первичного скрининга кандидата (must-have)
-        if (data.getInterviewChecklist() == null || data.getInterviewChecklist().trim().isEmpty() || data.getInterviewChecklist().length() < 100) {
-            data.setInterviewChecklist(buildInterviewChecklist(data));
-        }
+        // 3. Dedicated-функция вызывается всегда: VACANCY_SMART_PARSE_JSON формирует
+        // основную карточку, но не является второй реализацией материалов вакансии.
+        String checklistFallback = isSufficientMaterial(data.getInterviewChecklist())
+                ? data.getInterviewChecklist() : buildInterviewChecklist(data);
+        data.setInterviewChecklist(generateVacancyMaterial(
+                VacancyMaterialType.CHECKLIST, data, sourceText, checklistFallback));
         // По регламенту навыка: один и тот же чеклист записывается одновременно в interviewChecklist и exercise
         data.setExercise(data.getInterviewChecklist());
 
         // 4. Карта поиска / инструкция сорсеру
-        if (data.getSearchMap() == null || data.getSearchMap().trim().isEmpty() || data.getSearchMap().length() < 100) {
-            data.setSearchMap(buildSearchMap(data));
-        }
+        String searchMapFallback = isSufficientMaterial(data.getSearchMap())
+                ? data.getSearchMap() : buildSearchMap(data);
+        data.setSearchMap(generateVacancyMaterial(
+                VacancyMaterialType.SEARCH_MAP, data, sourceText, searchMapFallback));
         // По регламенту навыка: одна и та же карта поиска записывается одновременно в searchMap и memoForInterview
         data.setMemoForInterview(data.getSearchMap());
 
         // 5. План продающего собеседования (6 блоков)
-        if (data.getInterviewPlan() == null || data.getInterviewPlan().trim().isEmpty() || data.getInterviewPlan().length() < 100) {
-            data.setInterviewPlan(buildInterviewPlan(data));
-        }
+        String interviewPlanFallback = isSufficientMaterial(data.getInterviewPlan())
+                ? data.getInterviewPlan() : buildInterviewPlan(data);
+        data.setInterviewPlan(generateVacancyMaterial(
+                VacancyMaterialType.INTERVIEW_PLAN, data, sourceText, interviewPlanFallback));
         // По регламенту навыка: один и тот же план пишется одновременно в interviewPlan и templateLetter
         data.setTemplateLetter(data.getInterviewPlan());
 
@@ -822,6 +828,60 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         if (data.getTelegramPost() == null || data.getTelegramPost().trim().isEmpty()) {
             data.setTelegramPost(buildTelegramPost(data));
         }
+    }
+
+    /**
+     * Делегирует каждый материал тому же типизированному vacancy AI-фасаду, который
+     * вызывают edit-экраны. Ошибка отдельной AI-функции не отменяет умное создание:
+     * уже распарсенный материал или детерминированный генератор остаётся fallback.
+     */
+    private String generateVacancyMaterial(VacancyMaterialType type,
+                                           SmartOpenPositionParsedData data,
+                                           String sourceText,
+                                           String fallback) {
+        if (hrmAiService == null) {
+            return fallback;
+        }
+        Map<String, Object> context = new LinkedHashMap<>();
+        context.put("description", vacancyMaterialDescription(data, sourceText));
+        context.put("vacancyName", safeValue(data.getVacansyName()));
+        context.put("projectName", safeValue(data.getProjectName()));
+        context.put("positionName", safeValue(data.getPositionTypeName()));
+        context.put("grade", safeValue(data.getGradeName()));
+        try {
+            AiExecutionResult result = hrmAiService.generateVacancyMaterial(type, context);
+            if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
+                return result.getText().trim();
+            }
+            log.warn("AI-функция материала {} вернула пустой результат; используется fallback", type);
+        } catch (RuntimeException failure) {
+            log.warn("AI-функция материала {} недоступна; используется fallback. Причина: {}",
+                    type, failure.toString());
+        }
+        return fallback;
+    }
+
+    private boolean isSufficientMaterial(String value) {
+        return value != null && !value.trim().isEmpty() && value.length() >= 100;
+    }
+
+    /**
+     * Контекст строится только из DTO smart ingest, а не из detached OpenPosition:
+     * это исключает Cannot get unfetched attribute в комплексном сценарии.
+     */
+    private String vacancyMaterialDescription(SmartOpenPositionParsedData data, String sourceText) {
+        String description = data.getComment();
+        if (description == null || description.trim().isEmpty()) {
+            description = sourceText;
+        }
+        if (description == null || description.trim().isEmpty()) {
+            description = data.getRawText();
+        }
+        return safeValue(description);
+    }
+
+    private String safeValue(String value) {
+        return value == null ? "" : value.trim();
     }
 
     void applyOutstaffingRates(SmartOpenPositionParsedData data) {
@@ -2261,4 +2321,3 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
         return oneLine.length() <= maxLen ? oneLine : oneLine.substring(0, maxLen) + "...";
     }
 }
-
