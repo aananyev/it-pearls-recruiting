@@ -459,7 +459,7 @@ ensure_local_app_properties
 configure_jvm_diagnostics
 
 log "Запуск Tomcat..."
-with_profile_env ./gradlew start --no-daemon
+with_profile_env "$ROOT/deploy/tomcat/bin/startup.sh"
 
 log "URL: $APP_URL"
 wait_for_http
