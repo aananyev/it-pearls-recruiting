@@ -11,9 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -156,5 +159,44 @@ public class CandidateVacancyMatchContractTest {
         String metadata = new String(Files.readAllBytes(metadataPath), StandardCharsets.UTF_8);
         assertTrue("CandidateVacancyMatchItem должен быть зарегистрирован в metadata.xml",
                 metadata.contains("com.company.hunttech.entity.CandidateVacancyMatchItem"));
+    }
+
+    @Test
+    public void testScreenLayoutKeepsLocalStyleRootAndStableBindings() throws IOException {
+        Path xmlPath = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/jobcandidate/candidate-vacancy-match-screen.xml");
+        String xml = new String(Files.readAllBytes(xmlPath), StandardCharsets.UTF_8);
+
+        assertTrue(xml.contains("stylename=\"candidate-vacancy-match-root\""));
+        assertTrue(xml.contains("dataContainer=\"matchesDc\""));
+        assertTrue(xml.contains("id=\"analysisProgressTimer\""));
+        assertTrue(xml.contains("id=\"mainSplit\""));
+        assertTrue(xml.contains("id=\"matchesTable\""));
+        assertTrue(xml.contains("id=\"refreshAnalysisBtn\""));
+        assertTrue(xml.contains("id=\"closeBtn\""));
+    }
+
+    @Test
+    public void testAllThemePartialsUseSameScreenScopedLayout() throws IOException {
+        List<String> themes = Arrays.asList(
+                "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark",
+                "helium", "halo", "hover", "havana");
+        String reference = null;
+
+        for (String theme : themes) {
+            Path scssPath = projectRoot().resolve("modules/web/themes/" + theme
+                    + "/com.company.hunttech/candidate-vacancy-match-screen.scss");
+            String scss = new String(Files.readAllBytes(scssPath), StandardCharsets.UTF_8);
+            assertTrue(theme + ": отсутствует локальный корень", scss.contains(".candidate-vacancy-match-root"));
+            assertFalse(theme + ": запрещено менять геометрию всех HBox slot-обёрток",
+                    scss.contains(".candidate-vacancy-match-header > .v-slot"));
+            assertFalse(theme + ": запрещено подменять CUBA expand-layout через общий flex",
+                    scss.contains(".candidate-vacancy-match-root > .v-expand {\n    flex:"));
+            if (reference == null) {
+                reference = scss;
+            } else {
+                assertEquals("SCSS partial тем должны быть идентичны", reference, scss);
+            }
+        }
     }
 }

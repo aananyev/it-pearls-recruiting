@@ -25,11 +25,6 @@
   .candidate-vacancy-match-root .v-slot-mainSplit {
     min-width: 0 !important;
     min-height: 0 !important;
-    height: 100% !important;
-  }
-
-  .candidate-vacancy-match-root > .v-expand {
-    flex: 1 1 0% !important;
   }
 
   .candidate-vacancy-match-header,
@@ -43,119 +38,6 @@
     border: 1px solid $candidate-vacancy-match-border;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
-  }
-
-  // Auto-height HBox rows use flex-wrap instead of fixed offsets or heights.
-  .candidate-vacancy-match-header,
-  .candidate-vacancy-match-window-actions,
-  .candidate-vacancy-match-skill-status,
-  .candidate-vacancy-match-progress-head,
-  .candidate-vacancy-match-steps,
-  .candidate-vacancy-match-progress-footer,
-  .candidate-vacancy-match-section-header,
-  .candidate-vacancy-match-action-row,
-  .candidate-vacancy-match-filter-row,
-  .candidate-vacancy-match-quick-actions,
-  .candidate-vacancy-match-header > .v-expand,
-  .candidate-vacancy-match-skill-status > .v-expand,
-  .candidate-vacancy-match-progress-head > .v-expand,
-  .candidate-vacancy-match-progress-footer > .v-expand,
-  .candidate-vacancy-match-section-header > .v-expand {
-    box-sizing: border-box !important;
-    flex: 1 1 0% !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-  }
-
-  .candidate-vacancy-match-header > .v-expand,
-  .candidate-vacancy-match-skill-status > .v-expand,
-  .candidate-vacancy-match-progress-head > .v-expand,
-  .candidate-vacancy-match-progress-footer > .v-expand,
-  .candidate-vacancy-match-section-header > .v-expand {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 8px !important;
-  }
-
-  .candidate-vacancy-match-header > .v-slot,
-  .candidate-vacancy-match-window-actions > .v-slot,
-  .candidate-vacancy-match-skill-status > .v-slot,
-  .candidate-vacancy-match-progress-head > .v-slot,
-  .candidate-vacancy-match-steps > .v-slot,
-  .candidate-vacancy-match-progress-footer > .v-slot,
-  .candidate-vacancy-match-section-header > .v-slot,
-  .candidate-vacancy-match-action-row > .v-slot,
-  .candidate-vacancy-match-filter-row > .v-slot,
-  .candidate-vacancy-match-quick-actions > .v-slot,
-  .candidate-vacancy-match-header > .v-expand > .v-slot,
-  .candidate-vacancy-match-skill-status > .v-expand > .v-slot,
-  .candidate-vacancy-match-progress-head > .v-expand > .v-slot,
-  .candidate-vacancy-match-progress-footer > .v-expand > .v-slot,
-  .candidate-vacancy-match-section-header > .v-expand > .v-slot {
-    box-sizing: border-box !important;
-    position: relative !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    margin: 0 !important;
-  }
-
-  .candidate-vacancy-match-header > .v-spacing,
-  .candidate-vacancy-match-window-actions > .v-spacing,
-  .candidate-vacancy-match-skill-status > .v-spacing,
-  .candidate-vacancy-match-progress-head > .v-spacing,
-  .candidate-vacancy-match-steps > .v-spacing,
-  .candidate-vacancy-match-progress-footer > .v-spacing,
-  .candidate-vacancy-match-section-header > .v-spacing,
-  .candidate-vacancy-match-action-row > .v-spacing,
-  .candidate-vacancy-match-filter-row > .v-spacing,
-  .candidate-vacancy-match-quick-actions > .v-spacing,
-  .candidate-vacancy-match-header > .v-expand > .v-spacing,
-  .candidate-vacancy-match-skill-status > .v-expand > .v-spacing,
-  .candidate-vacancy-match-progress-head > .v-expand > .v-spacing,
-  .candidate-vacancy-match-progress-footer > .v-expand > .v-spacing,
-  .candidate-vacancy-match-section-header > .v-expand > .v-spacing {
-    display: none !important;
-  }
-
-  .candidate-vacancy-match-header .v-slot-analysisContextBox {
-    flex: 1 1 420px !important;
-  }
-
-  .candidate-vacancy-match-header .v-slot-windowActionsBox {
-    flex: 0 1 auto !important;
-  }
-
-  .candidate-vacancy-match-window-actions > .v-slot,
-  .candidate-vacancy-match-action-row > .v-slot {
-    flex: 0 1 auto !important;
-  }
-
-  .candidate-vacancy-match-skill-status .v-slot-skillRefreshStatusLabel,
-  .candidate-vacancy-match-progress-head .v-slot-analysisPhaseLabel,
-  .candidate-vacancy-match-progress-footer .v-slot-statusLabel,
-  .candidate-vacancy-match-section-header .v-slot-resultsTitleLabel {
-    flex: 1 1 280px !important;
-  }
-
-  .candidate-vacancy-match-steps > .v-slot {
-    flex: 1 1 180px !important;
-  }
-
-  .candidate-vacancy-match-steps .candidate-vacancy-match-step {
-    width: 100% !important;
-  }
-
-  .candidate-vacancy-match-filter-row > .v-slot:last-child {
-    flex: 1 1 220px !important;
   }
 
   .candidate-vacancy-match-filter-row .v-filterselect {
@@ -346,10 +228,6 @@
     box-shadow: none;
   }
 
-  .candidate-vacancy-match-quick-actions > .v-slot {
-    flex: 1 1 160px !important;
-  }
-
   .candidate-vacancy-match-quick-actions .v-button {
     width: 100% !important;
     min-width: 0 !important;
@@ -453,19 +331,7 @@
       display: none !important;
     }
 
-    .candidate-vacancy-match-window-actions,
-    .candidate-vacancy-match-header .v-slot-windowActionsBox {
-      width: 100% !important;
-      flex: 1 1 100% !important;
-      justify-content: flex-start !important;
-    }
-
-    .candidate-vacancy-match-action-row > .v-slot {
-      flex: 1 1 160px !important;
-    }
-
     .candidate-vacancy-match-action-row .v-button {
-      width: 100% !important;
       min-width: 0 !important;
     }
   }
