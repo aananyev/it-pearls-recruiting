@@ -121,6 +121,15 @@ class MarkdownRendererTest {
     }
 
     @Test
+    void testTableAllowsOptionalOuterPipesOnBodyRow() {
+        String raw = "| A | B |\n| --- | --- |\n1 | 2";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("<td class=\"llm-md-td\">1</td>"));
+        assertTrue(html.contains("<td class=\"llm-md-td\">2</td>"));
+    }
+
+    @Test
     void testLinks() {
         String raw = "Подробнее на [HRM Portal](https://hunttech.internal/portal).";
         String html = MarkdownRenderer.renderMarkdown(raw);
@@ -513,4 +522,3 @@ class MarkdownRendererTest {
         assertTrue(html3.contains("Вакансия Middle Java Developer"));
     }
 }
-
