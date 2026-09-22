@@ -150,6 +150,9 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
         ai.setProviderCode("openrouter");
         ai.setModelName("model-x");
         assertEquals("openrouter / model-x", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(ai));
+        ai.setProviderCode("deepseek");
+        ai.setModelName("deepseek-v4-flash");
+        assertEquals("deepseek / deepseek-v4-flash", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(ai));
 
         CandidateCvSkillAnalysis fallback = new CandidateCvSkillAnalysis();
         fallback.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_DICTIONARY_FALLBACK);
@@ -169,5 +172,10 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
 
         CandidateCvSkillAnalysis legacy = new CandidateCvSkillAnalysis();
         assertEquals("Метаданные недоступны", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(legacy));
+        CandidateCvSkillAnalysis incomplete = new CandidateCvSkillAnalysis();
+        incomplete.setExecutionSource(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE);
+        incomplete.setProviderCode("deepseek");
+        assertEquals("AI: deepseek / модель недоступна",
+                CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(incomplete));
     }
 }

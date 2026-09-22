@@ -305,6 +305,36 @@ public class CandidateSkillEnrichmentServiceTest {
     }
 
     @Test
+    public void testScanAndEnrich_SavesActualAiExecutionMetadata() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Мария Смирнова");
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Java, Spring, PostgreSQL");
+
+        CandidateCvSkillAnalysis analysis = new CandidateCvSkillAnalysis();
+        when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(analysis);
+        when(mockDataManager.load(CandidateSkill.class).query(anyString()).parameter("candidateId", candidate.getId())
+                .view("candidateSkill-view").list()).thenReturn(Collections.emptyList());
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class).query(anyString()).parameter("cvId", cv.getId())
+                .view("candidateCvSkillAnalysis-browse-view").optional()).thenReturn(Optional.empty());
+
+        AiExecutionResult execution = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
+                "deepseek-v4-flash", "deepseek", AiCredentialOwner.ADMIN, "[]", 1, 2, 3);
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), execution));
+
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI, analysis.getExecutionSource());
+        assertEquals("deepseek", analysis.getProviderCode());
+        assertEquals("deepseek-v4-flash", analysis.getModelName());
+        verify(mockDataManager, atLeastOnce()).commit(analysis);
+    }
+
+    @Test
     public void testFreeOnlyToggle() {
         when(mockConfig.getFreeOnly()).thenReturn(true);
         assertTrue("Должен возвращать true из конфигурации", service.isFreeOnly());
