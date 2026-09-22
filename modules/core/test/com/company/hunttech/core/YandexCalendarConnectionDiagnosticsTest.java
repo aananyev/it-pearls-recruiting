@@ -94,7 +94,7 @@ public class YandexCalendarConnectionDiagnosticsTest {
 
         assertFalse(result.isSuccess());
         assertEquals(404, result.getHttpStatusCode());
-        assertTrue(result.getMessage().contains("доступных календарей"));
+        assertTrue(result.getMessage().contains("HTTP 404"));
         assertFalse(configuration.getCalendarConnected());
     }
 
