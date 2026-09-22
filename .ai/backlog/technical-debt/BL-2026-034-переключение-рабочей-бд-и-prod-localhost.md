@@ -3,7 +3,7 @@
 - ID: BL-2026-034
 - Создано: 2026-09-22
 - Источник: руководитель
-- Статус: NEW
+- Статус: IN_PROGRESS — безопасная конфигурационная часть подготовлена, runtime-параметры требуют подтверждения владельца окружения
 - Приоритет: не определён
 - Срочность: не определена
 - Ценность: работать локально с общей тестовой БД и исключить ошибочное подключение production к удалённому PostgreSQL
@@ -84,3 +84,13 @@
 
 - 2026-09-22 — создана задача по разделению LOCAL PostgreSQL на `192.168.1.135` и production PostgreSQL на `127.0.0.1`.
 - 2026-09-22 — добавлены матрица окружений, запрет небезопасного fallback, deployment checks и ограничения на перенос данных.
+- 2026-09-22 — реализован профильный контракт `LOCAL`/`TEST`/`PRODUCTION`, JNDI runtime-rendering без секретов, fail-fast production guard, automated checks и runbook/rollback-документация.
+
+## Результат аудита и ограничения реализации
+
+- Фактический datasource приложения — JNDI `jdbc/CubaDS`; адрес дублировался в `context.xml`, `jetty-env.xml`, `war-context.xml`, Gradle `createDb/updateDb` и deployment scripts.
+- `LOCAL` теперь резолвится на `192.168.1.135`; `start-app.sh` не запускает локальный PostgreSQL и проверяет профильный host/database до deploy.
+- `PRODUCTION` fail-fast принимает только `127.0.0.1` и блокирует `192.168.1.135`, `localhost`, generic host override и неизвестный профиль.
+- `TEST` имеет отдельные обязательные переменные без fallback; подтверждённых host/port/database/user/password TEST в репозитории нет.
+- Порт `5432`, database `hunttech` и user `cuba` сохранены как текущий non-secret application contract; наличие целевой БД и отдельного пользователя на `192.168.1.135` не подтверждалось сетевым подключением.
+- Production deployment, SSH, изменение PostgreSQL, перенос данных и smoke-test против удалённых/production БД не выполнялись.

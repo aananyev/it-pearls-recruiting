@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=db-profile.sh
+source "${ROOT}/scripts/db-profile.sh"
+
+failures=0
+pass() { printf 'PASS %s\n' "$1"; }
+fail() { printf 'FAIL %s\n' "$1" >&2; failures=$((failures + 1)); }
+
+if db_profile_resolve LOCAL && [[ "$DB_PROFILE_HOST" == "192.168.1.135" ]]; then
+    pass 'LOCAL resolves to 192.168.1.135'
+else
+    fail 'LOCAL must resolve to 192.168.1.135'
+fi
+
+if db_profile_resolve PRODUCTION && [[ "$DB_PROFILE_HOST" == "127.0.0.1" ]]; then
+    pass 'PRODUCTION resolves to 127.0.0.1'
+else
+    fail 'PRODUCTION must resolve to 127.0.0.1'
+fi
+
+if HUNTTECH_PRODUCTION_DB_HOST=192.168.1.135 db_profile_resolve PRODUCTION >/dev/null 2>&1; then
+    fail 'PRODUCTION accepted 192.168.1.135'
+else
+    pass 'PRODUCTION rejects 192.168.1.135'
+fi
+
+if HUNTTECH_PRODUCTION_DB_HOST=localhost db_profile_resolve PRODUCTION >/dev/null 2>&1; then
+    fail 'PRODUCTION accepted localhost'
+else
+    pass 'PRODUCTION rejects localhost'
+fi
+
+if db_profile_resolve UNKNOWN >/dev/null 2>&1; then
+    fail 'unknown profile was accepted'
+else
+    pass 'unknown profile is rejected'
+fi
+
+if HUNTTECH_TEST_DB_HOST=10.20.30.40 \
+   HUNTTECH_TEST_DB_PORT=5544 \
+   HUNTTECH_TEST_DB_NAME=hrm_test \
+   HUNTTECH_TEST_DB_USER=hrm_test_user \
+   db_profile_resolve TEST &&
+   [[ "$DB_PROFILE_HOST" == "10.20.30.40" &&
+      "$DB_PROFILE_PORT" == "5544" &&
+      "$DB_PROFILE_DATABASE" == "hrm_test" &&
+      "$DB_PROFILE_USER" == "hrm_test_user" ]]; then
+    pass 'TEST uses explicit independent settings'
+else
+    fail 'TEST did not use explicit independent settings'
+fi
+
+if HUNTTECH_TEST_DB_HOST=192.168.1.135 \
+   HUNTTECH_TEST_DB_PORT=5432 \
+   HUNTTECH_TEST_DB_NAME=hrm_test \
+   HUNTTECH_TEST_DB_USER=hrm_test_user \
+   db_profile_resolve TEST >/dev/null 2>&1; then
+    fail 'TEST inherited the LOCAL host'
+else
+    pass 'TEST rejects the LOCAL host'
+fi
+
+if rg -n 'password="cuba"|^cuba\.dataSource\.password=cuba$' \
+    "$ROOT/modules/core/web/META-INF" "$ROOT/modules/core/src/app.properties" \
+    "$ROOT/modules/core/src/com/company/hunttech/app.properties" >/dev/null; then
+    fail 'tracked datasource password remains in application configuration'
+else
+    pass 'tracked datasource password is absent'
+fi
+
+if HUNTTECH_DB_PROFILE=UNKNOWN "$ROOT/scripts/validate-db-profile.sh" --profile UNKNOWN >/dev/null 2>&1; then
+    fail 'validation command accepted an unknown profile'
+else
+    pass 'validation command rejects an unknown profile'
+fi
+
+if [[ "$failures" -ne 0 ]]; then
+    printf '%s\n' "${failures} db-profile test(s) failed" >&2
+    exit 1
+fi
+printf '%s\n' 'All db-profile tests passed.'

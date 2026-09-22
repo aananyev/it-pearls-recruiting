@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=db-profile.sh
+source "${ROOT}/scripts/db-profile.sh"
+
+usage() {
+    cat <<'USAGE'
+Usage: validate-db-profile.sh --profile LOCAL|TEST|PRODUCTION
+
+The command prints only non-secret effective connection metadata.
+USAGE
+}
+
+PROFILE=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --profile)
+            PROFILE="${2:-}"
+            shift 2
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            usage >&2
+            exit 2
+            ;;
+    esac
+done
+
+[[ -n "$PROFILE" ]] || { usage >&2; exit 2; }
+db_profile_resolve "$PROFILE"
+
+if [[ "$PROFILE" == "PRODUCTION" ]]; then
+    [[ "$DB_PROFILE_HOST" == "127.0.0.1" ]] || {
+        printf 'Refusing PRODUCTION: effective DB host is not 127.0.0.1\n' >&2
+        exit 20
+    }
+
+    # Production artifacts must never carry the remote work DB or an ambiguous
+    # localhost fallback in a JNDI JDBC URL.
+    while IFS= read -r config_file; do
+        [[ -f "$config_file" ]] || continue
+        if rg -n -i 'jdbc:postgresql://(192\.168\.1\.135|localhost)([:/"[:space:]]|$)' "$config_file" >/dev/null; then
+            printf 'Refusing PRODUCTION: unsafe JDBC host found in %s\n' "$config_file" >&2
+            exit 21
+        fi
+        if rg -n 'password="[^$][^"]*"|^cuba\.dataSource\.password=[^$].*$' "$config_file" >/dev/null; then
+            printf 'Refusing PRODUCTION: hardcoded datasource password found in %s\n' "$config_file" >&2
+            exit 22
+        fi
+    done <<EOF
+${ROOT}/modules/core/web/META-INF/context.xml
+${ROOT}/modules/core/web/META-INF/jetty-env.xml
+${ROOT}/modules/core/web/META-INF/war-context.xml
+${ROOT}/modules/core/src/app.properties
+EOF
+fi
+
+printf 'profile=%s host=%s port=%s database=%s user=%s\n' \
+    "$DB_PROFILE_NAME" "$DB_PROFILE_HOST" "$DB_PROFILE_PORT" \
+    "$DB_PROFILE_DATABASE" "$DB_PROFILE_USER"

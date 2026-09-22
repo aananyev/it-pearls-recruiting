@@ -1,4 +1,4 @@
-# Локальный PostgreSQL для разработки HuntTech Recruiting.
+# Опциональный DEV-only PostgreSQL; стандартный LOCAL-профиль его не запускает.
 # Запуск: docker compose up -d
 # Остановка: docker compose down
 
@@ -11,7 +11,7 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-cuba}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cuba}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set outside Git}
       POSTGRES_DB: ${POSTGRES_DB:-HuntTech}
     volumes:
       - hunttech_pgdata:/var/lib/postgresql/data
