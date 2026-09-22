@@ -8,6 +8,7 @@ import org.dom4j.Element;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 public class HunttechTestContainer extends TestContainer {
 
@@ -48,9 +49,43 @@ public class HunttechTestContainer extends TestContainer {
         Element resourceElem = contextXmlDoc.getRootElement().element("Resource");
 
         dbDriver = resourceElem.attributeValue("driverClassName");
-        dbUrl = resourceElem.attributeValue("url");
-        dbUser = resourceElem.attributeValue("username");
-        dbPassword = resourceElem.attributeValue("password");
+        String profile = System.getenv().getOrDefault("HUNTTECH_DB_PROFILE", "LOCAL").toUpperCase(Locale.ROOT);
+        if ("PRODUCTION".equals(profile)) {
+            throw new IllegalStateException("Integration tests cannot use the PRODUCTION database profile");
+        }
+        if ("LOCAL".equals(profile)) {
+            dbUrl = jdbcUrl(
+                    envOrDefault("HUNTTECH_LOCAL_DB_HOST", "192.168.1.135"),
+                    envOrDefault("HUNTTECH_LOCAL_DB_PORT", "5432"),
+                    envOrDefault("HUNTTECH_LOCAL_DB_NAME", "hunttech"));
+            dbUser = envOrDefault("HUNTTECH_LOCAL_DB_USER", "cuba");
+            dbPassword = requiredEnv("HUNTTECH_LOCAL_DB_PASSWORD");
+        } else if ("TEST".equals(profile)) {
+            dbUrl = jdbcUrl(requiredEnv("HUNTTECH_TEST_DB_HOST"),
+                    requiredEnv("HUNTTECH_TEST_DB_PORT"),
+                    requiredEnv("HUNTTECH_TEST_DB_NAME"));
+            dbUser = requiredEnv("HUNTTECH_TEST_DB_USER");
+            dbPassword = requiredEnv("HUNTTECH_TEST_DB_PASSWORD");
+        } else {
+            throw new IllegalStateException("Unknown HUNTTECH_DB_PROFILE: " + profile);
+        }
+    }
+
+    private static String envOrDefault(String name, String defaultValue) {
+        String value = System.getenv(name);
+        return value == null || value.trim().isEmpty() ? defaultValue : value;
+    }
+
+    private static String requiredEnv(String name) {
+        String value = System.getenv(name);
+        if (value == null || value.trim().isEmpty() || value.contains("\n") || value.contains("\r")) {
+            throw new IllegalStateException(name + " must be supplied outside Git without newlines");
+        }
+        return value;
+    }
+
+    private static String jdbcUrl(String host, String port, String database) {
+        return "jdbc:postgresql://" + host + ":" + port + "/" + database;
     }
 
     public static class Common extends HunttechTestContainer {

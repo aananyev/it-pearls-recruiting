@@ -29,7 +29,12 @@ db_profile_validate_token() {
 db_profile_validate_port() {
     local name="$1"
     local value="$2"
-    if [[ ! "$value" =~ ^[0-9]+$ || "$value" -lt 1 || "$value" -gt 65535 ]]; then
+    if [[ ! "$value" =~ ^[0-9]+$ ]]; then
+        db_profile_error "${name} must be a TCP port"
+        return 1
+    fi
+    local decimal_value=$((10#$value))
+    if (( decimal_value < 1 || decimal_value > 65535 )); then
         db_profile_error "${name} must be a TCP port"
         return 1
     fi
@@ -85,7 +90,8 @@ db_profile_resolve() {
             test_host_lower="$(printf '%s' "$DB_PROFILE_HOST" | tr '[:upper:]' '[:lower:]')"
             if [[ "$test_host_lower" == "192.168.1.135" ||
                   "$test_host_lower" == "127.0.0.1" ||
-                  "$test_host_lower" == "localhost" ]]; then
+                  "$test_host_lower" == "localhost" ||
+                  "$test_host_lower" == "::1" ]]; then
                 db_profile_error "TEST must use an explicitly separate database host"
                 return 1
             fi

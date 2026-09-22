@@ -40,6 +40,11 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
         exit 20
     }
 
+    command -v rg >/dev/null 2>&1 || {
+        printf 'Refusing PRODUCTION: ripgrep (rg) is required for artifact scan\n' >&2
+        exit 23
+    }
+
     # Production artifacts must never carry the remote work DB or an ambiguous
     # localhost fallback in a JNDI JDBC URL.
     while IFS= read -r config_file; do
@@ -57,6 +62,8 @@ ${ROOT}/modules/core/web/META-INF/context.xml
 ${ROOT}/modules/core/web/META-INF/jetty-env.xml
 ${ROOT}/modules/core/web/META-INF/war-context.xml
 ${ROOT}/modules/core/src/app.properties
+${ROOT}/modules/core/src/com/company/hunttech/app.properties
+${ROOT}/deploy/tomcat/webapps/hrm-core/META-INF/context.xml
 EOF
 fi
 

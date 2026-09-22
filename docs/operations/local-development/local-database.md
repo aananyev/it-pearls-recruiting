@@ -2,20 +2,17 @@
 
 Проект — приложение на **CUBA Platform 7.3** с **PostgreSQL** и JNDI-источником данных `jdbc/CubaDS`.
 
-## Параметры подключения (локальная разработка)
+## Профили подключения (локальная разработка)
 
-| Параметр | Значение |
-|----------|----------|
-| Хост | `localhost` |
-| Порт | `5432` |
-| База данных | `HuntTech` |
-| Пользователь | `cuba` |
-| Пароль | `cuba` |
-| JDBC URL | `jdbc:postgresql://localhost:5432/HuntTech` |
+| Профиль | Хост | Пароль |
+|---------|------|--------|
+| `LOCAL` | `192.168.1.135` | `HUNTTECH_LOCAL_DB_PASSWORD` вне Git |
+| `TEST` | отдельный явно заданный host | `HUNTTECH_TEST_DB_PASSWORD` вне Git |
+| `PRODUCTION` | только `127.0.0.1` | production secret store |
 
 Файлы с настройками подключения:
 
-- `modules/core/web/META-INF/context.xml` — Tomcat / тесты
+- `modules/core/web/META-INF/context.xml` — шаблон Tomcat; runtime context рендерится профилем
 - `modules/core/web/META-INF/war-context.xml` — сборка WAR
 - `modules/core/web/META-INF/jetty-env.xml` — запуск из IDE (Jetty)
 - `build.gradle` — задачи `createDb` / `updateDb`
@@ -95,7 +92,9 @@ PostgreSQL готов → Tomcat остановлен → updateDb → clean dep
 ## Проверка подключения
 
 ```bash
-psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT version();"
+HUNTTECH_DB_PROFILE=LOCAL \
+HUNTTECH_LOCAL_DB_PASSWORD='***' \
+psql -h 192.168.1.135 -p 5432 -U cuba -d hunttech -c "SELECT version();"
 ```
 
 Или через скрипт проекта:
