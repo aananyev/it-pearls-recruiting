@@ -103,19 +103,20 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         UserYandexConfiguration config = getOrCreateConfiguration(userId);
         String token = resolveToken(config);
         if (StringUtils.isBlank(token)) {
+            updateCalendarDiagnosticState(config, serviceType, false,
+                    "Не указан OAuth токен авторизации Яндекс 360");
             return YandexDiagnosticResult.error(serviceType, 401, "Не указан OAuth токен авторизации Яндекс 360", null);
         }
 
         try {
             if ("CALENDAR".equalsIgnoreCase(serviceType)) {
-                List<YandexCalendarInfoDto> calendars = discoverCalendarsInternal(config, token);
+                // Диагностика не использует fallback: синтетический путь календаря не доказывает
+                // успешную OAuth-авторизацию или наличие прав CalDAV.
+                List<YandexCalendarInfoDto> calendars = discoverCalendarsInternal(config, token, true);
                 boolean foundClient = calendars.stream().anyMatch(YandexCalendarInfoDto::isClientInterviewCalendar);
                 String msg = String.format("Календари доступны. Обнаружено %d календарей (в т.ч. 'Hunttech у заказчика': %s)",
                         calendars.size(), foundClient ? "найден" : "не найден, будет создан или использован личный");
-                config.setCalendarConnected(true);
-                config.setLastVerifiedAt(new Date());
-                config.setLastVerificationMessage(msg);
-                dataManager.commit(config);
+                updateCalendarDiagnosticState(config, serviceType, true, msg);
                 return YandexDiagnosticResult.ok("CALENDAR", msg);
 
             } else if ("TELEMOST".equalsIgnoreCase(serviceType)) {
@@ -154,10 +155,30 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                     return YandexDiagnosticResult.error("AUTH", res.statusCode, "Неверный токен авторизации", res.body);
                 }
             }
+        } catch (CalendarConnectionException ex) {
+            String message = "Ошибка календарного подключения: " + ex.getMessage();
+            updateCalendarDiagnosticState(config, serviceType, false, message);
+            log.warn("Диагностика календаря завершилась ошибкой: {}", ex.getMessage());
+            return YandexDiagnosticResult.error(serviceType, ex.getStatusCode(), message, null);
         } catch (Exception ex) {
+            updateCalendarDiagnosticState(config, serviceType, false, "Ошибка связи с календарным сервисом");
             log.error("Ошибка при проверке подключения к {}: {}", serviceType, ex.getMessage(), ex);
             return YandexDiagnosticResult.error(serviceType, 500, "Ошибка связи: " + ex.getMessage(), null);
         }
+    }
+
+    /**
+     * Сохраняет результат календарной диагностики без токенов и ответов внешнего сервиса.
+     */
+    protected void updateCalendarDiagnosticState(UserYandexConfiguration config, String serviceType,
+                                                 boolean connected, String message) {
+        if (config == null || !"CALENDAR".equalsIgnoreCase(serviceType)) {
+            return;
+        }
+        config.setCalendarConnected(connected);
+        config.setLastVerifiedAt(new Date());
+        config.setLastVerificationMessage(message);
+        dataManager.commit(config);
     }
 
     @Override
@@ -722,7 +743,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
 
     // --- Внутренние вспомогательные методы ---
 
-    private String resolveToken(UserYandexConfiguration config) {
+    protected String resolveToken(UserYandexConfiguration config) {
         if (config == null || StringUtils.isBlank(config.getOauthTokenEncrypted())) {
             return null;
         }
@@ -778,6 +799,15 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
     }
 
     private List<YandexCalendarInfoDto> discoverCalendarsInternal(UserYandexConfiguration config, String token) {
+        return discoverCalendarsInternal(config, token, false);
+    }
+
+    /**
+     * Выполняет CalDAV discovery. Строгий режим предназначен только для диагностики подключения:
+     * он запрещает маскировать HTTP- и сетевые ошибки синтетическими fallback-календарями.
+     */
+    protected List<YandexCalendarInfoDto> discoverCalendarsInternal(UserYandexConfiguration config, String token,
+                                                                    boolean strictDiagnostics) {
         List<YandexCalendarInfoDto> result = new ArrayList<>();
         String baseUrl = StringUtils.defaultIfBlank(config.getCalendarBaseUrl(), UserYandexConfiguration.DEFAULT_CALENDAR_BASE_URL);
         String account = resolveAccountEmail(config, token);
@@ -793,6 +823,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                     "</d:propfind>";
 
             HttpResult propfindRes = sendHttp("PROPFIND", principalUrl, token, propfindBody, "application/xml; charset=utf-8", Collections.singletonMap("Depth", "0"));
+            requireSuccessfulCaldavResponse(propfindRes, "получение principal", strictDiagnostics);
 
             String homeSetPath = extractTagContent(propfindRes.body, "href");
             if (StringUtils.isBlank(homeSetPath)) {
@@ -810,6 +841,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
                     "</d:propfind>";
 
             HttpResult listRes = sendHttp("PROPFIND", homeUrl, token, listBody, "application/xml; charset=utf-8", Collections.singletonMap("Depth", "1"));
+            requireSuccessfulCaldavResponse(listRes, "получение списка календарей", strictDiagnostics);
 
             // Разбираем ответы
             Pattern responsePattern = Pattern.compile("<(?:\\w+:)?response>(.*?)</(?:\\w+:)?response>", Pattern.DOTALL);
@@ -817,7 +849,10 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
 
             while (matcher.find()) {
                 String responseXml = matcher.group(1);
-                if (responseXml.contains("<resourcetype") && (responseXml.contains("calendar") || responseXml.contains("collection"))) {
+                boolean hasResourceType = Pattern.compile("<(?:\\w+:)?resourcetype", Pattern.CASE_INSENSITIVE)
+                        .matcher(responseXml)
+                        .find();
+                if (hasResourceType && (responseXml.contains("calendar") || responseXml.contains("collection"))) {
                     String href = extractTagContent(responseXml, "href");
                     String displayname = extractTagContent(responseXml, "displayname");
                     if (StringUtils.isNotBlank(href) && !href.equals(homeSetPath)) {
@@ -829,6 +864,10 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             }
 
             if (result.isEmpty()) {
+                if (strictDiagnostics) {
+                    throw new CalendarConnectionException(404,
+                            "CalDAV не вернул доступных календарей");
+                }
                 // Фолбэк на стандартный путь календаря пользователя
                 String defaultPath = "/calendars/" + URLEncoder.encode(account, StandardCharsets.UTF_8.name()) + "/events/";
                 result.add(new YandexCalendarInfoDto("default", "Основной", defaultPath, true, false));
@@ -837,6 +876,12 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
             }
 
         } catch (Exception ex) {
+            if (strictDiagnostics) {
+                if (ex instanceof CalendarConnectionException) {
+                    throw (CalendarConnectionException) ex;
+                }
+                throw new CalendarConnectionException(503, "сетевая ошибка CalDAV");
+            }
             log.warn("Ошибка CalDAV discovery: {}", ex.getMessage());
             // Фолбэк
             String defaultPath = "/calendars/" + account + "/events/";
@@ -844,6 +889,14 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         }
 
         return result;
+    }
+
+    private void requireSuccessfulCaldavResponse(HttpResult response, String operation, boolean strictDiagnostics) {
+        if (!strictDiagnostics || (response.statusCode >= 200 && response.statusCode < 300)) {
+            return;
+        }
+        throw new CalendarConnectionException(response.statusCode,
+                operation + " завершено с HTTP " + response.statusCode);
     }
 
     private String resolveTargetCalendarPath(UserYandexConfiguration config, String token, YandexCalendarType calendarType, String customPath) {
@@ -907,7 +960,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         }
     }
 
-    private CorporateYandexCalendar resolveCorporateCalendarForPath(String calendarPath) {
+    protected CorporateYandexCalendar resolveCorporateCalendarForPath(String calendarPath) {
         if (StringUtils.isNotBlank(calendarPath)) {
             List<CorporateYandexCalendar> list = dataManager.load(CorporateYandexCalendar.class)
                     .query("select e from hunttech_CorporateYandexCalendar e where e.calendarPath = :path and e.active = true")
@@ -1032,7 +1085,7 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         return null;
     }
 
-    private HttpResult sendHttp(String method, String urlStr, String token, String body, String contentType, Map<String, String> extraHeaders) throws Exception {
+    protected HttpResult sendHttp(String method, String urlStr, String token, String body, String contentType, Map<String, String> extraHeaders) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         setRequestMethodSafely(conn, method);
@@ -1333,13 +1386,26 @@ public class YandexIntegrationServiceBean implements YandexIntegrationService {
         }
     }
 
-    private static class HttpResult {
-        final int statusCode;
-        final String body;
+    protected static class HttpResult {
+        protected final int statusCode;
+        protected final String body;
 
-        HttpResult(int statusCode, String body) {
+        public HttpResult(int statusCode, String body) {
             this.statusCode = statusCode;
             this.body = body;
+        }
+    }
+
+    private static class CalendarConnectionException extends RuntimeException {
+        private final int statusCode;
+
+        CalendarConnectionException(int statusCode, String message) {
+            super(message);
+            this.statusCode = statusCode;
+        }
+
+        int getStatusCode() {
+            return statusCode;
         }
     }
 }
