@@ -1031,6 +1031,52 @@
 
     /* Вкладка «Комментарии»: карточки-пузыри чата (локальное переопределение legacy tail*;
        в modern-темах эти классы не определены вовсе, поэтому вид задаётся здесь, во всех 7 темах). */
+    .job-candidate-comments-scroll,
+    .job-candidate-comments-feed,
+    .job-candidate-comment-row {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    .job-candidate-comments-scroll {
+      overflow-x: hidden !important;
+    }
+
+    .job-candidate-comments-feed .job-candidate-comment-bubble {
+      width: calc(100% - 2px) !important;
+      max-width: 520px;
+      min-width: 0;
+    }
+
+    .job-candidate-comment-bubble.v-horizontallayout-margin,
+    .job-candidate-comment-bubble > .v-horizontallayout-margin {
+      display: flex !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .job-candidate-comment-bubble .v-slot-job-candidate-comment-body {
+      flex: 1 1 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+    }
+
+    .job-candidate-comment-body {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .job-candidate-comment-bubble.tailMyMessage {
+      margin-left: auto;
+    }
+
+    .job-candidate-comment-bubble.tailOtherMessage {
+      margin-right: auto;
+    }
+
     .toolTip {
       max-width: 520px;
       width: auto !important;

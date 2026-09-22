@@ -257,9 +257,11 @@ Accordion-слой не удаляет и не подменяет штатную
 - загрузка ленты — `interactionCommentDl` (`order by e.dateIteraction desc`); исправлена
   legacy-опечатка JPQL `e.deteIteraction` (коммит rebranding `7f93cfa5`) — запрос падал
   с `JPQLException "cannot be resolved"`, лента была пустой;
-- пузырь ограничен `max-width: 520px`; текст переносится (`white-space: pre-wrap`,
-  `overflow-wrap: anywhere`); имя рекрутера — жирное, вакансия — курсивом, дата — мелкая
-  серая в формате `dd.MM.yyyy HH:mm`;
+- пузырь ограничен меньшей из доступной ширины ленты и `520px`: локальные классы
+  `job-candidate-comments-*` задают shrinkable flex-геометрию тела и фиксированного аватара,
+  `min-width: 0` снимает intrinsic-width Vaadin layout, а горизонтальное переполнение ленты
+  скрыто; длинные текст/URL, имя рекрутера и вакансия остаются внутри пузыря и переносятся
+  (`white-space: pre-wrap`, `overflow-wrap: anywhere`);
 - аватар рекрутера — круг 50px с белой рамкой (у своих — справа, у чужих — слева);
 - кнопка «Ответить» стилизована как ссылка (без рамки и заливки);
 - поле ввода нового комментария получило `inputPrompt="msg://msgInputComment"`;
@@ -369,6 +371,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-22 | **BL-2026-023, presentation-only:** устранён выход элементов чат-комментария за границы вкладки на стандартной и узкой ширине. Корневая причина — сочетание `width:auto`/`min-width:180px` у пузыря и auto/intrinsic width вложенных Vaadin `HBox/VBox`: `max-width:520px` ограничивал оболочку, но не давал телу комментария shrink-контекста при длинном URL, имени или вакансии. В XML добавлены screen-scoped классы ленты, в `buildCommentComponent()` — структурные классы строки/пузыря/тела; SCSS во всех 7 темах ограничивает пузырь доступной шириной, делает тело flex-shrinkable (`min-width:0`) и сохраняет аватар 50px. Высота по содержимому, перенос текста, Reply, поле ввода, кнопка отправки, lazy-loading, права и порядок комментариев не изменены. |
 | 2026-08-16 | Уведомление об AI-обработке фотографии: после реального нейросетевого удаления фона (rembg/u2net) в форме показывается исчезающая TRAY-нотификация «Фотография обработана с помощью AI» (стандартный механизм CUBA, `Notifications`, правый нижний угол). Реализация в общем компоненте `WebProjectLogoFileUploadField` (только режим `fileImageFace`): флаг `aiProcessed` в `ProcessedImage` + `ProjectLogoImageProcessingServiceBean` отличает нейросетевое удаление фона от классики и простых конвертации/ресайза — нотификация не показывается, если rembg недоступен (фото только конвертируется). Распространяется на все формы загрузки фото кандидата (JobCandidateEdit, CandidateCVEdit, PersonEdit). XML и контроллер формы не менялись |
 | 2026-08-15 | Умная обработка фотографии кандидата (как логотипы в ProjectEdit/CompanyEdit): `WebProjectLogoFileUploadField` расширен на свойство `fileImageFace` — PNG, ресайз до 300px, удаление белого фона (rembg/AI/классика), вписывание в круг; конфиг общий `hunttech.projectLogo.*`; повторная загрузка без закрытия экрана обрабатывается заново. XML и контроллер формы не менялись — поле `fileImageFaceUpload` уже использует кастомный `upload`, обработка включилась автоматически |
 | 2026-08-08 | Заголовку навигации «Разделы формы» sidebar добавлен локальный класс `job-candidate-section-title` — полоса-заголовок с двумя горизонтальными inset-линиями (белая сверху `rgba(255,255,255,1) 0 1px 0 0 inset`, светлая снизу `rgba(244,244,244,1) 0 -1px 0 0 inset`) + разделитель `border-bottom rgba(255,255,255,.14)`, полоса `rgba(255,255,255,.045)`, текст `#ffb11b` 15px/700, min-height 36px, padding 7px 11px — контракт §4.1 (как OpenPositionEdit/IteractionListEdit/CandidateCVEdit); SCSS `job-candidate-editor.scss` во всех 7 темах; добавлен контрактный тест `JobCandidateEditLayoutContractTest.navigationSectionTitleHasTwoInsetLines`. |

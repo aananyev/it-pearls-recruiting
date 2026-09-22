@@ -263,7 +263,7 @@ layout stylename="job-candidate-editor"
 │       │   ├── tab tabPositions (Позиции и вакансии) — аккордеон, две табличные карточки
 │       │   ├── tab tabIteraction (Взаимодействия) — аккордеон, dataGrid
 │       │   ├── tab tabResume (Резюме и файлы) — аккордеон, dataGrid
-│       │   ├── tab commentsTab (Комментарии) — аккордеон, dataGrid + чат
+│       │   ├── tab commentsTab (Комментарии) — аккордеон, scrollBox + vbox чат
 │       │   └── tab tabHistory (История) — аккордеон, метаданные записи
 │       └── hbox id="jobCandidateBottomBar" — commit&close, Отмена
 ├── dialogMode height="750" width="1200"
@@ -280,6 +280,15 @@ Captions вкладок больше не обрезаются через ellips
 tabcontainer. Названия вкладок видны полностью и не расширяют рабочую область
 за правую границу формы. Подписи вкладок — 14px/600, активная вкладка выделяется
 theme-aware `$v-selection-color` с нижней границей 3px (дизайн-ревью 2026-08-03).
+
+**Контракт вкладки «Комментарии»:** `jobCandidateCommentsScroll` и
+`jobCandidateCommentsContainer` имеют локальные классы `job-candidate-comments-*`.
+Каждая строка, пузырь и его текстовое тело получают отдельные классы из
+`buildCommentComponent()`. Пузырь не шире `520px` и доступной ширины ленты; flex-slot тела
+может сжиматься до `0`, поэтому длинный текст/URL, имя и вакансия переносятся внутри пузыря,
+а аватар 50px остаётся фиксированным. Свои комментарии выравниваются вправо, чужие — влево.
+Высота определяется содержимым. Reply, поле ввода, кнопка отправки, lazy-loading,
+права и порядок комментариев сохраняются.
 
 **Required поля (XML):** `firstName`, `currentCompany`, `personPosition`, `cityOfResidence`, контакты на вкладке Contact Info, `priorityContact`.
 
@@ -505,6 +514,7 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 ## История изменений
 
+| 2026-09-22 | **BL-2026-023:** presentation-only исправление переполнения вкладки «Комментарии». Устранена intrinsic-width проблема вложенных Vaadin `HBox/VBox`: добавлены screen-scoped классы ленты/строки/пузыря/тела, ширина пузыря ограничена контейнером и `520px`, тело сделано flex-shrinkable с `min-width:0`, горизонтальный overflow ленты закрыт. Синхронизированы 7 тем и контрактный тест; бизнес-логика, loaders, JPQL, actions, порядок, lazy-loading и права не менялись. |
 | 2026-08-16 | Вкладка «Резюме и файлы»: добавлена выпадающая кнопка «Действия» (`skillActionsPopupButton`) с действиями «Сканировать навыки» (`scanSkillsAction`, вызов `SkillAnalysisService` в фоне с уведомлением и обновлением чипов сайдбара) и «Проверить навыки» (`checkSkillFromJDAction`). Sidebar: быстрые действия «Создать резюме» и «Создать взаимодействие» перемещены в верхнюю часть под должность кандидата над рейтингом и стилизованы в соответствии с кнопками сайдбара Split-View. Вкладка «Комментарии»: исправлено форматирование и переполнение текста чат-пузырей во всех 7 темах. В форме `JobCandidateTest1Browse` в выпадающее меню действий кандидата добавлена операция «Сканировать навыки» по всем связанным резюме кандидата с разделением навыков на 3 группы («Основные», «Второстепенные», «Прочее»). |
 | 2026-08-03 | **Дизайн-ревью компоновки JobCandidateEdit (22 файла, presentation-only)** по заданию `.team/JobCandidateEdit/design-notes.md` (P1-1…P3-14), Java-контроллер не менялся. XML: toolbar получил заголовок/описание (`jobCandidateToolbarTitleBox`, `edit-toolbar-title`/`-description`, `expand` переведён на него), русские подписи переведены на `msg://`/`mainMsg://` (+24 ключа в `messages*.properties`), секция «Социальные сети» — `height="AUTO"` + `min-height: 320px` у `socialNetworkTable`, удалены мёртвые stylename (`job-candidate-half-card`, `-contact-card`, `-positions-layout`, `-table-comments`, `-info-grid`, `-sidebar-grid`, `-name-row`), добавлены captions колонок `networkName`/`vacancy`/`iteractionType`/`recrutier`, панель комментариев — `edit-card`/`edit-form-control` вместо `well`/`large`. SCSS ×7 тем: label-навигация по эталону 27px/3px/20px (было 38px/8px/18px), убран маркер `▼`, карточки «Основного» — вертикальный стек, подписи вкладок 14px + `$v-selection-color`, поля 15px/38px, подписи строк контактов 100px, sidebar 296/284px, удалены `.job-candidate-audit-*`; `styles.scss` ×7 — порядок слоёв по контракту 6.4; контракт-тест — ассерты 27px/14px. Бизнес-логика, actions, loaders и bindings не менялись. |
 | 2026-07-29 | По визуальной проверке во внутреннем браузере на `1280×720` устранено перекрытие sidebar/workspace: Vaadin slot sidebar зафиксирован на 312px во всех темах, вкладки ограничены `112px` с ellipsis, чтобы длинные captions не выходили за границы формы. |

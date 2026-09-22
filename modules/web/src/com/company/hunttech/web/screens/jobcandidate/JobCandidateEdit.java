@@ -4297,6 +4297,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retBox.setWidthFull();
         retBox.setSpacing(false);
         retBox.setMargin(false);
+        retBox.setStyleName("job-candidate-comment-row");
 
         HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
         innerBox.setMargin(true);
@@ -4307,6 +4308,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         outerBox.setMargin(false);
         outerBox.setWidthAuto();
         outerBox.setSpacing(false);
+        outerBox.setStyleName("job-candidate-comment-body");
 
         if (item.getComment() != null
                 && !item.getComment().equals("")) {
@@ -4350,7 +4352,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             image.setHeight("50px");
             image.setStyleName("circle-50px");
 
-            innerBox.setStyleName("toolTip");
+            innerBox.setStyleName("toolTip job-candidate-comment-bubble");
 
             Button replyButton = uiComponents.create(Button.class);
             replyButton.setWidthAuto();

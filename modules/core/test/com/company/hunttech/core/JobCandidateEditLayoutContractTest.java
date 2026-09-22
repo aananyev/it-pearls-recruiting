@@ -19,6 +19,8 @@ public class JobCandidateEditLayoutContractTest {
 
     private static final String XML =
             "modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml";
+    private static final String JAVA =
+            "modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java";
     private static final String[] THEMES = {
             "halo",
             "havana",
@@ -178,6 +180,8 @@ public class JobCandidateEditLayoutContractTest {
         assertTrue("Лента комментариев — scrollBox + vbox (авто-высота пузырей)",
                 comments.contains("id=\"jobCandidateCommentsScroll\""));
         assertTrue(comments.contains("id=\"jobCandidateCommentsContainer\""));
+        assertTrue(comments.contains("stylename=\"job-candidate-comments-scroll\""));
+        assertTrue(comments.contains("stylename=\"job-candidate-comments-feed\""));
         assertTrue("dataGrid удалён: Vaadin Grid не поддерживает авто-высоту строк — "
                         + "пузыри разной высоты перекрывались (rowHeight 30px)",
                 !comments.contains("<dataGrid"));
@@ -191,6 +195,11 @@ public class JobCandidateEditLayoutContractTest {
 
     @Test
     public void everyThemeStylesCommentBubbles() throws IOException {
+        String controller = readProjectFile(JAVA);
+        assertTrue(controller.contains("job-candidate-comment-row"));
+        assertTrue(controller.contains("toolTip job-candidate-comment-bubble"));
+        assertTrue(controller.contains("job-candidate-comment-body"));
+
         for (String theme : THEMES) {
             String scss = readProjectFile("modules/web/themes/" + theme
                     + "/com.company.hunttech/job-candidate-editor.scss");
@@ -200,6 +209,11 @@ public class JobCandidateEditLayoutContractTest {
             assertTrue(theme, scss.contains(".tailOtherMessage {"));
             assertTrue(theme, scss.contains("max-width: 520px"));
             assertTrue(theme, scss.contains(".table-wordwrap {"));
+            assertTrue(theme, scss.contains(".job-candidate-comments-feed .job-candidate-comment-bubble"));
+            assertTrue(theme, scss.contains("width: calc(100% - 2px) !important"));
+            assertTrue(theme, scss.contains(".v-slot-job-candidate-comment-body"));
+            assertTrue(theme, scss.contains("flex: 1 1 0 !important"));
+            assertTrue(theme, scss.contains("overflow-x: hidden !important"));
         }
     }
 
