@@ -368,8 +368,7 @@ public class MarkdownRenderer {
             boolean tableContinuation = inTable
                     && isTableRow(trimmed)
                     && splitCells(trimmed).size() == tableColumnCount
-                    && (hasSameTablePipeStyle(trimmed, tableHasLeadingPipe, tableHasTrailingPipe)
-                    || isOptionalOuterPipeRow(trimmed, tableColumnCount));
+                    && hasSameTablePipeStyle(trimmed, tableHasLeadingPipe, tableHasTrailingPipe);
             if (tableStart || tableContinuation) {
                 if (!inTable) {
                     // Close other open block structures
@@ -984,23 +983,6 @@ public class MarkdownRenderer {
 
     private static boolean hasSameTablePipeStyle(String row, boolean leadingPipe, boolean trailingPipe) {
         return row.startsWith("|") == leadingPipe && hasTrailingPipe(row) == trailingPipe;
-    }
-
-    private static boolean isOptionalOuterPipeRow(String row, int expectedColumns) {
-        if (row.startsWith("|") || hasTrailingPipe(row)) {
-            return false;
-        }
-        List<String> cells = splitCells(row);
-        if (cells.size() != expectedColumns) {
-            return false;
-        }
-        for (String cell : cells) {
-            String value = cell.trim();
-            if (value.isEmpty() || value.matches("^[^|]{1,40}:\\s+.*") || value.matches(".*[.!?]$")) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static boolean hasTrailingPipe(String row) {

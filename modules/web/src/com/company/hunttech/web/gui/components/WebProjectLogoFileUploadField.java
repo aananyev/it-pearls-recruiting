@@ -1,10 +1,10 @@
 package com.company.hunttech.web.gui.components;
 
 import com.company.hunttech.app.ProcessedImage;
+import com.company.hunttech.app.InvalidImageInputException;
 import com.company.hunttech.app.SidebarImageNormalizationService;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.gui.components.WebFileUploadField;
@@ -57,14 +57,14 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
             return;
         }
         if (fileDescriptor == null) {
-            rejectImageUpload(null, null);
+            rejectImageUpload(null, null, true);
             return;
         }
 
         final FileDescriptor normalized;
         try {
             normalized = normalizeImage(fileDescriptor);
-        } catch (DevelopmentException ex) {
+        } catch (InvalidImageInputException ex) {
             rejectImageUpload(fileDescriptor, ex, true);
             return;
         } catch (Exception ex) {
@@ -149,10 +149,6 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
      * Удаляет отвергнутый temporary upload и оставляет текущее bound-значение без
      * изменений. Исходник намеренно не передаётся в super.saveFile().
      */
-    private void rejectImageUpload(FileDescriptor fileDescriptor, Exception cause) {
-        rejectImageUpload(fileDescriptor, cause, cause instanceof DevelopmentException);
-    }
-
     private void rejectImageUpload(FileDescriptor fileDescriptor, Exception cause, boolean validationFailure) {
         processedDescriptor = null;
         uploadRejected = true;

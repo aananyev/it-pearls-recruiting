@@ -121,12 +121,12 @@ class MarkdownRendererTest {
     }
 
     @Test
-    void testTableAllowsOptionalOuterPipesOnBodyRow() {
+    void testTableClosesOnDifferentOuterPipeStyle() {
         String raw = "| A | B |\n| --- | --- |\n1 | 2";
         String html = MarkdownRenderer.renderMarkdown(raw);
 
-        assertTrue(html.contains("<td class=\"llm-md-td\">1</td>"));
-        assertTrue(html.contains("<td class=\"llm-md-td\">2</td>"));
+        assertEquals(0, occurrences(html, "<td class=\"llm-md-td\">"));
+        assertTrue(html.contains("1 | 2"));
     }
 
     @Test
