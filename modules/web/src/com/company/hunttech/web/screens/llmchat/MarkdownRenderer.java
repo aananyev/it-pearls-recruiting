@@ -351,6 +351,9 @@ public class MarkdownRenderer {
         boolean inBlockquote = false;
         boolean inTable = false;
         List<String> tableRows = new ArrayList<>();
+        int tableColumnCount = 0;
+        boolean tableHasLeadingPipe = false;
+        boolean tableHasTrailingPipe = false;
 
         for (int i = 0; i < lines.length; i++) {
             String rawLine = lines[i];
@@ -361,7 +364,12 @@ public class MarkdownRenderer {
             // ("a | b"). A table starts only when the following line is the
             // delimiter row, which prevents ordinary prose containing a pipe
             // from being rendered as a table.
-            if (isMarkdownTableStart(lines, i) || (inTable && isTableRow(trimmed))) {
+            boolean tableStart = isMarkdownTableStart(lines, i);
+            boolean tableContinuation = inTable
+                    && isTableRow(trimmed)
+                    && splitCells(trimmed).size() == tableColumnCount
+                    && hasSameTablePipeStyle(trimmed, tableHasLeadingPipe, tableHasTrailingPipe);
+            if (tableStart || tableContinuation) {
                 if (!inTable) {
                     // Close other open block structures
                     if (inUnorderedList) { out.append("</ul>\n"); inUnorderedList = false; }
@@ -369,6 +377,9 @@ public class MarkdownRenderer {
                     if (inBlockquote) { out.append("</blockquote>\n"); inBlockquote = false; }
                     inTable = true;
                     tableRows.clear();
+                    tableColumnCount = splitCells(trimmed).size();
+                    tableHasLeadingPipe = trimmed.startsWith("|");
+                    tableHasTrailingPipe = hasTrailingPipe(trimmed);
                 }
                 tableRows.add(trimmed);
                 continue;
@@ -376,6 +387,9 @@ public class MarkdownRenderer {
                 out.append(renderTable(tableRows));
                 inTable = false;
                 tableRows.clear();
+                tableColumnCount = 0;
+                tableHasLeadingPipe = false;
+                tableHasTrailingPipe = false;
             }
 
             // Check if line is code block placeholder
@@ -901,7 +915,9 @@ public class MarkdownRenderer {
         }
         String header = lines[index] != null ? lines[index].trim() : "";
         String delimiter = lines[index + 1] != null ? lines[index + 1].trim() : "";
-        return isTableRow(header) && isTableDelimiterRow(delimiter);
+        return isTableRow(header)
+                && isTableDelimiterRow(delimiter)
+                && splitCells(header).size() == splitCells(delimiter).size();
     }
 
     private static boolean isTableRow(String line) {
@@ -957,7 +973,7 @@ public class MarkdownRenderer {
             normalized = normalized.substring(0, normalized.length() - 1);
         }
         String[] columns = normalized.split("\\|", -1);
-        if (columns.length < 2) {
+        if (columns.length < 1) {
             return false;
         }
         for (String column : columns) {
@@ -968,6 +984,14 @@ public class MarkdownRenderer {
         return true;
     }
 
+    private static boolean hasSameTablePipeStyle(String row, boolean leadingPipe, boolean trailingPipe) {
+        return row.startsWith("|") == leadingPipe && hasTrailingPipe(row) == trailingPipe;
+    }
+
+    private static boolean hasTrailingPipe(String row) {
+        return row != null && row.endsWith("|") && !row.endsWith("\\|");
+    }
+
     private static List<String> splitCells(String row) {
         List<String> cells = new ArrayList<>();
         if (row == null) {
@@ -976,8 +1000,7 @@ public class MarkdownRenderer {
 
         String normalized = row.trim();
         boolean hasLeadingPipe = normalized.startsWith("|");
-        boolean hasTrailingPipe = normalized.endsWith("|")
-                && !normalized.endsWith("\\|");
+        boolean hasTrailingPipe = hasTrailingPipe(normalized);
         StringBuilder cell = new StringBuilder();
         for (int i = 0; i < normalized.length(); i++) {
             char current = normalized.charAt(i);

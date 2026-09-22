@@ -118,6 +118,8 @@ public class IteractionListVisualAlignmentTest {
         assertTrue(partial.contains("padding: 0 10px !important;"));
         assertTrue(partial.contains(".c-timefield:focus"));
         assertTrue(partial.contains(".c-timefield-error"));
+        assertTrue(partial.contains(".iteraction-list-service-card .c-timefield.c-timefield-error"));
+        assertTrue(partial.contains(".iteraction-list-service-card .c-timefield:focus"));
         assertTrue(partial.contains("min-height: 61px !important;"));
         assertTrue(partial.contains(".iteraction-list-subscription-filter > label"));
         assertTrue(partial.contains("padding: 0 0 0 28px !important;"));

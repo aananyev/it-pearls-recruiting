@@ -55,7 +55,15 @@
   .candidate-vacancy-match-section-header,
   .candidate-vacancy-match-action-row,
   .candidate-vacancy-match-filter-row,
-  .candidate-vacancy-match-quick-actions,
+  .candidate-vacancy-match-quick-actions {
+    box-sizing: border-box !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
   .candidate-vacancy-match-header > .v-expand,
   .candidate-vacancy-match-skill-status > .v-expand,
   .candidate-vacancy-match-progress-head > .v-expand,
@@ -67,6 +75,17 @@
     min-width: 0 !important;
     max-width: 100% !important;
     height: auto !important;
+  }
+
+  .candidate-vacancy-match-window-actions,
+  .candidate-vacancy-match-steps,
+  .candidate-vacancy-match-action-row,
+  .candidate-vacancy-match-filter-row,
+  .candidate-vacancy-match-quick-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
   }
 
   .candidate-vacancy-match-header > .v-expand,
@@ -330,12 +349,6 @@
   }
 
   .candidate-vacancy-match-details-scroll {
-    overflow-x: hidden !important;
-    overflow-y: hidden !important;
-  }
-
-  .candidate-vacancy-match-details-scroll > .c-scrollbox-content,
-  .candidate-vacancy-match-details-scroll > .v-scrollable {
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;

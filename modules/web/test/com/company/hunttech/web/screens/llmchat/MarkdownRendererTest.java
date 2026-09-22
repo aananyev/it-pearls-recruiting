@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MarkdownRendererTest {
@@ -94,11 +95,45 @@ class MarkdownRendererTest {
     }
 
     @Test
+    void testTableDoesNotConsumeFollowingProseWithPipe() {
+        String raw = "| Заголовок | Значение |\n| --- | --- |\n| A | B |\nПримечание: A | B";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertEquals(2, occurrences(html, "<td class=\"llm-md-td\">"));
+        assertTrue(html.contains("Примечание: A | B"));
+    }
+
+    @Test
+    void testTableRejectsHeaderAndDelimiterColumnMismatch() {
+        String raw = "| Заголовок | Значение |\n| --- |\n| A | B |";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertFalse(html.contains("<table class=\"llm-md-table\">"));
+    }
+
+    @Test
+    void testSingleColumnTableRemainsSupported() {
+        String raw = "| Значение |\n| --- |\n| A |";
+        String html = MarkdownRenderer.renderMarkdown(raw);
+
+        assertTrue(html.contains("<th class=\"llm-md-th\">Значение</th>"));
+        assertTrue(html.contains("<td class=\"llm-md-td\">A</td>"));
+    }
+
+    @Test
     void testLinks() {
         String raw = "Подробнее на [HRM Portal](https://hunttech.internal/portal).";
         String html = MarkdownRenderer.renderMarkdown(raw);
 
         assertTrue(html.contains("<a href=\"https://hunttech.internal/portal\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"llm-md-link\">HRM Portal</a>"));
+    }
+
+    private static int occurrences(String text, String needle) {
+        int count = 0;
+        for (int index = 0; (index = text.indexOf(needle, index)) >= 0; index += needle.length()) {
+            count++;
+        }
+        return count;
     }
 
     @Test
@@ -478,5 +513,4 @@ class MarkdownRendererTest {
         assertTrue(html3.contains("Вакансия Middle Java Developer"));
     }
 }
-
 

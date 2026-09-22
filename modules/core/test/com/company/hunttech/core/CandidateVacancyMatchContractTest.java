@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.lang.reflect.Method;
 import java.util.UUID;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -156,5 +158,32 @@ public class CandidateVacancyMatchContractTest {
         String metadata = new String(Files.readAllBytes(metadataPath), StandardCharsets.UTF_8);
         assertTrue("CandidateVacancyMatchItem должен быть зарегистрирован в metadata.xml",
                 metadata.contains("com.company.hunttech.entity.CandidateVacancyMatchItem"));
+    }
+
+    @Test
+    public void testResponsiveLayoutKeepsRowsCompactAndDetailsScrollable() throws IOException {
+        Path root = projectRoot();
+        List<String> themes = Arrays.asList(
+                "halo", "havana", "helium", "hover", "hunttech-modern",
+                "hunttech-modern-dark", "hunttech-modern-light");
+        String canonical = null;
+        for (String theme : themes) {
+            Path scss = root.resolve("modules/web/themes/" + theme
+                    + "/com.company.hunttech/candidate-vacancy-match-screen.scss");
+            String content = new String(Files.readAllBytes(scss), StandardCharsets.UTF_8);
+            if (canonical == null) {
+                canonical = content;
+            } else {
+                assertEquals("Все темы CandidateVacancyMatch должны иметь одинаковый layout-контракт",
+                        canonical, content);
+            }
+            assertTrue(content.contains(".candidate-vacancy-match-header > .v-expand"));
+            assertTrue(content.contains("flex: 0 0 auto !important"));
+            assertTrue(content.contains(".candidate-vacancy-match-action-row"));
+            assertTrue(content.contains("gap: 8px !important"));
+            assertTrue(content.contains(".candidate-vacancy-match-details-scroll {\n    overflow-x: hidden !important;\n    overflow-y: auto !important;"));
+            assertTrue("ScrollBox root must not hide its own vertical scroll",
+                    !content.contains(".candidate-vacancy-match-details-scroll {\n    overflow-x: hidden !important;\n    overflow-y: hidden !important;"));
+        }
     }
 }

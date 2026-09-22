@@ -4,6 +4,7 @@ import com.company.hunttech.app.ProcessedImage;
 import com.company.hunttech.app.SidebarImageNormalizationService;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.gui.components.WebFileUploadField;
@@ -60,14 +61,25 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
             return;
         }
 
+        final FileDescriptor normalized;
         try {
-            FileDescriptor normalized = normalizeImage(fileDescriptor);
+            normalized = normalizeImage(fileDescriptor);
+        } catch (DevelopmentException ex) {
+            rejectImageUpload(fileDescriptor, ex, true);
+            return;
+        } catch (Exception ex) {
+            rejectImageUpload(fileDescriptor, ex, false);
+            return;
+        }
+
+        try {
             processedDescriptor = normalized;
             super.saveFile(normalized);
             // Повторная загрузка должна оставаться доступной после client RPC succeeded.
             getComposition().markAsDirty();
         } catch (Exception ex) {
-            rejectImageUpload(fileDescriptor, ex);
+            // Storage/UI failures are operational errors, not invalid image input.
+            rejectImageUpload(fileDescriptor, ex, false);
         }
     }
 
@@ -138,6 +150,10 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
      * изменений. Исходник намеренно не передаётся в super.saveFile().
      */
     private void rejectImageUpload(FileDescriptor fileDescriptor, Exception cause) {
+        rejectImageUpload(fileDescriptor, cause, cause instanceof DevelopmentException);
+    }
+
+    private void rejectImageUpload(FileDescriptor fileDescriptor, Exception cause, boolean validationFailure) {
         processedDescriptor = null;
         uploadRejected = true;
         FileDescriptor currentValue = getValue();
@@ -152,21 +168,27 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
 
         if (cause == null) {
             log.warn("Отклонён пустой sidebar image upload");
-        } else {
+        } else if (validationFailure) {
             log.warn("Отклонён небезопасный sidebar image upload id={}",
+                    fileDescriptor == null ? null : fileDescriptor.getId(), cause);
+        } else {
+            log.error("Ошибка обработки sidebar image upload id={}",
                     fileDescriptor == null ? null : fileDescriptor.getId(), cause);
         }
 
         AppUI appUI = AppUI.getCurrent();
         if (appUI != null) {
+            String description = validationFailure
+                    ? "Выберите PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до "
+                    + (SidebarImageNormalizationService.MAX_INPUT_BYTES / (1024 * 1024))
+                    + " МБ и разрешением до "
+                    + (SidebarImageNormalizationService.MAX_PIXELS / 1_000_000L)
+                    + " млн пикселей."
+                    : "Не удалось обработать изображение. Прежнее изображение сохранено; повторите попытку позже.";
             appUI.getNotifications()
                     .create(Notifications.NotificationType.ERROR)
                     .withCaption("Изображение не загружено")
-                    .withDescription("Выберите PNG, JPEG, GIF, BMP, WBMP, WebP или TIFF размером до "
-                            + (SidebarImageNormalizationService.MAX_INPUT_BYTES / (1024 * 1024))
-                            + " МБ и разрешением до "
-                            + (SidebarImageNormalizationService.MAX_PIXELS / 1_000_000L)
-                            + " млн пикселей.")
+                    .withDescription(description)
                     .show();
         }
         getComposition().markAsDirty();

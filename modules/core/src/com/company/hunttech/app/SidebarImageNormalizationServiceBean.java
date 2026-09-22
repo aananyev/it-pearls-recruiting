@@ -125,7 +125,7 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
             return null;
         }
         int cursor = 2;
-        while (cursor + 4 <= data.length) {
+        while (cursor + 1 < data.length) {
             if ((data[cursor] & 0xff) != 0xff) {
                 cursor++;
                 continue;
@@ -135,6 +135,9 @@ public class SidebarImageNormalizationServiceBean implements SidebarImageNormali
                     && (data[cursor] & 0xff) == 0xff
                     && (data[cursor + 1] & 0xff) == 0xff) {
                 cursor++;
+            }
+            if (cursor + 1 >= data.length) {
+                return null;
             }
             int marker = data[cursor + 1] & 0xff;
             cursor += 2;
