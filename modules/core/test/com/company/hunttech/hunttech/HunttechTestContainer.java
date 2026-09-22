@@ -50,7 +50,7 @@ public class HunttechTestContainer extends TestContainer {
         Element resourceElem = contextXmlDoc.getRootElement().element("Resource");
 
         dbDriver = resourceElem.attributeValue("driverClassName");
-        String profile = System.getenv().getOrDefault("HUNTTECH_DB_PROFILE", "LOCAL").toUpperCase(Locale.ROOT);
+        String profile = System.getenv().getOrDefault("HUNTTECH_DB_PROFILE", "LOCAL").trim().toUpperCase(Locale.ROOT);
         if ("PRODUCTION".equals(profile)) {
             throw new IllegalStateException("Integration tests cannot use the PRODUCTION database profile");
         }
@@ -67,14 +67,18 @@ public class HunttechTestContainer extends TestContainer {
             dbPassword = requiredEnv("HUNTTECH_LOCAL_DB_PASSWORD");
         } else if ("TEST".equals(profile)) {
             String testHost = requiredEnv("HUNTTECH_TEST_DB_HOST");
-            String normalizedTestHost = testHost.toLowerCase(Locale.ROOT);
+            String normalizedTestHost = testHost.trim().toLowerCase(Locale.ROOT);
             if (normalizedTestHost.endsWith(".")) {
                 normalizedTestHost = normalizedTestHost.substring(0, normalizedTestHost.length() - 1);
+            }
+            if (normalizedTestHost.matches(".*(^|\\.)0[0-9].*")) {
+                throw new IllegalStateException("TEST profile must not use ambiguous leading-zero host notation");
             }
             if (normalizedTestHost.equals("192.168.1.135") || normalizedTestHost.equals("127.0.0.1")
                     || normalizedTestHost.startsWith("127.") || normalizedTestHost.equals("localhost")
                     || normalizedTestHost.startsWith("localhost.") || normalizedTestHost.equals("::1")
-                    || normalizedTestHost.equals("0.0.0.0") || normalizedTestHost.matches("[0-9]+")) {
+                    || normalizedTestHost.startsWith("::ffff:127.") || normalizedTestHost.equals("0.0.0.0")
+                    || normalizedTestHost.matches("[0-9]+")) {
                 throw new IllegalStateException("TEST profile must use an explicitly separate database host");
             }
             dbUrl = jdbcUrl(testHost,
@@ -89,7 +93,7 @@ public class HunttechTestContainer extends TestContainer {
 
     private static String envOrDefault(String name, String defaultValue) {
         String value = System.getenv(name);
-        return value == null || value.trim().isEmpty() ? defaultValue : value;
+        return value == null || value.trim().isEmpty() ? defaultValue : value.trim();
     }
 
     private static String requiredEnv(String name) {
@@ -97,7 +101,7 @@ public class HunttechTestContainer extends TestContainer {
         if (value == null || value.trim().isEmpty() || value.contains("\n") || value.contains("\r")) {
             throw new IllegalStateException(name + " must be supplied outside Git without newlines");
         }
-        return value;
+        return value.trim();
     }
 
     private static String jdbcUrl(String host, String port, String database) {

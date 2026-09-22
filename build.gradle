@@ -106,6 +106,9 @@ if (configuredDbProfile == 'TEST') {
         throw new GradleException('HUNTTECH_DB_PROFILE=TEST requires a separate non-local database host')
     }
 }
+if (configuredDbProfile == 'LOCAL' && configuredDb.host.toString().trim() != '192.168.1.135') {
+    throw new GradleException('HUNTTECH_DB_PROFILE=LOCAL host must be exactly 192.168.1.135')
+}
 
 configure([globalModule, coreModule, webModule, guiModule, webToolkitModule]) {
     apply(plugin: 'java')

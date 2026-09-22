@@ -110,8 +110,7 @@ else
 fi
 
 if rg -n 'password="cuba"|^cuba\.dataSource\.password=cuba$' \
-    "$ROOT/modules/core/web/META-INF" "$ROOT/modules/core/src/app.properties" \
-    "$ROOT/modules/core/src/com/company/hunttech/app.properties" >/dev/null; then
+    "$ROOT/modules/core/web/META-INF" "$ROOT/modules/core/src" -g '*.properties' >/dev/null; then
     fail 'tracked datasource password remains in application configuration'
 else
     pass 'tracked datasource password is absent'
