@@ -130,6 +130,11 @@ if (!(configuredDb.host.toString() ==~ /[A-Za-z0-9._-]+/) ||
         !(configuredDb.user.toString() ==~ /[A-Za-z0-9._-]+/)) {
     throw new GradleException("HUNTTECH_DB_PROFILE=${configuredDbProfile} contains invalid connection settings")
 }
+def configuredDbHost = configuredDb.host.toString()
+def configuredDbPort = configuredDb.port.toString()
+def configuredDbName = configuredDb.name.toString()
+def configuredDbUser = configuredDb.user.toString()
+def configuredDbPasswordEnv = configuredDb.passwordEnv.toString()
 
 configure([globalModule, coreModule, webModule, guiModule, webToolkitModule]) {
     apply(plugin: 'java')
@@ -231,29 +236,29 @@ configure(coreModule) {
     }
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
-        host = "${configuredDb.host}:${configuredDb.port}"
-        dbName = configuredDb.name
+        host = "${configuredDbHost}:${configuredDbPort}"
+        dbName = configuredDbName
         dbms = 'postgres'
-        dbUser = configuredDb.user
-        def passwordValue = System.getenv(configuredDb.passwordEnv) ?: ''
+        dbUser = configuredDbUser
+        def passwordValue = System.getenv(configuredDbPasswordEnv) ?: ''
         dbPassword = passwordValue ?: ''
         doFirst {
             if (!dbPassword?.toString()?.trim()) {
-                throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
+                throw new GradleException("${configuredDbPasswordEnv} must be supplied outside Git")
             }
         }
     }
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
-        host = "${configuredDb.host}:${configuredDb.port}"
-        dbName = configuredDb.name
+        host = "${configuredDbHost}:${configuredDbPort}"
+        dbName = configuredDbName
         dbms = 'postgres'
-        dbUser = configuredDb.user
-        def passwordValue = System.getenv(configuredDb.passwordEnv) ?: ''
+        dbUser = configuredDbUser
+        def passwordValue = System.getenv(configuredDbPasswordEnv) ?: ''
         dbPassword = passwordValue ?: ''
         doFirst {
             if (!dbPassword?.toString()?.trim()) {
-                throw new GradleException("${configuredDb.passwordEnv} must be supplied outside Git")
+                throw new GradleException("${configuredDbPasswordEnv} must be supplied outside Git")
             }
         }
     }
