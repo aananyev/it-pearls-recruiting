@@ -116,7 +116,7 @@ db_profile_resolve() {
         PRODUCTION)
             # Production is fail-closed. localhost is rejected even though it
             # often resolves to loopback, because it permits an ambiguous fallback.
-            if [[ -n "${HUNTTECH_DB_HOST:-}" && "${HUNTTECH_DB_HOST}" != "127.0.0.1" ]]; then
+            if [[ -n "${HUNTTECH_DB_HOST:-}" ]]; then
                 db_profile_error "generic HUNTTECH_DB_HOST is forbidden for PRODUCTION"
                 return 1
             fi

@@ -103,14 +103,14 @@ if HUNTTECH_LOCAL_DB_PASSWORD='p<&"' \
    bash "$ROOT/scripts/render-db-context.sh" --profile LOCAL --output "$render_dir/context.xml" >/dev/null 2>&1 &&
    [[ "$(stat -f '%OLp' "$render_dir/context.xml" 2>/dev/null || stat -c '%a' "$render_dir/context.xml")" == "600" ]] &&
    rg -q 'jdbc:postgresql://192\.168\.1\.135:5432/hunttech' "$render_dir/context.xml" &&
-   rg -q 'p&lt;&amp;&quot;' "$render_dir/context.xml"; then
-    pass 'rendered context uses profile host, escapes password, and is mode 600'
+   rg -q 'password="\$\{env\.HUNTTECH_DB_PASSWORD\}"' "$render_dir/context.xml"; then
+    pass 'rendered context uses profile host, keeps password in environment, and is mode 600'
 else
     fail 'rendered context contract failed'
 fi
 
 if rg -n 'password="cuba"|^cuba\.dataSource\.password=cuba$' \
-    "$ROOT/modules/core/web/META-INF" "$ROOT/modules/core/src" -g '*.properties' >/dev/null; then
+    "$ROOT/modules/core/web/META-INF" "$ROOT/modules/core/src" >/dev/null; then
     fail 'tracked datasource password remains in application configuration'
 else
     pass 'tracked datasource password is absent'

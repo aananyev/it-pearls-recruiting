@@ -51,7 +51,16 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
 
     # Production artifacts must never carry the remote work DB or an ambiguous
     # localhost fallback in a JNDI JDBC URL.
-    while IFS= read -r config_file; do
+    config_files=(
+        "${ROOT}/modules/core/web/META-INF/context.xml"
+        "${ROOT}/modules/core/web/META-INF/jetty-env.xml"
+        "${ROOT}/modules/core/web/META-INF/war-context.xml"
+        "${ROOT}/modules/core/src/app.properties"
+        "${ROOT}/modules/core/src/com/company/hunttech/app.properties"
+    )
+    runtime_config="${ROOT}/deploy/tomcat/webapps/hrm-core/META-INF/context.xml"
+    [[ -f "$runtime_config" ]] && config_files+=("$runtime_config")
+    for config_file in "${config_files[@]}"; do
         [[ -f "$config_file" ]] || {
             printf 'Refusing PRODUCTION: mandatory config is missing: %s\n' "$config_file" >&2
             exit 24
@@ -76,13 +85,7 @@ if [[ "$PROFILE" == "PRODUCTION" ]]; then
             printf 'Refusing PRODUCTION: hardcoded datasource password found in %s\n' "$config_file" >&2
             exit 22
         fi
-    done <<EOF
-${ROOT}/modules/core/web/META-INF/context.xml
-${ROOT}/modules/core/web/META-INF/jetty-env.xml
-${ROOT}/modules/core/web/META-INF/war-context.xml
-${ROOT}/modules/core/src/app.properties
-${ROOT}/modules/core/src/com/company/hunttech/app.properties
-EOF
+    done
 fi
 
 printf 'profile=%s host=%s port=%s database=%s user=%s\n' \

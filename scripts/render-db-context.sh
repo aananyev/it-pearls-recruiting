@@ -50,7 +50,6 @@ xml_escape() {
         -e "s/'/\&apos;/g"
 }
 
-escaped_password="$(xml_escape "$password")"
 escaped_user="$(xml_escape "$DB_PROFILE_USER")"
 mkdir -p "$(dirname "$OUTPUT")"
 if [[ -L "$OUTPUT" ]]; then
@@ -65,8 +64,8 @@ trap 'rm -f "$temporary_output"' EXIT
     printf '%s\n' '<Context>'
     printf '%s\n' '    <!-- Generated outside Git by render-db-context.sh. -->'
     printf '%s\n' '    <Manager pathname=""/>'
-    printf '    <Resource driverClassName="org.postgresql.Driver" maxIdle="2" maxTotal="20" maxWaitMillis="5000" name="jdbc/CubaDS" type="javax.sql.DataSource" url="%s" username="%s" password="%s"/>\n' \
-        "$(db_profile_jdbc_url)" "$escaped_user" "$escaped_password"
+    printf '    <Resource driverClassName="org.postgresql.Driver" maxIdle="2" maxTotal="20" maxWaitMillis="5000" name="jdbc/CubaDS" type="javax.sql.DataSource" url="%s" username="%s" password="${env.HUNTTECH_DB_PASSWORD}"/>\n' \
+        "$(db_profile_jdbc_url)" "$escaped_user"
     printf '%s\n' '</Context>'
 } > "$temporary_output"
 mv "$temporary_output" "$OUTPUT"
