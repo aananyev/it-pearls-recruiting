@@ -39,6 +39,10 @@ done
 [[ -n "$PROFILE" && -n "$OUTPUT" ]] || { usage >&2; exit 2; }
 db_profile_resolve "$PROFILE"
 db_profile_require_password
+[[ -n "${HUNTTECH_DB_PASSWORD:-}" ]] || {
+    printf 'HUNTTECH_DB_PASSWORD must be supplied for the rendered JNDI context\n' >&2
+    exit 1
+}
 
 xml_escape() {
     printf '%s' "$1" | sed \
@@ -63,7 +67,7 @@ trap 'rm -f "$temporary_output"' EXIT
     printf '%s\n' '<Context>'
     printf '%s\n' '    <!-- Generated outside Git by render-db-context.sh. -->'
     printf '%s\n' '    <Manager pathname=""/>'
-    printf '    <Resource driverClassName="org.postgresql.Driver" maxIdle="2" maxTotal="20" maxWaitMillis="5000" name="jdbc/CubaDS" type="javax.sql.DataSource" url="%s" username="%s" password="${HUNTTECH_DB_PASSWORD}"/>\n' \
+    printf '    <Resource driverClassName="org.postgresql.Driver" maxIdle="2" maxTotal="20" maxWaitMillis="5000" name="jdbc/CubaDS" type="javax.sql.DataSource" url="%s" username="%s" password="${env.HUNTTECH_DB_PASSWORD}"/>\n' \
         "$(db_profile_jdbc_url)" "$escaped_user"
     printf '%s\n' '</Context>'
 } > "$temporary_output"

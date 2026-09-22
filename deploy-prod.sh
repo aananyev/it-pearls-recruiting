@@ -1128,7 +1128,14 @@ parse_args "$@"
 # Production datasource обязан оставаться на loopback IPv4; localhost и рабочий
 # PostgreSQL никогда не принимаются как неявный fallback.
 export HUNTTECH_DB_PROFILE=PRODUCTION
-bash "${current_catalog}/scripts/validate-db-profile.sh" --profile PRODUCTION >/dev/null
+VALIDATE_PROFILE_ARGS=(--profile PRODUCTION)
+if [[ "$CHECK_CONFIG" -eq 0 && "$SKIP_DB_UPDATE" -eq 0 ]]; then
+    resolve_db_update_password
+    export HUNTTECH_PRODUCTION_DB_PASSWORD="$DB_UPDATE_PASSWORD"
+    VALIDATE_PROFILE_ARGS+=(--require-password)
+fi
+bash "${current_catalog}/scripts/validate-db-profile.sh" "${VALIDATE_PROFILE_ARGS[@]}" >/dev/null
+unset HUNTTECH_PRODUCTION_DB_PASSWORD
 
 if [ "$CHECK_CONFIG" -eq 1 ]; then
     : >"$LOG"

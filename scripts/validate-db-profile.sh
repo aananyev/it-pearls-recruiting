@@ -7,18 +7,23 @@ source "${ROOT}/scripts/db-profile.sh"
 
 usage() {
     cat <<'USAGE'
-Usage: validate-db-profile.sh --profile LOCAL|TEST|PRODUCTION
+Usage: validate-db-profile.sh --profile LOCAL|TEST|PRODUCTION [--require-password]
 
 The command prints only non-secret effective connection metadata.
 USAGE
 }
 
 PROFILE=""
+REQUIRE_PASSWORD=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --profile)
             PROFILE="${2:-}"
             shift 2
+            ;;
+        --require-password)
+            REQUIRE_PASSWORD=true
+            shift
             ;;
         --help|-h)
             usage
@@ -33,6 +38,9 @@ done
 
 [[ -n "$PROFILE" ]] || { usage >&2; exit 2; }
 db_profile_resolve "$PROFILE"
+if [[ "$REQUIRE_PASSWORD" == true ]]; then
+    db_profile_require_password || exit 20
+fi
 
 if [[ "$PROFILE" == "PRODUCTION" ]]; then
     [[ "$DB_PROFILE_HOST" == "127.0.0.1" ]] || {
