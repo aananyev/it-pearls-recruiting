@@ -1,5 +1,7 @@
 <Context>
 
+    <!-- Requires -Dorg.apache.tomcat.util.digester.PROPERTY_SOURCE=org.apache.tomcat.util.digester.EnvironmentPropertySource. -->
+
     <!-- Database connection -->
     <Resource
       name="jdbc/CubaDS"

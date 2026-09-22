@@ -18,7 +18,8 @@ REQUIRE_PASSWORD=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --profile)
-            PROFILE="${2:-}"
+            [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+            PROFILE="$2"
             shift 2
             ;;
         --require-password)

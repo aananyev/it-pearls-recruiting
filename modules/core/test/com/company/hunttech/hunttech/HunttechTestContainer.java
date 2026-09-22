@@ -88,7 +88,7 @@ public class HunttechTestContainer extends TestContainer {
                     || comparisonHost.matches("[0-9]+")) {
                 throw new IllegalStateException("TEST profile must use an explicitly separate database host");
             }
-            dbUrl = jdbcUrl(comparisonHost,
+            dbUrl = jdbcUrl(testHost,
                     validatedPort("HUNTTECH_TEST_DB_PORT", requiredEnv("HUNTTECH_TEST_DB_PORT")),
                     validatedToken("HUNTTECH_TEST_DB_NAME", requiredEnv("HUNTTECH_TEST_DB_NAME")));
             dbUser = validatedToken("HUNTTECH_TEST_DB_USER", requiredEnv("HUNTTECH_TEST_DB_USER"));

@@ -18,7 +18,8 @@ OUTPUT=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --profile)
-            PROFILE="${2:-}"
+            [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+            PROFILE="$2"
             shift 2
             ;;
         --output)
@@ -54,13 +55,13 @@ xml_escape() {
 }
 
 escaped_user="$(xml_escape "$DB_PROFILE_USER")"
+umask 077
 mkdir -p "$(dirname "$OUTPUT")"
 if [[ -L "$OUTPUT" ]]; then
     printf 'Refusing to overwrite symlink output: %s\n' "$OUTPUT" >&2
     exit 3
 fi
-umask 077
-temporary_output="${OUTPUT}.tmp.$$"
+temporary_output="$(mktemp "${OUTPUT}.tmp.XXXXXX")"
 trap 'rm -f "$temporary_output"' EXIT
 
 {

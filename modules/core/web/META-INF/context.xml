@@ -1,5 +1,7 @@
 <Context>
 
+    <!-- Requires -Dorg.apache.tomcat.util.digester.PROPERTY_SOURCE=org.apache.tomcat.util.digester.EnvironmentPropertySource. -->
+
     <!-- Switch off session serialization -->
     <Manager pathname=""/>
     <Resource driverClassName="org.postgresql.Driver"

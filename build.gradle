@@ -230,7 +230,7 @@ configure(coreModule) {
         dbName = configuredDb.name
         dbms = 'postgres'
         dbUser = configuredDb.user
-        def passwordValue = System.getenv(configuredDb.passwordEnv)?.trim()
+        def passwordValue = System.getenv(configuredDb.passwordEnv) ?: ''
         dbPassword = passwordValue ?: ''
         doFirst {
             if (!dbPassword?.toString()?.trim()) {
@@ -244,7 +244,7 @@ configure(coreModule) {
         dbName = configuredDb.name
         dbms = 'postgres'
         dbUser = configuredDb.user
-        def passwordValue = System.getenv(configuredDb.passwordEnv)?.trim()
+        def passwordValue = System.getenv(configuredDb.passwordEnv) ?: ''
         dbPassword = passwordValue ?: ''
         doFirst {
             if (!dbPassword?.toString()?.trim()) {
