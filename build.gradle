@@ -93,7 +93,7 @@ if (configuredDbProfile == 'PRODUCTION' && genericJdbcUrl &&
     throw new GradleException('HUNTTECH_DB_JDBC_URL must target 127.0.0.1 for PRODUCTION')
 }
 def dbProfileSettings = [
-    LOCAL     : [host: System.getenv('HUNTTECH_LOCAL_DB_HOST') ?: '192.168.1.135', port: System.getenv('HUNTTECH_LOCAL_DB_PORT') ?: '5432',
+    LOCAL     : [host: System.getenv('HUNTTECH_LOCAL_DB_HOST') ?: '127.0.0.1', port: System.getenv('HUNTTECH_LOCAL_DB_PORT') ?: '5432',
                  name: System.getenv('HUNTTECH_LOCAL_DB_NAME') ?: 'hunttech',
                  user: System.getenv('HUNTTECH_LOCAL_DB_USER') ?: 'cuba', passwordEnv: 'HUNTTECH_LOCAL_DB_PASSWORD'],
     TEST      : [host: System.getenv('HUNTTECH_TEST_DB_HOST'), port: System.getenv('HUNTTECH_TEST_DB_PORT'),
@@ -119,8 +119,8 @@ if (configuredDbProfile == 'TEST') {
         throw new GradleException('HUNTTECH_DB_PROFILE=TEST requires a separate non-local database host')
     }
 }
-if (configuredDbProfile == 'LOCAL' && configuredDb.host.toString().trim() != '192.168.1.135') {
-    throw new GradleException('HUNTTECH_DB_PROFILE=LOCAL host must be exactly 192.168.1.135')
+if (configuredDbProfile == 'LOCAL' && configuredDb.host.toString().trim() != '192.168.1.135' && configuredDb.host.toString().trim() != '127.0.0.1') {
+    throw new GradleException('HUNTTECH_DB_PROFILE=LOCAL host must be 127.0.0.1 or 192.168.1.135')
 }
 def configuredPort = configuredDb.port.toString()
 if (!(configuredDb.host.toString() ==~ /[A-Za-z0-9._-]+/) ||

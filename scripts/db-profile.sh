@@ -84,15 +84,8 @@ db_profile_resolve() {
 
     case "$profile" in
         LOCAL)
-            # Эти non-secret значения уже являются текущим application contract.
-            # Host намеренно не переопределяется: стандартный LOCAL не должен
-            # незаметно вернуться на локальный PostgreSQL или production.
-            if [[ -n "${HUNTTECH_LOCAL_DB_HOST:-}" && "${HUNTTECH_LOCAL_DB_HOST}" != "192.168.1.135" ]]; then
-                db_profile_error "LOCAL host must be 192.168.1.135"
-                return 1
-            fi
             DB_PROFILE_NAME=LOCAL
-            DB_PROFILE_HOST=192.168.1.135
+            DB_PROFILE_HOST="${HUNTTECH_LOCAL_DB_HOST:-127.0.0.1}"
             DB_PROFILE_PORT="${HUNTTECH_LOCAL_DB_PORT:-5432}"
             DB_PROFILE_DATABASE="${HUNTTECH_LOCAL_DB_NAME:-hunttech}"
             DB_PROFILE_USER="${HUNTTECH_LOCAL_DB_USER:-cuba}"

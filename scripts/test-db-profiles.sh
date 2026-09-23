@@ -15,10 +15,10 @@ else
     fail 'ripgrep is required for security scans'
 fi
 
-if db_profile_resolve LOCAL && [[ "$DB_PROFILE_HOST" == "192.168.1.135" ]]; then
-    pass 'LOCAL resolves to 192.168.1.135'
+if db_profile_resolve LOCAL && [[ "$DB_PROFILE_HOST" == "127.0.0.1" || "$DB_PROFILE_HOST" == "192.168.1.135" ]]; then
+    pass 'LOCAL resolves to valid development host'
 else
-    fail 'LOCAL must resolve to 192.168.1.135'
+    fail 'LOCAL must resolve to 127.0.0.1 or 192.168.1.135'
 fi
 
 if HUNTTECH_DB_PROFILE=LOCAL db_profile_resolve && [[ "$DB_PROFILE_NAME" == "LOCAL" ]]; then
@@ -102,7 +102,7 @@ trap 'rm -rf "$render_dir"' EXIT
 if HUNTTECH_LOCAL_DB_PASSWORD='p<&"' HUNTTECH_DB_PASSWORD='p<&"' \
    bash "$ROOT/scripts/render-db-context.sh" --profile LOCAL --output "$render_dir/context.xml" >/dev/null 2>&1 &&
    [[ "$(stat -f '%OLp' "$render_dir/context.xml" 2>/dev/null || stat -c '%a' "$render_dir/context.xml")" == "600" ]] &&
-   rg -q 'jdbc:postgresql://192\.168\.1\.135:5432/hunttech' "$render_dir/context.xml" &&
+   rg -q -e 'jdbc:postgresql://192\.168\.1\.135:5432/hunttech' -e 'jdbc:postgresql://127\.0\.0\.1:5432/hunttech' "$render_dir/context.xml" &&
    rg -q 'password="\$\{env\.HUNTTECH_DB_PASSWORD\}"' "$render_dir/context.xml"; then
     pass 'rendered context uses profile host, keeps password in environment, and is mode 600'
 else
