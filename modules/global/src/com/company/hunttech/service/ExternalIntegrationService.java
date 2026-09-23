@@ -1,9 +1,6 @@
 package com.company.hunttech.service;
 
-import com.company.hunttech.dto.integration.CompanyCreateRequestDto;
-import com.company.hunttech.dto.integration.CompanyResponseDto;
-import com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto;
-import com.company.hunttech.dto.integration.ProjectVacancyResponseDto;
+import com.company.hunttech.dto.integration.*;
 
 /**
  * Единый сервис внешней интеграции HRM HuntTech (BL-2026-036).
@@ -30,5 +27,31 @@ public interface ExternalIntegrationService {
      * @return структурированный ответ с идентификаторами созданного проекта и вакансии
      */
     ProjectVacancyResponseDto createProjectAndVacancy(ProjectVacancyCreateRequestDto request);
+
+    /**
+     * Создает резюме кандидата CandidateCV с привязкой к кандидату и опционально вакансии/должности (BL-2026-028).
+     *
+     * @param request запрос с данными резюме
+     * @return структурированный ответ с идентификатором созданного резюме
+     */
+    CandidateCvResponseDto createCandidateCV(CandidateCvCreateRequestDto request);
+
+    /**
+     * Создает запись взаимодействия IteractionList с кандидатом по вакансии (BL-2026-028).
+     *
+     * @param request запрос с данными взаимодействия
+     * @return структурированный ответ с идентификатором и номером созданного взаимодействия
+     */
+    InteractionResponseDto createInteraction(InteractionCreateRequestDto request);
+
+    /**
+     * Комплексно создает кандидата, резюме и первое взаимодействие в рамках одной транзакции (BL-2026-026).
+     * Поддерживает дедупликацию по телефону, email и ФИО с обогащением существующей карточки.
+     *
+     * @param request комплексный запрос создания кандидата
+     * @return структурированный ответ с идентификаторами созданных/привязанных сущностей
+     */
+    CandidateCompositeResponseDto createCandidateWithDetails(CandidateCompositeCreateRequestDto request);
 }
+
 

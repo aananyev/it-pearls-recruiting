@@ -39,6 +39,9 @@ FROM sec_role r, (VALUES
     (40, 'cuba.rest.service.hunttech_ExternalReferenceDataService.getCountries', 1),
     (40, 'cuba.rest.service.hunttech_ExternalIntegrationService.createCompany', 1),
     (40, 'cuba.rest.service.hunttech_ExternalIntegrationService.createProjectAndVacancy', 1),
+    (40, 'cuba.rest.service.hunttech_ExternalIntegrationService.createCandidateCV', 1),
+    (40, 'cuba.rest.service.hunttech_ExternalIntegrationService.createInteraction', 1),
+    (40, 'cuba.rest.service.hunttech_ExternalIntegrationService.createCandidateWithDetails', 1),
     (20, 'hunttech_Company:create', 1),
     (20, 'hunttech_Company:read', 1),
     (20, 'hunttech_Company:update', 1),
@@ -51,16 +54,27 @@ FROM sec_role r, (VALUES
     (20, 'hunttech_CompanyDepartament:create', 1),
     (20, 'hunttech_CompanyDepartament:read', 1),
     (20, 'hunttech_CompanyDepartament:update', 1),
+    (20, 'hunttech_JobCandidate:create', 1),
+    (20, 'hunttech_JobCandidate:read', 1),
+    (20, 'hunttech_JobCandidate:update', 1),
+    (20, 'hunttech_CandidateCV:create', 1),
+    (20, 'hunttech_CandidateCV:read', 1),
+    (20, 'hunttech_CandidateCV:update', 1),
+    (20, 'hunttech_IteractionList:create', 1),
+    (20, 'hunttech_IteractionList:read', 1),
+    (20, 'hunttech_IteractionList:update', 1),
     (20, 'hunttech_City:read', 1),
     (20, 'hunttech_Region:read', 1),
     (20, 'hunttech_Position:read', 1),
     (20, 'hunttech_Grade:read', 1),
     (20, 'hunttech_Country:read', 1),
     (20, 'hunttech_SkillTree:read', 1),
-    (20, 'hunttech_Iteraction:read', 1)
+    (20, 'hunttech_Iteraction:read', 1),
+    (20, 'sec$User:read', 1)
 ) AS p(permission_type, target, value_)
 WHERE r.name = 'REST Внешняя интеграция'
   AND NOT EXISTS (
       SELECT 1 FROM sec_permission sp
       WHERE sp.role_id = r.id AND sp.permission_type = p.permission_type AND sp.target = p.target AND sp.value_ = p.value_ AND sp.delete_ts IS NULL
   );
+

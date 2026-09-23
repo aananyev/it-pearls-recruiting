@@ -1,11 +1,26 @@
 package com.company.hunttech.service;
 
+import com.company.hunttech.dto.integration.CandidateCompositeCreateRequestDto;
+import com.company.hunttech.dto.integration.CandidateCompositeResponseDto;
+import com.company.hunttech.dto.integration.CandidateCvCreateRequestDto;
+import com.company.hunttech.dto.integration.CandidateCvResponseDto;
 import com.company.hunttech.dto.integration.CompanyCreateRequestDto;
 import com.company.hunttech.dto.integration.CompanyResponseDto;
+import com.company.hunttech.dto.integration.InteractionCreateRequestDto;
+import com.company.hunttech.dto.integration.InteractionResponseDto;
+import com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto;
+import com.company.hunttech.dto.integration.ProjectVacancyResponseDto;
+import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.City;
 import com.company.hunttech.entity.Company;
+import com.company.hunttech.entity.Iteraction;
+import com.company.hunttech.entity.IteractionList;
+import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.Project;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -304,10 +319,197 @@ public class ExternalIntegrationServiceBeanTest {
         assertTrue(resp2.getMessage().contains("existingProjectId или projectName"));
     }
 
+    @Test
+    public void testCreateCandidateCvSuccess() {
+        JobCandidate candidate = new JobCandidate();
+        UUID candidateId = UUID.randomUUID();
+        candidate.setId(candidateId);
+
+        CandidateCV newCv = new CandidateCV();
+        UUID cvId = UUID.randomUUID();
+        newCv.setId(cvId);
+
+        when(mockDataManager.load(JobCandidate.class).id(eq(candidateId)).optional()).thenReturn(Optional.of(candidate));
+        when(mockMetadata.create(CandidateCV.class)).thenReturn(newCv);
+
+        CandidateCvCreateRequestDto req = new CandidateCvCreateRequestDto();
+        req.setCandidateId(candidateId.toString());
+        req.setTextCv("Опыт работы 7 лет, Java, Spring, Kubernetes");
+        req.setResumeUrl("https://hh.ru/resume/12345");
+        req.setCoverLetter("Здравствуйте! Прошу рассмотреть мое резюме.");
+        req.setExternalId("ext-cv-001");
+        req.setCorrelationId("corr-cv-1");
+
+        CandidateCvResponseDto resp = service.createCandidateCV(req);
+
+        assertNotNull(resp);
+        assertTrue(resp.isSuccess());
+        assertEquals(cvId.toString(), resp.getCandidateCvId());
+        assertEquals(candidateId.toString(), resp.getCandidateId());
+        assertEquals("ext-cv-001", resp.getExternalId());
+        assertEquals(CandidateCvResponseDto.STATUS_CREATED, resp.getStatus());
+
+        assertEquals(candidate, newCv.getCandidate());
+        assertEquals("Опыт работы 7 лет, Java, Spring, Kubernetes", newCv.getTextCV());
+        assertEquals("https://hh.ru/resume/12345", newCv.getLinkOriginalCv());
+
+        verify(mockDataManager).commit(newCv);
+    }
+
+    @Test
+    public void testCreateInteractionSuccess() {
+        JobCandidate candidate = new JobCandidate();
+        UUID candidateId = UUID.randomUUID();
+        candidate.setId(candidateId);
+
+        OpenPosition vacancy = new OpenPosition();
+        UUID vacancyId = UUID.randomUUID();
+        vacancy.setId(vacancyId);
+
+        Iteraction interactionType = new Iteraction();
+        UUID typeId = UUID.randomUUID();
+        interactionType.setId(typeId);
+
+        IteractionList newInteraction = new IteractionList();
+        UUID interactionId = UUID.randomUUID();
+        newInteraction.setId(interactionId);
+
+        when(mockDataManager.load(JobCandidate.class).id(eq(candidateId)).optional()).thenReturn(Optional.of(candidate));
+        when(mockDataManager.load(OpenPosition.class).id(eq(vacancyId)).optional()).thenReturn(Optional.of(vacancy));
+        when(mockDataManager.load(Iteraction.class).id(eq(typeId)).optional()).thenReturn(Optional.of(interactionType));
+        when(mockDataManager.loadValue(contains("select max(e.numberIteraction)"), eq(java.math.BigDecimal.class)).optional())
+                .thenReturn(Optional.of(new java.math.BigDecimal("41")));
+        when(mockMetadata.create(IteractionList.class)).thenReturn(newInteraction);
+
+        InteractionCreateRequestDto req = new InteractionCreateRequestDto();
+        req.setCandidateId(candidateId.toString());
+        req.setVacancyId(vacancyId.toString());
+        req.setInteractionTypeId(typeId.toString());
+        req.setComment("Кандидат подтвердил прохождение интервью");
+        req.setCommunicationMethod("Telegram");
+        req.setRating(5);
+        req.setExternalId("ext-act-1");
+        req.setCorrelationId("corr-act-1");
+
+        InteractionResponseDto resp = service.createInteraction(req);
+
+        assertNotNull(resp);
+        assertTrue(resp.isSuccess());
+        assertEquals(interactionId.toString(), resp.getInteractionId());
+        assertEquals(candidateId.toString(), resp.getCandidateId());
+        assertEquals(vacancyId.toString(), resp.getVacancyId());
+        assertEquals(new java.math.BigDecimal("42"), resp.getNumberInteraction());
+        assertEquals("CREATED", resp.getStatus());
+
+        assertEquals(candidate, newInteraction.getCandidate());
+        assertEquals(vacancy, newInteraction.getVacancy());
+        assertEquals("Telegram", newInteraction.getCommunicationMethod());
+        assertEquals(Integer.valueOf(5), newInteraction.getRating());
+
+        verify(mockDataManager).commit(newInteraction);
+    }
+
+    @Test
+    public void testCreateCandidateWithDetailsNewCandidateWithCvAndInteraction() {
+        JobCandidate newCandidate = new JobCandidate();
+        UUID candidateId = UUID.randomUUID();
+        newCandidate.setId(candidateId);
+
+        CandidateCV newCv = new CandidateCV();
+        UUID cvId = UUID.randomUUID();
+        newCv.setId(cvId);
+
+        IteractionList newInteraction = new IteractionList();
+        UUID interactionId = UUID.randomUUID();
+        newInteraction.setId(interactionId);
+
+        OpenPosition vacancy = new OpenPosition();
+        UUID vacancyId = UUID.randomUUID();
+        vacancy.setId(vacancyId);
+
+        when(mockMetadata.create(JobCandidate.class)).thenReturn(newCandidate);
+        when(mockMetadata.create(CandidateCV.class)).thenReturn(newCv);
+        when(mockMetadata.create(IteractionList.class)).thenReturn(newInteraction);
+
+        // Кандидат не найден при дедупликации
+        when(mockDataManager.load(JobCandidate.class).query(anyString()).parameter(anyString(), any()).optional())
+                .thenReturn(Optional.empty());
+        when(mockDataManager.load(OpenPosition.class).id(eq(vacancyId)).optional())
+                .thenReturn(Optional.of(vacancy));
+
+        CandidateCompositeCreateRequestDto req = new CandidateCompositeCreateRequestDto();
+        req.setFirstName("Иван");
+        req.setSecondName("Иванов");
+        req.setMiddleName("Иванович");
+        req.setPhone("+7 999 123-45-67");
+        req.setEmail("ivanov@example.com");
+        req.setCvText("Резюме Senior Java Developer");
+        req.setVacancyId(vacancyId.toString());
+        req.setInteractionComment("Первичный контакт через API");
+        req.setExternalId("ext-comp-cand-1");
+        req.setCorrelationId("corr-comp-cand-1");
+
+        CandidateCompositeResponseDto resp = service.createCandidateWithDetails(req);
+
+        assertNotNull(resp);
+        assertTrue(resp.isSuccess());
+        assertEquals(candidateId.toString(), resp.getCandidateId());
+        assertEquals(cvId.toString(), resp.getCandidateCvId());
+        assertEquals(interactionId.toString(), resp.getInteractionId());
+        assertEquals(CandidateCompositeResponseDto.STATUS_CREATED, resp.getStatus());
+        assertEquals("ext-comp-cand-1", resp.getExternalId());
+
+        assertEquals("Иван", newCandidate.getFirstName());
+        assertEquals("Иванов", newCandidate.getSecondName());
+        assertEquals("Иванов Иван Иванович", newCandidate.getFullName());
+
+        verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
+    }
+
+    @Test
+    public void testCreateCandidateWithDetailsDeduplicationByPhone() {
+        JobCandidate existingCandidate = new JobCandidate();
+        UUID candidateId = UUID.randomUUID();
+        existingCandidate.setId(candidateId);
+        existingCandidate.setFirstName("Петр");
+        existingCandidate.setSecondName("Петров");
+
+        CandidateCV newCv = new CandidateCV();
+        UUID cvId = UUID.randomUUID();
+        newCv.setId(cvId);
+
+        when(mockMetadata.create(CandidateCV.class)).thenReturn(newCv);
+
+        // Найден по номеру телефона
+        when(mockDataManager.load(JobCandidate.class).query(contains("c.phone = :p")).parameter(eq("p"), anyString()).optional())
+                .thenReturn(Optional.of(existingCandidate));
+
+
+        CandidateCompositeCreateRequestDto req = new CandidateCompositeCreateRequestDto();
+        req.setFirstName("Петр");
+        req.setSecondName("Петров");
+        req.setPhone("+7 (999) 777-88-99");
+        req.setCvText("Обновленное резюме Петра");
+        req.setExternalId("ext-dup-phone");
+
+        CandidateCompositeResponseDto resp = service.createCandidateWithDetails(req);
+
+        assertNotNull(resp);
+        assertTrue(resp.isSuccess());
+        assertEquals(candidateId.toString(), resp.getCandidateId());
+        assertEquals(cvId.toString(), resp.getCandidateCvId());
+        assertEquals(CandidateCompositeResponseDto.STATUS_EXISTING_FOUND, resp.getStatus());
+
+        // Проверяем, что новое резюме привязано к существующему кандидату
+        assertEquals(existingCandidate, newCv.getCandidate());
+        verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
+    }
+
     private static void injectField(Object target, String fieldName, Object value) throws Exception {
         Field field = target.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(target, value);
     }
 }
+
 

@@ -31,6 +31,16 @@
         <method name="createProjectAndVacancy">
             <param name="request" type="com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto"/>
         </method>
+        <method name="createCandidateCV">
+            <param name="request" type="com.company.hunttech.dto.integration.CandidateCvCreateRequestDto"/>
+        </method>
+        <method name="createInteraction">
+            <param name="request" type="com.company.hunttech.dto.integration.InteractionCreateRequestDto"/>
+        </method>
+        <method name="createCandidateWithDetails">
+            <param name="request" type="com.company.hunttech.dto.integration.CandidateCompositeCreateRequestDto"/>
+        </method>
     </service>
 
 </services>
+

@@ -281,4 +281,147 @@ Content-Type: `application/json`
 - **Проект**: если передан `existingProjectId`, вакансия создается в указанном проекте. Если передан `projectName`, система выполняет поиск открытого проекта с таким именем, либо создает новый проект и привязывает его к организации (`companyId`) через основной департамент.
 - **Вакансии**: по умолчанию создается открытая (`openClose = false`), не черновик (`signDraft = false`), с приоритетом `NORMAL` (2).
 
+---
+
+## 7. API создания резюме кандидата CandidateCV (BL-2026-028)
+
+Метод создания отдельного резюме кандидата с привязкой к существующему `JobCandidate`.  
+URL: `POST /hrm/rest/v2/services/hunttech_ExternalIntegrationService/createCandidateCV`  
+Заголовок: `Authorization: Bearer <access_token>`  
+Content-Type: `application/json`
+
+### 7.1 Формат запроса (`CandidateCvCreateRequestDto`)
+```json
+{
+  "request": {
+    "candidateId": "91a82f14-3c81-4b12-9214-9812470123ef",
+    "vacancyId": "b182c943-3fae-4d81-9b12-9812470123ef",
+    "positionId": "71234567-89ab-cdef-0123-456789abcdef",
+    "textCv": "Опыт работы: 5 лет Java/Kotlin, Spring Boot, микросервисы",
+    "resumeUrl": "https://hh.ru/resume/abcdef123456",
+    "coverLetter": "Добрый день! Рассматриваю предложения по разработке бэкенда.",
+    "externalId": "ext-cv-101",
+    "idempotencyKey": "idem-cv-101",
+    "correlationId": "corr-cv-101"
+  }
+}
+```
+
+### 7.2 Формат ответа (`CandidateCvResponseDto`)
+```json
+{
+  "success": true,
+  "candidateCvId": "c8124891-4fae-4d81-9b12-1247890123aa",
+  "candidateId": "91a82f14-3c81-4b12-9214-9812470123ef",
+  "externalId": "ext-cv-101",
+  "status": "CREATED",
+  "correlationId": "corr-cv-101"
+}
+```
+
+---
+
+## 8. API создания взаимодействия IteractionList (BL-2026-028)
+
+Метод фиксации события взаимодействия рекрутера с кандидатом по вакансии.  
+URL: `POST /hrm/rest/v2/services/hunttech_ExternalIntegrationService/createInteraction`  
+Заголовок: `Authorization: Bearer <access_token>`  
+Content-Type: `application/json`
+
+### 8.1 Формат запроса (`InteractionCreateRequestDto`)
+```json
+{
+  "request": {
+    "candidateId": "91a82f14-3c81-4b12-9214-9812470123ef",
+    "vacancyId": "b182c943-3fae-4d81-9b12-9812470123ef",
+    "interactionTypeId": "31234567-89ab-cdef-0123-456789abcdef",
+    "comment": "Проведено техническое интервью. Кандидат ответил на все вопросы по архитектуре.",
+    "communicationMethod": "Telegram",
+    "rating": 5,
+    "externalId": "ext-act-201",
+    "idempotencyKey": "idem-act-201",
+    "correlationId": "corr-act-201"
+  }
+}
+```
+
+### 8.2 Формат ответа (`InteractionResponseDto`)
+```json
+{
+  "success": true,
+  "interactionId": "e9124891-4fae-4d81-9b12-3347890123cc",
+  "candidateId": "91a82f14-3c81-4b12-9214-9812470123ef",
+  "vacancyId": "b182c943-3fae-4d81-9b12-9812470123ef",
+  "numberInteraction": 42,
+  "externalId": "ext-act-201",
+  "status": "CREATED",
+  "correlationId": "corr-act-201"
+}
+```
+
+---
+
+## 9. Комплексный API создания кандидата, резюме и взаимодействия (BL-2026-026)
+
+Атомарный транзакционный метод создания новой анкеты кандидата с резюме и первым взаимодействием по вакансии, либо обогащения существующей карточки кандидата при обнаружении дубля.  
+URL: `POST /hrm/rest/v2/services/hunttech_ExternalIntegrationService/createCandidateWithDetails`  
+Заголовок: `Authorization: Bearer <access_token>`  
+Content-Type: `application/json`
+
+### 9.1 Формат запроса (`CandidateCompositeCreateRequestDto`)
+```json
+{
+  "request": {
+    "firstName": "Алексей",
+    "secondName": "Смирнов",
+    "middleName": "Петрович",
+    "phone": "+7 (999) 111-22-33",
+    "mobilePhone": "+7 (999) 111-22-33",
+    "email": "smirnov@example.com",
+    "telegramName": "@smirnov_dev",
+    "cityId": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+    "positionId": "71234567-89ab-cdef-0123-456789abcdef",
+    "companyId": "1a2b3c4d-5e6f-7890-abcd-ef1234567890",
+    "cvText": "Senior Fullstack Developer. React, TypeScript, Java, Spring.",
+    "cvUrl": "https://hh.ru/resume/998877",
+    "coverLetter": "Готов рассмотреть удаленную работу.",
+    "vacancyId": "b182c943-3fae-4d81-9b12-9812470123ef",
+    "interactionComment": "Кандидат откликнулся на позицию через внешний портал",
+    "communicationMethod": "Портал",
+    "rating": 4,
+    "externalId": "partner-applicant-881",
+    "idempotencyKey": "idem-applicant-881",
+    "correlationId": "corr-applicant-881"
+  }
+}
+```
+
+### 9.2 Формат ответа (`CandidateCompositeResponseDto`)
+```json
+{
+  "success": true,
+  "candidateId": "91a82f14-3c81-4b12-9214-9812470123ef",
+  "candidateCvId": "c8124891-4fae-4d81-9b12-1247890123aa",
+  "interactionId": "e9124891-4fae-4d81-9b12-3347890123cc",
+  "externalId": "partner-applicant-881",
+  "status": "CREATED",
+  "correlationId": "corr-applicant-881"
+}
+```
+
+Если кандидат уже найден в базе по номеру телефона, email или ФИО:
+```json
+{
+  "success": true,
+  "candidateId": "91a82f14-3c81-4b12-9214-9812470123ef",
+  "candidateCvId": "c8124891-4fae-4d81-9b12-1247890123aa",
+  "interactionId": "e9124891-4fae-4d81-9b12-3347890123cc",
+  "externalId": "partner-applicant-881",
+  "status": "EXISTING_FOUND",
+  "correlationId": "corr-applicant-881"
+}
+```
+При дедупликации дубликат карточки кандидата не создается, а новое резюме и взаимодействие по вакансии корректно прикрепляются к существующему кандидату.
+
+
 
