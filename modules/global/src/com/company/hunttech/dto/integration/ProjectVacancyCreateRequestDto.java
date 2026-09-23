@@ -26,15 +26,17 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
     private String vacancyName;
     private String shortDescription;
     private String comment;
-    private Integer remoteWork = 1; // 1 = Удаленка по умолчанию
+    private Integer remoteWork;
     private Integer commandCandidate = 1;
-    private Integer workExperience = 1;
+    private Integer workExperience;
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private String gradeId;
     private String cityId;
+    private String cityName;
     private String positionTypeId;
     private String positionName;
+    private BigDecimal outstaffingCost;
 
     public ProjectVacancyCreateRequestDto() {
     }
@@ -205,6 +207,22 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
 
     public void setPositionTypeId(String positionTypeId) {
         this.positionTypeId = positionTypeId;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public BigDecimal getOutstaffingCost() {
+        return outstaffingCost;
+    }
+
+    public void setOutstaffingCost(BigDecimal outstaffingCost) {
+        this.outstaffingCost = outstaffingCost;
     }
 
     public String getPositionName() {

@@ -84,6 +84,11 @@ public class ExternalIntegrationServiceBeanTest {
 
         when(mockMetadata.create(com.company.hunttech.entity.CompanyDepartament.class))
                 .thenReturn(new com.company.hunttech.entity.CompanyDepartament());
+
+        com.company.hunttech.entity.ExtUser defaultHunttechUser = new com.company.hunttech.entity.ExtUser();
+        defaultHunttechUser.setLogin("hunttech");
+        when(mockDataManager.load(com.company.hunttech.entity.ExtUser.class).query(anyString()).parameter(anyString(), any()).optional())
+                .thenReturn(Optional.of(defaultHunttechUser));
     }
 
     @Test
@@ -281,12 +286,14 @@ public class ExternalIntegrationServiceBeanTest {
         assertEquals("CREATED", response.getStatus());
         assertEquals("corr-vac-1", response.getCorrelationId());
 
-        assertEquals("Java Senior Developer", newVacancy.getVacansyName());
+        assertTrue(newVacancy.getVacansyName().contains(newProject.getProjectName()));
         assertEquals(newProject, newVacancy.getProjectName());
         assertEquals(new java.math.BigDecimal("300000"), newVacancy.getSalaryMin());
         assertEquals(new java.math.BigDecimal("400000"), newVacancy.getSalaryMax());
         assertFalse(newVacancy.getOpenClose());
         assertFalse(newVacancy.getSignDraft());
+        assertEquals(Integer.valueOf(5), newVacancy.getWorkExperience()); // Senior -> 5 years
+        assertEquals("hunttech", newVacancy.getCreatedBy());
 
         // Проверка формата имени созданного проекта
         assertTrue(newProject.getProjectName().contains("SSP \"Банковский КХД. Проект Татьяны Кареевой\""));
@@ -666,6 +673,78 @@ public class ExternalIntegrationServiceBeanTest {
         // Проверяем, что новое резюме привязано к существующему кандидату
         assertEquals(existingCandidate, newCv.getCandidate());
         verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
+    }
+
+    @Test
+    public void testCreateProjectAndVacancyWithOutstaffingRatesAndNewFields() {
+        Company mockCompany = new Company();
+        mockCompany.setId(UUID.randomUUID());
+        mockCompany.setComanyName("SSP");
+
+        com.company.hunttech.entity.Person mockPerson = new com.company.hunttech.entity.Person();
+        mockPerson.setId(UUID.randomUUID());
+        mockPerson.setFirstName("Татьяна");
+        mockPerson.setSecondName("Кареева");
+        mockPerson.setTelegramName("KareevaTatyana");
+
+        com.company.hunttech.entity.Project newProject = new com.company.hunttech.entity.Project();
+        newProject.setId(UUID.randomUUID());
+
+        com.company.hunttech.entity.OpenPosition newVacancy = new com.company.hunttech.entity.OpenPosition();
+        newVacancy.setId(UUID.randomUUID());
+
+        when(mockMetadata.create(com.company.hunttech.entity.Project.class)).thenReturn(newProject);
+        when(mockMetadata.create(com.company.hunttech.entity.OpenPosition.class)).thenReturn(newVacancy);
+
+        when(mockDataManager.load(Company.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(mockCompany));
+        when(mockDataManager.load(com.company.hunttech.entity.Person.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(mockPerson));
+
+        com.company.hunttech.entity.City remoteCity = new com.company.hunttech.entity.City();
+        remoteCity.setCityRuName("Регионы РФ (МСК +/- 2 часа)");
+        when(mockDataManager.load(com.company.hunttech.entity.City.class).query(contains("Регионы РФ")).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(remoteCity));
+
+        com.company.hunttech.entity.ExtUser hunttechUser = new com.company.hunttech.entity.ExtUser();
+        hunttechUser.setLogin("hunttech");
+        when(mockDataManager.load(com.company.hunttech.entity.ExtUser.class).query(contains("hunttech")).parameter(anyString(), any()).optional())
+                .thenReturn(Optional.of(hunttechUser));
+
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        request.setCompanyName("SSP");
+        request.setCustomerContact("@KareevaTatyana");
+        request.setVacancyName("ID 13994 Архитектор Системный");
+        request.setComment("ID 13994 Архитектор Системный\n"
+                + "Ограничение по ставке T&M (без НДС)\n"
+                + "Senior/ - руб.\n"
+                + "Формат работы Удаленно\n"
+                + "Резюме принимаются до 25.10.2026\n"
+                + "Опыт работы: от 5 лет в КХД");
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto response = service.createProjectAndVacancy(request);
+
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+
+        // Оформление аутстаффинг (0)
+        assertEquals(Integer.valueOf(0), newVacancy.getRegistrationForWork());
+        // Ставка не найдена в заявке -> ориентируемся на запрос кандидата
+        assertTrue(Boolean.TRUE.equals(newVacancy.getSalaryCandidateRequest()));
+        assertNull(newVacancy.getOutstaffingCost());
+        // Автор - hunttech
+        assertEquals(hunttechUser, newVacancy.getOwner());
+        assertEquals("hunttech", newVacancy.getCreatedBy());
+        // Опыт - 5 лет
+        assertEquals(Integer.valueOf(5), newVacancy.getWorkExperience());
+        // Город - удаленка
+        assertNotNull(newVacancy.getCityPosition());
+        assertEquals("Регионы РФ (МСК +/- 2 часа)", newVacancy.getCityPosition().getCityRuName());
+        // Дата закрытия спарсена
+        assertNotNull(newVacancy.getClosingDate());
+        // Название вакансии сформировано по каноническому правилу
+        assertNotNull(newVacancy.getVacansyName());
+        assertTrue(newVacancy.getVacansyName().contains("SSP"));
     }
 
     private static void injectField(Object target, String fieldName, Object value) throws Exception {

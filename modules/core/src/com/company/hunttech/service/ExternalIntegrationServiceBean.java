@@ -21,6 +21,7 @@ import com.company.hunttech.entity.Iteraction;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.OutstaffingRates;
 import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.Position;
 import com.company.hunttech.entity.Project;
@@ -36,6 +37,8 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -86,6 +89,8 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
 
     @Inject
     private SmartOpenPositionIngestService smartOpenPositionIngestService;
+
+    private volatile ExtUser cachedHunttechUser;
 
     @Override
     public CompanyResponseDto createCompany(CompanyCreateRequestDto request) {
@@ -286,6 +291,15 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
             }
         }
 
+        // Быстрая проверка идемпотентности ДО долгих вызовов AI
+        if (idempotencyKey != null) {
+            ProjectVacancyResponseDto cached = projectVacancyIdempotencyCache.get(idempotencyKey);
+            if (cached != null) {
+                log.info("Returning early cached projectVacancy response for idempotencyKey: {} [correlationId={}]", idempotencyKey, correlationId);
+                return cached;
+            }
+        }
+
         // Оригинал вакансии для сохранения в rawDescription и генерации AI-артефактов
         String rawText = StringUtils.isNotBlank(request.getComment())
                 ? request.getComment().trim()
@@ -439,6 +453,11 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
             }
         }
 
+        // Предварительная подготовка AI-перевода описания на английский язык ДО входа в synchronized блок
+        String descForCommentPre = StringUtils.isNotBlank(standardizedDescription) ? standardizedDescription : rawText;
+        String commentHtmlPre = MarkdownToHtmlUtils.toHtml(descForCommentPre);
+        String commentEnHtml = translateVacancyDescriptionToEnglish(commentHtmlPre, parsedData, rawText);
+
         try {
             com.company.hunttech.dto.integration.ProjectVacancyResponseDto response;
             synchronized (projectVacancyLock) {
@@ -498,23 +517,30 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 if (grade == null && parsedData != null && StringUtils.isNotBlank(parsedData.getGradeName())) {
                     grade = findGrade(parsedData.getGradeName());
                 }
-
-                City city = null;
-                if (StringUtils.isNotBlank(request.getCityId())) {
-                    try {
-                        UUID cityUuid = UUID.fromString(request.getCityId().trim());
-                        city = dataManager.load(City.class).id(cityUuid).optional().orElse(null);
-                    } catch (IllegalArgumentException ex) {
-                        log.warn("Invalid cityId format [correlationId={}]: {}", correlationId, request.getCityId(), ex);
+                if (grade == null) {
+                    String extractedGrade = extractGradeNameFromText(rawText);
+                    if (extractedGrade != null) {
+                        grade = findGrade(extractedGrade);
                     }
                 }
-                if (city == null && parsedData != null && StringUtils.isNotBlank(parsedData.getCityName())) {
-                    city = findCity(parsedData.getCityName());
+                if (grade == null && (request.getVacancyName().toLowerCase(Locale.ROOT).contains("senior")
+                        || request.getVacancyName().toLowerCase(Locale.ROOT).contains("архитектор")
+                        || (positionType != null && StringUtils.trimToEmpty(positionType.getPositionRuName()).toLowerCase(Locale.ROOT).contains("архитектор")))) {
+                    grade = findGrade("Senior");
                 }
+
+                // Определение формата удаленной работы (1=Удаленно, 0=Офис, 2=Гибрид)
+                Integer remoteWork = request.getRemoteWork();
+                if (remoteWork == null) {
+                    remoteWork = isRemoteWork(null, rawText) ? 1 : 0;
+                }
+
+                // Разрешение города: для удаленки выставляется "Регионы РФ (МСК +/- 2 часа)"
+                City city = resolveCity(remoteWork, request.getCityId(), request.getCityName(),
+                        parsedData != null ? parsedData.getCityName() : null, rawText);
 
                 // 7. Создание сущности OpenPosition и HTML-трансформация AI-артефактов
                 OpenPosition openPosition = metadata.create(OpenPosition.class);
-                openPosition.setVacansyName(truncate(request.getVacancyName().trim(), 250));
                 openPosition.setProjectName(project);
 
                 if (StringUtils.isNotBlank(request.getExternalId())) {
@@ -534,6 +560,10 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 String descForComment = StringUtils.isNotBlank(standardizedDescription) ? standardizedDescription : rawText;
                 String commentHtml = MarkdownToHtmlUtils.toHtml(descForComment);
                 openPosition.setComment(commentHtml);
+
+                if (StringUtils.isNotBlank(commentEnHtml)) {
+                    openPosition.setCommentEn(commentEnHtml);
+                }
 
                 if (StringUtils.isNotBlank(checklist)) {
                     String checklistHtml = MarkdownToHtmlUtils.toHtml(checklist);
@@ -556,11 +586,66 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     openPosition.setNeedLetter(true);
                 }
 
-                openPosition.setRemoteWork(request.getRemoteWork() != null ? request.getRemoteWork() : 1);
+                openPosition.setRemoteWork(remoteWork);
                 openPosition.setCommandCandidate(request.getCommandCandidate() != null ? request.getCommandCandidate() : 1);
-                openPosition.setWorkExperience(request.getWorkExperience() != null ? request.getWorkExperience() : 1);
-                openPosition.setSalaryMin(request.getSalaryMin());
-                openPosition.setSalaryMax(request.getSalaryMax());
+
+                // Общий опыт работы: из текста либо junior=2, middle=3, senior/lead/architect=5
+                int exp = request.getWorkExperience() != null ? request.getWorkExperience()
+                        : resolveWorkExperience(rawText, request.getVacancyName(), grade, positionType);
+                openPosition.setWorkExperience(exp);
+
+                // Оформление (0=Аутстаффинг, 1=Рекрутинг) и расчет ставки из OutstaffingRates
+                BigDecimal customerRate = request.getOutstaffingCost() != null ? request.getOutstaffingCost()
+                        : (parsedData != null && parsedData.getOutstaffingCost() != null ? parsedData.getOutstaffingCost() : extractCustomerRate(rawText));
+                int registrationForWork = resolveRegistrationForWork(rawText, customerRate, request.getSalaryMax());
+                openPosition.setRegistrationForWork(registrationForWork);
+
+                if (registrationForWork == 0) {
+                    // Аутстаффинг
+                    if (customerRate != null) {
+                        openPosition.setOutstaffingCost(customerRate);
+                        OutstaffingRates rateRow = findOutstaffingRate(customerRate);
+                        if (rateRow != null) {
+                            openPosition.setSalaryMin(rateRow.getMinSalary());
+                            openPosition.setSalaryMax(rateRow.getMaxSalary());
+                            openPosition.setSalaryIE(rateRow.getMaxIESalary());
+                            openPosition.setSalaryCandidateRequest(false);
+                            openPosition.setSalaryComment("Маржинальная ставка: " + customerRate + " \n"
+                                    + "Зарплатное предложение min: " + rateRow.getMinSalary() + " \n"
+                                    + "Зарплатное предложение max: " + rateRow.getMaxSalary() + " \n"
+                                    + "Зарплатное предложение для ИП: " + rateRow.getMaxIESalary());
+                        } else {
+                            openPosition.setSalaryCandidateRequest(true);
+                        }
+                    } else {
+                        openPosition.setOutstaffingCost(null);
+                        openPosition.setSalaryCandidateRequest(true); // флаг "Ориентируемся на запрос кандидата"
+                        openPosition.setSalaryMin(null);
+                        openPosition.setSalaryMax(null);
+                        openPosition.setSalaryIE(null);
+                    }
+                } else {
+                    // Рекрутинг
+                    openPosition.setSalaryCandidateRequest(false);
+                    openPosition.setSalaryMin(request.getSalaryMin());
+                    openPosition.setSalaryMax(request.getSalaryMax());
+                    openPosition.setSalaryIE(null);
+                    openPosition.setOutstaffingCost(null);
+                }
+
+                // Автор записи - "hunttech"
+                ExtUser hunttechUser = resolveHunttechUser();
+                if (hunttechUser != null) {
+                    openPosition.setOwner(hunttechUser);
+                }
+                openPosition.setCreatedBy("hunttech");
+
+                // Дата закрытия (если в тексте есть "резюме принимаются до...")
+                Date closingDate = resolveClosingDate(rawText);
+                if (closingDate != null) {
+                    openPosition.setClosingDate(closingDate);
+                }
+
                 openPosition.setGrade(grade);
                 openPosition.setCityPosition(city);
                 openPosition.setPositionType(positionType);
@@ -569,6 +654,10 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 openPosition.setInternalProject(false);
                 openPosition.setLastOpenDate(new Date());
                 openPosition.setPriority(2); // NORMAL
+
+                // ГЛАВНОЕ: алгоритм генерации названия вакансии из OpenPositionEdit (кнопка «Генерировать»)
+                String generatedVacancyName = generateCanonicalVacancyName(grade, positionType, project, city);
+                openPosition.setVacansyName(truncate(generatedVacancyName, 250));
 
                 commitContext.addInstanceToCommit(openPosition);
 
@@ -1015,8 +1104,15 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
     private Grade findGrade(String gradeName) {
         if (StringUtils.isBlank(gradeName)) return null;
         String clean = gradeName.trim();
+        List<Grade> exact = dataManager.load(Grade.class)
+                .query("select e from hunttech_Grade e where lower(e.gradeName) = lower(:g) and lower(e.gradeName) not like 'testgrade%' and lower(e.gradeName) not like 'grade-%'")
+                .parameter("g", clean)
+                .maxResults(1)
+                .list();
+        if (!exact.isEmpty()) return exact.get(0);
+
         List<Grade> list = dataManager.load(Grade.class)
-                .query("select e from hunttech_Grade e where lower(e.gradeName) like lower(:g)")
+                .query("select e from hunttech_Grade e where lower(e.gradeName) like lower(:g) and lower(e.gradeName) not like 'testgrade%' and lower(e.gradeName) not like 'grade-%'")
                 .parameter("g", "%" + clean + "%")
                 .maxResults(1)
                 .list();
@@ -1617,6 +1713,319 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
             cache.clear();
         }
         cache.put(idempotencyKey, response);
+    }
+
+    private ExtUser resolveHunttechUser() {
+        if (cachedHunttechUser != null) {
+            return cachedHunttechUser;
+        }
+        ExtUser user = dataManager.load(ExtUser.class)
+                .query("select u from sec$User u where u.login = :login")
+                .parameter("login", "hunttech")
+                .optional()
+                .orElse(null);
+        if (user == null) {
+            log.warn("System user with login 'hunttech' not found in sec$User! Vacancy owner will not be set.");
+        } else {
+            cachedHunttechUser = user;
+        }
+        return user;
+    }
+
+    private City resolveRemoteCity() {
+        List<City> list = dataManager.load(City.class)
+                .query("select c from hunttech_City c where c.cityRuName = :name")
+                .parameter("name", "Регионы РФ (МСК +/- 2 часа)")
+                .maxResults(1)
+                .list();
+        if (!list.isEmpty()) return list.get(0);
+
+        list = dataManager.load(City.class)
+                .query("select c from hunttech_City c where lower(c.cityRuName) like lower(:p)")
+                .parameter("p", "%регионы рф%2 часа%")
+                .maxResults(1)
+                .list();
+        if (!list.isEmpty()) return list.get(0);
+
+        list = dataManager.load(City.class)
+                .query("select c from hunttech_City c where lower(c.cityRuName) like lower(:p)")
+                .parameter("p", "%регионы рф%")
+                .maxResults(1)
+                .list();
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    private boolean isRemoteWork(Integer remoteWork, String rawText) {
+        if (remoteWork != null && remoteWork == 1) return true;
+        if (StringUtils.isBlank(rawText)) return false;
+        String lower = rawText.toLowerCase(Locale.ROOT);
+        return lower.contains("удален")
+                || lower.contains("remote")
+                || lower.contains("локация рф")
+                || lower.contains("формат работы удаленно");
+    }
+
+    private City resolveCity(Integer remoteWork, String cityId, String cityName, String parsedCityName, String rawText) {
+        if (StringUtils.isNotBlank(cityId)) {
+            try {
+                UUID cityUuid = UUID.fromString(cityId.trim());
+                City city = dataManager.load(City.class).id(cityUuid).optional().orElse(null);
+                if (city != null) return city;
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        boolean remote = isRemoteWork(remoteWork, rawText);
+        if (remote) {
+            City remoteCity = resolveRemoteCity();
+            if (remoteCity != null) return remoteCity;
+        }
+
+        String candidate = StringUtils.isNotBlank(cityName) ? cityName : parsedCityName;
+        if (StringUtils.isNotBlank(candidate)) {
+            City found = findCity(candidate);
+            if (found != null) return found;
+        }
+
+        return null;
+    }
+
+    private String extractGradeNameFromText(String text) {
+        if (StringUtils.isBlank(text)) return null;
+        String lower = text.toLowerCase(Locale.ROOT);
+        if (lower.contains("senior+") || lower.contains("сеньор+") || lower.contains("senior plus")) return "Senior+";
+        if (lower.contains("senior") || lower.contains("сеньор") || lower.contains("сениор")) return "Senior";
+        if (lower.contains("lead") || lower.contains("лид") || lower.contains("тимлид") || lower.contains("руководитель")) return "Lead";
+        if (lower.contains("middle+") || lower.contains("мидл+") || lower.contains("миддл+")) return "Middle+";
+        if (lower.contains("middle") || lower.contains("мидл") || lower.contains("миддл")) return "Middle";
+        if (lower.contains("junior") || lower.contains("джуниор") || lower.contains("джун")) return "Junior";
+        return null;
+    }
+
+    private int resolveRegistrationForWork(String rawText, BigDecimal customerRate, BigDecimal salaryOffer) {
+        String lower = StringUtils.isNotBlank(rawText) ? rawText.toLowerCase(Locale.ROOT) : "";
+
+        // Если указана ставка в час / T&M / рейт -> аутстаффинг
+        if (lower.contains("t&m") || lower.contains("т&м") || lower.contains("в час") || lower.contains("руб/час")
+                || lower.contains("руб./час") || lower.contains("руб/ч") || lower.contains("р/час")
+                || lower.contains("ставка заказчика") || lower.contains("почасов") || lower.contains("аутстаф")) {
+            return 0; // Аутстаффинг
+        }
+
+        // Если указано четкое зарплатное предложение (оклад за месяц) без почасовой ставки
+        if (lower.contains("руб/мес") || lower.contains("в месяц") || lower.contains("оклад")
+                || lower.contains("зарплатное предложение") || Pattern.compile("(?iu)\\b(net|gross)\\b").matcher(lower).find()) {
+            return 1; // Рекрутинг
+        }
+
+        // Если задано зарплатное предложение (оклад) и нет ставки в час -> рекрутинг
+        if (salaryOffer != null && salaryOffer.compareTo(new BigDecimal("50000")) >= 0 && customerRate == null) {
+            return 1; // Рекрутинг
+        }
+
+        return 0; // аутстаффинг по умолчанию, если не указано иное
+    }
+
+    private BigDecimal extractCustomerRate(String rawText) {
+        if (StringUtils.isBlank(rawText)) return null;
+        Pattern p = Pattern.compile("(?iu)(?:ставка|рейт|t&m|т&м|ограничение по ставке)[^0-9\n\r]{0,35}(\\d[\\d\\s]{2,5})(?!\\s*000\\s*руб\\/мес)(?:\\s*(?:руб|р|₽)?\\s*(?:\\/|\\s*в\\s*)?(?:час|ч)?)");
+        Matcher m = p.matcher(rawText);
+        if (m.find()) {
+            String numStr = m.group(1).replaceAll("\\s+", "");
+            try {
+                BigDecimal val = new BigDecimal(numStr);
+                if (val.compareTo(new BigDecimal("500")) >= 0 && val.compareTo(new BigDecimal("20000")) <= 0) {
+                    return val;
+                }
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    private OutstaffingRates findOutstaffingRate(BigDecimal customerRate) {
+        if (customerRate == null) return null;
+        List<OutstaffingRates> list = dataManager.load(OutstaffingRates.class)
+                .query("select e from hunttech_OutstaffingRates e where e.rate <= :rate and e.minSalary is not null order by e.rate desc")
+                .parameter("rate", customerRate)
+                .maxResults(1)
+                .list();
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    private Date resolveClosingDate(String rawText) {
+        if (StringUtils.isBlank(rawText)) return null;
+        Pattern pattern = Pattern.compile("(?iu)(?:резюме\\s+принимаются\\s+до|прием\\s+резюме\\s+до|подача\\s+до|дедлайн[:\\s]+|срок\\s+до)\\s*([0-9]{1,2}[.\\/-][0-9]{1,2}[.\\/-][0-9]{2,4}|[0-9]{1,2}\\s+[а-яёА-ЯЁ]+(?:\\s+[0-9]{4})?)");
+        Matcher m = pattern.matcher(rawText);
+        if (m.find()) {
+            String dateStr = m.group(1).trim();
+            Date parsed = parseDateString(dateStr);
+            if (parsed != null) return parsed;
+        }
+        return null;
+    }
+
+    private Date parseDateString(String dateStr) {
+        if (StringUtils.isBlank(dateStr)) return null;
+        String clean = dateStr.trim();
+        String[] patterns = new String[]{"dd.MM.yyyy", "dd.MM.yy", "yyyy-MM-dd", "dd/MM/yyyy", "dd-MM-yyyy"};
+        for (String p : patterns) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(p);
+                sdf.setLenient(false);
+                return sdf.parse(clean);
+            } catch (Exception ignored) {}
+        }
+
+        Pattern monthPattern = Pattern.compile("(?iu)^([0-9]{1,2})\\s+([а-яёА-ЯЁ]+)(?:\\s+([0-9]{4}))?");
+        Matcher mm = monthPattern.matcher(clean);
+        if (mm.find()) {
+            try {
+                int day = Integer.parseInt(mm.group(1));
+                String monthName = mm.group(2).toLowerCase(Locale.ROOT);
+                int year = mm.group(3) != null ? Integer.parseInt(mm.group(3)) : Calendar.getInstance().get(Calendar.YEAR);
+                int month = parseRuMonth(monthName);
+                if (month >= 0) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.YEAR, year);
+                    cal.set(Calendar.MONTH, month);
+                    cal.set(Calendar.DAY_OF_MONTH, day);
+                    cal.set(Calendar.HOUR_OF_DAY, 23);
+                    cal.set(Calendar.MINUTE, 59);
+                    cal.set(Calendar.SECOND, 59);
+                    return cal.getTime();
+                }
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    private int parseRuMonth(String monthName) {
+        if (monthName.startsWith("янв")) return 0;
+        if (monthName.startsWith("фев")) return 1;
+        if (monthName.startsWith("мар")) return 2;
+        if (monthName.startsWith("апр")) return 3;
+        if (monthName.startsWith("май") || monthName.startsWith("мае") || monthName.startsWith("мая")) return 4;
+        if (monthName.startsWith("июн")) return 5;
+        if (monthName.startsWith("июл")) return 6;
+        if (monthName.startsWith("авг")) return 7;
+        if (monthName.startsWith("сен")) return 8;
+        if (monthName.startsWith("окт")) return 9;
+        if (monthName.startsWith("ноя")) return 10;
+        if (monthName.startsWith("дек")) return 11;
+        return -1;
+    }
+
+    private int resolveWorkExperience(String rawText, String vacancyName, Grade grade, Position positionType) {
+        if (StringUtils.isNotBlank(rawText)) {
+            Pattern p = Pattern.compile("(?iu)(?:опыт(?:\\s+работы)?|стаж|коммерческий опыт)[^0-9\n\r]{0,25}(?:от|более|>)?\\s*([1-9]|1[0-5])\\s*(?:лет|года|год|\\+)");
+            Matcher m = p.matcher(rawText);
+            if (m.find()) {
+                try {
+                    return Integer.parseInt(m.group(1));
+                } catch (Exception ignored) {}
+            }
+        }
+
+        String textToAnalyze = "";
+        if (StringUtils.isNotBlank(vacancyName)) {
+            textToAnalyze += " " + vacancyName.toLowerCase(Locale.ROOT);
+        }
+        if (grade != null && StringUtils.isNotBlank(grade.getGradeName())) {
+            textToAnalyze += " " + grade.getGradeName().toLowerCase(Locale.ROOT);
+        }
+        if (positionType != null) {
+            textToAnalyze += " " + StringUtils.trimToEmpty(positionType.getPositionRuName()).toLowerCase(Locale.ROOT);
+            textToAnalyze += " " + StringUtils.trimToEmpty(positionType.getPositionEnName()).toLowerCase(Locale.ROOT);
+        }
+        if (StringUtils.isNotBlank(rawText)) {
+            textToAnalyze += " " + rawText.toLowerCase(Locale.ROOT);
+        }
+
+        if (textToAnalyze.contains("architect") || textToAnalyze.contains("архитектор")
+                || textToAnalyze.contains("senior") || textToAnalyze.contains("сеньор") || textToAnalyze.contains("сениор")
+                || textToAnalyze.contains("lead") || textToAnalyze.contains("лид")
+                || textToAnalyze.contains("руководитель")) {
+            return 5;
+        }
+
+        if (textToAnalyze.contains("junior") || textToAnalyze.contains("джуниор") || textToAnalyze.contains("джун")) {
+            return 2;
+        }
+
+        return 3;
+    }
+
+    private String translateVacancyDescriptionToEnglish(String commentHtml, SmartOpenPositionParsedData parsedData, String rawText) {
+        if (StringUtils.isNotBlank(commentHtml)) {
+            try {
+                String prompt = "Translate the following Russian job vacancy description into professional English. "
+                        + "Keep all HTML tags intact (such as <h3>, <p>, <ul>, <li>, <strong>, etc.) and preserve exact technical terms and structure. "
+                        + "Return ONLY the translated HTML content without markdown code blocks, backticks, or any conversational preamble.\n\n"
+                        + commentHtml;
+                Map<String, Object> params = new HashMap<>();
+                params.put("prompt", prompt);
+                params.put("text", commentHtml);
+                AiExecutionResult result = aiExecutionService.executeText("TEXT_SMART_FORMAT_HTML", params);
+                if (result != null && StringUtils.isNotBlank(result.getText())) {
+                    String translated = result.getText().trim();
+                    if (translated.startsWith("```")) {
+                        translated = translated.replaceAll("(?s)^```[a-zA-Z]*\\s*", "").replaceAll("```\\s*$", "").trim();
+                    }
+                    if (translated.length() > 50) {
+                        String lowerTrans = translated.toLowerCase(Locale.ROOT);
+                        if (lowerTrans.contains("<p>") || lowerTrans.contains("<h3>") || lowerTrans.contains("<ul>") || lowerTrans.contains("<div>")) {
+                            return MarkdownToHtmlUtils.sanitizeDangerousHtml(translated);
+                        }
+                        return MarkdownToHtmlUtils.toHtml(translated);
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("AI translation of vacancy description failed, falling back: {}", ex.getMessage());
+            }
+        }
+
+        if (parsedData != null && StringUtils.isNotBlank(parsedData.getCommentEn())) {
+            return MarkdownToHtmlUtils.toHtml(parsedData.getCommentEn());
+        }
+
+        return null;
+    }
+
+    private String generateCanonicalVacancyName(Grade grade, Position positionType, Project project, City city) {
+        StringBuilder sb = new StringBuilder();
+
+        if (grade != null && StringUtils.isNotBlank(grade.getGradeName())) {
+            sb.append(grade.getGradeName().trim()).append(" ");
+        }
+
+        if (positionType != null) {
+            String ru = StringUtils.trimToEmpty(positionType.getPositionRuName());
+            String en = StringUtils.trimToEmpty(positionType.getPositionEnName());
+            if (StringUtils.isNotBlank(ru) && StringUtils.isNotBlank(en)) {
+                sb.append(ru).append(" / ").append(en);
+            } else if (StringUtils.isNotBlank(ru)) {
+                sb.append(ru);
+            } else if (StringUtils.isNotBlank(en)) {
+                sb.append(en);
+            }
+        }
+
+        boolean hasProject = project != null && StringUtils.isNotBlank(project.getProjectName());
+        boolean hasCity = city != null && StringUtils.isNotBlank(city.getCityRuName());
+
+        if (hasProject || hasCity) {
+            sb.append(" (");
+            if (hasProject) {
+                sb.append(project.getProjectName().trim());
+                if (hasCity) {
+                    sb.append(", ").append(city.getCityRuName().trim());
+                }
+            } else {
+                sb.append(city.getCityRuName().trim());
+            }
+            sb.append(")");
+        }
+
+        return sb.toString().trim();
     }
 
     private String truncate(String value, int maxLength) {
