@@ -155,15 +155,36 @@ public interface SmartCvIngestService {
 
 ### Вызов из реестров и сохранение фокуса таблицы:
 ```java
-// Реестр кандидатов (JobCandidateReestr.java)
+// Реестр кандидатов (JobCandidateReestr.java) — BL-2026-024
 screen.addAfterCloseListener(closeEvent -> {
     if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+        clearSignIconFilter();
         setCandidateScopeFilter("ALL", "Все кандидаты", "USERS");
-        if (screen.getCreatedCandidate() != null) {
+        JobCandidate createdCandidate = screen.getCreatedCandidate();
+        if (createdCandidate != null) {
             try {
                 JobCandidate toSelect = jobCandidatesDc != null
-                        ? jobCandidatesDc.getItemOrNull(screen.getCreatedCandidate().getId()) : null;
-                candidatesTable.setSelected(toSelect != null ? toSelect : screen.getCreatedCandidate());
+                        ? jobCandidatesDc.getItemOrNull(createdCandidate.getId()) : null;
+                if (toSelect == null && jobCandidatesDc != null) {
+                    JobCandidate reloadedCandidate = dataManager.load(JobCandidate.class)
+                            .id(createdCandidate.getId())
+                            .view("jobCandidate-view")
+                            .optional()
+                            .orElse(null);
+                    if (reloadedCandidate != null) {
+                        jobCandidatesDc.getMutableItems().add(0, reloadedCandidate);
+                        toSelect = reloadedCandidate;
+                    }
+                }
+                if (toSelect == null) {
+                    toSelect = createdCandidate;
+                }
+                candidatesTable.setSelected(toSelect);
+                candidatesTable.scrollTo(toSelect);
+                candidatesTable.focus();
+                populateDetailPane(toSelect);
+                updateActionsState(toSelect);
+                updateSignIconsState(toSelect);
             } catch (Exception ignored) {
             }
         }
@@ -201,4 +222,14 @@ screen.addAfterCloseListener(closeEvent -> {
 ## 7. Набор автоматизированных тестов
 
 - `SmartCvIngestComprehensiveTest.java` — 13 комплексных тестов на парсинг PDF, DOCX, RTF, TXT, Apple Pages, устойчивость к битым файлам, парсинг JSON с markdown-обертками, нормализацию кириллических компаний и телефонов;
-- `SmartCvIngestServiceContractTest.java` — контрактные тесты DTO, сервисов и регистрации миграций в `db.changelog-master.xml`.
+- `SmartCvIngestServiceContractTest.java` — контрактные тесты DTO, сервисов и регистрации миграций в `db.changelog-master.xml`;
+- `JobCandidateReestrSmartUploadContractTest.java` — регрессионный контрактный тест реестра: сброс фильтров, позиционирование, автоматический скролл, фокус и наполнение сайдбара профиля после создания кандидата (BL-2026-024).
+
+---
+
+## 8. История изменений
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-09-23 | BL-2026-024: В `JobCandidateReestr` после «Умной загрузки» реализован сброс фильтра меток (`clearSignIconFilter()`), сброс области на «Все кандидаты» (`ALL`), догрузка кандидата в `jobCandidatesDc` при выпадении из первых 200 записей выборки, вызовы `setSelected`, `scrollTo`, `focus`, принудительное наполнение сайдбара `populateDetailPane(toSelect)` и обновление кнопок действий. Добавлен тест `JobCandidateReestrSmartUploadContractTest`. |
+| 2026-09-13 | Создание модуля «Умная загрузка резюме»: сервис `SmartCvIngestService`, мастер `SmartCvUploadScreen`, системный промпт v3, дедупликация и комплексные автотесты. |

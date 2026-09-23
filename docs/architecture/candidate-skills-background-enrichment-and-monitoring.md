@@ -97,3 +97,23 @@
 | `hunttech.skillsEnrichment.batchFetchSize` | int | `10` | Размер порции выборки кандидатов из БД |
 | `hunttech.skillsEnrichment.stuckTimeoutMinutes` | int | `15` | Таймаут возврата зависших в PROCESSING задач в очередь |
 | `hunttech.skillsEnrichment.aiFunctionCode` | String | `SKILLS_EXTRACT_BACKGROUND` | Код AI-функции из каталога Control Plane |
+
+---
+
+## 6. Привязка AI-провайдера и отображение в мониторинге
+
+1. **Системная функция `SKILLS_EXTRACT_BACKGROUND`**:
+   - В миграции `modules/core/db/update/postgres/26/260920-4-bind-skills-extract-background-glm52.sql` функция явно привязана к провайдеру `bai` и модели `GLM 5.2` (BigModel GLM).
+   - Политика: `ADMIN_ONLY`, `NO_FALLBACK`.
+2. **Отображение фактической модели в мониторинге**:
+   - Таблица `hunttech_CandidateSkillsEnrichmentMonitoring` в колонках «Провайдер» и «Модель» отображает фактические значения `providerCode` и `modelName` из сущности `CandidateCvSkillAnalysis`, полученные из реального ответа `AiExecutionResult`.
+   - Если метаданные вызова отсутствуют (исторические записи), отображается `—`.
+
+---
+
+## 7. История изменений
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-09-23 | BL-2026-020: Добавлена миграция `260920-4-bind-skills-extract-background-glm52.sql` с привязкой функции `SKILLS_EXTRACT_BACKGROUND` к B.AI GLM 5.2, гарантировано отображение фактических `providerCode` и `modelName` в строках мониторинга. |
+| 2026-09-17 | Проектирование и ввод в эксплуатацию фонового сервиса `CandidateSkillsEnrichmentWorker` и экрана мониторинга `hunttech_CandidateSkillsEnrichmentMonitoring`. |

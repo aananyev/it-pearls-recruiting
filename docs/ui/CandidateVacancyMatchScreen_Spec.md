@@ -26,7 +26,7 @@
 | Java | `CandidateVacancyMatchScreen.java` |
 | XML | `candidate-vacancy-match-screen.xml` |
 | Тип | modal `Screen`, resizable |
-| Целевая геометрия | Полноэкранный modal, адаптивный к viewport; эталон 1100×780 px |
+| Целевая геометрия | Полноэкранный modal, адаптивный к viewport: `@DialogMode(width = "95%", height = "90%", resizable = true)`; эталон 1100×780 px |
 | focus | `matchesTable` |
 
 ## 2. Связь с моделью данных (Data & Entity Binding)
@@ -103,6 +103,7 @@ Timer facet `analysisProgressTimer` имеет интервал 1000 мс, `auto
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-23 | BL-2026-032: В контроллере `CandidateVacancyMatchScreen.java` исправлена аннотация `@DialogMode`: некорректные единицы `95vw` / `90vh`, вызывавшие исключение `IllegalArgumentException: Invalid size argument: "95vw"` в `com.vaadin.server.SizeWithUnit.parseStringSize`, заменены на валидные процентные значения `95%` / `90%`. Диалог проверен тестом `AllXmlScreensIntegrityTest`. |
 | 2026-09-22 | CDP-проверка 768×600 выявила переполнение подписей в строках действий; во всех семи темах кнопки получили ширину слота, перенос текста и auto-height без изменения бизнес-действий. |
 | 2026-09-22 | BL-2026-032: удалено глобальное вмешательство в геометрию Vaadin slot/expand-контейнеров, появившееся после merge PR #260; восстановлен нативный расчёт CUBA для обычной ширины, а узкий режим ограничен непосредственными контейнерами `mainSplit`. Добавлен контракт идентичности и локальной области SCSS для семи тем. |
 | 2026-09-22 | Исправлен dialogMode: XML и `@DialogMode` используют 95% × 90% (стандартные единицы Vaadin/CUBA вместо неподдерживаемых vw/vh), чтобы диалог оставлял поля окна и не вызывал IllegalArgumentException. |

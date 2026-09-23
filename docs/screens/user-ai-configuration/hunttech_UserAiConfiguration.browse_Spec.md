@@ -90,5 +90,6 @@ select e from hunttech_UserAiConfiguration e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-23 | BL-2026-021: В `UserAiConfigurationBrowse` и `UserAiConfigurationEdit` внедрена гарантированная привязка текущего пользователя сессии (`UserSessionSource`) при создании конфигурации, добавлена pre-commit валидация и визуализация владельца (`user.login`) в сайдбаре редактора. Подтверждено тестом `UserAiConfigurationOwnerContractTest`. |
 | 2026-09-22 | BL-2026-021: generic create-action заменён владельческим сценарием; `user` назначается из текущей сессии до commit |
 | 2026-06-27 | Создание read-only browse для мониторинга AI-конфигураций без apiKey в view |
