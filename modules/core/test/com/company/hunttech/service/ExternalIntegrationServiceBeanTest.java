@@ -38,15 +38,18 @@ public class ExternalIntegrationServiceBeanTest {
     private ExternalIntegrationServiceBean service;
     private DataManager mockDataManager;
     private Metadata mockMetadata;
+    private HrmAiService mockHrmAiService;
 
     @Before
     public void setUp() throws Exception {
         service = new ExternalIntegrationServiceBean();
         mockDataManager = mock(DataManager.class, Mockito.RETURNS_DEEP_STUBS);
         mockMetadata = mock(Metadata.class);
+        mockHrmAiService = mock(HrmAiService.class);
 
         injectField(service, "dataManager", mockDataManager);
         injectField(service, "metadata", mockMetadata);
+        injectField(service, "hrmAiService", mockHrmAiService);
     }
 
     @Test
@@ -233,6 +236,68 @@ public class ExternalIntegrationServiceBeanTest {
         assertEquals(new java.math.BigDecimal("400000"), newVacancy.getSalaryMax());
         assertFalse(newVacancy.getOpenClose());
         assertFalse(newVacancy.getSignDraft());
+
+        verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
+    }
+
+    @Test
+    public void testCreateProjectAndVacancyWithAiArtifacts() {
+        com.company.hunttech.entity.Project newProject = new com.company.hunttech.entity.Project();
+        UUID projectId = UUID.randomUUID();
+        newProject.setId(projectId);
+
+        com.company.hunttech.entity.OpenPosition newVacancy = new com.company.hunttech.entity.OpenPosition();
+        UUID vacancyId = UUID.randomUUID();
+        newVacancy.setId(vacancyId);
+
+        when(mockMetadata.create(com.company.hunttech.entity.Project.class)).thenReturn(newProject);
+        when(mockMetadata.create(com.company.hunttech.entity.OpenPosition.class)).thenReturn(newVacancy);
+
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).optional())
+                .thenReturn(Optional.empty());
+
+        String rawComment = "Требуется Java разработчик со знанием Spring, PostgreSQL и Liquibase.";
+        String standardized = "### Описание вакансии\nJava разработчик уровня Senior.";
+        String checklist = "- [ ] Опыт с Java 11+\n- [ ] Опыт с Spring Boot";
+        String searchMap = "1. Компании-доноры: FinTech\n2. Ключевые слова: Java, Spring";
+        String interviewPlan = "1. Знакомство (5 мин)\n2. Технический блок (40 мин)";
+
+        when(mockHrmAiService.standardizeVacancyDescription(rawComment)).thenReturn(standardized);
+        when(mockHrmAiService.generateChecklist(standardized)).thenReturn(checklist);
+        when(mockHrmAiService.generateSearchMap(standardized)).thenReturn(searchMap);
+        when(mockHrmAiService.generateInterviewPlan(standardized)).thenReturn(interviewPlan);
+
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        request.setProjectName("AI Проект");
+        request.setVacancyName("Senior Java Dev");
+        request.setComment(rawComment);
+        request.setExternalId("ext-ai-001");
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto response = service.createProjectAndVacancy(request);
+
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+
+        // Проверка записи оригинала вакансии
+        assertEquals(rawComment, newVacancy.getRawDescription());
+
+        // Проверка стандартизированного описания
+        assertEquals(standardized, newVacancy.getComment());
+
+        // Проверка чеклиста (в обоих полях)
+        assertEquals(checklist, newVacancy.getInterviewChecklist());
+        assertEquals(checklist, newVacancy.getExercise());
+        assertTrue(Boolean.TRUE.equals(newVacancy.getNeedExercise()));
+
+        // Проверка карты поиска (в обоих полях)
+        assertEquals(searchMap, newVacancy.getSearchMap());
+        assertEquals(searchMap, newVacancy.getMemoForInterview());
+        assertTrue(Boolean.TRUE.equals(newVacancy.getNeedMemoForInterview()));
+
+        // Проверка плана интервью (в обоих полях)
+        assertEquals(interviewPlan, newVacancy.getInterviewPlan());
+        assertEquals(interviewPlan, newVacancy.getTemplateLetter());
+        assertTrue(Boolean.TRUE.equals(newVacancy.getNeedLetter()));
 
         verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
     }

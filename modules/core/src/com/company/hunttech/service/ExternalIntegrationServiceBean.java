@@ -69,6 +69,9 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
     @Inject
     private UserSessionSource userSessionSource;
 
+    @Inject
+    private HrmAiService hrmAiService;
+
     @Override
     public CompanyResponseDto createCompany(CompanyCreateRequestDto request) {
         if (request == null) {
@@ -256,6 +259,77 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     "Необходимо указать existingProjectId или projectName для привязки вакансии к проекту", correlationId, "VALIDATION_ERROR");
         }
 
+        // Предварительная валидация existingProjectId (если задан) до обращения к LLM
+        if (hasExistingProject) {
+            try {
+                UUID projectUuid = UUID.fromString(request.getExistingProjectId().trim());
+                com.company.hunttech.entity.Project existingProj = dataManager.load(com.company.hunttech.entity.Project.class)
+                        .id(projectUuid).optional().orElse(null);
+                if (existingProj == null) {
+                    return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                            "Проект с указанным existingProjectId не найден: " + request.getExistingProjectId(),
+                            correlationId, "NOT_FOUND");
+                }
+            } catch (IllegalArgumentException ex) {
+                return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                        "Некорректный формат UUID для existingProjectId: " + request.getExistingProjectId(),
+                        correlationId, "VALIDATION_ERROR");
+            }
+        }
+
+        // Оригинал вакансии для сохранения в rawDescription и генерации AI-артефактов
+        String rawText = StringUtils.isNotBlank(request.getComment())
+                ? request.getComment().trim()
+                : StringUtils.trimToEmpty(request.getShortDescription());
+
+        // Внутренняя AI-генерация согласно существующим в базе промптам:
+        // 1) "Описание вакансии" (STANDARDIZE_VACANCY)
+        // 2) "Чеклист" (VACANCY_CHECKLIST)
+        // 3) "Карта поиска" (VACANCY_SEARCH_MAP)
+        // 4) "План собеседования" (VACANCY_INTERVIEW_PLAN)
+        // Выполняется ДО входа в synchronized блок, исключая блокировку потоков долгими LLM-вызовами
+        String standardizedDescription = null;
+        String checklist = null;
+        String searchMap = null;
+        String interviewPlan = null;
+
+        if (StringUtils.isNotBlank(rawText)) {
+            try {
+                log.info("Starting AI vacancy standardization for external vacancy [name='{}', correlationId={}]",
+                        request.getVacancyName(), correlationId);
+                standardizedDescription = hrmAiService.standardizeVacancyDescription(rawText);
+            } catch (Exception ex) {
+                log.warn("Failed to standardize vacancy description via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            }
+
+            String textForArtifacts = StringUtils.isNotBlank(standardizedDescription) ? standardizedDescription : rawText;
+
+            try {
+                checklist = hrmAiService.generateChecklist(textForArtifacts);
+            } catch (Exception ex) {
+                log.warn("Failed to generate vacancy checklist via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            }
+
+            try {
+                searchMap = hrmAiService.generateSearchMap(textForArtifacts);
+            } catch (Exception ex) {
+                log.warn("Failed to generate vacancy search map via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            }
+
+            try {
+                interviewPlan = hrmAiService.generateInterviewPlan(textForArtifacts);
+            } catch (Exception ex) {
+                log.warn("Failed to generate vacancy interview plan via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            }
+
+            log.info("AI vacancy enrichment completed [correlationId={}]: desc={}, checklist={}, searchMap={}, interviewPlan={}",
+                    correlationId,
+                    standardizedDescription != null ? "OK" : "FALLBACK",
+                    checklist != null ? "OK" : "SKIPPED",
+                    searchMap != null ? "OK" : "SKIPPED",
+                    interviewPlan != null ? "OK" : "SKIPPED");
+        }
+
         try {
             com.company.hunttech.dto.integration.ProjectVacancyResponseDto response;
             synchronized (projectVacancyLock) {
@@ -377,7 +451,33 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 String shortDesc = request.getShortDescription() != null && !request.getShortDescription().trim().isEmpty()
                         ? request.getShortDescription() : request.getVacancyName();
                 openPosition.setShortDescription(truncate(shortDesc, 250));
-                openPosition.setComment(request.getComment() != null ? request.getComment() : "");
+
+                openPosition.setRawDescription(rawText);
+
+                // Запись стандартизированного описания (или оригинала при сбое AI) в comment
+                openPosition.setComment(StringUtils.isNotBlank(standardizedDescription) ? standardizedDescription : rawText);
+
+                // Запись чеклиста требований (синхронно в interviewChecklist и exercise)
+                if (StringUtils.isNotBlank(checklist)) {
+                    openPosition.setInterviewChecklist(checklist);
+                    openPosition.setExercise(checklist);
+                    openPosition.setNeedExercise(true);
+                }
+
+                // Запись карты поиска (синхронно в searchMap и memoForInterview)
+                if (StringUtils.isNotBlank(searchMap)) {
+                    openPosition.setSearchMap(searchMap);
+                    openPosition.setMemoForInterview(searchMap);
+                    openPosition.setNeedMemoForInterview(true);
+                }
+
+                // Запись плана собеседования (синхронно в interviewPlan и templateLetter)
+                if (StringUtils.isNotBlank(interviewPlan)) {
+                    openPosition.setInterviewPlan(interviewPlan);
+                    openPosition.setTemplateLetter(interviewPlan);
+                    openPosition.setNeedLetter(true);
+                }
+
                 openPosition.setRemoteWork(request.getRemoteWork() != null ? request.getRemoteWork() : 1);
                 openPosition.setCommandCandidate(request.getCommandCandidate() != null ? request.getCommandCandidate() : 1);
                 openPosition.setWorkExperience(request.getWorkExperience() != null ? request.getWorkExperience() : 1);
