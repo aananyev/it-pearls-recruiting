@@ -302,7 +302,12 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
             analysis.setModelName(normalizeMetadata(aiExecution.getModelName()));
             analysis.setPromptTokens(promptTokens != null ? promptTokens : aiExecution.getPromptTokens());
             analysis.setCompletionTokens(completionTokens != null ? completionTokens : aiExecution.getCompletionTokens());
-            analysis.setTotalTokens(totalTokens != null ? totalTokens : aiExecution.getTotalTokens());
+            Integer effectiveTotal = totalTokens != null ? totalTokens : aiExecution.getTotalTokens();
+            if (effectiveTotal == null && (analysis.getPromptTokens() != null || analysis.getCompletionTokens() != null)) {
+                effectiveTotal = (analysis.getPromptTokens() != null ? analysis.getPromptTokens() : 0)
+                        + (analysis.getCompletionTokens() != null ? analysis.getCompletionTokens() : 0);
+            }
+            analysis.setTotalTokens(effectiveTotal);
         } else {
             // A dictionary fallback is successful enrichment, but has no AI usage.
             analysis.setProviderCode(null);
@@ -477,7 +482,35 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
     }
 
     private Integer sumTotalTokens(SkillAnalysisResult... results) {
-        return sumTokens(AiExecutionResult::getTotalTokens, results);
+        if (results == null) return null;
+        int sum = 0;
+        boolean hasAny = false;
+        for (SkillAnalysisResult r : results) {
+            if (r != null && r.getAiExecution() != null) {
+                AiExecutionResult exec = r.getAiExecution();
+                Integer total = exec.getTotalTokens();
+                if (total != null && total > 0) {
+                    sum += total;
+                    hasAny = true;
+                } else {
+                    int part = 0;
+                    boolean partFound = false;
+                    if (exec.getPromptTokens() != null) {
+                        part += exec.getPromptTokens();
+                        partFound = true;
+                    }
+                    if (exec.getCompletionTokens() != null) {
+                        part += exec.getCompletionTokens();
+                        partFound = true;
+                    }
+                    if (partFound) {
+                        sum += part;
+                        hasAny = true;
+                    }
+                }
+            }
+        }
+        return hasAny ? sum : null;
     }
 
     private Integer sumTokens(java.util.function.Function<AiExecutionResult, Integer> extractor, SkillAnalysisResult... results) {
@@ -680,6 +713,7 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
             Date startOfToday = cal.getTime();
 
             Date past24h = new Date(now.getTime() - 24L * 3600_000L);
@@ -718,7 +752,9 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
             kpi.setAiRequestsToday(aiReqToday != null ? aiReqToday.longValue() : 0);
 
             Object[] tokensToday = (Object[]) em.createQuery(
-                    "select sum(e.promptTokens), sum(e.completionTokens), sum(e.totalTokens) " +
+                    "select sum(coalesce(e.promptTokens, 0)), " +
+                            "sum(coalesce(e.completionTokens, 0)), " +
+                            "sum(coalesce(e.totalTokens, coalesce(e.promptTokens, 0) + coalesce(e.completionTokens, 0))) " +
                             "from hunttech_CandidateCvSkillAnalysis e " +
                             "where e.processingFinishedAt >= :today")
                     .setParameter("today", startOfToday)

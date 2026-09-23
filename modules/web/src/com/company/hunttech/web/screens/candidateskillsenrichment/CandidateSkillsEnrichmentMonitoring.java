@@ -308,6 +308,8 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
 
             // AI-токены
             kpiTokensValueLabel.setValue(String.format("%,d токенов", kpi.getTotalTokensToday()));
+            kpiTokensValueLabel.setDescription(String.format("Промпт: %,d | Генерация: %,d | Всего: %,d",
+                    kpi.getPromptTokensToday(), kpi.getCompletionTokensToday(), kpi.getTotalTokensToday()));
             kpiTokensSubLabel.setValue(String.format("Запросов сегодня: %d", kpi.getAiRequestsToday()));
 
         } catch (Exception e) {

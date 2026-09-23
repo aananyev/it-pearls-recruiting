@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -175,5 +176,25 @@ class CandidateSkillsEnrichmentMonitoringContractTest {
 
         CandidateCvSkillAnalysis legacy = new CandidateCvSkillAnalysis();
         assertEquals("Метаданные недоступны", CandidateSkillsEnrichmentMonitoring.formatProviderAndModel(legacy));
+    }
+
+    @Test
+    void testTokenCalculationAndKpiIntegrity() throws Exception {
+        File serviceBeanFile = resolveFile("modules/core/src/com/company/hunttech/service/CandidateSkillEnrichmentServiceBean.java");
+        assertTrue(serviceBeanFile.exists(), "CandidateSkillEnrichmentServiceBean.java должен существовать");
+        String beanContent = new String(Files.readAllBytes(serviceBeanFile.toPath()), StandardCharsets.UTF_8);
+
+        // Проверяем обнуление миллисекунд для точных временных срезов
+        assertTrue(beanContent.contains("cal.set(Calendar.MILLISECOND, 0)"),
+                "startOfToday должен гарантированно обнулять миллисекунды");
+
+        // Проверяем безопасную агрегацию токенов через coalesce
+        assertTrue(beanContent.contains("coalesce(e.totalTokens, coalesce(e.promptTokens, 0) + coalesce(e.completionTokens, 0))"),
+                "Агрегация токенов должна учитывать строки с null totalTokens через сумму prompt + completion");
+
+        // Проверяем fallback-расчет totalTokens при сохранении
+        assertTrue(beanContent.contains("effectiveTotal = (analysis.getPromptTokens() != null ? analysis.getPromptTokens() : 0)")
+                        && beanContent.contains("(analysis.getCompletionTokens() != null ? analysis.getCompletionTokens() : 0)"),
+                "При сохранении записи анализа totalTokens должен вычисляться из promptTokens + completionTokens если explicit total null");
     }
 }
