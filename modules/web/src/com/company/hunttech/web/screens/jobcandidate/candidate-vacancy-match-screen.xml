@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="Результаты AI-подбора"
         focusComponent="matchesTable">
-    <dialogMode width="95vw" height="90vh" modal="true" resizable="true"/>
+    <dialogMode width="95%" height="90%" modal="true" resizable="true"/>
     <data>
         <collection id="matchesDc" class="com.company.hunttech.entity.CandidateVacancyMatchItem"/>
     </data>

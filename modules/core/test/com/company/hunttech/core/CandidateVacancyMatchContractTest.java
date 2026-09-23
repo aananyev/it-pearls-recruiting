@@ -167,13 +167,13 @@ public class CandidateVacancyMatchContractTest {
                 "modules/web/src/com/company/hunttech/web/screens/jobcandidate/candidate-vacancy-match-screen.xml");
         String xml = new String(Files.readAllBytes(xmlPath), StandardCharsets.UTF_8);
 
-        assertTrue("Диалог CandidateVacancyMatch должен использовать размеры viewport",
-                xml.contains("<dialogMode width=\"95vw\" height=\"90vh\""));
+        assertTrue("Диалог CandidateVacancyMatch должен использовать адаптивные размеры",
+                xml.contains("<dialogMode width=\"95%\" height=\"90%\""));
         Path controllerPath = projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/jobcandidate/CandidateVacancyMatchScreen.java");
         String controller = new String(Files.readAllBytes(controllerPath), StandardCharsets.UTF_8);
         assertTrue("@DialogMode должен совпадать с XML, иначе он переопределит размеры диалога",
-                controller.contains("@DialogMode(width = \"95vw\", height = \"90vh\""));
+                controller.contains("@DialogMode(width = \"95%\", height = \"90%\""));
         assertTrue(xml.contains("stylename=\"candidate-vacancy-match-root\""));
         assertTrue(xml.contains("dataContainer=\"matchesDc\""));
         assertTrue(xml.contains("id=\"analysisProgressTimer\""));
