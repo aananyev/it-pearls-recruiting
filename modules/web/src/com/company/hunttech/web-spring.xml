@@ -96,6 +96,10 @@
                        value="com.company.hunttech.service.CandidateSkillEnrichmentService"/>
                 <entry key="hunttech_CandidateVacancyWorkflowService"
                        value="com.company.hunttech.service.CandidateVacancyWorkflowService"/>
+                <entry key="hunttech_ExternalReferenceDataService"
+                       value="com.company.hunttech.service.ExternalReferenceDataService"/>
+                <entry key="hunttech_ExternalIntegrationService"
+                       value="com.company.hunttech.service.ExternalIntegrationService"/>
             </map>
         </property>
     </bean>
