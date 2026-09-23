@@ -192,3 +192,93 @@ Content-Type: `application/json`
 ```
 Дедупликация выполняется по совпадению ИНН (при наличии) либо по нечувствительному к регистру наименованию компании, исключая появление дубликатов в справочнике.
 
+---
+
+## 6. API создания проекта и вакансии (BL-2026-025)
+
+Транзакционный метод создания проекта и связанной вакансии (или добавления вакансии в существующий проект).  
+URL: `POST /hrm/rest/v2/services/hunttech_ExternalIntegrationService/createProjectAndVacancy`  
+Заголовок: `Authorization: Bearer <access_token>`  
+Content-Type: `application/json`
+
+### 6.1 Формат запроса (`ProjectVacancyCreateRequestDto`)
+
+```json
+{
+  "request": {
+    "externalId": "partner-vac-501",
+    "idempotencyKey": "idem-vac-501",
+    "correlationId": "corr-vac-501",
+    "projectName": "Проект Финтех 2.0",
+    "projectDescription": "Разработка высоконагруженной платежной платформы",
+    "companyId": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+    "vacancyName": "Senior Java Developer / Kotlin",
+    "shortDescription": "Разработка микросервисов ядра биллинга",
+    "comment": "Требуется опыт работы с Spring Boot, Kafka, PostgreSQL от 5 лет",
+    "remoteWork": 1,
+    "commandCandidate": 1,
+    "workExperience": 5,
+    "salaryMin": 300000.00,
+    "salaryMax": 450000.00,
+    "gradeId": "91234567-89ab-cdef-0123-456789abcdef",
+    "cityId": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+    "positionTypeId": "71234567-89ab-cdef-0123-456789abcdef"
+  }
+}
+```
+
+Если необходимо привязать вакансию к уже существующему проекту, вместо `projectName` передается `existingProjectId`:
+```json
+{
+  "request": {
+    "existingProjectId": "4a28f731-9a7c-48be-9fae-d4c391748201",
+    "vacancyName": "QA Automation Lead",
+    "remoteWork": 1
+  }
+}
+```
+
+### 6.2 Формат ответа (`ProjectVacancyResponseDto`)
+
+Успешное создание:
+```json
+{
+  "success": true,
+  "projectId": "4a28f731-9a7c-48be-9fae-d4c391748201",
+  "vacancyId": "b182c943-3fae-4d81-9b12-9812470123ef",
+  "externalId": "partner-vac-501",
+  "status": "CREATED",
+  "correlationId": "corr-vac-501",
+  "message": null,
+  "errorDetails": null
+}
+```
+
+Ошибка валидации:
+```json
+{
+  "success": false,
+  "projectId": null,
+  "vacancyId": null,
+  "externalId": null,
+  "status": null,
+  "correlationId": "corr-vac-501",
+  "message": "Наименование вакансии (vacancyName) обязательно для заполнения",
+  "errorDetails": {
+    "success": false,
+    "errorCode": "VALIDATION_ERROR",
+    "message": "Наименование вакансии (vacancyName) обязательно для заполнения",
+    "correlationId": "corr-vac-501",
+    "timestamp": "2026-09-23T10:15:00.000Z",
+    "details": []
+  }
+}
+```
+
+### 6.3 Поведение и правила
+- **Транзакционность**: проект, вакансия и связь с компанией/департаментом коммитятся атомарно в одном `CommitContext`. При сбое откатываются все изменения.
+- **Идемпотентность**: при передаче `idempotencyKey` ответ кэшируется в `projectVacancyIdempotencyCache` и возвращается повторно без дублирования записей.
+- **Проект**: если передан `existingProjectId`, вакансия создается в указанном проекте. Если передан `projectName`, система выполняет поиск открытого проекта с таким именем, либо создает новый проект и привязывает его к организации (`companyId`) через основной департамент.
+- **Вакансии**: по умолчанию создается открытая (`openClose = false`), не черновик (`signDraft = false`), с приоритетом `NORMAL` (2).
+
+

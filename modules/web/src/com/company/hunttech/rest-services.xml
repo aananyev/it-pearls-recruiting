@@ -28,6 +28,9 @@
         <method name="createCompany">
             <param name="request" type="com.company.hunttech.dto.integration.CompanyCreateRequestDto"/>
         </method>
+        <method name="createProjectAndVacancy">
+            <param name="request" type="com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto"/>
+        </method>
     </service>
 
 </services>

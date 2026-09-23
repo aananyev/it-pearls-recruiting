@@ -177,9 +177,137 @@ public class ExternalIntegrationServiceBeanTest {
         assertTrue(response.getMessage().contains("ИНН должен содержать 10 или 12 цифр"));
     }
 
+    @Test
+    public void testCreateProjectAndVacancySuccessNewProject() {
+        com.company.hunttech.entity.Project newProject = new com.company.hunttech.entity.Project();
+        UUID projectId = UUID.randomUUID();
+        newProject.setId(projectId);
+
+        com.company.hunttech.entity.OpenPosition newVacancy = new com.company.hunttech.entity.OpenPosition();
+        UUID vacancyId = UUID.randomUUID();
+        newVacancy.setId(vacancyId);
+
+        when(mockMetadata.create(com.company.hunttech.entity.Project.class)).thenReturn(newProject);
+        when(mockMetadata.create(com.company.hunttech.entity.OpenPosition.class)).thenReturn(newVacancy);
+
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).optional())
+                .thenReturn(Optional.empty());
+
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        request.setProjectName("Проект Альфа");
+        request.setProjectDescription("Описание проекта Альфа");
+        request.setVacancyName("Java Senior Developer");
+        request.setExternalId("ext-vac-001");
+        request.setCorrelationId("corr-vac-1");
+        request.setSalaryMin(new java.math.BigDecimal("300000"));
+        request.setSalaryMax(new java.math.BigDecimal("400000"));
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto response = service.createProjectAndVacancy(request);
+
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertEquals(projectId.toString(), response.getProjectId());
+        assertEquals(vacancyId.toString(), response.getVacancyId());
+        assertEquals("ext-vac-001", response.getExternalId());
+        assertEquals("CREATED", response.getStatus());
+        assertEquals("corr-vac-1", response.getCorrelationId());
+
+        assertEquals("Java Senior Developer", newVacancy.getVacansyName());
+        assertEquals(newProject, newVacancy.getProjectName());
+        assertEquals(new java.math.BigDecimal("300000"), newVacancy.getSalaryMin());
+        assertEquals(new java.math.BigDecimal("400000"), newVacancy.getSalaryMax());
+        assertFalse(newVacancy.getOpenClose());
+        assertFalse(newVacancy.getSignDraft());
+
+        verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
+    }
+
+    @Test
+    public void testCreateProjectAndVacancySuccessExistingProject() {
+        com.company.hunttech.entity.Project existingProject = new com.company.hunttech.entity.Project();
+        UUID projectId = UUID.randomUUID();
+        existingProject.setId(projectId);
+        existingProject.setProjectName("Существующий проект");
+
+        com.company.hunttech.entity.OpenPosition newVacancy = new com.company.hunttech.entity.OpenPosition();
+        UUID vacancyId = UUID.randomUUID();
+        newVacancy.setId(vacancyId);
+
+        when(mockMetadata.create(com.company.hunttech.entity.OpenPosition.class)).thenReturn(newVacancy);
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).id(eq(projectId)).optional())
+                .thenReturn(Optional.of(existingProject));
+
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        request.setExistingProjectId(projectId.toString());
+        request.setVacancyName("QA Automation Engineer");
+        request.setExternalId("ext-vac-002");
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto response = service.createProjectAndVacancy(request);
+
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertEquals(projectId.toString(), response.getProjectId());
+        assertEquals(vacancyId.toString(), response.getVacancyId());
+        assertEquals(existingProject, newVacancy.getProjectName());
+
+        verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
+    }
+
+    @Test
+    public void testCreateProjectAndVacancyIdempotencyKeyCached() {
+        com.company.hunttech.entity.Project existingProject = new com.company.hunttech.entity.Project();
+        UUID projectId = UUID.randomUUID();
+        existingProject.setId(projectId);
+
+        com.company.hunttech.entity.OpenPosition newVacancy = new com.company.hunttech.entity.OpenPosition();
+        UUID vacancyId = UUID.randomUUID();
+        newVacancy.setId(vacancyId);
+
+        when(mockMetadata.create(com.company.hunttech.entity.OpenPosition.class)).thenReturn(newVacancy);
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).id(eq(projectId)).optional())
+                .thenReturn(Optional.of(existingProject));
+
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        request.setExistingProjectId(projectId.toString());
+        request.setVacancyName("Frontend Tech Lead");
+        request.setIdempotencyKey("idem-vac-key-1");
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto firstResponse = service.createProjectAndVacancy(request);
+        assertNotNull(firstResponse);
+        assertTrue(firstResponse.isSuccess());
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto secondResponse = service.createProjectAndVacancy(request);
+        assertNotNull(secondResponse);
+        assertTrue(secondResponse.isSuccess());
+        assertEquals(firstResponse.getVacancyId(), secondResponse.getVacancyId());
+
+        // commit Context вызывается только один раз
+        verify(mockDataManager, times(1)).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
+    }
+
+    @Test
+    public void testCreateProjectAndVacancyValidationFailures() {
+        // 1. Пустой vacancyName
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto req1 = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        req1.setProjectName("Проект");
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto resp1 = service.createProjectAndVacancy(req1);
+        assertNotNull(resp1);
+        assertFalse(resp1.isSuccess());
+        assertTrue(resp1.getMessage().contains("vacancyName"));
+
+        // 2. Нет ни existingProjectId, ни projectName
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto req2 = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        req2.setVacancyName("Разработчик");
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto resp2 = service.createProjectAndVacancy(req2);
+        assertNotNull(resp2);
+        assertFalse(resp2.isSuccess());
+        assertTrue(resp2.getMessage().contains("existingProjectId или projectName"));
+    }
+
     private static void injectField(Object target, String fieldName, Object value) throws Exception {
         Field field = target.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(target, value);
     }
 }
+
