@@ -930,13 +930,47 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .build();
         screen.addAfterCloseListener(closeEvent -> {
             if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                jobCandidatesDl.removeParameter("signIcon");
                 setCandidateScopeFilter("ALL", "Все кандидаты", "USERS");
-                if (screen.getCreatedCandidate() != null) {
+                JobCandidate created = screen.getCreatedCandidate();
+                if (created != null) {
                     try {
+                        UUID candidateId = created.getId();
                         JobCandidate toSelect = jobCandidatesDc != null
-                                ? jobCandidatesDc.getItemOrNull(screen.getCreatedCandidate().getId()) : null;
-                        candidatesTable.setSelected(toSelect != null ? toSelect : screen.getCreatedCandidate());
-                    } catch (Exception ignored) {
+                                ? jobCandidatesDc.getItemOrNull(candidateId) : null;
+                        if (toSelect == null) {
+                            toSelect = dataManager.load(JobCandidate.class)
+                                    .id(candidateId)
+                                    .view("jobCandidate-view")
+                                    .optional()
+                                    .orElse(created);
+                            if (jobCandidatesDc != null) {
+                                jobCandidatesDc.getMutableItems().add(0, toSelect);
+                            }
+                            List<JobCandidateSignIcon> candidateSigns = dataManager.load(JobCandidateSignIcon.class)
+                                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                                    .parameter("jobCandidate", toSelect)
+                                    .view("jobCandidateSignIcon-view")
+                                    .list();
+                            List<SignIcons> iconsList = new ArrayList<>();
+                            for (JobCandidateSignIcon jcsi : candidateSigns) {
+                                if (jcsi.getSignIcon() != null) {
+                                    iconsList.add(jcsi.getSignIcon());
+                                }
+                            }
+                            if (!(signIconsByCandidateId instanceof HashMap)) {
+                                signIconsByCandidateId = new HashMap<>(signIconsByCandidateId);
+                            }
+                            signIconsByCandidateId.put(candidateId, iconsList);
+                        }
+                        candidatesTable.setSelected(toSelect);
+                        candidatesTable.scrollTo(toSelect);
+                        candidatesTable.focus();
+                        populateDetailPane(toSelect);
+                        updateActionsState(toSelect);
+                        updateSignIconsState(toSelect);
+                    } catch (Exception e) {
+                        log.warn("Не удалось сфокусировать созданного кандидата после умной загрузки: {}", e.getMessage());
                     }
                 }
             }

@@ -253,6 +253,12 @@
    Создана миграция `260913-2-updateSmartCvParsePromptV3.xml` и подключена в `db.changelog-master.xml` (`CONFIGURATION_VERSION = 3`).
 6. **Автоматизированное подтверждение**:
    Все 13 тестов в `SmartCvIngestComprehensiveTest` и контрактные тесты `SmartCvIngestServiceContractTest` успешно пройдены.
+7. **Улучшение позиционирования, скролла и наполнения сайдбара после «Умной загрузки» (BL-2026-024)**:
+   В `JobCandidateReestr.java` при завершении мастера с `COMMIT` обеспечено:
+   - Сброс фильтра меток (`signIcon`) и установка фильтра области на «Все кандидаты» (`ALL`);
+   - Гарантированное присутствие созданного кандидата в `jobCandidatesDc` (догрузка на первую позицию при превышении лимита 200 записей или сортировки);
+   - Вызовы `candidatesTable.setSelected(toSelect)`, `candidatesTable.scrollTo(toSelect)` и `candidatesTable.focus()`;
+   - Синхронизация левого сайдбара (`populateDetailPane`) и кнопок действий (`updateActionsState`, `updateSignIconsState`).
 
 ---
 *Отчёт подготовлен рабочей группой субагентов под руководством Руководителя проектов.*
