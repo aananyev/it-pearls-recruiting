@@ -217,20 +217,25 @@ Content-Type: `application/json`
     "externalId": "partner-vac-501",
     "idempotencyKey": "idem-vac-501",
     "correlationId": "corr-vac-501",
+    "vacancyName": "Senior Java Developer / Kotlin",
     "projectName": "Проект Финтех 2.0",
     "projectDescription": "Разработка высоконагруженной платежной платформы",
-    "companyId": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
-    "vacancyName": "Senior Java Developer / Kotlin",
+    "companyName": "SSP",
+    "companyId": null,
+    "customerContact": "@KareevaTatyana",
+    "actPeriod": "2 месяца",
     "shortDescription": "Разработка микросервисов ядра биллинга",
-    "comment": "Требуется опыт работы с Spring Boot, Kafka, PostgreSQL от 5 лет",
+    "comment": "Заказчик: SSP. Ответственный: @KareevaTatyana. Ограничение по ставке T&M: 3500 руб/час. Требуется опыт работы от 5 лет. Формат работы: Удаленно.",
     "remoteWork": 1,
     "commandCandidate": 1,
-    "workExperience": 5,
-    "salaryMin": 300000.00,
-    "salaryMax": 450000.00,
-    "gradeId": "91234567-89ab-cdef-0123-456789abcdef",
-    "cityId": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
-    "positionTypeId": "71234567-89ab-cdef-0123-456789abcdef"
+    "workExperience": null,
+    "cityName": "Регионы РФ (МСК +/- 2 часа)",
+    "cityId": null,
+    "outstaffingCost": 3500.00,
+    "salaryMin": null,
+    "salaryMax": null,
+    "gradeId": null,
+    "positionTypeId": null
   }
 }
 ```
@@ -241,7 +246,7 @@ Content-Type: `application/json`
   "request": {
     "existingProjectId": "4a28f731-9a7c-48be-9fae-d4c391748201",
     "vacancyName": "QA Automation Lead",
-    "remoteWork": 1
+    "comment": "Требуется опыт тестирования от 3 лет. Формат: Удаленно."
   }
 }
 ```
@@ -262,7 +267,7 @@ Content-Type: `application/json`
 }
 ```
 
-Ошибка валидации:
+Ошибка валидации / бизнес-правил:
 ```json
 {
   "success": false,
@@ -271,23 +276,32 @@ Content-Type: `application/json`
   "externalId": null,
   "status": null,
   "correlationId": "corr-vac-501",
-  "message": "Наименование вакансии (vacancyName) обязательно для заполнения",
+  "message": "Не удалось определить компанию заказчика (клиента) из описания вакансии или переданных параметров. Заполните поле companyName/companyId или укажите заказчика в тексте вакансии.",
   "errorDetails": {
     "success": false,
-    "errorCode": "VALIDATION_ERROR",
-    "message": "Наименование вакансии (vacancyName) обязательно для заполнения",
+    "errorCode": "CUSTOMER_NOT_FOUND",
+    "message": "Не удалось определить компанию заказчика (клиента) из описания вакансии или переданных параметров. Заполните поле companyName/companyId или укажите заказчика в тексте вакансии.",
     "correlationId": "corr-vac-501",
-    "timestamp": "2026-09-23T10:15:00.000Z",
+    "timestamp": "2026-09-23 16:11:08.416",
     "details": []
   }
 }
 ```
 
-### 6.3 Поведение и правила
-- **Транзакционность**: проект, вакансия и связь с компанией/департаментом коммитятся атомарно в одном `CommitContext`. При сбое откатываются все изменения.
-- **Идемпотентность**: при передаче `idempotencyKey` ответ кэшируется в `projectVacancyIdempotencyCache` и возвращается повторно без дублирования записей.
-- **Проект**: если передан `existingProjectId`, вакансия создается в указанном проекте. Если передан `projectName`, система выполняет поиск открытого проекта с таким именем, либо создает новый проект и привязывает его к организации (`companyId`) через основной департамент.
-- **Вакансии**: по умолчанию создается открытая (`openClose = false`), не черновик (`signDraft = false`), с приоритетом `NORMAL` (2).
+### 6.3 Бизнес-правила заполнения полей вакансии
+- **Город вакансии**: для удаленной работы (по тексту или `remoteWork = 1`) автоматически выставляется город **«Регионы РФ (МСК +/- 2 часа)»** (`hunttech_City`).
+- **Оформление (`registrationForWork`)**: по умолчанию устанавливается **Аутстаффинг** (`0`). Если в тексте указан четкий ежемесячный оклад (руб/мес, в месяц, net/gross) без почасовой ставки, устанавливается **Рекрутинг** (`1`).
+- **Ставка и расчет зарплатного предложения**:
+  - При аутстаффинге ставка заказчика пишется в `outstaffingCost`.
+  - По справочнику «Рейты по аутстафу» (`hunttech_OutstaffingRates`) подбирается ставка по правилу: точное совпадение либо ближайшее значение в меньшую сторону (`rate <= :customerRate ORDER BY rate DESC LIMIT 1`). Из найденной строки заполняются `salaryMin`, `salaryMax`, `salaryIE`, `salaryComment`.
+  - Если ставку заказчика определить не удалось: выставляется флаг `salaryCandidateRequest = true` («Ориентируемся на запрос кандидата»), а числовые поля зарплаты остаются пустыми.
+- **Автор записи**: в качестве ответственного (`owner_id`) всегда назначается системный пользователь **`hunttech`** (`ExtUser`), `createdBy = "hunttech"`.
+- **Дата закрытия (`closingDate`)**: автоматически извлекается из фраз «резюме принимаются до [дата]», «прием резюме до...».
+- **Общий опыт работы (`workExperience`)**: вычисляется из текста (например «опыт от 3 лет»), а при отсутствии — по грейду: Junior = 2 года, Middle/Regular = 3 года, Senior/Lead/Architect = от 5 лет.
+- **Английское описание (`commentEn`)**: AI выполняет перевод стандартизированного описания на английский язык с сохранением структуры HTML (`<h3>`, `<p>`, `<ul>`, `<li>`).
+- **Каноническое название вакансии (`vacansyName`)**: формируется вызовом алгоритма кнопки «Генерировать» формы `OpenPositionEdit`:
+  `[Grade] [PositionRu] / [PositionEn] ([ProjectName], [CityName])`.
+- **Транзакционность и идемпотентность**: проект и вакансия коммитятся в одной транзакции; повторные запросы с тем же `idempotencyKey` возвращают закэшированный результат без дублирования.
 
 ---
 

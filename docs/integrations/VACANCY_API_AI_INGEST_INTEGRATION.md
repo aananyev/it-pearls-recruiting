@@ -125,7 +125,7 @@ Content-Type: application/json
 
 | Поле | Тип | Обязательное | Описание |
 | :--- | :--- | :---: | :--- |
-| `vacancyName` | `String` | **Да** | Название вакансии (до 250 символов) |
+| `vacancyName` | `String` | **Да** | Входное название вакансии (до 250 символов, например `ID 13994 Архитектор Системный`). В сущности сохраняется каноническое имя |
 | `externalId` | `String` | Нет | Внешний идентификатор вакансии в системе-источнике (до 16 символов, например `13994`) |
 | `comment` | `String` | Нет | **Оригинал описания вакансии**. Сохраняется без изменений в `rawDescription` и является источником для AI |
 | `shortDescription` | `String` | Нет | Краткое резюме вакансии (до 250 символов) |
@@ -139,11 +139,13 @@ Content-Type: application/json
 | `positionTypeId` | `String (UUID)` | Нет | Прямой UUID должности в справочнике `hunttech_Position` |
 | `remoteWork` | `Integer` | Нет | Формат работы: `1` — Удалённо, `2` — Офис, `3` — Гибрид |
 | `commandCandidate` | `Integer` | Нет | Командность кандидата (по умолчанию `1`) |
-| `workExperience` | `Integer` | Нет | Опыт работы (1–4) |
+| `workExperience` | `Integer` | Нет | Опыт работы в годах. Если не передан — извлекается из текста, либо по грейду (Junior=2, Middle=3, Senior/Lead/Architect=5) |
 | `gradeId` | `String (UUID)` | Нет | Идентификатор грейда в справочнике `hunttech_Grade` |
 | `cityId` | `String (UUID)` | Нет | Идентификатор города в справочнике `hunttech_City` |
-| `salaryMin` | `BigDecimal` | Нет | Нижняя граница заработной платы |
-| `salaryMax` | `BigDecimal` | Нет | Верхняя граница заработной платы |
+| `cityName` | `String` | Нет | Наименование города. Для удаленной работы автоматически выставляется «Регионы РФ (МСК +/- 2 часа)» |
+| `outstaffingCost` | `BigDecimal` | Нет | Почасовая ставка заказчика (T&M). Если не указана — парсится из текста |
+| `salaryMin` | `BigDecimal` | Нет | Нижняя граница заработной платы (оклад в месяц для рекрутинга, либо авторасчет по «Рейтам по аутстафу») |
+| `salaryMax` | `BigDecimal` | Нет | Верхняя граница заработной платы (оклад в месяц для рекрутинга, либо авторасчет по «Рейтам по аутстафу») |
 | `correlationId` | `String` | Нет | Сквозной трассировочный ID для логов и мониторинга |
 | `idempotencyKey` | `String` | Нет | Ключ идемпотентности для предотвращения дублирования запросов |
 
@@ -200,6 +202,7 @@ $$\mathbf{<\text{ЗАКАЗЧИК}>\quad "\text{Наименование про�
 | :--- | :--- | :--- | :--- | :--- |
 | **Оригинал вакансии** | Plain Text | `rawDescription` (`RAW_DESCRIPTION`) | **Без изменений (чистый оригинал)** | Аудит исходных требований клиента |
 | **Описание вакансии** | Markdown | `comment` (`COMMENT_`) | Заголовки `<h3>`, абзацы `<p>`, списки `<ul><li>` | Публикация и презентация роли |
+| **Английское описание** | Plain / Markdown | `commentEn` (`COMMENT_EN`) | Заголовки `<h3>`, абзацы `<p>`, списки `<ul><li>` | Англоязычная презентация вакансии |
 | **Чеклист** | Markdown / Таблица | `interviewChecklist`, `exercise` | `<table border="1">`, `<thead>`, `<tbody>`, `<tr>`, `<td>` | Must-have матрица отбора кандидатов |
 | **Карта поиска** | Markdown / Списки | `searchMap`, `memoForInterview` | `<b>`, `<code>`, `<p>`, `<ol><li>` | Сорсинг-стратегия и компании-доноры |
 | **План собеседования** | Markdown | `interviewPlan`, `templateLetter` | `<h2>`, `<p>`, `<ol><li>` | Сценарий продающего интервью |
@@ -216,21 +219,19 @@ $$\mathbf{<\text{ЗАКАЗЧИК}>\quad "\text{Наименование про�
 set -euo pipefail
 
 HRM_HOST="http://localhost:8080/hrm"
-TOKEN="Ed4Lav7qU4aBanNEJk0C82G5oSo"
+TOKEN="qdptAHrN8ZCLOG7qCLciANgwrhg"
 
 curl -s -X POST \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "request": {
-      "vacancyName": "Senior Системный архитектор / System Architect",
+      "vacancyName": "ID 13994 Архитектор Системный",
       "externalId": "13994",
       "projectName": "КХД Банка",
       "comment": "Заказчик: SSP. Ответственный со стороны заказчика: @KareevaTatyana (Татьяна Кареева). Актирование 2 месяца.\n\nID 13994 Архитектор Системный\n\nОграничение по ставке T&M (без НДС)\nSenior/ - руб.\nКлючевые компетенции\nJava Liquibase CI/CD DWH Python Greenplum ETL Airflow Apache Spark\nКХД BI data vault2\nФормат работы Удаленно\nПродолжительность проекта Больше года\nГражданство|Локация РФ\n\nТребования\nОпыт и архитектурная ответственность: - Опыт проектирования, развития или технического лидерства в КХД больших объёмов от 3-х лет (банковский сектор как преимущество). - Глубокое понимание методологий моделирования хранилищ данных (Data Vault 2.0 обязательно). - Опыт практической работы с Greenplum, Airflow, Spark...",
       "remoteWork": 1,
-      "commandCandidate": 1,
-      "workExperience": 4,
-      "correlationId": "corr-vac-13994-ai-eval"
+      "correlationId": "corr-vac-13994-final"
     }
   }' \
   "${HRM_HOST}/rest/v2/services/hunttech_ExternalIntegrationService/createProjectAndVacancy"
@@ -241,10 +242,9 @@ curl -s -X POST \
 {
   "success": true,
   "projectId": "207af1f3-0ffa-7eaf-0f44-5c1426d8389a",
-  "vacancyId": "70c6d1ab-5c3b-d4c8-6879-091c695714e3",
+  "vacancyId": "0546a73b-aa72-adc2-436a-662b5329742b",
   "externalId": "13994",
-  "status": "CREATED",
-  "correlationId": "corr-vac-13994-ai-eval"
+  "status": "CREATED"
 }
 ```
 
@@ -256,17 +256,19 @@ curl -s -X POST \
 SELECT 
   v.vacansy_id,
   v.vacansy_name,
+  v.registration_for_work,
+  v.salary_candidate_request,
+  v.outstaffing_cost,
+  v.work_experience,
+  u.login as owner_login,
+  c.city_ru_name as city_name,
   pos.position_ru_name,
   p.project_name,
   concat(owner.second_name, ' ', owner.first_name) AS project_owner,
-  comp.company_short_name AS customer_company,
-  (exercise = interview_checklist) AS checklist_duplicated,
-  (memo_for_interview = search_map) AS search_map_duplicated,
-  (template_letter = interview_plan) AS interview_plan_duplicated,
-  need_exercise,
-  need_memo_for_interview,
-  need_letter
+  comp.company_short_name AS customer_company
 FROM hunttech_open_position v
+LEFT JOIN sec_user u ON u.id = v.owner_id
+LEFT JOIN hunttech_city c ON c.id = v.city_position_id
 LEFT JOIN hunttech_position pos ON pos.id = v.position_type_id
 LEFT JOIN hunttech_project p ON p.id = v.project_name_id
 LEFT JOIN hunttech_person owner ON owner.id = p.project_owner_id
@@ -277,8 +279,13 @@ WHERE v.vacansy_id = '13994';
 
 **Результат верификации**:
 - `vacansy_id`: `13994`
+- `vacansy_name`: `Senior Системный архитектор / System Architect (SSP "КХД Банка. Проект Татьяны Кареевой" /Штат HuntTech ТК/ГПХ или ИП. Актирование 2 месяца/, Регионы РФ (МСК +/- 2 часа))`
+- `registration_for_work`: `0` (Аутстаффинг)
+- `salary_candidate_request`: `true` (ставка не была указана в тексте -> ориентируемся на запрос кандидата)
+- `work_experience`: `5` (Senior / Архитектор)
+- `owner_login`: `hunttech` (системный пользователь-владелец)
+- `city_name`: `Регионы РФ (МСК +/- 2 часа)`
 - `position_ru_name`: `Системный архитектор`
 - `project_name`: `SSP "КХД Банка. Проект Татьяны Кареевой" /Штат HuntTech ТК/ГПХ или ИП. Актирование 2 месяца/`
-- `project_owner`: `Кареева Татьяна`
 - `customer_company`: `SSP`
-- Все дублирующие поля синхронизированы (`true`), флаги потребностей установлены в `true`.
+- Все AI-артефакты (`comment_`, `comment_en`, `interview_checklist`, `search_map`, `interview_plan`, `raw_description`) заполнены и синхронизированы.
