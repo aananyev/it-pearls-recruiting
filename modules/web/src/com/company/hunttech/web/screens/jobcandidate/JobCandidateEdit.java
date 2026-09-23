@@ -4306,13 +4306,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         VBoxLayout outerBox = uiComponents.create(VBoxLayout.class);
         outerBox.setMargin(false);
-        outerBox.setWidthAuto();
+        outerBox.setWidthFull();
         outerBox.setSpacing(false);
         outerBox.setStyleName("job-candidate-comment-body");
 
         if (item.getComment() != null
                 && !item.getComment().equals("")) {
             Label name = uiComponents.create(Label.class);
+            name.setWidthFull();
             if (item.getRecrutier() != null) {
                 name.setValue(item.getRecrutier().getName() != null
                         ? item.getRecrutier().getName() :
@@ -4321,12 +4322,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             name.setStyleName("tailName");
 
             Label vacancy = uiComponents.create(Label.class);
+            vacancy.setWidthFull();
             vacancy.setValue(item.getVacancy() != null &&
                     !item.getVacancy().getVacansyName().equals("Default")
                     ? item.getVacancy().getVacansyName() : "");
             vacancy.setStyleName("tailVacancy");
 
             Label text = uiComponents.create(Label.class);
+            text.setWidthFull();
             text.setValue(item.getComment() != null ?
                     item.getComment().replaceAll("\n\n", "\n") : "");
             text.addStyleName("table-wordwrap");
@@ -4334,7 +4337,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             Label date = uiComponents.create(Label.class);
             date.setValue(item.getDateIteraction() != null ?
                     new SimpleDateFormat("dd.MM.yyyy HH:mm").format(item.getDateIteraction()) : "");
-            date.setAlignment(Component.Alignment.BOTTOM_RIGHT);
             date.setStyleName("tailDate");
 
             Image image = uiComponents.create(Image.class);
@@ -4356,7 +4358,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             Button replyButton = uiComponents.create(Button.class);
             replyButton.setWidthAuto();
-            replyButton.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+            replyButton.setStyleName("link job-candidate-comment-reply");
             replyButton.setCaption(messageBundle.getMessage("msgReplyButton"));
             replyButton.setDescription(messageBundle.getMessage("msgReplyButtonDesc"));
             replyButton.addClickListener(e -> {
@@ -4382,6 +4384,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .show();
             });
 
+            HBoxLayout footerBox = uiComponents.create(HBoxLayout.class);
+            footerBox.setWidthFull();
+            footerBox.setSpacing(true);
+            footerBox.setMargin(false);
+            footerBox.setStyleName("job-candidate-comment-footer");
+
             if (userSession.getUser().getLogin().equals(item.getCreatedBy())) {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 date.setAlignment(Component.Alignment.MIDDLE_RIGHT);
@@ -4390,6 +4398,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 name.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 innerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 innerBox.addStyleName("tailMyMessage");
+
+                footerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                footerBox.add(replyButton);
+                footerBox.add(date);
             } else {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 date.setAlignment(Component.Alignment.MIDDLE_LEFT);
@@ -4398,6 +4410,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 name.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 innerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 innerBox.addStyleName("tailOtherMessage");
+
+                footerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                footerBox.add(date);
+                footerBox.add(replyButton);
             }
 
             outerBox.add(name);
@@ -4406,8 +4422,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             outerBox.add(text);
-            outerBox.add(date);
-            outerBox.add(replyButton);
+            outerBox.add(footerBox);
 
             if (!userSession.getUser().getLogin().equals(item.getCreatedBy())) {
                 innerBox.add(image);

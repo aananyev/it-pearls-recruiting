@@ -1183,6 +1183,22 @@
     .toolTip .v-button:hover {
       color: #0a4d92 !important;
     }
+
+    .job-candidate-comment-footer {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      margin-top: 4px !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .job-candidate-comment-reply {
+      padding: 0 !important;
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      cursor: pointer;
+    }
   }
 
   @media (max-width: 1366px) {
