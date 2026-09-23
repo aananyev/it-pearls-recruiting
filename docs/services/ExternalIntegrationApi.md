@@ -194,9 +194,17 @@ Content-Type: `application/json`
 
 ---
 
-## 6. API создания проекта и вакансии (BL-2026-025)
+## 6. API создания проекта и вакансии с AI-генерацией артефактов (BL-2026-025 / BL-2026-036)
 
-Транзакционный метод создания проекта и связанной вакансии (или добавления вакансии в существующий проект).  
+Транзакционный метод создания проекта и связанной вакансии (или добавления вакансии в существующий проект) с автоматической интеллектуальной упаковкой:
+- **Оригинал вакансии**: входящий текст из поля `comment` (или `shortDescription`) сохраняется в неизменном виде в атрибуте сущности **«Оригинал вакансии»** (`OpenPosition.rawDescription`).
+- **Внутренняя AI-генерация 4 артефактов стандарта**: на основе оригинала вакансии нейросеть автоматически формирует и записывает:
+  1. **«Описание вакансии»** (`STANDARDIZE_VACANCY`) ➔ поле `OpenPosition.comment` (`COMMENT_`);
+  2. **«Чеклист»** (`VACANCY_CHECKLIST`) ➔ поля `OpenPosition.interviewChecklist` и `exercise`;
+  3. **«Карта поиска»** (`VACANCY_SEARCH_MAP`) ➔ поля `OpenPosition.searchMap` и `memoForInterview`;
+  4. **«План собеседования»** (`VACANCY_INTERVIEW_PLAN`) ➔ поля `OpenPosition.interviewPlan` и `templateLetter`.
+- **Подробное руководство**: см. специализированный документ [VACANCY_API_AI_INGEST_INTEGRATION.md](../integrations/VACANCY_API_AI_INGEST_INTEGRATION.md).
+
 URL: `POST /hrm/rest/v2/services/hunttech_ExternalIntegrationService/createProjectAndVacancy`  
 Заголовок: `Authorization: Bearer <access_token>`  
 Content-Type: `application/json`
