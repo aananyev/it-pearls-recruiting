@@ -36,6 +36,11 @@ public class ExternalReferenceDataRestContractTest {
                 content.contains("name=\"getSkills\""));
         assertTrue("rest-services.xml должен экспортировать метод getCountries",
                 content.contains("name=\"getCountries\""));
+
+        assertTrue("rest-services.xml должен содержать hunttech_ExternalIntegrationService",
+                content.contains("hunttech_ExternalIntegrationService"));
+        assertTrue("rest-services.xml должен экспортировать метод createCompany",
+                content.contains("name=\"createCompany\""));
     }
 
     @Test
