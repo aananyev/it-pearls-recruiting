@@ -132,3 +132,63 @@ Content-Type: `application/json`
 - `POST /hrm/rest/v2/queries/hunttech_Country/countryAll`
 - `POST /hrm/rest/v2/queries/hunttech_SkillTree/skillAll`
 - `POST /hrm/rest/v2/queries/hunttech_Iteraction/iteractionTypeAll`
+
+---
+
+## 5. API создания компаний (BL-2026-027)
+
+Метод создания или дедупликации организации в справочнике `Company`.  
+URL: `POST /hrm/rest/v2/services/hunttech_ExternalIntegrationService/createCompany`  
+Заголовок: `Authorization: Bearer <access_token>`  
+Content-Type: `application/json`
+
+### 5.1 Формат запроса (`CompanyCreateRequestDto`)
+
+```json
+{
+  "request": {
+    "externalId": "partner-comp-1001",
+    "idempotencyKey": "idem-key-99128",
+    "correlationId": "corr-comp-99128",
+    "companyName": "ООО Инновационные Системы",
+    "companyShortName": "Инновационные Системы",
+    "legalEntityName": "Общество с ограниченной ответственностью 'Инновационные Системы'",
+    "inn": "7701987654",
+    "kpp": "770101001",
+    "ogrn": "1027700132195",
+    "addressOfCompany": "г. Москва, ул. Ленина, д. 10",
+    "cityId": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+    "countryId": null,
+    "regionId": null,
+    "website": "https://example.com"
+  }
+}
+```
+
+### 5.2 Формат ответа (`CompanyResponseDto`)
+
+#### При успешном создании новой компании (`status: "CREATED"`):
+```json
+{
+  "success": true,
+  "companyId": "3f2c5891-9a7c-48be-9fae-d4c391748201",
+  "externalId": "partner-comp-1001",
+  "companyName": "ООО Инновационные Системы",
+  "status": "CREATED",
+  "correlationId": "corr-comp-99128"
+}
+```
+
+#### При обнаружении существующей компании-дубликата (`status: "EXISTING_FOUND"`):
+```json
+{
+  "success": true,
+  "companyId": "1a2b3c4d-5e6f-7890-abcd-ef1234567890",
+  "externalId": "partner-comp-1001",
+  "companyName": "ООО Инновационные Системы",
+  "status": "EXISTING_FOUND",
+  "correlationId": "corr-comp-99128"
+}
+```
+Дедупликация выполняется по совпадению ИНН (при наличии) либо по нечувствительному к регистру наименованию компании, исключая появление дубликатов в справочнике.
+

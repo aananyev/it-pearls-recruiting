@@ -1,4 +1,4 @@
--- Локальная настройка роли и технического пользователя для External Integration API (BL-2026-030, BL-2026-029).
+-- Локальная настройка роли и технического пользователя для External Integration API (BL-2026-030, BL-2026-029, BL-2026-027).
 -- ТОЛЬКО ДЛЯ ЛОКАЛЬНОЙ/ТЕСТОВОЙ БАЗЫ. На проде пользователи создаются администратором с секретными паролями.
 -- Применение: PGPASSWORD=cuba psql -h 127.0.0.1 -U cuba -d hunttech -v ON_ERROR_STOP=1 -f scripts/rest_integration_setup.sql
 -- Идемпотентен: повторный запуск безопасен.
@@ -26,7 +26,7 @@ WHERE u.login = 'ext-integration-client' AND r.name = 'REST Внешняя ин�
       WHERE sur.user_id = u.id AND sur.role_id = r.id AND sur.delete_ts IS NULL
   );
 
--- 4. Права роли (permission_type: 20 = entity read, 40 = specific/service)
+-- 4. Права роли (permission_type: 20 = entity operation, 40 = specific/service)
 INSERT INTO sec_permission (id, create_ts, version, permission_type, target, value_, role_id)
 SELECT (md5(random()::text || clock_timestamp()::text))::uuid, now(), 1, p.permission_type, p.target, p.value_, r.id
 FROM sec_role r, (VALUES
@@ -37,7 +37,12 @@ FROM sec_role r, (VALUES
     (40, 'cuba.rest.service.hunttech_ExternalReferenceDataService.getInteractionTypes', 1),
     (40, 'cuba.rest.service.hunttech_ExternalReferenceDataService.getSkills', 1),
     (40, 'cuba.rest.service.hunttech_ExternalReferenceDataService.getCountries', 1),
+    (40, 'cuba.rest.service.hunttech_ExternalIntegrationService.createCompany', 1),
+    (20, 'hunttech_Company:create', 1),
+    (20, 'hunttech_Company:read', 1),
+    (20, 'hunttech_Company:update', 1),
     (20, 'hunttech_City:read', 1),
+    (20, 'hunttech_Region:read', 1),
     (20, 'hunttech_Position:read', 1),
     (20, 'hunttech_Grade:read', 1),
     (20, 'hunttech_Country:read', 1),

@@ -23,4 +23,11 @@
         </method>
     </service>
 
+    <!-- Сервис внешних интеграций HRM HuntTech (BL-2026-036) -->
+    <service name="hunttech_ExternalIntegrationService">
+        <method name="createCompany">
+            <param name="request" type="com.company.hunttech.dto.integration.CompanyCreateRequestDto"/>
+        </method>
+    </service>
+
 </services>
