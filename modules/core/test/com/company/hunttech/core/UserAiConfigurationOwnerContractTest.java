@@ -34,12 +34,17 @@ public class UserAiConfigurationOwnerContractTest {
     @Test
     public void editorBlocksOwnerlessCommitAndDatabaseConstraintRemains() throws IOException {
         String editor = source("modules/web/src/com/company/hunttech/web/screens/useraiconfiguration/UserAiConfigurationEdit.java");
+        String editXml = source("modules/web/src/com/company/hunttech/web/screens/useraiconfiguration/user-ai-configuration-edit.xml");
         String entity = source("modules/global/src/com/company/hunttech/entity/UserAiConfiguration.java");
 
+        assertTrue("UserAiConfigurationEdit должен автоматически подставлять пользователя сессии при отсутствии parentUser",
+                editor.contains("userSessionSource.getUserSession().getUser()"));
         assertTrue(editor.contains("getEditedEntity().getUser() == null"));
         assertTrue(editor.contains("event.preventCommit()"));
         assertTrue(editor.contains("Не удалось определить владельца AI-конфигурации"));
         assertFalse("createdBy не является бизнес-основанием для FK", editor.contains("getCreatedBy()"));
+        assertTrue("user-ai-configuration-edit.xml должен отображать логин владельца конфигурации",
+                editXml.contains("property=\"user.login\""));
         assertTrue(entity.contains("@ManyToOne(fetch = FetchType.LAZY, optional = false)"));
         assertTrue(entity.contains("@NotNull"));
     }

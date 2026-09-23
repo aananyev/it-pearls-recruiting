@@ -112,6 +112,10 @@
                                 <columns count="2"/>
                                 <rows>
                                     <row>
+                                        <label value="Пользователь:" stylename="bold"/>
+                                        <label dataContainer="userAiConfigurationDc" property="user.login"/>
+                                    </row>
+                                    <row>
                                         <label value="Провайдер:" stylename="bold"/>
                                         <label dataContainer="userAiConfigurationDc" property="providerCode"/>
                                     </row>

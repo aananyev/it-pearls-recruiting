@@ -7,6 +7,7 @@ import com.company.hunttech.service.AiCredentialService;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentLoader;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
@@ -53,6 +54,8 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
     @Inject
     private Dialogs dialogs;
     @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
     private Button mainNav;
     @Inject
     private Button securityNav;
@@ -98,6 +101,8 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
     public void onInitEntity(InitEntityEvent<UserAiConfiguration> event) {
         if (parentUser != null) {
             event.getEntity().setUser(parentUser);
+        } else if (event.getEntity().getUser() == null && userSessionSource != null && userSessionSource.checkCurrentUserSession()) {
+            event.getEntity().setUser(userSessionSource.getUserSession().getUser());
         }
         if (event.getEntity().getIsActive() == null) {
             event.getEntity().setIsActive(true);
@@ -109,8 +114,12 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if (parentUser != null && PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setUser(parentUser);
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            if (parentUser != null) {
+                getEditedEntity().setUser(parentUser);
+            } else if (getEditedEntity().getUser() == null && userSessionSource != null && userSessionSource.checkCurrentUserSession()) {
+                getEditedEntity().setUser(userSessionSource.getUserSession().getUser());
+            }
         }
         setDefaultModelForProvider(getEditedEntity().getProviderCode());
         apiKeyField.setValue(null);

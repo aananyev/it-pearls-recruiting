@@ -76,6 +76,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-09-23 | BL-2026-021: в `UserAiConfigurationEdit` добавлен fallback на текущего пользователя сессии (`UserSessionSource`) при открытии новой конфигурации без `parentUser`; в сайдбаре добавлено отображение владельца (`user.login`) |
 | 2026-09-22 | BL-2026-021: общий реестр назначает владельцем пользователя текущей сессии; Edit блокирует commit при отсутствии `user`; DB constraint сохранён |
 | 2026-06-27 | Browse мониторинга без apiKey; view `userAiConfiguration-browse-view`; меню aiAdministration |
 | 2026-06-27 | Edit-модаль в ExtUser; сущность и миграции AI |
