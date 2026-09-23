@@ -330,4 +330,9 @@
     <include file="260923-1-allowUserOverrideSkillsExtractBackground.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Добавление PROJECT_LOGO_BLOB в HUNTTECH_PROJECT для хранения логотипа проекта -->
+    <include file="260923-2-addProjectLogoBlob.xml"
+             relativeToChangelogFile="true"/>
+
+
 </databaseChangeLog>

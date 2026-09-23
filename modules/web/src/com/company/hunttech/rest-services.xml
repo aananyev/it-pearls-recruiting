@@ -40,6 +40,9 @@
         <method name="createCandidateWithDetails">
             <param name="request" type="com.company.hunttech.dto.integration.CandidateCompositeCreateRequestDto"/>
         </method>
+        <method name="uploadProjectLogo">
+            <param name="request" type="com.company.hunttech.dto.integration.ProjectLogoUploadRequestDto"/>
+        </method>
     </service>
 
 </services>

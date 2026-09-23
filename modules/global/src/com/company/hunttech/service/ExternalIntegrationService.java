@@ -52,6 +52,15 @@ public interface ExternalIntegrationService {
      * @return структурированный ответ с идентификаторами созданных/привязанных сущностей
      */
     CandidateCompositeResponseDto createCandidateWithDetails(CandidateCompositeCreateRequestDto request);
+
+    /**
+     * Загружает логотип проекта в бинарное поле BLOB (PROJECT_LOGO_BLOB).
+     * Поддерживает поиск проекта по projectId, vacancyId, externalId или projectName.
+     *
+     * @param request запрос с изображением логотипа (Base64) и идентификаторами
+     * @return структурированный ответ о результате загрузки логотипа
+     */
+    ProjectLogoResponseDto uploadProjectLogo(ProjectLogoUploadRequestDto request);
 }
 
 

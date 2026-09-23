@@ -8,6 +8,8 @@ import com.company.hunttech.dto.integration.CompanyCreateRequestDto;
 import com.company.hunttech.dto.integration.CompanyResponseDto;
 import com.company.hunttech.dto.integration.InteractionCreateRequestDto;
 import com.company.hunttech.dto.integration.InteractionResponseDto;
+import com.company.hunttech.dto.integration.ProjectLogoResponseDto;
+import com.company.hunttech.dto.integration.ProjectLogoUploadRequestDto;
 import com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto;
 import com.company.hunttech.dto.integration.ProjectVacancyResponseDto;
 import com.company.hunttech.entity.CandidateCV;
@@ -35,22 +37,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service(ExternalIntegrationService.NAME)
 public class ExternalIntegrationServiceBean implements ExternalIntegrationService {
@@ -58,12 +68,17 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
     private static final Logger log = LoggerFactory.getLogger(ExternalIntegrationServiceBean.class);
     private static final Pattern SSP_PATTERN = Pattern.compile("(?i)\\b(?:ssp|ссп)\\b");
 
+    private static final int MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
+    private static final int MAX_BASE64_LOGO_CHARS = 7 * 1024 * 1024;
+    private static final int MAX_IMAGE_DIMENSION = 4096;
+
     // In-memory кэш ответов для идемпотентности запросов в рамках процесса (BL-2026-030/036)
     private final Map<String, CompanyResponseDto> idempotencyCache = new ConcurrentHashMap<>();
     private final Map<String, ProjectVacancyResponseDto> projectVacancyIdempotencyCache = new ConcurrentHashMap<>();
     private final Map<String, CandidateCvResponseDto> candidateCvIdempotencyCache = new ConcurrentHashMap<>();
     private final Map<String, InteractionResponseDto> interactionIdempotencyCache = new ConcurrentHashMap<>();
     private final Map<String, CandidateCompositeResponseDto> candidateCompositeIdempotencyCache = new ConcurrentHashMap<>();
+    private final Map<String, ProjectLogoResponseDto> projectLogoIdempotencyCache = new ConcurrentHashMap<>();
 
     private final Object companyCreateLock = new Object();
     private final Object projectVacancyLock = new Object();
@@ -496,10 +511,30 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                         project.setProjectIsClosed(false);
                         project.setStartProjectDate(new Date());
 
+                        if (StringUtils.isNotBlank(request.getProjectLogoBase64())) {
+                            ImageValidationResult logoRes = validateAndDecodeLogo(request.getProjectLogoBase64());
+                            if (logoRes.isValid()) {
+                                project.setProjectLogoBlob(logoRes.bytes);
+                            } else {
+                                log.warn("Project logo provided in createProjectAndVacancy is invalid [correlationId={}]: {} ({})",
+                                        correlationId, logoRes.errorMessage, logoRes.errorCode);
+                            }
+                        }
+
                         commitContext.addInstanceToCommit(project);
                         log.info("Creating new Project via corporate naming rule: '{}' (owner={}, dept={}) [correlationId={}]",
                                 project.getProjectName(), customerContact.getId(), dept != null ? dept.getId() : null, correlationId);
                     } else {
+                        if (StringUtils.isNotBlank(request.getProjectLogoBase64())) {
+                            ImageValidationResult logoRes = validateAndDecodeLogo(request.getProjectLogoBase64());
+                            if (logoRes.isValid()) {
+                                project.setProjectLogoBlob(logoRes.bytes);
+                                commitContext.addInstanceToCommit(project);
+                            } else {
+                                log.warn("Project logo provided in createProjectAndVacancy is invalid [correlationId={}]: {} ({})",
+                                        correlationId, logoRes.errorMessage, logoRes.errorCode);
+                            }
+                        }
                         log.info("Reusing existing Project: '{}' (id={}) [correlationId={}]", project.getProjectName(), project.getId(), correlationId);
                     }
                 }
@@ -1192,7 +1227,7 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     return CandidateCvResponseDto.error("Некорректный UUID кандидата: " + request.getCandidateId(), correlationId, "VALIDATION_ERROR");
                 }
 
-                JobCandidate candidate = dataManager.load(JobCandidate.class).id(candidateUuid).optional().orElse(null);
+                JobCandidate candidate = dataManager.load(JobCandidate.class).id(candidateUuid).view("jobCandidate-dedup-view").optional().orElse(null);
                 if (candidate == null) {
                     return CandidateCvResponseDto.error("Кандидат с указанным candidateId не найден: " + request.getCandidateId(), correlationId, "NOT_FOUND");
                 }
@@ -1201,7 +1236,7 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 if (StringUtils.isNotBlank(request.getVacancyId())) {
                     try {
                         UUID vacUuid = UUID.fromString(request.getVacancyId().trim());
-                        toVacancy = dataManager.load(OpenPosition.class).id(vacUuid).optional().orElse(null);
+                        toVacancy = dataManager.load(OpenPosition.class).id(vacUuid).view("openPosition-view").optional().orElse(null);
                     } catch (IllegalArgumentException ex) {
                         log.warn("Invalid vacancyId format [correlationId={}]: {}", correlationId, request.getVacancyId(), ex);
                     }
@@ -1289,12 +1324,12 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     return InteractionResponseDto.error("Некорректный формат UUID для candidateId или vacancyId", correlationId, "VALIDATION_ERROR");
                 }
 
-                JobCandidate candidate = dataManager.load(JobCandidate.class).id(candidateUuid).optional().orElse(null);
+                JobCandidate candidate = dataManager.load(JobCandidate.class).id(candidateUuid).view("jobCandidate-dedup-view").optional().orElse(null);
                 if (candidate == null) {
                     return InteractionResponseDto.error("Кандидат с указанным candidateId не найден: " + request.getCandidateId(), correlationId, "NOT_FOUND");
                 }
 
-                OpenPosition vacancy = dataManager.load(OpenPosition.class).id(vacancyUuid).optional().orElse(null);
+                OpenPosition vacancy = dataManager.load(OpenPosition.class).id(vacancyUuid).view("openPosition-view").optional().orElse(null);
                 if (vacancy == null) {
                     return InteractionResponseDto.error("Вакансия с указанным vacancyId не найдена: " + request.getVacancyId(), correlationId, "NOT_FOUND");
                 }
@@ -1416,6 +1451,7 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     candidate = dataManager.load(JobCandidate.class)
                             .query("select c from hunttech_JobCandidate c where c.phone = :p or c.mobilePhone = :p")
                             .parameter("p", rawPhone)
+                            .view("jobCandidate-dedup-view")
                             .optional()
                             .orElse(null);
                 }
@@ -1426,6 +1462,7 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     candidate = dataManager.load(JobCandidate.class)
                             .query("select c from hunttech_JobCandidate c where lower(c.email) = :email")
                             .parameter("email", cleanEmail)
+                            .view("jobCandidate-dedup-view")
                             .optional()
                             .orElse(null);
                 }
@@ -1438,6 +1475,7 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                             .query("select c from hunttech_JobCandidate c where lower(c.secondName) = :sec and lower(c.firstName) = :fir")
                             .parameter("sec", secName)
                             .parameter("fir", firName)
+                            .view("jobCandidate-dedup-view")
                             .optional()
                             .orElse(null);
                 }
@@ -1577,7 +1615,7 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 if (StringUtils.isNotBlank(request.getVacancyId())) {
                     try {
                         UUID vacUuid = UUID.fromString(request.getVacancyId().trim());
-                        OpenPosition vacancy = dataManager.load(OpenPosition.class).id(vacUuid).optional().orElse(null);
+                        OpenPosition vacancy = dataManager.load(OpenPosition.class).id(vacUuid).view("openPosition-view").optional().orElse(null);
                         if (vacancy != null) {
                             if (cv != null) {
                                 cv.setToVacancy(vacancy);
@@ -2026,6 +2064,223 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
         }
 
         return sb.toString().trim();
+    }
+
+    @Override
+    public ProjectLogoResponseDto uploadProjectLogo(ProjectLogoUploadRequestDto request) {
+        if (request == null) {
+            return ProjectLogoResponseDto.error("Тело запроса отсутствует", null, "VALIDATION_ERROR");
+        }
+
+        String correlationId = request.getCorrelationId();
+        String idempotencyKey = StringUtils.trimToNull(request.getIdempotencyKey());
+
+        // Проверка идемпотентности по Idempotency-Key
+        if (idempotencyKey != null) {
+            ProjectLogoResponseDto cached = projectLogoIdempotencyCache.get(idempotencyKey);
+            if (cached != null) {
+                log.info("Returning cached response for idempotencyKey: {} [correlationId={}]", idempotencyKey, correlationId);
+                return cached;
+            }
+        }
+
+        if (StringUtils.isBlank(request.getLogoBase64())) {
+            return ProjectLogoResponseDto.error("Поле logoBase64 обязательно для заполнения", correlationId, "VALIDATION_ERROR");
+        }
+
+        if (StringUtils.isNotBlank(request.getContentType())) {
+            String ct = request.getContentType().trim().toLowerCase(Locale.ROOT);
+            if (!ct.startsWith("image/")) {
+                return ProjectLogoResponseDto.error("Недопустимый contentType: ожидается image/*, получено: " + request.getContentType(), correlationId, "VALIDATION_ERROR");
+            }
+        }
+
+        ImageValidationResult imageResult = validateAndDecodeLogo(request.getLogoBase64());
+        if (!imageResult.isValid()) {
+            return ProjectLogoResponseDto.error(imageResult.errorMessage, correlationId, imageResult.errorCode);
+        }
+        byte[] logoBytes = imageResult.bytes;
+
+        try {
+            ProjectLogoResponseDto response;
+            synchronized (projectVacancyLock) {
+                if (idempotencyKey != null) {
+                    ProjectLogoResponseDto cached = projectLogoIdempotencyCache.get(idempotencyKey);
+                    if (cached != null) {
+                        return cached;
+                    }
+                }
+
+                Project targetProject = null;
+
+                // 1. Поиск по projectId
+                if (StringUtils.isNotBlank(request.getProjectId())) {
+                    try {
+                        UUID pUuid = UUID.fromString(request.getProjectId().trim());
+                        targetProject = dataManager.load(Project.class).id(pUuid).view("project-logo-upload-view").optional().orElse(null);
+                    } catch (IllegalArgumentException ex) {
+                        log.warn("Invalid projectId UUID format [correlationId={}]: {}", correlationId, request.getProjectId());
+                    }
+                }
+
+                // 2. Поиск по vacancyId
+                if (targetProject == null && StringUtils.isNotBlank(request.getVacancyId())) {
+                    try {
+                        UUID vUuid = UUID.fromString(request.getVacancyId().trim());
+                        OpenPosition pos = dataManager.load(OpenPosition.class).id(vUuid).view("openPosition-view").optional().orElse(null);
+                        if (pos != null && pos.getProjectName() != null) {
+                            targetProject = dataManager.load(Project.class).id(pos.getProjectName().getId()).view("project-logo-upload-view").optional().orElse(null);
+                        }
+                    } catch (IllegalArgumentException ex) {
+                        log.warn("Invalid vacancyId UUID format [correlationId={}]: {}", correlationId, request.getVacancyId());
+                    }
+                }
+
+                // 3. Поиск по externalId вакансии (с дедупликацией проектов и проверкой неоднозначности)
+                if (targetProject == null && StringUtils.isNotBlank(request.getExternalId())) {
+                    List<OpenPosition> list = dataManager.load(OpenPosition.class)
+                            .query("select p from hunttech_OpenPosition p where p.vacansyID = :extId and p.deleteTs is null")
+                            .parameter("extId", request.getExternalId().trim())
+                            .view("openPosition-view")
+                            .list();
+                    Set<UUID> projectIds = list.stream()
+                            .map(OpenPosition::getProjectName)
+                            .filter(Objects::nonNull)
+                            .map(Project::getId)
+                            .collect(Collectors.toSet());
+                    if (projectIds.size() > 1) {
+                        return ProjectLogoResponseDto.error("Найдено несколько вакансий с externalId '" + request.getExternalId() + "' в разных проектах. Укажите projectId или vacancyId.", correlationId, "AMBIGUOUS_EXTERNAL_ID");
+                    } else if (projectIds.size() == 1) {
+                        UUID pId = projectIds.iterator().next();
+                        targetProject = dataManager.load(Project.class).id(pId).view("project-logo-upload-view").optional().orElse(null);
+                    }
+                }
+
+                // 4. Поиск по projectName (точное совпадение с контролем неоднозначности)
+                if (targetProject == null && StringUtils.isNotBlank(request.getProjectName())) {
+                    List<Project> list = dataManager.load(Project.class)
+                            .query("select p from hunttech_Project p where lower(p.projectName) = lower(:name) and p.deleteTs is null")
+                            .parameter("name", request.getProjectName().trim())
+                            .view("project-logo-upload-view")
+                            .maxResults(2)
+                            .list();
+                    if (list.size() > 1) {
+                        return ProjectLogoResponseDto.error("Найдено несколько проектов с наименованием '" + request.getProjectName() + "'. Укажите projectId или vacancyId.", correlationId, "AMBIGUOUS_PROJECT_NAME");
+                    }
+                    if (!list.isEmpty()) {
+                        targetProject = list.get(0);
+                    }
+                }
+
+                if (targetProject == null) {
+                    return ProjectLogoResponseDto.error("Проект для привязки логотипа не найден по переданным критериям (projectId, vacancyId, externalId или projectName)", correlationId, "PROJECT_NOT_FOUND");
+                }
+
+                targetProject.setProjectLogoBlob(logoBytes);
+                dataManager.commit(targetProject);
+
+                log.info("Project logo BLOB successfully uploaded for project '{}' (id={}, size={} bytes) [correlationId={}]",
+                        targetProject.getProjectName(), targetProject.getId(), logoBytes.length, correlationId);
+
+                response = ProjectLogoResponseDto.success(
+                        targetProject.getId().toString(),
+                        targetProject.getProjectName(),
+                        logoBytes.length,
+                        correlationId
+                );
+
+                if (idempotencyKey != null) {
+                    cacheResponse(projectLogoIdempotencyCache, idempotencyKey, response);
+                }
+            }
+            return response;
+        } catch (Exception ex) {
+            log.error("Failed to upload project logo [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            return ProjectLogoResponseDto.error("Ошибка сохранения логотипа проекта. Correlation ID: " + correlationId, correlationId, "INTERNAL_ERROR");
+        }
+    }
+
+    private static class ImageValidationResult {
+        final byte[] bytes;
+        final String errorCode;
+        final String errorMessage;
+
+        private ImageValidationResult(byte[] bytes, String errorCode, String errorMessage) {
+            this.bytes = bytes;
+            this.errorCode = errorCode;
+            this.errorMessage = errorMessage;
+        }
+
+        static ImageValidationResult success(byte[] bytes) {
+            return new ImageValidationResult(bytes, null, null);
+        }
+
+        static ImageValidationResult error(String errorCode, String errorMessage) {
+            return new ImageValidationResult(null, errorCode, errorMessage);
+        }
+
+        boolean isValid() {
+            return bytes != null;
+        }
+    }
+
+    private ImageValidationResult validateAndDecodeLogo(String base64) {
+        if (StringUtils.isBlank(base64)) {
+            return ImageValidationResult.error("VALIDATION_ERROR", "Поле с логотипом не должно быть пустым");
+        }
+        if (base64.length() > MAX_BASE64_LOGO_CHARS) {
+            return ImageValidationResult.error("PAYLOAD_TOO_LARGE", "Размер Base64 строки превышает допустимый лимит (~7 МБ)");
+        }
+        String cleaned = base64.trim();
+        if (cleaned.startsWith("data:") && cleaned.contains(";base64,")) {
+            cleaned = cleaned.substring(cleaned.indexOf(";base64,") + 8).trim();
+        }
+        cleaned = cleaned.replaceAll("\\s+", "");
+
+        byte[] bytes;
+        try {
+            bytes = Base64.getDecoder().decode(cleaned);
+        } catch (IllegalArgumentException ex) {
+            return ImageValidationResult.error("VALIDATION_ERROR", "Не удалось декодировать изображение из Base64: некорректная Base64 строка");
+        }
+
+        if (bytes == null || bytes.length == 0) {
+            return ImageValidationResult.error("VALIDATION_ERROR", "Пустые данные изображения после декодирования Base64");
+        }
+
+        if (bytes.length > MAX_LOGO_SIZE_BYTES) {
+            return ImageValidationResult.error("PAYLOAD_TOO_LARGE", "Размер логотипа превышает максимально допустимый лимит (5 МБ)");
+        }
+
+        if (bytes.length < 4) {
+            return ImageValidationResult.error("INVALID_IMAGE_FORMAT", "Недопустимый формат файла: слишком короткий заголовок");
+        }
+
+        try (ImageInputStream iis = ImageIO.createImageInputStream(new ByteArrayInputStream(bytes))) {
+            if (iis == null) {
+                return ImageValidationResult.error("INVALID_IMAGE_FORMAT", "Загружаемый файл не является поддерживаемым изображением");
+            }
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (!readers.hasNext()) {
+                return ImageValidationResult.error("INVALID_IMAGE_FORMAT", "Загружаемый файл не является поддерживаемым изображением (PNG, JPEG, GIF, WEBP)");
+            }
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(iis);
+                int width = reader.getWidth(0);
+                int height = reader.getHeight(0);
+                if (width <= 0 || height <= 0 || width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+                    return ImageValidationResult.error("IMAGE_DIMENSION_EXCEEDED", "Габариты изображения (" + width + "x" + height + " px) превышают максимально допустимые " + MAX_IMAGE_DIMENSION + "x" + MAX_IMAGE_DIMENSION + " px");
+                }
+            } finally {
+                reader.dispose();
+            }
+        } catch (Exception ex) {
+            log.warn("Image format validation failed: {}", ex.getMessage());
+            return ImageValidationResult.error("INVALID_IMAGE_FORMAT", "Ошибка чтения формата изображения: " + ex.getMessage());
+        }
+
+        return ImageValidationResult.success(bytes);
     }
 
     private String truncate(String value, int maxLength) {

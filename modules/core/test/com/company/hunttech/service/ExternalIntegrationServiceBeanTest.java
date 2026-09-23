@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -499,7 +500,7 @@ public class ExternalIntegrationServiceBeanTest {
         UUID cvId = UUID.randomUUID();
         newCv.setId(cvId);
 
-        when(mockDataManager.load(JobCandidate.class).id(eq(candidateId)).optional()).thenReturn(Optional.of(candidate));
+        when(mockDataManager.load(JobCandidate.class).id(eq(candidateId)).view(anyString()).optional()).thenReturn(Optional.of(candidate));
         when(mockMetadata.create(CandidateCV.class)).thenReturn(newCv);
 
         CandidateCvCreateRequestDto req = new CandidateCvCreateRequestDto();
@@ -544,8 +545,8 @@ public class ExternalIntegrationServiceBeanTest {
         UUID interactionId = UUID.randomUUID();
         newInteraction.setId(interactionId);
 
-        when(mockDataManager.load(JobCandidate.class).id(eq(candidateId)).optional()).thenReturn(Optional.of(candidate));
-        when(mockDataManager.load(OpenPosition.class).id(eq(vacancyId)).optional()).thenReturn(Optional.of(vacancy));
+        when(mockDataManager.load(JobCandidate.class).id(eq(candidateId)).view(anyString()).optional()).thenReturn(Optional.of(candidate));
+        when(mockDataManager.load(OpenPosition.class).id(eq(vacancyId)).view(anyString()).optional()).thenReturn(Optional.of(vacancy));
         when(mockDataManager.load(Iteraction.class).id(eq(typeId)).optional()).thenReturn(Optional.of(interactionType));
         when(mockDataManager.loadValue(contains("select max(e.numberIteraction)"), eq(java.math.BigDecimal.class)).optional())
                 .thenReturn(Optional.of(new java.math.BigDecimal("41")));
@@ -602,9 +603,9 @@ public class ExternalIntegrationServiceBeanTest {
         when(mockMetadata.create(IteractionList.class)).thenReturn(newInteraction);
 
         // Кандидат не найден при дедупликации
-        when(mockDataManager.load(JobCandidate.class).query(anyString()).parameter(anyString(), any()).optional())
+        when(mockDataManager.load(JobCandidate.class).query(anyString()).parameter(anyString(), any()).view(anyString()).optional())
                 .thenReturn(Optional.empty());
-        when(mockDataManager.load(OpenPosition.class).id(eq(vacancyId)).optional())
+        when(mockDataManager.load(OpenPosition.class).id(eq(vacancyId)).view(anyString()).optional())
                 .thenReturn(Optional.of(vacancy));
 
         CandidateCompositeCreateRequestDto req = new CandidateCompositeCreateRequestDto();
@@ -651,7 +652,7 @@ public class ExternalIntegrationServiceBeanTest {
         when(mockMetadata.create(CandidateCV.class)).thenReturn(newCv);
 
         // Найден по номеру телефона
-        when(mockDataManager.load(JobCandidate.class).query(contains("c.phone = :p")).parameter(eq("p"), anyString()).optional())
+        when(mockDataManager.load(JobCandidate.class).query(contains("c.phone = :p")).parameter(eq("p"), anyString()).view(anyString()).optional())
                 .thenReturn(Optional.of(existingCandidate));
 
 
@@ -745,6 +746,66 @@ public class ExternalIntegrationServiceBeanTest {
         // Название вакансии сформировано по каноническому правилу
         assertNotNull(newVacancy.getVacansyName());
         assertTrue(newVacancy.getVacansyName().contains("SSP"));
+    }
+
+    @Test
+    public void testUploadProjectLogoSuccess() {
+        Project mockProject = new Project();
+        UUID projId = UUID.randomUUID();
+        mockProject.setId(projId);
+        mockProject.setProjectName("Тестовый Проект");
+
+        when(mockDataManager.load(Project.class).id(projId).view(anyString()).optional())
+                .thenReturn(Optional.of(mockProject));
+
+        com.company.hunttech.dto.integration.ProjectLogoUploadRequestDto request = new com.company.hunttech.dto.integration.ProjectLogoUploadRequestDto();
+        request.setProjectId(projId.toString());
+        // Base64 1x1 png image
+        request.setLogoBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
+        request.setCorrelationId("corr-logo-1");
+
+        com.company.hunttech.dto.integration.ProjectLogoResponseDto response = service.uploadProjectLogo(request);
+
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertEquals("UPLOADED", response.getStatus());
+        assertNotNull(mockProject.getProjectLogoBlob());
+        assertTrue(mockProject.getProjectLogoBlob().length > 0);
+        verify(mockDataManager).commit(mockProject);
+    }
+
+    @Test
+    public void testUploadProjectLogoByExternalIdAndIdempotency() {
+        Project mockProject = new Project();
+        UUID projId = UUID.randomUUID();
+        mockProject.setId(projId);
+        mockProject.setProjectName("Тестовый Проект");
+
+        OpenPosition mockPos = new OpenPosition();
+        mockPos.setId(UUID.randomUUID());
+        mockPos.setProjectName(mockProject);
+
+        when(mockDataManager.load(OpenPosition.class).query(anyString()).parameter(anyString(), any()).view(anyString()).list())
+                .thenReturn(Collections.singletonList(mockPos));
+        when(mockDataManager.load(Project.class).id(projId).view(anyString()).optional())
+                .thenReturn(Optional.of(mockProject));
+
+        com.company.hunttech.dto.integration.ProjectLogoUploadRequestDto request = new com.company.hunttech.dto.integration.ProjectLogoUploadRequestDto();
+        request.setExternalId("13994");
+        request.setIdempotencyKey("idem-logo-key-1");
+        request.setLogoBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
+        request.setCorrelationId("corr-logo-ext");
+
+        com.company.hunttech.dto.integration.ProjectLogoResponseDto response1 = service.uploadProjectLogo(request);
+        assertNotNull(response1);
+        assertTrue(response1.isSuccess());
+        assertEquals("UPLOADED", response1.getStatus());
+
+        // Повторный запрос с тем же Idempotency-Key
+        com.company.hunttech.dto.integration.ProjectLogoResponseDto response2 = service.uploadProjectLogo(request);
+        assertNotNull(response2);
+        assertTrue(response2.isSuccess());
+        assertEquals(response1.getProjectId(), response2.getProjectId());
     }
 
     private static void injectField(Object target, String fieldName, Object value) throws Exception {

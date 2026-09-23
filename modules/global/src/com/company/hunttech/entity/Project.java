@@ -28,6 +28,11 @@ public class Project extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private FileDescriptor projectLogo;
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "PROJECT_LOGO_BLOB")
+    protected byte[] projectLogoBlob;
+
     @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "PROJECT_TREE_ID")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -93,6 +98,14 @@ public class Project extends StandardEntity {
 
     public void setProjectLogo(FileDescriptor projectLogo) {
         this.projectLogo = projectLogo;
+    }
+
+    public byte[] getProjectLogoBlob() {
+        return projectLogoBlob;
+    }
+
+    public void setProjectLogoBlob(byte[] projectLogoBlob) {
+        this.projectLogoBlob = projectLogoBlob;
     }
 
     public Boolean getDefaultProject() {

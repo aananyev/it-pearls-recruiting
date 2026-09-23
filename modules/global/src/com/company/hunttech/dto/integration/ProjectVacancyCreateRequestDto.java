@@ -37,6 +37,7 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
     private String positionTypeId;
     private String positionName;
     private BigDecimal outstaffingCost;
+    private String projectLogoBase64;
 
     public ProjectVacancyCreateRequestDto() {
     }
@@ -231,5 +232,13 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
 
     public void setPositionName(String positionName) {
         this.positionName = positionName;
+    }
+
+    public String getProjectLogoBase64() {
+        return projectLogoBase64;
+    }
+
+    public void setProjectLogoBase64(String projectLogoBase64) {
+        this.projectLogoBase64 = projectLogoBase64;
     }
 }
