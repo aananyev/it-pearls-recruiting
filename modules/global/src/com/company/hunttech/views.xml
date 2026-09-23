@@ -1715,4 +1715,24 @@
             <property name="resumePosition" view="_minimal"/>
         </property>
     </view>
+
+    <view entity="hunttech_CandidateCvContactAnalysis" name="candidateCvContactAnalysis-browse-view" extends="_local">
+        <property name="providerCode"/>
+        <property name="modelName"/>
+        <property name="executionSource"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+            <property name="email"/>
+            <property name="phone"/>
+            <property name="mobilePhone"/>
+            <property name="telegramName"/>
+            <property name="fileImageFace"/>
+        </property>
+        <property name="candidateCv" view="_minimal">
+            <property name="datePost"/>
+            <property name="resumePosition" view="_minimal"/>
+            <property name="fileCV"/>
+            <property name="originalFileCV"/>
+        </property>
+    </view>
 </views>

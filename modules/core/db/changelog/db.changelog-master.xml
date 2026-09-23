@@ -338,4 +338,10 @@
     <include file="260924-1-setAdminQuotaUnlimited.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- BL-2026-004: Фоновое определение контактных данных и фото кандидатов (Candidate Contact Enrichment) -->
+    <include file="260924-1-createCandidateCvContactAnalysisTable.xml"
+             relativeToChangelogFile="true"/>
+    <include file="260924-2-seedContactsExtractBackgroundAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -142,6 +142,10 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
 
+    @Lob
+    @Column(name = "IMAGE_BYTE_ARRAY")
+    protected byte[] imageByteArray;
+
     @Column(name = "WORK_STATUS")
     protected Integer workStatus;
 
@@ -203,6 +207,14 @@ public class JobCandidate extends StandardEntity {
 
     public void setFileImageFace(FileDescriptor fileImageFace) {
         this.fileImageFace = fileImageFace;
+    }
+
+    public byte[] getImageByteArray() {
+        return imageByteArray;
+    }
+
+    public void setImageByteArray(byte[] imageByteArray) {
+        this.imageByteArray = imageByteArray;
     }
 
     public Integer getStatus() {

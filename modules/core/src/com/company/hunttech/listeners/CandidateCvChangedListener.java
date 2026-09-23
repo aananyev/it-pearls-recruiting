@@ -1,6 +1,7 @@
 package com.company.hunttech.listeners;
 
 import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.service.CandidateContactEnrichmentService;
 import com.company.hunttech.service.CandidateSkillEnrichmentService;
 import com.haulmont.cuba.core.app.events.EntityChangedEvent;
 import com.haulmont.cuba.security.app.Authentication;
@@ -16,10 +17,10 @@ import java.util.UUID;
 /**
  * Слушатель жизненного цикла резюме (CandidateCV).
  * <p>
- * При создании нового резюме или обновлении текста резюме (в карточке кандидата,
+ * При создании нового резюме или обновлении текста/файла резюме (в карточке кандидата,
  * форме резюме, парсерах или умном импорте) автоматически ставит кандидата
- * в начало очереди сервиса «Фоновое определение навыков» с наивысшим приоритетом
- * (PRIORITY_HIGH = 100) и немедленно инициирует шаг воркера.
+ * в начало очередей сервисов «Фоновое определение навыков» и «Фоновое определение контактов»
+ * с наивысшим приоритетом (PRIORITY_HIGH = 100) и немедленно инициирует шаги воркеров.
  */
 @Component("hunttech_CandidateCvChangedListener")
 public class CandidateCvChangedListener {
@@ -28,6 +29,8 @@ public class CandidateCvChangedListener {
 
     @Inject
     private CandidateSkillEnrichmentService enrichmentService;
+    @Inject
+    private CandidateContactEnrichmentService contactEnrichmentService;
     @Inject
     private Authentication authentication;
 
@@ -38,22 +41,25 @@ public class CandidateCvChangedListener {
         }
 
         boolean isNew = (event.getType() == EntityChangedEvent.Type.CREATED);
-        boolean textChanged = (event.getType() == EntityChangedEvent.Type.UPDATED
-                && event.getChanges().isChanged("textCV"));
+        boolean contentChanged = (event.getType() == EntityChangedEvent.Type.UPDATED
+                && (event.getChanges().isChanged("textCV")
+                || event.getChanges().isChanged("originalFileCV")
+                || event.getChanges().isChanged("fileCV")));
 
-        if (!isNew && !textChanged) {
+        if (!isNew && !contentChanged) {
             return;
         }
 
         UUID cvId = event.getEntityId().getValue();
-        log.info("Перехвачено событие {} для CandidateCV ID: {} -> постановка в приоритетную очередь анализа навыков",
+        log.info("Перехвачено событие {} для CandidateCV ID: {} -> постановка в приоритетную очередь анализа навыков и контактов",
                 event.getType(), cvId);
 
         try {
             authentication.begin();
             enrichmentService.enqueueCandidateCvPriority(cvId);
+            contactEnrichmentService.enqueueCandidateCvPriority(cvId);
         } catch (Exception e) {
-            log.warn("Ошибка при автоматической постановке CandidateCV {} в очередь анализа навыков: {}",
+            log.warn("Ошибка при автоматической постановке CandidateCV {} в очередь анализа: {}",
                     cvId, e.getMessage());
         } finally {
             authentication.end();

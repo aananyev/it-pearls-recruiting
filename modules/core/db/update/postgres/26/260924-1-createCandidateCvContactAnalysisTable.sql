@@ -1,0 +1,67 @@
+-- Создание таблицы HUNTTECH_CAND_CV_CONTACT_ANALYSIS для фонового извлечения контактов и фото кандидатов (BL-2026-004)
+-- и добавление BLOB-поля IMAGE_BYTE_ARRAY в HUNTTECH_JOB_CANDIDATE.
+
+-- 1. Добавление BLOB поля для фото в HUNTTECH_JOB_CANDIDATE (требование 11)
+ALTER TABLE HUNTTECH_JOB_CANDIDATE
+    ADD COLUMN IF NOT EXISTS IMAGE_BYTE_ARRAY bytea;
+
+-- 2. Создание таблицы аудита и состояний анализа контактов
+CREATE TABLE IF NOT EXISTS HUNTTECH_CAND_CV_CONTACT_ANALYSIS (
+    ID uuid NOT NULL,
+    VERSION integer NOT NULL,
+    CREATE_TS timestamp without time zone,
+    CREATED_BY character varying(50),
+    UPDATE_TS timestamp without time zone,
+    UPDATED_BY character varying(50),
+    DELETE_TS timestamp without time zone,
+    DELETED_BY character varying(50),
+    CANDIDATE_ID uuid NOT NULL,
+    CANDIDATE_CV_ID uuid NOT NULL,
+    CV_CONTENT_HASH character varying(64),
+    STATUS integer NOT NULL,
+    CONTACTS_ANALYZED_AT timestamp without time zone,
+    PROCESSING_STARTED_AT timestamp without time zone,
+    PROCESSING_FINISHED_AT timestamp without time zone,
+    DURATION_MS bigint,
+    CONTACTS_CONFIG_VERSION integer,
+    RETRY_COUNT integer DEFAULT 0,
+    NEXT_RETRY_AT timestamp without time zone,
+    LAST_ERROR character varying(2000),
+    PROVIDER_CODE character varying(64),
+    MODEL_NAME character varying(128),
+    EXECUTION_SOURCE character varying(32),
+    AI_FUNCTION_CODE character varying(64),
+    PROMPT_TOKENS integer,
+    COMPLETION_TOKENS integer,
+    TOTAL_TOKENS integer,
+    ESTIMATED_COST numeric(19, 6),
+    CONTACTS_FOUND_COUNT integer DEFAULT 0,
+    CONTACTS_UPDATED_COUNT integer DEFAULT 0,
+    PHOTO_EXTRACTED boolean DEFAULT false,
+    EXTRACTED_PHONE character varying(64),
+    EXTRACTED_EMAIL character varying(128),
+    EXTRACTED_TELEGRAM character varying(64),
+    EXTRACTED_CITY character varying(128),
+    DELTA_DETAILS_JSON text,
+    PRIORITY integer DEFAULT 0,
+    CONSTRAINT PK_HUNTTECH_CAND_CV_CONTACT_ANALYSIS PRIMARY KEY (ID)
+);
+
+CREATE INDEX IF NOT EXISTS IDX_CAND_CV_CNT_STATUS
+    ON HUNTTECH_CAND_CV_CONTACT_ANALYSIS (STATUS);
+
+CREATE UNIQUE INDEX IF NOT EXISTS IDX_CAND_CV_CNT_UNQ_CV
+    ON HUNTTECH_CAND_CV_CONTACT_ANALYSIS (CANDIDATE_CV_ID)
+    WHERE DELETE_TS IS NULL;
+
+CREATE INDEX IF NOT EXISTS IDX_CAND_CV_CNT_CAND
+    ON HUNTTECH_CAND_CV_CONTACT_ANALYSIS (CANDIDATE_ID);
+
+CREATE INDEX IF NOT EXISTS IDX_CAND_CV_CNT_NEXT_RETRY
+    ON HUNTTECH_CAND_CV_CONTACT_ANALYSIS (NEXT_RETRY_AT);
+
+CREATE INDEX IF NOT EXISTS IDX_CAND_CV_CNT_STARTED
+    ON HUNTTECH_CAND_CV_CONTACT_ANALYSIS (PROCESSING_STARTED_AT);
+
+CREATE INDEX IF NOT EXISTS IDX_CAND_CV_CNT_PRIORITY
+    ON HUNTTECH_CAND_CV_CONTACT_ANALYSIS (STATUS, PRIORITY, CREATE_TS);
