@@ -94,7 +94,10 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
             }
 
             String providerRequestId = root.path("id").isTextual() ? root.path("id").asText() : null;
-            return AiProviderResponse.ofText(text, promptTokens, completionTokens, totalTokens, providerRequestId);
+            String actualModel = root.path("model").isTextual() && isConfigured(root.path("model").asText())
+                    ? root.path("model").asText().trim()
+                    : resolveModelName(modelName);
+            return AiProviderResponse.ofText(text, promptTokens, completionTokens, totalTokens, providerRequestId, actualModel);
         } catch (IOException e) {
             if (isCancelled(requestId)) {
                 throw new AiRequestCancelledException(requestId);
@@ -123,6 +126,7 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
         HttpURLConnection connection = null;
         StringBuilder text = new StringBuilder();
         String providerRequestId = null;
+        String actualModel = resolveModelName(modelName);
         int promptTokens = 0;
         int completionTokens = 0;
         try {
@@ -164,6 +168,9 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
                         providerRequestId = root.path("id").asText();
                         listener.onProviderRequestId(providerRequestId);
                     }
+                    if (root.path("model").isTextual() && isConfigured(root.path("model").asText())) {
+                        actualModel = root.path("model").asText().trim();
+                    }
                     JsonNode delta = root.path("choices").path(0).path("delta").path("content");
                     if (delta.isTextual() && isConfigured(delta.asText())) {
                         String part = delta.asText();
@@ -188,7 +195,7 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
                 completionTokens = text.length() / 4;
             }
             return AiProviderResponse.ofText(text.toString(), promptTokens, completionTokens,
-                    promptTokens + completionTokens, providerRequestId);
+                    promptTokens + completionTokens, providerRequestId, actualModel);
         } catch (IOException e) {
             if (isCancelled(requestId)) {
                 throw new AiRequestCancelledException(requestId);

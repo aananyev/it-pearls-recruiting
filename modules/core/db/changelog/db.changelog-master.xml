@@ -322,4 +322,12 @@
     <include file="260922-1-addExecutionSourceToCandidateCvSkillAnalysis.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Подключение корпоративного календаря Hunttech у рекрутеров (alan) -->
+    <include file="260922-1-addRecruiterCorporateYandexCalendar.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- BL-2026-020: Разрешение переопределения модели пользователем в SKILLS_EXTRACT_BACKGROUND -->
+    <include file="260923-1-allowUserOverrideSkillsExtractBackground.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

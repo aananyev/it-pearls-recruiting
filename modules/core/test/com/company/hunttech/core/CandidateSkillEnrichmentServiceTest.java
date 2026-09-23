@@ -342,4 +342,67 @@ public class CandidateSkillEnrichmentServiceTest {
         service.setFreeOnly(false);
         verify(mockConfig).setFreeOnly(false);
     }
+
+    @Test
+    public void testReprocessCv_ResetsContentHash() {
+        UUID cvId = UUID.randomUUID();
+        CandidateCvSkillAnalysis mockAnalysis = new CandidateCvSkillAnalysis();
+        mockAnalysis.setStatus(CandidateCvAnalysisStatus.FRESH);
+        mockAnalysis.setCvContentHash("existing-hash");
+
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class)
+                .query(anyString())
+                .parameter("cvId", cvId)
+                .view("candidateCvSkillAnalysis-browse-view")
+                .optional()).thenReturn(Optional.of(mockAnalysis));
+
+        service.reprocessCv(cvId);
+
+        assertEquals("Статус должен быть NOT_ANALYZED", CandidateCvAnalysisStatus.NOT_ANALYZED, mockAnalysis.getStatus());
+        assertEquals("Приоритет должен быть HIGH", Integer.valueOf(CandidateSkillEnrichmentService.PRIORITY_HIGH), mockAnalysis.getPriority());
+        assertNull("cvContentHash должен быть сброшен в null для форсированного повторного анализа", mockAnalysis.getCvContentHash());
+        verify(mockDataManager).commit(mockAnalysis);
+    }
+
+    @Test
+    public void testScanAndEnrich_SumsTokensAcrossAllLevels() {
+        JobCandidate candidate = new JobCandidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("Алексей Тестов");
+        CandidateCV cv = new CandidateCV();
+        cv.setId(UUID.randomUUID());
+        cv.setTextCV("Java, Spring, SQL");
+
+        CandidateCvSkillAnalysis analysis = new CandidateCvSkillAnalysis();
+        when(mockMetadata.create(CandidateCvSkillAnalysis.class)).thenReturn(analysis);
+        when(mockDataManager.load(CandidateSkill.class).query(anyString()).parameter("candidateId", candidate.getId())
+                .view("candidateSkill-view").list()).thenReturn(Collections.emptyList());
+        when(mockDataManager.load(CandidateCvSkillAnalysis.class).query(anyString()).parameter("cvId", cv.getId())
+                .view("candidateCvSkillAnalysis-browse-view").optional()).thenReturn(Optional.empty());
+
+        AiExecutionResult exec1 = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
+                "deepseek-v4-flash", "deepseek", AiCredentialOwner.ADMIN, "[]", 100, 50, 150);
+        AiExecutionResult exec2 = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
+                "deepseek-v4-flash", "deepseek", AiCredentialOwner.ADMIN, "[]", 200, 80, 280);
+        AiExecutionResult exec3 = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
+                "deepseek-v4-flash", "deepseek", AiCredentialOwner.ADMIN, "[]", 150, 60, 210);
+
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), eq(SkillAnalysisService.LEVEL_MAIN), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), exec1));
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), eq(SkillAnalysisService.LEVEL_SECONDARY), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), exec2));
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), eq(SkillAnalysisService.LEVEL_TERTIARY), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), exec3));
+        when(mockSkillAnalysisService.analyzeWithFunction(anyString(), eq(SkillAnalysisService.LEVEL_ALL), anyString(), anyBoolean(), anyBoolean()))
+                .thenReturn(SkillAnalysisResult.of(Collections.emptyList(), null));
+
+        CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals("Провайдер должен совпадать с ответом AI", "deepseek", analysis.getProviderCode());
+        assertEquals("Модель должна совпадать с ответом AI", "deepseek-v4-flash", analysis.getModelName());
+        assertEquals("Prompt tokens должны суммироваться (100 + 200 + 150)", Integer.valueOf(450), analysis.getPromptTokens());
+        assertEquals("Completion tokens должны суммироваться (50 + 80 + 60)", Integer.valueOf(190), analysis.getCompletionTokens());
+        assertEquals("Total tokens должны суммироваться (150 + 280 + 210)", Integer.valueOf(640), analysis.getTotalTokens());
+    }
 }

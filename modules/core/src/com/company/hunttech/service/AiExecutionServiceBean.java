@@ -612,12 +612,14 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     AiProviderResponse response = executeProvider(config.getProviderCode(), apiKey, model,
                             function, prompt, effectiveSystemPrompt, requestId);
                     tracker.recordSuccess();
-                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                    String effectiveModel = response.getActualModel() != null && !response.getActualModel().trim().isEmpty()
+                            ? response.getActualModel().trim() : model;
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), effectiveModel, AiCredentialOwner.USER.name(),
                             prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                             response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                             userContext, tracker);
                     return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                            model, config.getProviderCode(), AiCredentialOwner.USER, response.getText(),
+                            effectiveModel, config.getProviderCode(), AiCredentialOwner.USER, response.getText(),
                             response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                             response.getProviderRequestId());
                 } catch (RuntimeException e) {
@@ -691,12 +693,14 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     AiProviderResponse response = executeProvider(config.getProviderCode(), apiKey, model,
                             function, prompt, effectiveSystemPrompt, requestId, config.getBaseApiUrl());
                     tracker.recordSuccess();
-                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                    String effectiveModel = response.getActualModel() != null && !response.getActualModel().trim().isEmpty()
+                            ? response.getActualModel().trim() : model;
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), effectiveModel, AiCredentialOwner.ADMIN.name(),
                             prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                             response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                             userContext, tracker);
                     return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                            model, config.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
+                            effectiveModel, config.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
                             response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                             response.getProviderRequestId());
                 } catch (RuntimeException e) {
@@ -763,12 +767,14 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     AiProviderResponse response = executeProviderStreaming(config.getProviderCode(),
                             apiKey, model, function, prompt, effectiveSystemPrompt, requestId, guardedListener);
                     tracker.recordSuccess();
-                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.USER.name(),
+                    String effectiveModel = response.getActualModel() != null && !response.getActualModel().trim().isEmpty()
+                            ? response.getActualModel().trim() : model;
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), effectiveModel, AiCredentialOwner.USER.name(),
                             prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                             response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                             userContext, tracker);
                     return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                            model, config.getProviderCode(), AiCredentialOwner.USER, response.getText(),
+                            effectiveModel, config.getProviderCode(), AiCredentialOwner.USER, response.getText(),
                             response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                             response.getProviderRequestId());
                 } catch (RuntimeException e) {
@@ -843,12 +849,14 @@ public class AiExecutionServiceBean implements AiExecutionService {
                     AiProviderResponse response = executeProviderStreaming(config.getProviderCode(), apiKey, model,
                             function, prompt, effectiveSystemPrompt, requestId, listener, config.getBaseApiUrl());
                     tracker.recordSuccess();
-                    saveAiCallLog(currentUser, function, config.getProviderCode(), model, AiCredentialOwner.ADMIN.name(),
+                    String effectiveModel = response.getActualModel() != null && !response.getActualModel().trim().isEmpty()
+                            ? response.getActualModel().trim() : model;
+                    saveAiCallLog(currentUser, function, config.getProviderCode(), effectiveModel, AiCredentialOwner.ADMIN.name(),
                             prompt, response.getText(), response.getPromptTokens(), response.getCompletionTokens(),
                             response.getTotalTokens(), System.currentTimeMillis() - startTime, callerSource, "SUCCESS", null,
                             userContext, tracker);
                     return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
-                            model, config.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
+                            effectiveModel, config.getProviderCode(), AiCredentialOwner.ADMIN, response.getText(),
                             response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(),
                             response.getProviderRequestId());
                 } catch (RuntimeException e) {

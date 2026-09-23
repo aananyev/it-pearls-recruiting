@@ -18,16 +18,24 @@ public class AiProviderResponse implements Serializable {
     private final BigDecimal cost;
     private final String currency;
     private final String providerRequestId;
+    private final String actualModel;
 
     public AiProviderResponse(String text, byte[] image, Integer promptTokens,
                               Integer completionTokens, Integer totalTokens,
                               BigDecimal cost, String currency) {
-        this(text, image, promptTokens, completionTokens, totalTokens, cost, currency, null);
+        this(text, image, promptTokens, completionTokens, totalTokens, cost, currency, null, null);
     }
 
     public AiProviderResponse(String text, byte[] image, Integer promptTokens,
                               Integer completionTokens, Integer totalTokens,
                               BigDecimal cost, String currency, String providerRequestId) {
+        this(text, image, promptTokens, completionTokens, totalTokens, cost, currency, providerRequestId, null);
+    }
+
+    public AiProviderResponse(String text, byte[] image, Integer promptTokens,
+                              Integer completionTokens, Integer totalTokens,
+                              BigDecimal cost, String currency, String providerRequestId,
+                              String actualModel) {
         this.text = text;
         this.image = image;
         this.promptTokens = promptTokens;
@@ -36,25 +44,32 @@ public class AiProviderResponse implements Serializable {
         this.cost = cost;
         this.currency = currency;
         this.providerRequestId = providerRequestId;
+        this.actualModel = actualModel;
     }
 
     public static AiProviderResponse ofText(String text, Integer promptTokens, Integer completionTokens, Integer totalTokens) {
-        return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens, null, null);
+        return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens, null, null, null, null);
     }
 
     public static AiProviderResponse ofTextWithCost(String text, Integer promptTokens, Integer completionTokens,
                                                     Integer totalTokens, BigDecimal cost, String currency) {
-        return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens, cost, currency);
+        return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens, cost, currency, null, null);
     }
 
     public static AiProviderResponse ofText(String text, Integer promptTokens, Integer completionTokens,
                                             Integer totalTokens, String providerRequestId) {
         return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens,
-                null, null, providerRequestId);
+                null, null, providerRequestId, null);
+    }
+
+    public static AiProviderResponse ofText(String text, Integer promptTokens, Integer completionTokens,
+                                            Integer totalTokens, String providerRequestId, String actualModel) {
+        return new AiProviderResponse(text, null, promptTokens, completionTokens, totalTokens,
+                null, null, providerRequestId, actualModel);
     }
 
     public static AiProviderResponse ofImage(byte[] image, Integer promptTokens, Integer completionTokens, Integer totalTokens) {
-        return new AiProviderResponse(null, image, promptTokens, completionTokens, totalTokens, null, null);
+        return new AiProviderResponse(null, image, promptTokens, completionTokens, totalTokens, null, null, null, null);
     }
 
     public String getText() {
@@ -87,5 +102,9 @@ public class AiProviderResponse implements Serializable {
 
     public String getProviderRequestId() {
         return providerRequestId;
+    }
+
+    public String getActualModel() {
+        return actualModel;
     }
 }

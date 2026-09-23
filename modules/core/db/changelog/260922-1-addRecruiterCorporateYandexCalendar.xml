@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Подключение корпоративного календаря Hunttech у рекрутеров для alan -->
+    <changeSet id="260922-1-addRecruiterCorporateYandexCalendar-pg" author="hunttech" dbms="postgresql">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_CORP_YANDEX_CAL"/>
+                <tableExists tableName="HUNTTECH_USER_YANDEX_CONFIG"/>
+                <tableExists tableName="SEC_USER"/>
+            </and>
+        </preConditions>
+        <sqlFile dbms="postgresql"
+                 encoding="UTF-8"
+                 path="com/company/hunttech/db/update/postgres/26/260922-1-addRecruiterCorporateYandexCalendar.sql"
+                 relativeToChangelogFile="false"
+                 splitStatements="false"
+                 stripComments="false"/>
+        <rollback>
+            DELETE FROM HUNTTECH_CORP_YANDEX_CAL
+             WHERE ID = '26092200-0000-4000-a000-000000000003'::uuid
+               AND CALENDAR_PATH = '/calendars/alan%40hunttech.ru/events-34179663/';
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

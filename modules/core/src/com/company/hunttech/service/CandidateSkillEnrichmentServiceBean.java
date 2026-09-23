@@ -130,12 +130,15 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
 
             if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
                 allResult = skillAnalysisService.analyzeWithFunction(cleanText, SkillAnalysisService.LEVEL_ALL, effectiveFunctionCode, allowFallback, freeOnly);
-                mainSkills = allResult.getSkills() != null ? allResult.getSkills() : Collections.emptyList();
+                mainSkills = (allResult != null && allResult.getSkills() != null) ? allResult.getSkills() : Collections.emptyList();
             }
 
             aiExecution = firstNonNullExecution(mainResult, secondaryResult, tertiaryResult, allResult);
             result.setAiExecution(aiExecution);
             String executionSource = resolveExecutionSource(mainResult, secondaryResult, tertiaryResult, allResult);
+            Integer promptTokens = sumPromptTokens(mainResult, secondaryResult, tertiaryResult, allResult);
+            Integer completionTokens = sumCompletionTokens(mainResult, secondaryResult, tertiaryResult, allResult);
+            Integer totalTokens = sumTotalTokens(mainResult, secondaryResult, tertiaryResult, allResult);
 
             // 3. Расчет дельты изменений и сохранение CandidateSkill (в короткой транзакции)
             applySkillsDelta(candidate, cv, mainSkills, secondarySkills, tertiarySkills, isBackground, result);
@@ -145,7 +148,7 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
 
             // 4. Сохранение статуса FRESH и аудита в CandidateCvSkillAnalysis
             saveSuccessAnalysisRecord(candidate, cv, contentHash, configVersion, effectiveFunctionCode,
-                    aiExecution, executionSource, result);
+                    aiExecution, executionSource, promptTokens, completionTokens, totalTokens, result);
 
             log.info("Успешно завершен AI-анализ навыков кандидата {} (CV ID: {}): обнаружено={}, добавлено={}, обновлено={}",
                     candidate.getFullName(), cv.getId(), result.getTotalDetected(), result.getAddedSkills().size(), result.getUpdatedSkills().size());
@@ -270,6 +273,9 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
                                            Integer configVersion, String functionCode,
                                            AiExecutionResult aiExecution,
                                            String executionSource,
+                                           Integer promptTokens,
+                                           Integer completionTokens,
+                                           Integer totalTokens,
                                            CandidateSkillsScanResult scanResult) {
         CandidateCvSkillAnalysis analysis = loadAnalysisRecord(cv.getId());
         if (analysis == null) {
@@ -294,9 +300,9 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
         if (aiExecution != null) {
             analysis.setProviderCode(normalizeMetadata(aiExecution.getProviderCode()));
             analysis.setModelName(normalizeMetadata(aiExecution.getModelName()));
-            analysis.setPromptTokens(aiExecution.getPromptTokens());
-            analysis.setCompletionTokens(aiExecution.getCompletionTokens());
-            analysis.setTotalTokens(aiExecution.getTotalTokens());
+            analysis.setPromptTokens(promptTokens != null ? promptTokens : aiExecution.getPromptTokens());
+            analysis.setCompletionTokens(completionTokens != null ? completionTokens : aiExecution.getCompletionTokens());
+            analysis.setTotalTokens(totalTokens != null ? totalTokens : aiExecution.getTotalTokens());
         } else {
             // A dictionary fallback is successful enrichment, but has no AI usage.
             analysis.setProviderCode(null);
@@ -462,6 +468,34 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
         return value != null && !value.trim().isEmpty();
     }
 
+    private Integer sumPromptTokens(SkillAnalysisResult... results) {
+        return sumTokens(AiExecutionResult::getPromptTokens, results);
+    }
+
+    private Integer sumCompletionTokens(SkillAnalysisResult... results) {
+        return sumTokens(AiExecutionResult::getCompletionTokens, results);
+    }
+
+    private Integer sumTotalTokens(SkillAnalysisResult... results) {
+        return sumTokens(AiExecutionResult::getTotalTokens, results);
+    }
+
+    private Integer sumTokens(java.util.function.Function<AiExecutionResult, Integer> extractor, SkillAnalysisResult... results) {
+        if (results == null) return null;
+        int sum = 0;
+        boolean hasAny = false;
+        for (SkillAnalysisResult r : results) {
+            if (r != null && r.getAiExecution() != null) {
+                Integer val = extractor.apply(r.getAiExecution());
+                if (val != null) {
+                    sum += val;
+                    hasAny = true;
+                }
+            }
+        }
+        return hasAny ? sum : null;
+    }
+
     @Override
     public String calculateNormalizedCvHash(String rawCvText) {
         if (rawCvText == null || rawCvText.trim().isEmpty()) {
@@ -570,6 +604,7 @@ public class CandidateSkillEnrichmentServiceBean implements CandidateSkillEnrich
             analysis.setRetryCount(0);
             analysis.setNextRetryAt(new Date());
             analysis.setLastError(null);
+            analysis.setCvContentHash(null);
             dataManager.commit(analysis);
             log.info("CV ID: {} вручную отправлено на повторный AI-анализ с приоритетом {}", candidateCvId, PRIORITY_HIGH);
             if (enrichmentWorker != null) {
