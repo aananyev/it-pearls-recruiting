@@ -18,6 +18,9 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
     private String projectName;
     private String projectDescription;
     private String companyId;
+    private String companyName;
+    private String customerContact; // ФИО или Telegram контакта со стороны заказчика
+    private String actPeriod; // Период актирования, например "2 месяца"
 
     // Параметры вакансии
     private String vacancyName;
@@ -31,6 +34,7 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
     private String gradeId;
     private String cityId;
     private String positionTypeId;
+    private String positionName;
 
     public ProjectVacancyCreateRequestDto() {
     }
@@ -89,6 +93,30 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
 
     public void setCompanyId(String companyId) {
         this.companyId = companyId;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCustomerContact() {
+        return customerContact;
+    }
+
+    public void setCustomerContact(String customerContact) {
+        this.customerContact = customerContact;
+    }
+
+    public String getActPeriod() {
+        return actPeriod;
+    }
+
+    public void setActPeriod(String actPeriod) {
+        this.actPeriod = actPeriod;
     }
 
     public String getVacancyName() {
@@ -177,5 +205,13 @@ public class ProjectVacancyCreateRequestDto implements Serializable {
 
     public void setPositionTypeId(String positionTypeId) {
         this.positionTypeId = positionTypeId;
+    }
+
+    public String getPositionName() {
+        return positionName;
+    }
+
+    public void setPositionName(String positionName) {
+        this.positionName = positionName;
     }
 }

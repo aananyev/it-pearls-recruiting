@@ -21,6 +21,7 @@ import com.company.hunttech.entity.Iteraction;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.Position;
 import com.company.hunttech.entity.Project;
 import com.company.hunttech.entity.Region;
@@ -35,16 +36,24 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service(ExternalIntegrationService.NAME)
 public class ExternalIntegrationServiceBean implements ExternalIntegrationService {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalIntegrationServiceBean.class);
+    private static final Pattern SSP_PATTERN = Pattern.compile("(?i)\\b(?:ssp|ссп)\\b");
 
     // In-memory кэш ответов для идемпотентности запросов в рамках процесса (BL-2026-030/036)
     private final Map<String, CompanyResponseDto> idempotencyCache = new ConcurrentHashMap<>();
@@ -71,6 +80,12 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
 
     @Inject
     private HrmAiService hrmAiService;
+
+    @Inject
+    private AiExecutionService aiExecutionService;
+
+    @Inject
+    private SmartOpenPositionIngestService smartOpenPositionIngestService;
 
     @Override
     public CompanyResponseDto createCompany(CompanyCreateRequestDto request) {
@@ -252,18 +267,12 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
         }
 
         boolean hasExistingProject = StringUtils.isNotBlank(request.getExistingProjectId());
-        boolean hasProjectName = StringUtils.isNotBlank(request.getProjectName());
 
-        if (!hasExistingProject && !hasProjectName) {
-            return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
-                    "Необходимо указать existingProjectId или projectName для привязки вакансии к проекту", correlationId, "VALIDATION_ERROR");
-        }
-
-        // Предварительная валидация existingProjectId (если задан) до обращения к LLM
+        // Предварительная валидация existingProjectId (если задан)
         if (hasExistingProject) {
             try {
                 UUID projectUuid = UUID.fromString(request.getExistingProjectId().trim());
-                com.company.hunttech.entity.Project existingProj = dataManager.load(com.company.hunttech.entity.Project.class)
+                Project existingProj = dataManager.load(Project.class)
                         .id(projectUuid).optional().orElse(null);
                 if (existingProj == null) {
                     return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
@@ -282,44 +291,117 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 ? request.getComment().trim()
                 : StringUtils.trimToEmpty(request.getShortDescription());
 
-        // Внутренняя AI-генерация согласно существующим в базе промптам:
-        // 1) "Описание вакансии" (STANDARDIZE_VACANCY)
-        // 2) "Чеклист" (VACANCY_CHECKLIST)
-        // 3) "Карта поиска" (VACANCY_SEARCH_MAP)
-        // 4) "План собеседования" (VACANCY_INTERVIEW_PLAN)
-        // Выполняется ДО входа в synchronized блок, исключая блокировку потоков долгими LLM-вызовами
-        String standardizedDescription = null;
-        String checklist = null;
-        String searchMap = null;
-        String interviewPlan = null;
-
+        // 1. Первичный AI-парсинг описания вакансии через SmartOpenPositionIngestService
+        SmartOpenPositionParsedData parsedData = null;
         if (StringUtils.isNotBlank(rawText)) {
             try {
-                log.info("Starting AI vacancy standardization for external vacancy [name='{}', correlationId={}]",
+                log.info("Parsing vacancy via SmartOpenPositionIngestService [name='{}', correlationId={}]",
                         request.getVacancyName(), correlationId);
-                standardizedDescription = hrmAiService.standardizeVacancyDescription(rawText);
+                parsedData = smartOpenPositionIngestService.parseVacancyText(rawText);
             } catch (Exception ex) {
-                log.warn("Failed to standardize vacancy description via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+                log.warn("Failed to parse vacancy text via SmartOpenPositionIngestService [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            }
+        }
+
+        // 2. Умное AI-определение наименования должности
+        Position positionType = null;
+        if (StringUtils.isNotBlank(request.getPositionTypeId())) {
+            try {
+                UUID posUuid = UUID.fromString(request.getPositionTypeId().trim());
+                positionType = dataManager.load(Position.class).id(posUuid).optional().orElse(null);
+            } catch (IllegalArgumentException ex) {
+                log.warn("Invalid positionTypeId format [correlationId={}]: {}", correlationId, request.getPositionTypeId(), ex);
+            }
+        }
+        if (positionType == null) {
+            String candidatePosName = StringUtils.isNotBlank(request.getPositionName())
+                    ? request.getPositionName()
+                    : (parsedData != null && StringUtils.isNotBlank(parsedData.getPositionTypeName())
+                        ? parsedData.getPositionTypeName()
+                        : request.getVacancyName());
+            positionType = findBestMatchingPositionType(candidatePosName);
+            if (positionType == null && StringUtils.isNotBlank(request.getVacancyName())) {
+                positionType = findBestMatchingPositionType(request.getVacancyName());
+            }
+        }
+
+        // 3. Разрешение Заказчика (Company) и Контакта (Person), если existingProjectId не указан
+        Company customerCompany = null;
+        Person customerContact = null;
+        if (!hasExistingProject) {
+            customerCompany = resolveCustomerCompany(
+                    request.getCompanyId(),
+                    request.getCompanyName(),
+                    parsedData != null ? parsedData.getCompanyName() : null,
+                    rawText
+            );
+            if (customerCompany == null) {
+                return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                        "Не удалось определить компанию заказчика (клиента) из описания вакансии или переданных параметров. Заполните поле companyName/companyId или укажите заказчика в тексте вакансии.",
+                        correlationId, "CUSTOMER_NOT_FOUND");
+            }
+
+            customerContact = resolveCustomerContact(
+                    request.getCustomerContact(),
+                    rawText,
+                    customerCompany
+            );
+            if (customerContact == null) {
+                return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                        "Не удалось найти контактное лицо со стороны заказчика в справочнике 'Люди'. Укажите ФИО или Telegram ответственного заказчика в описании вакансии или поле customerContact.",
+                        correlationId, "CUSTOMER_CONTACT_NOT_FOUND");
+            }
+        }
+
+        // 4. Внутренняя AI-генерация 4 артефактов вакансии (если отсутствуют в parsedData):
+        // 1) Описание вакансии (STANDARDIZE_VACANCY)
+        // 2) Чеклист (VACANCY_CHECKLIST)
+        // 3) Карта поиска (VACANCY_SEARCH_MAP)
+        // 4) План собеседования (VACANCY_INTERVIEW_PLAN)
+        String standardizedDescription = (parsedData != null && StringUtils.isNotBlank(parsedData.getComment()))
+                ? parsedData.getComment() : null;
+        String checklist = (parsedData != null && StringUtils.isNotBlank(parsedData.getInterviewChecklist()))
+                ? parsedData.getInterviewChecklist() : null;
+        String searchMap = (parsedData != null && StringUtils.isNotBlank(parsedData.getSearchMap()))
+                ? parsedData.getSearchMap() : null;
+        String interviewPlan = (parsedData != null && StringUtils.isNotBlank(parsedData.getInterviewPlan()))
+                ? parsedData.getInterviewPlan() : null;
+
+        if (StringUtils.isNotBlank(rawText)) {
+            if (standardizedDescription == null) {
+                try {
+                    log.info("Starting AI vacancy standardization for external vacancy [name='{}', correlationId={}]",
+                            request.getVacancyName(), correlationId);
+                    standardizedDescription = hrmAiService.standardizeVacancyDescription(rawText);
+                } catch (Exception ex) {
+                    log.warn("Failed to standardize vacancy description via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+                }
             }
 
             String textForArtifacts = StringUtils.isNotBlank(standardizedDescription) ? standardizedDescription : rawText;
 
-            try {
-                checklist = hrmAiService.generateChecklist(textForArtifacts);
-            } catch (Exception ex) {
-                log.warn("Failed to generate vacancy checklist via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            if (checklist == null) {
+                try {
+                    checklist = hrmAiService.generateChecklist(textForArtifacts);
+                } catch (Exception ex) {
+                    log.warn("Failed to generate vacancy checklist via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+                }
             }
 
-            try {
-                searchMap = hrmAiService.generateSearchMap(textForArtifacts);
-            } catch (Exception ex) {
-                log.warn("Failed to generate vacancy search map via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            if (searchMap == null) {
+                try {
+                    searchMap = hrmAiService.generateSearchMap(textForArtifacts);
+                } catch (Exception ex) {
+                    log.warn("Failed to generate vacancy search map via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+                }
             }
 
-            try {
-                interviewPlan = hrmAiService.generateInterviewPlan(textForArtifacts);
-            } catch (Exception ex) {
-                log.warn("Failed to generate vacancy interview plan via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+            if (interviewPlan == null) {
+                try {
+                    interviewPlan = hrmAiService.generateInterviewPlan(textForArtifacts);
+                } catch (Exception ex) {
+                    log.warn("Failed to generate vacancy interview plan via AI [correlationId={}]: {}", correlationId, ex.getMessage(), ex);
+                }
             }
 
             log.info("AI vacancy enrichment completed [correlationId={}]: desc={}, checklist={}, searchMap={}, interviewPlan={}",
@@ -328,6 +410,33 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     checklist != null ? "OK" : "SKIPPED",
                     searchMap != null ? "OK" : "SKIPPED",
                     interviewPlan != null ? "OK" : "SKIPPED");
+        }
+
+        // Предварительная подготовка AI-описания проекта ДО входа в synchronized блок
+        String baseProjectName = null;
+        String projectDescHtml = null;
+        String projectShortDesc = null;
+        String actPeriod = null;
+        String formattedContact = null;
+        String canonicalProjectName = null;
+
+        if (!hasExistingProject) {
+            baseProjectName = StringUtils.isNotBlank(request.getProjectName())
+                    ? request.getProjectName().trim()
+                    : (parsedData != null && StringUtils.isNotBlank(parsedData.getProjectName())
+                        ? parsedData.getProjectName().trim()
+                        : request.getVacancyName().trim());
+
+            Project existingProjectPreCheck = findExistingProject(baseProjectName, customerContact, customerCompany);
+            if (existingProjectPreCheck == null) {
+                actPeriod = resolveActPeriod(request.getActPeriod(), rawText);
+                formattedContact = formatContactForProjectName(customerContact);
+                canonicalProjectName = buildCanonicalProjectName(customerCompany, baseProjectName, formattedContact, actPeriod);
+
+                String projectDescRaw = generateProjectDescription(baseProjectName, rawText);
+                projectDescHtml = MarkdownToHtmlUtils.toHtml(projectDescRaw);
+                projectShortDesc = generateProjectShortDescription(baseProjectName, projectDescRaw, rawText);
+            }
         }
 
         try {
@@ -341,104 +450,70 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                     }
                 }
 
-                com.haulmont.cuba.core.global.CommitContext commitContext = new com.haulmont.cuba.core.global.CommitContext();
+                CommitContext commitContext = new CommitContext();
 
-                // 1. Поиск или создание проекта
-                com.company.hunttech.entity.Project project = null;
+                // 5. Поиск или создание проекта
+                Project project = null;
                 if (hasExistingProject) {
-                    try {
-                        UUID projectUuid = UUID.fromString(request.getExistingProjectId().trim());
-                        project = dataManager.load(com.company.hunttech.entity.Project.class).id(projectUuid).optional().orElse(null);
-                        if (project == null) {
-                            return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
-                                    "Проект с указанным existingProjectId не найден: " + request.getExistingProjectId(),
-                                    correlationId, "NOT_FOUND");
-                        }
-                    } catch (IllegalArgumentException ex) {
+                    UUID projectUuid = UUID.fromString(request.getExistingProjectId().trim());
+                    project = dataManager.load(Project.class).id(projectUuid).optional().orElse(null);
+                    if (project == null) {
                         return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
-                                "Некорректный формат UUID для existingProjectId: " + request.getExistingProjectId(),
-                                correlationId, "VALIDATION_ERROR");
+                                "Проект с указанным existingProjectId не найден: " + request.getExistingProjectId(),
+                                correlationId, "NOT_FOUND");
                     }
                 } else {
-                    String cleanProjectName = request.getProjectName().trim();
-                    String lookupName = truncate(cleanProjectName, 160);
-                    // Поиск существующего открытого проекта по имени
-                    project = dataManager.load(com.company.hunttech.entity.Project.class)
-                            .query("select e from hunttech_Project e where lower(e.projectName) = :name and (e.projectIsClosed is null or e.projectIsClosed = false)")
-                            .parameter("name", lookupName.toLowerCase(Locale.ROOT))
-                            .optional()
-                            .orElse(null);
+                    project = findExistingProject(baseProjectName, customerContact, customerCompany);
 
                     if (project == null) {
-                        project = metadata.create(com.company.hunttech.entity.Project.class);
-                        project.setProjectName(truncate(cleanProjectName, 160));
-                        project.setProjectDescription(request.getProjectDescription());
-                        project.setShortDescription(truncate(request.getProjectDescription(), 250));
+                        CompanyDepartament dept = resolveOrCreateDepartment(customerCompany, commitContext);
+
+                        project = metadata.create(Project.class);
+                        project.setProjectName(truncate(canonicalProjectName, 160));
+                        project.setProjectDescription(projectDescHtml);
+                        project.setShortDescription(truncate(projectShortDesc, 250));
+                        project.setProjectOwner(customerContact);
+                        project.setProjectDepartment(dept);
                         project.setProjectIsClosed(false);
-                        project.setStartProjectDate(new java.util.Date());
-
-                        // Привязка компании/департамента при наличии companyId
-                        if (StringUtils.isNotBlank(request.getCompanyId())) {
-                            try {
-                                UUID compUuid = UUID.fromString(request.getCompanyId().trim());
-                                Company company = dataManager.load(Company.class).id(compUuid).optional().orElse(null);
-                                if (company != null) {
-                                    com.company.hunttech.entity.CompanyDepartament dept = dataManager.load(com.company.hunttech.entity.CompanyDepartament.class)
-                                            .query("select d from hunttech_CompanyDepartament d where d.companyName.id = :compId")
-                                            .parameter("compId", compUuid)
-                                            .optional()
-                                            .orElse(null);
-
-                                    if (dept == null) {
-                                        dept = metadata.create(com.company.hunttech.entity.CompanyDepartament.class);
-                                        dept.setDepartamentRuName("Основной");
-                                        dept.setCompanyName(company);
-                                        commitContext.addInstanceToCommit(dept);
-                                    }
-                                    project.setProjectDepartment(dept);
-                                }
-                            } catch (IllegalArgumentException ex) {
-                                log.warn("Invalid companyId format [correlationId={}]: {}", correlationId, request.getCompanyId(), ex);
-                            }
-                        }
+                        project.setStartProjectDate(new Date());
 
                         commitContext.addInstanceToCommit(project);
+                        log.info("Creating new Project via corporate naming rule: '{}' (owner={}, dept={}) [correlationId={}]",
+                                project.getProjectName(), customerContact.getId(), dept != null ? dept.getId() : null, correlationId);
+                    } else {
+                        log.info("Reusing existing Project: '{}' (id={}) [correlationId={}]", project.getProjectName(), project.getId(), correlationId);
                     }
                 }
 
-                // 2. Разрешение связей для вакансии (Grade, City, Position)
-                com.company.hunttech.entity.Grade grade = null;
+                // 6. Разрешение связей для вакансии (Grade, City)
+                Grade grade = null;
                 if (StringUtils.isNotBlank(request.getGradeId())) {
                     try {
                         UUID gradeUuid = UUID.fromString(request.getGradeId().trim());
-                        grade = dataManager.load(com.company.hunttech.entity.Grade.class).id(gradeUuid).optional().orElse(null);
+                        grade = dataManager.load(Grade.class).id(gradeUuid).optional().orElse(null);
                     } catch (IllegalArgumentException ex) {
                         log.warn("Invalid gradeId format [correlationId={}]: {}", correlationId, request.getGradeId(), ex);
                     }
                 }
+                if (grade == null && parsedData != null && StringUtils.isNotBlank(parsedData.getGradeName())) {
+                    grade = findGrade(parsedData.getGradeName());
+                }
 
-                com.company.hunttech.entity.City city = null;
+                City city = null;
                 if (StringUtils.isNotBlank(request.getCityId())) {
                     try {
                         UUID cityUuid = UUID.fromString(request.getCityId().trim());
-                        city = dataManager.load(com.company.hunttech.entity.City.class).id(cityUuid).optional().orElse(null);
+                        city = dataManager.load(City.class).id(cityUuid).optional().orElse(null);
                     } catch (IllegalArgumentException ex) {
                         log.warn("Invalid cityId format [correlationId={}]: {}", correlationId, request.getCityId(), ex);
                     }
                 }
-
-                com.company.hunttech.entity.Position positionType = null;
-                if (StringUtils.isNotBlank(request.getPositionTypeId())) {
-                    try {
-                        UUID posUuid = UUID.fromString(request.getPositionTypeId().trim());
-                        positionType = dataManager.load(com.company.hunttech.entity.Position.class).id(posUuid).optional().orElse(null);
-                    } catch (IllegalArgumentException ex) {
-                        log.warn("Invalid positionTypeId format [correlationId={}]: {}", correlationId, request.getPositionTypeId(), ex);
-                    }
+                if (city == null && parsedData != null && StringUtils.isNotBlank(parsedData.getCityName())) {
+                    city = findCity(parsedData.getCityName());
                 }
 
-                // 3. Создание сущности OpenPosition
-                com.company.hunttech.entity.OpenPosition openPosition = metadata.create(com.company.hunttech.entity.OpenPosition.class);
+                // 7. Создание сущности OpenPosition и HTML-трансформация AI-артефактов
+                OpenPosition openPosition = metadata.create(OpenPosition.class);
                 openPosition.setVacansyName(truncate(request.getVacancyName().trim(), 250));
                 openPosition.setProjectName(project);
 
@@ -452,29 +527,32 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                         ? request.getShortDescription() : request.getVacancyName();
                 openPosition.setShortDescription(truncate(shortDesc, 250));
 
+                // Исходный текст сохраняется в rawDescription без изменений
                 openPosition.setRawDescription(rawText);
 
-                // Запись стандартизированного описания (или оригинала при сбое AI) в comment
-                openPosition.setComment(StringUtils.isNotBlank(standardizedDescription) ? standardizedDescription : rawText);
+                // Трансформация AI-артефактов из Markdown в HTML перед записью в сущность
+                String descForComment = StringUtils.isNotBlank(standardizedDescription) ? standardizedDescription : rawText;
+                String commentHtml = MarkdownToHtmlUtils.toHtml(descForComment);
+                openPosition.setComment(commentHtml);
 
-                // Запись чеклиста требований (синхронно в interviewChecklist и exercise)
                 if (StringUtils.isNotBlank(checklist)) {
-                    openPosition.setInterviewChecklist(checklist);
-                    openPosition.setExercise(checklist);
+                    String checklistHtml = MarkdownToHtmlUtils.toHtml(checklist);
+                    openPosition.setInterviewChecklist(checklistHtml);
+                    openPosition.setExercise(checklistHtml);
                     openPosition.setNeedExercise(true);
                 }
 
-                // Запись карты поиска (синхронно в searchMap и memoForInterview)
                 if (StringUtils.isNotBlank(searchMap)) {
-                    openPosition.setSearchMap(searchMap);
-                    openPosition.setMemoForInterview(searchMap);
+                    String searchMapHtml = MarkdownToHtmlUtils.toHtml(searchMap);
+                    openPosition.setSearchMap(searchMapHtml);
+                    openPosition.setMemoForInterview(searchMapHtml);
                     openPosition.setNeedMemoForInterview(true);
                 }
 
-                // Запись плана собеседования (синхронно в interviewPlan и templateLetter)
                 if (StringUtils.isNotBlank(interviewPlan)) {
-                    openPosition.setInterviewPlan(interviewPlan);
-                    openPosition.setTemplateLetter(interviewPlan);
+                    String interviewPlanHtml = MarkdownToHtmlUtils.toHtml(interviewPlan);
+                    openPosition.setInterviewPlan(interviewPlanHtml);
+                    openPosition.setTemplateLetter(interviewPlanHtml);
                     openPosition.setNeedLetter(true);
                 }
 
@@ -489,7 +567,7 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 openPosition.setOpenClose(false);
                 openPosition.setSignDraft(false);
                 openPosition.setInternalProject(false);
-                openPosition.setLastOpenDate(new java.util.Date());
+                openPosition.setLastOpenDate(new Date());
                 openPosition.setPriority(2); // NORMAL
 
                 commitContext.addInstanceToCommit(openPosition);
@@ -497,8 +575,9 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
                 // Атомарный коммит всех сущностей в одной транзакции
                 dataManager.commit(commitContext);
 
-                log.info("Successfully created project and vacancy: projectId={}, vacancyId={}, vacancyName='{}' [correlationId={}]",
-                        project.getId(), openPosition.getId(), openPosition.getVacansyName(), correlationId);
+                log.info("Successfully created project and vacancy: projectId={}, vacancyId={}, vacancyName='{}', positionType='{}' [correlationId={}]",
+                        project.getId(), openPosition.getId(), openPosition.getVacansyName(),
+                        positionType != null ? positionType.getPositionRuName() : "NULL", correlationId);
 
                 response = com.company.hunttech.dto.integration.ProjectVacancyResponseDto.ok(
                         project.getId().toString(),
@@ -517,6 +596,466 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
             return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
                     "Ошибка при сохранении проекта и вакансии. Correlation ID: " + correlationId, correlationId, "SYSTEM_ERROR");
         }
+    }
+
+    private Position findBestMatchingPositionType(String positionName) {
+        if (StringUtils.isBlank(positionName)) return null;
+        String safeName = truncate(positionName.trim(), 80);
+        log.info("Matching Position in hunttech_Position for '{}'", safeName);
+
+        // 1. Поиск по точному совпадению наименования (RU или EN)
+        List<Position> exactList = dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where (lower(e.positionRuName) = lower(:name) or lower(e.positionEnName) = lower(:name)) and (e.positionRuName not like '%(не использовать)%' and e.positionRuName not like '%дубль%')")
+                .parameter("name", safeName)
+                .maxResults(1)
+                .list();
+        if (!exactList.isEmpty()) {
+            log.info("Found exact position match: '{}' (ID={})", exactList.get(0).getPositionRuName(), exactList.get(0).getId());
+            return exactList.get(0);
+        }
+
+        // 2. Интеллектуальный поиск среди существующих активных должностей по схожести и токенам
+        List<Position> allPositions = dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where (e.positionRuName not like '%(не использовать)%' and e.positionRuName not like '%дубль%')")
+                .list();
+
+        Position bestMatch = null;
+        int bestScore = 0;
+        String lowerTarget = safeName.toLowerCase(Locale.ROOT);
+        Set<String> targetTokens = extractSignificantTokens(lowerTarget);
+
+        for (Position pos : allPositions) {
+            String ru = pos.getPositionRuName() != null ? pos.getPositionRuName().toLowerCase(Locale.ROOT) : "";
+            String en = pos.getPositionEnName() != null ? pos.getPositionEnName().toLowerCase(Locale.ROOT) : "";
+
+            int score = 0;
+            if (!ru.isEmpty() && lowerTarget.contains(ru)) {
+                score += 100 + ru.length();
+            }
+            if (!en.isEmpty() && lowerTarget.contains(en)) {
+                score += 100 + en.length();
+            }
+            if (!ru.isEmpty() && ru.contains(lowerTarget)) {
+                score += 50;
+            }
+
+            Set<String> candidateTokens = extractSignificantTokens(ru + " " + en);
+            for (String token : targetTokens) {
+                if (candidateTokens.contains(token)) {
+                    score += 25;
+                }
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = pos;
+            }
+        }
+
+        if (bestMatch != null && bestScore > 0) {
+            log.info("Matched best Position: '{}' (ID={}, score={}) for '{}'",
+                    bestMatch.getPositionRuName(), bestMatch.getId(), bestScore, safeName);
+            return bestMatch;
+        }
+
+        // Если не удалось уверенно сопоставить должность, возвращаем null, чтобы не подставлять случайные должности
+        return null;
+    }
+
+    private Company resolveCustomerCompany(String companyId, String companyName, String aiCompanyName, String rawText) {
+        if (StringUtils.isNotBlank(companyId)) {
+            try {
+                UUID compUuid = UUID.fromString(companyId.trim());
+                Company company = dataManager.load(Company.class).id(compUuid).optional().orElse(null);
+                if (company != null) return company;
+            } catch (IllegalArgumentException ex) {
+                log.warn("Invalid companyId format: {}", companyId);
+            }
+        }
+
+        String candidateName = StringUtils.isNotBlank(companyName) ? companyName : aiCompanyName;
+        if (StringUtils.isNotBlank(candidateName)) {
+            String trimmed = candidateName.trim();
+            // Точный поиск по comanyName или companyShortName
+            List<Company> list = dataManager.load(Company.class)
+                    .query("select c from hunttech_Company c where lower(c.comanyName) = lower(:n) or lower(c.companyShortName) = lower(:n)")
+                    .parameter("n", trimmed)
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+
+            // Поиск с like
+            list = dataManager.load(Company.class)
+                    .query("select c from hunttech_Company c where lower(c.comanyName) like lower(:n) or lower(c.companyShortName) like lower(:n)")
+                    .parameter("n", "%" + trimmed + "%")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        }
+
+        // Поиск по тексту вакансии
+        if (StringUtils.isNotBlank(rawText)) {
+            // Проверка ключевых паттернов "Заказчик: ...", "Клиент: ...", "Компания: ..."
+            Pattern pat = Pattern.compile("(?i)(?:заказчик|клиент|компания|работодатель)[:\\s]+([A-Za-zА-Яа-я0-9_\\-\\s]{2,40})");
+            Matcher m = pat.matcher(rawText);
+            if (m.find()) {
+                String extracted = m.group(1).trim();
+                List<Company> list = dataManager.load(Company.class)
+                        .query("select c from hunttech_Company c where lower(c.comanyName) = lower(:n) or lower(c.companyShortName) = lower(:n) or lower(c.comanyName) like lower(:likeN) or lower(c.companyShortName) like lower(:likeN)")
+                        .parameter("n", extracted)
+                        .parameter("likeN", "%" + extracted + "%")
+                        .maxResults(1)
+                        .list();
+                if (!list.isEmpty()) return list.get(0);
+            }
+
+            // Проверка известных компаний в тексте: SSP / ССП
+            List<Company> sspList = dataManager.load(Company.class)
+                    .query("select c from hunttech_Company c where lower(c.comanyName) = 'ссп' or lower(c.comanyName) = 'ssp' or lower(c.companyShortName) = 'ссп' or lower(c.companyShortName) = 'ssp'")
+                    .list();
+            for (Company c : sspList) {
+                if (SSP_PATTERN.matcher(rawText).find()) {
+                    return c;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Person resolveCustomerContact(String explicitContact, String rawText, Company customerCompany) {
+        // 1. По явно переданному контакту
+        if (StringUtils.isNotBlank(explicitContact)) {
+            String clean = explicitContact.trim();
+            // По Telegram (@username или username)
+            String tgLookup = clean.startsWith("@") ? clean.substring(1).trim() : clean;
+            if (!tgLookup.contains(" ") && tgLookup.matches("[A-Za-z0-9_]{3,}")) {
+                List<String> tgs = java.util.Arrays.asList(tgLookup.toLowerCase(Locale.ROOT), "@" + tgLookup.toLowerCase(Locale.ROOT));
+                List<Person> list = dataManager.load(Person.class)
+                        .query("select p from hunttech_Person p where lower(p.telegramName) in :tgs")
+                        .parameter("tgs", tgs)
+                        .maxResults(1)
+                        .list();
+                if (!list.isEmpty()) return list.get(0);
+            }
+
+            // По ФИО
+            List<Person> list = dataManager.load(Person.class)
+                    .query("select p from hunttech_Person p where lower(concat(p.secondName, ' ', p.firstName)) like lower(:fio) or lower(concat(p.firstName, ' ', p.secondName)) like lower(:fio)")
+                    .parameter("fio", "%" + clean + "%")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        }
+
+        // 2. Поиск Telegram ников в тексте вакансии (батчем во избежание N+1)
+        if (StringUtils.isNotBlank(rawText)) {
+            Pattern tgPattern = Pattern.compile("@([A-Za-z0-9_]{4,})");
+            Matcher tgMatcher = tgPattern.matcher(rawText);
+            Set<String> foundHandles = new HashSet<>();
+            while (tgMatcher.find()) {
+                String rawHandle = tgMatcher.group(1);
+                foundHandles.add(rawHandle);
+                foundHandles.add("@" + rawHandle);
+                foundHandles.add(rawHandle.toLowerCase(Locale.ROOT));
+                foundHandles.add("@" + rawHandle.toLowerCase(Locale.ROOT));
+            }
+
+            if (!foundHandles.isEmpty()) {
+                List<Person> tgPersons = dataManager.load(Person.class)
+                        .query("select p from hunttech_Person p where p.telegramName in :tgs")
+                        .parameter("tgs", foundHandles)
+                        .list();
+                if (!tgPersons.isEmpty()) {
+                    if (customerCompany != null) {
+                        for (Person p : tgPersons) {
+                            if (p.getCompanyDepartment() != null && p.getCompanyDepartment().getCompanyName() != null
+                                    && customerCompany.getId().equals(p.getCompanyDepartment().getCompanyName().getId())) {
+                                return p;
+                            }
+                        }
+                    }
+                    return tgPersons.get(0);
+                }
+            }
+
+            // 3. Поиск упоминания людей из справочника в тексте вакансии (строго среди сотрудников компании)
+            if (customerCompany != null) {
+                List<Person> candidatePersons = dataManager.load(Person.class)
+                        .query("select p from hunttech_Person p where p.companyDepartment.companyName.id = :compId")
+                        .parameter("compId", customerCompany.getId())
+                        .list();
+
+                String lowerText = rawText.toLowerCase(Locale.ROOT);
+                for (Person p : candidatePersons) {
+                    String first = p.getFirstName() != null ? p.getFirstName().trim().toLowerCase(Locale.ROOT) : "";
+                    String second = p.getSecondName() != null ? p.getSecondName().trim().toLowerCase(Locale.ROOT) : "";
+                    String tg = p.getTelegramName() != null ? p.getTelegramName().replace("@", "").trim().toLowerCase(Locale.ROOT) : "";
+
+                    if (!tg.isEmpty() && tg.length() >= 4 && lowerText.contains(tg)) {
+                        return p;
+                    }
+                    if (second.length() >= 4 && Pattern.compile("(?i)\\b" + Pattern.quote(second) + "\\b").matcher(rawText).find()) {
+                        if (first.length() >= 3) {
+                            if (lowerText.contains(first)) {
+                                return p;
+                            }
+                        } else {
+                            return p;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Project findExistingProject(String baseProjectName, Person owner, Company company) {
+        if (StringUtils.isBlank(baseProjectName)) return null;
+        String clean = cleanProjectTitle(baseProjectName);
+
+        List<Project> list;
+        // 1. По точному совпадению названия проекта среди открытых проектов компании
+        if (company != null) {
+            list = dataManager.load(Project.class)
+                    .query("select p from hunttech_Project p where p.projectDepartment.companyName.id = :compId and lower(p.projectName) = lower(:name) and (p.projectIsClosed is null or p.projectIsClosed = false)")
+                    .parameter("compId", company.getId())
+                    .parameter("name", clean.toLowerCase(Locale.ROOT))
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        } else {
+            list = dataManager.load(Project.class)
+                    .query("select p from hunttech_Project p where lower(p.projectName) = lower(:name) and (p.projectIsClosed is null or p.projectIsClosed = false)")
+                    .parameter("name", clean.toLowerCase(Locale.ROOT))
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        }
+
+        // 2. Поиск по владельцу проекта и ключевой подстроке
+        if (owner != null && StringUtils.isNotBlank(clean) && clean.length() >= 3) {
+            list = dataManager.load(Project.class)
+                    .query("select p from hunttech_Project p where p.projectOwner.id = :ownerId and (p.projectIsClosed is null or p.projectIsClosed = false) and lower(p.projectName) like lower(:p)")
+                    .parameter("ownerId", owner.getId())
+                    .parameter("p", "%" + clean + "%")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        }
+
+        // 3. Поиск по компании и подстроке в открытых проектах
+        if (company != null && StringUtils.isNotBlank(clean) && clean.length() >= 3) {
+            list = dataManager.load(Project.class)
+                    .query("select p from hunttech_Project p where p.projectDepartment.companyName.id = :compId and (p.projectIsClosed is null or p.projectIsClosed = false) and lower(p.projectName) like lower(:p)")
+                    .parameter("compId", company.getId())
+                    .parameter("p", "%" + clean + "%")
+                    .maxResults(1)
+                    .list();
+            if (!list.isEmpty()) return list.get(0);
+        }
+
+        return null;
+    }
+
+    private String buildCanonicalProjectName(Company company, String rawProjectName, String formattedContact, String actPeriod) {
+        String customerCode = company != null
+                ? (StringUtils.isNotBlank(company.getCompanyShortName())
+                    ? company.getCompanyShortName().trim()
+                    : (company.getComanyName() != null ? company.getComanyName().trim() : "Клиент"))
+                : "Клиент";
+        String cleanTitle = cleanProjectTitle(rawProjectName);
+        if (cleanTitle.isEmpty()) {
+            cleanTitle = "Основной";
+        }
+        String contactPart = StringUtils.isNotBlank(formattedContact)
+                ? "Проект " + formattedContact
+                : "Проект заказчика";
+
+        String period = StringUtils.isNotBlank(actPeriod) ? actPeriod.trim() : "2 месяца";
+
+        // Шаблон: <ЗАКАЗЧИК> "Наименование проекта. Проект <контакт со стороны заказчика>" /Штат Hunttech ТК/ГПХ или ИП. Актирование <количество месяцев>"
+        return String.format("%s \"%s. %s\" /Штат HuntTech ТК/ГПХ или ИП. Актирование %s/",
+                customerCode, cleanTitle, contactPart, period);
+    }
+
+    private String cleanProjectTitle(String title) {
+        if (StringUtils.isBlank(title)) return "";
+        String s = title.replaceAll("[\"«»]", " ").trim();
+        s = s.replaceAll("(?i)^ssp\\s+", "");
+        s = s.replaceAll("(?i)/штат.*", "");
+        s = s.replaceAll("(?i)\\.?[\\s]*проект.*", "");
+        return s.replaceAll("\\s+", " ").trim();
+    }
+
+    private String resolveActPeriod(String explicitActPeriod, String rawText) {
+        if (StringUtils.isNotBlank(explicitActPeriod)) {
+            return explicitActPeriod.trim();
+        }
+        if (StringUtils.isNotBlank(rawText)) {
+            Matcher m = Pattern.compile("(?i)актирован(?:ие|ия|ии)[^0-9a-zA-Zа-яА-Я]{0,10}(\\d+\\s*(?:месяц(?:а|ев)?|мес|дн(?:ей|я)?))").matcher(rawText);
+            if (m.find()) {
+                return m.group(1).trim();
+            }
+            if (Pattern.compile("(?i)месячное\\s+актирование").matcher(rawText).find()) {
+                return "1 месяц";
+            }
+        }
+        return "2 месяца";
+    }
+
+    private CompanyDepartament resolveOrCreateDepartment(Company company, CommitContext commitContext) {
+        if (company == null) return null;
+        List<CompanyDepartament> depts = dataManager.load(CompanyDepartament.class)
+                .query("select d from hunttech_CompanyDepartament d where d.companyName.id = :compId")
+                .parameter("compId", company.getId())
+                .list();
+        if (!depts.isEmpty()) {
+            return depts.get(0);
+        }
+        CompanyDepartament dept = metadata.create(CompanyDepartament.class);
+        dept.setDepartamentRuName("Основной");
+        dept.setCompanyName(company);
+        commitContext.addInstanceToCommit(dept);
+        return dept;
+    }
+
+    private String generateProjectDescription(String projectName, String rawText) {
+        if (StringUtils.isBlank(rawText)) return "";
+        try {
+            log.info("Generating project description via AI [projectName='{}']", projectName);
+            Map<String, Object> ctx = new HashMap<>();
+            ctx.put("projectName", projectName);
+            ctx.put("sourceFileName", "");
+            ctx.put("sourceText", rawText);
+            AiExecutionResult result = aiExecutionService.executeText("PROJECT_DESCRIPTION_GENERATE", ctx);
+            if (result != null && StringUtils.isNotBlank(result.getText())) {
+                return result.getText().trim();
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to generate project description via AI for '{}': {}", projectName, ex.getMessage());
+        }
+        return "Проект: " + projectName + "\n\n" + rawText;
+    }
+
+    private String generateProjectShortDescription(String projectName, String fullDescription, String rawText) {
+        try {
+            Map<String, Object> ctx = new HashMap<>();
+            ctx.put("projectName", projectName);
+            ctx.put("sourceText", StringUtils.isNotBlank(fullDescription) ? fullDescription : rawText);
+            AiExecutionResult result = aiExecutionService.executeText("PROJECT_SHORT_DESCRIPTION_GENERATE", ctx);
+            if (result != null && StringUtils.isNotBlank(result.getText())) {
+                return result.getText().trim();
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to generate project short description via AI for '{}': {}", projectName, ex.getMessage());
+        }
+        String fallback = StringUtils.isNotBlank(fullDescription) ? fullDescription : rawText;
+        return truncate(fallback.replaceAll("\\s+", " ").trim(), 250);
+    }
+
+    private String formatContactForProjectName(Person person) {
+        if (person == null) return "";
+        String first = StringUtils.trimToEmpty(person.getFirstName());
+        String second = StringUtils.trimToEmpty(person.getSecondName());
+        if (first.isEmpty() && second.isEmpty()) return "";
+        if (first.isEmpty()) return declineRuSurname(second);
+        if (second.isEmpty()) return declineRuFirstName(first);
+        return (declineRuFirstName(first) + " " + declineRuSurname(second)).trim();
+    }
+
+    private String declineRuFirstName(String name) {
+        if (StringUtils.isBlank(name)) return "";
+        String trimmed = name.trim();
+        String lower = trimmed.toLowerCase(Locale.ROOT);
+        if (lower.endsWith("ка") || lower.endsWith("га") || lower.endsWith("ха") || lower.endsWith("ша") || lower.endsWith("жа")) {
+            return trimmed.substring(0, trimmed.length() - 1) + "и";
+        }
+        if (lower.endsWith("а")) {
+            return trimmed.substring(0, trimmed.length() - 1) + "ы";
+        }
+        if (lower.endsWith("я")) {
+            return trimmed.substring(0, trimmed.length() - 1) + "и";
+        }
+        if (lower.endsWith("ел")) {
+            return trimmed.substring(0, trimmed.length() - 2) + "ла";
+        }
+        if (lower.endsWith("й")) {
+            return trimmed.substring(0, trimmed.length() - 1) + "я";
+        }
+        if (lower.matches(".*[бвгджзклмнпрстфхцчшщ]$")) {
+            return trimmed + "а";
+        }
+        return trimmed;
+    }
+
+    private String declineRuSurname(String surname) {
+        if (StringUtils.isBlank(surname)) return "";
+        String trimmed = surname.trim();
+        String lower = trimmed.toLowerCase(Locale.ROOT);
+        if (lower.endsWith("ая")) {
+            return trimmed.substring(0, trimmed.length() - 2) + "ой";
+        }
+        if (lower.endsWith("ва") || lower.endsWith("на")) {
+            return trimmed.substring(0, trimmed.length() - 1) + "ой";
+        }
+        if (lower.endsWith("ов") || lower.endsWith("ев") || lower.endsWith("ин") || lower.endsWith("ын")) {
+            return trimmed + "а";
+        }
+        if (lower.endsWith("ий") || lower.endsWith("ый")) {
+            return trimmed.substring(0, trimmed.length() - 2) + "ого";
+        }
+        if (lower.endsWith("да")) {
+            return trimmed.substring(0, trimmed.length() - 1) + "ы";
+        }
+        return trimmed;
+    }
+
+    private Grade findGrade(String gradeName) {
+        if (StringUtils.isBlank(gradeName)) return null;
+        String clean = gradeName.trim();
+        List<Grade> list = dataManager.load(Grade.class)
+                .query("select e from hunttech_Grade e where lower(e.gradeName) like lower(:g)")
+                .parameter("g", "%" + clean + "%")
+                .maxResults(1)
+                .list();
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    private City findCity(String cityName) {
+        if (StringUtils.isBlank(cityName)) return null;
+        String clean = cityName.trim();
+        List<City> list = dataManager.load(City.class)
+                .query("select c from hunttech_City c where lower(c.cityRuName) = lower(:n) or lower(c.cityEngName) = lower(:n)")
+                .parameter("n", clean)
+                .maxResults(1)
+                .list();
+        if (!list.isEmpty()) return list.get(0);
+        list = dataManager.load(City.class)
+                .query("select c from hunttech_City c where lower(c.cityRuName) like lower(:n)")
+                .parameter("n", "%" + clean + "%")
+                .maxResults(1)
+                .list();
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    private Set<String> extractSignificantTokens(String text) {
+        if (text == null) return Collections.emptySet();
+        Set<String> tokens = new HashSet<>();
+        for (String part : text.toLowerCase(Locale.ROOT).split("[^a-zA-Zа-яА-Я0-9]+")) {
+            String trimmed = part.trim();
+            if (trimmed.length() >= 2 && !isStopWord(trimmed)) {
+                tokens.add(trimmed);
+            }
+        }
+        return tokens;
+    }
+
+    private boolean isStopWord(String word) {
+        return "от".equals(word) || "до".equals(word) || "для".equals(word) || "по".equals(word)
+                || "на".equals(word) || "в".equals(word) || "и".equals(word) || "или".equals(word)
+                || "с".equals(word) || "со".equals(word) || "за".equals(word) || "из".equals(word);
     }
 
     @Override

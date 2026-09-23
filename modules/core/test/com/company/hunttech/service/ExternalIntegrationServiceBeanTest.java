@@ -39,6 +39,8 @@ public class ExternalIntegrationServiceBeanTest {
     private DataManager mockDataManager;
     private Metadata mockMetadata;
     private HrmAiService mockHrmAiService;
+    private AiExecutionService mockAiExecutionService;
+    private SmartOpenPositionIngestService mockSmartOpenPositionIngestService;
 
     @Before
     public void setUp() throws Exception {
@@ -46,10 +48,42 @@ public class ExternalIntegrationServiceBeanTest {
         mockDataManager = mock(DataManager.class, Mockito.RETURNS_DEEP_STUBS);
         mockMetadata = mock(Metadata.class);
         mockHrmAiService = mock(HrmAiService.class);
+        mockAiExecutionService = mock(AiExecutionService.class);
+        mockSmartOpenPositionIngestService = mock(SmartOpenPositionIngestService.class);
 
         injectField(service, "dataManager", mockDataManager);
         injectField(service, "metadata", mockMetadata);
         injectField(service, "hrmAiService", mockHrmAiService);
+        injectField(service, "aiExecutionService", mockAiExecutionService);
+        injectField(service, "smartOpenPositionIngestService", mockSmartOpenPositionIngestService);
+
+        when(mockDataManager.load(com.company.hunttech.entity.Position.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+        when(mockDataManager.load(com.company.hunttech.entity.Position.class).query(anyString()).list())
+                .thenReturn(java.util.Collections.emptyList());
+        when(mockDataManager.load(com.company.hunttech.entity.Position.class).query(anyString()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+
+        when(mockDataManager.load(com.company.hunttech.entity.Grade.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+        when(mockDataManager.load(com.company.hunttech.entity.City.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+
+        when(mockDataManager.load(com.company.hunttech.entity.Person.class).query(anyString()).parameter(anyString(), any()).list())
+                .thenReturn(java.util.Collections.emptyList());
+        when(mockDataManager.load(com.company.hunttech.entity.Person.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+
+        when(mockDataManager.load(com.company.hunttech.entity.CompanyDepartament.class).query(anyString()).parameter(anyString(), any()).list())
+                .thenReturn(java.util.Collections.emptyList());
+
+        when(mockMetadata.create(com.company.hunttech.entity.CompanyDepartament.class))
+                .thenReturn(new com.company.hunttech.entity.CompanyDepartament());
     }
 
     @Test
@@ -197,6 +231,17 @@ public class ExternalIntegrationServiceBeanTest {
 
     @Test
     public void testCreateProjectAndVacancySuccessNewProject() {
+        Company mockCompany = new Company();
+        mockCompany.setId(UUID.randomUUID());
+        mockCompany.setComanyName("ООО ССП");
+        mockCompany.setCompanyShortName("SSP");
+
+        com.company.hunttech.entity.Person mockPerson = new com.company.hunttech.entity.Person();
+        mockPerson.setId(UUID.randomUUID());
+        mockPerson.setFirstName("Татьяна");
+        mockPerson.setSecondName("Кареева");
+        mockPerson.setTelegramName("KareevaTatyana");
+
         com.company.hunttech.entity.Project newProject = new com.company.hunttech.entity.Project();
         UUID projectId = UUID.randomUUID();
         newProject.setId(projectId);
@@ -208,12 +253,18 @@ public class ExternalIntegrationServiceBeanTest {
         when(mockMetadata.create(com.company.hunttech.entity.Project.class)).thenReturn(newProject);
         when(mockMetadata.create(com.company.hunttech.entity.OpenPosition.class)).thenReturn(newVacancy);
 
-        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).optional())
-                .thenReturn(Optional.empty());
+        when(mockDataManager.load(Company.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(mockCompany));
+        when(mockDataManager.load(com.company.hunttech.entity.Person.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(mockPerson));
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
 
         com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
-        request.setProjectName("Проект Альфа");
-        request.setProjectDescription("Описание проекта Альфа");
+        request.setCompanyName("SSP");
+        request.setCustomerContact("@KareevaTatyana");
+        request.setProjectName("Банковский КХД");
+        request.setProjectDescription("Описание проекта КХД");
         request.setVacancyName("Java Senior Developer");
         request.setExternalId("ext-vac-001");
         request.setCorrelationId("corr-vac-1");
@@ -237,11 +288,24 @@ public class ExternalIntegrationServiceBeanTest {
         assertFalse(newVacancy.getOpenClose());
         assertFalse(newVacancy.getSignDraft());
 
+        // Проверка формата имени созданного проекта
+        assertTrue(newProject.getProjectName().contains("SSP \"Банковский КХД. Проект Татьяны Кареевой\""));
+        assertEquals(mockPerson, newProject.getProjectOwner());
+
         verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
     }
 
     @Test
     public void testCreateProjectAndVacancyWithAiArtifacts() {
+        Company mockCompany = new Company();
+        mockCompany.setId(UUID.randomUUID());
+        mockCompany.setCompanyShortName("SSP");
+
+        com.company.hunttech.entity.Person mockPerson = new com.company.hunttech.entity.Person();
+        mockPerson.setId(UUID.randomUUID());
+        mockPerson.setFirstName("Татьяна");
+        mockPerson.setSecondName("Кареева");
+
         com.company.hunttech.entity.Project newProject = new com.company.hunttech.entity.Project();
         UUID projectId = UUID.randomUUID();
         newProject.setId(projectId);
@@ -253,8 +317,12 @@ public class ExternalIntegrationServiceBeanTest {
         when(mockMetadata.create(com.company.hunttech.entity.Project.class)).thenReturn(newProject);
         when(mockMetadata.create(com.company.hunttech.entity.OpenPosition.class)).thenReturn(newVacancy);
 
-        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).optional())
-                .thenReturn(Optional.empty());
+        when(mockDataManager.load(Company.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(mockCompany));
+        when(mockDataManager.load(com.company.hunttech.entity.Person.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(mockPerson));
+        when(mockDataManager.load(com.company.hunttech.entity.Project.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
 
         String rawComment = "Требуется Java разработчик со знанием Spring, PostgreSQL и Liquibase.";
         String standardized = "### Описание вакансии\nJava разработчик уровня Senior.";
@@ -268,6 +336,8 @@ public class ExternalIntegrationServiceBeanTest {
         when(mockHrmAiService.generateInterviewPlan(standardized)).thenReturn(interviewPlan);
 
         com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        request.setCompanyName("SSP");
+        request.setCustomerContact("Татьяна Кареева");
         request.setProjectName("AI Проект");
         request.setVacancyName("Senior Java Dev");
         request.setComment(rawComment);
@@ -278,25 +348,33 @@ public class ExternalIntegrationServiceBeanTest {
         assertNotNull(response);
         assertTrue(response.isSuccess());
 
-        // Проверка записи оригинала вакансии
+        // Проверка записи оригинала вакансии в нетронутом виде
         assertEquals(rawComment, newVacancy.getRawDescription());
 
-        // Проверка стандартизированного описания
-        assertEquals(standardized, newVacancy.getComment());
+        // Проверка трансформации стандартизированного описания в HTML
+        assertNotNull(newVacancy.getComment());
+        assertTrue(newVacancy.getComment().contains("<h3"));
+        assertTrue(newVacancy.getComment().contains("Описание вакансии</h3>"));
+        assertTrue(newVacancy.getComment().contains("<p"));
+        assertTrue(newVacancy.getComment().contains("Java разработчик уровня Senior.</p>"));
 
-        // Проверка чеклиста (в обоих полях)
-        assertEquals(checklist, newVacancy.getInterviewChecklist());
-        assertEquals(checklist, newVacancy.getExercise());
+        // Проверка чеклиста (в обоих полях) в HTML
+        assertNotNull(newVacancy.getInterviewChecklist());
+        assertTrue(newVacancy.getInterviewChecklist().contains("<ul"));
+        assertTrue(newVacancy.getInterviewChecklist().contains("<li>"));
+        assertEquals(newVacancy.getInterviewChecklist(), newVacancy.getExercise());
         assertTrue(Boolean.TRUE.equals(newVacancy.getNeedExercise()));
 
-        // Проверка карты поиска (в обоих полях)
-        assertEquals(searchMap, newVacancy.getSearchMap());
-        assertEquals(searchMap, newVacancy.getMemoForInterview());
+        // Проверка карты поиска (в обоих полях) в HTML
+        assertNotNull(newVacancy.getSearchMap());
+        assertTrue(newVacancy.getSearchMap().contains("<li>"));
+        assertEquals(newVacancy.getSearchMap(), newVacancy.getMemoForInterview());
         assertTrue(Boolean.TRUE.equals(newVacancy.getNeedMemoForInterview()));
 
-        // Проверка плана интервью (в обоих полях)
-        assertEquals(interviewPlan, newVacancy.getInterviewPlan());
-        assertEquals(interviewPlan, newVacancy.getTemplateLetter());
+        // Проверка плана интервью (в обоих полях) в HTML
+        assertNotNull(newVacancy.getInterviewPlan());
+        assertTrue(newVacancy.getInterviewPlan().contains("<li>"));
+        assertEquals(newVacancy.getInterviewPlan(), newVacancy.getTemplateLetter());
         assertTrue(Boolean.TRUE.equals(newVacancy.getNeedLetter()));
 
         verify(mockDataManager).commit(any(com.haulmont.cuba.core.global.CommitContext.class));
@@ -366,22 +444,42 @@ public class ExternalIntegrationServiceBeanTest {
     }
 
     @Test
-    public void testCreateProjectAndVacancyValidationFailures() {
-        // 1. Пустой vacancyName
-        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto req1 = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
-        req1.setProjectName("Проект");
-        com.company.hunttech.dto.integration.ProjectVacancyResponseDto resp1 = service.createProjectAndVacancy(req1);
-        assertNotNull(resp1);
-        assertFalse(resp1.isSuccess());
-        assertTrue(resp1.getMessage().contains("vacancyName"));
+    public void testCreateProjectAndVacancyCustomerNotFound() {
+        when(mockDataManager.load(Company.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
 
-        // 2. Нет ни existingProjectId, ни projectName
-        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto req2 = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
-        req2.setVacancyName("Разработчик");
-        com.company.hunttech.dto.integration.ProjectVacancyResponseDto resp2 = service.createProjectAndVacancy(req2);
-        assertNotNull(resp2);
-        assertFalse(resp2.isSuccess());
-        assertTrue(resp2.getMessage().contains("existingProjectId или projectName"));
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto req = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        req.setVacancyName("DevOps Engineer");
+        req.setCompanyName("НеизвестнаяКомпания");
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto resp = service.createProjectAndVacancy(req);
+        assertNotNull(resp);
+        assertFalse(resp.isSuccess());
+        assertEquals("CUSTOMER_NOT_FOUND", resp.getErrorDetails().getErrorCode());
+        assertTrue(resp.getMessage().contains("компанию заказчика"));
+    }
+
+    @Test
+    public void testCreateProjectAndVacancyCustomerContactNotFound() {
+        Company mockCompany = new Company();
+        mockCompany.setId(UUID.randomUUID());
+        mockCompany.setCompanyShortName("SSP");
+
+        when(mockDataManager.load(Company.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.singletonList(mockCompany));
+        when(mockDataManager.load(com.company.hunttech.entity.Person.class).query(anyString()).parameter(anyString(), any()).maxResults(anyInt()).list())
+                .thenReturn(java.util.Collections.emptyList());
+
+        com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto req = new com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto();
+        req.setVacancyName("DevOps Engineer");
+        req.setCompanyName("SSP");
+        req.setCustomerContact("НеизвестныйКонтакт");
+
+        com.company.hunttech.dto.integration.ProjectVacancyResponseDto resp = service.createProjectAndVacancy(req);
+        assertNotNull(resp);
+        assertFalse(resp.isSuccess());
+        assertEquals("CUSTOMER_CONTACT_NOT_FOUND", resp.getErrorDetails().getErrorCode());
+        assertTrue(resp.getMessage().contains("контактное лицо"));
     }
 
     @Test
