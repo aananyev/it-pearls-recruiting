@@ -334,5 +334,8 @@
     <include file="260923-2-addProjectLogoBlob.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Установка безлимитной квоты токенов для admin и системных фоновых процессов -->
+    <include file="260924-1-setAdminQuotaUnlimited.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

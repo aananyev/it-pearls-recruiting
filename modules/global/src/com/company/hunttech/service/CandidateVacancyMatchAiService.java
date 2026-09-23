@@ -76,4 +76,13 @@ public interface CandidateVacancyMatchAiService {
      * @return структурированный отчёт с ранжированным списком кандидатов
      */
     CandidateVacancyMatchReport matchCandidatesForVacancy(UUID openPositionId);
+
+    /**
+     * Выполняет подбор кандидатов с заданным идентификатором для сквозной диагностики.
+     *
+     * @param openPositionId уникальный идентификатор вакансии
+     * @param operationId идентификатор попытки, создаваемый вызывающей стороной
+     * @return структурированный отчёт с ранжированным списком кандидатов
+     */
+    CandidateVacancyMatchReport matchCandidatesForVacancy(UUID openPositionId, UUID operationId);
 }

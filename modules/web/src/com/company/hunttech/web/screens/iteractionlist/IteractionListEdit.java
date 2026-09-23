@@ -1094,23 +1094,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setOnlyMySubscribeCheckBox() {
-        onlyMySubscribeCheckBox.setValue(true);
-        openPositionsDl.setParameter("subscriber", userSession.getUser());
+        onlyMySubscribeCheckBox.setValue(false);
+        openPositionsDl.removeParameter("subscriber");
         openPositionsReady = true;
         openPositionsDl.load();
 
-        if (openPositionDc.getItems().size() == 0) {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
-                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                    .withHideDelayMs(10000)
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-        }
-
         onlyMySubscribeCheckBox.addValueChangeListener(e -> {
-            if (e.getValue()) {
+            if (Boolean.TRUE.equals(e.getValue())) {
                 openPositionsDl.setParameter("subscriber", userSession.getUser());
                 openPositionsReady = true;
                 openPositionsDl.load();

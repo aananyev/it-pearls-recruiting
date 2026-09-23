@@ -4302,11 +4302,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
         innerBox.setMargin(true);
         innerBox.setWidthAuto();
-        innerBox.setSpacing(true);
+        innerBox.setSpacing(false);
 
         VBoxLayout outerBox = uiComponents.create(VBoxLayout.class);
         outerBox.setMargin(false);
-        outerBox.setWidthFull();
+        outerBox.setWidthAuto();
         outerBox.setSpacing(false);
         outerBox.setStyleName("job-candidate-comment-body");
 

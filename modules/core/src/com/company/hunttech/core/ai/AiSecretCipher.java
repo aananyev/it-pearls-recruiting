@@ -37,8 +37,16 @@ public class AiSecretCipher {
     }
 
     public String decrypt(String token, String keyMaterial) {
+        if (token == null) {
+            return null;
+        }
+        String trimmed = token.trim();
+        if (!trimmed.startsWith(PREFIX + ":")) {
+            // Обратная совместимость с незашифрованными ключами (sk-...), переданными через прямой seed/SQL
+            return trimmed;
+        }
         try {
-            String[] parts = token.split(":", 3);
+            String[] parts = trimmed.split(":", 3);
             if (parts.length != 3 || !PREFIX.equals(parts[0])) {
                 throw new IllegalArgumentException("Unsupported secret format");
             }

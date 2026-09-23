@@ -635,6 +635,8 @@ public class CandidateVacancyMatchScreen extends Screen {
     }
 
     private void startVacancyCandidateAnalysis() {
+        currentMatchOperationId = UUID.randomUUID();
+        final UUID operationId = currentMatchOperationId;
         skillRefreshStatusBox.setVisible(false);
         setBusy(true, "AI анализирует профили и формирует ранжированные рекомендации...");
         analysisProgressBar.setIndeterminate(true);
@@ -649,7 +651,7 @@ public class CandidateVacancyMatchScreen extends Screen {
                     public CandidateVacancyMatchReport run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
                         taskLifeCycle.publish(1);
                         if (mode == Mode.VACANCY_TO_CANDIDATES && openPosition != null) {
-                            return candidateVacancyMatchAiService.matchCandidatesForVacancy(openPosition.getId());
+                            return candidateVacancyMatchAiService.matchCandidatesForVacancy(openPosition.getId(), operationId);
                         } else if (candidate != null) {
                             return candidateVacancyMatchAiService.matchVacanciesForCandidate(candidate.getId());
                         }
@@ -675,12 +677,12 @@ public class CandidateVacancyMatchScreen extends Screen {
                     public boolean handleTimeoutException() {
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
-                        log.error("Timeout during candidate-vacancy matching");
+                        log.error("Timeout during vacancy-to-candidates matching: operationId={}", operationId);
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Превышено время AI-подбора")
-                                .withDescription("Анализ занял слишком много времени.")
+                                .withDescription("Анализ занял слишком много времени. Код обращения: " + operationId)
                                 .show();
-                        statusLabel.setValue("Превышено время выполнения AI-анализа.");
+                        statusLabel.setValue("Превышено время выполнения AI-анализа. Код обращения: " + operationId);
                         return true;
                     }
 
@@ -688,12 +690,13 @@ public class CandidateVacancyMatchScreen extends Screen {
                     public boolean handleException(Exception ex) {
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
-                        log.error("Error during candidate-vacancy matching", ex);
+                        log.error("Vacancy-to-candidates task failed: operationId={}, errorType={}",
+                                operationId, ex.getClass().getSimpleName());
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Ошибка AI-подбора")
-                                .withDescription("Не удалось выполнить анализ. Подробности записаны в журнале операции.")
+                                .withDescription("Не удалось завершить анализ. Сообщите код обращения службе поддержки: " + operationId)
                                 .show();
-                        statusLabel.setValue("Ошибка при выполнении AI-анализа.");
+                        statusLabel.setValue("Ошибка при выполнении AI-анализа. Код обращения: " + operationId);
                         return true;
                     }
                 };
@@ -864,7 +867,10 @@ public class CandidateVacancyMatchScreen extends Screen {
         if (!report.isSuccess()) {
             String msg = report.getStatusMessage() != null ? report.getStatusMessage() : "Ошибка анализа.";
             statusLabel.setValue(msg);
-            notifications.create(Notifications.NotificationType.WARNING)
+            Notifications.NotificationType notificationType = msg.contains("Код обращения:")
+                    ? Notifications.NotificationType.ERROR
+                    : Notifications.NotificationType.WARNING;
+            notifications.create(notificationType)
                     .withCaption("AI-подбор")
                     .withDescription(msg)
                     .show();
@@ -876,11 +882,26 @@ public class CandidateVacancyMatchScreen extends Screen {
         applyFilter(decisionFilter.getValue());
 
         if (report.isFallbackUsed()) {
-            statusLabel.setValue("AI недоступен. Выполнена предварительная оценка по совпадению навыков.");
+            String fallbackMessage = report.getStatusMessage() != null && !report.getStatusMessage().trim().isEmpty()
+                    ? report.getStatusMessage()
+                    : "AI-анализ недоступен. Выполнена предварительная оценка по сохранённым данным.";
+            statusLabel.setValue(fallbackMessage);
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("Внимание")
-                    .withDescription("AI-сервис временно недоступен. Отображён честный эвристический расчёт.")
+                    .withDescription(fallbackMessage)
                     .show();
+        } else if (report.getStatusMessage() != null && !report.getStatusMessage().trim().isEmpty()) {
+            statusLabel.setValue(report.getStatusMessage());
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("AI-подбор завершён с замечаниями")
+                    .withDescription(report.getStatusMessage())
+                    .show();
+            if (report.getAiExecutionResult() != null) {
+                AiOperationNotifier.show(notifications, report.getAiExecutionResult(),
+                        "AI-подбор завершён с замечаниями",
+                        String.format("Проанализировано объектов: %d, сформировано рекомендаций: %d",
+                                report.getTotalVacanciesAnalyzed(), report.getItems().size()));
+            }
         } else {
             statusLabel.setValue(String.format("AI-анализ завершен. Рекомендовано: %d.", report.getItems().size()));
             if (report.getAiExecutionResult() != null) {

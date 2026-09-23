@@ -671,13 +671,13 @@
                                                    stylename="edit-form-control"
                                                    width="100%"
                                                    maxWidth="540px"/>
-                                        <!-- Горизонтальный ряд выбора даты и интеграции с календарем -->
+                                        <!-- Ряд выбора даты и компактный блок интеграции с календарем -->
                                         <hbox id="actionDateCalendarRow"
-                                               width="100%"
-                                               spacing="false"
-                                               visible="false"
-                                               align="MIDDLE_LEFT"
-                                               stylename="iteraction-date-calendar-row">
+                                              width="100%"
+                                              spacing="true"
+                                              visible="false"
+                                              align="MIDDLE_LEFT"
+                                              stylename="iteraction-date-calendar-row">
                                             <!-- Дополнительное поле даты действия (16 символов) -->
                                             <dateField id="addDate"
                                                        dataContainer="iteractionListDc"
@@ -685,32 +685,26 @@
                                                        stylename="edit-form-control"
                                                        width="100%"
                                                        maxWidth="220px"/>
-                                            <!-- Контейнер настроек календаря Яндекс -->
+                                            <!-- Компактный вертикальный контейнер настроек календаря Яндекс -->
                                             <vbox id="calendarBox"
-                                                  width="AUTO"
-                                                  spacing="false"
+                                                  width="100%"
+                                                  maxWidth="420px"
+                                                  spacing="true"
                                                   visible="false"
                                                   stylename="iteraction-calendar-box">
-                                                <!-- Внутренняя строка чекбокса и списка календарей -->
-                                                <hbox id="calendarInlineBox"
-                                                      spacing="false"
-                                                      align="MIDDLE_LEFT"
-                                                      stylename="iteraction-calendar-inline-box">
-                                                    <!-- Чекбокс добавления встречи в календарь -->
-                                                    <checkBox id="addToCalendarCheckBox"
-                                                              caption="msg://msgAddToCalendar"
-                                                              dataContainer="iteractionListDc"
-                                                              property="addToCalendar"
-                                                              align="MIDDLE_LEFT"/>
-                                                    <!-- Выпадающий список выбора календаря -->
-                                                    <lookupField id="calendarLookupField"
-                                                                 caption="msg://msgCalendarLookup"
-                                                                 dataContainer="iteractionListDc"
-                                                                 property="calendarId"
-                                                                 width="100%"
-                                                                 maxWidth="280px"
-                                                                 stylename="edit-form-control iteraction-calendar-lookup"/>
-                                                </hbox>
+                                                <!-- Чекбокс добавления встречи в календарь -->
+                                                <checkBox id="addToCalendarCheckBox"
+                                                          caption="msg://msgAddToCalendar"
+                                                          dataContainer="iteractionListDc"
+                                                          property="addToCalendar"
+                                                          stylename="iteraction-calendar-checkbox"/>
+                                                <!-- Выпадающий список выбора календаря -->
+                                                <lookupField id="calendarLookupField"
+                                                             caption="msg://msgCalendarLookup"
+                                                             dataContainer="iteractionListDc"
+                                                             property="calendarId"
+                                                             width="100%"
+                                                             stylename="edit-form-control iteraction-calendar-lookup"/>
                                             </vbox>
                                         </hbox>
                                         <!-- Дополнительное числовое поле действия (компактная ширина под числовые данные) -->

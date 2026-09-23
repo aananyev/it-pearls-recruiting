@@ -128,14 +128,14 @@ Toolbar
 Основные поля ввода в правой рабочей области используют общий stylename `edit-form-control` (ровно 7 контролов по контракту тестов: `iteractionTypeField`, `addString`, `addDate`, `addInteger`, `ratingField`, `recrutierField`, `commentField`):
 
 - `candidateField` и `vacancyFiels` сохраняют специализированный `iteraction-list-primary-picker`, но итоговая SCSS-геометрия совпадает с `edit-form-control`: высота `38px`, единая рамка, фон, focus-state и фиксированная ширина action-кнопок. Ширина 50% (~630px) обеспечивает достаточное пространство для длинных названий вакансий (40-80 символов) и ФИО кандидатов.
-- `onlyMySubscribeCheckBox`: ширина `100%`, исключает перенос или обрезку текста длинного чекбокса.
+- `onlyMySubscribeCheckBox`: ширина `100%`, по умолчанию выключен (`setValue(false)`), при открытии формы загружает все доступные вакансии; при активации пользователем ограничивает выбор вакансиями, на которые подписан текущий рекрутер.
 - `ratingField`: ширина колонки 50%, но с `maxWidth="240px"`, так как значение рейтинга (1..5) не требует растяжения на пол-экрана.
 - `recrutierField`: занимает 50% ширины (width="100%" внутри своей колонки), с единым выравниванием caption и нижней базовой линии.
 - `communicationMethodField`: расположен во второй строке `resultAccordionGrid` (colspan="2"), но ограничен `maxWidth="540px"`, что обеспечивает аккуратное отображение номера телефона, Telegram-ника или email без неестественного растяжения на всю ширину формы.
 - `commentField`: занимает 100% ширины рабочей области (`height="170px"`, `rows="7"`), обеспечивая удобный ввод развернутых заметок рекрутера.
 - `buttonsPanelCallAction` и динамические поля:
   - `addDate`: ширина `220px`, сгруппирована в единый ряд `actionDateCalendarRow` вместе с плашкой календаря `calendarBox`. Внутренняя time-часть составного CUBA DateField имеет ширину `72px`, высоту `38px`, формат `HH:mm`, шрифт `15px` и горизонтальный padding `10px`; ширина рассчитана как `44.96px` для `23:59` в 15px Verdana + `20px` padding + `2px` рамки + запас на caret/округление. Календарная кнопка (`25px` в runtime) остаётся в date-части и не входит в ширину time input.
-  - `calendarBox` / `calendarInlineBox`: компактная плашка (`padding: 6px 12px`, border-radius 6px) с чекбоксом `addToCalendarCheckBox` и выпадающим списком календарей `calendarLookupField` (`width="280px"` со стилем `iteraction-calendar-lookup`).
+  - `calendarBox`: компактная вертикальная карточка (ширина `100%`, `maxWidth="420px"`, `padding: 10px 14px`, border-radius 6px) с чекбоксом `addToCalendarCheckBox` в верхней строке и выпадающим списком календарей `calendarLookupField` (`width="100%"`, со стилем `iteraction-calendar-lookup`) в нижней строке, обеспечивающая гармоничное выравнивание и адаптивное сжатие.
   - `buttonCallAction`: `width="AUTO"`, `align="MIDDLE_LEFT"`, стилизована классом `iteraction-call-action-btn`.
   - `addInteger`: ширина `140px` (для кратких числовых значений).
   - `addString`: максимальная ширина `540px`.gridInteractionType` | Тип и действие (50/50) | `iteractionTypeField`, `buttonsPanelCallAction` (`buttonCallAction`, `addString`, `actionDateCalendarRow` (`addDate` + `calendarBox`), `addInteger`) | `iteractionTypeField` |

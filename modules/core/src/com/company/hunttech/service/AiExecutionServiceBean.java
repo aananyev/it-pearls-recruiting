@@ -156,7 +156,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 }
             }
         } else {
-            if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY) {
+            if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY && !"admin".equalsIgnoreCase(currentUser.getLogin())) {
                 userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
             }
             ensureAdminFallbackAllowed(function, currentUser, userContext);
@@ -243,7 +243,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                 }
             }
         } else {
-            if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY) {
+            if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY && !"admin".equalsIgnoreCase(currentUser.getLogin())) {
                 userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
             }
             ensureAdminFallbackAllowed(function, currentUser, userContext);
@@ -313,7 +313,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
                         "Персональные AI-подключения для функции «" + functionCode + "» недоступны.", userFailure);
             }
         }
-        if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY) {
+        if (userAiQuotaService != null && currentUser != null && function.getExecutionPolicy() != AiExecutionPolicy.ADMIN_ONLY && !"admin".equalsIgnoreCase(currentUser.getLogin())) {
             userAiQuotaService.checkQuotaAvailable(currentUser.getId(), 1);
         }
         return executeWithAdminCandidatesImage(function, adminCandidates, prompt, sourceImage, sourceMimeType,

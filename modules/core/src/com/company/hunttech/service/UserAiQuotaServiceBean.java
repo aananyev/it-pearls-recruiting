@@ -65,7 +65,16 @@ public class UserAiQuotaServiceBean implements UserAiQuotaService {
             allocatedTokens = overrides.get(0).getMonthlyQuotaTokens();
             customOverride = true;
         } else {
-            allocatedTokens = loadDefaultMonthlyQuota();
+            ExtUser user = dataManager.load(ExtUser.class)
+                    .id(userId)
+                    .view("extUser-view")
+                    .optional()
+                    .orElse(null);
+            if (user != null && "admin".equalsIgnoreCase(user.getLogin())) {
+                allocatedTokens = -1;
+            } else {
+                allocatedTokens = loadDefaultMonthlyQuota();
+            }
         }
 
         // 2. Загрузка расхода за текущий месяц из периода

@@ -1121,8 +1121,8 @@
       min-width: 0 !important;
       display: flex;
       flex-wrap: wrap;
-      align-items: flex-end;
-      gap: 12px;
+      align-items: flex-start;
+      gap: 16px;
 
       > .v-slot {
         width: auto !important;
@@ -1133,34 +1133,27 @@
 
     .iteraction-calendar-box {
       box-sizing: border-box;
-      max-width: 100% !important;
+      width: 100% !important;
+      max-width: 420px !important;
+      min-width: 240px;
       margin-top: 0 !important;
-      padding: 6px 12px !important;
+      padding: 10px 14px !important;
       background: rgba(30, 136, 229, 0.05);
       border: 1px solid rgba(30, 136, 229, 0.2);
       border-radius: 6px;
-
-      // Выравнивание по нижнему краю flex-end для синхронизации базовой линии чекбокса и поля выбора календаря
-      .iteraction-calendar-inline-box {
-        box-sizing: border-box;
-        max-width: 100% !important;
-        display: flex;
-        align-items: flex-end;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
 
       .v-checkbox {
-        margin-right: 12px;
         margin-bottom: 0;
         white-space: nowrap;
       }
 
       .iteraction-calendar-lookup {
-        width: 320px;
-        max-width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
         min-width: 180px;
-        flex: 1 1 320px;
       }
     }
   }

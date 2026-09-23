@@ -271,12 +271,21 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
     @Override
     public CandidateVacancyMatchReport matchCandidatesForVacancy(UUID openPositionId) {
+        return matchCandidatesForVacancy(openPositionId, UUID.randomUUID());
+    }
+
+    @Override
+    public CandidateVacancyMatchReport matchCandidatesForVacancy(UUID openPositionId, UUID requestedOperationId) {
+        UUID operationId = requestedOperationId != null ? requestedOperationId : UUID.randomUUID();
         if (openPositionId == null) {
             CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
             emptyReport.setSuccess(false);
             emptyReport.setStatusMessage("Идентификатор вакансии не указан.");
             return emptyReport;
         }
+
+        log.info("Starting vacancy-to-candidates matching: operationId={}, vacancyId={}", operationId, openPositionId);
+        try {
 
         // 1. Загрузка вакансии
         OpenPosition vacancy = dataManager.load(OpenPosition.class)
@@ -336,76 +345,104 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         Map<UUID, OpenPosition> positionById = Collections.singletonMap(vacancy.getId(), vacancy);
 
         AiExecutionResult lastAiResult = null;
-        boolean anyAiSuccess = false;
-        UUID reverseOperationId = UUID.randomUUID();
         int candidateSequence = 0;
+        int failedCandidates = 0;
+        int fallbackCandidates = 0;
+        int aiCallFailures = 0;
+        int emptyAiResponses = 0;
+        int unusableAiResponses = 0;
+        boolean anyAiMatchParsed = false;
 
         for (JobCandidate cand : candidates) {
             candidateSequence++;
-            List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
-                    .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(e.textCV)) > 0 order by e.datePost desc, e.createTs desc")
-                    .parameter("candId", cand.getId())
-                    .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy"))
-                    .list();
-
-            List<CandidateSkill> candidateSkills = dataManager.load(CandidateSkill.class)
-                    .query("select e from hunttech_CandidateSkill e where e.candidate.id = :candId")
-                    .parameter("candId", cand.getId())
-                    .view(viewBuilder -> viewBuilder.add("skill.skillName").add("priority"))
-                    .list();
-
-            String candidateProfile = buildCandidateProfileString(cand);
-            String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
-            String candidateResumeText = buildCandidateResumeText(cvList);
-
-            Map<String, Object> context = new HashMap<>();
-            context.put(PARAM_CANDIDATE_PROFILE, candidateProfile);
-            context.put(PARAM_CANDIDATE_SKILLS, candidateSkillsText);
-            context.put(PARAM_CANDIDATE_RESUME_TEXT, candidateResumeText);
-            context.put(PARAM_VACANCIES_JSON, vacanciesJson);
-            context.put("callerSource", "CandidateVacancyMatch:vacancy-to-candidates");
-            context.put("requestId", reverseOperationId + "-candidate-" + candidateSequence);
-
-            CandidateVacancyMatchItem matchedItem = null;
+            String phase = "load-resume";
+            String requestId = operationId + "-candidate-" + candidateSequence;
             try {
-                AiExecutionResult aiResult = aiExecutionService.executeText(FUNCTION_CODE, context);
-                if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
-                    lastAiResult = aiResult;
-                    Set<UUID> seenVacancyIds = new HashSet<>();
-                    List<CandidateVacancyMatchItem> parsed = parseAiResponse(aiResult.getText(), singleVacancyList, positionById, seenVacancyIds, report);
-                    if (!parsed.isEmpty()) {
-                        matchedItem = parsed.get(0);
-                        anyAiSuccess = true;
+                List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
+                        .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(e.textCV)) > 0 order by e.datePost desc, e.createTs desc")
+                        .parameter("candId", cand.getId())
+                        .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy"))
+                        .list();
+
+                phase = "load-skills";
+                List<CandidateSkill> candidateSkills = dataManager.load(CandidateSkill.class)
+                        .query("select e from hunttech_CandidateSkill e where e.candidate.id = :candId")
+                        .parameter("candId", cand.getId())
+                        .view(viewBuilder -> viewBuilder.add("skill.skillName").add("priority"))
+                        .list();
+
+                phase = "prepare-context";
+                String candidateProfile = buildCandidateProfileString(cand);
+                String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
+                String candidateResumeText = buildCandidateResumeText(cvList);
+
+                Map<String, Object> context = new HashMap<>();
+                context.put(PARAM_CANDIDATE_PROFILE, candidateProfile);
+                context.put(PARAM_CANDIDATE_SKILLS, candidateSkillsText);
+                context.put(PARAM_CANDIDATE_RESUME_TEXT, candidateResumeText);
+                context.put(PARAM_VACANCIES_JSON, vacanciesJson);
+                context.put("callerSource", "CandidateVacancyMatch:vacancy-to-candidates");
+                context.put("requestId", requestId);
+
+                CandidateVacancyMatchItem matchedItem = null;
+                phase = "ai-execution";
+                try {
+                    AiExecutionResult aiResult = aiExecutionService.executeText(FUNCTION_CODE, context);
+                    if (aiResult != null && aiResult.getText() != null && !aiResult.getText().trim().isEmpty()) {
+                        lastAiResult = aiResult;
+                        Set<UUID> seenVacancyIds = new HashSet<>();
+                        List<CandidateVacancyMatchItem> parsed = parseAiResponse(aiResult.getText(), singleVacancyList, positionById, seenVacancyIds, report);
+                        if (!parsed.isEmpty()) {
+                            matchedItem = parsed.get(0);
+                            anyAiMatchParsed = true;
+                        } else {
+                            unusableAiResponses++;
+                            log.warn("Vacancy-to-candidates AI response produced no match: operationId={}, requestId={}, vacancyId={}, candidateId={}, phase=ai-parse, errorCategory=no-match-record",
+                                    operationId, requestId, openPositionId, cand.getId());
+                        }
+                    } else {
+                        emptyAiResponses++;
+                        log.warn("Vacancy-to-candidates AI response is empty: operationId={}, requestId={}, vacancyId={}, candidateId={}, phase=ai-response, errorCategory=empty-response",
+                                operationId, requestId, openPositionId, cand.getId());
                     }
+                } catch (Exception e) {
+                    aiCallFailures++;
+                    log.warn("Vacancy-to-candidates AI call failed: operationId={}, requestId={}, vacancyId={}, candidateId={}, phase=ai-execution, errorType={}",
+                            operationId, requestId, openPositionId, cand.getId(), e.getClass().getSimpleName());
+                }
+
+                if (matchedItem == null) {
+                    phase = "rule-based-fallback";
+                    List<CandidateVacancyMatchItem> fallbackList = buildHonestFallbackItems(cand, candidateSkills, candidateResumeText, singleVacancyList);
+                    if (!fallbackList.isEmpty()) {
+                        matchedItem = fallbackList.get(0);
+                        fallbackCandidates++;
+                    }
+                }
+
+                if (matchedItem != null) {
+                    phase = "workflow-state";
+                    matchedItem.setCandidateId(cand.getId());
+                    matchedItem.setCandidateFullName(cand.getFullName());
+                    matchedItem.setCandidatePosition(cand.getPersonPosition() != null ? cand.getPersonPosition().getPositionRuName() : "");
+                    matchedItem.setCandidateCity(cand.getCityOfResidence() != null ? cand.getCityOfResidence().getCityRuName() : "");
+                    matchedItem.setCandidateCurrentCompany(cand.getCurrentCompany() != null ?
+                            (cand.getCurrentCompany().getComanyName() != null ? cand.getCurrentCompany().getComanyName() : cand.getCurrentCompany().getCompanyShortName()) : "");
+
+                    if (workflowService != null) {
+                        IteractionList existing = workflowService.getExistingRelation(cand.getId(), vacancy.getId());
+                        if (existing != null) {
+                            matchedItem.setAlreadyInWork(true);
+                            matchedItem.setRecruiterDecision("В работе");
+                        }
+                    }
+
+                    allItems.add(matchedItem);
                 }
             } catch (Exception e) {
-                log.warn("AI match failed for candidate {}: {}", cand.getFullName(), e.getMessage());
-            }
-
-            if (matchedItem == null) {
-                List<CandidateVacancyMatchItem> fallbackList = buildHonestFallbackItems(cand, candidateSkills, candidateResumeText, singleVacancyList);
-                if (!fallbackList.isEmpty()) {
-                    matchedItem = fallbackList.get(0);
-                }
-            }
-
-            if (matchedItem != null) {
-                matchedItem.setCandidateId(cand.getId());
-                matchedItem.setCandidateFullName(cand.getFullName());
-                matchedItem.setCandidatePosition(cand.getPersonPosition() != null ? cand.getPersonPosition().getPositionRuName() : "");
-                matchedItem.setCandidateCity(cand.getCityOfResidence() != null ? cand.getCityOfResidence().getCityRuName() : "");
-                matchedItem.setCandidateCurrentCompany(cand.getCurrentCompany() != null ?
-                        (cand.getCurrentCompany().getComanyName() != null ? cand.getCurrentCompany().getComanyName() : cand.getCurrentCompany().getCompanyShortName()) : "");
-
-                if (workflowService != null) {
-                    IteractionList existing = workflowService.getExistingRelation(cand.getId(), vacancy.getId());
-                    if (existing != null) {
-                        matchedItem.setAlreadyInWork(true);
-                        matchedItem.setRecruiterDecision("В работе");
-                    }
-                }
-
-                allItems.add(matchedItem);
+                failedCandidates++;
+                log.warn("Vacancy-to-candidates candidate processing failed: operationId={}, requestId={}, vacancyId={}, candidateSequence={}, candidateId={}, phase={}, errorType={}",
+                        operationId, requestId, openPositionId, candidateSequence, cand.getId(), phase, e.getClass().getSimpleName());
             }
         }
 
@@ -414,7 +451,8 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             try {
                 run = workflowService.createMatchRun(openPositionId, null, FUNCTION_CODE, allItems.size());
             } catch (Exception e) {
-                log.warn("Failed to create match run: {}", e.getMessage());
+                log.warn("Failed to create vacancy-candidate match run: operationId={}, vacancyId={}, phase=workflow-run, errorType={}",
+                        operationId, openPositionId, e.getClass().getSimpleName());
             }
         }
 
@@ -435,8 +473,49 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         report.setItems(allItems);
         report.setMatchedVacanciesCount(allItems.size());
         report.setAiExecutionResult(lastAiResult);
-        report.setFallbackUsed(!anyAiSuccess);
+        report.setFallbackUsed(fallbackCandidates > 0);
+        if (allItems.isEmpty()) {
+            report.setSuccess(false);
+            report.setStatusMessage(failedCandidates == candidates.size()
+                    ? "Не удалось обработать кандидатов. Код обращения: " + operationId
+                    : "AI-анализ завершен, рекомендации не сформированы. Код обращения: " + operationId);
+        } else if (failedCandidates > 0 || fallbackCandidates > 0) {
+            List<String> statusDetails = new ArrayList<>();
+            if (fallbackCandidates > 0 && !anyAiMatchParsed) {
+                if (aiCallFailures > 0) {
+                    statusDetails.add(String.format(Locale.ROOT,
+                            "AI-сервис не выполнил запрос для %d кандидатов", aiCallFailures));
+                }
+                if (emptyAiResponses > 0) {
+                    statusDetails.add(String.format(Locale.ROOT,
+                            "получен пустой ответ AI для %d кандидатов", emptyAiResponses));
+                }
+                if (unusableAiResponses > 0) {
+                    statusDetails.add(String.format(Locale.ROOT,
+                            "ответ AI не содержал разбираемого совпадения для %d кандидатов", unusableAiResponses));
+                }
+            }
+            if (fallbackCandidates > 0) {
+                statusDetails.add(String.format(Locale.ROOT,
+                        "для %d из %d кандидатов показана предварительная оценка по сохранённым данным",
+                        fallbackCandidates, candidates.size()));
+            }
+            if (failedCandidates > 0) {
+                statusDetails.add(String.format(Locale.ROOT,
+                        "не удалось обработать %d из %d кандидатов",
+                        failedCandidates, candidates.size()));
+            }
+            report.setStatusMessage(String.join("; ", statusDetails) + ". Код обращения: " + operationId);
+        }
         return report;
+        } catch (Exception e) {
+            log.error("Vacancy-to-candidates matching failed before completion: operationId={}, vacancyId={}, phase=operation, errorType={}",
+                    operationId, openPositionId, e.getClass().getSimpleName());
+            CandidateVacancyMatchReport failedReport = new CandidateVacancyMatchReport();
+            failedReport.setSuccess(false);
+            failedReport.setStatusMessage("Не удалось завершить AI-подбор. Код обращения: " + operationId);
+            return failedReport;
+        }
     }
 
     private void enrichItemsWithCandidateAndStatus(List<CandidateVacancyMatchItem> items, JobCandidate candidate, UUID vacancyId) {
@@ -531,6 +610,9 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
     private String buildCandidateResumeText(List<CandidateCV> cvList) {
         StringBuilder sb = new StringBuilder();
+        if (cvList == null || cvList.isEmpty()) {
+            return "Резюме с распознанным текстом отсутствует. Для анализа используйте только профиль и сохранённые навыки кандидата; не предполагайте неподтверждённый опыт.";
+        }
         CandidateCV mainCV = cvList.get(0);
         sb.append("--- ОСНОВНОЕ РЕЗЮМЕ ---\n");
         if (mainCV.getTextCV() != null) {
@@ -748,7 +830,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             }
 
         } catch (Exception e) {
-            log.warn("Failed to parse JSON response for candidate-vacancy match: {}", e.getMessage());
+            log.warn("Failed to parse JSON response for candidate-vacancy match: errorType={}", e.getClass().getSimpleName());
         }
 
         return result;
