@@ -43,7 +43,14 @@ public class ExternalReferenceDataRestContractTest {
                 content.contains("name=\"createCompany\""));
         assertTrue("rest-services.xml должен экспортировать метод createProjectAndVacancy",
                 content.contains("name=\"createProjectAndVacancy\""));
+        assertTrue("rest-services.xml должен экспортировать метод createCandidateCV",
+                content.contains("name=\"createCandidateCV\""));
+        assertTrue("rest-services.xml должен экспортировать метод createInteraction",
+                content.contains("name=\"createInteraction\""));
+        assertTrue("rest-services.xml должен экспортировать метод createCandidateWithDetails",
+                content.contains("name=\"createCandidateWithDetails\""));
     }
+
 
 
     @Test
