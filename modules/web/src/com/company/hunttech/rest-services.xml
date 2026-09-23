@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns="http://schemas.haulmont.com/cuba/rest-services-v2.xsd">
+
+    <!-- Сервис выдачи нормализованных справочников внешним системам (BL-2026-029) -->
+    <service name="hunttech_ExternalReferenceDataService">
+        <method name="getCities">
+            <param name="filter" type="com.company.hunttech.dto.integration.ReferenceFilterDto"/>
+        </method>
+        <method name="getPositions">
+            <param name="filter" type="com.company.hunttech.dto.integration.ReferenceFilterDto"/>
+        </method>
+        <method name="getGrades">
+            <param name="filter" type="com.company.hunttech.dto.integration.ReferenceFilterDto"/>
+        </method>
+        <method name="getInteractionTypes">
+            <param name="filter" type="com.company.hunttech.dto.integration.ReferenceFilterDto"/>
+        </method>
+        <method name="getSkills">
+            <param name="filter" type="com.company.hunttech.dto.integration.ReferenceFilterDto"/>
+        </method>
+        <method name="getCountries">
+            <param name="filter" type="com.company.hunttech.dto.integration.ReferenceFilterDto"/>
+        </method>
+    </service>
+
+</services>
