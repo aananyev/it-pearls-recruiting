@@ -285,12 +285,33 @@ public class CandidateVacancyMatchScreen extends Screen {
     private Label<String> aiMetaLabel;
 
     public void setCandidate(JobCandidate candidate) {
-        this.candidate = candidate;
+        if (candidate != null && candidate.getId() != null) {
+            this.candidate = dataManager.load(JobCandidate.class)
+                    .id(candidate.getId())
+                    .view("jobCandidate-full-view")
+                    .optional()
+                    .orElse(candidate);
+        } else {
+            this.candidate = candidate;
+        }
         this.mode = Mode.CANDIDATE_TO_VACANCIES;
     }
 
     public void setOpenPosition(OpenPosition openPosition) {
-        this.openPosition = openPosition;
+        if (openPosition != null && openPosition.getId() != null) {
+            this.openPosition = dataManager.load(OpenPosition.class)
+                    .id(openPosition.getId())
+                    .view(viewBuilder -> viewBuilder.addAll(
+                            "vacansyID", "vacansyName", "positionType.positionRuName", "comment", "shortDescription",
+                            "workExperience", "grade", "skillsList.skillName", "remoteWork",
+                            "remoteComment", "cityPosition.cityRuName", "cities.cityRuName",
+                            "projectName.projectName", "priority", "openClose"
+                    ))
+                    .optional()
+                    .orElse(openPosition);
+        } else {
+            this.openPosition = openPosition;
+        }
         this.mode = Mode.VACANCY_TO_CANDIDATES;
     }
 

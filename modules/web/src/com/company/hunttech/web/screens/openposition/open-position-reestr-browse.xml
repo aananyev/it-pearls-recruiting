@@ -26,6 +26,7 @@
                 <property name="openPositionComments" fetch="BATCH" view="_minimal"/>
                 <property name="someFiles" fetch="BATCH" view="_minimal"/>
                 <property name="cities" fetch="BATCH" view="city-picker-view"/>
+                <property name="cityPosition" fetch="BATCH" view="city-picker-view"/>
                 <property name="skillsList" fetch="BATCH" view="_minimal">
                     <property name="skillName"/>
                 </property>
@@ -137,6 +138,7 @@
                                     width="100%"/>
                             <button id="suggestCandidatesBtn"
                                     caption="Подобрать кандидатов"
+                                    description="AI-подбор подходящих кандидатов по требованиям вакансии"
                                     icon="font-icon:MAGIC"
                                     enabled="false"
                                     width="100%"/>

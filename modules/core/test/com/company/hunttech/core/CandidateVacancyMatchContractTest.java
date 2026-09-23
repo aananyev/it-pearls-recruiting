@@ -213,4 +213,25 @@ public class CandidateVacancyMatchContractTest {
             }
         }
     }
+
+    @Test
+    public void testOpenPositionReestrBrowseCityPositionAndSidebarIntegration() throws IOException {
+        Path reestrXmlPath = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/openposition/open-position-reestr-browse.xml");
+        String xml = new String(Files.readAllBytes(reestrXmlPath), StandardCharsets.UTF_8);
+
+        assertTrue("view openPositionsDc должен декларировать cityPosition для Data View Integrity",
+                xml.contains("<property name=\"cityPosition\""));
+        assertTrue("Sidebar реестра должен содержать кнопку suggestCandidatesBtn",
+                xml.contains("id=\"suggestCandidatesBtn\""));
+
+        Path matchScreenJavaPath = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/jobcandidate/CandidateVacancyMatchScreen.java");
+        String java = new String(Files.readAllBytes(matchScreenJavaPath), StandardCharsets.UTF_8);
+
+        assertTrue("setOpenPosition должен безопасно перезагружать вакансию через dataManager во избежание unfetched attribute access",
+                java.contains("this.openPosition = dataManager.load(OpenPosition.class)"));
+        assertTrue("setCandidate должен безопасно перезагружать кандидата через dataManager",
+                java.contains("this.candidate = dataManager.load(JobCandidate.class)"));
+    }
 }

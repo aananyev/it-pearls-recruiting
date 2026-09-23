@@ -3,7 +3,7 @@
 - ID: BL-2026-042
 - Создано: 2026-09-23
 - Источник: руководитель
-- Статус: NEW
+- Статус: REVIEW (НА ПРОВЕРКУ)
 - Приоритет: не определён
 - Срочность: не определена
 - Ценность: восстановить запуск AI-подбора кандидата из реестра вакансий
@@ -50,3 +50,4 @@
 ## История
 
 - 2026-09-23 — карточка создана как BUG; связь с общими задачами AI-подбора указана как тематическая, дублирование не подтверждено.
+- 2026-09-23 — исправлен вызов AI из sidebar: 1) в `open-position-reestr-browse.xml` во view `openPositionsDc` добавлено поле `cityPosition` во избежание UnfetchedAttributeException (Data View Integrity); 2) в `CandidateVacancyMatchScreen.java` методы `setCandidate` и `setOpenPosition` теперь безопасно перезагружают сущности через DataManager с полным view; 3) добавлено описание к кнопке `suggestCandidatesBtn`; 4) проверен контрактный тест `CandidateVacancyMatchContractTest` и OCR review (0 замечаний). Статус переведён в REVIEW (НА ПРОВЕРКУ).
