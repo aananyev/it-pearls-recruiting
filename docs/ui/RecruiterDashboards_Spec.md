@@ -6,15 +6,15 @@
 
 ## UI Context & Navigation
 
-Верхнеуровневое меню `application-dashboards` — «Дашборды» (`DASHBOARD`) содержит ровно пять экранов:
+Группа меню `application-hunting → recruiter-dashboards` — «Дашборды рекрутера» (`DASHBOARD`) содержит три операционных экрана:
 
 - `hunttech_RecruiterKanbanDashboard` — «Kanban»;
 - `hunttech_RecruiterFunnelDashboard` — «Воронка найма»;
-- `hunttech_RecruiterReserveDashboard` — «Кадровый резерв»;
+- `hunttech_RecruiterReserveDashboard` — «Кадровый резерв».
+
+Экраны аналитики AI расположены в группе `aiAdministration` («Управление AI»):
 - `hunttech_AdminAiDashboard` — «Дашборд аналитики AI»;
 - `hunttech_UserAiDashboard` — «Моя статистика AI».
-
-Старая вложенная группа `application-hunting → recruiter-dashboards` удалена. Dashboard items исключены из `aiAdministration`; в «Управлении AI» остаются LLM-чат, AI-конфигурация, логи и технические экраны. Перенос не меняет screen permissions: административный `hunttech_AdminAiDashboard` остаётся доступен только ролям с ранее выданным разрешением на экран.
 
 Каждый экран использует `dashboard:dashboard` с `jsonPath` и `timerDelay="60"`. JSON-модель хранится в исходниках и подключает собственный `@DashboardWidget`.
 

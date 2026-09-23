@@ -239,12 +239,12 @@ public class CandidateSkillsEnrichmentMonitoring extends Screen {
         String model = trimToEmpty(item.getModelName());
         if (CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI_METADATA_INCOMPLETE.equals(item.getExecutionSource())) {
             if (provider.isEmpty() && model.isEmpty()) {
-                return "AI: метаданные неполные";
+                return "AI: модель не зафиксирована";
             }
             return "AI: "
-                    + (provider.isEmpty() ? "провайдер недоступен" : provider)
+                    + (provider.isEmpty() ? "провайдер не зафиксирован" : provider)
                     + " / "
-                    + (model.isEmpty() ? "модель недоступна" : model);
+                    + (model.isEmpty() ? "модель не зафиксирована" : model);
         }
         if (provider.isEmpty() && model.isEmpty()) {
             return "Метаданные недоступны";

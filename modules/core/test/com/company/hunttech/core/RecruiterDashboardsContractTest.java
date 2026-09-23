@@ -58,30 +58,19 @@ public class RecruiterDashboardsContractTest {
     }
 
     @Test
-    public void menuContainsUnifiedTopLevelDashboardGroup() throws IOException {
+    public void menuContainsRecruiterDashboardsGroup() throws IOException {
         String menu = source("modules/web/src/com/company/hunttech/web-menu.xml");
-        String dashboards = menuSection(menu, "application-dashboards");
+        String dashboards = menuSection(menu, "recruiter-dashboards");
 
-        assertEquals(1, occurrences(menu, "id=\"application-dashboards\""));
-        assertTrue(dashboards.contains("caption=\"Дашборды\""));
+        assertEquals(1, occurrences(menu, "id=\"recruiter-dashboards\""));
+        assertTrue(dashboards.contains("caption=\"Дашборды рекрутера\""));
         assertTrue(dashboards.contains("icon=\"DASHBOARD\""));
-        assertEquals(5, occurrences(dashboards, "screen=\""));
+        assertEquals(3, occurrences(dashboards, "screen=\""));
 
         assertDashboardItem(menu, dashboards, "hunttech_RecruiterKanbanDashboard", "Kanban", "COLUMNS");
         assertDashboardItem(menu, dashboards, "hunttech_RecruiterFunnelDashboard", "Воронка найма", "FILTER");
         assertDashboardItem(menu, dashboards, "hunttech_RecruiterReserveDashboard", "Кадровый резерв", "SHIELD");
-        assertDashboardItem(menu, dashboards, "hunttech_AdminAiDashboard",
-                "mainMsg://menu_config.hunttech_AdminAiDashboard", "DASHBOARD");
-        assertDashboardItem(menu, dashboards, "hunttech_UserAiDashboard",
-                "mainMsg://menu_config.hunttech_UserAiDashboard", "PIE_CHART");
 
-        String messagesRu = source("modules/web/src/com/company/hunttech/web/messages_ru.properties");
-        assertTrue(messagesRu.contains("menu_config.hunttech_AdminAiDashboard=Дашборд аналитики AI"));
-        assertTrue(messagesRu.contains("menu_config.hunttech_UserAiDashboard=Моя статистика AI"));
-
-        assertFalse(menu.contains("id=\"recruiter-dashboards\""));
-        assertFalse(menu.contains("caption=\"Дашборды рекрутера\""));
-        assertFalse(menuSection(menu, "application-hunting").contains("Dashboard"));
         assertFalse("Persistent recruiting-dashboard остаётся стартовым и не добавляется в меню",
                 menu.contains("screen=\"recruiting-dashboard\""));
     }
@@ -93,6 +82,8 @@ public class RecruiterDashboardsContractTest {
 
         for (String screenId : new String[]{
                 "hunttech_LlmChatScreen",
+                "hunttech_AdminAiDashboard",
+                "hunttech_UserAiDashboard",
                 "hunttech_AiFunctionConfiguration.reestr",
                 "hunttech_AiFunctionConfiguration.browse",
                 "hunttech_AdminAiConfiguration.browse",
@@ -106,8 +97,8 @@ public class RecruiterDashboardsContractTest {
                     1, occurrences(aiAdministration, "screen=\"" + screenId + "\""));
         }
 
-        assertFalse(aiAdministration.contains("hunttech_AdminAiDashboard"));
-        assertFalse(aiAdministration.contains("hunttech_UserAiDashboard"));
+        assertTrue(aiAdministration.contains("hunttech_AdminAiDashboard"));
+        assertTrue(aiAdministration.contains("hunttech_UserAiDashboard"));
     }
 
     @Test

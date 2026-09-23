@@ -19,6 +19,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Контейнерный тест {@link SkillAnalysisServiceBean} со стабом {@link AiExecutionService}
@@ -193,6 +197,24 @@ public class SkillAnalysisServiceBeanTest {
         assertNull("При классическом fallback метаданные AI-выполнения должны быть null",
                 outcome.getAiExecution());
         assertTrue(!outcome.isAiUsed());
+    }
+
+    @Test
+    public void postAiDictionaryFailureIsNotRelabeledAsFallback() throws Exception {
+        DataManager failingDataManager = mock(DataManager.class);
+        when(failingDataManager.loadList(any(com.haulmont.cuba.core.global.LoadContext.class)))
+                .thenThrow(new RuntimeException("dictionary mapping failed after AI response"))
+                .thenReturn(Collections.emptyList());
+        injectField("dataManager", failingDataManager);
+        stub.result = "[]";
+
+        try {
+            bean.analyzeAll("Текст резюме");
+            fail("Ошибка после успешного AI-вызова не должна превращаться в dictionary fallback");
+        } catch (RuntimeException expected) {
+            assertEquals("dictionary mapping failed after AI response", expected.getMessage());
+            assertEquals(SkillAnalysisService.FUNCTION_SKILLS_EXTRACT, stub.lastFunctionCode);
+        }
     }
 
     @Test

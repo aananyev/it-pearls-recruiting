@@ -223,15 +223,16 @@ public class CandidateSkillEnrichmentServiceTest {
         when(mockDataManager.load(CandidateCvSkillAnalysis.class).query(anyString()).parameter("cvId", cv.getId()).view("candidateCvSkillAnalysis-browse-view").optional())
                 .thenReturn(Optional.empty());
         AiExecutionResult execution = AiExecutionResult.textResult("SKILLS_EXTRACT", "Skills", AiCapability.TEXT_GENERATION,
-                "test-model", "test-provider", AiCredentialOwner.ADMIN, "[]", 1, 2, 3);
+                "deepseek-v4-flash", "deepseek", AiCredentialOwner.ADMIN, "[]", 1, 2, 3);
         SkillAnalysisResult aiResult = SkillAnalysisResult.of(Collections.emptyList(), execution);
+        SkillAnalysisResult dictionaryFallback = SkillAnalysisResult.of(Collections.emptyList(), null);
         when(mockSkillAnalysisService.analyzeWithFunction(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
-                .thenReturn(aiResult);
+                .thenReturn(dictionaryFallback, dictionaryFallback, dictionaryFallback, aiResult);
         CandidateSkillsScanResult result = service.scanAndEnrich(candidate, cv, "SKILLS_EXTRACT", false);
         assertTrue(result.isSuccess());
         assertEquals(CandidateCvSkillAnalysis.EXECUTION_SOURCE_AI, mockAnalysis.getExecutionSource());
-        assertEquals("test-provider", mockAnalysis.getProviderCode());
-        assertEquals("test-model", mockAnalysis.getModelName());
+        assertEquals("deepseek", mockAnalysis.getProviderCode());
+        assertEquals("deepseek-v4-flash", mockAnalysis.getModelName());
         verify(mockDataManager, atLeastOnce()).commit(mockAnalysis);
     }
 

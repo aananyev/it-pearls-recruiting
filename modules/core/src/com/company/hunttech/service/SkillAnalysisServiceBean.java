@@ -107,15 +107,15 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
         String normalizedText = validateAndNormalize(sourceText);
         String effectiveFunctionCode = functionCode != null && !functionCode.trim().isEmpty()
                 ? functionCode.trim() : FUNCTION_SKILLS_EXTRACT;
+        Map<String, Object> context = new LinkedHashMap<>();
+        context.put(PARAM_SOURCE_TEXT, normalizedText);
+        context.put(PARAM_SKILL_LEVEL, skillLevel);
+        context.put("freeOnly", freeOnly);
+        context.put("callerSource", "SkillAnalysisService (" + skillLevel + " / " + effectiveFunctionCode + ")");
+
+        AiExecutionResult execution;
         try {
-            Map<String, Object> context = new LinkedHashMap<>();
-            context.put(PARAM_SOURCE_TEXT, normalizedText);
-            context.put(PARAM_SKILL_LEVEL, skillLevel);
-            context.put("freeOnly", freeOnly);
-            context.put("callerSource", "SkillAnalysisService (" + skillLevel + " / " + effectiveFunctionCode + ")");
-            AiExecutionResult execution = aiExecutionService.executeText(effectiveFunctionCode, context);
-            List<SkillTree> matched = matchAgainstDictionary(parseSkillNames(execution.getText()));
-            return SkillAnalysisResult.of(matched, execution);
+            execution = aiExecutionService.executeText(effectiveFunctionCode, context);
         } catch (RuntimeException e) {
             if (!allowDictionaryFallback) {
                 // В фоновом режиме (FREE_ONLY) падение AI нельзя маскировать словарным поиском —
@@ -135,6 +135,12 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
                             SkillNameMatcher.matchText(loadDictionary(), normalizedText)),
                     null);
         }
+
+        // AiExecutionResult уже доказывает успешный внешний AI-вызов. Ошибки разбора
+        // ответа или сопоставления со справочником должны уйти в RETRY/ERROR, а не
+        // уничтожить provenance и выдать фактический AI-вызов за dictionary fallback.
+        List<SkillTree> matched = matchAgainstDictionary(parseSkillNames(execution.getText()));
+        return SkillAnalysisResult.of(matched, execution);
     }
 
     private SkillAnalysisResult analyze(String sourceText, String skillLevel) {

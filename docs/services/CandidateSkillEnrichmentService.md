@@ -46,14 +46,30 @@ CandidateSkillsScanResult scanAndEnrich(
 
 ## Metadata выполнения и колонка «Провайдер / Модель»
 
-После успешного запуска запись `CandidateCvSkillAnalysis` сохраняет фактические `providerCode` и `modelName` из `AiExecutionResult`. Эти значения относятся к конкретному вызову и не являются текущей настройкой AI.
+### Фактическая цепочка выполнения
 
-`executionSource` фиксирует семантику результата:
+Все точки запуска используют один orchestration-контракт:
 
-- `AI` — хотя бы один уровень анализа выполнен AI с полными provider/model metadata;
-- `AI_METADATA_INCOMPLETE` — AI вернул неполные metadata;
-- `DICTIONARY_FALLBACK` — навыки получены словарным fallback без AI-вызова.
+| Путь | Вход в сервис | Что происходит с metadata |
+|---|---|---|
+| Фоновый worker | `CandidateSkillsEnrichmentWorker -> scanAndEnrich(..., true)` | Каждый уровень `MAIN/SECONDARY/TERTIARY`, а при пустом результате и `ALL`, получает собственный `SkillAnalysisResult`. Первый фактический `AiExecutionResult` с полными metadata выбирается для аудита; если полных metadata нет, сохраняется первый фактический AI-результат без выдумывания отсутствующих значений. |
+| Ручное сканирование | `JobCandidateReestr -> scanAndEnrich(..., false)` | Использует ту же цепочку и тот же mapping, отличается только разрешённой fallback-политикой. |
+| Проверка перед подбором вакансий | `CandidateVacancyMatchScreen -> scanAndEnrich(..., false, true)` | `forceScan` обходит только hash/version guard; способ получения и сохранения metadata не меняется. |
+| Retry worker | запись `RETRY` переводится worker-ом в `PROCESSING`, затем вызывается тот же `scanAndEnrich` | До нового успешного результата прежние `providerCode`, `modelName` и `executionSource` не очищаются. Ошибка меняет статус/ошибку/backoff, но не provenance последнего успеха. |
+| Повторный анализ из мониторинга | `reprocessCv()` ставит `NOT_ANALYZED`, затем worker вызывает тот же `scanAndEnrich` | Постановка в очередь не меняет metadata. Они заменяются только новым успешным AI-результатом либо новым фактически использованным dictionary fallback. |
 
-Fallback отображается как «Fallback: справочник», а старые записи с пустыми metadata — как «Метаданные недоступны». Повторный запуск с ошибкой или статусом `RETRY` не затирает metadata последнего успешного вызова. Таблица мониторинга перезагружает `analysesDl`, поэтому renderer читает сохранённые поля из `candidateCvSkillAnalysis-browse-view`.
+`SkillAnalysisService` вызывает `AiExecutionService.executeText()`. Успешный внешний вызов возвращает `AiExecutionResult` с эффективными `providerCode` и `modelName` — с учётом provider/model failover и override. Ошибка именно внешнего AI-вызова может привести к dictionary fallback, если он разрешён. Ошибка после получения `AiExecutionResult` (парсинг, сопоставление со справочником, persistence) не должна маскироваться как dictionary fallback: она проходит в обычный `RETRY/ERROR`, а metadata предыдущего успешного анализа сохраняются.
+
+### Mapping `AiExecutionResult -> entity -> DB -> view -> UI`
+
+| Условие | `CandidateCvSkillAnalysis` | Колонки БД | Значение UI |
+|---|---|---|---|
+| Хотя бы один уровень реально завершён через AI, `providerCode` и `modelName` заполнены | `executionSource=AI`; сохраняются фактические значения выбранного `AiExecutionResult` | `EXECUTION_SOURCE`, `PROVIDER_CODE`, `MODEL_NAME`; токены из того же результата | Фактическая модель; при наличии провайдера — `provider / model`, например `deepseek / deepseek-v4-flash` |
+| AI завершён, но metadata неполная | `executionSource=AI_METADATA_INCOMPLETE`; известное значение сохраняется, отсутствующее остаётся `NULL` | Те же колонки, без подстановки текущей конфигурации | Явная частичная metadata: `AI: provider / модель не зафиксирована`, `AI: провайдер не зафиксирован / model` либо `AI: модель не зафиксирована` |
+| Ни один AI-результат не использован, применён прямой поиск по справочнику | `executionSource=DICTIONARY_FALLBACK`; provider/model/tokens для этого успешного результата равны `NULL` | `EXECUTION_SOURCE=DICTIONARY_FALLBACK` | `Fallback: справочник` |
+| Историческая запись до появления provenance metadata | `executionSource`, provider и model равны `NULL` | Миграция не выполняет `UPDATE`/backfill | `Метаданные недоступны` |
+| Retry/error после ранее успешного анализа | статус/error/backoff обновляются, provenance последнего успеха не меняется | provider/model/source остаются прежними | Колонка продолжает показывать последнюю успешно зафиксированную модель или fallback |
+
+Запрещено восстанавливать старые metadata из текущей `AiFunctionConfiguration`: это не доказывает, какая модель выполнила исторический вызов. `candidateCvSkillAnalysis-browse-view` обязан загружать `providerCode`, `modelName` и `executionSource`; `analysesDl.load()` перечитывает их перед renderer-ом. Единственный источник строки «Fallback: справочник» — renderer мониторинга при явном `DICTIONARY_FALLBACK`, а не отсутствие model/provider.
 
 Добавление `EXECUTION_SOURCE` выполняется миграцией `260922-1-addExecutionSourceToCandidateCvSkillAnalysis`.
