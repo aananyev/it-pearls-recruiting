@@ -35,5 +35,14 @@
     <query entity="hunttech_Grade" name="gradeAll" view="_minimal">
         <jpql><![CDATA[ select g from hunttech_Grade g order by g.gradeName ]]></jpql>
     </query>
+    <query entity="hunttech_Country" name="countryAll" view="_minimal">
+        <jpql><![CDATA[ select c from hunttech_Country c order by c.countryRuName ]]></jpql>
+    </query>
+    <query entity="hunttech_SkillTree" name="skillAll" view="_minimal">
+        <jpql><![CDATA[ select s from hunttech_SkillTree s order by s.skillName ]]></jpql>
+    </query>
+    <query entity="hunttech_Iteraction" name="iteractionTypeAll" view="_minimal">
+        <jpql><![CDATA[ select i from hunttech_Iteraction i order by i.number, i.iterationName ]]></jpql>
+    </query>
 
 </queries>
