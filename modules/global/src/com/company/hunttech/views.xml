@@ -531,6 +531,7 @@
             <property name="openPosition" view="_local"/>
         </property>
     </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-full-view" extends="openPosition-view"/>
     <view entity="hunttech_JobCandidate" name="jobCandidate-dedup-view" extends="_local">
         <property name="currentCompany" view="_minimal"/>
         <property name="cityOfResidence" view="_minimal"/>
@@ -590,6 +591,9 @@
             </property>
             <property name="iteractionType" view="_local"/>
         </property>
+    </view>
+    <view entity="hunttech_JobCandidate" name="jobCandidate-full-view" extends="jobCandidate-view">
+        <property name="candidateSkills" view="_local"/>
     </view>
     <view entity="hunttech_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="socialNetworkURL" view="_minimal">
