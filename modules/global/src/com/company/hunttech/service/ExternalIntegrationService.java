@@ -2,6 +2,8 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.dto.integration.CompanyCreateRequestDto;
 import com.company.hunttech.dto.integration.CompanyResponseDto;
+import com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto;
+import com.company.hunttech.dto.integration.ProjectVacancyResponseDto;
 
 /**
  * Единый сервис внешней интеграции HRM HuntTech (BL-2026-036).
@@ -20,4 +22,13 @@ public interface ExternalIntegrationService {
      * @return структурированный ответ с ID компании и статусом (CREATED / EXISTING_FOUND)
      */
     CompanyResponseDto createCompany(CompanyCreateRequestDto request);
+
+    /**
+     * Транзакционно создает проект и связанную вакансию (BL-2026-025).
+     *
+     * @param request запрос с данными проекта и вакансии
+     * @return структурированный ответ с идентификаторами созданного проекта и вакансии
+     */
+    ProjectVacancyResponseDto createProjectAndVacancy(ProjectVacancyCreateRequestDto request);
 }
+

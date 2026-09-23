@@ -26,7 +26,9 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
 
     // In-memory кэш ответов для идемпотентности запросов в рамках процесса (BL-2026-030/036)
     private final Map<String, CompanyResponseDto> idempotencyCache = new ConcurrentHashMap<>();
+    private final Map<String, com.company.hunttech.dto.integration.ProjectVacancyResponseDto> projectVacancyIdempotencyCache = new ConcurrentHashMap<>();
     private final Object companyCreateLock = new Object();
+    private final Object projectVacancyLock = new Object();
 
     @Inject
     private DataManager dataManager;
@@ -77,6 +79,14 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
         try {
             CompanyResponseDto response;
             synchronized (companyCreateLock) {
+                if (idempotencyKey != null) {
+                    CompanyResponseDto cached = idempotencyCache.get(idempotencyKey);
+                    if (cached != null) {
+                        log.info("Returning cached response inside lock for idempotencyKey: {} [correlationId={}]", idempotencyKey, correlationId);
+                        return cached;
+                    }
+                }
+
                 // 1. Дедупликация по ИНН
                 if (inn != null) {
                     Company existingByInn = dataManager.load(Company.class)
@@ -181,14 +191,218 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
         }
     }
 
+    @Override
+    public com.company.hunttech.dto.integration.ProjectVacancyResponseDto createProjectAndVacancy(
+            com.company.hunttech.dto.integration.ProjectVacancyCreateRequestDto request) {
+        if (request == null) {
+            return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error("Тело запроса отсутствует", null, "VALIDATION_ERROR");
+        }
+
+        String correlationId = request.getCorrelationId();
+        String idempotencyKey = StringUtils.trimToNull(request.getIdempotencyKey());
+
+        // Проверка идемпотентности по Idempotency-Key
+        if (idempotencyKey != null) {
+            com.company.hunttech.dto.integration.ProjectVacancyResponseDto cached = projectVacancyIdempotencyCache.get(idempotencyKey);
+            if (cached != null) {
+                log.info("Returning cached projectVacancy response for idempotencyKey: {} [correlationId={}]", idempotencyKey, correlationId);
+                return cached;
+            }
+        }
+
+        if (StringUtils.isBlank(request.getVacancyName())) {
+            return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                    "Наименование вакансии (vacancyName) обязательно для заполнения", correlationId, "VALIDATION_ERROR");
+        }
+
+        boolean hasExistingProject = StringUtils.isNotBlank(request.getExistingProjectId());
+        boolean hasProjectName = StringUtils.isNotBlank(request.getProjectName());
+
+        if (!hasExistingProject && !hasProjectName) {
+            return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                    "Необходимо указать existingProjectId или projectName для привязки вакансии к проекту", correlationId, "VALIDATION_ERROR");
+        }
+
+        try {
+            com.company.hunttech.dto.integration.ProjectVacancyResponseDto response;
+            synchronized (projectVacancyLock) {
+                if (idempotencyKey != null) {
+                    com.company.hunttech.dto.integration.ProjectVacancyResponseDto cached = projectVacancyIdempotencyCache.get(idempotencyKey);
+                    if (cached != null) {
+                        log.info("Returning cached projectVacancy response inside lock for idempotencyKey: {} [correlationId={}]", idempotencyKey, correlationId);
+                        return cached;
+                    }
+                }
+
+                com.haulmont.cuba.core.global.CommitContext commitContext = new com.haulmont.cuba.core.global.CommitContext();
+
+                // 1. Поиск или создание проекта
+                com.company.hunttech.entity.Project project = null;
+                if (hasExistingProject) {
+                    try {
+                        UUID projectUuid = UUID.fromString(request.getExistingProjectId().trim());
+                        project = dataManager.load(com.company.hunttech.entity.Project.class).id(projectUuid).optional().orElse(null);
+                        if (project == null) {
+                            return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                                    "Проект с указанным existingProjectId не найден: " + request.getExistingProjectId(),
+                                    correlationId, "NOT_FOUND");
+                        }
+                    } catch (IllegalArgumentException ex) {
+                        return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                                "Некорректный формат UUID для existingProjectId: " + request.getExistingProjectId(),
+                                correlationId, "VALIDATION_ERROR");
+                    }
+                } else {
+                    String cleanProjectName = request.getProjectName().trim();
+                    String lookupName = truncate(cleanProjectName, 160);
+                    // Поиск существующего открытого проекта по имени
+                    project = dataManager.load(com.company.hunttech.entity.Project.class)
+                            .query("select e from hunttech_Project e where lower(e.projectName) = :name and (e.projectIsClosed is null or e.projectIsClosed = false)")
+                            .parameter("name", lookupName.toLowerCase(Locale.ROOT))
+                            .optional()
+                            .orElse(null);
+
+                    if (project == null) {
+                        project = metadata.create(com.company.hunttech.entity.Project.class);
+                        project.setProjectName(truncate(cleanProjectName, 160));
+                        project.setProjectDescription(request.getProjectDescription());
+                        project.setShortDescription(truncate(request.getProjectDescription(), 250));
+                        project.setProjectIsClosed(false);
+                        project.setStartProjectDate(new java.util.Date());
+
+                        // Привязка компании/департамента при наличии companyId
+                        if (StringUtils.isNotBlank(request.getCompanyId())) {
+                            try {
+                                UUID compUuid = UUID.fromString(request.getCompanyId().trim());
+                                Company company = dataManager.load(Company.class).id(compUuid).optional().orElse(null);
+                                if (company != null) {
+                                    com.company.hunttech.entity.CompanyDepartament dept = dataManager.load(com.company.hunttech.entity.CompanyDepartament.class)
+                                            .query("select d from hunttech_CompanyDepartament d where d.companyName.id = :compId")
+                                            .parameter("compId", compUuid)
+                                            .optional()
+                                            .orElse(null);
+
+                                    if (dept == null) {
+                                        dept = metadata.create(com.company.hunttech.entity.CompanyDepartament.class);
+                                        dept.setDepartamentRuName("Основной");
+                                        dept.setCompanyName(company);
+                                        commitContext.addInstanceToCommit(dept);
+                                    }
+                                    project.setProjectDepartment(dept);
+                                }
+                            } catch (IllegalArgumentException ex) {
+                                log.warn("Invalid companyId format [correlationId={}]: {}", correlationId, request.getCompanyId(), ex);
+                            }
+                        }
+
+                        commitContext.addInstanceToCommit(project);
+                    }
+                }
+
+                // 2. Разрешение связей для вакансии (Grade, City, Position)
+                com.company.hunttech.entity.Grade grade = null;
+                if (StringUtils.isNotBlank(request.getGradeId())) {
+                    try {
+                        UUID gradeUuid = UUID.fromString(request.getGradeId().trim());
+                        grade = dataManager.load(com.company.hunttech.entity.Grade.class).id(gradeUuid).optional().orElse(null);
+                    } catch (IllegalArgumentException ex) {
+                        log.warn("Invalid gradeId format [correlationId={}]: {}", correlationId, request.getGradeId(), ex);
+                    }
+                }
+
+                com.company.hunttech.entity.City city = null;
+                if (StringUtils.isNotBlank(request.getCityId())) {
+                    try {
+                        UUID cityUuid = UUID.fromString(request.getCityId().trim());
+                        city = dataManager.load(com.company.hunttech.entity.City.class).id(cityUuid).optional().orElse(null);
+                    } catch (IllegalArgumentException ex) {
+                        log.warn("Invalid cityId format [correlationId={}]: {}", correlationId, request.getCityId(), ex);
+                    }
+                }
+
+                com.company.hunttech.entity.Position positionType = null;
+                if (StringUtils.isNotBlank(request.getPositionTypeId())) {
+                    try {
+                        UUID posUuid = UUID.fromString(request.getPositionTypeId().trim());
+                        positionType = dataManager.load(com.company.hunttech.entity.Position.class).id(posUuid).optional().orElse(null);
+                    } catch (IllegalArgumentException ex) {
+                        log.warn("Invalid positionTypeId format [correlationId={}]: {}", correlationId, request.getPositionTypeId(), ex);
+                    }
+                }
+
+                // 3. Создание сущности OpenPosition
+                com.company.hunttech.entity.OpenPosition openPosition = metadata.create(com.company.hunttech.entity.OpenPosition.class);
+                openPosition.setVacansyName(truncate(request.getVacancyName().trim(), 250));
+                openPosition.setProjectName(project);
+
+                if (StringUtils.isNotBlank(request.getExternalId())) {
+                    openPosition.setVacansyID(truncate(request.getExternalId().trim(), 16));
+                } else {
+                    openPosition.setVacansyID("EXT-" + Math.abs(UUID.randomUUID().hashCode() % 1000000));
+                }
+
+                String shortDesc = request.getShortDescription() != null && !request.getShortDescription().trim().isEmpty()
+                        ? request.getShortDescription() : request.getVacancyName();
+                openPosition.setShortDescription(truncate(shortDesc, 250));
+                openPosition.setComment(request.getComment() != null ? request.getComment() : "");
+                openPosition.setRemoteWork(request.getRemoteWork() != null ? request.getRemoteWork() : 1);
+                openPosition.setCommandCandidate(request.getCommandCandidate() != null ? request.getCommandCandidate() : 1);
+                openPosition.setWorkExperience(request.getWorkExperience() != null ? request.getWorkExperience() : 1);
+                openPosition.setSalaryMin(request.getSalaryMin());
+                openPosition.setSalaryMax(request.getSalaryMax());
+                openPosition.setGrade(grade);
+                openPosition.setCityPosition(city);
+                openPosition.setPositionType(positionType);
+                openPosition.setOpenClose(false);
+                openPosition.setSignDraft(false);
+                openPosition.setInternalProject(false);
+                openPosition.setLastOpenDate(new java.util.Date());
+                openPosition.setPriority(2); // NORMAL
+
+                commitContext.addInstanceToCommit(openPosition);
+
+                // Атомарный коммит всех сущностей в одной транзакции
+                dataManager.commit(commitContext);
+
+                log.info("Successfully created project and vacancy: projectId={}, vacancyId={}, vacancyName='{}' [correlationId={}]",
+                        project.getId(), openPosition.getId(), openPosition.getVacansyName(), correlationId);
+
+                response = com.company.hunttech.dto.integration.ProjectVacancyResponseDto.ok(
+                        project.getId().toString(),
+                        openPosition.getId().toString(),
+                        request.getExternalId(),
+                        com.company.hunttech.dto.integration.ProjectVacancyResponseDto.STATUS_CREATED,
+                        correlationId
+                );
+
+                cacheIfIdempotent(idempotencyKey, response);
+                return response;
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to create project and vacancy for external API [correlationId={}]", correlationId, e);
+            return com.company.hunttech.dto.integration.ProjectVacancyResponseDto.error(
+                    "Ошибка при сохранении проекта и вакансии. Correlation ID: " + correlationId, correlationId, "SYSTEM_ERROR");
+        }
+    }
+
     private void cacheIfIdempotent(String idempotencyKey, CompanyResponseDto response) {
         if (idempotencyKey != null && response != null && response.isSuccess()) {
-            // Ограничение размера кэша для защиты от утечки памяти
-            if (idempotencyCache.size() > 5000) {
-                idempotencyCache.clear();
-            }
-            idempotencyCache.put(idempotencyKey, response);
+            cacheResponse(idempotencyCache, idempotencyKey, response);
         }
+    }
+
+    private void cacheIfIdempotent(String idempotencyKey, com.company.hunttech.dto.integration.ProjectVacancyResponseDto response) {
+        if (idempotencyKey != null && response != null && response.isSuccess()) {
+            cacheResponse(projectVacancyIdempotencyCache, idempotencyKey, response);
+        }
+    }
+
+    private <T> void cacheResponse(Map<String, T> cache, String idempotencyKey, T response) {
+        if (cache.size() > 5000) {
+            cache.clear();
+        }
+        cache.put(idempotencyKey, response);
     }
 
     private String truncate(String value, int maxLength) {
@@ -199,3 +413,5 @@ public class ExternalIntegrationServiceBean implements ExternalIntegrationServic
         return trimmed.length() <= maxLength ? trimmed : trimmed.substring(0, maxLength);
     }
 }
+
+

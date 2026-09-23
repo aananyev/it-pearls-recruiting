@@ -41,7 +41,10 @@ public class ExternalReferenceDataRestContractTest {
                 content.contains("hunttech_ExternalIntegrationService"));
         assertTrue("rest-services.xml должен экспортировать метод createCompany",
                 content.contains("name=\"createCompany\""));
+        assertTrue("rest-services.xml должен экспортировать метод createProjectAndVacancy",
+                content.contains("name=\"createProjectAndVacancy\""));
     }
+
 
     @Test
     public void testWebAppPropertiesEnablesServicesConfig() throws Exception {
