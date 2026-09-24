@@ -12,18 +12,32 @@ import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.SkillTree;
 import com.company.hunttech.entity.VacancyCandidateMatchRun;
+import com.company.hunttech.entity.JobHistory;
+import com.company.hunttech.entity.Position;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileLoader;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.extractor.POITextExtractor;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +63,9 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
     @Inject
     private CandidateVacancyWorkflowService workflowService;
+
+    @Inject
+    private FileLoader fileLoader;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ConcurrentMap<UUID, MatchProgressState> progressStates = new ConcurrentHashMap<>();
@@ -291,10 +308,10 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         OpenPosition vacancy = dataManager.load(OpenPosition.class)
                 .id(openPositionId)
                 .view(viewBuilder -> viewBuilder.addAll(
-                        "vacansyID", "vacansyName", "positionType.positionRuName", "comment", "shortDescription",
-                        "workExperience", "grade", "skillsList.skillName", "remoteWork",
-                        "remoteComment", "cityPosition.cityRuName", "cities.cityRuName",
-                        "projectName.projectName", "priority", "openClose"
+                        "vacansyID", "vacansyName", "positionType.positionRuName", "positionType.positionEnName",
+                        "comment", "shortDescription", "workExperience", "grade", "skillsList.skillName",
+                        "remoteWork", "remoteComment", "cityPosition.cityRuName", "cities.cityRuName",
+                        "projectName.projectName", "priority", "openClose", "searchMap"
                 ))
                 .optional()
                 .orElse(null);
@@ -313,25 +330,56 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             return emptyReport;
         }
 
-        // 2. Загрузка релевантного пула кандидатов
-        List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
-                .query("select distinct e from hunttech_JobCandidate e where (e.blocked = false or e.blocked is null) and exists (select cv from hunttech_CandidateCV cv where cv.candidate.id = e.id and cv.textCV is not null and length(trim(cv.textCV)) > 0) order by e.updateTs desc")
-                .view("jobCandidate-full-view")
-                .maxResults(25)
-                .list();
+        // 2. Определение должностей вакансии через карту поиска / AI и справочник Position
+        List<Position> targetPositions = resolveVacancyPositions(vacancy, operationId);
+
+        // 3. Выборка релевантного пула кандидатов из JobCandidate с учетом доступности
+        List<JobCandidate> candidates = Collections.emptyList();
+        if (!targetPositions.isEmpty()) {
+            List<UUID> posIds = targetPositions.stream().map(Position::getId).collect(Collectors.toList());
+            try {
+                candidates = dataManager.load(JobCandidate.class)
+                        .query("select distinct e from hunttech_JobCandidate e where (e.blockCandidate = false or e.blockCandidate is null) and (e.personPosition.id in :posIds or exists (select pl from hunttech_JobCandidatePositionLists pl where pl.jobCandidate.id = e.id and pl.positionList.id in :posIds)) order by e.updateTs desc")
+                        .parameter("posIds", posIds)
+                        .view("jobCandidate-full-view")
+                        .maxResults(25)
+                        .list();
+            } catch (Exception ex) {
+                log.debug("Query candidates by positions failed: {}", ex.getMessage());
+            }
+        }
+
+        // Fallback-выборка при отсутствии кандидатов по точным должностям
+        if (candidates.isEmpty()) {
+            try {
+                candidates = dataManager.load(JobCandidate.class)
+                        .query("select distinct e from hunttech_JobCandidate e where (e.blocked = false or e.blocked is null) and exists (select cv from hunttech_CandidateCV cv where cv.candidate.id = e.id and cv.textCV is not null and length(trim(cv.textCV)) > 0) order by e.updateTs desc")
+                        .view("jobCandidate-full-view")
+                        .maxResults(25)
+                        .list();
+            } catch (Exception ex) {
+                log.debug("Resume candidate query failed: {}", ex.getMessage());
+            }
+        }
 
         if (candidates.isEmpty()) {
-            candidates = dataManager.load(JobCandidate.class)
-                    .query("select e from hunttech_JobCandidate e where e.blocked = false or e.blocked is null order by e.updateTs desc")
-                    .view("jobCandidate-full-view")
-                    .maxResults(25)
-                    .list();
+            try {
+                candidates = dataManager.load(JobCandidate.class)
+                        .query("select e from hunttech_JobCandidate e where e.blocked = false or e.blocked is null order by e.updateTs desc")
+                        .view("jobCandidate-full-view")
+                        .maxResults(25)
+                        .list();
+            } catch (Exception ex) {
+                log.debug("Fallback candidate query failed: {}", ex.getMessage());
+            }
         }
 
         if (candidates.isEmpty()) {
             CandidateVacancyMatchReport emptyReport = new CandidateVacancyMatchReport();
             emptyReport.setSuccess(false);
-            emptyReport.setStatusMessage("В базе нет кандидатов для анализа.");
+            emptyReport.setStatusMessage(targetPositions.isEmpty() && vacancy.getPositionType() == null
+                    ? "Не удалось сопоставить должности вакансии со справочником должностей системы. Укажите должность вакансии в карточке или проверьте карту поиска. Код обращения: " + operationId
+                    : "В базе нет подходящих кандидатов для анализа. Код обращения: " + operationId);
             return emptyReport;
         }
 
@@ -358,21 +406,36 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             String phase = "load-resume";
             String requestId = operationId + "-candidate-" + candidateSequence;
             try {
-                List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
-                        .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(e.textCV)) > 0 order by e.datePost desc, e.createTs desc")
-                        .parameter("candId", cand.getId())
-                        .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy"))
-                        .list();
+                List<CandidateCV> cvList = Collections.emptyList();
+                try {
+                    cvList = dataManager.load(CandidateCV.class)
+                            .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId order by e.datePost desc, e.createTs desc")
+                            .parameter("candId", cand.getId())
+                            .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy", "letter", "commentLetter", "originalFileCV", "fileCV"))
+                            .list();
+                } catch (Exception ex) {
+                    log.debug("Load CV list failed for candidate {}: {}", cand.getId(), ex.getMessage());
+                }
 
                 phase = "load-skills";
-                List<CandidateSkill> candidateSkills = dataManager.load(CandidateSkill.class)
-                        .query("select e from hunttech_CandidateSkill e where e.candidate.id = :candId")
-                        .parameter("candId", cand.getId())
-                        .view(viewBuilder -> viewBuilder.add("skill.skillName").add("priority"))
-                        .list();
+                List<CandidateSkill> candidateSkills = Collections.emptyList();
+                try {
+                    candidateSkills = dataManager.load(CandidateSkill.class)
+                            .query("select e from hunttech_CandidateSkill e where e.candidate.id = :candId")
+                            .parameter("candId", cand.getId())
+                            .view(viewBuilder -> viewBuilder.add("skill.skillName").add("priority"))
+                            .list();
+                } catch (Exception ex) {
+                    log.debug("Load skills failed for candidate {}: {}", cand.getId(), ex.getMessage());
+                }
 
                 phase = "prepare-context";
-                String candidateProfile = buildCandidateProfileString(cand);
+                String recruiterActivity = resolveRecruiterActivityDescription(cand.getId());
+                String lastJobDomain = resolveLastJobDomainDescription(cand);
+
+                String candidateProfile = buildCandidateProfileString(cand)
+                        + "\nАктуальность взаимодействия с рекрутером в HRM: " + recruiterActivity
+                        + "\nПредметная область последнего места работы: " + lastJobDomain;
                 String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
                 String candidateResumeText = buildCandidateResumeText(cvList);
 
@@ -430,10 +493,14 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                             (cand.getCurrentCompany().getComanyName() != null ? cand.getCurrentCompany().getComanyName() : cand.getCurrentCompany().getCompanyShortName()) : "");
 
                     if (workflowService != null) {
-                        IteractionList existing = workflowService.getExistingRelation(cand.getId(), vacancy.getId());
-                        if (existing != null) {
-                            matchedItem.setAlreadyInWork(true);
-                            matchedItem.setRecruiterDecision("В работе");
+                        try {
+                            IteractionList existing = workflowService.getExistingRelation(cand.getId(), vacancy.getId());
+                            if (existing != null) {
+                                matchedItem.setAlreadyInWork(true);
+                                matchedItem.setRecruiterDecision("В работе");
+                            }
+                        } catch (Exception ex) {
+                            log.debug("Workflow relation check failed: {}", ex.getMessage());
                         }
                     }
 
@@ -608,19 +675,93 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         return sb.toString();
     }
 
+    private String extractFileTextSafely(FileDescriptor fd) {
+        if (fd == null || fileLoader == null) {
+            return "";
+        }
+        try (InputStream is = fileLoader.openStream(fd)) {
+            byte[] bytes = is.readAllBytes();
+            if (bytes == null || bytes.length == 0) {
+                return "";
+            }
+            String ext = fd.getExtension() != null ? fd.getExtension().toLowerCase(Locale.ROOT) : "";
+            if ("pdf".equals(ext)) {
+                try (PDDocument doc = Loader.loadPDF(bytes)) {
+                    return new PDFTextStripper().getText(doc);
+                }
+            } else if ("docx".equals(ext)) {
+                try (InputStream bis = new java.io.ByteArrayInputStream(bytes);
+                     XWPFDocument doc = new XWPFDocument(bis);
+                     XWPFWordExtractor extractor = new XWPFWordExtractor(doc)) {
+                    return extractor.getText();
+                }
+            } else if ("txt".equals(ext)) {
+                return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+            }
+        } catch (Exception | LinkageError e) {
+            log.debug("extractFileTextSafely failed for file {}: {}", fd.getId(), e.getMessage());
+        }
+        return "";
+    }
+
     private String buildCandidateResumeText(List<CandidateCV> cvList) {
-        StringBuilder sb = new StringBuilder();
         if (cvList == null || cvList.isEmpty()) {
             return "Резюме с распознанным текстом отсутствует. Для анализа используйте только профиль и сохранённые навыки кандидата; не предполагайте неподтверждённый опыт.";
         }
         CandidateCV mainCV = cvList.get(0);
-        sb.append("--- ОСНОВНОЕ РЕЗЮМЕ ---\n");
-        if (mainCV.getTextCV() != null) {
-            String text = mainCV.getTextCV().trim();
-            if (text.length() > MAX_RESUME_TEXT_CHARS) {
-                text = text.substring(0, MAX_RESUME_TEXT_CHARS) + "\n...[текст сокращен]";
+        StringBuilder sb = new StringBuilder();
+
+        // 1. Оригинальный файл резюме, если он есть
+        String fileText = "";
+        if (mainCV.getOriginalFileCV() != null) {
+            fileText = extractFileTextSafely(mainCV.getOriginalFileCV());
+        }
+        if (fileText.trim().isEmpty() && mainCV.getFileCV() != null) {
+            fileText = extractFileTextSafely(mainCV.getFileCV());
+        }
+
+        // 2. textCV, если оригинального файла нет
+        String bodyText = "";
+        if (!fileText.trim().isEmpty()) {
+            bodyText = fileText.trim();
+        } else if (mainCV.getTextCV() != null && !mainCV.getTextCV().trim().isEmpty()) {
+            bodyText = mainCV.getTextCV().trim();
+        }
+
+        // 3. Чек-лист кандидата / комментарий
+        String checklistText = mainCV.getCommentLetter() != null ? mainCV.getCommentLetter().trim() : "";
+
+        // 4. Сопроводительное письмо из резюме, если оно есть
+        String coverLetterText = mainCV.getLetter() != null ? mainCV.getLetter().trim() : "";
+
+        if (bodyText.isEmpty() && checklistText.isEmpty() && coverLetterText.isEmpty()) {
+            boolean foundAnyInPast = false;
+            for (int i = 1; i < cvList.size(); i++) {
+                CandidateCV past = cvList.get(i);
+                if (past.getTextCV() != null && !past.getTextCV().trim().isEmpty()) {
+                    foundAnyInPast = true;
+                    break;
+                }
             }
-            sb.append(text).append("\n");
+            if (!foundAnyInPast) {
+                return "Резюме с распознанным текстом отсутствует. Для анализа используйте только профиль и сохранённые навыки кандидата; не предполагайте неподтверждённый опыт.";
+            }
+        }
+
+        sb.append("--- ОСНОВНОЕ РЕЗЮМЕ ---\n");
+        if (!bodyText.isEmpty()) {
+            if (bodyText.length() > MAX_RESUME_TEXT_CHARS) {
+                bodyText = bodyText.substring(0, MAX_RESUME_TEXT_CHARS) + "\n...[текст сокращен]";
+            }
+            sb.append(bodyText).append("\n");
+        }
+
+        if (!checklistText.isEmpty()) {
+            sb.append("\n--- ЧЕК-ЛИСТ И ЗАМЕТКИ РЕКРУТЕРА ПО КАНДИДАТУ ---\n").append(checklistText).append("\n");
+        }
+
+        if (!coverLetterText.isEmpty()) {
+            sb.append("\n--- СОПРОВОДИТЕЛЬНОЕ ПИСЬМО ИЗ РЕЗЮМЕ ---\n").append(coverLetterText).append("\n");
         }
 
         // Если есть более ранние резюме, добавляем сжатую историческую справку
@@ -642,6 +783,312 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             }
         }
         return sb.toString();
+    }
+
+    private List<Position> resolveVacancyPositions(OpenPosition vacancy, UUID operationId) {
+        Set<String> titles = new LinkedHashSet<>();
+
+        // 1. Попытка извлечь должности из карты поиска searchMap
+        String searchMap = vacancy.getSearchMap();
+        if (searchMap != null && !searchMap.trim().isEmpty()) {
+            extractPositionsFromSearchMap(searchMap, titles);
+        }
+
+        // 2. Если карта поиска должности не задает, генерируем список подходящих должностей
+        if (titles.isEmpty()) {
+            titles.addAll(generatePositionsWithAi(vacancy, operationId));
+        }
+
+        // 3. Сопоставляем каждую должность с точным значением справочника Position
+        List<Position> matchedPositions = new ArrayList<>();
+        Set<UUID> matchedIds = new HashSet<>();
+
+        for (String title : titles) {
+            Position pos = matchExactPositionInDictionary(title);
+            if (pos != null && matchedIds.add(pos.getId())) {
+                matchedPositions.add(pos);
+            }
+        }
+
+        // 4. Безопасное поведение, если точное сопоставление не найдено: используем должность вакансии
+        if (matchedPositions.isEmpty() && vacancy.getPositionType() != null) {
+            matchedPositions.add(vacancy.getPositionType());
+        }
+
+        return matchedPositions;
+    }
+
+    private void extractPositionsFromSearchMap(String rawSearchMap, Set<String> titles) {
+        if (rawSearchMap == null || rawSearchMap.trim().isEmpty()) {
+            return;
+        }
+        String formatted = rawSearchMap
+                .replaceAll("(?i)<(?:br|hr|/p|/div|/li|/h[1-6]|/tr)>", "\n")
+                .replaceAll("(?i)<[^>]+>", " ");
+
+        String[] lines = formatted.split("[\\r\\n]+");
+        boolean inAltSection = false;
+
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+
+            String lower = trimmed.toLowerCase(Locale.ROOT);
+            if (inAltSection && (lower.contains("компании-донор")
+                    || lower.contains("требовани")
+                    || lower.contains("обязанност")
+                    || lower.contains("приложени")
+                    || lower.contains("стек")
+                    || lower.contains("условия"))) {
+                inAltSection = false;
+            }
+
+            if (lower.contains("альтернативные названия должностей")
+                    || lower.contains("альтернативные должности")
+                    || lower.contains("вспомогательные должности")) {
+                inAltSection = true;
+                int colonIdx = trimmed.indexOf(':');
+                if (colonIdx >= 0 && colonIdx + 1 < trimmed.length()) {
+                    String afterColon = trimmed.substring(colonIdx + 1).trim();
+                    for (String item : afterColon.split("[,;•]+")) {
+                        String clean = cleanPositionTitle(item);
+                        if (!clean.isEmpty() && clean.length() >= 3 && clean.length() <= 60) {
+                            titles.add(clean);
+                        }
+                    }
+                }
+                continue;
+            }
+
+            if (inAltSection) {
+                for (String item : trimmed.split("[,;•]+")) {
+                    String clean = cleanPositionTitle(item);
+                    if (!clean.isEmpty() && clean.length() >= 3 && clean.length() <= 60) {
+                        titles.add(clean);
+                    }
+                }
+                continue;
+            }
+
+            Pattern p = Pattern.compile("(?i)^(?:.*?(?:Карта поиска для рекрутера|Должность))[:\\s]+([^:;,\\n\\r]{3,60})");
+            Matcher m = p.matcher(trimmed);
+            if (m.find()) {
+                String clean = cleanPositionTitle(m.group(1));
+                if (!clean.isEmpty()) {
+                    titles.add(clean);
+                }
+            }
+        }
+    }
+
+    private String cleanPositionTitle(String raw) {
+        if (raw == null) return "";
+        String s = raw.trim();
+        s = s.replaceAll("(?i)\\[|\\]", "");
+        s = s.replaceAll("(?i)\\((?:УТОЧНИТЬ|основная|вспомогательная|приоритет)[^)]*\\)", "");
+        s = s.replaceAll("^[-*•0-9.\\s]+", "");
+        s = s.trim();
+        if (s.startsWith(":") || s.startsWith("-")) {
+            s = s.substring(1).trim();
+        }
+        return s;
+    }
+
+    private String stripGradeModifiers(String title) {
+        if (title == null) return "";
+        return title.replaceAll("(?i)\\b(senior|middle|junior|lead|teamlead|techlead|ведущий|главный|старший|младший|руководитель группы)\\b", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
+    private List<String> generatePositionsWithAi(OpenPosition vacancy, UUID operationId) {
+        List<String> result = new ArrayList<>();
+        if (vacancy == null) {
+            return result;
+        }
+
+        if (aiExecutionService != null) {
+            try {
+                Map<String, Object> ctx = new HashMap<>();
+                String vacancyDesc = vacancy.getVacansyName() != null ? vacancy.getVacansyName() : "";
+                if (vacancy.getComment() != null) {
+                    String cleanComment = Jsoup.parse(vacancy.getComment()).text();
+                    if (cleanComment.length() > 500) {
+                        cleanComment = cleanComment.substring(0, 500);
+                    }
+                    vacancyDesc += ". " + cleanComment;
+                }
+                ctx.put("vacancyText", vacancyDesc);
+                ctx.put("requestId", operationId + "-positions-gen");
+                ctx.put("callerSource", "CandidateVacancyMatch:positions-gen");
+
+                AiExecutionResult aiRes = aiExecutionService.executeText("VACANCY_SMART_POSITIONS", ctx);
+                if (aiRes != null && aiRes.getText() != null && !aiRes.getText().trim().isEmpty()) {
+                    String text = aiRes.getText().trim();
+                    if (text.startsWith("```")) {
+                        text = text.replaceAll("^```(?:json)?", "").replaceAll("```$", "").trim();
+                    }
+                    JsonNode root = objectMapper.readTree(text);
+                    if (root.isArray()) {
+                        for (JsonNode n : root) {
+                            String t = cleanPositionTitle(n.asText());
+                            if (!t.isEmpty()) {
+                                result.add(t);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("generatePositionsWithAi call failed: {}", e.getMessage());
+            }
+        }
+
+        if (result.isEmpty() && vacancy.getVacansyName() != null) {
+            String raw = vacancy.getVacansyName().trim();
+            String cleaned = cleanPositionTitle(raw);
+            if (!cleaned.isEmpty()) {
+                result.add(cleaned);
+                String stripped = stripGradeModifiers(cleaned);
+                if (!stripped.isEmpty() && !stripped.equalsIgnoreCase(cleaned)) {
+                    result.add(stripped);
+                }
+            }
+        }
+        return result;
+    }
+
+    private Position matchExactPositionInDictionary(String rawTitle) {
+        if (rawTitle == null || rawTitle.trim().isEmpty() || dataManager == null) {
+            return null;
+        }
+        String clean = cleanPositionTitle(rawTitle);
+        if (clean.isEmpty()) {
+            return null;
+        }
+        try {
+            // 1. Точное совпадение по positionRuName или positionEnName (регистронезависимо)
+            List<Position> list = dataManager.load(Position.class)
+                    .query("select p from hunttech_Position p where lower(trim(p.positionRuName)) = :t or lower(trim(p.positionEnName)) = :t")
+                    .parameter("t", clean.toLowerCase(Locale.ROOT))
+                    .list();
+            if (!list.isEmpty()) {
+                return list.get(0);
+            }
+
+            // 2. Очистка от грейдов (Senior/Middle/Junior/Lead) и повторный поиск точного совпадения
+            String stripped = stripGradeModifiers(clean);
+            if (!stripped.isEmpty() && !stripped.equalsIgnoreCase(clean)) {
+                list = dataManager.load(Position.class)
+                        .query("select p from hunttech_Position p where lower(trim(p.positionRuName)) = :s or lower(trim(p.positionEnName)) = :s")
+                        .parameter("s", stripped.toLowerCase(Locale.ROOT))
+                        .list();
+                if (!list.isEmpty()) {
+                    return list.get(0);
+                }
+            }
+
+            // 3. Поиск по началу названия (префиксное совпадение в справочнике)
+            String prefix = (stripped.isEmpty() ? clean : stripped).toLowerCase(Locale.ROOT);
+            if (prefix.length() >= 4) {
+                list = dataManager.load(Position.class)
+                        .query("select p from hunttech_Position p where lower(trim(p.positionRuName)) like :p or lower(trim(p.positionEnName)) like :p")
+                        .parameter("p", prefix + "%")
+                        .list();
+                if (!list.isEmpty()) {
+                    return list.get(0);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("matchExactPositionInDictionary query failed for title '{}': {}", rawTitle, e.getMessage());
+        }
+        return null;
+    }
+
+    private String resolveRecruiterActivityDescription(UUID candidateId) {
+        if (candidateId == null || dataManager == null) {
+            return "Нет данных о взаимодействиях (новый кандидат)";
+        }
+        try {
+            List<Date> dates = dataManager.loadValue(
+                    "select max(e.dateIteraction) from hunttech_IteractionList e where e.candidate.id = :candId", Date.class)
+                    .parameter("candId", candidateId)
+                    .list();
+            Date lastDate = (dates != null && !dates.isEmpty()) ? dates.get(0) : null;
+            if (lastDate == null) {
+                return "Ранее не взаимодействовали (новый кандидат в базе HRM)";
+            }
+            long diffMillis = System.currentTimeMillis() - lastDate.getTime();
+            long days = diffMillis / (1000L * 60 * 60 * 24);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ROOT);
+            if (days <= 30) {
+                return "В работе / контакт в течение последнего месяца (" + sdf.format(lastDate) + ", " + days + " дн. назад) — наивысшая актуальность";
+            } else if (days <= 180) {
+                return "Контакт в течение полугода (" + sdf.format(lastDate) + ", " + days + " дн. назад) — высокая актуальность";
+            } else if (days <= 365) {
+                return "Контакт в течение года (" + sdf.format(lastDate) + ", " + days + " дн. назад) — средняя актуальность";
+            } else {
+                long years = days / 365;
+                return "Контакт более " + (years >= 2 ? years + " лет" : "года") + " назад (" + sdf.format(lastDate) + ") — низкий приоритет взаимодействия";
+            }
+        } catch (Exception e) {
+            log.debug("resolveRecruiterActivityDescription failed for candidate {}: {}", candidateId, e.getMessage());
+            return "Информация о взаимодействиях не определена";
+        }
+    }
+
+    private String resolveLastJobDomainDescription(JobCandidate candidate) {
+        if (candidate == null) {
+            return "Не указана";
+        }
+        StringBuilder sb = new StringBuilder();
+        if (dataManager != null) {
+            try {
+                List<JobHistory> history = dataManager.load(JobHistory.class)
+                        .query("select e from hunttech_JobHistory e where e.candidate.id = :candId order by e.endDate desc, e.startDate desc, e.createTs desc")
+                        .parameter("candId", candidate.getId())
+                        .view(viewBuilder -> viewBuilder.addAll("currentCompany.comanyName", "currentCompany.companyShortName",
+                                "currentPosition.positionRuName", "rawCompanyName", "rawPositionName", "duties"))
+                        .maxResults(1)
+                        .list();
+                if (!history.isEmpty()) {
+                    JobHistory jh = history.get(0);
+                    String comp = jh.getCurrentCompany() != null ?
+                            (jh.getCurrentCompany().getComanyName() != null ? jh.getCurrentCompany().getComanyName() : jh.getCurrentCompany().getCompanyShortName()) :
+                            jh.getRawCompanyName();
+                    String pos = jh.getCurrentPosition() != null ? jh.getCurrentPosition().getPositionRuName() : jh.getRawPositionName();
+
+                    if (comp != null && !comp.isEmpty()) {
+                        sb.append("Компания: ").append(comp);
+                    }
+                    if (pos != null && !pos.isEmpty()) {
+                        sb.append(", Должность: ").append(pos);
+                    }
+                    if (jh.getDuties() != null && !jh.getDuties().trim().isEmpty()) {
+                        String duties = jh.getDuties().trim();
+                        if (duties.length() > 300) duties = duties.substring(0, 300) + "...";
+                        sb.append(". Обязанности: ").append(duties);
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("resolveLastJobDomainDescription query failed for candidate {}: {}", candidate.getId(), e.getMessage());
+            }
+        }
+
+        if (sb.length() == 0) {
+            if (candidate.getCurrentCompany() != null) {
+                String cName = candidate.getCurrentCompany().getComanyName() != null ?
+                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+                sb.append("Текущая компания: ").append(cName);
+            }
+            if (candidate.getSpecialisation() != null && candidate.getSpecialisation().getSpecRuName() != null) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append("Специализация: ").append(candidate.getSpecialisation().getSpecRuName());
+            }
+        }
+
+        return sb.length() > 0 ? sb.toString() : "Предметная область последнего места работы не зафиксирована";
     }
 
     private List<List<OpenPosition>> splitIntoChunks(List<OpenPosition> openPositions) {
