@@ -912,24 +912,25 @@
     .candidate-browse-grid .v-grid-row,
     .candidate-browse-grid .v-table-row,
     .candidate-browse-grid .v-table-row-odd {
-      min-height: 38px !important;
+      min-height: 57px !important;
     }
 
     .candidate-browse-grid .v-grid-cell,
     .candidate-browse-grid .v-table-cell-content {
       box-sizing: border-box;
       min-width: 0;
-      padding-top: 6px !important;
-      padding-bottom: 6px !important;
+      min-height: 57px !important;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
       white-space: normal !important;
-      line-height: 1.35 !important;
+      line-height: 1.4 !important;
       word-break: break-word !important;
       overflow-wrap: break-word !important;
     }
 
     .candidate-browse-grid .v-table-cell-wrapper {
       white-space: normal !important;
-      line-height: 1.35 !important;
+      line-height: 1.4 !important;
       word-break: break-word !important;
     }
 
@@ -951,14 +952,14 @@
       border-bottom: none !important;
     }
 
-    /* bodyRowHeight переопределения (контракт п.3.2):
-     * - iteractionList: 36px → 38px (контрактная)
-     * - candidateCv: 55px остаётся (HTML-контент, обосновано в PR) */
+    /* bodyRowHeight переопределения:
+     * - iteractionList: увеличено до 57px (1.5x)
+     * - candidateCv: увеличено до 57px (1.5x) */
     .job-candidate-iteraction-grid.candidate-browse-grid .v-grid-row {
-      min-height: 38px !important;
+      min-height: 57px !important;
     }
     .job-candidate-resume-grid.candidate-browse-grid .v-grid-row {
-      min-height: 38px !important;
+      min-height: 57px !important;
     }
 
     /* word-break для URL соцсетей (socialNetworkTable) */
@@ -2085,26 +2086,26 @@
     padding: 0 14px !important;
   }
 
-  /* Таблица реестров кандидатов и резюме (увеличение высоты строк на 20% + поддержка многострочного переноса) */
+  /* Таблица реестров кандидатов и резюме (увеличение высоты строк в 1.5 раза до 57px + поддержка многострочного переноса) */
   .candidate-browse-grid {
     .v-table-cell-content,
     .v-grid-cell {
-      padding-top: 6px !important;
-      padding-bottom: 6px !important;
-      min-height: 38px !important;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      min-height: 57px !important;
       vertical-align: middle !important;
     }
 
     .v-table-cell-wrapper {
       white-space: normal !important;
-      line-height: 1.35 !important;
+      line-height: 1.4 !important;
       word-break: break-word !important;
     }
 
     .v-table-row,
     .v-table-row-odd,
     .v-grid-row {
-      min-height: 38px !important;
+      min-height: 57px !important;
     }
   }
 

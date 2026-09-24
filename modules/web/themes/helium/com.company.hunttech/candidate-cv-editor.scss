@@ -755,7 +755,7 @@
     .candidate-browse-grid .v-table-row,
     .candidate-browse-grid .v-table-row-odd,
     .candidate-browse-grid .v-grid-row {
-      min-height: 38px !important;
+      min-height: 57px !important;
       border-bottom: 1px solid rgba($v-font-color, 0.08) !important;
       transition: background-color 0.15s ease;
     }
@@ -776,9 +776,10 @@
     .candidate-browse-grid .v-grid-cell {
       box-sizing: border-box;
       min-width: 0;
-      padding: 6px 10px !important;
+      min-height: 57px !important;
+      padding: 8px 12px !important;
       white-space: normal !important;
-      line-height: 1.35 !important;
+      line-height: 1.4 !important;
       word-break: break-word !important;
       overflow-wrap: break-word !important;
       vertical-align: middle !important;
