@@ -2087,7 +2087,8 @@
 
   /* Таблица реестров кандидатов и резюме (увеличение высоты строк на 20% + поддержка многострочного переноса) */
   .candidate-browse-grid {
-    .v-table-cell-content {
+    .v-table-cell-content,
+    .v-grid-cell {
       padding-top: 6px !important;
       padding-bottom: 6px !important;
       min-height: 38px !important;
@@ -2101,7 +2102,8 @@
     }
 
     .v-table-row,
-    .v-table-row-odd {
+    .v-table-row-odd,
+    .v-grid-row {
       min-height: 38px !important;
     }
   }

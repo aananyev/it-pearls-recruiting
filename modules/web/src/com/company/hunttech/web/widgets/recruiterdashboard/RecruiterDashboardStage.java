@@ -11,20 +11,22 @@ import java.util.Locale;
  * название используется только как совместимый fallback для legacy-записей.
  */
 public enum RecruiterDashboardStage {
-    NEW("Новые", "recruiter-stage-new"),
-    RECRUITER_INTERVIEW("Собеседование рекрутера", "recruiter-stage-recruiter"),
-    CLIENT("У заказчика", "recruiter-stage-client"),
-    CLIENT_INTERVIEW("Интервью заказчика", "recruiter-stage-client-interview"),
-    OFFER("Оффер / финал", "recruiter-stage-offer"),
-    OUTCOME("Исход", "recruiter-stage-outcome"),
-    RESERVE("Кадровый резерв", "recruiter-stage-reserve");
+    NEW("Новые", "recruiter-stage-new", 0),
+    RECRUITER_INTERVIEW("Собеседование рекрутера", "recruiter-stage-recruiter", 1),
+    CLIENT("У заказчика", "recruiter-stage-client", 2),
+    CLIENT_INTERVIEW("Интервью заказчика", "recruiter-stage-client-interview", 3),
+    OFFER("Оффер / финал", "recruiter-stage-offer", 4),
+    OUTCOME("Исход", "recruiter-stage-outcome", 5),
+    RESERVE("Кадровый резерв", "recruiter-stage-reserve", -1);
 
     private final String caption;
     private final String styleName;
+    private final int order;
 
-    RecruiterDashboardStage(String caption, String styleName) {
+    RecruiterDashboardStage(String caption, String styleName, int order) {
         this.caption = caption;
         this.styleName = styleName;
+        this.order = order;
     }
 
     public String getCaption() {
@@ -33,6 +35,10 @@ public enum RecruiterDashboardStage {
 
     public String getStyleName() {
         return styleName;
+    }
+
+    public int getOrder() {
+        return order;
     }
 
     public static RecruiterDashboardStage resolve(Iteraction type) {

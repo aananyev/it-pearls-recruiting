@@ -463,6 +463,19 @@
     border: 1px solid $recruiter-dashboard-subtle-border;
     border-radius: 7px;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    user-select: none;
+    cursor: grab;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-column.recruiter-kanban-column-drop-hover {
+    border-color: $recruiter-dashboard-accent !important;
+    background: rgba($recruiter-dashboard-accent, 0.08) !important;
+    box-shadow: 0 0 0 2px rgba($recruiter-dashboard-accent, 0.45) !important;
   }
 
   .recruiter-dashboard-root .recruiter-candidate-link {

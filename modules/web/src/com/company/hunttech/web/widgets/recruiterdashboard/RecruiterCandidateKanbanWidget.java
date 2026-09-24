@@ -1,16 +1,23 @@
 package com.company.hunttech.web.widgets.recruiterdashboard;
 
+import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.entity.Iteraction;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.events.DashboardEvent;
 import com.haulmont.addon.dashboard.web.widget.RefreshableWidget;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.ScreenFragment.InitEvent;
+import com.haulmont.cuba.gui.screen.StandardOutcome;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
@@ -51,15 +58,26 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
     private HBoxLayout kanbanBoard;
     @Inject
     private Label<String> periodLabel;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private Notifications notifications;
 
+    private RecruiterKanbanDragDropExtension dndExtension;
     private boolean isInitialized = false;
     private final SimpleDateFormat dayFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     @Subscribe
     public void onInit(InitEvent event) {
         initFilters();
+        initDragAndDrop();
         isInitialized = true;
         reload();
+    }
+
+    private void initDragAndDrop() {
+        dndExtension = new RecruiterKanbanDragDropExtension();
+        dndExtension.extend(kanbanBoard, this::handleCardMoved);
     }
 
     @Override
@@ -184,12 +202,45 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         List<IteractionList> cases = loader.list();
 
+        // 1. Дедупликация: кандидат не должен повторяться на доске два и более раз.
+        // Выбираем наиболее старшую (самую правую) стадию, при равенстве стадий — более свежее взаимодействие.
+        Map<UUID, IteractionList> bestCasesByCandidate = new LinkedHashMap<>();
+        List<IteractionList> candidateLessCases = new ArrayList<>();
+
+        for (IteractionList item : cases) {
+            JobCandidate candidate = item.getCandidate();
+            if (candidate == null || candidate.getId() == null) {
+                candidateLessCases.add(item);
+                continue;
+            }
+            UUID candidateId = candidate.getId();
+            IteractionList existing = bestCasesByCandidate.get(candidateId);
+            if (existing == null) {
+                bestCasesByCandidate.put(candidateId, item);
+            } else {
+                RecruiterDashboardStage currentStage = RecruiterDashboardStage.resolve(item.getIteractionType());
+                RecruiterDashboardStage existingStage = RecruiterDashboardStage.resolve(existing.getIteractionType());
+                if (currentStage.getOrder() > existingStage.getOrder()) {
+                    bestCasesByCandidate.put(candidateId, item);
+                } else if (currentStage.getOrder() == existingStage.getOrder()) {
+                    Date currentDate = item.getDateIteraction();
+                    Date existingDate = existing.getDateIteraction();
+                    if (currentDate != null && (existingDate == null || currentDate.after(existingDate))) {
+                        bestCasesByCandidate.put(candidateId, item);
+                    }
+                }
+            }
+        }
+
+        List<IteractionList> uniqueCases = new ArrayList<>(bestCasesByCandidate.values());
+        uniqueCases.addAll(candidateLessCases);
+
         Map<RecruiterDashboardStage, List<IteractionList>> grouped =
                 new EnumMap<>(RecruiterDashboardStage.class);
         for (RecruiterDashboardStage stage : RecruiterDashboardStage.values()) {
             grouped.put(stage, new ArrayList<>());
         }
-        for (IteractionList item : cases) {
+        for (IteractionList item : uniqueCases) {
             RecruiterDashboardStage stage = RecruiterDashboardStage.resolve(item.getIteractionType());
             if (stage != RecruiterDashboardStage.RESERVE) {
                 grouped.get(stage).add(item);
@@ -201,7 +252,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         String periodText = (days > 0) ? ("Последние " + days + " дней") : "За все время";
         String recruiterText = selectedRecruiter != null ? selectedRecruiter.getName() : "Все";
-        periodLabel.setValue(periodText + " · " + recruiterText + " · " + cases.size() + " активных кейсов");
+        periodLabel.setValue(periodText + " · " + recruiterText + " · " + uniqueCases.size() + " активных кандидатов");
     }
 
     private void renderKpis(Map<RecruiterDashboardStage, List<IteractionList>> grouped) {
@@ -260,6 +311,9 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
                 RecruiterDashboardStage.OUTCOME}) {
             kanbanBoard.add(createColumn(stage, grouped.get(stage)));
         }
+        if (dndExtension != null) {
+            dndExtension.reinit();
+        }
     }
 
     private VBoxLayout createColumn(RecruiterDashboardStage stage, List<IteractionList> items) {
@@ -268,6 +322,8 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         column.setHeight("100%");
         column.setStyleName("recruiter-kanban-column " + stage.getStyleName());
         column.setSpacing(true);
+        column.unwrap(com.vaadin.ui.AbstractComponent.class).setId("kanban-column-" + stage.name());
+        column.unwrap(com.vaadin.ui.AbstractComponent.class).setDescription("stage:" + stage.name());
 
         HBoxLayout header = uiComponents.create(HBoxLayout.class);
         header.setWidthFull();
@@ -305,7 +361,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             cardsBox.add(empty);
         } else {
             for (IteractionList item : items) {
-                cardsBox.add(createCandidateCard(item));
+                cardsBox.add(createCandidateCard(item, stage));
             }
         }
 
@@ -315,11 +371,12 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         return column;
     }
 
-    private VBoxLayout createCandidateCard(IteractionList item) {
+    private VBoxLayout createCandidateCard(IteractionList item, RecruiterDashboardStage stage) {
         VBoxLayout card = uiComponents.create(VBoxLayout.class);
         card.setWidthFull();
         card.setSpacing(true);
-        card.setStyleName("recruiter-kanban-card");
+        card.setStyleName("recruiter-kanban-card card-stage-" + stage.name());
+        card.unwrap(com.vaadin.ui.AbstractComponent.class).setId("kanban-card-" + item.getId());
 
         JobCandidate candidate = item.getCandidate();
 
@@ -433,6 +490,82 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         }
 
         return card;
+    }
+
+    private void handleCardMoved(String interactionIdStr, String targetStageName) {
+        if (interactionIdStr == null || targetStageName == null) return;
+
+        UUID interactionId;
+        RecruiterDashboardStage targetStage;
+        try {
+            interactionId = UUID.fromString(interactionIdStr);
+            targetStage = RecruiterDashboardStage.valueOf(targetStageName);
+        } catch (Exception e) {
+            return;
+        }
+
+        IteractionList sourceItem = dataManager.load(IteractionList.class)
+                .id(interactionId)
+                .view("recruiter-dashboard-iteraction-list-view")
+                .optional()
+                .orElse(null);
+
+        if (sourceItem == null) return;
+
+        RecruiterDashboardStage currentStage = RecruiterDashboardStage.resolve(sourceItem.getIteractionType());
+        if (currentStage == targetStage) return;
+
+        Iteraction defaultType = findDefaultIteractionForStage(targetStage);
+
+        IteractionList draft = metadata.create(IteractionList.class);
+        draft.setCandidate(sourceItem.getCandidate());
+        draft.setVacancy(sourceItem.getVacancy());
+        ExtUser targetRecruiter = sourceItem.getRecrutier();
+        if (targetRecruiter == null && recruiterLookupField.getValue() != null) {
+            targetRecruiter = dataManager.load(ExtUser.class)
+                    .id(recruiterLookupField.getValue().getId())
+                    .optional().orElse(null);
+        }
+        if (targetRecruiter == null && userSession.getCurrentOrSubstitutedUser() != null) {
+            targetRecruiter = dataManager.load(ExtUser.class)
+                    .id(userSession.getCurrentOrSubstitutedUser().getId())
+                    .optional().orElse(null);
+        }
+        draft.setRecrutier(targetRecruiter);
+        draft.setDateIteraction(new Date());
+        draft.setIteractionType(defaultType);
+
+        screenBuilders.editor(IteractionList.class, this)
+                .withScreenClass(IteractionListEdit.class)
+                .newEntity(draft)
+                .withOpenMode(OpenMode.DIALOG)
+                .withAfterCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                        reload();
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Взаимодействие зарегистрировано")
+                                .withDescription("Кандидат перемещён в этап: " + targetStage.getCaption())
+                                .show();
+                    } else {
+                        // Пользователь нажал "Отменить" - карточка возвращается в прежний столбец
+                        reload();
+                    }
+                })
+                .show();
+    }
+
+    private Iteraction findDefaultIteractionForStage(RecruiterDashboardStage targetStage) {
+        List<Iteraction> allTypes = dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e order by e.number asc")
+                .view("_local")
+                .list();
+
+        for (Iteraction type : allTypes) {
+            if (RecruiterDashboardStage.resolve(type) == targetStage) {
+                return type;
+            }
+        }
+        return null;
     }
 
     private Date daysAgo(int days) {

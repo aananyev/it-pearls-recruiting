@@ -1368,7 +1368,7 @@
                                   width="100%"
                                   height="100%"
                                   spacing="true"
-                                  expand="jobCandidateIteractionListTable"
+                                  expand="jobCandidateIteractionListTableCard"
                                   stylename="job-candidate-accordion-content">
 
                                 <!-- Фильтр таблицы по вакансии (picker открытых вакансий). -->
@@ -1384,9 +1384,14 @@
                                         <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                     </actions>
                                 </lookupPickerField>
-                                <!-- Таблица взаимодействий кандидата: иконка, проект, номер, рейтинг,
-                                     вакансия, статус, тип, комментарий, рекрутер, дата. -->
-                                <dataGrid id="jobCandidateIteractionListTable"
+                                <!-- Карточка таблицы взаимодействий в эталонном стиле реестров -->
+                                <vbox id="jobCandidateIteractionListTableCard"
+                                      width="100%"
+                                      height="100%"
+                                      spacing="false"
+                                      stylename="edit-card candidate-table-card"
+                                      expand="jobCandidateIteractionListTable">
+                                    <dataGrid id="jobCandidateIteractionListTable"
                                           dataContainer="jobCandidateIteractionDc"
                                           stylename="borderless grid candidate-browse-grid job-candidate-iteraction-grid"
                                           width="100%"
@@ -1465,6 +1470,7 @@
                                     <!-- Счётчик записей таблицы. -->
                                     <rowsCount/>
                                 </dataGrid>
+                                </vbox>
 
                             </vbox>
                         </vbox>
@@ -1498,7 +1504,7 @@
 
                                 <!-- Вертикальный контейнер вкладки: кнопка над таблицей. -->
                                 <vbox id="tabResumeVbox" spacing="true" width="100%" height="100%"
-                                      expand="jobCandidateCandidateCvTable">
+                                      expand="jobCandidateCandidateCvTableCard">
                                     <!-- Панель действий над резюме кандидата. -->
                                     <hbox id="resumeActionsToolbar" spacing="true" width="100%" align="MIDDLE_RIGHT">
                                         <button id="smartScanCvBtn"
@@ -1523,81 +1529,90 @@
                                             </actions>
                                         </popupButton>
                                     </hbox>
-                                    <!-- Таблица резюме кандидата: проект, дата поста, вакансия, позиция,
-                                         оригинальный/HRM CV, сопроводительное письмо, автор. -->
-                                    <dataGrid id="jobCandidateCandidateCvTable"
-                                              width="100%"
-                                              height="100%"
-                                              descriptionAsHtml="true"
-                                              captionAsHtml="true"
-                                              stylename="borderless grid candidate-browse-grid job-candidate-resume-grid"
-                                              bodyRowHeight="38px"
-                                              dataContainer="jobCandidateCandidateCvsDc">
-                                        <columns>
-                                            <!-- Логотип проекта (рендер компонентом). -->
-                                            <column id="projectLogoColumn" resizable="true" collapsible="true"
-                                                    collapsed="false"
-                                                    caption="msg://msgProject" width="70px" minimumWidth="70px">
-                                                <!-- Рендер ячейки кастомным компонентом. -->
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Дата публикации резюме. -->
-                                            <column id="datePost" width="100px" maximumWidth="100px" property="datePost"
-                                                    caption="msg://msgDatePost"/>
-                                            <!-- Вакансия, на которую подано резюме. -->
-                                            <column id="toVacancy" property="toVacancy" caption="msg://msgToVacansy"/>
-                                            <!-- Позиция в резюме (скрыта по умолчанию). -->
-                                            <column id="resumePosition" collapsible="true" collapsed="true"
-                                                    property="resumePosition" caption="msg://msgToPosition"/>
-                                            <!-- Иконка оригинального файла CV. -->
-                                            <column id="iconOriginalCVFile" width="100px" maximumWidth="100px"
-                                                    caption="msg://msgOriginalCV">
-                                                <iconRenderer/>
-                                            </column>
-                                            <!-- Иконка файла CV HRM HuntTech. -->
-                                            <column id="iconHuntTechCVFile" width="100px" maximumWidth="100px"
-                                                    caption="msg://msgHuntTechCV">
-                                                <iconRenderer/>
-                                            </column>
-                                            <!-- Иконка сопроводительного письма. -->
-                                            <column id="letter" width="100px" maximumWidth="100px"
-                                                    caption="msg://msgCoverLetter">
-                                                <iconRenderer/>
-                                            </column>
-                                            <!-- Ссылка на оригинальный CV (компонент-рендер). -->
-                                            <column id="candidateOriginalCVColumn" width="150px"
-                                                    caption="msg://msgOriginalCV">
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Ссылка на CV HRM HuntTech (компонент-рендер). -->
-                                            <column id="candidateHuntTechCVColumn" width="150px"
-                                                    caption="msg://msgHuntTechCV">
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Автор резюме. -->
-                                            <column id="createdBy" property="createdBy" width="100px"
-                                                    caption="msg://msgCreatedBy"/>
-                                        </columns>
-                                        <!-- CRUD-действия таблицы. -->
-                                        <actions>
-                                            <action type="create" id="create"/>
-                                            <action id="edit" type="edit"/>
-                                            <!-- Действие remove (remove). -->
-                                            <action id="remove" type="remove"/>
-                                        </actions>
-                                        <!-- Панель кнопок: создание, копирование, редактирование, удаление, скан контактов. -->
-                                        <buttonsPanel>
-                                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
-                                            <button id="copyCVButton" caption="msg://msgCopy" icon="COPY"/>
-                                            <!-- Кнопка editButtonCV: действие jobCandidateCandidateCvTable.edit. -->
-                                            <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
-                                            <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
-                                            <!-- Скан контактов из CV (включается при выборе резюме). -->
-                                            <button id="scanContactsFromCVButton" caption="msg://msgScan" enable="false"
-                                                    invoke="scanContactsFromCVs"/>
-                                        </buttonsPanel>
-                                        <rowsCount/>
-                                    </dataGrid>
+                                    <!-- Карточка таблицы резюме в эталонном стиле реестров -->
+                                    <vbox id="jobCandidateCandidateCvTableCard"
+                                          width="100%"
+                                          height="100%"
+                                          spacing="false"
+                                          stylename="edit-card candidate-table-card"
+                                          expand="jobCandidateCandidateCvTable">
+                                        <!-- Таблица резюме кандидата: проект, дата поста, вакансия, позиция,
+                                             оригинальный/HRM CV, сопроводительное письмо, автор. -->
+                                        <dataGrid id="jobCandidateCandidateCvTable"
+                                                  width="100%"
+                                                  height="100%"
+                                                  descriptionAsHtml="true"
+                                                  captionAsHtml="true"
+                                                  stylename="borderless grid candidate-browse-grid job-candidate-resume-grid"
+                                                  bodyRowHeight="38px"
+                                                  dataContainer="jobCandidateCandidateCvsDc">
+                                            <columns>
+                                                <!-- Логотип проекта (рендер компонентом). -->
+                                                <column id="projectLogoColumn" resizable="true" collapsible="true"
+                                                        collapsed="false"
+                                                        caption="msg://msgProject" width="70px" minimumWidth="70px">
+                                                    <!-- Рендер ячейки кастомным компонентом. -->
+                                                    <componentRenderer/>
+                                                </column>
+                                                <!-- Дата публикации резюме. -->
+                                                <column id="datePost" width="100px" maximumWidth="100px" property="datePost"
+                                                        caption="msg://msgDatePost"/>
+                                                <!-- Вакансия, на которую подано резюме. -->
+                                                <column id="toVacancy" property="toVacancy" caption="msg://msgToVacansy"/>
+                                                <!-- Позиция в резюме (скрыта по умолчанию). -->
+                                                <column id="resumePosition" collapsible="true" collapsed="true"
+                                                        property="resumePosition" caption="msg://msgToPosition"/>
+                                                <!-- Иконка оригинального файла CV. -->
+                                                <column id="iconOriginalCVFile" width="100px" maximumWidth="100px"
+                                                        caption="msg://msgOriginalCV">
+                                                    <iconRenderer/>
+                                                </column>
+                                                <!-- Иконка файла CV HRM HuntTech. -->
+                                                <column id="iconHuntTechCVFile" width="100px" maximumWidth="100px"
+                                                        caption="msg://msgHuntTechCV">
+                                                    <iconRenderer/>
+                                                </column>
+                                                <!-- Иконка сопроводительного письма. -->
+                                                <column id="letter" width="100px" maximumWidth="100px"
+                                                        caption="msg://msgCoverLetter">
+                                                    <iconRenderer/>
+                                                </column>
+                                                <!-- Ссылка на оригинальный CV (компонент-рендер). -->
+                                                <column id="candidateOriginalCVColumn" width="150px"
+                                                        caption="msg://msgOriginalCV">
+                                                    <componentRenderer/>
+                                                </column>
+                                                <!-- Ссылка на CV HRM HuntTech (компонент-рендер). -->
+                                                <column id="candidateHuntTechCVColumn" width="150px"
+                                                        caption="msg://msgHuntTechCV">
+                                                    <componentRenderer/>
+                                                </column>
+                                                <!-- Автор резюме. -->
+                                                <column id="createdBy" property="createdBy" width="100px"
+                                                        caption="msg://msgCreatedBy"/>
+                                            </columns>
+                                            <!-- CRUD-действия таблицы. -->
+                                            <actions>
+                                                <action type="create" id="create"/>
+                                                <action id="edit" type="edit"/>
+                                                <!-- Действие remove (remove). -->
+                                                <action id="remove" type="remove"/>
+                                            </actions>
+                                            <!-- Панель кнопок: создание, копирование, редактирование, удаление, скан контактов. -->
+                                            <buttonsPanel>
+                                                <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
+                                                <button id="copyCVButton" caption="msg://msgCopy" icon="COPY"/>
+                                                <!-- Кнопка editButtonCV: действие jobCandidateCandidateCvTable.edit. -->
+                                                <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
+                                                <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
+                                                <!-- Скан контактов из CV (включается при выборе резюме). -->
+                                                <button id="scanContactsFromCVButton" caption="msg://msgScan" enable="false"
+                                                        invoke="scanContactsFromCVs"/>
+                                            </buttonsPanel>
+                                            <rowsCount/>
+                                        </dataGrid>
+                                    </vbox>
+                                </vbox>
                                 </vbox>
 
                             </vbox>

@@ -594,7 +594,7 @@
                       spacing="true"
                       width="100%"
                       height="100%"
-                      expand="jobHistoriesTable"
+                      expand="jobHistoriesTableCard"
                       stylename="candidate-cv-tab-content">
                     <hbox id="jobHistoryToolbar"
                           spacing="true"
@@ -625,24 +625,33 @@
                                 icon="font-icon:REFRESH"
                                 stylename="candidate-cv-editor-action"/>
                     </hbox>
-                    <table id="jobHistoriesTable"
-                           width="100%"
-                           dataContainer="jobHistoriesDc"
-                           stylename="borderless grid candidate-browse-grid candidate-cv-job-history-table">
-                        <actions>
-                            <action id="create" type="create"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                            <action id="refresh" type="refresh"/>
-                        </actions>
-                        <columns>
-                            <column id="period" caption="msg://msgJobPeriod"/>
-                            <column id="companyName" caption="msg://msgJobCompany"/>
-                            <column id="positionName" caption="msg://msgJobPosition"/>
-                            <column id="duties" caption="msg://msgJobDuties" maxTextLength="150"/>
-                        </columns>
-                        <rowsCount/>
-                    </table>
+                    <!-- Карточка таблицы опыта работы в эталонном стиле реестров -->
+                    <vbox id="jobHistoriesTableCard"
+                          width="100%"
+                          height="100%"
+                          spacing="false"
+                          stylename="edit-card candidate-table-card"
+                          expand="jobHistoriesTable">
+                        <table id="jobHistoriesTable"
+                               width="100%"
+                               height="100%"
+                               dataContainer="jobHistoriesDc"
+                               stylename="borderless grid candidate-browse-grid candidate-cv-job-history-table">
+                            <actions>
+                                <action id="create" type="create"/>
+                                <action id="edit" type="edit"/>
+                                <action id="remove" type="remove"/>
+                                <action id="refresh" type="refresh"/>
+                            </actions>
+                            <columns>
+                                <column id="period" caption="msg://msgJobPeriod"/>
+                                <column id="companyName" caption="msg://msgJobCompany"/>
+                                <column id="positionName" caption="msg://msgJobPosition"/>
+                                <column id="duties" caption="msg://msgJobDuties" maxTextLength="150"/>
+                            </columns>
+                            <rowsCount/>
+                        </table>
+                    </vbox>
                 </vbox>
             </tab>
 
