@@ -803,52 +803,161 @@
     border: none !important;
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * Счетчик строк и пагинация (rowsCount / CubaRowsCount в DataGrid и Table, BL-2026-049)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Контейнер композиции DataGrid: flex-колонка гарантирует, что шапка и сетка
+     не перекрывают друг друга при любых размерах окна и темах оформления */
+  .c-data-grid-composition {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+
+    /* Верхняя панель DataGrid (тулбар действий слева и/или rowsCount справа) */
+    .c-data-grid-top {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      flex-shrink: 0 !important;
+      height: auto !important;
+      min-height: 28px !important;
+      padding: 2px 4px !important;
+      margin-bottom: 2px !important;
+      box-sizing: border-box !important;
+      overflow: visible !important;
+
+      /* Когда в topPanel только rowsCount (нет buttonsPanel), счетчик прижимается вправо */
+      & > .v-slot:only-child,
+      & > .c-table-rows-count:only-child,
+      & > .v-slot-c-table-rows-count:only-child {
+        margin-left: auto !important;
+      }
+
+      /* При наличии тулбара слева блок rowsCount выравнивается по правому краю */
+      .c-table-rows-count,
+      .c-paging,
+      .v-slot-c-table-rows-count {
+        margin-left: auto !important;
+        align-self: center !important;
+      }
+    }
+
+    /* Сама сетка DataGrid занимает всю оставшуюся высоту без наложения на topPanel */
+    & > .v-grid {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+  }
+
   /* Счетчик строк и пагинация над/под таблицами (rowsCount в DataGrid / TreeDataGrid / Table) */
   .c-simplepagination,
   .c-rows-count,
+  .c-table-rows-count,
   .v-slot-c-rows-count,
+  .v-slot-c-table-rows-count,
   .c-paging,
+  .c-data-grid-top .c-table-rows-count,
+  .c-data-grid-top .c-paging,
+  .c-data-grid-top .v-slot-c-table-rows-count,
   .v-table-footer-container .c-rows-count,
-  .v-grid-footer-container .c-rows-count {
+  .v-table-footer-container .c-table-rows-count,
+  .v-grid-footer-container .c-rows-count,
+  .v-grid-footer-container .c-table-rows-count {
     display: inline-flex !important;
     align-items: center !important;
     height: 28px !important;
     min-height: 28px !important;
     line-height: 28px !important;
     padding: 0 4px !important;
+    margin: 0 !important;
     box-sizing: border-box !important;
     vertical-align: middle !important;
+
+    /* Внутренний контейнер CubaRowsCount (обнуляем паразитный margin-bottom из Vaadin Valo/Halo) */
+    .c-paging-wrap {
+      display: inline-flex !important;
+      align-items: center !important;
+      height: 24px !important;
+      min-height: 24px !important;
+      max-height: 24px !important;
+      line-height: 24px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+
+      & > * {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        vertical-align: middle !important;
+      }
+    }
 
     /* Текст статуса строк (например, 1 - 100 из ...) */
     .c-simplepagination-status,
     .c-rows-count-label,
+    .c-paging-status,
+    .v-label.c-paging-status,
     .v-label {
       font-size: 12px !important;
-      line-height: 28px !important;
+      line-height: 24px !important;
       color: rgba($v-font-color, 0.72) !important;
       padding: 0 6px !important;
       white-space: nowrap !important;
       vertical-align: middle !important;
       margin: 0 !important;
-      height: 28px !important;
+      height: 24px !important;
     }
 
     /* Кнопка ссылки подсчета общего количества (из 350) */
     .c-simplepagination-count,
     .c-rows-count-count,
-    .v-button-link {
+    .c-paging-count,
+    .c-paging-count-number,
+    .v-button.v-button-link.c-paging-count,
+    .v-button.v-button-link {
+      width: auto !important;
+      min-width: auto !important;
+      max-width: none !important;
       height: 24px !important;
       min-height: 24px !important;
+      max-height: 24px !important;
       line-height: 24px !important;
       font-size: 12px !important;
       padding: 0 4px !important;
       margin: 0 !important;
       vertical-align: middle !important;
       color: $v-selection-color !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+
+      .v-button-wrap {
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 24px !important;
+      }
+
+      .v-button-caption {
+        font-size: 12px !important;
+        line-height: 24px !important;
+        color: $v-selection-color !important;
+      }
     }
 
-    /* Стрелки пагинации влево / вправо / в начало / в конец */
-    .v-button,
+    /* Стрелки пагинации влево / вправо / в начало / в конец (24x24px по стилю HuntTech) */
+    .v-button.c-paging-change-page,
+    .c-paging-change-page,
+    .c-paging-first,
+    .c-paging-prev,
+    .c-paging-next,
+    .c-paging-last,
     .c-simplepagination-first,
     .c-simplepagination-prev,
     .c-simplepagination-next,
@@ -856,7 +965,8 @@
     .c-rows-count-first,
     .c-rows-count-prev,
     .c-rows-count-next,
-    .c-rows-count-last {
+    .c-rows-count-last,
+    .c-paging-wrap > .v-button:not(.v-button-link) {
       height: 24px !important;
       min-height: 24px !important;
       max-height: 24px !important;
@@ -875,17 +985,35 @@
       vertical-align: middle !important;
       box-sizing: border-box !important;
       box-shadow: none !important;
+      line-height: 1 !important;
+
+      &:before {
+        display: none !important;
+      }
 
       .v-icon {
         font-size: 11px !important;
         line-height: 1 !important;
         margin: 0 !important;
         padding: 0 !important;
+        max-width: 14px !important;
+        max-height: 14px !important;
         color: $v-font-color !important;
+      }
+
+      img.v-icon {
+        width: 14px !important;
+        height: 14px !important;
+        max-width: 14px !important;
+        max-height: 14px !important;
+        vertical-align: middle !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
 
       .v-button-wrap {
         height: 100% !important;
+        width: 100% !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
