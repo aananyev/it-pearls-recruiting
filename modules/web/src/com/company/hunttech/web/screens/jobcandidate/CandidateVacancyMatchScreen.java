@@ -485,6 +485,9 @@ public class CandidateVacancyMatchScreen extends Screen {
     private void startCandidateVacancyAnalysis() {
         currentMatchOperationId = UUID.randomUUID();
         analysisStartedAtMillis = System.currentTimeMillis();
+        progressStepSkillsLabel.setValue("1  Навыки");
+        progressStepVacanciesLabel.setValue("2  Открытые вакансии");
+        progressStepAiLabel.setValue("3  AI-сопоставление");
         skillRefreshStatusBox.setVisible(true);
         skillRefreshStatusLabel.setValue("Проверяем даты резюме и навыков кандидата...");
         setCandidateProgress(CandidateAnalysisStage.CHECKING_SKILLS, 0, "Проверка актуальности навыков");
@@ -637,13 +640,25 @@ public class CandidateVacancyMatchScreen extends Screen {
     private void startVacancyCandidateAnalysis() {
         currentMatchOperationId = UUID.randomUUID();
         final UUID operationId = currentMatchOperationId;
+        analysisStartedAtMillis = System.currentTimeMillis();
         skillRefreshStatusBox.setVisible(false);
         setBusy(true, "AI анализирует профили и формирует ранжированные рекомендации...");
-        analysisProgressBar.setIndeterminate(true);
-        analysisPhaseLabel.setValue("Анализ кандидатов");
-        analysisStepsLabel.setValue("Выполняется AI-сопоставление");
-        analysisPercentLabel.setValue("…");
-        analysisEtaLabel.setValue("Осталось: оценивается");
+        analysisProgressBar.setIndeterminate(false);
+        analysisProgressBar.setValue(0.05);
+        analysisPercentLabel.setValue("5%");
+        analysisPhaseLabel.setValue("Определение должностей");
+        analysisStepsLabel.setValue("Этап 1 из 3 · Должности");
+        statusLabel.setValue("Определение целевых должностей вакансии и сопоставление со справочником...");
+        analysisEtaLabel.setValue("Прошло: 0 сек · Осталось: оценивается");
+
+        progressStepSkillsLabel.setValue("1  Должности вакансии");
+        progressStepVacanciesLabel.setValue("2  Выборка кандидатов");
+        progressStepAiLabel.setValue("3  AI-сопоставление");
+        setProgressStepActive(progressStepSkillsLabel, true);
+        setProgressStepActive(progressStepVacanciesLabel, false);
+        setProgressStepActive(progressStepAiLabel, false);
+
+        analysisProgressTimer.start();
 
         BackgroundTask<Integer, CandidateVacancyMatchReport> task =
                 new BackgroundTask<Integer, CandidateVacancyMatchReport>(240, this) {
@@ -665,16 +680,19 @@ public class CandidateVacancyMatchScreen extends Screen {
 
                     @Override
                     public void done(CandidateVacancyMatchReport report) {
+                        stopAnalysisProgressTimer();
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
                         analysisProgressBar.setValue(1.0);
                         analysisPercentLabel.setValue("100%");
-                        analysisEtaLabel.setValue("Осталось: 0");
+                        long elapsedMillis = Math.max(0, System.currentTimeMillis() - analysisStartedAtMillis);
+                        analysisEtaLabel.setValue("Прошло: " + formatDuration(elapsedMillis) + " · Завершено");
                         handleReport(report);
                     }
 
                     @Override
                     public boolean handleTimeoutException() {
+                        stopAnalysisProgressTimer();
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
                         log.error("Timeout during vacancy-to-candidates matching: operationId={}", operationId);
@@ -688,6 +706,7 @@ public class CandidateVacancyMatchScreen extends Screen {
 
                     @Override
                     public boolean handleException(Exception ex) {
+                        stopAnalysisProgressTimer();
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
                         log.error("Vacancy-to-candidates task failed: operationId={}, errorType={}",
@@ -754,7 +773,11 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     @Subscribe("analysisProgressTimer")
     public void onAnalysisProgressTimer(Timer.TimerActionEvent event) {
-        if (currentMatchOperationId == null || mode != Mode.CANDIDATE_TO_VACANCIES) {
+        if (currentMatchOperationId == null) {
+            return;
+        }
+        if (mode == Mode.VACANCY_TO_CANDIDATES) {
+            updateVacancyCandidateProgress(currentMatchOperationId);
             return;
         }
         try {
@@ -794,6 +817,66 @@ public class CandidateVacancyMatchScreen extends Screen {
         } catch (Exception ex) {
             // Не прерываем AI-операцию, если очередной снимок прогресса временно недоступен.
             log.debug("Could not poll candidate-vacancy match progress", ex);
+        }
+    }
+
+    private void updateVacancyCandidateProgress(UUID operationId) {
+        try {
+            CandidateVacancyMatchProgress progress = candidateVacancyMatchAiService
+                    .getVacancyMatchProgress(operationId);
+            long elapsedMillis = Math.max(0, System.currentTimeMillis() - analysisStartedAtMillis);
+            String elapsedFormatted = formatDuration(elapsedMillis);
+
+            if (progress == null) {
+                analysisEtaLabel.setValue("Прошло: " + elapsedFormatted + " · Осталось: оценивается");
+                return;
+            }
+
+            int totalCandidates = progress.getTotalVacancies();
+            int processedCandidates = progress.getProcessedVacancies();
+            String phase = progress.getPhase();
+            String statusMsg = progress.getStatusMessage();
+
+            if (totalCandidates <= 0) {
+                boolean isSelecting = phase != null && (phase.contains("Выборка") || phase.contains("Поиск"));
+                setProgressStepActive(progressStepSkillsLabel, true);
+                setProgressStepActive(progressStepVacanciesLabel, isSelecting);
+                setProgressStepActive(progressStepAiLabel, false);
+
+                int percent = isSelecting ? 15 : 8;
+                analysisProgressBar.setValue(percent / 100.0);
+                analysisPercentLabel.setValue(percent + "%");
+                analysisStepsLabel.setValue(isSelecting ? "Этап 2 из 3 · Выборка кандидатов" : "Этап 1 из 3 · Должности");
+                analysisPhaseLabel.setValue(phase != null ? phase : "Определение должностей");
+                statusLabel.setValue(statusMsg != null ? statusMsg : "Определение целевых должностей и поиск в справочнике...");
+                analysisEtaLabel.setValue("Прошло: " + elapsedFormatted + " · Осталось: оценивается");
+            } else {
+                setProgressStepActive(progressStepSkillsLabel, true);
+                setProgressStepActive(progressStepVacanciesLabel, true);
+                setProgressStepActive(progressStepAiLabel, true);
+
+                int percent = 20 + (int) Math.round(progress.getProgressPercent() * 0.78);
+                percent = Math.max(20, Math.min(99, percent));
+                analysisProgressBar.setValue(percent / 100.0);
+                analysisPercentLabel.setValue(percent + "%");
+
+                analysisStepsLabel.setValue("Этап 3 из 3 · Кандидатов: " + processedCandidates + " из " + totalCandidates);
+                analysisPhaseLabel.setValue(phase != null ? phase : "AI-анализ кандидатов");
+                statusLabel.setValue(statusMsg != null ? statusMsg : "Сопоставление резюме и навыков с вакансией...");
+
+                Long remainingMillis = progress.getEstimatedRemainingMillis();
+                if (remainingMillis != null && remainingMillis > 0) {
+                    analysisEtaLabel.setValue("Прошло: " + elapsedFormatted
+                            + " · Кандидатов: " + processedCandidates + " из " + totalCandidates
+                            + " · Осталось: примерно " + formatDuration(remainingMillis));
+                } else {
+                    analysisEtaLabel.setValue("Прошло: " + elapsedFormatted
+                            + " · Кандидатов: " + processedCandidates + " из " + totalCandidates
+                            + " · Осталось: оценивается");
+                }
+            }
+        } catch (Exception ex) {
+            log.debug("Could not poll vacancy-candidate match progress", ex);
         }
     }
 
