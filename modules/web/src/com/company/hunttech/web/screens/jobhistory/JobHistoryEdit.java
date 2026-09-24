@@ -14,6 +14,7 @@ import javax.inject.Inject;
 @UiController("hunttech_JobHistory.edit")
 @UiDescriptor("job-history-edit.xml")
 @EditedEntityContainer("jobHistoryDc")
+@LoadDataBeforeShow
 public class JobHistoryEdit extends StandardEditor<JobHistory> {
 
     private static final Logger log = LoggerFactory.getLogger(JobHistoryEdit.class);

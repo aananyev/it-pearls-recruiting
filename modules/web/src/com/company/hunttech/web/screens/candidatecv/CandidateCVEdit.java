@@ -422,6 +422,20 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         jobHistory.setCandidate(resolveCandidate());
     }
 
+    @Install(to = "jobHistoriesTable.create", subject = "afterCloseHandler")
+    private void jobHistoriesTableCreateAfterCloseHandler(AfterCloseEvent afterCloseEvent) {
+        if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+            refreshJobHistories();
+        }
+    }
+
+    @Install(to = "jobHistoriesTable.edit", subject = "afterCloseHandler")
+    private void jobHistoriesTableEditAfterCloseHandler(AfterCloseEvent afterCloseEvent) {
+        if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+            refreshJobHistories();
+        }
+    }
+
     @Install(to = "jobHistoriesTable.period", subject = "columnGenerator")
     private Component jobHistoriesTablePeriodColumnGenerator(JobHistory jobHistory) {
         Label<String> label = uiComponents.create(Label.TYPE_STRING);

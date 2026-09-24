@@ -119,13 +119,13 @@ class JobHistoryEditContractAndMemoryLeakTest {
     }
 
     @Test
-    void testControllerClassDoesNotHaveLoadDataBeforeShow() throws Exception {
+    void testControllerClassHasLoadDataBeforeShow() throws Exception {
         File javaFile = resolveFile("modules/web/src/com/company/hunttech/web/screens/jobhistory/JobHistoryEdit.java");
         assertTrue(javaFile.exists(), "Файл JobHistoryEdit.java должен существовать");
 
         String content = new String(Files.readAllBytes(javaFile.toPath()));
-        assertFalse(content.contains("@LoadDataBeforeShow"),
-                "Контроллер JobHistoryEdit не должен содержать @LoadDataBeforeShow, чтобы исключить неконтролируемую предзагрузку коллекций");
+        assertTrue(content.contains("@LoadDataBeforeShow"),
+                "Контроллер JobHistoryEdit ОБЯЗАН содержать @LoadDataBeforeShow, иначе редактируемая сущность не загружается и форма открывается пустой!");
         assertTrue(content.contains("logMemState"),
                 "Контроллер JobHistoryEdit должен содержать логирование состояния памяти JVM");
     }
