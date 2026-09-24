@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -128,7 +129,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
                 .query("select e from hunttech_CandidateCV e where e.candidate.id = :candId and e.textCV is not null and length(trim(e.textCV)) > 0 order by e.datePost desc, e.createTs desc")
                 .parameter("candId", candidateId)
-                .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy"))
+                .view(viewBuilder -> viewBuilder.addAll("textCV", "datePost", "resumePosition", "toVacancy", "letter", "commentLetter", "originalFileCV", "fileCV"))
                 .list();
 
         if (cvList.isEmpty()) {
@@ -154,7 +155,8 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                         "vacansyID", "vacansyName", "positionType.positionRuName", "comment", "shortDescription",
                         "workExperience", "grade", "skillsList.skillName", "remoteWork",
                         "remoteComment", "cityPosition.cityRuName", "cities.cityRuName",
-                        "projectName.projectName", "priority", "openClose"
+                        "projectName.projectName", "priority", "openClose",
+                        "salaryMin", "salaryMax", "salaryIE", "salaryFixLimit", "salaryCandidateRequest", "salaryComment"
                 ))
                 .list();
 
@@ -174,10 +176,13 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
         // 5. Формирование контекста кандидата с глубоким анализом истории взаимодействий и прошлых отказов
         CandidateInteractionProfile interactionProfile = loadCandidateInteractionProfile(candidateId);
-        String candidateProfile = buildCandidateProfileString(candidate)
-                + "\n\n" + interactionProfile.toPromptSection();
         String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
         String candidateResumeText = buildCandidateResumeText(cvList);
+        if (interactionProfile.candidateSalaryExpectations == null || interactionProfile.candidateSalaryExpectations.trim().isEmpty()) {
+            interactionProfile.candidateSalaryExpectations = extractCandidateSalaryFromResume(candidateResumeText);
+        }
+        String candidateProfile = buildCandidateProfileString(candidate)
+                + "\n\n" + interactionProfile.toPromptSection();
 
         // 6. Батчинг вакансий на чанки
         List<List<OpenPosition>> chunks = splitIntoChunks(openPositions);
@@ -267,6 +272,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             allItems.sort(getComparator());
             report.setItems(allItems);
             report.setMatchedVacanciesCount(allItems.size());
+            applySalaryExpectationsFallback(report, interactionProfile);
             report.setAiExecutionResult(lastAiResult);
             report.setFallbackUsed(false);
             report.setSuccess(true);
@@ -281,11 +287,21 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
         report.setItems(fallbackItems);
         report.setMatchedVacanciesCount(fallbackItems.size());
+        applySalaryExpectationsFallback(report, interactionProfile);
         report.setFallbackUsed(true);
         report.setGeneralConclusion("Внимание: экспертный AI-анализ временно недоступен. Отображена предварительная оценка по совпадению ключевых параметров.");
         report.setStatusMessage("Предварительная оценка без AI");
         report.setSuccess(true);
         return report;
+    }
+
+    private void applySalaryExpectationsFallback(CandidateVacancyMatchReport report, CandidateInteractionProfile profile) {
+        if (report != null && report.getCandidateSummary() != null &&
+                (report.getCandidateSummary().getCandidateSalaryExpectations() == null || report.getCandidateSummary().getCandidateSalaryExpectations().isEmpty())) {
+            report.getCandidateSummary().setCandidateSalaryExpectations(
+                    profile != null && profile.candidateSalaryExpectations != null ? profile.candidateSalaryExpectations : "Не указаны"
+            );
+        }
     }
 
     @Override
@@ -318,7 +334,8 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                             "vacansyID", "vacansyName", "positionType.positionRuName", "positionType.positionEnName",
                             "comment", "shortDescription", "workExperience", "grade", "skillsList.skillName",
                             "remoteWork", "remoteComment", "cityPosition.cityRuName", "cities.cityRuName",
-                            "projectName.projectName", "priority", "openClose", "searchMap"
+                            "projectName.projectName", "priority", "openClose", "searchMap",
+                            "salaryMin", "salaryMax", "salaryIE", "salaryFixLimit", "salaryCandidateRequest", "salaryComment"
                     ))
                     .optional()
                     .orElse(null);
@@ -449,13 +466,16 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
                     phase = "prepare-context";
                     CandidateInteractionProfile interactionProfile = loadCandidateInteractionProfile(cand.getId());
+                    String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
+                    String candidateResumeText = buildCandidateResumeText(cvList);
+                    if (interactionProfile.candidateSalaryExpectations == null || interactionProfile.candidateSalaryExpectations.trim().isEmpty()) {
+                        interactionProfile.candidateSalaryExpectations = extractCandidateSalaryFromResume(candidateResumeText);
+                    }
                     String lastJobDomain = resolveLastJobDomainDescription(cand);
 
                     String candidateProfile = buildCandidateProfileString(cand)
                             + "\nПредметная область последнего места работы: " + lastJobDomain
                             + "\n\n" + interactionProfile.toPromptSection();
-                    String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
-                    String candidateResumeText = buildCandidateResumeText(cvList);
 
                     Map<String, Object> context = new HashMap<>();
                     context.put(PARAM_CANDIDATE_PROFILE, candidateProfile);
@@ -506,6 +526,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
                     if (matchedItem != null) {
                         phase = "workflow-state";
+                        enrichSalaryFit(matchedItem, vacancy, interactionProfile);
                         applyInteractionAnalysisAndWeights(matchedItem, vacancy, interactionProfile);
                         matchedItem.setCandidateId(cand.getId());
                         matchedItem.setCandidateFullName(cand.getFullName());
@@ -636,6 +657,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             if (rId != null) {
                 it.setMatchRunId(rId);
             }
+            enrichSalaryFit(it, it.getOpenPosition(), profile);
             if (profile != null) {
                 applyInteractionAnalysisAndWeights(it, it.getOpenPosition(), profile);
             }
@@ -1085,6 +1107,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         UUID candidateId;
         String recruiterActivityText;
         int totalInteractionsCount = 0;
+        String candidateSalaryExpectations;
         List<InteractionDetail> employerRejections = new ArrayList<>();
         List<InteractionDetail> candidateRefusals = new ArrayList<>();
         List<InteractionDetail> interviews = new ArrayList<>();
@@ -1152,10 +1175,15 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 sb.append("• Отказов самого кандидата от оферов и предложений в истории не зафиксировано.\n");
             }
 
-            sb.append("\nИНСТРУКЦИЯ ДЛЯ AI ПО ИСТОРИИ СОБЕСЕДОВАНИЙ И ОТКАЗОВ:\n");
+            if (candidateSalaryExpectations != null && !candidateSalaryExpectations.trim().isEmpty()) {
+                sb.append("• Зарплатные ожидания кандидата: ").append(candidateSalaryExpectations.trim()).append("\n");
+            }
+
+            sb.append("\nИНСТРУКЦИЯ ДЛЯ AI ПО ИСТОРИИ СОБЕСЕДОВАНИЙ, ОТКАЗОВ И ЗАРПЛАТЕ:\n");
             sb.append("1. Учти результаты прошлых собеседований (с рекрутером или на стороне заказчика): если на прошлых интервью кандидат уже подтвердил ключевые навыки вакансии — отрази это в candidateEvidence и reasonsToOffer; если получил замечания от заказчика — учти в рисках.\n");
             sb.append("2. Проанализируй причины прошлых отказов работодателей кандидату (недостаток стека, грейд, ставка, софты, отказ в офере) и сопоставь с текущей вакансией. Если дефицитный стек требуется — обязательно укажи в рисках/пробелах; если не требуется — отметь снятие риска.\n");
-            sb.append("3. Проанализируй, что не устраивало кандидата в прошлых оферах (удаленка против офиса, уровень зарплаты, тестовые задания, легаси). Если условия текущей вакансии закрывают эти боли (например, 100% удаленка) — укажи в reasonsToOffer; если вакансия повторяет нежелательные условия (офис, тестовое) — укажи критический риск отказа кандидата.");
+            sb.append("3. Проанализируй, что не устраивало кандидата в прошлых оферах (удаленка против офиса, уровень зарплаты, тестовые задания, легаси). Если условия текущей вакансии закрывают эти боли (например, 100% удаленка) — укажи в reasonsToOffer; если вакансия повторяет нежелательные условия (офис, тестовое) — укажи критический риск отказа кандидата.\n");
+            sb.append("4. Сопоставь зарплатные ожидания кандидата с зарплатным предложением заказчика (salaryOffer). Укажи зарплатные ожидания и оценку их соответствия предложению заказчика в итоговом выводе (summary).");
 
             return sb.toString();
         }
@@ -1182,7 +1210,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                             "vacancy.remoteWork", "vacancy.remoteComment", "vacancy.comment",
                             "vacancy.cityPosition.cityRuName", "vacancy.projectName.projectName",
                             "recrutier.lastName", "recrutier.firstName", "recrutier.name",
-                            "recrutierName"
+                            "recrutierName", "addString"
                     ))
                     .list();
 
@@ -1227,6 +1255,15 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 detail.recruiterName = extractRecruiterName(il);
                 detail.isInterview = classifyIsInterview(il, detail);
                 detail.isClientInterview = classifyIsClientInterview(il, detail);
+
+                // Извлечение зарплатных ожиданий из истории взаимодействий (тип "Зарплатные ожидания" или поле addString)
+                if (profile.candidateSalaryExpectations == null
+                        && il.getAddString() != null && !il.getAddString().trim().isEmpty()
+                        && il.getIteractionType() != null && il.getIteractionType().getIterationName() != null
+                        && (il.getIteractionType().getIterationName().toLowerCase(Locale.ROOT).contains("зарплат")
+                            || il.getIteractionType().getIterationName().toLowerCase(Locale.ROOT).contains("ожидан"))) {
+                    profile.candidateSalaryExpectations = il.getAddString().trim();
+                }
 
                 if (detail.isInterview) {
                     profile.interviews.add(detail);
@@ -1820,6 +1857,18 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             }
             v.put("comment", plainComment);
 
+            if (op.getSalaryMin() != null || op.getSalaryMax() != null || op.getSalaryIE() != null
+                    || op.getSalaryFixLimit() != null || op.getSalaryComment() != null || Boolean.TRUE.equals(op.getSalaryCandidateRequest())) {
+                Map<String, Object> salaryOffer = new LinkedHashMap<>();
+                if (op.getSalaryMin() != null) salaryOffer.put("salaryMin", op.getSalaryMin());
+                if (op.getSalaryMax() != null) salaryOffer.put("salaryMax", op.getSalaryMax());
+                if (op.getSalaryIE() != null) salaryOffer.put("salaryIE", op.getSalaryIE());
+                if (op.getSalaryFixLimit() != null) salaryOffer.put("salaryFixLimit", op.getSalaryFixLimit());
+                if (op.getSalaryComment() != null) salaryOffer.put("salaryComment", op.getSalaryComment());
+                salaryOffer.put("formattedOffer", formatVacancySalaryOffer(op));
+                v.put("salaryOffer", salaryOffer);
+            }
+
             list.add(v);
         }
 
@@ -1828,6 +1877,245 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         } catch (Exception e) {
             log.error("Failed to serialize vacancies to JSON", e);
             return "[]";
+        }
+    }
+
+    public static class SalaryEvaluation {
+        public final String status;
+        public final String analysisText;
+        public SalaryEvaluation(String status, String analysisText) {
+            this.status = status;
+            this.analysisText = analysisText;
+        }
+    }
+
+    private static final ThreadLocal<DecimalFormat> DECIMAL_FORMAT = ThreadLocal.withInitial(() -> {
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols(Locale.ROOT);
+        symbols.setGroupingSeparator(' ');
+        return new DecimalFormat("#,###", symbols);
+    });
+
+    private static DecimalFormat getDecimalFormat() {
+        return DECIMAL_FORMAT.get();
+    }
+
+    public static String formatVacancySalaryOffer(OpenPosition op) {
+        if (op == null) return null;
+        DecimalFormat df = getDecimalFormat();
+        StringBuilder sb = new StringBuilder();
+        if (op.getSalaryMin() != null && op.getSalaryMax() != null) {
+            sb.append("от ").append(df.format(op.getSalaryMin())).append(" до ").append(df.format(op.getSalaryMax())).append(" ₽");
+        } else if (op.getSalaryMin() != null) {
+            sb.append("от ").append(df.format(op.getSalaryMin())).append(" ₽");
+        } else if (op.getSalaryMax() != null) {
+            sb.append("до ").append(df.format(op.getSalaryMax())).append(" ₽");
+        }
+        if (op.getSalaryIE() != null) {
+            if (sb.length() > 0) sb.append(" (ИП: ").append(df.format(op.getSalaryIE())).append(" ₽)");
+            else sb.append("ИП: ").append(df.format(op.getSalaryIE())).append(" ₽");
+        }
+        if (op.getSalaryComment() != null && !op.getSalaryComment().trim().isEmpty()) {
+            if (sb.length() > 0) sb.append(" [").append(op.getSalaryComment().trim()).append("]");
+            else sb.append(op.getSalaryComment().trim());
+        }
+        if (Boolean.TRUE.equals(op.getSalaryCandidateRequest())) {
+            if (sb.length() > 0) sb.append(" (по запросу кандидата)");
+            else sb.append("По договоренности (по запросу кандидата)");
+        }
+        return sb.length() > 0 ? sb.toString() : null;
+    }
+
+    private static final Pattern RESUME_SALARY_PATTERN = Pattern.compile(
+            "(?iu)(?:зарплат[а-я]*|з/п|желаемый\\s+доход|ожидания|вознаграждение|ставка)[^\\d\\n\\r]{0,25}?(?:от\\s*)?(\\d{1,3}(?:[\\s.,]\\d{3})+|\\d{2,7})\\s*(руб[а-я]*|rub|₽|usd|\\$|eur|€|тыс[а-я]*|т\\.р\\.?)",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    private static final Pattern STANDALONE_SALARY_PATTERN = Pattern.compile(
+            "(?iu)(?:^|[\\s,(])(?:от\\s*)?(\\d{1,3}(?:[\\s.,]\\d{3})+|\\d{4,7})\\s*(руб[а-я]*|rub|₽|usd|\\$|eur|€|долл[а-я]*|евро)",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    public static String extractCandidateSalaryFromResume(String resumeText) {
+        if (resumeText == null || resumeText.trim().isEmpty()) return null;
+        Matcher m1 = RESUME_SALARY_PATTERN.matcher(resumeText);
+        while (m1.find()) {
+            String numStr = m1.group(1).replaceAll("[\\s.,]", "");
+            String unit = m1.group(2).toLowerCase(Locale.ROOT);
+            try {
+                long num = Long.parseLong(numStr);
+                if (unit.contains("тыс") || unit.contains("т.р")) num *= 1000L;
+                if (num >= 15000 && num <= 5000000) {
+                    DecimalFormat df = getDecimalFormat();
+                    String currency = (unit.contains("usd") || unit.contains("$") || unit.contains("долл")) ? " $" : (unit.contains("eur") || unit.contains("€") || unit.contains("евро")) ? " €" : " ₽";
+                    return df.format(num) + currency;
+                }
+            } catch (Exception ignored) {}
+        }
+        Matcher m2 = STANDALONE_SALARY_PATTERN.matcher(resumeText);
+        while (m2.find()) {
+            String numStr = m2.group(1).replaceAll("[\\s.,]", "");
+            String unit = m2.group(2).toLowerCase(Locale.ROOT);
+            try {
+                long num = Long.parseLong(numStr);
+                if (num >= 30000 && num <= 5000000) {
+                    DecimalFormat df = getDecimalFormat();
+                    String currency = (unit.contains("usd") || unit.contains("$") || unit.contains("долл")) ? " $" : (unit.contains("eur") || unit.contains("€") || unit.contains("евро")) ? " €" : " ₽";
+                    return df.format(num) + currency;
+                }
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    private static final Pattern NUMERIC_SALARY_PATTERN = Pattern.compile("(\\d[\\d\\s.,]{0,10})\\s*(тыс[а-я]*|т\\.р\\.?)?");
+
+    public static Long parseSalaryNumericValue(String salaryStr) {
+        if (salaryStr == null || salaryStr.trim().isEmpty()) return null;
+        String cleaned = salaryStr.toLowerCase(Locale.ROOT).trim();
+        Matcher matcher = NUMERIC_SALARY_PATTERN.matcher(cleaned);
+        if (matcher.find()) {
+            try {
+                String raw = matcher.group(1).trim();
+                boolean isThousand = matcher.group(2) != null || cleaned.contains("тыс") || cleaned.contains("т.р");
+                if (isThousand) {
+                    raw = raw.replaceAll("\\s", "");
+                    if (raw.contains(".") && raw.contains(",")) {
+                        int lastDot = raw.lastIndexOf('.');
+                        int lastComma = raw.lastIndexOf(',');
+                        if (lastComma > lastDot) {
+                            raw = raw.replace(".", "").replace(',', '.');
+                        } else {
+                            raw = raw.replace(",", "");
+                        }
+                    } else {
+                        raw = raw.replace(',', '.');
+                    }
+                    double d = Double.parseDouble(raw);
+                    return (long) (d * 1000.0);
+                } else {
+                    if (raw.matches(".*[.,]\\d{2}$")) {
+                        raw = raw.substring(0, raw.length() - 3);
+                    }
+                    return Long.parseLong(raw.replaceAll("[\\s.,]", ""));
+                }
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    public static SalaryEvaluation evaluateSalary(String candidateSalary, OpenPosition vacancy) {
+        if (vacancy == null) {
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_BY_AGREEMENT, "Не указаны параметры вакансии");
+        }
+        String vacancyOffer = formatVacancySalaryOffer(vacancy);
+        String displayOffer = vacancyOffer != null ? vacancyOffer : "По договоренности / не указано";
+        if (Boolean.TRUE.equals(vacancy.getSalaryCandidateRequest())) {
+            String note = vacancyOffer != null
+                    ? "По договоренности (" + vacancyOffer + ")"
+                    : "По договоренности (заказчик готов обсуждать ставку по запросу кандидата)";
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_BY_AGREEMENT, note);
+        }
+        if (candidateSalary != null) {
+            String lowerSal = candidateSalary.toLowerCase(Locale.ROOT);
+            if (lowerSal.contains("$") || lowerSal.contains("usd") || lowerSal.contains("долл")
+                    || lowerSal.contains("€") || lowerSal.contains("eur") || lowerSal.contains("евро")) {
+                return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_BY_AGREEMENT, String.format(Locale.ROOT,
+                        "Ожидания указаны в валюте (%s), вилка заказчика: %s (требуется конвертация/уточнение)",
+                        candidateSalary, displayOffer));
+            }
+        }
+        Long min = vacancy.getSalaryMin() != null ? vacancy.getSalaryMin().longValue() : null;
+        Long max = vacancy.getSalaryMax() != null ? vacancy.getSalaryMax().longValue() : null;
+        if (min == null && max == null) {
+            String text = candidateSalary != null && !candidateSalary.trim().isEmpty()
+                    ? "Вилка заказчика не зафиксирована (ожидания кандидата: " + candidateSalary + ")"
+                    : "По договоренности (финансовые условия не зафиксированы)";
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_BY_AGREEMENT, text);
+        }
+        Long candVal = parseSalaryNumericValue(candidateSalary);
+        if (candVal == null) {
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_BY_AGREEMENT, "Ожидания кандидата не указаны в резюме (вилка заказчика: " + displayOffer + ")");
+        }
+
+        DecimalFormat df = getDecimalFormat();
+        if (max != null && candVal > max) {
+            long diff = candVal - max;
+            String text = max > 0
+                    ? String.format(Locale.ROOT, "Ожидания превышают вилку заказчика на %d%% (запрос: %s ₽, максимум вилки: %s ₽, превышение: +%s ₽)",
+                            (diff * 100) / max, df.format(candVal), df.format(max), df.format(diff))
+                    : String.format(Locale.ROOT, "Ожидания превышают максимальную ставку заказчика (запрос: %s ₽, максимум: %s ₽, превышение: +%s ₽)",
+                            df.format(candVal), df.format(max), df.format(diff));
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_ABOVE, text);
+        } else if (min != null && candVal < min) {
+            String text = String.format(Locale.ROOT,
+                    "Ожидания ниже начальной вилки заказчика (запрос: %s ₽, вилка заказчика: %s)",
+                    df.format(candVal), displayOffer);
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_BELOW, text);
+        } else if (min != null && max == null) {
+            String text = String.format(Locale.ROOT,
+                    "Соответствие: ожидания не ниже начального предложения заказчика (%s ₽, от %s ₽)",
+                    df.format(candVal), df.format(min));
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_IN_RANGE, text);
+        } else {
+            String text = String.format(Locale.ROOT,
+                    "Полное соответствие: ожидания укладываются в вилку заказчика (%s ₽ в диапазоне %s)",
+                    df.format(candVal), displayOffer);
+            return new SalaryEvaluation(CandidateVacancyMatchItem.SALARY_FIT_IN_RANGE, text);
+        }
+    }
+
+    public static String evaluateSalaryFit(String candidateSalary, OpenPosition vacancy) {
+        return evaluateSalary(candidateSalary, vacancy).analysisText;
+    }
+
+    public static String classifySalaryFitStatus(String candidateSalary, OpenPosition vacancy) {
+        return evaluateSalary(candidateSalary, vacancy).status;
+    }
+
+    private void enrichSalaryFit(CandidateVacancyMatchItem item,
+                                OpenPosition vacancy,
+                                CandidateInteractionProfile profile) {
+        if (item == null) return;
+        String candSalary = item.getCandidateSalary();
+        if (candSalary == null || candSalary.trim().isEmpty()) {
+            if (profile != null && profile.candidateSalaryExpectations != null && !profile.candidateSalaryExpectations.trim().isEmpty()) {
+                candSalary = profile.candidateSalaryExpectations.trim();
+            }
+        }
+        if (candSalary != null && !candSalary.trim().isEmpty()) {
+            item.setCandidateSalary(candSalary);
+        }
+
+        String offerStr = formatVacancySalaryOffer(vacancy);
+        if (offerStr != null) {
+            item.setVacancySalary(offerStr);
+        }
+
+        boolean hasAnySalaryData = (candSalary != null && !candSalary.trim().isEmpty()) || offerStr != null;
+        if (hasAnySalaryData) {
+            SalaryEvaluation evaluation = evaluateSalary(item.getCandidateSalary(), vacancy);
+            String fitAnalysis = item.getSalaryFitAnalysis();
+            if (fitAnalysis == null || fitAnalysis.trim().isEmpty()) {
+                fitAnalysis = evaluation.analysisText;
+                item.setSalaryFitAnalysis(fitAnalysis);
+                item.setSalaryFitStatus(evaluation.status);
+            } else if (item.getSalaryFitStatus() == null || item.getSalaryFitStatus().trim().isEmpty()) {
+                item.setSalaryFitStatus(evaluation.status);
+            }
+
+            // Обогащаем итоговое резюме (summary) информацией о зарплате
+            String currentSummary = item.getSummary();
+            String salarySummaryNote = String.format(Locale.ROOT,
+                    "Зарплатные ожидания: %s | Предложение заказчика: %s (%s).",
+                    item.getCandidateSalary() != null ? item.getCandidateSalary() : "не указаны",
+                    offerStr != null ? offerStr : "по договоренности",
+                    fitAnalysis != null ? fitAnalysis : evaluation.analysisText);
+
+            if (currentSummary == null || currentSummary.trim().isEmpty()) {
+                item.setSummary(salarySummaryNote);
+            } else if (!currentSummary.contains("Зарплатные ожидания") && !currentSummary.contains("Предложение заказчика")) {
+                item.setSummary(currentSummary.trim() + "\n\n• " + salarySummaryNote);
+            }
         }
     }
 
@@ -1857,6 +2145,9 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 }
                 if (summaryNode.has("explicitPreferences") && summaryNode.get("explicitPreferences").isArray()) {
                     summary.setExplicitPreferences(extractStringList(summaryNode.get("explicitPreferences")));
+                }
+                if (summaryNode.hasNonNull("candidateSalaryExpectations")) {
+                    summary.setCandidateSalaryExpectations(summaryNode.get("candidateSalaryExpectations").asText());
                 }
                 report.setCandidateSummary(summary);
             }
@@ -1936,6 +2227,21 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                     }
                     if (m.has("summary")) {
                         item.setSummary(m.get("summary").asText());
+                    }
+                    if (m.has("candidateSalary") && !m.get("candidateSalary").asText().isEmpty()) {
+                        item.setCandidateSalary(m.get("candidateSalary").asText());
+                    }
+                    if (m.has("salaryFit") && !m.get("salaryFit").asText().isEmpty()) {
+                        item.setSalaryFitAnalysis(m.get("salaryFit").asText());
+                    } else if (m.has("salaryFitAnalysis") && !m.get("salaryFitAnalysis").asText().isEmpty()) {
+                        item.setSalaryFitAnalysis(m.get("salaryFitAnalysis").asText());
+                    }
+
+                    if ((item.getCandidateSalary() == null || item.getCandidateSalary().trim().isEmpty())
+                            && report != null && report.getCandidateSummary() != null
+                            && report.getCandidateSummary().getCandidateSalaryExpectations() != null
+                            && !report.getCandidateSummary().getCandidateSalaryExpectations().trim().isEmpty()) {
+                        item.setCandidateSalary(report.getCandidateSummary().getCandidateSalaryExpectations().trim());
                     }
 
                     seenVacancyIds.add(vid);

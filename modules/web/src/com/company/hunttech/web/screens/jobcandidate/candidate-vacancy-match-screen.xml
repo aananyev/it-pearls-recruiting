@@ -97,60 +97,67 @@
                            stylename="candidate-vacancy-match-count" align="MIDDLE_RIGHT"/>
                 </hbox>
 
-                <hbox id="tableActionsToolbar" spacing="true" width="100%" height="AUTO" align="MIDDLE_LEFT"
+                <hbox id="tableActionsToolbar" spacing="true" width="100%" height="46px" align="MIDDLE_LEFT"
                       expand="toolbarSpacer"
-                      stylename="candidate-vacancy-match-actions-card candidate-vacancy-match-toolbar">
-                    <hbox id="toolbarButtonsBox" spacing="true" height="AUTO" align="MIDDLE_LEFT"
-                          stylename="candidate-vacancy-match-toolbar-group">
+                      stylename="candidate-vacancy-match-actions-card">
+                    <hbox id="toolbarButtonsBox" spacing="true" height="100%" align="MIDDLE_LEFT">
                         <button id="takeIntoWorkBtn"
                                 description="Взять в работу — Начать работу по кандидату на выбранную вакансию"
                                 icon="font-icon:CHECK"
                                 stylename="primary candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 enabled="false"/>
                         <button id="addToReserveBtn"
                                 description="В кадровый резерв — Поместить кандидата в кадровый резерв с аналитикой"
                                 icon="font-icon:BOOKMARK"
                                 stylename="candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 enabled="false"/>
                         <button id="createInteractionBtn"
                                 description="Взаимодействие — Зафиксировать собеседование или контакт с кандидатом"
                                 icon="font-icon:COMMENTS"
                                 stylename="candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 enabled="false"/>
                         <button id="outreachDraftBtn"
                                 description="Предложение (AI) — Сгенерировать персональный оффер или сопроводительное письмо"
                                 icon="font-icon:MAGIC"
                                 stylename="candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 enabled="false"/>
                         <button id="bulkTakeIntoWorkBtn"
                                 description="Взять выбранных — Перевести всех отмеченных кандидатов в работу"
                                 icon="font-icon:USERS"
                                 stylename="friendly candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 visible="false"/>
                         <button id="openEntityBtn"
                                 description="Открыть карточку — Просмотреть подробную анкету кандидата или вакансию"
                                 icon="font-icon:EXTERNAL_LINK"
                                 stylename="candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 enabled="false"/>
                         <button id="postponeBtn"
                                 description="Отложить — Отложить принятие решения по кандидату"
                                 icon="font-icon:CLOCK_O"
                                 stylename="candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 enabled="false"/>
                         <button id="rejectBtn"
                                 description="Не подходит — Отклонить кандидата по текущей вакансии"
                                 icon="font-icon:BAN"
                                 stylename="danger candidate-vacancy-match-toolbar-btn"
+                                align="MIDDLE_LEFT"
                                 enabled="false"/>
                     </hbox>
 
-                    <hbox id="toolbarSpacer" width="100%" stylename="candidate-vacancy-match-toolbar-spacer"/>
+                    <hbox id="toolbarSpacer" width="100%"/>
 
-                    <hbox id="toolbarFilterBox" spacing="true" height="AUTO" align="MIDDLE_RIGHT"
-                          stylename="candidate-vacancy-match-toolbar-filter">
+                    <hbox id="toolbarFilterBox" spacing="true" height="100%" align="MIDDLE_RIGHT"
+                          margin="false,true,false,false">
                         <label value="Решение рекрутера:" align="MIDDLE_LEFT"
                                stylename="candidate-vacancy-match-filter-caption"/>
-                        <lookupField id="decisionFilter" width="180px" nullOptionVisible="false"/>
+                        <lookupField id="decisionFilter" width="180px" align="MIDDLE_LEFT" nullOptionVisible="false"/>
                     </hbox>
                 </hbox>
 
@@ -337,6 +344,34 @@
                         <label value="РИСКИ И ЗОНЫ ВНИМАНИЯ"
                                stylename="candidate-vacancy-match-detail-caption" width="100%"/>
                         <label id="risksLabel" htmlEnabled="true" width="100%"/>
+                    </vbox>
+
+                    <!-- Блок: Зарплатный анализ и соответствие предложению заказчика -->
+                    <vbox id="salaryFitBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section candidate-vacancy-match-salary-section">
+                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="salaryTitleLabel">
+                            <label id="salaryTitleLabel" value="ЗАРПЛАТНЫЙ АНАЛИЗ И ПРЕДЛОЖЕНИЕ ЗАКАЗЧИКА"
+                                   stylename="candidate-vacancy-match-detail-caption bold"/>
+                            <label id="salaryFitBadge" value="—"
+                                   stylename="candidate-vacancy-match-weight-badge" align="MIDDLE_RIGHT"/>
+                        </hbox>
+                        <grid spacing="true" width="100%" stylename="candidate-vacancy-match-score-grid">
+                            <columns count="2"/>
+                            <rows>
+                                <row>
+                                    <label value="Ожидания кандидата:" stylename="bold"/>
+                                    <label id="candidateSalaryDetailLabel" value="—"/>
+                                </row>
+                                <row>
+                                    <label value="Предложение заказчика:" stylename="bold"/>
+                                    <label id="vacancySalaryDetailLabel" value="—"/>
+                                </row>
+                                <row>
+                                    <label value="Оценка соответствия:" stylename="bold"/>
+                                    <label id="salaryFitDetailLabel" value="—"/>
+                                </row>
+                            </rows>
+                        </grid>
                     </vbox>
 
                     <!-- Блок: Итоговое экспертное заключение AI -->

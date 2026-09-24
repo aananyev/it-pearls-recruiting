@@ -104,6 +104,15 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
     protected String candidateSalary;
 
     @MetaProperty
+    protected String vacancySalary;
+
+    @MetaProperty
+    protected String salaryFitAnalysis;
+
+    @MetaProperty
+    protected String salaryFitStatus;
+
+    @MetaProperty
     protected String candidateRole;
 
     @MetaProperty
@@ -186,6 +195,58 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
 
     public void setCandidateSalary(String candidateSalary) {
         this.candidateSalary = candidateSalary;
+    }
+
+    public String getVacancySalary() {
+        return vacancySalary;
+    }
+
+    public void setVacancySalary(String vacancySalary) {
+        this.vacancySalary = vacancySalary;
+    }
+
+    public String getSalaryFitAnalysis() {
+        return salaryFitAnalysis;
+    }
+
+    public void setSalaryFitAnalysis(String salaryFitAnalysis) {
+        this.salaryFitAnalysis = salaryFitAnalysis;
+    }
+
+    public String getSalaryFitStatus() {
+        return salaryFitStatus;
+    }
+
+    public void setSalaryFitStatus(String salaryFitStatus) {
+        this.salaryFitStatus = salaryFitStatus;
+    }
+
+    public static final String SALARY_FIT_IN_RANGE = "IN_RANGE";
+    public static final String SALARY_FIT_ABOVE = "ABOVE";
+    public static final String SALARY_FIT_BELOW = "BELOW";
+    public static final String SALARY_FIT_BY_AGREEMENT = "BY_AGREEMENT";
+
+    @MetaProperty
+    public String getSalaryFitStatusDisplay() {
+        if (SALARY_FIT_IN_RANGE.equals(salaryFitStatus)) return "В рамках вилки";
+        if (SALARY_FIT_ABOVE.equals(salaryFitStatus)) return "Выше вилки";
+        if (SALARY_FIT_BELOW.equals(salaryFitStatus)) return "Ниже вилки";
+        if (SALARY_FIT_BY_AGREEMENT.equals(salaryFitStatus)) return "По договоренности";
+        return "—";
+    }
+
+    @MetaProperty
+    public String getSalaryFitDisplay() {
+        if (salaryFitAnalysis != null && !salaryFitAnalysis.trim().isEmpty()) {
+            return salaryFitAnalysis;
+        }
+        if ((candidateSalary != null && !candidateSalary.trim().isEmpty())
+                || (vacancySalary != null && !vacancySalary.trim().isEmpty())) {
+            return String.format(java.util.Locale.ROOT, "Ожидания: %s | Предложение: %s",
+                    candidateSalary != null && !candidateSalary.trim().isEmpty() ? candidateSalary : "не указаны",
+                    vacancySalary != null && !vacancySalary.trim().isEmpty() ? vacancySalary : "не указано");
+        }
+        return "Не указано";
     }
 
     public String getCandidateRole() {

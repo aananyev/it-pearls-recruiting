@@ -333,6 +333,21 @@ public class CandidateVacancyMatchScreen extends Screen {
     private VBoxLayout summaryBox;
 
     @Inject
+    private VBoxLayout salaryFitBox;
+
+    @Inject
+    private Label<String> salaryFitBadge;
+
+    @Inject
+    private Label<String> candidateSalaryDetailLabel;
+
+    @Inject
+    private Label<String> vacancySalaryDetailLabel;
+
+    @Inject
+    private Label<String> salaryFitDetailLabel;
+
+    @Inject
     private Label<String> summaryTextLabel;
 
     @Inject
@@ -1293,12 +1308,43 @@ public class CandidateVacancyMatchScreen extends Screen {
             risksBox.setVisible(false);
         }
 
-        // Summary
+        // Summary & Salary Fit
+        String candSalary = item.getCandidateSalary();
+        String vacSalary = item.getVacancySalary();
+        String salaryFit = item.getSalaryFitAnalysis();
+        boolean hasSalaryData = (candSalary != null && !candSalary.trim().isEmpty())
+                || (vacSalary != null && !vacSalary.trim().isEmpty())
+                || (salaryFit != null && !salaryFit.trim().isEmpty());
+
+        if (hasSalaryData) {
+            salaryFitBox.setVisible(true);
+            candidateSalaryDetailLabel.setValue(candSalary != null && !candSalary.trim().isEmpty() ? candSalary : "Не указаны");
+            vacancySalaryDetailLabel.setValue(vacSalary != null && !vacSalary.trim().isEmpty() ? vacSalary : "По договоренности / не указано");
+            salaryFitDetailLabel.setValue(item.getSalaryFitDisplay());
+
+            resetSalaryFitBadge();
+
+            String fitStatus = item.getSalaryFitStatus() != null ? item.getSalaryFitStatus() : CandidateVacancyMatchItem.SALARY_FIT_BY_AGREEMENT;
+            salaryFitBadge.setValue(item.getSalaryFitStatusDisplay() != null ? item.getSalaryFitStatusDisplay().toUpperCase(java.util.Locale.ROOT) : "ПО ДОГОВОРЕННОСТИ");
+
+            if (CandidateVacancyMatchItem.SALARY_FIT_IN_RANGE.equals(fitStatus)
+                    || CandidateVacancyMatchItem.SALARY_FIT_BELOW.equals(fitStatus)) {
+                salaryFitBadge.addStyleName("candidate-vacancy-match-weight-positive");
+            } else if (CandidateVacancyMatchItem.SALARY_FIT_ABOVE.equals(fitStatus)) {
+                salaryFitBadge.addStyleName("candidate-vacancy-match-weight-negative");
+            } else {
+                salaryFitBadge.addStyleName("candidate-vacancy-match-weight-neutral");
+            }
+        } else {
+            clearSalaryFitBox();
+        }
+
         if (item.getSummary() != null && !item.getSummary().trim().isEmpty()) {
             summaryBox.setVisible(true);
             summaryTextLabel.setValue(escapeHtml(item.getSummary()));
         } else {
             summaryBox.setVisible(false);
+            summaryTextLabel.setValue("");
         }
 
         // AI Meta
@@ -1311,6 +1357,21 @@ public class CandidateVacancyMatchScreen extends Screen {
         } else {
             aiMetaBox.setVisible(false);
         }
+    }
+
+    private void resetSalaryFitBadge() {
+        salaryFitBadge.setValue("—");
+        salaryFitBadge.removeStyleName("candidate-vacancy-match-weight-positive");
+        salaryFitBadge.removeStyleName("candidate-vacancy-match-weight-negative");
+        salaryFitBadge.removeStyleName("candidate-vacancy-match-weight-neutral");
+    }
+
+    private void clearSalaryFitBox() {
+        salaryFitBox.setVisible(false);
+        candidateSalaryDetailLabel.setValue("—");
+        vacancySalaryDetailLabel.setValue("—");
+        salaryFitDetailLabel.setValue("—");
+        resetSalaryFitBadge();
     }
 
     private void clearDetailsPane() {
@@ -1328,6 +1389,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         missingReqsBox.setVisible(false);
         risksBox.setVisible(false);
         summaryBox.setVisible(false);
+        clearSalaryFitBox();
         aiMetaBox.setVisible(false);
     }
 
