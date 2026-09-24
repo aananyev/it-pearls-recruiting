@@ -1716,6 +1716,23 @@
         </property>
     </view>
 
+    <view entity="hunttech_CandidateCV" name="candidateCV-contact-enrichment-view" extends="_minimal">
+        <property name="textCV"/>
+        <property name="letter"/>
+        <property name="datePost"/>
+        <property name="originalFileCV" view="_local"/>
+        <property name="fileCV" view="_local"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="toVacancy" view="_minimal"/>
+        <property name="resumePosition" view="_minimal"/>
+    </view>
+
+    <view entity="hunttech_JobCandidate" name="jobCandidate-contact-enrichment-view" extends="_local">
+        <property name="fileImageFace" view="_local"/>
+    </view>
+
     <view entity="hunttech_CandidateCvContactAnalysis" name="candidateCvContactAnalysis-browse-view" extends="_local">
         <property name="providerCode"/>
         <property name="modelName"/>
@@ -1726,13 +1743,13 @@
             <property name="phone"/>
             <property name="mobilePhone"/>
             <property name="telegramName"/>
-            <property name="fileImageFace"/>
+            <property name="fileImageFace" view="_local"/>
         </property>
         <property name="candidateCv" view="_minimal">
             <property name="datePost"/>
             <property name="resumePosition" view="_minimal"/>
-            <property name="fileCV"/>
-            <property name="originalFileCV"/>
+            <property name="fileCV" view="_local"/>
+            <property name="originalFileCV" view="_local"/>
         </property>
     </view>
 </views>

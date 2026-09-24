@@ -149,14 +149,40 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
         String effectiveFunctionCode = (aiFunctionCode != null && !aiFunctionCode.trim().isEmpty())
                 ? aiFunctionCode : cfg.getAiFunctionCode();
 
+        CandidateCV effectiveCv = cv;
+        if (cv.getId() != null) {
+            try {
+                effectiveCv = dataManager.load(CandidateCV.class)
+                        .id(cv.getId())
+                        .view("candidateCV-contact-enrichment-view")
+                        .optional()
+                        .orElse(cv);
+            } catch (Exception e) {
+                log.debug("Не удалось загрузить candidateCV-contact-enrichment-view: {}", e.getMessage());
+            }
+        }
+
+        JobCandidate effectiveCandidate = candidate;
+        if (candidate.getId() != null) {
+            try {
+                effectiveCandidate = dataManager.load(JobCandidate.class)
+                        .id(candidate.getId())
+                        .view("jobCandidate-contact-enrichment-view")
+                        .optional()
+                        .orElse(candidate);
+            } catch (Exception e) {
+                log.debug("Не удалось загрузить jobCandidate-contact-enrichment-view: {}", e.getMessage());
+            }
+        }
+
         // 1. Извлечение текста и картинок из оригинала файла (DOCX, PDF и др.) или из textCV
-        ExtractedDocumentData docData = extractDocumentData(cv);
+        ExtractedDocumentData docData = extractDocumentData(effectiveCv);
         String rawText = docData.text;
         List<byte[]> candidateImages = docData.images;
 
         if (rawText == null || rawText.trim().isEmpty()) {
-            log.info("Текст резюме кандидата {} (CV ID: {}) пуст -> SKIPPED", candidate.getFullName(), cv.getId());
-            saveSkippedAnalysisRecord(candidate, cv, effectiveFunctionCode);
+            log.info("Текст резюме кандидата {} (CV ID: {}) пуст -> SKIPPED", effectiveCandidate.getFullName(), effectiveCv.getId());
+            saveSkippedAnalysisRecord(effectiveCandidate, effectiveCv, effectiveFunctionCode);
             result.setSuccess(true);
             result.setDurationMs(System.currentTimeMillis() - startTime);
             return result;
@@ -166,12 +192,12 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
         Integer configVersion = loadFunctionVersion(effectiveFunctionCode);
 
         // Проверка неизменности хэша и версии AI
-        CandidateCvContactAnalysis existingAnalysis = loadAnalysisRecord(cv.getId());
+        CandidateCvContactAnalysis existingAnalysis = loadAnalysisRecord(effectiveCv.getId());
         if (existingAnalysis != null && existingAnalysis.getStatus() == CandidateCvAnalysisStatus.FRESH && !forceScan) {
             if (Objects.equals(existingAnalysis.getCvContentHash(), contentHash)
                     && Objects.equals(existingAnalysis.getContactsConfigurationVersion(), configVersion)) {
                 log.info("Контакты резюме кандидата {} (CV ID: {}) уже проанализированы актуальной версией, пропуск",
-                        candidate.getFullName(), cv.getId());
+                        effectiveCandidate.getFullName(), effectiveCv.getId());
                 result.setSuccess(true);
                 result.setDurationMs(System.currentTimeMillis() - startTime);
                 return result;
@@ -183,7 +209,7 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
 
         boolean freeOnly = isBackground && cfg.getFreeOnly();
         log.info("AI-анализ контактов кандидата {} (CV ID: {}, background={}, freeOnly={})",
-                candidate.getFullName(), cv.getId(), isBackground, freeOnly);
+                effectiveCandidate.getFullName(), effectiveCv.getId(), isBackground, freeOnly);
 
         // 2. Детекция и сохранение фотографии кандидата (отсечение логотипов)
         byte[] bestPhotoBytes = detectCandidatePhoto(candidateImages);
@@ -214,13 +240,13 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
             }
 
             // 5. Безопасное сохранение контактов и фото в JobCandidate (защита от блокировок)
-            List<String> updatedFields = applyContactsAndPhotoSafe(candidate, cv, extracted, bestPhotoBytes);
+            List<String> updatedFields = applyContactsAndPhotoSafe(effectiveCandidate, effectiveCv, extracted, bestPhotoBytes);
             result.setUpdatedFields(updatedFields);
             result.setTotalContactsFound(calculateContactsCount(extracted));
             result.setTotalContactsUpdated(updatedFields.size());
 
             // 6. Фиксация результата в CandidateCvContactAnalysis
-            saveSuccessAnalysisRecord(candidate, cv, contentHash, configVersion, effectiveFunctionCode,
+            saveSuccessAnalysisRecord(effectiveCandidate, effectiveCv, contentHash, configVersion, effectiveFunctionCode,
                     aiExecution, extracted, updatedFields, photoFound, System.currentTimeMillis() - startTime);
 
             result.setSuccess(true);
@@ -230,12 +256,12 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
             log.error("Ошибка при AI-анализе контактов кандидата {} (CV ID: {}): {}",
-                    candidate.getFullName(), cv.getId(), e.getMessage(), e);
+                    effectiveCandidate.getFullName(), effectiveCv.getId(), e.getMessage(), e);
             result.setSuccess(false);
             result.setRawError(e.getMessage());
             result.setDurationMs(duration);
 
-            handleAnalysisError(candidate, cv, contentHash, configVersion, effectiveFunctionCode, e, duration);
+            handleAnalysisError(effectiveCandidate, effectiveCv, contentHash, configVersion, effectiveFunctionCode, e, duration);
             return result;
         }
     }
@@ -246,9 +272,32 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
     private ExtractedDocumentData extractDocumentData(CandidateCV cv) {
         ExtractedDocumentData data = new ExtractedDocumentData();
 
-        FileDescriptor fd = cv.getOriginalFileCV();
+        FileDescriptor fd = null;
+        try {
+            fd = cv.getOriginalFileCV();
+        } catch (Exception e) {
+            log.debug("originalFileCV не загружен у CV {}: {}", cv.getId(), e.getMessage());
+        }
         if (fd == null) {
-            fd = cv.getFileCV();
+            try {
+                fd = cv.getFileCV();
+            } catch (Exception e) {
+                log.debug("fileCV не загружен у CV {}: {}", cv.getId(), e.getMessage());
+            }
+        }
+
+        if (fd != null && fd.getId() != null) {
+            try {
+                if (fd.getExtension() == null) {
+                    fd = dataManager.load(FileDescriptor.class).id(fd.getId()).view("_local").optional().orElse(fd);
+                }
+            } catch (Exception e) {
+                try {
+                    fd = dataManager.load(FileDescriptor.class).id(fd.getId()).view("_local").optional().orElse(fd);
+                } catch (Exception ex) {
+                    log.warn("Не удалось дозагрузить FileDescriptor {}: {}", fd.getId(), ex.getMessage());
+                }
+            }
         }
 
         if (fd != null && fd.getExtension() != null) {

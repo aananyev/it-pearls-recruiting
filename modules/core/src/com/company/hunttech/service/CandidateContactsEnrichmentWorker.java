@@ -150,13 +150,13 @@ public class CandidateContactsEnrichmentWorker {
             // 6. Вызов AI и обогащение контактов (ВНЕ транзакции БД!)
             CandidateCV cv = dataManager.load(CandidateCV.class)
                     .id(task.candidateCvId)
-                    .view("candidateCV-llm-view")
+                    .view("candidateCV-contact-enrichment-view")
                     .optional()
                     .orElse(null);
 
             JobCandidate candidate = dataManager.load(JobCandidate.class)
                     .id(task.candidateId)
-                    .view("_local")
+                    .view("jobCandidate-contact-enrichment-view")
                     .optional()
                     .orElse(null);
 
