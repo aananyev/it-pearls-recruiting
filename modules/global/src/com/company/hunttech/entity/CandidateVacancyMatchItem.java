@@ -71,6 +71,18 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
     protected String summary;
 
     @MetaProperty
+    protected String interactionHistoryAnalysis;
+
+    @MetaProperty
+    protected List<String> pastRejectionsEmployerSide = new ArrayList<>();
+
+    @MetaProperty
+    protected List<String> pastRejectionsCandidateSide = new ArrayList<>();
+
+    @MetaProperty
+    protected Integer interactionWeightAdjustment = 0;
+
+    @MetaProperty
     protected Integer priority;
 
     @MetaProperty
@@ -437,5 +449,61 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
             return "Нет явных пробелов";
         }
         return String.join(", ", missingCriticalRequirements);
+    }
+
+    public String getInteractionHistoryAnalysis() {
+        return interactionHistoryAnalysis;
+    }
+
+    public void setInteractionHistoryAnalysis(String interactionHistoryAnalysis) {
+        this.interactionHistoryAnalysis = interactionHistoryAnalysis;
+    }
+
+    public List<String> getPastRejectionsEmployerSide() {
+        return pastRejectionsEmployerSide;
+    }
+
+    public void setPastRejectionsEmployerSide(List<String> pastRejectionsEmployerSide) {
+        this.pastRejectionsEmployerSide = pastRejectionsEmployerSide != null ? pastRejectionsEmployerSide : new ArrayList<>();
+    }
+
+    public List<String> getPastRejectionsCandidateSide() {
+        return pastRejectionsCandidateSide;
+    }
+
+    public void setPastRejectionsCandidateSide(List<String> pastRejectionsCandidateSide) {
+        this.pastRejectionsCandidateSide = pastRejectionsCandidateSide != null ? pastRejectionsCandidateSide : new ArrayList<>();
+    }
+
+    public Integer getInteractionWeightAdjustment() {
+        return interactionWeightAdjustment;
+    }
+
+    public void setInteractionWeightAdjustment(Integer interactionWeightAdjustment) {
+        this.interactionWeightAdjustment = interactionWeightAdjustment != null ? interactionWeightAdjustment : 0;
+    }
+
+    @MetaProperty
+    public String getInteractionWeightAdjustmentDisplay() {
+        if (interactionWeightAdjustment == null || interactionWeightAdjustment == 0) {
+            return "0% (нейтрально)";
+        }
+        return (interactionWeightAdjustment > 0 ? "+" : "") + interactionWeightAdjustment + "% к рейтингу";
+    }
+
+    @MetaProperty
+    public String getPastRejectionsEmployerSideDisplay() {
+        if (pastRejectionsEmployerSide == null || pastRejectionsEmployerSide.isEmpty()) {
+            return "Отказов со стороны работодателей/клиентов не зафиксировано";
+        }
+        return "• " + String.join("\n• ", pastRejectionsEmployerSide);
+    }
+
+    @MetaProperty
+    public String getPastRejectionsCandidateSideDisplay() {
+        if (pastRejectionsCandidateSide == null || pastRejectionsCandidateSide.isEmpty()) {
+            return "Отказов от оферов/предложений не зафиксировано";
+        }
+        return "• " + String.join("\n• ", pastRejectionsCandidateSide);
     }
 }

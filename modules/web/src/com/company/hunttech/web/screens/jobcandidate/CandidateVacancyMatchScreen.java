@@ -249,6 +249,30 @@ public class CandidateVacancyMatchScreen extends Screen {
     private VBoxLayout scoresBox;
 
     @Inject
+    private VBoxLayout interactionHistorySectionBox;
+
+    @Inject
+    private Label<String> historyHeaderTitle;
+
+    @Inject
+    private Label<String> historyWeightAdjustmentBadge;
+
+    @Inject
+    private Label<String> historyAnalysisSummaryLabel;
+
+    @Inject
+    private VBoxLayout employerRejectionsSubBox;
+
+    @Inject
+    private Label<String> employerRejectionsListLabel;
+
+    @Inject
+    private VBoxLayout candidateRefusalsSubBox;
+
+    @Inject
+    private Label<String> candidateRefusalsListLabel;
+
+    @Inject
     private Label<String> roleFitLabel;
 
     @Inject
@@ -1108,6 +1132,58 @@ public class CandidateVacancyMatchScreen extends Screen {
         domainFitLabel.setValue(String.format("%d / 10", item.getDomainFit() != null ? item.getDomainFit() : 0));
         totalScoreLabel.setValue(String.format("%d / 100", item.getScore() != null ? item.getScore() : 0));
 
+        // Умный анализ истории взаимодействий и прошлых отказов
+        boolean hasInteractionAnalysis = (item.getInteractionHistoryAnalysis() != null && !item.getInteractionHistoryAnalysis().trim().isEmpty())
+                || (item.getPastRejectionsEmployerSide() != null && !item.getPastRejectionsEmployerSide().isEmpty())
+                || (item.getPastRejectionsCandidateSide() != null && !item.getPastRejectionsCandidateSide().isEmpty())
+                || (item.getInteractionWeightAdjustment() != null && item.getInteractionWeightAdjustment() != 0);
+
+        if (hasInteractionAnalysis) {
+            interactionHistorySectionBox.setVisible(true);
+
+            // Бейдж весового коэффициента
+            int weight = item.getInteractionWeightAdjustment() != null ? item.getInteractionWeightAdjustment() : 0;
+            String badgeText = (weight > 0 ? "+" : "") + weight + "% к рейтингу";
+            historyWeightAdjustmentBadge.setValue(badgeText);
+
+            historyWeightAdjustmentBadge.removeStyleName("candidate-vacancy-match-weight-positive");
+            historyWeightAdjustmentBadge.removeStyleName("candidate-vacancy-match-weight-negative");
+            historyWeightAdjustmentBadge.removeStyleName("candidate-vacancy-match-weight-neutral");
+            if (weight > 0) {
+                historyWeightAdjustmentBadge.addStyleName("candidate-vacancy-match-weight-positive");
+            } else if (weight < 0) {
+                historyWeightAdjustmentBadge.addStyleName("candidate-vacancy-match-weight-negative");
+            } else {
+                historyWeightAdjustmentBadge.addStyleName("candidate-vacancy-match-weight-neutral");
+            }
+
+            // Аналитическое резюме
+            if (item.getInteractionHistoryAnalysis() != null && !item.getInteractionHistoryAnalysis().trim().isEmpty()) {
+                historyAnalysisSummaryLabel.setVisible(true);
+                historyAnalysisSummaryLabel.setValue(escapeHtml(item.getInteractionHistoryAnalysis()));
+            } else {
+                historyAnalysisSummaryLabel.setVisible(false);
+            }
+
+            // Отказы работодателей
+            if (item.getPastRejectionsEmployerSide() != null && !item.getPastRejectionsEmployerSide().isEmpty()) {
+                employerRejectionsSubBox.setVisible(true);
+                employerRejectionsListLabel.setValue(formatListAsHtml(item.getPastRejectionsEmployerSide()));
+            } else {
+                employerRejectionsSubBox.setVisible(false);
+            }
+
+            // Отказы кандидата
+            if (item.getPastRejectionsCandidateSide() != null && !item.getPastRejectionsCandidateSide().isEmpty()) {
+                candidateRefusalsSubBox.setVisible(true);
+                candidateRefusalsListLabel.setValue(formatListAsHtml(item.getPastRejectionsCandidateSide()));
+            } else {
+                candidateRefusalsSubBox.setVisible(false);
+            }
+        } else {
+            interactionHistorySectionBox.setVisible(false);
+        }
+
         // Reasons to offer
         if (item.getReasonsToOffer() != null && !item.getReasonsToOffer().isEmpty()) {
             reasonsBox.setVisible(true);
@@ -1172,6 +1248,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         quickActionsBox.setVisible(false);
         recruiterDecisionBox.setVisible(false);
         scoresBox.setVisible(false);
+        interactionHistorySectionBox.setVisible(false);
         reasonsBox.setVisible(false);
         matchedSkillsBox.setVisible(false);
         missingReqsBox.setVisible(false);

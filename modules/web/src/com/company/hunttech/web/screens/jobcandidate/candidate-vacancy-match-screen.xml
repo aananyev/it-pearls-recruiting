@@ -248,6 +248,33 @@
                         </grid>
                     </vbox>
 
+                    <!-- Блок: Умный анализ истории взаимодействий и отказов -->
+                    <vbox id="interactionHistorySectionBox" spacing="true" width="100%" visible="false"
+                          stylename="candidate-vacancy-match-detail-section candidate-vacancy-match-history-section">
+                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="historyHeaderTitle">
+                            <label id="historyHeaderTitle" value="УМНЫЙ АНАЛИЗ ИСТОРИИ ВЗАИМОДЕЙСТВИЙ И ОТКАЗОВ"
+                                   stylename="candidate-vacancy-match-detail-caption"/>
+                            <label id="historyWeightAdjustmentBadge" value="0%"
+                                   stylename="candidate-vacancy-match-weight-badge" align="MIDDLE_RIGHT"/>
+                        </hbox>
+                        <label id="historyAnalysisSummaryLabel" htmlEnabled="true" width="100%"
+                               stylename="candidate-vacancy-match-history-summary"/>
+
+                        <vbox id="employerRejectionsSubBox" spacing="false" width="100%" visible="false"
+                              stylename="candidate-vacancy-match-sub-history-box">
+                            <label value="Отказы работодателей кандидату и сопоставление с требованиями:"
+                                   stylename="bold candidate-vacancy-match-history-subcaption" width="100%"/>
+                            <label id="employerRejectionsListLabel" htmlEnabled="true" width="100%"/>
+                        </vbox>
+
+                        <vbox id="candidateRefusalsSubBox" spacing="false" width="100%" visible="false"
+                              stylename="candidate-vacancy-match-sub-history-box">
+                            <label value="Отказы кандидата от прошлых предложений и сопоставление с условиями:"
+                                   stylename="bold candidate-vacancy-match-history-subcaption" width="100%"/>
+                            <label id="candidateRefusalsListLabel" htmlEnabled="true" width="100%"/>
+                        </vbox>
+                    </vbox>
+
                     <!-- Блок: Почему стоит предложить -->
                     <vbox id="reasonsBox" spacing="true" width="100%" visible="false"
                           stylename="candidate-vacancy-match-detail-section">

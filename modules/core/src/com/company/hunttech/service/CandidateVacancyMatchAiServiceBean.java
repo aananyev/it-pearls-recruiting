@@ -172,8 +172,10 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             return emptyReport;
         }
 
-        // 5. Формирование контекста кандидата
-        String candidateProfile = buildCandidateProfileString(candidate);
+        // 5. Формирование контекста кандидата с глубоким анализом истории взаимодействий и прошлых отказов
+        CandidateInteractionProfile interactionProfile = loadCandidateInteractionProfile(candidateId);
+        String candidateProfile = buildCandidateProfileString(candidate)
+                + "\n\n" + interactionProfile.toPromptSection();
         String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
         String candidateResumeText = buildCandidateResumeText(cvList);
 
@@ -261,7 +263,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                     seenVacancyIds.add(op.getId());
                 }
             }
-            enrichItemsWithCandidateAndStatus(allItems, candidate, null);
+            enrichItemsWithCandidateAndStatus(allItems, candidate, null, interactionProfile);
             allItems.sort(getComparator());
             report.setItems(allItems);
             report.setMatchedVacanciesCount(allItems.size());
@@ -274,7 +276,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         // 7. Честный Fallback при недоступности AI: рассчитываем базовую эвристическую оценку без фальсификации
         log.warn("AI service unavailable for candidate-vacancy match. Using honest rule-based fallback.");
         List<CandidateVacancyMatchItem> fallbackItems = buildHonestFallbackItems(candidate, candidateSkills, candidateResumeText, openPositions);
-        enrichItemsWithCandidateAndStatus(fallbackItems, candidate, null);
+        enrichItemsWithCandidateAndStatus(fallbackItems, candidate, null, interactionProfile);
         fallbackItems.sort(getComparator());
 
         report.setItems(fallbackItems);
@@ -446,12 +448,12 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                     }
 
                     phase = "prepare-context";
-                    String recruiterActivity = resolveRecruiterActivityDescription(cand.getId());
+                    CandidateInteractionProfile interactionProfile = loadCandidateInteractionProfile(cand.getId());
                     String lastJobDomain = resolveLastJobDomainDescription(cand);
 
                     String candidateProfile = buildCandidateProfileString(cand)
-                            + "\nАктуальность взаимодействия с рекрутером в HRM: " + recruiterActivity
-                            + "\nПредметная область последнего места работы: " + lastJobDomain;
+                            + "\nПредметная область последнего места работы: " + lastJobDomain
+                            + "\n\n" + interactionProfile.toPromptSection();
                     String candidateSkillsText = buildCandidateSkillsString(candidateSkills);
                     String candidateResumeText = buildCandidateResumeText(cvList);
 
@@ -504,6 +506,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
 
                     if (matchedItem != null) {
                         phase = "workflow-state";
+                        applyInteractionAnalysisAndWeights(matchedItem, vacancy, interactionProfile);
                         matchedItem.setCandidateId(cand.getId());
                         matchedItem.setCandidateFullName(cand.getFullName());
                         matchedItem.setCandidatePosition(cand.getPersonPosition() != null ? cand.getPersonPosition().getPositionRuName() : "");
@@ -612,7 +615,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         }
     }
 
-    private void enrichItemsWithCandidateAndStatus(List<CandidateVacancyMatchItem> items, JobCandidate candidate, UUID vacancyId) {
+    private void enrichItemsWithCandidateAndStatus(List<CandidateVacancyMatchItem> items, JobCandidate candidate, UUID vacancyId, CandidateInteractionProfile profile) {
         VacancyCandidateMatchRun run = null;
         if (workflowService != null) {
             try {
@@ -632,6 +635,9 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             }
             if (rId != null) {
                 it.setMatchRunId(rId);
+            }
+            if (profile != null) {
+                applyInteractionAnalysisAndWeights(it, it.getOpenPosition(), profile);
             }
             if (workflowService != null && it.getCandidateId() != null && it.getOpenPositionId() != null) {
                 IteractionList existing = workflowService.getExistingRelation(it.getCandidateId(), it.getOpenPositionId());
@@ -1061,6 +1067,476 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             log.debug("matchExactPositionInDictionary query failed for title '{}': {}", rawTitle, e.getMessage());
         }
         return null;
+    }
+
+    static class InteractionDetail {
+        Date date;
+        String interactionTypeNumber;
+        String interactionTypeName;
+        String vacancyTitle;
+        String comment;
+    }
+
+    static class CandidateInteractionProfile {
+        UUID candidateId;
+        String recruiterActivityText;
+        int totalInteractionsCount = 0;
+        List<InteractionDetail> employerRejections = new ArrayList<>();
+        List<InteractionDetail> candidateRefusals = new ArrayList<>();
+        List<InteractionDetail> otherInteractions = new ArrayList<>();
+
+        String toPromptSection() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("ИСТОРИЯ ВЗАИМОДЕЙСТВИЙ И ПРИЧИНЫ ПРОШЛЫХ ОТКАЗОВ В СИСТЕМЕ HRM:\n");
+            sb.append("• Актуальность контактов: ").append(recruiterActivityText != null ? recruiterActivityText : "Новый кандидат").append("\n");
+            sb.append("• Всего зафиксировано взаимодействий в базе: ").append(totalInteractionsCount).append("\n");
+
+            if (!employerRejections.isEmpty()) {
+                sb.append("• ПРОШЛЫЕ ОТКАЗЫ РАБОТОДАТЕЛЕЙ/КЛИЕНТОВ КАНДИДАТУ (").append(employerRejections.size()).append("):\n");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ROOT);
+                for (InteractionDetail d : employerRejections) {
+                    sb.append("  - [").append(d.date != null ? sdf.format(d.date) : "—");
+                    if (d.vacancyTitle != null && !d.vacancyTitle.isEmpty()) {
+                        sb.append(", Вакансия: '").append(d.vacancyTitle).append("'");
+                    }
+                    sb.append("]: ").append(d.interactionTypeName != null ? d.interactionTypeName : "Отказ");
+                    if (d.comment != null && !d.comment.trim().isEmpty()) {
+                        sb.append(". Комментарий заказчика/рекрутера: \"").append(d.comment.trim()).append("\"");
+                    }
+                    sb.append("\n");
+                }
+            } else {
+                sb.append("• Отказов кандидату со стороны работодателей/клиентов не зафиксировано.\n");
+            }
+
+            if (!candidateRefusals.isEmpty()) {
+                sb.append("• ПРИЧИНЫ ОТКАЗОВ САМОГО КАНДИДАТА ОТ ПРОШЛЫХ ОФЕРОВ ИЛИ ПРЕДЛОЖЕНИЙ (").append(candidateRefusals.size()).append("):\n");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ROOT);
+                for (InteractionDetail d : candidateRefusals) {
+                    sb.append("  - [").append(d.date != null ? sdf.format(d.date) : "—");
+                    if (d.vacancyTitle != null && !d.vacancyTitle.isEmpty()) {
+                        sb.append(", Вакансия: '").append(d.vacancyTitle).append("'");
+                    }
+                    sb.append("]: ").append(d.interactionTypeName != null ? d.interactionTypeName : "Отказ кандидата");
+                    if (d.comment != null && !d.comment.trim().isEmpty()) {
+                        sb.append(". Что не устроило кандидата: \"").append(d.comment.trim()).append("\"");
+                    }
+                    sb.append("\n");
+                }
+            } else {
+                sb.append("• Отказов самого кандидата от оферов и предложений в истории не зафиксировано.\n");
+            }
+
+            sb.append("\nИНСТРУКЦИЯ ДЛЯ AI ПО ИСТОРИИ ОТКАЗОВ:\n");
+            sb.append("1. Проанализируй причины прошлых отказов работодателей кандидату (недостаток стека, грейд, ставка, софты, отказ в офере) и сопоставь с текущей вакансией. Если дефицитный стек требуется — обязательно укажи в рисках/пробелах; если не требуется — отметь снятие риска.\n");
+            sb.append("2. Проанализируй, что не устраивало кандидата в прошлых оферах (удаленка против офиса, уровень зарплаты, тестовые задания, легаси). Если условия текущей вакансии закрывают эти боли (например, 100% удаленка) — укажи в reasonsToOffer; если вакансия повторяет нежелательные условия (офис, тестовое) — укажи критический риск отказа кандидата.");
+
+            return sb.toString();
+        }
+    }
+
+    private CandidateInteractionProfile loadCandidateInteractionProfile(UUID candidateId) {
+        CandidateInteractionProfile profile = new CandidateInteractionProfile();
+        if (candidateId == null || dataManager == null) {
+            profile.recruiterActivityText = "Нет данных о взаимодействиях";
+            return profile;
+        }
+        profile.candidateId = candidateId;
+
+        try {
+            List<IteractionList> list = dataManager.load(IteractionList.class)
+                    .query("select e from hunttech_IteractionList e where e.candidate.id = :candId order by e.dateIteraction desc, e.createTs desc")
+                    .parameter("candId", candidateId)
+                    .view(viewBuilder -> viewBuilder.addAll(
+                            "numberIteraction", "dateIteraction", "comment", "rating",
+                            "iteractionType.number", "iteractionType.iterationName",
+                            "vacancy.vacansyName", "vacancy.positionType.positionRuName",
+                            "vacancy.remoteWork", "vacancy.remoteComment", "vacancy.comment",
+                            "vacancy.cityPosition.cityRuName", "vacancy.projectName.projectName",
+                            "recrutierName"
+                    ))
+                    .list();
+
+            if (list == null || list.isEmpty()) {
+                profile.recruiterActivityText = "Ранее не взаимодействовали (новый кандидат в базе HRM)";
+                return profile;
+            }
+
+            profile.totalInteractionsCount = list.size();
+
+            Date lastDate = list.get(0).getDateIteraction();
+            if (lastDate != null) {
+                long diffMillis = System.currentTimeMillis() - lastDate.getTime();
+                long days = diffMillis / (1000L * 60 * 60 * 24);
+                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ROOT);
+                if (days <= 30) {
+                    profile.recruiterActivityText = "В работе / контакт в течение последнего месяца (" + sdf.format(lastDate) + ", " + days + " дн. назад) — наивысшая актуальность";
+                } else if (days <= 180) {
+                    profile.recruiterActivityText = "Контакт в течение полугода (" + sdf.format(lastDate) + ", " + days + " дн. назад) — высокая актуальность";
+                } else if (days <= 365) {
+                    profile.recruiterActivityText = "Контакт в течение года (" + sdf.format(lastDate) + ", " + days + " дн. назад) — средняя актуальность";
+                } else {
+                    long years = days / 365;
+                    profile.recruiterActivityText = "Контакт более " + (years >= 2 ? years + " лет" : "года") + " назад (" + sdf.format(lastDate) + ") — низкий приоритет взаимодействия";
+                }
+            } else {
+                profile.recruiterActivityText = "Взаимодействия зафиксированы (дата не указана)";
+            }
+
+            for (IteractionList il : list) {
+                InteractionDetail detail = new InteractionDetail();
+                detail.date = il.getDateIteraction();
+                detail.comment = il.getComment();
+                if (il.getIteractionType() != null) {
+                    detail.interactionTypeNumber = il.getIteractionType().getNumber();
+                    detail.interactionTypeName = il.getIteractionType().getIterationName();
+                }
+                if (il.getVacancy() != null) {
+                    detail.vacancyTitle = il.getVacancy().getVacansyName();
+                }
+
+                if (classifyIsEmployerRejection(detail)) {
+                    profile.employerRejections.add(detail);
+                } else if (classifyIsCandidateRefusal(detail)) {
+                    profile.candidateRefusals.add(detail);
+                } else {
+                    profile.otherInteractions.add(detail);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("loadCandidateInteractionProfile failed for candidate {}: {}", candidateId, e.getMessage());
+            profile.recruiterActivityText = "Информация о взаимодействиях не определена";
+        }
+
+        return profile;
+    }
+
+    private boolean classifyIsEmployerRejection(InteractionDetail d) {
+        String num = d.interactionTypeNumber != null ? d.interactionTypeNumber.trim() : "";
+        String name = d.interactionTypeName != null ? d.interactionTypeName.toLowerCase(Locale.ROOT) : "";
+        String comment = d.comment != null ? d.comment.toLowerCase(Locale.ROOT) : "";
+
+        if (num.startsWith("8.05") || num.startsWith("8.06") || num.startsWith("8.07")
+                || num.startsWith("8.08") || num.startsWith("8.09") || num.startsWith("8.10")
+                || num.startsWith("8.11") || num.startsWith("8.12") || num.startsWith("8.13")
+                || num.startsWith("8.14") || num.startsWith("8.19") || num.startsWith("8.24")
+                || num.startsWith("8.25") || "007".equals(num) || "2".equals(num) || "5".equals(num)) {
+            return true;
+        }
+
+        if (name.contains("отказано в офере") || name.contains("отказано на стороне")
+                || name.contains("отказано по резюме") || name.contains("отказ на стороне")
+                || name.contains("недостаточно компетенций") || name.contains("завысил свой грейд")
+                || name.contains("завышены зарплатные") || name.contains("не тот профиль")
+                || name.contains("не вписывается в ставку") || name.contains("отказано по софтам")
+                || name.contains("отказано рекрутером") || name.contains("не прошел испытательный")
+                || name.contains("отказать кандидаты") || name.contains("не пришел на собеседование")
+                || name.contains("отказ заказчика")) {
+            return true;
+        }
+
+        if (comment.contains("заказчик отказал") || comment.contains("отказ заказчика")
+                || comment.contains("отказали кандидату") || comment.contains("не подошел заказчику")
+                || comment.contains("отказано заказчиком")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean classifyIsCandidateRefusal(InteractionDetail d) {
+        String num = d.interactionTypeNumber != null ? d.interactionTypeNumber.trim() : "";
+        String name = d.interactionTypeName != null ? d.interactionTypeName.toLowerCase(Locale.ROOT) : "";
+        String comment = d.comment != null ? d.comment.toLowerCase(Locale.ROOT) : "";
+
+        if (num.startsWith("8.01") || num.startsWith("8.02") || num.startsWith("8.03")
+                || num.startsWith("8.04") || num.startsWith("8.17") || num.startsWith("8.23")
+                || num.startsWith("3.6")) {
+            return true;
+        }
+
+        if (name.contains("отказался от офера") || name.contains("отказался: не заинтересовала")
+                || name.contains("отказался от собеседования") || name.contains("отказался делать тестовое")
+                || name.contains("отказался выполнять тестовое") || name.contains("отказался: нашел работу")
+                || name.contains("отказался: получил контроффер") || name.contains("отмена собеседования кандидатом")) {
+            return true;
+        }
+
+        if (comment.contains("кандидат отказался") || comment.contains("отказался от оффера")
+                || comment.contains("отказался от офера") || comment.contains("отказался от предложения")
+                || comment.contains("не устроила зарплата") || comment.contains("не устроил офер")
+                || comment.contains("не хочет в офис") || comment.contains("отклонил офер")
+                || comment.contains("отклонил предложение")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void applyInteractionAnalysisAndWeights(CandidateVacancyMatchItem item,
+                                                   OpenPosition vacancy,
+                                                   CandidateInteractionProfile profile) {
+        if (item == null) return;
+        if (profile == null) {
+            item.setInteractionWeightAdjustment(0);
+            item.setInteractionHistoryAnalysis("История взаимодействий: данных нет (новый кандидат). Весовой коэффициент: 0%.");
+            return;
+        }
+
+        int totalWeightAdjustment = 0;
+        int prefAdjustment = 0;
+        int skillAdjustment = 0;
+
+        List<String> employerRejectionReport = new ArrayList<>();
+        List<String> candidateRefusalReport = new ArrayList<>();
+        List<String> riskAdditions = new ArrayList<>();
+        List<String> offerReasonAdditions = new ArrayList<>();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ROOT);
+
+        // 1. Анализ причин отказов самого кандидата от прошлых оферов и предложений
+        for (InteractionDetail d : profile.candidateRefusals) {
+            String dateStr = d.date != null ? sdf.format(d.date) : "В архиве";
+            String vacStr = d.vacancyTitle != null && !d.vacancyTitle.isEmpty() ? " ('" + d.vacancyTitle + "')" : "";
+            String fullText = ((d.interactionTypeName != null ? d.interactionTypeName : "") + " " + (d.comment != null ? d.comment : "")).toLowerCase(Locale.ROOT);
+
+            // A) Удаленка против офиса
+            boolean mentionsRemoteOffice = fullText.contains("удален") || fullText.contains("remote")
+                    || fullText.contains("офис") || fullText.contains("гибрид") || fullText.contains("присутстви")
+                    || fullText.contains("релокац") || fullText.contains("переезд");
+
+            // B) Зарплатные ожидания
+            boolean mentionsSalary = fullText.contains("зарплат") || fullText.contains("з/п") || fullText.contains("ставка")
+                    || fullText.contains("мало") || fullText.contains("деньг") || fullText.contains("доход") || fullText.contains("бюджет");
+
+            // C) Контроффер
+            boolean mentionsCounter = fullText.contains("контроффер") || fullText.contains("контр-офер") || fullText.contains("остался в своей компании");
+
+            // D) Тестовое задание
+            boolean mentionsTestTask = fullText.contains("тестов") || fullText.contains("тестовое задание") || fullText.contains("тестового задания");
+
+            if (mentionsRemoteOffice) {
+                // OpenPosition.remoteWork: 1 = Remote, 0 = Office, 2 = Hybrid
+                boolean vacancyIsRemote = vacancy != null && Integer.valueOf(1).equals(vacancy.getRemoteWork());
+                boolean vacancyIsOffice = vacancy != null && Integer.valueOf(0).equals(vacancy.getRemoteWork());
+
+                if (vacancyIsRemote) {
+                    candidateRefusalReport.add(String.format(Locale.ROOT,
+                            "[%s%s] Отказ от офера/предложения из-за очного формата работы. В ТЕКУЩЕЙ ВАКАНСИИ: предусмотрена 100%% удалённая работа (устраняет прошлый блокер кандидата, весовой бонус +10%% к предпочтениям).",
+                            dateStr, vacStr));
+                    prefAdjustment += 10;
+                    totalWeightAdjustment += 10;
+                    offerReasonAdditions.add("Устранение ключевого блокера: вакансия предлагает 100% удаленный формат работы, из-за отсутствия которого кандидат ранее отказался от оффера.");
+                } else if (vacancyIsOffice) {
+                    candidateRefusalReport.add(String.format(Locale.ROOT,
+                            "[%s%s] ВНИМАНИЕ: Кандидат ранее отказался от офера/предложения из-за очного формата в офисе. ТЕКУЩАЯ ВАКАНСИЯ: требует работы в офисе/гибрида (критический риск повторного отказа кандидата, штраф -15%% к рейтингу).",
+                            dateStr, vacStr));
+                    prefAdjustment -= 15;
+                    totalWeightAdjustment -= 15;
+                    riskAdditions.add("Критический риск отказа кандидата: ранее кандидат отклонял офер из-за очного формата в офисе, а данная вакансия не является полностью удаленной.");
+                } else {
+                    candidateRefusalReport.add(String.format(Locale.ROOT,
+                            "[%s%s] Отказ от офера из-за формата работы (офис/удаленка). Формат текущей вакансии: %s.",
+                            dateStr, vacStr, vacancy != null && vacancy.getRemoteComment() != null ? vacancy.getRemoteComment() : "уточняется"));
+                }
+            } else if (mentionsSalary) {
+                candidateRefusalReport.add(String.format(Locale.ROOT,
+                        "[%s%s] Отказ кандидата по зарплатным ожиданиям (%s). Рекомендуется согласовать финансовые условия до финала (штраф -5%% к рейтингу).",
+                        dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : "уровень офера"));
+                totalWeightAdjustment -= 5;
+            } else if (mentionsCounter) {
+                candidateRefusalReport.add(String.format(Locale.ROOT,
+                        "[%s%s] Кандидат ранее принял контроффер в текущей компании (%s). Риск контр-предложения при найме (штраф -5%% к рейтингу).",
+                        dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : "удержание работодателем"));
+                totalWeightAdjustment -= 5;
+                riskAdditions.add("Риск контроффера: кандидат склонен принимать встречные предложения текущего работодателя.");
+            } else if (mentionsTestTask) {
+                candidateRefusalReport.add(String.format(Locale.ROOT,
+                        "[%s%s] Кандидат отказывается выполнять объемные тестовые задания. Рекомендуется оценивать опыт на техническом интервью.",
+                        dateStr, vacStr));
+            } else {
+                candidateRefusalReport.add(String.format(Locale.ROOT,
+                        "[%s%s] %s%s",
+                        dateStr, vacStr,
+                        d.interactionTypeName != null ? d.interactionTypeName : "Отказ кандидата",
+                        d.comment != null && !d.comment.isEmpty() ? ": " + d.comment.trim() : ""));
+            }
+        }
+
+        // 2. Анализ прошлых отказов работодателей кандидату
+        for (InteractionDetail d : profile.employerRejections) {
+            String dateStr = d.date != null ? sdf.format(d.date) : "В архиве";
+            String vacStr = d.vacancyTitle != null && !d.vacancyTitle.isEmpty() ? " ('" + d.vacancyTitle + "')" : "";
+            String fullText = ((d.interactionTypeName != null ? d.interactionTypeName : "") + " " + (d.comment != null ? d.comment : "")).toLowerCase(Locale.ROOT);
+
+            // A) Отказ в офере работодателем
+            boolean isOfferRejection = fullText.contains("отказано в офере") || (d.interactionTypeNumber != null && d.interactionTypeNumber.startsWith("8.05"));
+
+            // B) Недостаточно компетенций / стек технологий
+            boolean isCompetencyRejection = fullText.contains("недостаточно компетенций") || fullText.contains("не тот профиль")
+                    || fullText.contains("отказано по резюме") || (d.interactionTypeNumber != null && (d.interactionTypeNumber.startsWith("8.24") || d.interactionTypeNumber.startsWith("8.25") || d.interactionTypeNumber.startsWith("8.14")));
+
+            // C) Завысил свой грейд
+            boolean isGradeRejection = fullText.contains("завысил свой грейд") || fullText.contains("грейд")
+                    || (d.interactionTypeNumber != null && (d.interactionTypeNumber.startsWith("8.06") || d.interactionTypeNumber.startsWith("8.09")));
+
+            // D) Завышены зарплатные ожидания со стороны работодателя
+            boolean isSalaryRejection = fullText.contains("завышены зарплатные") || fullText.contains("не вписывается в ставку")
+                    || (d.interactionTypeNumber != null && (d.interactionTypeNumber.startsWith("8.07") || d.interactionTypeNumber.startsWith("8.10") || d.interactionTypeNumber.startsWith("8.13")));
+
+            // E) Софт-скиллы
+            boolean isSoftSkillsRejection = fullText.contains("софт") || fullText.contains("собеседован") || fullText.contains("коммуникац");
+
+            if (isOfferRejection) {
+                employerRejectionReport.add(String.format(Locale.ROOT,
+                        "[%s%s] ВНИМАНИЕ: Работодатель отказал кандидату в офере на финальном этапе (%s). Требуется уточнить причину отзыва офера заказчиком (штраф -10%% к рейтингу).",
+                        dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : "финальный этап"));
+                totalWeightAdjustment -= 10;
+                riskAdditions.add("Ранее кандидату было отказано в офере работодателем: " + (d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : "уточнить причины отказа"));
+            } else if (isCompetencyRejection) {
+                boolean deficitMentionedInVacancy = isDeficitStackMentionedInVacancy(d.comment, vacancy);
+                if (deficitMentionedInVacancy) {
+                    employerRejectionReport.add(String.format(Locale.ROOT,
+                            "[%s%s] Отказ заказчика по компетенциям/стеку: '%s'. ВНИМАНИЕ: указанный стек требуется в текущей вакансии (прямой риск повторного несоответствия, штраф -10%% к навыкам).",
+                            dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : d.interactionTypeName));
+                    skillAdjustment -= 10;
+                    totalWeightAdjustment -= 10;
+                    riskAdditions.add("Прошлый отказ заказчика связан с дефицитом компетенций, которые требуются в данной вакансии: " + (d.comment != null ? d.comment.trim() : "стек вакансии"));
+                } else {
+                    employerRejectionReport.add(String.format(Locale.ROOT,
+                            "[%s%s] Отказ заказчика по стеку/профилю: '%s'. СМЯГЧАЮЩИЙ ФАКТОР: в текущей вакансии данный стек не требуется (риск нейтрализован, бонус +3%%).",
+                            dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : d.interactionTypeName));
+                    totalWeightAdjustment += 3;
+                }
+            } else if (isGradeRejection) {
+                employerRejectionReport.add(String.format(Locale.ROOT,
+                        "[%s%s] Отказ заказчика: завышен заявленный грейд (%s). Требуется точная калибровка грейда кандидата (штраф -5%% к рейтингу).",
+                        dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : "middle vs senior"));
+                totalWeightAdjustment -= 5;
+            } else if (isSalaryRejection) {
+                employerRejectionReport.add(String.format(Locale.ROOT,
+                        "[%s%s] Отказ работодателя: кандидат не вписался в бюджетную ставку вакансии (%s).",
+                        dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : "вилка заказчика"));
+                totalWeightAdjustment -= 5;
+            } else if (isSoftSkillsRejection) {
+                employerRejectionReport.add(String.format(Locale.ROOT,
+                        "[%s%s] Отказ заказчика по soft skills / интервью (%s). Рекомендуется обратить внимание на коммуникацию кандидата.",
+                        dateStr, vacStr, d.comment != null && !d.comment.isEmpty() ? d.comment.trim() : "обратная связь"));
+                totalWeightAdjustment -= 5;
+            } else {
+                employerRejectionReport.add(String.format(Locale.ROOT,
+                        "[%s%s] %s%s",
+                        dateStr, vacStr,
+                        d.interactionTypeName != null ? d.interactionTypeName : "Отказ работодателя",
+                        d.comment != null && !d.comment.isEmpty() ? ": " + d.comment.trim() : ""));
+            }
+        }
+
+        // Ограничение диапазонов корректировок
+        totalWeightAdjustment = clamp(totalWeightAdjustment, -25, 15);
+        prefAdjustment = clamp(prefAdjustment, -15, 10);
+        skillAdjustment = clamp(skillAdjustment, -15, 0);
+
+        item.setInteractionWeightAdjustment(totalWeightAdjustment);
+        item.setPastRejectionsEmployerSide(employerRejectionReport);
+        item.setPastRejectionsCandidateSide(candidateRefusalReport);
+
+        // Формирование итогового аналитического резюме
+        StringBuilder summary = new StringBuilder();
+        if (profile.totalInteractionsCount == 0) {
+            summary.append("История взаимодействий: новый кандидат в базе HRM. Прошлых отказов работодателей и отказов от оферов не зафиксировано. Весовой коэффициент нейтральный (0%).");
+        } else {
+            summary.append(String.format(Locale.ROOT,
+                    "Умный анализ истории взаимодействия (всего контактов: %d, отказов работодателей: %d, отказов кандидата: %d):\n",
+                    profile.totalInteractionsCount, profile.employerRejections.size(), profile.candidateRefusals.size()));
+
+            if (totalWeightAdjustment > 0) {
+                summary.append(String.format(Locale.ROOT,
+                        "• Сопоставление с вакансией благоприятное: условия вакансии устраняют прошлые блокеры кандидата. Применён весовой бонус: +%d%% к итоговому AI Score.\n",
+                        totalWeightAdjustment));
+            } else if (totalWeightAdjustment < 0) {
+                summary.append(String.format(Locale.ROOT,
+                        "• Сопоставление выявило существенные риски: пересечение с прошлыми причинами отказов (%s). Применён штрафной весовой коэффициент: %d%% к итоговому AI Score.\n",
+                        totalWeightAdjustment < -10 ? "критические факторы" : "зоны внимания", totalWeightAdjustment));
+            } else {
+                summary.append("• Сопоставление с вакансией нейтральное: прямых противоречий с историей прошлых отказов не выявлено (корректировка 0%).\n");
+            }
+            summary.append("• Актуальность взаимодействия: ").append(profile.recruiterActivityText != null ? profile.recruiterActivityText : "—");
+        }
+        item.setInteractionHistoryAnalysis(summary.toString());
+
+        // Корректировка subscores и score
+        int originalScore = item.getScore() != null ? item.getScore() : 0;
+        int adjustedScore = clamp(originalScore + totalWeightAdjustment, 0, 100);
+        item.setScore(adjustedScore);
+
+        int originalPref = item.getPreferencesFit() != null ? item.getPreferencesFit() : 0;
+        item.setPreferencesFit(clamp(originalPref + prefAdjustment, 0, 10));
+
+        int originalSkill = item.getSkillsFit() != null ? item.getSkillsFit() : 0;
+        item.setSkillsFit(clamp(originalSkill + skillAdjustment, 0, 35));
+
+        item.setVerdict(resolveVerdict(adjustedScore));
+
+        // Дополнение рисков и причин предложить
+        if (!riskAdditions.isEmpty()) {
+            List<String> currentRisks = new ArrayList<>(item.getRisks() != null ? item.getRisks() : Collections.emptyList());
+            for (String r : riskAdditions) {
+                if (!currentRisks.contains(r)) currentRisks.add(r);
+            }
+            item.setRisks(currentRisks);
+        }
+
+        if (!offerReasonAdditions.isEmpty()) {
+            List<String> currentReasons = new ArrayList<>(item.getReasonsToOffer() != null ? item.getReasonsToOffer() : Collections.emptyList());
+            for (String reason : offerReasonAdditions) {
+                if (!currentReasons.contains(reason)) currentReasons.add(reason);
+            }
+            item.setReasonsToOffer(currentReasons);
+        }
+    }
+
+    private boolean isDeficitStackMentionedInVacancy(String rejectionComment, OpenPosition vacancy) {
+        if (rejectionComment == null || rejectionComment.trim().isEmpty() || vacancy == null) {
+            return false;
+        }
+
+        // 1. Check if any structured skill of the vacancy appears in the rejection comment
+        if (vacancy.getSkillsList() != null) {
+            String lowerComment = rejectionComment.toLowerCase(Locale.ROOT);
+            for (SkillTree st : vacancy.getSkillsList()) {
+                if (st.getSkillName() != null && st.getSkillName().trim().length() >= 2) {
+                    String sName = st.getSkillName().toLowerCase(Locale.ROOT).trim();
+                    if (lowerComment.contains(sName)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // 2. Check tech tokens against vacancy text
+        String vacText = ((vacancy.getVacansyName() != null ? vacancy.getVacansyName() : "") + " "
+                + (vacancy.getComment() != null ? vacancy.getComment() : "") + " "
+                + (vacancy.getShortDescription() != null ? vacancy.getShortDescription() : "")).toLowerCase(Locale.ROOT);
+
+        String[] tokens = rejectionComment.split("[\\s,;:.()\"'/\\[\\]]+");
+        for (String t : tokens) {
+            String token = t.toLowerCase(Locale.ROOT).trim();
+            if (token.length() >= 3 && isTechKeyword(token)) {
+                if (vacText.contains(token)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isTechKeyword(String word) {
+        return word.matches("^[a-z0-9#+.]+$")
+                || Arrays.asList("kafka", "docker", "kubernetes", "k8s", "spring", "react", "angular", "vue",
+                "postgres", "postgresql", "oracle", "redis", "rabbitmq", "ci/cd", "devops", "qa", "sql", "nosql",
+                "linux", "python", "golang", "java", "kotlin", "scala", "c#", ".net", "php", "typescript", "javascript",
+                "английский", "микросервис", "highload", "архитектур", "тестирован", "безопасност").contains(word);
     }
 
     private String resolveRecruiterActivityDescription(UUID candidateId) {
