@@ -94,6 +94,8 @@
                        value="com.company.hunttech.service.CandidateVacancyMatchAiService"/>
                 <entry key="hunttech_CandidateSkillEnrichmentService"
                        value="com.company.hunttech.service.CandidateSkillEnrichmentService"/>
+                <entry key="hunttech_CandidateContactEnrichmentService"
+                       value="com.company.hunttech.service.CandidateContactEnrichmentService"/>
                 <entry key="hunttech_CandidateVacancyWorkflowService"
                        value="com.company.hunttech.service.CandidateVacancyWorkflowService"/>
                 <entry key="hunttech_ExternalReferenceDataService"
