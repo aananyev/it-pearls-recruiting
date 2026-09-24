@@ -154,7 +154,6 @@
                        stylename="candidate-vacancy-match-table">
                     <columns>
                         <column id="score" caption="AI Score" width="90px" align="CENTER"/>
-                        <column id="recruiterDecisionDisplay" caption="Решение рекрутера" width="150px"/>
                         <column id="verdict" caption="AI Вердикт" width="160px"/>
                         <column id="candidateName" caption="Кандидат" width="200px"/>
                         <column id="vacancyName" caption="Вакансия" width="200px"/>

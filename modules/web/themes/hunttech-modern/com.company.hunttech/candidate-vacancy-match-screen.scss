@@ -203,12 +203,111 @@
     border: 1px solid $candidate-vacancy-match-border;
     border-radius: 6px;
     overflow: hidden;
+
+    .v-table-header-wrap {
+      font-size: 12px;
+      font-weight: 700;
+      background: $candidate-vacancy-match-soft;
+    }
+
+    .v-table-row,
+    .v-table-row-odd {
+      height: auto !important;
+      min-height: 64px !important;
+    }
+
+    .v-table-cell-content {
+      height: auto !important;
+      min-height: 64px !important;
+      vertical-align: middle !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      box-sizing: border-box !important;
+    }
+
+    .v-table-cell-wrapper {
+      height: auto !important;
+      max-height: 4.15em !important;
+      line-height: 1.35 !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 3 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+      vertical-align: middle !important;
+
+      > .v-widget,
+      > .v-label {
+        white-space: normal !important;
+        line-height: 1.35 !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        max-height: 4.15em !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+      }
+    }
+
+    .v-table-cell-content-score .v-table-cell-wrapper,
+    .v-table-cell-content-verdict .v-table-cell-wrapper {
+      display: flex !important;
+      align-items: center !important;
+      max-height: none !important;
+    }
+
+    .v-table-cell-content-score .v-table-cell-wrapper {
+      justify-content: center !important;
+    }
   }
 
-  .candidate-vacancy-match-table .v-table-header-wrap {
-    font-size: 12px;
-    font-weight: 700;
-    background: $candidate-vacancy-match-soft;
+  .suitable-check-datagrid {
+    .v-grid-row {
+      height: auto !important;
+      min-height: 64px !important;
+    }
+
+    .v-grid-cell {
+      height: auto !important;
+      min-height: 64px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      vertical-align: middle !important;
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      box-sizing: border-box !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 3 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+      max-height: 4.15em !important;
+
+      > span,
+      > div,
+      > .v-widget {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        max-height: 4.15em !important;
+        line-height: 1.35 !important;
+      }
+    }
+
+    .v-grid-cell[col-id="priority"],
+    .v-grid-cell[col-id="remoteWork"],
+    .v-grid-cell[col-id="blackRectangle"] {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
   }
 
   .candidate-vacancy-match-details-scroll {

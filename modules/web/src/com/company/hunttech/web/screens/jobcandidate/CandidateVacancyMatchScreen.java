@@ -124,6 +124,9 @@ public class CandidateVacancyMatchScreen extends Screen {
     private Label<String> subTitleLabel;
 
     @Inject
+    private Label<String> resultsTitleLabel;
+
+    @Inject
     private ProgressBar analysisProgressBar;
 
     @Inject
@@ -336,23 +339,6 @@ public class CandidateVacancyMatchScreen extends Screen {
             return label;
         });
 
-        matchesTable.addGeneratedColumn("recruiterDecisionDisplay", item -> {
-            Label<String> label = uiComponents.create(Label.TYPE_STRING);
-            String dec = item.getRecruiterDecision();
-            if (dec == null || dec.trim().isEmpty() || "—".equals(dec)) {
-                label.setValue("<span style='color: #6c757d;'>—</span>");
-            } else if ("В работе".equalsIgnoreCase(dec) || "IN_WORK".equalsIgnoreCase(dec)) {
-                label.setValue("<span style='background-color: #28a745; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>В работе</span>");
-            } else if ("Отложен".equalsIgnoreCase(dec) || "POSTPONED".equalsIgnoreCase(dec)) {
-                label.setValue("<span style='background-color: #fd7e14; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>Отложен</span>");
-            } else if ("Не подходит".equalsIgnoreCase(dec) || "REJECTED".equalsIgnoreCase(dec)) {
-                label.setValue("<span style='background-color: #dc3545; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>Не подходит</span>");
-            } else {
-                label.setValue(escapeHtml(dec));
-            }
-            label.setHtmlEnabled(true);
-            return label;
-        });
 
         matchesTable.addGeneratedColumn("verdict", item -> {
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
@@ -434,6 +420,10 @@ public class CandidateVacancyMatchScreen extends Screen {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if (mode == Mode.CANDIDATE_TO_VACANCIES && candidate != null) {
+            getWindow().setCaption("Интеллектуальный поиск вакансий для кандидата");
+            if (resultsTitleLabel != null) {
+                resultsTitleLabel.setValue("Подходящие открытые вакансии");
+            }
             String fio = candidate.getFullName() != null ? candidate.getFullName() : "Кандидат";
             mainTitleLabel.setValue("Кандидат: " + fio);
 
@@ -449,6 +439,10 @@ public class CandidateVacancyMatchScreen extends Screen {
             openEntityBtn.setCaption("Открыть вакансию");
             startAnalysis();
         } else if (mode == Mode.VACANCY_TO_CANDIDATES && openPosition != null) {
+            getWindow().setCaption("AI-поиск кандидатов на вакансию");
+            if (resultsTitleLabel != null) {
+                resultsTitleLabel.setValue("Подходящие кандидаты");
+            }
             String vacName = openPosition.getVacansyName() != null ? openPosition.getVacansyName() : "Вакансия";
             mainTitleLabel.setValue("Вакансия: " + vacName);
 
