@@ -65,8 +65,46 @@
   }
 
   .candidate-vacancy-match-window-actions .v-button,
-  .candidate-vacancy-match-actions-card .v-button {
-    min-height: 34px;
+  .candidate-vacancy-match-actions-card .v-button,
+  .candidate-vacancy-match-quick-actions .v-button {
+    box-sizing: border-box !important;
+    min-height: 34px !important;
+    padding: 0 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+    line-height: normal !important;
+
+    .v-button-wrap {
+      box-sizing: border-box !important;
+      min-height: 100% !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      line-height: normal !important;
+    }
+
+    .v-button-caption {
+      display: inline-block !important;
+      vertical-align: middle !important;
+      line-height: normal !important;
+      white-space: nowrap;
+    }
+
+    .v-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      vertical-align: middle !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      margin-right: 6px !important;
+      line-height: 1 !important;
+      flex-shrink: 0 !important;
+    }
   }
 
   .candidate-vacancy-match-skill-status {
