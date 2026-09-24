@@ -2,61 +2,129 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
-        messagesPack="com.company.hunttech.web.screens.jobhistory" icon="HISTORY">
+        messagesPack="com.company.hunttech.web.screens.jobhistory"
+        icon="HISTORY">
     <data>
         <instance id="jobHistoryDc"
                   class="com.company.hunttech.entity.JobHistory"
                   view="jobHistory-view">
             <loader/>
         </instance>
-        <collection id="candidatesDc" class="com.company.hunttech.entity.JobCandidate" view="_minimal">
-            <loader id="candidatesLc">
-                <query><![CDATA[select e from hunttech_JobCandidate e
-order by e.secondName, e.firstName]]></query>
-            </loader>
-        </collection>
-        <collection id="currentPositionsDc" class="com.company.hunttech.entity.Position" view="_minimal">
-            <loader id="currentPositionsLc">
-                <query><![CDATA[select e from hunttech_Position e
-order by e.positionRuName]]></query>
-            </loader>
-        </collection>
-        <collection id="currentCompaniesDc" class="com.company.hunttech.entity.Company" view="_minimal">
-            <loader id="currentCompaniesLc">
-                <query><![CDATA[select e from hunttech_Company e
-order by e.comanyName]]></query>
-            </loader>
-        </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="jobHistoryDc">
-            <column width="250px">
-                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate"
-                                   caption="mainMsg://msgCandidate">
+    <dialogMode height="650"
+                width="840"
+                resizable="true"
+                modal="true"/>
+    <layout expand="dutiesVBox" spacing="true">
+        <form id="form" dataContainer="jobHistoryDc" width="100%">
+            <column width="380px">
+                <suggestionPickerField id="candidateField"
+                                       property="candidate"
+                                       caption="msg://msgCandidate"
+                                       width="100%"
+                                       minSearchStringLength="3"
+                                       suggestionsLimit="30"
+                                       asyncSearchDelayMs="300"
+                                       inputPrompt="mainMsg://msgStartInput"
+                                       required="true">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                        <action id="clear" type="picker_clear"/>
                     </actions>
-                </lookupPickerField>
-                <lookupPickerField id="currentPositionField" optionsContainer="currentPositionsDc"
-                                   property="currentPosition" caption="mainMsg://msgCurrentPosition">
+                    <query entityClass="com.company.hunttech.entity.JobCandidate"
+                           escapeValueForLike="true"
+                           searchStringFormat="%$searchString%">
+                        select e from hunttech_JobCandidate e
+                        where lower(e.fullName) like lower(:searchString) escape '\'
+                        order by e.fullName
+                    </query>
+                </suggestionPickerField>
+
+                <suggestionPickerField id="currentCompanyField"
+                                       property="currentCompany"
+                                       caption="msg://msgCompany"
+                                       width="100%"
+                                       minSearchStringLength="2"
+                                       suggestionsLimit="50"
+                                       asyncSearchDelayMs="300"
+                                       inputPrompt="mainMsg://msgStartInput"
+                                       required="true">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                        <action id="clear" type="picker_clear"/>
                     </actions>
-                </lookupPickerField>
-                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                   property="currentCompany" caption="mainMsg://msgCompany">
+                    <query entityClass="com.company.hunttech.entity.Company"
+                           escapeValueForLike="true"
+                           searchStringFormat="%$searchString%">
+                        select e from hunttech_Company e
+                        where lower(e.comanyName) like lower(:searchString) escape '\'
+                        order by e.comanyName, e.companyShortName
+                    </query>
+                </suggestionPickerField>
+
+                <textField id="rawCompanyNameField"
+                           property="rawCompanyName"
+                           caption="msg://msgRawCompanyName"
+                           width="100%"/>
+
+                <suggestionPickerField id="currentPositionField"
+                                       property="currentPosition"
+                                       caption="msg://msgPosition"
+                                       width="100%"
+                                       minSearchStringLength="2"
+                                       suggestionsLimit="50"
+                                       asyncSearchDelayMs="300"
+                                       inputPrompt="mainMsg://msgStartInput">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                        <action id="clear" type="picker_clear"/>
                     </actions>
-                </lookupPickerField>
-                <dateField id="dateNewsPositionField" property="dateNewsPosition"
-                           caption="mainMsg://msgDateNewPosition"/>
+                    <query entityClass="com.company.hunttech.entity.Position"
+                           escapeValueForLike="true"
+                           searchStringFormat="%$searchString%">
+                        select e from hunttech_Position e
+                        where lower(e.positionRuName) like lower(:searchString) escape '\'
+                        order by e.positionRuName
+                    </query>
+                </suggestionPickerField>
+
+                <textField id="rawPositionNameField"
+                           property="rawPositionName"
+                           caption="msg://msgRawPositionName"
+                           width="100%"/>
+            </column>
+
+            <column width="380px">
+                <dateField id="startDateField"
+                           property="startDate"
+                           caption="msg://msgStartDate"
+                           width="100%"/>
+
+                <dateField id="endDateField"
+                           property="endDate"
+                           caption="msg://msgEndDate"
+                           width="100%"/>
+
+                <dateField id="dateNewsPositionField"
+                           property="dateNewsPosition"
+                           caption="msg://msgDateNewsPosition"
+                           width="100%"/>
             </column>
         </form>
+
+        <vbox id="dutiesVBox" spacing="false" width="100%" expand="dutiesField">
+            <label value="msg://msgDuties" stylename="bold"/>
+            <richTextArea id="dutiesField"
+                          dataContainer="jobHistoryDc"
+                          property="duties"
+                          width="100%"/>
+        </vbox>
+
         <hbox id="editActions" spacing="true">
-            <button action="windowCommitAndClose"/>
+            <button action="windowCommitAndClose" primary="true"/>
             <button action="windowClose"/>
         </hbox>
     </layout>
