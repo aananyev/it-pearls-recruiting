@@ -146,7 +146,6 @@ public class ExtMainScreen extends MainScreen {
 
         llmChatLauncherWindow = new com.vaadin.ui.Window();
         llmChatLauncherWindow.setId("llmChatLauncherWindow");
-        llmChatLauncherWindow.setStyleName("borderless llm-chat-launcher-window");
         llmChatLauncherWindow.setCaption("");
         llmChatLauncherWindow.setClosable(false);
         llmChatLauncherWindow.setResizable(false);
@@ -155,9 +154,11 @@ public class ExtMainScreen extends MainScreen {
         llmChatLauncherWindow.setWidth(56, com.vaadin.server.Sizeable.Unit.PIXELS);
         llmChatLauncherWindow.setHeight(56, com.vaadin.server.Sizeable.Unit.PIXELS);
         if (initialCoords != null) {
+            llmChatLauncherWindow.setStyleName(LLM_CHAT_LAUNCHER_WINDOW_CUSTOM_POSITION_STYLE);
             llmChatLauncherWindow.setPositionX(initialCoords[0]);
             llmChatLauncherWindow.setPositionY(initialCoords[1]);
         } else {
+            llmChatLauncherWindow.setStyleName(LLM_CHAT_LAUNCHER_WINDOW_STYLE);
             llmChatLauncherWindow.setPositionX(DEFAULT_OFFSCREEN_POSITION);
             llmChatLauncherWindow.setPositionY(DEFAULT_OFFSCREEN_POSITION);
         }
@@ -218,6 +219,9 @@ public class ExtMainScreen extends MainScreen {
         return newSettings;
     }
 
+    private static final String LLM_CHAT_LAUNCHER_WINDOW_STYLE = "borderless llm-chat-launcher-window";
+    private static final String LLM_CHAT_LAUNCHER_WINDOW_CUSTOM_POSITION_STYLE =
+            "borderless llm-chat-launcher-window llm-chat-launcher-custom-position";
     private static final int MAX_COORDINATE_BOUND = 9000;
     private static final int DEFAULT_OFFSCREEN_POSITION = 9999;
 
@@ -253,9 +257,11 @@ public class ExtMainScreen extends MainScreen {
 
         int[] coords = parsePositionCoordinates(trimmed);
         if (coords != null && llmChatLauncherWindow != null) {
+            llmChatLauncherWindow.setStyleName(LLM_CHAT_LAUNCHER_WINDOW_CUSTOM_POSITION_STYLE);
             llmChatLauncherWindow.setPositionX(coords[0]);
             llmChatLauncherWindow.setPositionY(coords[1]);
         } else if (trimmed.contains("bottom-right") && llmChatLauncherWindow != null) {
+            llmChatLauncherWindow.setStyleName(LLM_CHAT_LAUNCHER_WINDOW_STYLE);
             llmChatLauncherWindow.setPositionX(DEFAULT_OFFSCREEN_POSITION);
             llmChatLauncherWindow.setPositionY(DEFAULT_OFFSCREEN_POSITION);
         }

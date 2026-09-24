@@ -7,11 +7,18 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
         const MAX_COORDINATE_BOUND = 9000;
         let attached = false;
         let observer = null;
+        let windowClassObserver = null;
         let currentWindowElement = null;
 
         function attach(attempt) {
             if (attached && currentWindowElement && document.body.contains(currentWindowElement)) {
                 return;
+            }
+            if (windowClassObserver) {
+                try {
+                    windowClassObserver.disconnect();
+                } catch (ignore) {}
+                windowClassObserver = null;
             }
             attached = false;
 
@@ -255,11 +262,19 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                 onEnd(event);
             }
 
+            function onPointerCancel(event) {
+                if (event && event.pointerType === 'mouse' && event.buttons !== undefined && (event.buttons & 1)) {
+                    // Мышь всё ещё удерживается — игнорируем ложный cancel
+                    return;
+                }
+                onEnd(event);
+            }
+
             function attachDragListeners() {
                 if (window.PointerEvent) {
                     window.addEventListener('pointermove', onPointerMove, { capture: true, passive: false });
                     window.addEventListener('pointerup', onPointerUp, { capture: true, passive: false });
-                    window.addEventListener('pointercancel', onPointerUp, { capture: true, passive: false });
+                    window.addEventListener('pointercancel', onPointerCancel, { capture: true, passive: false });
                 } else {
                     window.addEventListener('mousemove', onMouseMove, { capture: true });
                     window.addEventListener('mouseup', onMouseUp, { capture: true });
@@ -273,7 +288,7 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                 if (window.PointerEvent) {
                     window.removeEventListener('pointermove', onPointerMove, { capture: true, passive: false });
                     window.removeEventListener('pointerup', onPointerUp, { capture: true, passive: false });
-                    window.removeEventListener('pointercancel', onPointerUp, { capture: true, passive: false });
+                    window.removeEventListener('pointercancel', onPointerCancel, { capture: true, passive: false });
                 }
                 window.removeEventListener('mousemove', onMouseMove, { capture: true });
                 window.removeEventListener('mouseup', onMouseUp, { capture: true });
@@ -294,10 +309,11 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                 startLeft = rect.left;
                 startTop = rect.top;
 
-                if (event.pointerId !== undefined && event.target && typeof event.target.setPointerCapture === 'function') {
+                const captureTarget = button || windowElement;
+                if (event.pointerId !== undefined && captureTarget && typeof captureTarget.setPointerCapture === 'function') {
                     try {
-                        event.target.setPointerCapture(event.pointerId);
-                        capturedTarget = event.target;
+                        captureTarget.setPointerCapture(event.pointerId);
+                        capturedTarget = captureTarget;
                         capturedPointerId = event.pointerId;
                     } catch (ignore) {}
                 }
@@ -370,6 +386,15 @@ window.com_company_hunttech_web_extension_LlmChatLauncherExtension = function ()
                     applyDefaultBottomRight();
                 }
             });
+
+            if (window.MutationObserver) {
+                windowClassObserver = new MutationObserver(function () {
+                    if (hasCustomPosition && !dragging && !windowElement.classList.contains('llm-chat-launcher-custom-position')) {
+                        windowElement.classList.add('llm-chat-launcher-custom-position');
+                    }
+                });
+                windowClassObserver.observe(windowElement, { attributes: true, attributeFilter: ['class'] });
+            }
 
             // Восстанавливаем позицию сразу и контрольно через микротаймаут
             restorePosition();
