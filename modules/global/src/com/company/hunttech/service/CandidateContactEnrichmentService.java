@@ -60,6 +60,13 @@ public interface CandidateContactEnrichmentService {
                                              boolean isBackground, boolean forceScan);
 
     /**
+     * Выполняет AI-анализ контактов с возможностью принудительного повторного сканирования
+     * и явного указания режима только бесплатных моделей.
+     */
+    CandidateContactsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode,
+                                             boolean isBackground, boolean forceScan, boolean freeOnly);
+
+    /**
      * Вычисляет SHA-256 хеш нормализованного текста резюме для отслеживания изменений.
      *
      * @param rawCvText исходный текст
@@ -94,6 +101,16 @@ public interface CandidateContactEnrichmentService {
     boolean isWorkerEnabled();
 
     /**
+     * Проверяет, включен ли режим вызова только бесплатных AI-моделей (freeModel = true).
+     */
+    boolean isFreeOnly();
+
+    /**
+     * Включает или выключает режим вызова только бесплатных AI-моделей (сохраняется в SYS_CONFIG).
+     */
+    void setFreeOnly(boolean freeOnly);
+
+    /**
      * Запускает один цикл фоновой обработки немедленно (для тестирования или ручного триггера).
      */
     void runSingleCycleNow();
@@ -110,5 +127,16 @@ public interface CandidateContactEnrichmentService {
      * @return список созданных или обновленных записей JobHistory
      */
     List<JobHistory> enrichWorkExperience(JobCandidate candidate, CandidateCV cv, boolean forceReprocess);
+
+    /**
+     * Выполняет распознавание мест работы с явным указанием режима только бесплатных моделей.
+     *
+     * @param candidate       кандидат
+     * @param cv              резюме кандидата
+     * @param forceReprocess  принудительное обновление
+     * @param freeOnly        true - только бесплатные модели, false - любые по правилам fallback
+     * @return список созданных или обновленных записей JobHistory
+     */
+    List<JobHistory> enrichWorkExperience(JobCandidate candidate, CandidateCV cv, boolean forceReprocess, boolean freeOnly);
 }
 

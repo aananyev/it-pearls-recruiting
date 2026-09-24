@@ -1,12 +1,10 @@
 package com.company.hunttech.web.screens.candidatecontactsenrichment;
 
-import com.company.hunttech.config.HunttechContactEnrichmentConfig;
 import com.company.hunttech.entity.CandidateCvAnalysisStatus;
 import com.company.hunttech.entity.CandidateCvContactAnalysis;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.service.CandidateContactEnrichmentService;
 import com.company.hunttech.service.dto.CandidateContactsEnrichmentKpiDto;
-import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -38,8 +36,6 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
 
     @Inject
     private CandidateContactEnrichmentService enrichmentService;
-    @Inject
-    private Configuration configuration;
     @Inject
     private Messages messages;
     @Inject
@@ -260,8 +256,7 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
         }
         isRefreshing = true;
         try {
-            HunttechContactEnrichmentConfig cfg = configuration.getConfig(HunttechContactEnrichmentConfig.class);
-            freeOnlyCheckBox.setValue(cfg.getFreeOnly());
+            freeOnlyCheckBox.setValue(enrichmentService.isFreeOnly());
 
             CandidateContactsEnrichmentKpiDto kpi = enrichmentService.getKpiMetrics();
 
@@ -397,13 +392,12 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
 
     @Subscribe("freeOnlyCheckBox")
     public void onFreeOnlyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if (!isInitialized) return;
+        if (!isInitialized || !event.isUserOriginated()) return;
         boolean val = Boolean.TRUE.equals(event.getValue());
-        HunttechContactEnrichmentConfig cfg = configuration.getConfig(HunttechContactEnrichmentConfig.class);
-        cfg.setFreeOnly(val);
+        enrichmentService.setFreeOnly(val);
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Настройки AI обновлены")
-                .withDescription(val ? "Режим FREE ONLY активен: только бесплатные модели" : "Разрешено использование платных AI-моделей")
+                .withDescription(val ? "Режим FREE ONLY активен: только бесплатные модели" : "Разрешено использование всех моделей (fallback)")
                 .show();
     }
 

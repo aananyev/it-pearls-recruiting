@@ -147,4 +147,13 @@ public class CandidateContactsPriorityQueueTest {
         assertNotNull("Портретное фото должно быть успешно определено", detectedPhoto);
         assertArrayEquals("Должно быть выбрано именно портретное фото, а не логотип", portraitBytes, detectedPhoto);
     }
+
+    @Test
+    public void testFreeOnlyToggle() {
+        when(mockConfig.getFreeOnly()).thenReturn(true);
+        assertTrue("Должен возвращать true при включенном getFreeOnly", service.isFreeOnly());
+
+        service.setFreeOnly(false);
+        verify(mockConfig).setFreeOnly(false);
+    }
 }

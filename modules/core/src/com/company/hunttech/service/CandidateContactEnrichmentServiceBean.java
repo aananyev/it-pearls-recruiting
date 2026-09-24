@@ -135,12 +135,18 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
 
     @Override
     public CandidateContactsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode, boolean isBackground) {
-        return scanAndEnrich(candidate, cv, aiFunctionCode, isBackground, false);
+        return scanAndEnrich(candidate, cv, aiFunctionCode, isBackground, false, isFreeOnly());
     }
 
     @Override
     public CandidateContactsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode,
                                                      boolean isBackground, boolean forceScan) {
+        return scanAndEnrich(candidate, cv, aiFunctionCode, isBackground, forceScan, isFreeOnly());
+    }
+
+    @Override
+    public CandidateContactsScanResult scanAndEnrich(JobCandidate candidate, CandidateCV cv, String aiFunctionCode,
+                                                     boolean isBackground, boolean forceScan, boolean freeOnly) {
         long startTime = System.currentTimeMillis();
         CandidateContactsScanResult result = new CandidateContactsScanResult();
 
@@ -212,7 +218,6 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
             }
         }
 
-        boolean freeOnly = isBackground && cfg.getFreeOnly();
         log.info("AI-анализ контактов кандидата {} (CV ID: {}, background={}, freeOnly={})",
                 effectiveCandidate.getFullName(), effectiveCv.getId(), isBackground, freeOnly);
 
@@ -231,6 +236,7 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
         try {
             Map<String, Object> aiContext = new HashMap<>();
             aiContext.put("sourceText", contactHeaderText);
+            aiContext.put("freeOnly", freeOnly);
 
             aiExecution = aiExecutionService.executeText(effectiveFunctionCode, aiContext);
             result.setAiExecution(aiExecution);
@@ -253,7 +259,7 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
             // 5.1. Распознавание и сохранение мест работы (JobHistory)
             List<JobHistory> enrichedHistory = Collections.emptyList();
             try {
-                enrichedHistory = enrichWorkExperience(effectiveCandidate, effectiveCv, forceScan);
+                enrichedHistory = enrichWorkExperience(effectiveCandidate, effectiveCv, forceScan, freeOnly);
                 result.setWorkExperienceFoundCount(enrichedHistory.size());
                 for (JobHistory jh : enrichedHistory) {
                     if (jh.getRawCompanyName() != null) {
@@ -780,6 +786,11 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
 
     @Override
     public List<JobHistory> enrichWorkExperience(JobCandidate candidate, CandidateCV cv, boolean forceReprocess) {
+        return enrichWorkExperience(candidate, cv, forceReprocess, isFreeOnly());
+    }
+
+    @Override
+    public List<JobHistory> enrichWorkExperience(JobCandidate candidate, CandidateCV cv, boolean forceReprocess, boolean freeOnly) {
         if (candidate == null || cv == null) {
             return Collections.emptyList();
         }
@@ -813,20 +824,24 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
 
         Map<String, Object> aiContext = new HashMap<>();
         aiContext.put("sourceText", promptText);
+        aiContext.put("freeOnly", freeOnly);
+
+        log.info("Определение мест работы кандидата {} (CV ID: {}, forceReprocess={}, freeOnly={})",
+                effectiveCandidate.getFullName(), cv.getId(), forceReprocess, freeOnly);
 
         AiExecutionResult aiResult = null;
         try {
             aiResult = aiExecutionService.executeText("EXPERIENCE_EXTRACT_BACKGROUND", aiContext);
         } catch (Exception e) {
-            log.warn("Ошибка вызова EXPERIENCE_EXTRACT_BACKGROUND: {}", e.getMessage());
+            log.warn("Ошибка вызова EXPERIENCE_EXTRACT_BACKGROUND (freeOnly={}): {}", freeOnly, e.getMessage());
         }
 
         if (aiResult == null || aiResult.getText() == null || aiResult.getText().trim().isEmpty()) {
-            log.warn("EXPERIENCE_EXTRACT_BACKGROUND не вернул результат, пробуем CV_SMART_PARSE_JSON");
+            log.warn("EXPERIENCE_EXTRACT_BACKGROUND не вернул результат, пробуем CV_SMART_PARSE_JSON (freeOnly={})", freeOnly);
             try {
                 aiResult = aiExecutionService.executeText("CV_SMART_PARSE_JSON", aiContext);
             } catch (Exception e) {
-                log.warn("Ошибка вызова fallback CV_SMART_PARSE_JSON: {}", e.getMessage());
+                log.warn("Ошибка вызова fallback CV_SMART_PARSE_JSON (freeOnly={}): {}", freeOnly, e.getMessage());
             }
         }
 
@@ -1524,6 +1539,18 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
     @Override
     public boolean isWorkerEnabled() {
         return configuration.getConfig(HunttechContactEnrichmentConfig.class).getEnabled();
+    }
+
+    @Override
+    public boolean isFreeOnly() {
+        return configuration.getConfig(HunttechContactEnrichmentConfig.class).getFreeOnly();
+    }
+
+    @Override
+    public void setFreeOnly(boolean freeOnly) {
+        HunttechContactEnrichmentConfig cfg = configuration.getConfig(HunttechContactEnrichmentConfig.class);
+        cfg.setFreeOnly(freeOnly);
+        log.info("Режим «Только бесплатные нейросети» для контактов и мест работы переключен: freeOnly={}", freeOnly);
     }
 
     @Override
