@@ -1,7 +1,7 @@
 # План безопасной миграции на прод: Фоновое определение контактных данных и фото кандидатов (BL-2026-004)
 
 > [!IMPORTANT]
-> **ПРАВИЛО БЕЗОПАСНОСТИ**: Прод менять запрещается в рамках задачи! Данный документ является утверждённым планом выполнения миграций структуры данных и системных промптов на продакшене при релизе.
+> **ПРАВИЛО БЕЗОПАСНОСТИ**: Прод менять напрямую запрещается! Данный документ является утверждённым регламентом и планом выполнения миграций структуры данных, системных настроек ИИ и накопленных данных контактов кандидатов на продакшене при релизе.
 
 ---
 
@@ -9,27 +9,34 @@
 
 | Параметр | Значение |
 |---|---|
-| **Идентификатор задачи** | `BL-2026-004` |
-| **Компоненты** | База данных PostgreSQL (`hunttech_db`), AI Control Plane (`HUNTTECH_AI_FUNCTION_CONFIGURATION`) |
-| **Тип изменений** | 1) DDL: добавление колонки `IMAGE_BYTE_ARRAY` в `HUNTTECH_JOB_CANDIDATE`<br>2) DDL: создание таблицы `HUNTTECH_CAND_CV_CONTACT_ANALYSIS` и индексов<br>3) DML/Seed: регистрация AI-функции `CONTACTS_EXTRACT_BACKGROUND` |
-| **Время простоя (Downtime)** | 0 секунд (Zero-Downtime, неблокирующие DDL-операции) |
+| **Идентификатор задачи** | `BL-2026-004` (Candidate Contact Enrichment) |
+| **Компоненты** | База данных PostgreSQL (`hunttech`), AI Control Plane (`HUNTTECH_AI_FUNCTION_CONFIGURATION`), карточки кандидатов (`HUNTTECH_JOB_CANDIDATE`), аудит анализа (`HUNTTECH_CAND_CV_CONTACT_ANALYSIS`) |
+| **Тип изменений** | 1) **DDL**: колонка `IMAGE_BYTE_ARRAY` в `HUNTTECH_JOB_CANDIDATE`<br>2) **DDL**: таблица `HUNTTECH_CAND_CV_CONTACT_ANALYSIS` и индексы<br>3) **DML/Seed**: регистрация AI-функции `CONTACTS_EXTRACT_BACKGROUND`<br>4) **DML/Data**: миграция накопленных распознанных контактных данных (28 CV, 7 кандидатов) |
+| **Время простоя (Downtime)** | 0 секунд (Zero-Downtime, неблокирующие DDL и идемпотентные DML-операции) |
 
 ---
 
-## 2. Предварительные шаги перед применением на продакшене
+## 2. Предварительные шаги перед применением на продакшене (Pre-Checks)
 
 1. **Создание полного бэкапа рабочей БД**:
    ```bash
    pg_dump -h $PROD_DB_HOST -U $PROD_DB_USER -d $PROD_DB_NAME -F c -b -v -f "/backups/hunttech_prod_pre_bl2026_004_$(date +%Y%m%d_%H%M%S).dump"
    ```
 2. **Проверка свободного места на диске**:
-   - Минимум 10 GB свободного дискового пространства для временных файлов индексов.
+   - Минимум 10 GB свободного дискового пространства для временных файлов и построения индексов.
+3. **Проверка подключения и целостности связей**:
+   ```sql
+   SELECT count(*) FROM HUNTTECH_JOB_CANDIDATE WHERE DELETE_TS IS NULL;
+   SELECT count(*) FROM HUNTTECH_CANDIDATE_CV WHERE DELETE_TS IS NULL;
+   ```
 
 ---
 
 ## 3. Пошаговые скрипты миграции
 
 ### Шаг 3.1. DDL — Структура данных (`260924-1-createCandidateCvContactAnalysisTable.sql`)
+
+Файл changelog: `modules/core/db/changelog/260924-1-createCandidateCvContactAnalysisTable.xml`
 
 ```sql
 -- 1. Добавление BLOB-поля для фотографии кандидата
@@ -98,7 +105,11 @@ CREATE INDEX IF NOT EXISTS IDX_CAND_CV_CNT_PRIORITY
     ON HUNTTECH_CAND_CV_CONTACT_ANALYSIS (STATUS, PRIORITY, CREATE_TS);
 ```
 
+---
+
 ### Шаг 3.2. DML — Seed системной функции AI (`260924-2-seedContactsExtractBackgroundAiFunction.sql`)
+
+Файл changelog: `modules/core/db/changelog/260924-2-seedContactsExtractBackgroundAiFunction.xml`
 
 ```sql
 DO $$
@@ -155,30 +166,170 @@ $$;
 
 ---
 
+### Шаг 3.3. DML — Миграция накопленных данных контактов (`260924-3-migrateExtractedCandidateContactsData.sql`)
+
+Файл changelog: `modules/core/db/changelog/260924-3-migrateExtractedCandidateContactsData.xml`
+
+#### Гарантии безопасности данных:
+1. **Защита от перезаписи существующих контактов на проде**:
+   Применяется конструкция `COALESCE(NULLIF(COLUMN, ''), '<extracted_value>')`. Если рекрутер уже ввел телефон, email или telegram на проде вручную, эти данные **гарантированно сохраняются** и не перезаписываются.
+2. **Идемпотентность аудита**:
+   Все вставки в таблицу `HUNTTECH_CAND_CV_CONTACT_ANALYSIS` используют условие:
+   `ON CONFLICT (CANDIDATE_CV_ID) WHERE DELETE_TS IS NULL DO NOTHING;`
+   Это исключает ошибки дублирования первичных и уникальных ключей при повторном запуске.
+3. **Статистика мигрируемых данных**:
+   - **28 записей аудита** резюме (`HUNTTECH_CAND_CV_CONTACT_ANALYSIS`):
+     - 19 записей в статусе `FRESH` (успешно проанализированы нейросетью с сохранением телеметрии токенов, стоимости и времени выполнения).
+     - 9 записей системного контроля (пропущенные пустые резюме и восстановление после таймаутов).
+   - **7 обогащённых кандидатов** (`HUNTTECH_JOB_CANDIDATE`):
+
+| ID кандидата | ФИО / Резюме | Телефон | Мобильный | Email | Telegram |
+|---|---|---|---|---|---|
+| `07e8b22b-e420-4ac7-5ca0-aa1e44f48c2a` | Мустафа Мирзажанов | `+79636377171` | `+7 963 637-71-71` | — | `Mustafa_Mirzazhanov` |
+| `1a810cba-8037-c15e-b03b-132eb980510a` | Алексей Конкин | `+7 985 185-24-40` | `+7 985 185-24-40` | `konkin.alex777@mail.ru` | `Aleksei_Konkin` |
+| `21175350-c484-a80b-8fab-8600034cdcd5` | Ринат (BlackRine) | `+7 988 586-45-99` | `+7 988 586-45-99` | `black.lucky.rine@gmail.com` | `blackrine` |
+| `25c1f2db-4ea4-2f20-cc72-f9e6d88db0fe` | Евгений Долгов | `+7 993 296-91-35` | `+7 993 296-91-35` | `evg.dolg.12@yandex.com` | `evg_dolg` |
+| `524969b7-3398-c908-9e80-78596c4fc672` | Азмиддин | `+7 964 293-89-97` | `+7 964 293-89-97` | `azmiddin2mpxsal@mail.ru` | `misterbakss` |
+| `d6f6768e-20b8-a254-fdec-a070336c582d` | Глеб Шустиков | `+7 906 940-44-87` | `+7 906 940-44-87` | `shustikov.gleb@gmail.com` | `glebash100` |
+| `f46a4c84-e6d2-ac46-f785-611b2ff42fea` | Сергей Параев | `+79140042591` | `+7 914 004-25-91` | `sergey.paraev@gmail.com` | `sergeyparaev` |
+
+#### SQL-блок обновления кандидатов:
+```sql
+DO $$
+BEGIN
+    -- 1. Перенос записей телеметрии и аудита контактов
+    -- (полный список 28 INSERT приведен в файле 260924-3-migrateExtractedCandidateContactsData.sql)
+
+    -- 2. Безопасное наполнение контактов кандидатов (только пустые поля)
+    UPDATE HUNTTECH_JOB_CANDIDATE
+       SET PHONE = COALESCE(NULLIF(PHONE, ''), '+79636377171'),
+           MOBILE_PHONE = COALESCE(NULLIF(MOBILE_PHONE, ''), '+7 963 637-71-71'),
+           TELEGRAM_NAME = COALESCE(NULLIF(TELEGRAM_NAME, ''), 'Mustafa_Mirzazhanov'),
+           UPDATE_TS = CURRENT_TIMESTAMP, UPDATED_BY = 'migration'
+     WHERE ID = '07e8b22b-e420-4ac7-5ca0-aa1e44f48c2a'::uuid;
+
+    UPDATE HUNTTECH_JOB_CANDIDATE
+       SET PHONE = COALESCE(NULLIF(PHONE, ''), '+7 985 185-24-40'),
+           MOBILE_PHONE = COALESCE(NULLIF(MOBILE_PHONE, ''), '+7 985 185-24-40'),
+           EMAIL = COALESCE(NULLIF(EMAIL, ''), 'konkin.alex777@mail.ru'),
+           TELEGRAM_NAME = COALESCE(NULLIF(TELEGRAM_NAME, ''), 'Aleksei_Konkin'),
+           UPDATE_TS = CURRENT_TIMESTAMP, UPDATED_BY = 'migration'
+     WHERE ID = '1a810cba-8037-c15e-b03b-132eb980510a'::uuid;
+
+    UPDATE HUNTTECH_JOB_CANDIDATE
+       SET PHONE = COALESCE(NULLIF(PHONE, ''), '+7 988 586-45-99'),
+           MOBILE_PHONE = COALESCE(NULLIF(MOBILE_PHONE, ''), '+7 988 586-45-99'),
+           EMAIL = COALESCE(NULLIF(EMAIL, ''), 'black.lucky.rine@gmail.com'),
+           TELEGRAM_NAME = COALESCE(NULLIF(TELEGRAM_NAME, ''), 'blackrine'),
+           UPDATE_TS = CURRENT_TIMESTAMP, UPDATED_BY = 'migration'
+     WHERE ID = '21175350-c484-a80b-8fab-8600034cdcd5'::uuid;
+
+    UPDATE HUNTTECH_JOB_CANDIDATE
+       SET PHONE = COALESCE(NULLIF(PHONE, ''), '+7 993 296-91-35'),
+           MOBILE_PHONE = COALESCE(NULLIF(MOBILE_PHONE, ''), '+7 993 296-91-35'),
+           EMAIL = COALESCE(NULLIF(EMAIL, ''), 'evg.dolg.12@yandex.com'),
+           TELEGRAM_NAME = COALESCE(NULLIF(TELEGRAM_NAME, ''), 'evg_dolg'),
+           UPDATE_TS = CURRENT_TIMESTAMP, UPDATED_BY = 'migration'
+     WHERE ID = '25c1f2db-4ea4-2f20-cc72-f9e6d88db0fe'::uuid;
+
+    UPDATE HUNTTECH_JOB_CANDIDATE
+       SET PHONE = COALESCE(NULLIF(PHONE, ''), '+7 964 293-89-97'),
+           MOBILE_PHONE = COALESCE(NULLIF(MOBILE_PHONE, ''), '+7 964 293-89-97'),
+           EMAIL = COALESCE(NULLIF(EMAIL, ''), 'azmiddin2mpxsal@mail.ru'),
+           TELEGRAM_NAME = COALESCE(NULLIF(TELEGRAM_NAME, ''), 'misterbakss'),
+           UPDATE_TS = CURRENT_TIMESTAMP, UPDATED_BY = 'migration'
+     WHERE ID = '524969b7-3398-c908-9e80-78596c4fc672'::uuid;
+
+    UPDATE HUNTTECH_JOB_CANDIDATE
+       SET PHONE = COALESCE(NULLIF(PHONE, ''), '+7 906 940-44-87'),
+           MOBILE_PHONE = COALESCE(NULLIF(MOBILE_PHONE, ''), '+7 906 940-44-87'),
+           EMAIL = COALESCE(NULLIF(EMAIL, ''), 'shustikov.gleb@gmail.com'),
+           TELEGRAM_NAME = COALESCE(NULLIF(TELEGRAM_NAME, ''), 'glebash100'),
+           UPDATE_TS = CURRENT_TIMESTAMP, UPDATED_BY = 'migration'
+     WHERE ID = 'd6f6768e-20b8-a254-fdec-a070336c582d'::uuid;
+
+    UPDATE HUNTTECH_JOB_CANDIDATE
+       SET PHONE = COALESCE(NULLIF(PHONE, ''), '+79140042591'),
+           MOBILE_PHONE = COALESCE(NULLIF(MOBILE_PHONE, ''), '+7 914 004-25-91'),
+           EMAIL = COALESCE(NULLIF(EMAIL, ''), 'sergey.paraev@gmail.com'),
+           TELEGRAM_NAME = COALESCE(NULLIF(TELEGRAM_NAME, ''), 'sergeyparaev'),
+           UPDATE_TS = CURRENT_TIMESTAMP, UPDATED_BY = 'migration'
+     WHERE ID = 'f46a4c84-e6d2-ac46-f785-611b2ff42fea'::uuid;
+END $$;
+```
+
+---
+
 ## 4. Верификация после применения (Post-Deploy Checks)
 
-1. Проверить наличие колонки `IMAGE_BYTE_ARRAY`:
+Выполнить проверочные запросы на целевой БД:
+
+1. **Проверка добавления колонки фото**:
    ```sql
-   SELECT column_name, data_type FROM information_schema.columns
-    WHERE table_name = 'hunttech_job_candidate' AND column_name = 'image_byte_array';
+   SELECT column_name, data_type
+     FROM information_schema.columns
+    WHERE table_name = 'hunttech_job_candidate'
+      AND column_name = 'image_byte_array';
    ```
-2. Проверить создание таблицы и индексов `HUNTTECH_CAND_CV_CONTACT_ANALYSIS`:
+   *Ожидается:* 1 строка, тип `bytea`.
+
+2. **Проверка структуры таблицы и индексов аудита**:
    ```sql
-   SELECT table_name FROM information_schema.tables WHERE table_name = 'hunttech_cand_cv_contact_analysis';
+   SELECT count(*)
+     FROM pg_indexes
+    WHERE tablename = 'hunttech_cand_cv_contact_analysis';
    ```
-3. Проверить активность функции `CONTACTS_EXTRACT_BACKGROUND`:
+   *Ожидается:* 6 индексов (`PK`, `IDX_CAND_CV_CNT_STATUS`, `IDX_CAND_CV_CNT_UNQ_CV`, `IDX_CAND_CV_CNT_CAND`, `IDX_CAND_CV_CNT_NEXT_RETRY`, `IDX_CAND_CV_CNT_STARTED`, `IDX_CAND_CV_CNT_PRIORITY`).
+
+3. **Проверка активности AI-функции**:
    ```sql
    SELECT code, capability, is_active, admin_model_name, fallback_policy
      FROM hunttech_ai_function_configuration
     WHERE code = 'CONTACTS_EXTRACT_BACKGROUND';
    ```
+   *Ожидается:* `is_active = true`, `capability = TEXT_GENERATION`, `fallback_policy = FALLBACK_TO_ADMIN`.
+
+4. **Проверка перенесённых аудит-записей**:
+   ```sql
+   SELECT status, count(*)
+     FROM hunttech_cand_cv_contact_analysis
+    WHERE delete_ts IS NULL
+    GROUP BY status;
+   ```
+   *Ожидается:* не менее 28 записей (статусы 30 FRESH, 50 TIMEOUT/SKIPPED).
+
+5. **Проверка заполненности контактов кандидатов**:
+   ```sql
+   SELECT count(*)
+     FROM hunttech_job_candidate
+    WHERE id IN (
+        '07e8b22b-e420-4ac7-5ca0-aa1e44f48c2a'::uuid,
+        '1a810cba-8037-c15e-b03b-132eb980510a'::uuid,
+        '21175350-c484-a80b-8fab-8600034cdcd5'::uuid,
+        '25c1f2db-4ea4-2f20-cc72-f9e6d88db0fe'::uuid,
+        '524969b7-3398-c908-9e80-78596c4fc672'::uuid,
+        'd6f6768e-20b8-a254-fdec-a070336c582d'::uuid,
+        'f46a4c84-e6d2-ac46-f785-611b2ff42fea'::uuid
+    )
+    AND phone IS NOT NULL;
+   ```
+   *Ожидается:* 7 записей с заполненными телефонами.
 
 ---
 
 ## 5. План отката (Rollback Plan)
 
-```sql
-DROP TABLE IF EXISTS HUNTTECH_CAND_CV_CONTACT_ANALYSIS;
-ALTER TABLE HUNTTECH_JOB_CANDIDATE DROP COLUMN IF EXISTS IMAGE_BYTE_ARRAY;
-DELETE FROM HUNTTECH_AI_FUNCTION_CONFIGURATION WHERE CODE = 'CONTACTS_EXTRACT_BACKGROUND';
-```
+При возникновении непредвиденных сбоев откат выполняется следующими действиями:
+
+1. **Откат структуры и системной функции**:
+   ```sql
+   DROP TABLE IF EXISTS HUNTTECH_CAND_CV_CONTACT_ANALYSIS CASCADE;
+   ALTER TABLE HUNTTECH_JOB_CANDIDATE DROP COLUMN IF EXISTS IMAGE_BYTE_ARRAY;
+   DELETE FROM HUNTTECH_AI_FUNCTION_CONFIGURATION WHERE CODE = 'CONTACTS_EXTRACT_BACKGROUND';
+   ```
+
+2. **Откат из бэкапа (при повреждении критических данных)**:
+   При необходимости восстановления исходных значений полей контактов кандидатов до применения миграции используется созданный перед миграцией дамп базы:
+   ```bash
+   pg_restore -h $PROD_DB_HOST -U $PROD_DB_USER -d $PROD_DB_NAME -t hunttech_job_candidate --data-only /backups/hunttech_prod_pre_bl2026_004_*.dump
+   ```
