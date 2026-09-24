@@ -1075,6 +1075,10 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         String interactionTypeName;
         String vacancyTitle;
         String comment;
+        String recruiterName;
+        boolean isInterview;
+        boolean isClientInterview;
+        Integer rating;
     }
 
     static class CandidateInteractionProfile {
@@ -1083,13 +1087,34 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         int totalInteractionsCount = 0;
         List<InteractionDetail> employerRejections = new ArrayList<>();
         List<InteractionDetail> candidateRefusals = new ArrayList<>();
+        List<InteractionDetail> interviews = new ArrayList<>();
         List<InteractionDetail> otherInteractions = new ArrayList<>();
 
         String toPromptSection() {
             StringBuilder sb = new StringBuilder();
-            sb.append("ИСТОРИЯ ВЗАИМОДЕЙСТВИЙ И ПРИЧИНЫ ПРОШЛЫХ ОТКАЗОВ В СИСТЕМЕ HRM:\n");
+            sb.append("ИСТОРИЯ ВЗАИМОДЕЙСТВИЙ, СОБЕСЕДОВАНИЙ И ПРИЧИНЫ ПРОШЛЫХ ОТКАЗОВ В СИСТЕМЕ HRM:\n");
             sb.append("• Актуальность контактов: ").append(recruiterActivityText != null ? recruiterActivityText : "Новый кандидат").append("\n");
             sb.append("• Всего зафиксировано взаимодействий в базе: ").append(totalInteractionsCount).append("\n");
+
+            if (!interviews.isEmpty()) {
+                sb.append("• ПРОВЕДЕННЫЕ СОБЕСЕДОВАНИЯ И ИХ ИТОГИ (").append(interviews.size()).append("):\n");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ROOT);
+                for (InteractionDetail d : interviews) {
+                    sb.append("  - [").append(d.date != null ? sdf.format(d.date) : "—")
+                      .append(" | ").append(d.isClientInterview ? "На стороне заказчика" : "С рекрутером компании")
+                      .append(" | Рекрутер: ").append(d.recruiterName != null ? d.recruiterName : "не указан");
+                    if (d.vacancyTitle != null && !d.vacancyTitle.isEmpty()) {
+                        sb.append(" | Вакансия: '").append(d.vacancyTitle).append("'");
+                    }
+                    sb.append("]: ").append(d.interactionTypeName != null ? d.interactionTypeName : "Собеседование");
+                    if (d.comment != null && !d.comment.trim().isEmpty()) {
+                        sb.append(". Итоги: \"").append(d.comment.trim()).append("\"");
+                    }
+                    sb.append("\n");
+                }
+            } else {
+                sb.append("• Собеседований в истории HRM ранее не проводилось.\n");
+            }
 
             if (!employerRejections.isEmpty()) {
                 sb.append("• ПРОШЛЫЕ ОТКАЗЫ РАБОТОДАТЕЛЕЙ/КЛИЕНТОВ КАНДИДАТУ (").append(employerRejections.size()).append("):\n");
@@ -1127,9 +1152,10 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 sb.append("• Отказов самого кандидата от оферов и предложений в истории не зафиксировано.\n");
             }
 
-            sb.append("\nИНСТРУКЦИЯ ДЛЯ AI ПО ИСТОРИИ ОТКАЗОВ:\n");
-            sb.append("1. Проанализируй причины прошлых отказов работодателей кандидату (недостаток стека, грейд, ставка, софты, отказ в офере) и сопоставь с текущей вакансией. Если дефицитный стек требуется — обязательно укажи в рисках/пробелах; если не требуется — отметь снятие риска.\n");
-            sb.append("2. Проанализируй, что не устраивало кандидата в прошлых оферах (удаленка против офиса, уровень зарплаты, тестовые задания, легаси). Если условия текущей вакансии закрывают эти боли (например, 100% удаленка) — укажи в reasonsToOffer; если вакансия повторяет нежелательные условия (офис, тестовое) — укажи критический риск отказа кандидата.");
+            sb.append("\nИНСТРУКЦИЯ ДЛЯ AI ПО ИСТОРИИ СОБЕСЕДОВАНИЙ И ОТКАЗОВ:\n");
+            sb.append("1. Учти результаты прошлых собеседований (с рекрутером или на стороне заказчика): если на прошлых интервью кандидат уже подтвердил ключевые навыки вакансии — отрази это в candidateEvidence и reasonsToOffer; если получил замечания от заказчика — учти в рисках.\n");
+            sb.append("2. Проанализируй причины прошлых отказов работодателей кандидату (недостаток стека, грейд, ставка, софты, отказ в офере) и сопоставь с текущей вакансией. Если дефицитный стек требуется — обязательно укажи в рисках/пробелах; если не требуется — отметь снятие риска.\n");
+            sb.append("3. Проанализируй, что не устраивало кандидата в прошлых оферах (удаленка против офиса, уровень зарплаты, тестовые задания, легаси). Если условия текущей вакансии закрывают эти боли (например, 100% удаленка) — укажи в reasonsToOffer; если вакансия повторяет нежелательные условия (офис, тестовое) — укажи критический риск отказа кандидата.");
 
             return sb.toString();
         }
@@ -1150,9 +1176,12 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                     .view(viewBuilder -> viewBuilder.addAll(
                             "numberIteraction", "dateIteraction", "comment", "rating",
                             "iteractionType.number", "iteractionType.iterationName",
+                            "iteractionType.signOurInterview", "iteractionType.signOurInterviewAssigned",
+                            "iteractionType.signClientInterview",
                             "vacancy.vacansyName", "vacancy.positionType.positionRuName",
                             "vacancy.remoteWork", "vacancy.remoteComment", "vacancy.comment",
                             "vacancy.cityPosition.cityRuName", "vacancy.projectName.projectName",
+                            "recrutier.lastName", "recrutier.firstName", "recrutier.name",
                             "recrutierName"
                     ))
                     .list();
@@ -1187,6 +1216,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 InteractionDetail detail = new InteractionDetail();
                 detail.date = il.getDateIteraction();
                 detail.comment = il.getComment();
+                detail.rating = il.getRating();
                 if (il.getIteractionType() != null) {
                     detail.interactionTypeNumber = il.getIteractionType().getNumber();
                     detail.interactionTypeName = il.getIteractionType().getIterationName();
@@ -1194,12 +1224,18 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                 if (il.getVacancy() != null) {
                     detail.vacancyTitle = il.getVacancy().getVacansyName();
                 }
+                detail.recruiterName = extractRecruiterName(il);
+                detail.isInterview = classifyIsInterview(il, detail);
+                detail.isClientInterview = classifyIsClientInterview(il, detail);
 
+                if (detail.isInterview) {
+                    profile.interviews.add(detail);
+                }
                 if (classifyIsEmployerRejection(detail)) {
                     profile.employerRejections.add(detail);
                 } else if (classifyIsCandidateRefusal(detail)) {
                     profile.candidateRefusals.add(detail);
-                } else {
+                } else if (!detail.isInterview) {
                     profile.otherInteractions.add(detail);
                 }
             }
@@ -1209,6 +1245,74 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         }
 
         return profile;
+    }
+
+    private String extractRecruiterName(IteractionList il) {
+        if (il == null) return null;
+        if (il.getRecrutier() != null) {
+            String lastName = il.getRecrutier().getLastName();
+            String firstName = il.getRecrutier().getFirstName();
+            if (lastName != null && !lastName.trim().isEmpty()) {
+                if (firstName != null && !firstName.trim().isEmpty()) {
+                    return lastName.trim() + " " + firstName.trim().charAt(0) + ".";
+                }
+                return lastName.trim();
+            }
+            if (il.getRecrutier().getName() != null && !il.getRecrutier().getName().trim().isEmpty()) {
+                return il.getRecrutier().getName().trim();
+            }
+        }
+        if (il.getRecrutierName() != null && !il.getRecrutierName().trim().isEmpty()) {
+            return il.getRecrutierName().trim();
+        }
+        return null;
+    }
+
+    private boolean classifyIsInterview(IteractionList il, InteractionDetail d) {
+        if (il.getIteractionType() != null) {
+            Boolean signClient = il.getIteractionType().getSignClientInterview();
+            Boolean signOur = il.getIteractionType().getSignOurInterview();
+            Boolean signOurAssigned = il.getIteractionType().getSignOurInterviewAssigned();
+            if (Boolean.TRUE.equals(signClient) || Boolean.TRUE.equals(signOur) || Boolean.TRUE.equals(signOurAssigned)) {
+                return true;
+            }
+        }
+        String num = d.interactionTypeNumber != null ? d.interactionTypeNumber.trim() : "";
+        if (num.startsWith("3.") || num.startsWith("4.")) {
+            return true;
+        }
+        String name = d.interactionTypeName != null ? d.interactionTypeName.toLowerCase(Locale.ROOT) : "";
+        if (name.contains("собеседован") || name.contains("интервью")) {
+            return true;
+        }
+        String comment = d.comment != null ? d.comment.toLowerCase(Locale.ROOT) : "";
+        if (comment.contains("провели собеседование") || comment.contains("проведено интервью")
+                || comment.contains("интервью с рекрутером") || comment.contains("собеседование у заказчика")) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean classifyIsClientInterview(IteractionList il, InteractionDetail d) {
+        if (il.getIteractionType() != null) {
+            Boolean signClient = il.getIteractionType().getSignClientInterview();
+            if (Boolean.TRUE.equals(signClient)) {
+                return true;
+            }
+        }
+        String num = d.interactionTypeNumber != null ? d.interactionTypeNumber.trim() : "";
+        if (num.startsWith("4.")) {
+            return true;
+        }
+        String name = d.interactionTypeName != null ? d.interactionTypeName.toLowerCase(Locale.ROOT) : "";
+        if (name.contains("заказчик") && (name.contains("собеседован") || name.contains("интервью") || name.contains("встреча"))) {
+            return true;
+        }
+        String comment = d.comment != null ? d.comment.toLowerCase(Locale.ROOT) : "";
+        if (comment.contains("у заказчика") || comment.contains("с заказчиком") || comment.contains("со стороны клиента")) {
+            return true;
+        }
+        return false;
     }
 
     private boolean classifyIsEmployerRejection(InteractionDetail d) {
@@ -1437,18 +1541,39 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
         prefAdjustment = clamp(prefAdjustment, -15, 10);
         skillAdjustment = clamp(skillAdjustment, -15, 0);
 
+        List<String> interviewReport = new ArrayList<>();
+        for (InteractionDetail d : profile.interviews) {
+            String dateStr = d.date != null ? sdf.format(d.date) : "Дата не указана";
+            String partyStr = d.isClientInterview ? "На стороне заказчика" : "С рекрутером компании";
+            String recStr = d.recruiterName != null && !d.recruiterName.isEmpty() ? d.recruiterName : "Не указан";
+            String vacStr = d.vacancyTitle != null && !d.vacancyTitle.isEmpty() ? d.vacancyTitle : "Не указана";
+            String resultStr = d.interactionTypeName != null && !d.interactionTypeName.isEmpty() ? d.interactionTypeName : "Собеседование проведено";
+            if (d.comment != null && !d.comment.trim().isEmpty()) {
+                resultStr += ". " + d.comment.trim();
+            }
+            if (d.rating != null && d.rating >= 0) {
+                resultStr += " (Оценка: " + (d.rating + 1) + "/5)";
+            }
+
+            String reportItem = String.format(Locale.ROOT,
+                    "[%s] Сторона: %s | Рекрутер: %s | Вакансия: %s | Итоги: %s",
+                    dateStr, partyStr, recStr, vacStr, resultStr);
+            interviewReport.add(reportItem);
+        }
+
         item.setInteractionWeightAdjustment(totalWeightAdjustment);
         item.setPastRejectionsEmployerSide(employerRejectionReport);
         item.setPastRejectionsCandidateSide(candidateRefusalReport);
+        item.setPastInterviews(interviewReport);
 
         // Формирование итогового аналитического резюме
         StringBuilder summary = new StringBuilder();
         if (profile.totalInteractionsCount == 0) {
-            summary.append("История взаимодействий: новый кандидат в базе HRM. Прошлых отказов работодателей и отказов от оферов не зафиксировано. Весовой коэффициент нейтральный (0%).");
+            summary.append("История взаимодействий: новый кандидат в базе HRM. Прошлых собеседований и отказов не зафиксировано. Весовой коэффициент нейтральный (0%).");
         } else {
             summary.append(String.format(Locale.ROOT,
-                    "Умный анализ истории взаимодействия (всего контактов: %d, отказов работодателей: %d, отказов кандидата: %d):\n",
-                    profile.totalInteractionsCount, profile.employerRejections.size(), profile.candidateRefusals.size()));
+                    "Умный анализ истории взаимодействия (всего контактов: %d, собеседований: %d, отказов работодателей: %d, отказов кандидата: %d):\n",
+                    profile.totalInteractionsCount, profile.interviews.size(), profile.employerRejections.size(), profile.candidateRefusals.size()));
 
             if (totalWeightAdjustment > 0) {
                 summary.append(String.format(Locale.ROOT,
@@ -1461,6 +1586,15 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
             } else {
                 summary.append("• Сопоставление с вакансией нейтральное: прямых противоречий с историей прошлых отказов не выявлено (корректировка 0%).\n");
             }
+
+            if (!profile.interviews.isEmpty()) {
+                long clientCount = profile.interviews.stream().filter(i -> i.isClientInterview).count();
+                long recruiterCount = profile.interviews.size() - clientCount;
+                summary.append(String.format(Locale.ROOT,
+                        "• Собеседования в истории: проведено %d (на стороне заказчика: %d, с рекрутером компании: %d).\n",
+                        profile.interviews.size(), clientCount, recruiterCount));
+            }
+
             summary.append("• Актуальность взаимодействия: ").append(profile.recruiterActivityText != null ? profile.recruiterActivityText : "—");
         }
         item.setInteractionHistoryAnalysis(summary.toString());

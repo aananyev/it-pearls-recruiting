@@ -272,17 +272,37 @@
                         <label id="historyAnalysisSummaryLabel" htmlEnabled="true" width="100%"
                                stylename="candidate-vacancy-match-history-summary"/>
 
+                        <!-- Подблок: Собеседования и их итоги -->
+                        <vbox id="interviewsSubBox" spacing="false" width="100%" visible="false"
+                              stylename="candidate-vacancy-match-sub-history-box">
+                            <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                <label value="Собеседования и их итоги (сторона, рекрутер, дата, результат):"
+                                       stylename="bold candidate-vacancy-match-history-subcaption"/>
+                                <label id="interviewsCountBadge" value=""
+                                       stylename="candidate-vacancy-match-mini-badge"/>
+                            </hbox>
+                            <label id="interviewsListLabel" htmlEnabled="true" width="100%"/>
+                        </vbox>
+
                         <vbox id="employerRejectionsSubBox" spacing="false" width="100%" visible="false"
                               stylename="candidate-vacancy-match-sub-history-box">
-                            <label value="Отказы работодателей кандидату и сопоставление с требованиями:"
-                                   stylename="bold candidate-vacancy-match-history-subcaption" width="100%"/>
+                            <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                <label value="Отказы работодателей кандидату и сопоставление с требованиями:"
+                                       stylename="bold candidate-vacancy-match-history-subcaption"/>
+                                <label id="employerRejectionsCountBadge" value=""
+                                       stylename="candidate-vacancy-match-mini-badge"/>
+                            </hbox>
                             <label id="employerRejectionsListLabel" htmlEnabled="true" width="100%"/>
                         </vbox>
 
                         <vbox id="candidateRefusalsSubBox" spacing="false" width="100%" visible="false"
                               stylename="candidate-vacancy-match-sub-history-box">
-                            <label value="Отказы кандидата от прошлых предложений и сопоставление с условиями:"
-                                   stylename="bold candidate-vacancy-match-history-subcaption" width="100%"/>
+                            <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                <label value="Отказы кандидата от прошлых предложений и сопоставление с условиями:"
+                                       stylename="bold candidate-vacancy-match-history-subcaption"/>
+                                <label id="candidateRefusalsCountBadge" value=""
+                                       stylename="candidate-vacancy-match-mini-badge"/>
+                            </hbox>
                             <label id="candidateRefusalsListLabel" htmlEnabled="true" width="100%"/>
                         </vbox>
                     </vbox>

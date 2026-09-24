@@ -261,13 +261,28 @@ public class CandidateVacancyMatchScreen extends Screen {
     private Label<String> historyAnalysisSummaryLabel;
 
     @Inject
+    private VBoxLayout interviewsSubBox;
+
+    @Inject
+    private Label<String> interviewsCountBadge;
+
+    @Inject
+    private Label<String> interviewsListLabel;
+
+    @Inject
     private VBoxLayout employerRejectionsSubBox;
+
+    @Inject
+    private Label<String> employerRejectionsCountBadge;
 
     @Inject
     private Label<String> employerRejectionsListLabel;
 
     @Inject
     private VBoxLayout candidateRefusalsSubBox;
+
+    @Inject
+    private Label<String> candidateRefusalsCountBadge;
 
     @Inject
     private Label<String> candidateRefusalsListLabel;
@@ -1174,11 +1189,14 @@ public class CandidateVacancyMatchScreen extends Screen {
         domainFitLabel.setValue(String.format("%d / 10", item.getDomainFit() != null ? item.getDomainFit() : 0));
         totalScoreLabel.setValue(String.format("%d / 100", item.getScore() != null ? item.getScore() : 0));
 
-        // Умный анализ истории взаимодействий и прошлых отказов
-        boolean hasInteractionAnalysis = (item.getInteractionHistoryAnalysis() != null && !item.getInteractionHistoryAnalysis().trim().isEmpty())
-                || (item.getPastRejectionsEmployerSide() != null && !item.getPastRejectionsEmployerSide().isEmpty())
-                || (item.getPastRejectionsCandidateSide() != null && !item.getPastRejectionsCandidateSide().isEmpty())
-                || (item.getInteractionWeightAdjustment() != null && item.getInteractionWeightAdjustment() != 0);
+        // Умный анализ истории взаимодействий, собеседований и прошлых отказов
+        boolean hasInterviews = item.getPastInterviews() != null && !item.getPastInterviews().isEmpty();
+        boolean hasEmployerRejections = item.getPastRejectionsEmployerSide() != null && !item.getPastRejectionsEmployerSide().isEmpty();
+        boolean hasCandidateRefusals = item.getPastRejectionsCandidateSide() != null && !item.getPastRejectionsCandidateSide().isEmpty();
+        boolean hasWeight = item.getInteractionWeightAdjustment() != null && item.getInteractionWeightAdjustment() != 0;
+        boolean hasSummary = item.getInteractionHistoryAnalysis() != null && !item.getInteractionHistoryAnalysis().trim().isEmpty();
+
+        boolean hasInteractionAnalysis = hasInterviews || hasEmployerRejections || hasCandidateRefusals || hasWeight || hasSummary;
 
         if (hasInteractionAnalysis) {
             interactionHistorySectionBox.setVisible(true);
@@ -1199,26 +1217,37 @@ public class CandidateVacancyMatchScreen extends Screen {
                 historyWeightAdjustmentBadge.addStyleName("candidate-vacancy-match-weight-neutral");
             }
 
-            // Аналитическое резюме
-            if (item.getInteractionHistoryAnalysis() != null && !item.getInteractionHistoryAnalysis().trim().isEmpty()) {
+            // Аналитическое резюме со структурированным списком
+            if (hasSummary) {
                 historyAnalysisSummaryLabel.setVisible(true);
-                historyAnalysisSummaryLabel.setValue(escapeHtml(item.getInteractionHistoryAnalysis()));
+                historyAnalysisSummaryLabel.setValue(formatSummaryAsHtml(item.getInteractionHistoryAnalysis()));
             } else {
                 historyAnalysisSummaryLabel.setVisible(false);
             }
 
+            // Собеседования и их итоги
+            if (hasInterviews) {
+                interviewsSubBox.setVisible(true);
+                interviewsCountBadge.setValue(String.valueOf(item.getPastInterviews().size()));
+                interviewsListLabel.setValue(formatInterviewsListAsHtml(item.getPastInterviews()));
+            } else {
+                interviewsSubBox.setVisible(false);
+            }
+
             // Отказы работодателей
-            if (item.getPastRejectionsEmployerSide() != null && !item.getPastRejectionsEmployerSide().isEmpty()) {
+            if (hasEmployerRejections) {
                 employerRejectionsSubBox.setVisible(true);
-                employerRejectionsListLabel.setValue(formatListAsHtml(item.getPastRejectionsEmployerSide()));
+                employerRejectionsCountBadge.setValue(String.valueOf(item.getPastRejectionsEmployerSide().size()));
+                employerRejectionsListLabel.setValue(formatRejectionsListAsHtml(item.getPastRejectionsEmployerSide(), false));
             } else {
                 employerRejectionsSubBox.setVisible(false);
             }
 
             // Отказы кандидата
-            if (item.getPastRejectionsCandidateSide() != null && !item.getPastRejectionsCandidateSide().isEmpty()) {
+            if (hasCandidateRefusals) {
                 candidateRefusalsSubBox.setVisible(true);
-                candidateRefusalsListLabel.setValue(formatListAsHtml(item.getPastRejectionsCandidateSide()));
+                candidateRefusalsCountBadge.setValue(String.valueOf(item.getPastRejectionsCandidateSide().size()));
+                candidateRefusalsListLabel.setValue(formatRejectionsListAsHtml(item.getPastRejectionsCandidateSide(), true));
             } else {
                 candidateRefusalsSubBox.setVisible(false);
             }
@@ -1291,12 +1320,152 @@ public class CandidateVacancyMatchScreen extends Screen {
         recruiterDecisionBox.setVisible(false);
         scoresBox.setVisible(false);
         interactionHistorySectionBox.setVisible(false);
+        interviewsSubBox.setVisible(false);
+        employerRejectionsSubBox.setVisible(false);
+        candidateRefusalsSubBox.setVisible(false);
         reasonsBox.setVisible(false);
         matchedSkillsBox.setVisible(false);
         missingReqsBox.setVisible(false);
         risksBox.setVisible(false);
         summaryBox.setVisible(false);
         aiMetaBox.setVisible(false);
+    }
+
+    private String formatSummaryAsHtml(String text) {
+        if (text == null || text.trim().isEmpty()) return "";
+        String[] lines = text.split("\n");
+        StringBuilder sb = new StringBuilder("<div class='candidate-vacancy-match-summary-block'>");
+        boolean inList = false;
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty()) continue;
+            if (trimmed.startsWith("•") || trimmed.startsWith("-") || trimmed.startsWith("*")) {
+                if (!inList) {
+                    sb.append("<ul class='candidate-vacancy-match-summary-list'>");
+                    inList = true;
+                }
+                String content = trimmed.substring(1).trim();
+                sb.append("<li>").append(escapeHtml(content)).append("</li>");
+            } else {
+                if (inList) {
+                    sb.append("</ul>");
+                    inList = false;
+                }
+                sb.append("<div class='candidate-vacancy-match-summary-header'>").append(escapeHtml(trimmed)).append("</div>");
+            }
+        }
+        if (inList) {
+            sb.append("</ul>");
+        }
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    private String formatInterviewsListAsHtml(List<String> list) {
+        if (list == null || list.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder("<div class='candidate-vacancy-match-history-cards'>");
+        for (String raw : list) {
+            sb.append("<div class='candidate-vacancy-match-history-card candidate-vacancy-match-history-card-interview'>");
+            String text = raw;
+            String date = "";
+            if (text.startsWith("[") && text.contains("]")) {
+                int endIdx = text.indexOf("]");
+                date = text.substring(1, endIdx);
+                text = text.substring(endIdx + 1).trim();
+            }
+
+            String[] parts = text.split("\\s*\\|\\s*");
+            String party = "";
+            String recruiter = "";
+            String vacancy = "";
+            String result = "";
+
+            for (String part : parts) {
+                if (part.startsWith("Сторона:")) {
+                    party = part.substring("Сторона:".length()).trim();
+                } else if (part.startsWith("Рекрутер:")) {
+                    recruiter = part.substring("Рекрутер:".length()).trim();
+                } else if (part.startsWith("Вакансия:")) {
+                    vacancy = part.substring("Вакансия:".length()).trim();
+                } else if (part.startsWith("Итоги:")) {
+                    result = part.substring("Итоги:".length()).trim();
+                } else if (result.isEmpty()) {
+                    result = part;
+                } else {
+                    result += " | " + part;
+                }
+            }
+
+            sb.append("<div class='candidate-vacancy-match-history-header-row'>");
+            if (!date.isEmpty()) {
+                sb.append("<span class='candidate-vacancy-match-history-date'>📅 ").append(escapeHtml(date)).append("</span>");
+            }
+            if (!party.isEmpty()) {
+                boolean isClient = party.toLowerCase(Locale.ROOT).contains("заказчик");
+                String cls = isClient ? "candidate-vacancy-match-tag-client" : "candidate-vacancy-match-tag-recruiter";
+                sb.append("<span class='candidate-vacancy-match-history-tag ").append(cls).append("'>")
+                  .append(isClient ? "🏢 " : "👥 ").append(escapeHtml(party)).append("</span>");
+            }
+            if (!recruiter.isEmpty() && !"Не указан".equalsIgnoreCase(recruiter)) {
+                sb.append("<span class='candidate-vacancy-match-history-recruiter'>👤 <b>Рекрутер:</b> ")
+                  .append(escapeHtml(recruiter)).append("</span>");
+            }
+            sb.append("</div>");
+
+            if (!vacancy.isEmpty() && !"Не указана".equalsIgnoreCase(vacancy)) {
+                sb.append("<div class='candidate-vacancy-match-history-vacancy'><b>Вакансия:</b> ")
+                  .append(escapeHtml(vacancy)).append("</div>");
+            }
+
+            if (!result.isEmpty()) {
+                sb.append("<div class='candidate-vacancy-match-history-result'><b>Итоги собеседования:</b> ")
+                  .append(escapeHtml(result)).append("</div>");
+            }
+
+            sb.append("</div>");
+        }
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    private String formatRejectionsListAsHtml(List<String> list, boolean isCandidateSide) {
+        if (list == null || list.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder("<div class='candidate-vacancy-match-history-cards'>");
+        String cardClass = isCandidateSide
+                ? "candidate-vacancy-match-history-card-candidate-refusal"
+                : "candidate-vacancy-match-history-card-employer-rejection";
+        String tagClass = isCandidateSide
+                ? "candidate-vacancy-match-tag-candidate-refusal"
+                : "candidate-vacancy-match-tag-employer-rejection";
+        String icon = isCandidateSide ? "⚠️ " : "⛔ ";
+
+        for (String raw : list) {
+            sb.append("<div class='candidate-vacancy-match-history-card ").append(cardClass).append("'>");
+            String text = raw;
+            String date = "";
+            if (text.startsWith("[") && text.contains("]")) {
+                int endIdx = text.indexOf("]");
+                date = text.substring(1, endIdx);
+                text = text.substring(endIdx + 1).trim();
+            }
+
+            sb.append("<div class='candidate-vacancy-match-history-header-row'>");
+            if (!date.isEmpty()) {
+                sb.append("<span class='candidate-vacancy-match-history-date'>📅 ").append(escapeHtml(date)).append("</span>");
+            }
+            sb.append("<span class='candidate-vacancy-match-history-tag ").append(tagClass).append("'>")
+              .append(icon).append(isCandidateSide ? "Отказ кандидата от офера/предложения" : "Отказ работодателя")
+              .append("</span>");
+            sb.append("</div>");
+
+            sb.append("<div class='candidate-vacancy-match-history-result'>")
+              .append(escapeHtml(text))
+              .append("</div>");
+
+            sb.append("</div>");
+        }
+        sb.append("</div>");
+        return sb.toString();
     }
 
     private String formatListAsHtml(List<String> list) {

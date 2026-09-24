@@ -518,6 +518,131 @@
     color: mix($v-font-color, $candidate-vacancy-match-accent, 85%);
   }
 
+  .candidate-vacancy-match-summary-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    line-height: 1.45;
+  }
+
+  .candidate-vacancy-match-summary-header {
+    font-weight: 600;
+    font-size: 13px;
+    color: $v-font-color;
+  }
+
+  .candidate-vacancy-match-summary-list {
+    margin: 4px 0 2px 0;
+    padding-left: 20px;
+
+    li {
+      margin-bottom: 4px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: $v-font-color;
+    }
+  }
+
+  .candidate-vacancy-match-mini-badge {
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(#8e44ad, 0.25);
+    color: mix(#8e44ad, $v-font-color, 75%);
+    border: 1px solid rgba(#8e44ad, 0.4);
+  }
+
+  .candidate-vacancy-match-history-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  .candidate-vacancy-match-history-card {
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    background: rgba($v-font-color, 0.04);
+    border: 1px solid rgba($v-font-color, 0.1);
+  }
+
+  .candidate-vacancy-match-history-card-interview {
+    border-left: 3px solid mix(#2980b9, $v-font-color, 85%);
+    background: rgba(#2980b9, 0.1);
+  }
+
+  .candidate-vacancy-match-history-card-employer-rejection {
+    border-left: 3px solid mix(#e74c3c, $v-font-color, 85%);
+    background: rgba(#e74c3c, 0.1);
+  }
+
+  .candidate-vacancy-match-history-card-candidate-refusal {
+    border-left: 3px solid mix(#e67e22, $v-font-color, 85%);
+    background: rgba(#e67e22, 0.1);
+  }
+
+  .candidate-vacancy-match-history-header-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .candidate-vacancy-match-history-date {
+    font-weight: 700;
+    font-size: 11px;
+    color: $candidate-vacancy-match-muted;
+  }
+
+  .candidate-vacancy-match-history-tag {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .candidate-vacancy-match-tag-client {
+    background: rgba(#2980b9, 0.25);
+    color: mix(#2980b9, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-tag-recruiter {
+    background: rgba(#16a085, 0.25);
+    color: mix(#16a085, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-tag-employer-rejection {
+    background: rgba(#e74c3c, 0.25);
+    color: mix(#e74c3c, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-tag-candidate-refusal {
+    background: rgba(#e67e22, 0.25);
+    color: mix(#e67e22, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-history-recruiter {
+    font-size: 11px;
+    color: $v-font-color;
+  }
+
+  .candidate-vacancy-match-history-vacancy {
+    font-size: 12px;
+    margin-bottom: 2px;
+    color: $v-font-color;
+  }
+
+  .candidate-vacancy-match-history-result {
+    font-size: 12px;
+    line-height: 1.4;
+    color: $v-font-color;
+  }
+
   .candidate-vacancy-match-detail-caption {
     height: auto !important;
     color: $candidate-vacancy-match-muted;

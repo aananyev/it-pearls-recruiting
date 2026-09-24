@@ -35,6 +35,10 @@ public class CandidateVacancyMatchInteractionHistoryTest {
 
         item.setInteractionHistoryAnalysis("Умный анализ: условия вакансии устраняют блокеры.");
         assertEquals("Умный анализ: условия вакансии устраняют блокеры.", item.getInteractionHistoryAnalysis());
+
+        item.setPastInterviews(Arrays.asList("[15.08.2026] Сторона: На стороне заказчика | Рекрутер: Смирнова А. | Вакансия: Java Lead | Итоги: Пройдено успешно"));
+        assertTrue(item.getPastInterviewsDisplay().contains("На стороне заказчика"));
+        assertTrue(item.getPastInterviewsDisplay().contains("Смирнова А."));
     }
 
     @Test

@@ -80,6 +80,9 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
     protected List<String> pastRejectionsCandidateSide = new ArrayList<>();
 
     @MetaProperty
+    protected List<String> pastInterviews = new ArrayList<>();
+
+    @MetaProperty
     protected Integer interactionWeightAdjustment = 0;
 
     @MetaProperty
@@ -505,5 +508,21 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
             return "Отказов от оферов/предложений не зафиксировано";
         }
         return "• " + String.join("\n• ", pastRejectionsCandidateSide);
+    }
+
+    public List<String> getPastInterviews() {
+        return pastInterviews;
+    }
+
+    public void setPastInterviews(List<String> pastInterviews) {
+        this.pastInterviews = pastInterviews != null ? pastInterviews : new ArrayList<>();
+    }
+
+    @MetaProperty
+    public String getPastInterviewsDisplay() {
+        if (pastInterviews == null || pastInterviews.isEmpty()) {
+            return "Собеседований в истории не зафиксировано";
+        }
+        return "• " + String.join("\n• ", pastInterviews);
     }
 }
