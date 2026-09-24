@@ -94,4 +94,33 @@ public class CandidateContactsScanResult implements Serializable {
     public void setTotalContactsUpdated(int totalContactsUpdated) {
         this.totalContactsUpdated = totalContactsUpdated;
     }
+
+    private int workExperienceFoundCount;
+    private int workExperienceCreatedCount;
+    private List<String> createdWorkExperienceCompanies = new ArrayList<>();
+
+    public int getWorkExperienceFoundCount() {
+        return workExperienceFoundCount;
+    }
+
+    public void setWorkExperienceFoundCount(int workExperienceFoundCount) {
+        this.workExperienceFoundCount = workExperienceFoundCount;
+    }
+
+    public int getWorkExperienceCreatedCount() {
+        return workExperienceCreatedCount;
+    }
+
+    public void setWorkExperienceCreatedCount(int workExperienceCreatedCount) {
+        this.workExperienceCreatedCount = workExperienceCreatedCount;
+    }
+
+    public List<String> getCreatedWorkExperienceCompanies() {
+        return createdWorkExperienceCompanies;
+    }
+
+    public void setCreatedWorkExperienceCompanies(List<String> createdWorkExperienceCompanies) {
+        this.createdWorkExperienceCompanies = createdWorkExperienceCompanies;
+    }
 }
+

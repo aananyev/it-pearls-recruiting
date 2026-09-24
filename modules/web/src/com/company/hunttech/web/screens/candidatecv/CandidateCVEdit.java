@@ -79,6 +79,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private com.company.hunttech.service.SmartCvIngestService smartCvIngestService;
     @Inject
+    private com.company.hunttech.service.CandidateContactEnrichmentService candidateContactEnrichmentService;
+    @Inject
     private TextField<String> textFieldIOriginalCV;
     @Inject
     private TextField<String> textFieldHuntTechCV;
@@ -468,46 +470,36 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        String cvText = candidateCVRichTextArea != null && candidateCVRichTextArea.getValue() != null
-                ? candidateCVRichTextArea.getValue()
-                : getEditedEntity().getTextCV();
-
-        if (cvText == null || cvText.trim().isEmpty()) {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("Резюме пусто")
-                    .withDescription("Загрузите или вставьте текст резюме перед распознаванием мест работы.")
-                    .show();
-            return;
+        if (candidateCVRichTextArea != null && candidateCVRichTextArea.getValue() != null) {
+            getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
         }
 
         AiOperationNotifier.showStarted(notifications, "Запущен поиск мест работы кандидата в резюме…", null);
         final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ мест работы и компаний…");
-        final String textToParse = cvText;
 
-        BackgroundTask<Integer, com.company.hunttech.service.SmartCvIngestResult> task =
-                new BackgroundTask<Integer, com.company.hunttech.service.SmartCvIngestResult>(120, this) {
+        BackgroundTask<Integer, List<JobHistory>> task =
+                new BackgroundTask<Integer, List<JobHistory>>(180, this) {
                     @Override
-                    public com.company.hunttech.service.SmartCvIngestResult run(TaskLifeCycle<Integer> taskLifeCycle) {
-                        com.company.hunttech.service.SmartCvParsedData parsed = smartCvIngestService.parseCvText(textToParse);
-                        if (parsed != null) {
-                            ExtUser recruiter = userSession.getUser() instanceof ExtUser ? (ExtUser) userSession.getUser() : null;
-                            return smartCvIngestService.applyParsedDataToCandidateCv(getEditedEntity(), parsed, recruiter);
-                        }
-                        return null;
+                    public List<JobHistory> run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        return candidateContactEnrichmentService.enrichWorkExperience(candidate, getEditedEntity(), true);
                     }
 
                     @Override
-                    public void done(com.company.hunttech.service.SmartCvIngestResult result) {
+                    public void done(List<JobHistory> result) {
                         AiOperationNotifier.closeProgress(progressDialog);
                         refreshJobHistories();
-                        if (result != null && result.getStatus() == com.company.hunttech.service.SmartCvIngestResult.Status.SUCCESS) {
-                            int count = result.getParsedData() != null && result.getParsedData().getWorkExperience() != null
-                                    ? result.getParsedData().getWorkExperience().size()
-                                    : 0;
+                        int count = result != null ? result.size() : 0;
+                        if (count > 0) {
                             notifications.create(Notifications.NotificationType.TRAY)
                                     .withCaption("Распознавание мест работы завершено")
-                                    .withDescription("Найдено и синхронизировано мест работы: " + count)
+                                    .withDescription("Найдено и сохранено мест работы: " + count)
                                     .withHideDelayMs(4000)
+                                    .show();
+                        } else {
+                            notifications.create(Notifications.NotificationType.WARNING)
+                                    .withCaption("Места работы не определены")
+                                    .withDescription("Резюме пусто или в тексте резюме не удалось распознать места работы.")
+                                    .withHideDelayMs(5000)
                                     .show();
                         }
                     }

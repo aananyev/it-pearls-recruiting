@@ -267,6 +267,9 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                         if (wn.hasNonNull("city")) dto.setCity(wn.get("city").asText().trim());
                         if (wn.hasNonNull("duties")) dto.setDuties(wn.get("duties").asText().trim());
                         if (wn.hasNonNull("achievements")) dto.setAchievements(wn.get("achievements").asText().trim());
+                        if (wn.hasNonNull("projectDescription")) dto.setProjectDescription(wn.get("projectDescription").asText().trim());
+                        if (wn.hasNonNull("roleDescription")) dto.setRoleDescription(wn.get("roleDescription").asText().trim());
+                        if (wn.hasNonNull("formattedDutiesHtml")) dto.setFormattedDutiesHtml(wn.get("formattedDutiesHtml").asText().trim());
                         expList.add(dto);
                     }
                     data.setWorkExperience(expList);
@@ -742,6 +745,10 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                     .list();
         }
 
+        List<Position> allPositions = dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where e.deleteTs is null")
+                .list();
+
         for (com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto exp : data.getWorkExperience()) {
             if (exp.getCompanyName() == null || exp.getCompanyName().trim().isEmpty()) {
                 continue;
@@ -780,7 +787,7 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                 jh.setCurrentCompany(comp);
 
                 // 2. Поиск должности только в существующем справочнике (без автосоздания)
-                Position pos = findExistingPosition(exp.getPositionName(), data);
+                Position pos = findExistingPosition(exp.getPositionName(), data, allPositions);
                 jh.setCurrentPosition(pos);
 
                 // 3. Даты работы
@@ -788,8 +795,12 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                 jh.setEndDate(end);
                 jh.setDateNewsPosition(start != null ? start : new Date());
 
-                // 4. Обязанности и достижения
-                jh.setDuties(exp.getFullDescription());
+                // 4. Обязанности и достижения с поддержкой красивого HTML
+                String dutiesHtml = exp.getFormattedDutiesHtml();
+                if (dutiesHtml == null || dutiesHtml.trim().isEmpty()) {
+                    dutiesHtml = exp.getFullDescription();
+                }
+                jh.setDuties(dutiesHtml);
 
                 commitContext.addInstanceToCommit(jh);
             }
@@ -799,7 +810,7 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                 candidate.setCurrentCompany(comp);
                 commitContext.addInstanceToCommit(candidate);
             }
-            Position pos = findExistingPosition(exp.getPositionName(), data);
+            Position pos = findExistingPosition(exp.getPositionName(), data, allPositions);
             if (candidate.getPersonPosition() == null && pos != null && (Boolean.TRUE.equals(exp.getIsCurrent()) || end == null)) {
                 candidate.setPersonPosition(pos);
                 commitContext.addInstanceToCommit(candidate);
@@ -847,6 +858,10 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
      * Если не найдена - возвращает null и регистрирует в списке missingPositions (без автосоздания).
      */
     private Position findExistingPosition(String name, SmartCvParsedData data) {
+        return findExistingPosition(name, data, null);
+    }
+
+    private Position findExistingPosition(String name, SmartCvParsedData data, List<Position> preloadedPositions) {
         if (name == null || name.trim().isEmpty()) return null;
         name = name.trim();
         List<Position> list = dataManager.load(Position.class)
@@ -855,6 +870,15 @@ public class SmartCvIngestServiceBean implements SmartCvIngestService {
                 .list();
         if (!list.isEmpty()) {
             return list.get(0);
+        }
+
+        // Интеллектуальный нечеткий поиск среди существующих должностей
+        List<Position> allPositions = preloadedPositions != null ? preloadedPositions : dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where e.deleteTs is null")
+                .list();
+        Position fuzzyMatch = CandidateContactEnrichmentServiceBean.resolveMatchingPosition(name, allPositions);
+        if (fuzzyMatch != null) {
+            return fuzzyMatch;
         }
 
         // Должность не найдена в справочнике - фиксируем для нотификации пользователю

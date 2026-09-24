@@ -2,9 +2,11 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.JobHistory;
 import com.company.hunttech.service.dto.CandidateContactsEnrichmentKpiDto;
 import com.company.hunttech.service.dto.CandidateContactsScanResult;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -95,4 +97,18 @@ public interface CandidateContactEnrichmentService {
      * Запускает один цикл фоновой обработки немедленно (для тестирования или ручного триггера).
      */
     void runSingleCycleNow();
+
+    /**
+     * Выполняет распознавание мест работы кандидата по резюме и сохраняет их в сущность JobHistory.
+     * В первую очередь проверяется оригинальный файл (PDF, DOCX, DOC, RTF, TXT), затем textCV.
+     * Описания проектов, роли и достижений форматируются в читаемый HTML.
+     * Должность сопоставляется с наиболее похожей из справочника hunttech_Position.
+     *
+     * @param candidate       кандидат
+     * @param cv              резюме кандидата
+     * @param forceReprocess  принудительное обновление, даже если места работы уже есть
+     * @return список созданных или обновленных записей JobHistory
+     */
+    List<JobHistory> enrichWorkExperience(JobCandidate candidate, CandidateCV cv, boolean forceReprocess);
 }
+

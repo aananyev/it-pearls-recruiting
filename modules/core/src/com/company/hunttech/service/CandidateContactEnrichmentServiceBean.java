@@ -7,9 +7,14 @@ import com.company.hunttech.entity.ai.AiFunctionConfiguration;
 import com.company.hunttech.service.dto.CandidateContactsEnrichmentKpiDto;
 import com.company.hunttech.service.dto.CandidateContactsScanResult;
 import com.company.hunttech.service.dto.CandidateExtractedContactsDto;
+import com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto;
 import com.company.hunttech.core.ai.AiCostCalculator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Set;
+import java.util.HashSet;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
@@ -245,9 +250,25 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
             result.setTotalContactsFound(calculateContactsCount(extracted));
             result.setTotalContactsUpdated(updatedFields.size());
 
+            // 5.1. Распознавание и сохранение мест работы (JobHistory)
+            List<JobHistory> enrichedHistory = Collections.emptyList();
+            try {
+                enrichedHistory = enrichWorkExperience(effectiveCandidate, effectiveCv, forceScan);
+                result.setWorkExperienceFoundCount(enrichedHistory.size());
+                for (JobHistory jh : enrichedHistory) {
+                    if (jh.getRawCompanyName() != null) {
+                        result.getCreatedWorkExperienceCompanies().add(jh.getRawCompanyName());
+                    }
+                }
+                result.setWorkExperienceCreatedCount(enrichedHistory.size());
+            } catch (Exception ex) {
+                log.warn("Ошибка извлечения мест работы для кандидата {} (CV ID: {}): {}",
+                        effectiveCandidate.getFullName(), effectiveCv.getId(), ex.getMessage());
+            }
+
             // 6. Фиксация результата в CandidateCvContactAnalysis
             saveSuccessAnalysisRecord(effectiveCandidate, effectiveCv, contentHash, configVersion, effectiveFunctionCode,
-                    aiExecution, extracted, updatedFields, photoFound, System.currentTimeMillis() - startTime);
+                    aiExecution, extracted, updatedFields, photoFound, enrichedHistory, System.currentTimeMillis() - startTime);
 
             result.setSuccess(true);
             result.setDurationMs(System.currentTimeMillis() - startTime);
@@ -342,9 +363,11 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
             }
         }
 
-        // Если из файла текст не извлечен, берем сохраненный textCV
+        // Если из файла текст не извлечен, берем сохраненный textCV с очисткой от HTML-тегов
         if (data.text == null || data.text.trim().isEmpty()) {
-            data.text = cv.getTextCV();
+            if (cv.getTextCV() != null && !cv.getTextCV().trim().isEmpty()) {
+                data.text = cleanHtmlToPlainText(cv.getTextCV());
+            }
         }
 
         return data;
@@ -687,6 +710,7 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
                                            CandidateExtractedContactsDto extracted,
                                            List<String> updatedFields,
                                            boolean photoFound,
+                                           List<JobHistory> enrichedHistory,
                                            long durationMs) {
         try (Transaction tx = persistence.createTransaction()) {
             EntityManager em = persistence.getEntityManager();
@@ -735,6 +759,14 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
             deltaMap.put("extracted", extracted);
             deltaMap.put("updatedFields", updatedFields);
             deltaMap.put("photoFound", photoFound);
+            if (enrichedHistory != null) {
+                deltaMap.put("workExperienceFound", enrichedHistory.size());
+                List<String> comps = new ArrayList<>();
+                for (JobHistory jh : enrichedHistory) {
+                    if (jh.getRawCompanyName() != null) comps.add(jh.getRawCompanyName());
+                }
+                deltaMap.put("workExperienceCompanies", comps);
+            }
             try {
                 a.setDeltaDetailsJson(MAPPER.writeValueAsString(deltaMap));
             } catch (Exception ignored) {
@@ -744,6 +776,485 @@ public class CandidateContactEnrichmentServiceBean implements CandidateContactEn
         } catch (Exception e) {
             log.error("Ошибка сохранения успешного анализа контактов: {}", e.getMessage(), e);
         }
+    }
+
+    @Override
+    public List<JobHistory> enrichWorkExperience(JobCandidate candidate, CandidateCV cv, boolean forceReprocess) {
+        if (candidate == null || cv == null) {
+            return Collections.emptyList();
+        }
+
+        JobCandidate effectiveCandidate = candidate.getId() != null
+                ? dataManager.load(JobCandidate.class).id(candidate.getId()).view("jobCandidate-contact-enrichment-view").optional().orElse(candidate)
+                : candidate;
+
+        ExtractedDocumentData docData = extractDocumentData(cv);
+        String rawText = docData.text;
+        if (rawText == null || rawText.trim().isEmpty()) {
+            log.info("Текст резюме кандидата {} (CV ID: {}) пуст, пропуск извлечения мест работы",
+                    effectiveCandidate.getFullName(), cv.getId());
+            return Collections.emptyList();
+        }
+
+        // Загружаем уже существующие места работы кандидата
+        List<JobHistory> existingHistory = dataManager.load(JobHistory.class)
+                .query("select e from hunttech_JobHistory e where e.candidate = :candidate")
+                .parameter("candidate", effectiveCandidate)
+                .view("jobHistory-view")
+                .list();
+
+        if (!existingHistory.isEmpty() && !forceReprocess) {
+            log.info("У кандидата {} уже есть {} мест работы, пропуск (forceReprocess=false)",
+                    effectiveCandidate.getFullName(), existingHistory.size());
+            return existingHistory;
+        }
+
+        String promptText = rawText.length() > 20000 ? rawText.substring(0, 20000) : rawText;
+
+        Map<String, Object> aiContext = new HashMap<>();
+        aiContext.put("sourceText", promptText);
+
+        AiExecutionResult aiResult = null;
+        try {
+            aiResult = aiExecutionService.executeText("EXPERIENCE_EXTRACT_BACKGROUND", aiContext);
+        } catch (Exception e) {
+            log.warn("Ошибка вызова EXPERIENCE_EXTRACT_BACKGROUND: {}", e.getMessage());
+        }
+
+        if (aiResult == null || aiResult.getText() == null || aiResult.getText().trim().isEmpty()) {
+            log.warn("EXPERIENCE_EXTRACT_BACKGROUND не вернул результат, пробуем CV_SMART_PARSE_JSON");
+            try {
+                aiResult = aiExecutionService.executeText("CV_SMART_PARSE_JSON", aiContext);
+            } catch (Exception e) {
+                log.warn("Ошибка вызова fallback CV_SMART_PARSE_JSON: {}", e.getMessage());
+            }
+        }
+
+        if (aiResult == null || aiResult.getText() == null || aiResult.getText().trim().isEmpty()) {
+            log.warn("Не удалось получить результат анализа опыта работы для кандидата {}", candidate.getFullName());
+            return Collections.emptyList();
+        }
+
+        List<SmartCvWorkExperienceDto> expList = parseWorkExperienceJson(aiResult.getText());
+        if (expList.isEmpty()) {
+            log.info("В резюме кандидата {} не обнаружено мест работы", candidate.getFullName());
+            return Collections.emptyList();
+        }
+
+        List<JobHistory> createdList = new ArrayList<>();
+        CommitContext commitContext = new CommitContext();
+        Map<String, Company> companyCache = new HashMap<>();
+        Map<String, City> cityCache = new HashMap<>();
+
+        // Загружаем справочник должностей один раз для нечеткого сопоставления
+        List<Position> allPositions = dataManager.load(Position.class)
+                .query("select e from hunttech_Position e where e.deleteTs is null")
+                .view("position-view")
+                .list();
+
+        for (SmartCvWorkExperienceDto exp : expList) {
+            if (exp.getCompanyName() == null || exp.getCompanyName().trim().isEmpty()) {
+                continue;
+            }
+
+            String companyName = exp.getCompanyName().trim();
+
+            JobHistory jh = null;
+            for (JobHistory eh : existingHistory) {
+                boolean compMatch = (eh.getRawCompanyName() != null && (eh.getRawCompanyName().equalsIgnoreCase(companyName) || cleanCompanyName(eh.getRawCompanyName()).equalsIgnoreCase(cleanCompanyName(companyName))))
+                        || (eh.getCurrentCompany() != null && eh.getCurrentCompany().getComanyName() != null
+                            && (eh.getCurrentCompany().getComanyName().equalsIgnoreCase(companyName) || cleanCompanyName(eh.getCurrentCompany().getComanyName()).equalsIgnoreCase(cleanCompanyName(companyName))));
+                if (compMatch) {
+                    jh = eh;
+                    break;
+                }
+            }
+
+            if (jh != null && !forceReprocess) {
+                continue;
+            }
+
+            if (jh == null) {
+                jh = metadata.create(JobHistory.class);
+                jh.setCandidate(effectiveCandidate);
+            }
+
+            String rawComp = companyName.length() > 255 ? companyName.substring(0, 255) : companyName;
+            jh.setRawCompanyName(rawComp);
+
+            String rawPos = exp.getPositionName() != null ? exp.getPositionName().trim() : null;
+            if (rawPos != null && rawPos.length() > 255) {
+                rawPos = rawPos.substring(0, 255);
+            }
+            jh.setRawPositionName(rawPos);
+
+            // Поиск или создание компании с локальным кешированием (защита от N+1 и дубликатов)
+            Company comp = resolveOrCreateCompany(exp, commitContext, companyCache, cityCache);
+            jh.setCurrentCompany(comp);
+
+            // Интеллектуальный поиск должности (точный, нормализованный, нечеткий)
+            Position matchedPos = resolveMatchingPosition(rawPos, allPositions);
+            jh.setCurrentPosition(matchedPos);
+
+            // Даты работы
+            Date start = parseDateSafe(exp.getStartDate());
+            Date end = parseDateSafe(exp.getEndDate());
+            jh.setStartDate(start);
+            jh.setEndDate(end);
+            jh.setDateNewsPosition(start != null ? start : new Date());
+
+            // HTML форматирование обязанностей, проектов и достижений
+            String dutiesHtml = exp.getFormattedDutiesHtml();
+            if (dutiesHtml == null || dutiesHtml.trim().isEmpty()) {
+                dutiesHtml = exp.getFullDescription();
+            }
+            jh.setDuties(dutiesHtml);
+
+            commitContext.addInstanceToCommit(jh);
+            createdList.add(jh);
+
+            // Если у кандидата не заполнена текущая компания/должность и это текущее/последнее место работы
+            if (effectiveCandidate.getCurrentCompany() == null && (Boolean.TRUE.equals(exp.getIsCurrent()) || end == null)) {
+                effectiveCandidate.setCurrentCompany(comp);
+                commitContext.addInstanceToCommit(effectiveCandidate);
+            }
+            if (effectiveCandidate.getPersonPosition() == null && matchedPos != null && (Boolean.TRUE.equals(exp.getIsCurrent()) || end == null)) {
+                effectiveCandidate.setPersonPosition(matchedPos);
+                commitContext.addInstanceToCommit(effectiveCandidate);
+            }
+        }
+
+        if (!commitContext.getCommitInstances().isEmpty()) {
+            dataManager.commit(commitContext);
+            log.info("Для кандидата {} успешно сохранено {} мест работы (JobHistory)",
+                    effectiveCandidate.getFullName(), createdList.size());
+        }
+
+        return createdList;
+    }
+
+    private List<SmartCvWorkExperienceDto> parseWorkExperienceJson(String rawJson) {
+        List<SmartCvWorkExperienceDto> list = new ArrayList<>();
+        if (rawJson == null || rawJson.trim().isEmpty()) return list;
+
+        String clean = extractCleanJson(rawJson);
+        try {
+            JsonNode root = MAPPER.readTree(clean);
+            JsonNode arrayNode = null;
+            if (root.isArray()) {
+                arrayNode = root;
+            } else if (root.has("workExperience") && root.get("workExperience").isArray()) {
+                arrayNode = root.get("workExperience");
+            } else if (root.has("experience") && root.get("experience").isArray()) {
+                arrayNode = root.get("experience");
+            } else if (root.has("jobs") && root.get("jobs").isArray()) {
+                arrayNode = root.get("jobs");
+            }
+
+            if (arrayNode != null) {
+                for (JsonNode wn : arrayNode) {
+                    SmartCvWorkExperienceDto dto = new SmartCvWorkExperienceDto();
+                    if (wn.hasNonNull("companyName")) dto.setCompanyName(wn.get("companyName").asText().trim());
+                    if (wn.hasNonNull("companyDescription")) dto.setCompanyDescription(wn.get("companyDescription").asText().trim());
+                    if (wn.hasNonNull("companyWebsite")) dto.setCompanyWebsite(wn.get("companyWebsite").asText().trim());
+                    if (wn.hasNonNull("positionName")) dto.setPositionName(wn.get("positionName").asText().trim());
+                    if (wn.hasNonNull("startDate")) dto.setStartDate(wn.get("startDate").asText().trim());
+                    if (wn.hasNonNull("endDate")) dto.setEndDate(wn.get("endDate").asText().trim());
+                    if (wn.hasNonNull("isCurrent")) dto.setIsCurrent(wn.get("isCurrent").asBoolean());
+                    if (wn.hasNonNull("city")) dto.setCity(wn.get("city").asText().trim());
+                    if (wn.hasNonNull("duties")) dto.setDuties(wn.get("duties").asText().trim());
+                    if (wn.hasNonNull("achievements")) dto.setAchievements(wn.get("achievements").asText().trim());
+                    if (wn.hasNonNull("projectDescription")) dto.setProjectDescription(wn.get("projectDescription").asText().trim());
+                    if (wn.hasNonNull("roleDescription")) dto.setRoleDescription(wn.get("roleDescription").asText().trim());
+                    if (wn.hasNonNull("formattedDutiesHtml")) dto.setFormattedDutiesHtml(wn.get("formattedDutiesHtml").asText().trim());
+                    list.add(dto);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Ошибка десериализации JSON мест работы: {}", e.getMessage(), e);
+        }
+        return list;
+    }
+
+    private static String extractCleanJson(String raw) {
+        if (raw == null) return "";
+        String s = raw.trim();
+        if (s.startsWith("```json")) {
+            s = s.substring(7);
+        } else if (s.startsWith("```")) {
+            s = s.substring(3);
+        }
+        if (s.endsWith("```")) {
+            s = s.substring(0, s.length() - 3);
+        }
+        return s.trim();
+    }
+
+    private Company resolveOrCreateCompany(SmartCvWorkExperienceDto exp, CommitContext commitContext,
+                                           Map<String, Company> companyCache, Map<String, City> cityCache) {
+        if (exp == null || exp.getCompanyName() == null || exp.getCompanyName().trim().isEmpty()) {
+            return null;
+        }
+        String name = exp.getCompanyName().trim();
+        String cleaned = cleanCompanyName(name);
+
+        if (companyCache != null) {
+            Company cached = companyCache.get(cleaned.toLowerCase());
+            if (cached == null) {
+                cached = companyCache.get(name.toLowerCase());
+            }
+            if (cached != null) {
+                return cached;
+            }
+        }
+
+        List<Company> list = dataManager.load(Company.class)
+                .query("select e from hunttech_Company e where lower(e.comanyName) = :name or lower(e.companyShortName) = :name or lower(e.comanyName) = :clean or lower(e.companyShortName) = :clean")
+                .parameter("name", name.toLowerCase())
+                .parameter("clean", cleaned.toLowerCase())
+                .list();
+        if (!list.isEmpty()) {
+            Company existing = list.get(0);
+            if (companyCache != null) {
+                companyCache.put(name.toLowerCase(), existing);
+                companyCache.put(cleaned.toLowerCase(), existing);
+            }
+            return existing;
+        }
+
+        Company comp = metadata.create(Company.class);
+        comp.setComanyName(name.length() > 80 ? name.substring(0, 80) : name);
+        comp.setCompanyShortName(cleaned.length() > 80 ? cleaned.substring(0, 80) : cleaned);
+        if (exp.getCompanyDescription() != null && !exp.getCompanyDescription().trim().isEmpty()) {
+            comp.setCompanyDescription(exp.getCompanyDescription().trim());
+        }
+        if (exp.getCompanyWebsite() != null && !exp.getCompanyWebsite().trim().isEmpty()) {
+            comp.setWebsite(exp.getCompanyWebsite().trim());
+        }
+        if (exp.getCity() != null && !exp.getCity().trim().isEmpty()) {
+            City c = resolveCity(exp.getCity().trim(), commitContext, cityCache);
+            if (c != null) {
+                comp.setCityOfCompany(c);
+            }
+        }
+        comp.setOurClient(false);
+        comp.setOurLegalEntity(false);
+
+        if (commitContext != null) {
+            commitContext.addInstanceToCommit(comp);
+        } else {
+            dataManager.commit(comp);
+        }
+
+        if (companyCache != null) {
+            companyCache.put(name.toLowerCase(), comp);
+            companyCache.put(cleaned.toLowerCase(), comp);
+        }
+        return comp;
+    }
+
+    private City resolveCity(String name, CommitContext commitContext, Map<String, City> cityCache) {
+        if (name == null || name.trim().isEmpty()) return null;
+        name = name.trim();
+
+        if (cityCache != null && cityCache.containsKey(name.toLowerCase())) {
+            return cityCache.get(name.toLowerCase());
+        }
+
+        List<City> list = dataManager.load(City.class)
+                .query("select e from hunttech_City e where lower(e.cityRuName) = :name")
+                .parameter("name", name.toLowerCase())
+                .list();
+        if (!list.isEmpty()) {
+            City existing = list.get(0);
+            if (cityCache != null) {
+                cityCache.put(name.toLowerCase(), existing);
+            }
+            return existing;
+        }
+        City city = metadata.create(City.class);
+        city.setCityRuName(name.length() > 50 ? name.substring(0, 50) : name);
+        if (commitContext != null) {
+            commitContext.addInstanceToCommit(city);
+        } else {
+            dataManager.commit(city);
+        }
+
+        if (cityCache != null) {
+            cityCache.put(name.toLowerCase(), city);
+        }
+        return city;
+    }
+
+    private static String cleanCompanyName(String raw) {
+        if (raw == null) return "";
+        return raw.replaceAll("(?iU)\\b(ооо|зао|пао|ао|ип|нко|ltd|llc|inc|gmbh|corp)\\b", "")
+                .replaceAll("[\"«»'„“]", "")
+                .trim();
+    }
+
+    private static Date parseDateSafe(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        dateStr = dateStr.trim();
+        String[] patterns = {"yyyy-MM-dd", "yyyy-MM", "dd.MM.yyyy", "MM.yyyy", "yyyy"};
+        for (String pat : patterns) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(pat, Locale.ROOT);
+                sdf.setLenient(true);
+                return sdf.parse(dateStr);
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    public static Position resolveMatchingPosition(String rawPosition, List<Position> allPositions) {
+        if (rawPosition == null || rawPosition.trim().isEmpty() || allPositions == null || allPositions.isEmpty()) {
+            return null;
+        }
+        String search = rawPosition.trim();
+
+        // 1. Точное совпадение (без учета регистра)
+        for (Position p : allPositions) {
+            if (p.getPositionRuName() != null && p.getPositionRuName().equalsIgnoreCase(search)) {
+                return p;
+            }
+            if (p.getPositionEnName() != null && p.getPositionEnName().equalsIgnoreCase(search)) {
+                return p;
+            }
+        }
+
+        // 2. Нормализованное совпадение (без "(не использовать)", знаков препинания)
+        String normSearch = normalizePositionString(search);
+        for (Position p : allPositions) {
+            String normRu = normalizePositionString(p.getPositionRuName());
+            String normEn = normalizePositionString(p.getPositionEnName());
+            if (!normRu.isEmpty() && normRu.equalsIgnoreCase(normSearch)) {
+                return p;
+            }
+            if (!normEn.isEmpty() && normEn.equalsIgnoreCase(normSearch)) {
+                return p;
+            }
+        }
+
+        // 3. Интеллектуальное нечеткое сопоставление (Sørensen-Dice с синонимами и весами)
+        Position bestPosition = null;
+        double bestScore = 0.0;
+        Set<String> searchTokens = tokenizeAndExpandPosition(normSearch);
+
+        for (Position p : allPositions) {
+            boolean deprecated = (p.getPositionRuName() != null && p.getPositionRuName().toLowerCase().contains("не использовать"))
+                    || (p.getPositionEnName() != null && p.getPositionEnName().toLowerCase().contains("не использовать"));
+
+            Set<String> candidateTokens = new HashSet<>();
+            if (p.getPositionRuName() != null) {
+                candidateTokens.addAll(tokenizeAndExpandPosition(normalizePositionString(p.getPositionRuName())));
+            }
+            if (p.getPositionEnName() != null) {
+                candidateTokens.addAll(tokenizeAndExpandPosition(normalizePositionString(p.getPositionEnName())));
+            }
+
+            if (candidateTokens.isEmpty()) continue;
+
+            Set<String> intersection = new HashSet<>(searchTokens);
+            intersection.retainAll(candidateTokens);
+
+            if (intersection.isEmpty()) continue;
+
+            double exactTermBonus = 0.0;
+            for (String term : intersection) {
+                if ("backend".equals(term) || "data".equals(term) || "python".equals(term)
+                        || "java".equals(term) || "qa".equals(term) || "frontend".equals(term)
+                        || "devops".equals(term) || "fullstack".equals(term)) {
+                    exactTermBonus += 0.6;
+                }
+            }
+
+            double baseScore = (2.0 * intersection.size() + exactTermBonus) / (searchTokens.size() + candidateTokens.size());
+            if (deprecated) {
+                baseScore *= 0.6; // штраф за устаревшие должности
+            }
+
+            if (baseScore > bestScore) {
+                bestScore = baseScore;
+                bestPosition = p;
+            }
+        }
+
+        if (bestScore >= 0.35) {
+            return bestPosition;
+        }
+
+        return null;
+    }
+
+    private static String normalizePositionString(String s) {
+        if (s == null) return "";
+        String norm = s.replaceAll("(?i)\\(\\s*не\\s+использовать\\s*\\)", "");
+        norm = norm.replaceAll("[^a-zA-Zа-яА-Я0-9_\\s]", " ");
+        return norm.replaceAll("\\s+", " ").trim().toLowerCase();
+    }
+
+    private static Set<String> tokenizeAndExpandPosition(String normalized) {
+        Set<String> tokens = new HashSet<>();
+        if (normalized == null || normalized.trim().isEmpty()) {
+            return tokens;
+        }
+        String[] words = normalized.split("\\s+");
+        for (String w : words) {
+            if (w.length() < 2) continue;
+            tokens.add(w);
+            if ("developer".equals(w) || "разработчик".equals(w) || "программист".equals(w)
+                    || "engineer".equals(w) || "инженер".equals(w) || "dev".equals(w)) {
+                tokens.add("dev");
+                tokens.add("eng");
+            } else if ("lead".equals(w) || "лид".equals(w) || "тимлид".equals(w) || "руководитель".equals(w) || "head".equals(w)) {
+                tokens.add("lead");
+            } else if ("senior".equals(w) || "сеньор".equals(w) || "старший".equals(w) || "ведущий".equals(w)) {
+                tokens.add("senior");
+            } else if ("middle".equals(w) || "мидл".equals(w)) {
+                tokens.add("middle");
+            } else if ("junior".equals(w) || "джуниор".equals(w) || "младший".equals(w)) {
+                tokens.add("junior");
+            } else if ("data".equals(w) || "данных".equals(w) || "dwh".equals(w) || "bigdata".equals(w)) {
+                tokens.add("data");
+            } else if ("qa".equals(w) || "тестировщик".equals(w) || "tester".equals(w) || "тестирования".equals(w)) {
+                tokens.add("qa");
+            } else if ("backend".equals(w) || "бэкенд".equals(w) || "бэкэнд".equals(w)) {
+                tokens.add("backend");
+            } else if ("frontend".equals(w) || "фронтенд".equals(w) || "фронтэнд".equals(w)) {
+                tokens.add("frontend");
+            } else if ("fullstack".equals(w) || "фулстек".equals(w) || "фуллстек".equals(w)) {
+                tokens.add("fullstack");
+            } else if ("python".equals(w) || "питон".equals(w) || "phython".equals(w)) {
+                tokens.add("python");
+            } else if ("java".equals(w) || "джава".equals(w)) {
+                tokens.add("java");
+            }
+        }
+        return tokens;
+    }
+
+    public static String cleanHtmlToPlainText(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return "";
+        }
+        String s = text;
+        s = s.replaceAll("(?i)<br\\s*/?>", "\n");
+        s = s.replaceAll("(?i)</(p|div|tr|li|h[1-6])>", "\n");
+        s = s.replaceAll("(?i)<li[^>]*>", "• ");
+        s = s.replaceAll("<[^>]+>", " ");
+        s = s.replace("&nbsp;", " ")
+             .replace("&amp;", "&")
+             .replace("&quot;", "\"")
+             .replace("&lt;", "<")
+             .replace("&gt;", ">")
+             .replace("&mdash;", "—")
+             .replace("&ndash;", "–");
+        s = s.replaceAll("[ \\t\\x0B\\f\\r]+", " ");
+        s = s.replaceAll("\\n[ ]+", "\n");
+        s = s.replaceAll("\\n{3,}", "\n\n");
+        return s.trim();
     }
 
     private void handleAnalysisError(JobCandidate candidate, CandidateCV cv,

@@ -1731,6 +1731,9 @@
 
     <view entity="hunttech_JobCandidate" name="jobCandidate-contact-enrichment-view" extends="_local">
         <property name="fileImageFace" view="_local"/>
+        <property name="currentCompany" view="_minimal"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="cityOfResidence" view="_minimal"/>
     </view>
 
     <view entity="hunttech_CandidateCvContactAnalysis" name="candidateCvContactAnalysis-browse-view" extends="_local">

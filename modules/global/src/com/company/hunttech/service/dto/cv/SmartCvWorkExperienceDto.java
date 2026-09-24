@@ -18,6 +18,48 @@ public class SmartCvWorkExperienceDto implements Serializable {
     private String city;
     private String duties;
     private String achievements;
+    private String projectDescription;
+    private String roleDescription;
+    private String formattedDutiesHtml;
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
+    }
+
+    public String getRoleDescription() {
+        return roleDescription;
+    }
+
+    public void setRoleDescription(String roleDescription) {
+        this.roleDescription = roleDescription;
+    }
+
+    public String getFormattedDutiesHtml() {
+        if (formattedDutiesHtml != null && !formattedDutiesHtml.trim().isEmpty()) {
+            return formattedDutiesHtml.trim();
+        }
+        StringBuilder sb = new StringBuilder();
+        if (projectDescription != null && !projectDescription.trim().isEmpty()) {
+            sb.append("<p><strong>Проекты:</strong> ").append(projectDescription.trim()).append("</p>");
+        }
+        if (roleDescription != null && !roleDescription.trim().isEmpty()) {
+            sb.append("<p><strong>Роль и задачи:</strong> ").append(roleDescription.trim()).append("</p>");
+        } else if (duties != null && !duties.trim().isEmpty()) {
+            sb.append("<p><strong>Обязанности:</strong> ").append(duties.trim()).append("</p>");
+        }
+        if (achievements != null && !achievements.trim().isEmpty()) {
+            sb.append("<p><strong>Достижения:</strong> ").append(achievements.trim()).append("</p>");
+        }
+        return sb.toString();
+    }
+
+    public void setFormattedDutiesHtml(String formattedDutiesHtml) {
+        this.formattedDutiesHtml = formattedDutiesHtml;
+    }
 
     public String getCompanyName() {
         return companyName;

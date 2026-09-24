@@ -345,6 +345,9 @@
              relativeToChangelogFile="true"/>
     <include file="260924-3-migrateExtractedCandidateContactsData.xml"
              relativeToChangelogFile="true"/>
+    <include file="260924-4-seedExperienceExtractBackgroundAiFunction.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
+
 
