@@ -47,15 +47,21 @@
    - В `recruiter-dashboard-iteraction-list-view` добавлены атрибуты `personPosition`, `cityOfResidence`, `fileImageFace` для `candidate` и `projectName` для `vacancy`.
 2. **Интерфейс дескриптора (`recruiter-candidate-kanban-widget.xml`):**
    - Добавлен `topToolbar` с `recruiterLookupField`, `periodRadioGroup`, `searchField` и `refreshBtn`.
-   - Добавлен `kanbanScrollBox` с горизонтальной прокруткой.
+   - Добавлен `kanbanScrollBox` с горизонтальной прокруткой (`orientation="horizontal" scrollBars="horizontal"`).
+   - На корневой layout добавлен атрибут `expand="kanbanScrollBox"`, полностью устраняющий пустое пространство между блоками шапки, KPI и канбаном без взаимного наезда.
 3. **Контроллер (`RecruiterCandidateKanbanWidget.java`):**
    - Использование `userSession.getCurrentOrSubstitutedUser()`.
    - Безопасный JPQL: `((e.vacancy is null and x.vacancy is null) or x.vacancy = e.vacancy)`.
    - Период по умолчанию — 90 дней (возвращает 233 активных кейса `eliberman`).
    - Динамическое построение карточек с аватаром, рейтингом, городом и кнопкой профиля.
+   - В `createColumn()` для `scrollBox` активирована вертикальная прокрутка: `scrollBox.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.VERTICAL)`.
+   - Компактные подписи фильтров периодов: `30 дн.`, `90 дн.`, `Всё время`.
 4. **Стилизация (SCSS в 7 темах):**
-   - В [recruiter-dashboard-shared-styles.scss](file:///Users/alekseyananyev/StudioProjects/hrm-antigravity/modules/web/themes/hunttech-modern/com.company.hunttech/recruiter-dashboard-shared-styles.scss) синхронизированы стили колонок, бейджей, карточек и скроллбоксов (`height: 540px !important`).
+   - В `recruiter-dashboard-shared-styles.scss` синхронизированы стили колонок, бейджей, карточек и скроллбоксов (`overflow-y: auto !important`, тонкий кастомный скроллбар). Внешний скролл зафиксирован от вертикальной прокрутки (`overflow-y: hidden !important`) для исключения конфликта скроллбаров.
+   - Заголовок и KPI-бар компактны и эргономичны.
    - Файлы идентичны во всех 7 темах: `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-dark`, `hunttech-modern-light`.
+5. **Документация:**
+   - Подготовлена детальная спецификация компоновки и бизнес-логики: [RecruiterCandidateKanbanWidget_Spec.md](file:///Users/alekseyananyev/StudioProjects/hrm-antigravity/docs/screens/recruiter-dashboard/RecruiterCandidateKanbanWidget_Spec.md).
 
 ## Критерии приёмки (Definition of Done) — Проверено
 
@@ -64,9 +70,13 @@
 - [x] Работает переключение периода (30 дн., 90 дн., Все время).
 - [x] Карточки оформлены по Эскизу 3 дизайнера (аватар 42px, рейтинг ★, город 📍, статус, вакансия, дата, кнопка профиля).
 - [x] Нажатие кнопки «Карточка профиля» открывает экран редактирования кандидата.
+- [x] Вертикальный скроллер для карточек активен, нижние карточки в колонках прокручиваются плавно.
+- [x] Интервалы между блоками нормализованы, пустое пространство удалено (`expand="kanbanScrollBox"`).
 - [x] Паритет SCSS-стилей во всех 7 темах подтвержден тестом `RecruiterDashboardsContractTest` (6/6 PASS).
-- [x] Проект компилируется (`:app-web:compileJava`, `:app-web:buildScssThemes`) и перезапущен на локальном сервере (HTTP 200).
+- [x] Проект скомпилирован (`:app-web:compileJava`, `:app-web:buildScssThemes`), задеплоен и запущен на локальном сервере (HTTP 200).
+- [x] Код закоммичен (`07224171f`), отправлен в remote `origin/master` и `origin/agent/antigravity-dev`.
 
 ## История
 
-- 2026-09-24 — карточка создана; проведен анализ причин пустой доски у `eliberman`, реализован rich UI по Эскизу 3, добавлены элементы фильтрации рекрутера и периода, пройдены контрактные тесты; статус переведён в REVIEW (НА ПРОВЕРКУ).
+- 2026-09-24 — карточка создана; проведен анализ причин пустой доски у `eliberman`, реализован rich UI по Эскизу 3, добавлены элементы фильтрации рекрутера и периода, пройдены контрактные тесты.
+- 2026-09-24 — добавлены вертикальный скролл на колонки канбана, устранены пустые промежутки блоков, оптимизирована эргономика шапки, составлена спецификация, произведена сборка и деплой; статус переведён в **REVIEW (НА ПРОВЕРКУ)**.
