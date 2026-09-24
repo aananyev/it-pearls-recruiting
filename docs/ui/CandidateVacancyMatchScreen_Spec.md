@@ -43,6 +43,7 @@ Timer facet `analysisProgressTimer` имеет интервал 1000 мс, `auto
 | Родитель | карточка кандидата | `findSuitableVacancyBtn` |
 | Дочерний | карточка выбранной вакансии | `openEntityBtn` |
 | Дочерний | создание взаимодействия | `createInteractionBtn` / `quickInteractionBtn` |
+| Дочерний | помещение в кадровый резерв | `addToReserveBtn` / `quickAddToReserveBtn` |
 | Дочерний | AI draft предложения | `outreachDraftBtn` / `quickOutreachBtn` |
 | Дочерний | диалог отказа | `rejectBtn` / `quickRejectBtn` |
 
@@ -110,6 +111,7 @@ Timer facet `analysisProgressTimer` имеет интервал 1000 мс, `auto
 
 | Дата | Изменение |
 |---|---|
+| 2026-09-24 | Реализовано действие «Поместить в кадровый резерв» (`addToReserveBtn` в строке действий над таблицей и `quickAddToReserveBtn` в сайдбаре быстрых действий). При выборе кандидата в таблице кнопка активируется и открывает диалог `PersonelReserveEdit` с автозаполнением кандидата, должности, вакансии, текущего рекрутера, дат и 30-дневного срока. Аналогичное действие подключено в `JobCandidateReestr`. |
 | 2026-09-23 | BL-2026-042: режим vacancy-to-candidates безопасно передаёт профиль и навыки кандидатов без читаемого CV, диагностика связывает попытки с operation/request ID без логирования PII/контекста AI, а экран показывает безопасный статус и код обращения для fallback/частичной ошибки. |
 | 2026-09-23 | BL-2026-032: В контроллере `CandidateVacancyMatchScreen.java` исправлена аннотация `@DialogMode`: некорректные единицы `95vw` / `90vh`, вызывавшие исключение `IllegalArgumentException: Invalid size argument: "95vw"` в `com.vaadin.server.SizeWithUnit.parseStringSize`, заменены на валидные процентные значения `95%` / `90%`. Диалог проверен тестом `AllXmlScreensIntegrityTest`. |
 | 2026-09-22 | CDP-проверка 768×600 выявила переполнение подписей в строках действий; во всех семи темах кнопки получили ширину слота, перенос текста и auto-height без изменения бизнес-действий. |

@@ -14,12 +14,18 @@ import com.company.hunttech.service.CandidateVacancyWorkflowService;
 import com.company.hunttech.service.dto.CandidateSkillsScanResult;
 import com.company.hunttech.service.dto.BulkTakeIntoWorkResult;
 import com.company.hunttech.service.dto.TakeIntoWorkResult;
+import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.entity.PersonelReserve;
+import com.company.hunttech.entity.Position;
 import com.company.hunttech.web.screens.candidatevacancymatch.CandidateOutreachDraftDialog;
 import com.company.hunttech.web.screens.candidatevacancymatch.RejectCandidateMatchDialog;
 import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
 import com.company.hunttech.web.screens.openposition.OpenPositionEdit;
+import com.company.hunttech.web.screens.personelreserve.PersonelReserveEdit;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -110,6 +116,9 @@ public class CandidateVacancyMatchScreen extends Screen {
     @Inject
     private UiComponents uiComponents;
 
+    @Inject
+    private UserSession userSession;
+
     /* Top Bar Components */
     @Inject
     private CollectionContainer<CandidateVacancyMatchItem> matchesDc;
@@ -171,6 +180,12 @@ public class CandidateVacancyMatchScreen extends Screen {
     /* Toolbar Action Buttons */
     @Inject
     private Button takeIntoWorkBtn;
+
+    @Inject
+    private Button addToReserveBtn;
+
+    @Inject
+    private Button quickAddToReserveBtn;
 
     @Inject
     private Button createInteractionBtn;
@@ -1019,6 +1034,7 @@ public class CandidateVacancyMatchScreen extends Screen {
             bulkTakeIntoWorkBtn.setVisible(true);
             bulkTakeIntoWorkBtn.setCaption("Взять выбранных (" + count + ")");
             takeIntoWorkBtn.setEnabled(false);
+            addToReserveBtn.setEnabled(false);
             createInteractionBtn.setEnabled(false);
             outreachDraftBtn.setEnabled(false);
             postponeBtn.setEnabled(false);
@@ -1027,6 +1043,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         } else if (count == 1) {
             bulkTakeIntoWorkBtn.setVisible(false);
             takeIntoWorkBtn.setEnabled(true);
+            addToReserveBtn.setEnabled(true);
             createInteractionBtn.setEnabled(true);
             outreachDraftBtn.setEnabled(true);
             postponeBtn.setEnabled(true);
@@ -1035,6 +1052,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         } else {
             bulkTakeIntoWorkBtn.setVisible(false);
             takeIntoWorkBtn.setEnabled(false);
+            addToReserveBtn.setEnabled(false);
             createInteractionBtn.setEnabled(false);
             outreachDraftBtn.setEnabled(false);
             postponeBtn.setEnabled(false);
@@ -1281,6 +1299,102 @@ public class CandidateVacancyMatchScreen extends Screen {
                                 }),
                         new DialogAction(DialogAction.Type.NO).withCaption("Отмена")
                 )
+                .show();
+    }
+
+    @Subscribe("addToReserveBtn")
+    public void onAddToReserveBtnClick(Button.ClickEvent event) {
+        executeAddToReserve();
+    }
+
+    @Subscribe("quickAddToReserveBtn")
+    public void onQuickAddToReserveBtnClick(Button.ClickEvent event) {
+        executeAddToReserve();
+    }
+
+    private void executeAddToReserve() {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        UUID candId = resolveCandidateId(selected);
+        UUID vacId = resolveVacancyId(selected);
+
+        if (candId == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Кандидат не определён")
+                    .withDescription("Не удалось определить кандидата для помещения в кадровый резерв")
+                    .show();
+            return;
+        }
+
+        JobCandidate cand = dataManager.load(JobCandidate.class)
+                .id(candId)
+                .view("jobCandidate-full-view")
+                .optional()
+                .orElse(null);
+
+        if (cand == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Кандидат не найден")
+                    .withDescription("Не удалось загрузить данные кандидата из базы данных")
+                    .show();
+            return;
+        }
+
+        OpenPosition vac = null;
+        if (vacId != null) {
+            vac = dataManager.load(OpenPosition.class)
+                    .id(vacId)
+                    .view("openPosition-view")
+                    .optional()
+                    .orElse(null);
+        }
+
+        final JobCandidate finalCand = cand;
+        final OpenPosition finalVac = vac;
+
+        Position targetPosition = null;
+        if (finalCand != null && finalCand.getPersonPosition() != null) {
+            targetPosition = finalCand.getPersonPosition();
+        } else if (finalVac != null && finalVac.getPositionType() != null) {
+            targetPosition = finalVac.getPositionType();
+        }
+
+        final Position finalPosition = targetPosition;
+
+        screenBuilders.editor(PersonelReserve.class, this)
+                .withScreenClass(PersonelReserveEdit.class)
+                .newEntity()
+                .withInitializer(reserve -> {
+                    reserve.setJobCandidate(finalCand);
+                    reserve.setPersonPosition(finalPosition);
+                    reserve.setOpenPosition(finalVac);
+                    if (userSession != null && userSession.getUser() instanceof ExtUser) {
+                        reserve.setRecruter((ExtUser) userSession.getUser());
+                    }
+                    reserve.setDate(new Date());
+                    GregorianCalendar cal = new GregorianCalendar();
+                    cal.add(java.util.Calendar.MONTH, 1);
+                    reserve.setEndDate(cal.getTime());
+                    reserve.setTermOfPlacement(30);
+                    reserve.setInProcess(true);
+                    reserve.setRemovedFromReserve(false);
+                })
+                .withOpenMode(OpenMode.DIALOG)
+                .withAfterCloseListener(afterCloseEvent -> {
+                    if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                        selected.setRecruiterDecision("В резерве");
+                        matchesDc.replaceItem(selected);
+                        populateDetailPane(selected);
+
+                        String candidateName = finalCand != null && finalCand.getFullName() != null
+                                ? finalCand.getFullName() : (selected.getCandidateFullName() != null ? selected.getCandidateFullName() : "Кандидат");
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Кадровый резерв")
+                                .withDescription(String.format("Кандидат «%s» успешно помещён в кадровый резерв", candidateName))
+                                .show();
+                    }
+                })
                 .show();
     }
 
