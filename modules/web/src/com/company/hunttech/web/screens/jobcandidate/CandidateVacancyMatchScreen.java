@@ -191,6 +191,9 @@ public class CandidateVacancyMatchScreen extends Screen {
     private LookupField<String> decisionFilter;
 
     @Inject
+    private CheckBox hideIrrelevantCheckBox;
+
+    @Inject
     private Label<String> countLabel;
 
     /* Right Detail Card Components */
@@ -406,29 +409,68 @@ public class CandidateVacancyMatchScreen extends Screen {
         decisionFilter.setValue("ALL");
 
         decisionFilter.addValueChangeListener(e -> applyFilter(e.getValue()));
+        if (hideIrrelevantCheckBox != null) {
+            hideIrrelevantCheckBox.addValueChangeListener(e -> applyFilter(decisionFilter.getValue()));
+        }
     }
 
     private void applyFilter(String filterKey) {
-        if (filterKey == null || "ALL".equalsIgnoreCase(filterKey)) {
-            matchesDc.setItems(allReportItems);
-        } else if ("UNPROCESSED".equalsIgnoreCase(filterKey)) {
-            matchesDc.setItems(allReportItems.stream()
-                    .filter(it -> it.getRecruiterDecision() == null || it.getRecruiterDecision().trim().isEmpty() || "—".equals(it.getRecruiterDecision()))
-                    .collect(Collectors.toList()));
+        boolean hideIrrelevant = hideIrrelevantCheckBox != null && Boolean.TRUE.equals(hideIrrelevantCheckBox.getValue());
+        java.util.stream.Stream<CandidateVacancyMatchItem> stream = allReportItems.stream();
+
+        if ("UNPROCESSED".equalsIgnoreCase(filterKey)) {
+            stream = stream.filter(it -> it.getRecruiterDecision() == null || it.getRecruiterDecision().trim().isEmpty() || "—".equals(it.getRecruiterDecision()));
         } else if ("IN_WORK".equalsIgnoreCase(filterKey)) {
-            matchesDc.setItems(allReportItems.stream()
-                    .filter(it -> "В работе".equalsIgnoreCase(it.getRecruiterDecision()) || "IN_WORK".equalsIgnoreCase(it.getRecruiterDecision()))
-                    .collect(Collectors.toList()));
+            stream = stream.filter(it -> "В работе".equalsIgnoreCase(it.getRecruiterDecision()) || "IN_WORK".equalsIgnoreCase(it.getRecruiterDecision()));
         } else if ("POSTPONED".equalsIgnoreCase(filterKey)) {
-            matchesDc.setItems(allReportItems.stream()
-                    .filter(it -> "Отложен".equalsIgnoreCase(it.getRecruiterDecision()) || "POSTPONED".equalsIgnoreCase(it.getRecruiterDecision()))
-                    .collect(Collectors.toList()));
+            stream = stream.filter(it -> "Отложен".equalsIgnoreCase(it.getRecruiterDecision()) || "POSTPONED".equalsIgnoreCase(it.getRecruiterDecision()));
         } else if ("REJECTED".equalsIgnoreCase(filterKey)) {
-            matchesDc.setItems(allReportItems.stream()
-                    .filter(it -> "Не подходит".equalsIgnoreCase(it.getRecruiterDecision()) || "REJECTED".equalsIgnoreCase(it.getRecruiterDecision()))
-                    .collect(Collectors.toList()));
+            stream = stream.filter(it -> "Не подходит".equalsIgnoreCase(it.getRecruiterDecision()) || "REJECTED".equalsIgnoreCase(it.getRecruiterDecision()));
         }
-        countLabel.setValue("Найдено совпадений: " + matchesDc.getItems().size());
+
+        if (hideIrrelevant) {
+            stream = stream.filter(it -> !isNotRecommended(it));
+        }
+
+        List<CandidateVacancyMatchItem> filtered = stream.collect(Collectors.toList());
+        matchesDc.setItems(filtered);
+        countLabel.setValue("Найдено совпадений: " + filtered.size());
+
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null || !filtered.contains(selected)) {
+            if (!filtered.isEmpty()) {
+                matchesTable.setSelected(filtered.get(0));
+                populateDetailPane(filtered.get(0));
+            } else {
+                matchesTable.setSelected(Collections.emptySet());
+                clearDetailsPane();
+            }
+        }
+        updateToolbarActionsState();
+    }
+
+    public static boolean isNotRecommended(CandidateVacancyMatchItem item) {
+        if (item == null) {
+            return false;
+        }
+        String verdict = item.getVerdict();
+        if (verdict != null) {
+            String trimmed = verdict.trim();
+            if (CandidateVacancyMatchAiService.VERDICT_NOT_RECOMMENDED.equalsIgnoreCase(trimmed)
+                    || CandidateVacancyMatchAiService.VERDICT_NOT_RECOMMENDED_CODE.equalsIgnoreCase(trimmed)
+                    || CandidateVacancyMatchAiService.VERDICT_NOT_EVALUATED.equalsIgnoreCase(trimmed)) {
+                return true;
+            }
+            String lower = trimmed.toLowerCase(Locale.ROOT);
+            if (lower.contains("не рекоменд") || lower.contains("not_recommend") || lower.contains("not recommended")) {
+                return true;
+            }
+        }
+        Integer score = item.getScore();
+        if (score != null && score < CandidateVacancyMatchAiService.SCORE_THRESHOLD_WEAK_MATCH) {
+            return true;
+        }
+        return false;
     }
 
     @Subscribe
@@ -910,11 +952,6 @@ public class CandidateVacancyMatchScreen extends Screen {
                         String.format("Проанализировано объектов: %d, сформировано рекомендаций: %d",
                                 report.getTotalVacanciesAnalyzed(), report.getItems().size()));
             }
-        }
-
-        if (!report.getItems().isEmpty()) {
-            matchesTable.setSelected(report.getItems().get(0));
-            populateDetailPane(report.getItems().get(0));
         }
     }
 

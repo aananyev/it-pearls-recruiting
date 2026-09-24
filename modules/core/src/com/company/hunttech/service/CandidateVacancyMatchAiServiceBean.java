@@ -234,7 +234,7 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
                     missingItem.setExperienceFit(0);
                     missingItem.setPreferencesFit(0);
                     missingItem.setDomainFit(0);
-                    missingItem.setVerdict("Не оценен AI");
+                    missingItem.setVerdict(CandidateVacancyMatchAiService.VERDICT_NOT_EVALUATED);
                     missingItem.setMatchedSkills(Collections.emptyList());
                     missingItem.setMissingCriticalRequirements(Collections.emptyList());
                     missingItem.setRisks(Collections.emptyList());
@@ -918,10 +918,10 @@ public class CandidateVacancyMatchAiServiceBean implements CandidateVacancyMatch
     }
 
     private String resolveVerdict(int score) {
-        if (score >= 80) return "Рекомендуется предложить";
-        if (score >= 65) return "Имеет смысл рассмотреть";
-        if (score >= 45) return "Слабое соответствие";
-        return "Не рекомендуется";
+        if (score >= SCORE_THRESHOLD_RECOMMEND) return VERDICT_RECOMMENDED;
+        if (score >= SCORE_THRESHOLD_CONSIDER) return VERDICT_CONSIDER;
+        if (score >= SCORE_THRESHOLD_WEAK_MATCH) return VERDICT_WEAK_MATCH;
+        return VERDICT_NOT_RECOMMENDED;
     }
 
     private int clamp(int val, int min, int max) {

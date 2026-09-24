@@ -143,6 +143,9 @@
                         <label value="Решение рекрутера:" align="MIDDLE_LEFT"
                                stylename="candidate-vacancy-match-filter-caption"/>
                         <lookupField id="decisionFilter" width="220px" nullOptionVisible="false"/>
+                        <checkBox id="hideIrrelevantCheckBox"
+                                  caption="Не выводить нерелевантных"
+                                  align="MIDDLE_LEFT"/>
                     </hbox>
                 </vbox>
 

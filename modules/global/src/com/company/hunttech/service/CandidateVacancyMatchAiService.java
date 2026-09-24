@@ -43,6 +43,23 @@ public interface CandidateVacancyMatchAiService {
     String PARAM_VACANCIES_JSON = "vacanciesJson";
 
     /**
+     * Пороговые значения оценки соответствия (0..100) по шкале AI-функции CANDIDATE_VACANCY_MATCH_ANALYZE.
+     */
+    int SCORE_THRESHOLD_RECOMMEND = 80;
+    int SCORE_THRESHOLD_CONSIDER = 65;
+    int SCORE_THRESHOLD_WEAK_MATCH = 45;
+
+    /**
+     * Канонические текстовые вердикты AI.
+     */
+    String VERDICT_RECOMMENDED = "Рекомендуется предложить";
+    String VERDICT_CONSIDER = "Имеет смысл рассмотреть";
+    String VERDICT_WEAK_MATCH = "Слабое соответствие";
+    String VERDICT_NOT_RECOMMENDED = "Не рекомендуется";
+    String VERDICT_NOT_RECOMMENDED_CODE = "NOT_RECOMMENDED";
+    String VERDICT_NOT_EVALUATED = "Не оценен AI";
+
+    /**
      * Выполняет глубокий анализ соответствия кандидата всем открытым вакансиям компании.
      *
      * @param candidateId уникальный идентификатор кандидата (JobCandidate)

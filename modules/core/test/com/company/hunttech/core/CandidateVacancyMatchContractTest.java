@@ -234,4 +234,29 @@ public class CandidateVacancyMatchContractTest {
         assertTrue("setCandidate должен безопасно перезагружать кандидата через dataManager",
                 java.contains("this.candidate = dataManager.load(JobCandidate.class)"));
     }
+
+    @Test
+    public void testHideIrrelevantCheckBoxContractAndWiring() throws IOException {
+        Path xmlPath = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/jobcandidate/candidate-vacancy-match-screen.xml");
+        String xml = new String(Files.readAllBytes(xmlPath), StandardCharsets.UTF_8);
+
+        assertTrue("XML должен содержать чекбокс hideIrrelevantCheckBox",
+                xml.contains("id=\"hideIrrelevantCheckBox\""));
+        assertTrue("Чекбокс должен иметь подпись «Не выводить нерелевантных»",
+                xml.contains("caption=\"Не выводить нерелевантных\""));
+
+        Path controllerPath = projectRoot().resolve(
+                "modules/web/src/com/company/hunttech/web/screens/jobcandidate/CandidateVacancyMatchScreen.java");
+        String java = new String(Files.readAllBytes(controllerPath), StandardCharsets.UTF_8);
+
+        assertTrue("Контроллер должен инжектировать hideIrrelevantCheckBox",
+                java.contains("private CheckBox hideIrrelevantCheckBox;"));
+        assertTrue("Контроллер должен подписываться на изменение hideIrrelevantCheckBox",
+                java.contains("hideIrrelevantCheckBox.addValueChangeListener("));
+        assertTrue("Контроллер должен содержать метод isNotRecommended",
+                java.contains("public static boolean isNotRecommended(CandidateVacancyMatchItem item)"));
+        assertTrue("applyFilter должен учитывать hideIrrelevantCheckBox",
+                java.contains("boolean hideIrrelevant = hideIrrelevantCheckBox != null && Boolean.TRUE.equals(hideIrrelevantCheckBox.getValue());"));
+    }
 }
