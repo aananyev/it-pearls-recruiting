@@ -439,6 +439,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Install(to = "jobHistoriesTable.period", subject = "columnGenerator")
     private Component jobHistoriesTablePeriodColumnGenerator(JobHistory jobHistory) {
         Label<String> label = uiComponents.create(Label.TYPE_STRING);
+        label.setStyleName("candidate-period-label");
         SimpleDateFormat sdf = new SimpleDateFormat("MM.yyyy");
         String start = jobHistory.getStartDate() != null ? sdf.format(jobHistory.getStartDate()) : "";
         String end = jobHistory.getEndDate() != null ? sdf.format(jobHistory.getEndDate())
@@ -460,7 +461,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 ? jobHistory.getCurrentCompany().getComanyName()
                 : (jobHistory.getRawCompanyName() != null ? jobHistory.getRawCompanyName() : "—");
         label.setValue(name);
-        label.setStyleName("bold");
+        label.setStyleName("bold candidate-company-label");
         return label;
     }
 
@@ -471,6 +472,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 ? jobHistory.getCurrentPosition().getPositionRuName()
                 : (jobHistory.getRawPositionName() != null ? jobHistory.getRawPositionName() : "—");
         label.setValue(pos);
+        label.setStyleName("candidate-position-label");
         return label;
     }
 

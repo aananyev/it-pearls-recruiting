@@ -893,9 +893,33 @@
       width: 100% !important;
       height: 100% !important;
 
-      .v-table-cell-wrapper {
-        padding: 6px 10px;
-        line-height: 20px;
+      .v-table-row,
+      .v-table-row-odd {
+        min-height: 57px !important;
+      }
+
+      .v-table-cell-content {
+        min-height: 57px !important;
+        padding: 8px 12px !important;
+        line-height: 1.4 !important;
+        vertical-align: middle !important;
+      }
+
+      .candidate-period-label {
+        font-weight: 600 !important;
+        font-size: 12.5px !important;
+        color: mix($v-font-color, $v-panel-background-color, 75%) !important;
+        white-space: nowrap !important;
+      }
+
+      .candidate-company-label {
+        font-size: 13px !important;
+        color: $v-font-color !important;
+      }
+
+      .candidate-position-label {
+        font-size: 13px !important;
+        color: mix($v-font-color, $v-panel-background-color, 85%) !important;
       }
     }
 

@@ -604,26 +604,26 @@
                                 caption="msg://msgSmartParseWorkExperience"
                                 icon="font-icon:MAGIC"
                                 invoke="smartExtractWorkExperience"
-                                stylename="primary candidate-cv-editor-primary-action"/>
+                                stylename="primary candidate-cv-editor-primary-action candidate-btn"/>
                         <button id="createJobHistoryBtn"
                                 action="jobHistoriesTable.create"
                                 caption="msg://msgAddWorkExperience"
                                 icon="font-icon:PLUS"
-                                stylename="candidate-cv-editor-action"/>
+                                stylename="secondary candidate-btn candidate-cv-editor-action"/>
                         <button id="editJobHistoryBtn"
                                 action="jobHistoriesTable.edit"
                                 caption="msg://msgEditWorkExperience"
                                 icon="font-icon:PENCIL"
-                                stylename="candidate-cv-editor-action"/>
+                                stylename="secondary candidate-btn candidate-cv-editor-action"/>
                         <button id="removeJobHistoryBtn"
                                 action="jobHistoriesTable.remove"
                                 caption="msg://msgRemoveWorkExperience"
                                 icon="font-icon:TRASH"
-                                stylename="candidate-cv-editor-action"/>
+                                stylename="secondary candidate-btn candidate-cv-editor-action"/>
                         <button id="refreshJobHistoryBtn"
                                 action="jobHistoriesTable.refresh"
                                 icon="font-icon:REFRESH"
-                                stylename="candidate-cv-editor-action"/>
+                                stylename="secondary candidate-btn candidate-cv-editor-action"/>
                     </hbox>
                     <!-- Карточка таблицы опыта работы в эталонном стиле реестров -->
                     <vbox id="jobHistoriesTableCard"
@@ -632,6 +632,10 @@
                           spacing="false"
                           stylename="edit-card candidate-table-card"
                           expand="jobHistoriesTable">
+                        <!-- Заголовок карточки -->
+                        <hbox width="100%" stylename="candidate-table-card-header" spacing="true" align="MIDDLE_LEFT">
+                            <label value="msg://msgTabJobHistory" stylename="h4 bold candidate-table-card-title"/>
+                        </hbox>
                         <table id="jobHistoriesTable"
                                width="100%"
                                height="100%"
@@ -644,10 +648,10 @@
                                 <action id="refresh" type="refresh"/>
                             </actions>
                             <columns>
-                                <column id="period" caption="msg://msgJobPeriod"/>
-                                <column id="companyName" caption="msg://msgJobCompany"/>
-                                <column id="positionName" caption="msg://msgJobPosition"/>
-                                <column id="duties" caption="msg://msgJobDuties" maxTextLength="150"/>
+                                <column id="period" caption="msg://msgJobPeriod" width="160px" align="CENTER"/>
+                                <column id="companyName" caption="msg://msgJobCompany" width="240px"/>
+                                <column id="positionName" caption="msg://msgJobPosition" width="240px"/>
+                                <column id="duties" caption="msg://msgJobDuties" expandRatio="1" maxTextLength="400"/>
                             </columns>
                             <rowsCount/>
                         </table>
