@@ -35,7 +35,7 @@ import java.util.Map;
 public class CandidateContactsEnrichmentMonitoring extends Screen {
 
     @Inject
-    private CandidateContactEnrichmentService enrichmentService;
+    private CandidateContactEnrichmentService candidateContactEnrichmentService;
     @Inject
     private Messages messages;
     @Inject
@@ -256,9 +256,9 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
         }
         isRefreshing = true;
         try {
-            freeOnlyCheckBox.setValue(enrichmentService.isFreeOnly());
+            freeOnlyCheckBox.setValue(candidateContactEnrichmentService.isFreeOnly());
 
-            CandidateContactsEnrichmentKpiDto kpi = enrichmentService.getKpiMetrics();
+            CandidateContactsEnrichmentKpiDto kpi = candidateContactEnrichmentService.getKpiMetrics();
 
             // 1. Верхние бейджи
             if (kpi.isWorkerEnabled()) {
@@ -394,7 +394,7 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
     public void onFreeOnlyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (!isInitialized || !event.isUserOriginated()) return;
         boolean val = Boolean.TRUE.equals(event.getValue());
-        enrichmentService.setFreeOnly(val);
+        candidateContactEnrichmentService.setFreeOnly(val);
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Настройки AI обновлены")
                 .withDescription(val ? "Режим FREE ONLY активен: только бесплатные модели" : "Разрешено использование всех моделей (fallback)")
@@ -403,7 +403,7 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
 
     @Subscribe("startWorkerBtn")
     public void onStartWorkerBtnClick(Button.ClickEvent event) {
-        enrichmentService.setWorkerEnabled(true);
+        candidateContactEnrichmentService.setWorkerEnabled(true);
         refreshDashboard(false);
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Служба CandidateContactsEnrichmentWorker включена")
@@ -412,7 +412,7 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
 
     @Subscribe("stopWorkerBtn")
     public void onStopWorkerBtnClick(Button.ClickEvent event) {
-        enrichmentService.setWorkerEnabled(false);
+        candidateContactEnrichmentService.setWorkerEnabled(false);
         refreshDashboard(false);
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Служба CandidateContactsEnrichmentWorker остановлена")
@@ -421,7 +421,7 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
 
     @Subscribe("runOnceBtn")
     public void onRunOnceBtnClick(Button.ClickEvent event) {
-        enrichmentService.runSingleCycleNow();
+        candidateContactEnrichmentService.runSingleCycleNow();
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Запущен 1 шаг анализа контактов")
                 .show();
@@ -459,7 +459,7 @@ public class CandidateContactsEnrichmentMonitoring extends Screen {
             return;
         }
         if (selected.getCandidateCv() != null) {
-            enrichmentService.reprocessCv(selected.getCandidateCv().getId());
+            candidateContactEnrichmentService.reprocessCv(selected.getCandidateCv().getId());
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Резюме поставлено в начало очереди для повтора")
                     .show();

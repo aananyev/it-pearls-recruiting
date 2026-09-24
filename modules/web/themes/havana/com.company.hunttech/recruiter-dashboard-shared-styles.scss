@@ -322,22 +322,60 @@
     border-radius: 7px;
   }
 
-  .recruiter-dashboard-root .recruiter-kanban-board {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    align-items: start;
+  .recruiter-dashboard-root .recruiter-kanban-header-bar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
     width: 100% !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-filter-controls {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kpi-badge {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: $recruiter-dashboard-muted !important;
+    margin-left: auto !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-scroll {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 560px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 6px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-board {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+    width: auto !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .recruiter-dashboard-root .recruiter-kanban-column {
     box-sizing: border-box;
-    min-width: 0 !important;
+    min-width: 290px !important;
+    width: 300px !important;
+    flex: 0 0 300px !important;
     padding: 10px;
     background: mix($v-app-background-color, $v-panel-background-color, 38%);
     border: 1px solid $recruiter-dashboard-subtle-border;
     border-top: 3px solid rgba($v-font-color, 0.28);
     border-radius: 8px;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .recruiter-dashboard-root .recruiter-stage-new { border-top-color: #64748b; }
@@ -371,6 +409,14 @@
     border-radius: 12px;
   }
 
+  .recruiter-dashboard-root .recruiter-kanban-column-scroll {
+    height: 540px !important;
+    max-height: 560px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 4px !important;
+  }
+
   .recruiter-dashboard-root .recruiter-kanban-card {
     box-sizing: border-box;
     padding: 10px 12px;
@@ -386,6 +432,17 @@
     font-weight: 700 !important;
   }
 
+  .recruiter-dashboard-root .recruiter-kanban-position-badge {
+    display: inline-block !important;
+    background: rgba($recruiter-dashboard-accent, 0.12) !important;
+    color: mix($recruiter-dashboard-accent, $v-font-color, 75%) !important;
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    margin-top: 2px !important;
+  }
+
   .recruiter-dashboard-root .recruiter-kanban-vacancy,
   .recruiter-dashboard-root .recruiter-kanban-interaction,
   .recruiter-dashboard-root .recruiter-kanban-date {
@@ -397,6 +454,13 @@
 
   .recruiter-dashboard-root .recruiter-kanban-interaction {
     color: mix($recruiter-dashboard-accent, $v-font-color, 58%) !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-card-btn {
+    margin-top: 6px !important;
+    height: 28px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
   }
 
   .recruiter-dashboard-root .recruiter-funnel-content {
@@ -501,11 +565,6 @@
   }
 
   @media (max-width: 1366px) {
-    .recruiter-dashboard-root .recruiter-kanban-board {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
     .recruiter-dashboard-root .recruiter-funnel-content {
       display: block !important;
     }
@@ -517,10 +576,6 @@
   }
 
   @media (max-width: 900px) {
-    .recruiter-dashboard-root .recruiter-kanban-board {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
     .recruiter-dashboard-root .recruiter-kpi-card {
       min-width: calc(50% - 8px);
     }

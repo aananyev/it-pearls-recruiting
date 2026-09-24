@@ -334,10 +334,49 @@
     }
 
     /* Dashboard Tables & DataGrids */
+    &.c-data-grid-composition,
+    .c-data-grid-composition.ai-dashboard-table,
+    .ai-dashboard-table.c-data-grid-composition {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      height: 520px !important;
+      min-height: 480px !important;
+      box-sizing: border-box !important;
+
+      .c-data-grid-top {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-shrink: 0 !important;
+        height: auto !important;
+        min-height: 28px !important;
+        padding: 4px 8px !important;
+        box-sizing: border-box !important;
+
+        .c-table-rows-count,
+        .c-paging,
+        .v-slot-c-table-rows-count {
+          margin-left: auto !important;
+          align-self: center !important;
+        }
+      }
+
+      & > .v-grid {
+        display: block !important;
+        flex: 1 1 auto !important;
+        height: 100% !important;
+        min-height: 440px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+    }
+
     .ai-dashboard-table {
       border: 1px solid $ht-border-subtle !important;
       border-radius: 8px !important;
       width: 100% !important;
+      min-height: 440px !important;
 
       .v-table-header-wrap,
       .v-grid-header {

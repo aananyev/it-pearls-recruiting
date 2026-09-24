@@ -6,16 +6,26 @@
             spacing="true"
             width="100%"
             height="100%">
-        <!-- Заголовок объясняет назначение операционного представления. -->
-        <vbox id="headerBox" spacing="false" width="100%">
-            <!-- Основной заголовок апплета. -->
-            <label value="Кандидаты в работе" stylename="widget-table-header"/>
-            <!-- Период и число найденных кейсов заполняются контроллером после bulk-загрузки. -->
-            <label id="periodLabel" stylename="recruiter-dashboard-subtitle"/>
-        </vbox>
+        <!-- Верхняя панель: заголовок и компактные фильтры управления -->
+        <hbox id="headerBar" width="100%" spacing="true" alignment="MIDDLE_LEFT" stylename="recruiter-kanban-header-bar">
+            <vbox id="headerBox" spacing="false" width="100%">
+                <!-- Основной заголовок апплета. -->
+                <label value="Кандидаты в работе (Kanban)" stylename="widget-table-header"/>
+                <!-- Период и число найденных кейсов заполняются контроллером после bulk-загрузки. -->
+                <label id="periodLabel" stylename="recruiter-dashboard-subtitle"/>
+            </vbox>
+            <hbox id="filterControlsBox" spacing="true" alignment="MIDDLE_RIGHT" stylename="recruiter-kanban-filter-controls">
+                <lookupField id="recruiterLookupField" nullOptionVisible="false" width="220px"/>
+                <radioButtonGroup id="periodRadioGroup" orientation="horizontal"/>
+                <textField id="searchField" placeholder="Поиск кандидата..." width="180px"/>
+                <button id="refreshBtn" icon="REFRESH"/>
+            </hbox>
+        </hbox>
         <!-- KPI-панель показывает распределение текущих кейсов по ключевым этапам. -->
         <hbox id="kpiBar" width="100%" spacing="true" stylename="recruiter-kpi-bar"/>
-        <!-- CSS-grid обеспечивает адаптивные колонки Kanban без глобального horizontal scroll. -->
-        <cssLayout id="kanbanBoard" width="100%" stylename="recruiter-kanban-board"/>
+        <!-- Горизонтальная прокрутка колонок Kanban -->
+        <scrollBox id="kanbanScrollBox" width="100%" height="100%" orientation="horizontal" scrollBars="horizontal" stylename="recruiter-kanban-scroll">
+            <hbox id="kanbanBoard" width="AUTO" height="100%" spacing="true" stylename="recruiter-kanban-board"/>
+        </scrollBox>
     </layout>
 </fragment>

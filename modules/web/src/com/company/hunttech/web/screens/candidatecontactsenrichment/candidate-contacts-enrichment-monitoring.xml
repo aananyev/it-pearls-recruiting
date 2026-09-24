@@ -99,7 +99,7 @@
             </hbox>
 
             <!-- Карточка таблицы аудита и истории -->
-            <vbox id="tableSectionCard" width="100%" spacing="true" stylename="ai-table-card">
+            <vbox id="tableSectionCard" width="100%" minHeight="560px" spacing="true" stylename="ai-table-card">
                 <!-- Верхняя строка фильтра таблицы -->
                 <hbox id="tableFilterRow" width="100%" spacing="true" alignment="MIDDLE_LEFT" stylename="ai-table-filter-bar">
                     <label value="msg://historyTableTitle" stylename="ai-card-header h2 bold" width="100%"/>
@@ -121,6 +121,7 @@
                 <dataGrid id="analysesTable"
                           width="100%"
                           height="520px"
+                          minHeight="480px"
                           stylename="ai-dashboard-table"
                           dataContainer="analysesDc"
                           selectionMode="SINGLE">

@@ -1531,7 +1531,7 @@
                                               descriptionAsHtml="true"
                                               captionAsHtml="true"
                                               stylename="borderless grid candidate-browse-grid job-candidate-resume-grid"
-                                              bodyRowHeight="55px"
+                                              bodyRowHeight="38px"
                                               dataContainer="jobCandidateCandidateCvsDc">
                                         <columns>
                                             <!-- Логотип проекта (рендер компонентом). -->
@@ -1596,6 +1596,7 @@
                                             <button id="scanContactsFromCVButton" caption="msg://msgScan" enable="false"
                                                     invoke="scanContactsFromCVs"/>
                                         </buttonsPanel>
+                                        <rowsCount/>
                                     </dataGrid>
                                 </vbox>
 
