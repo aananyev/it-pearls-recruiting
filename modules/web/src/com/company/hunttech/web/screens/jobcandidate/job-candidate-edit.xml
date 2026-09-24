@@ -1275,42 +1275,48 @@
                                     <!-- Карточка истории рассмотрения: таблица последних проектов кандидата. -->
                                     <vbox id="jobCandidatePositionHistory"
                                           width="100%" height="100%"
-                                          spacing="true"
+                                          spacing="false"
                                           box.expandRatio="1"
-                                          stylename="job-candidate-card job-candidate-position-column edit-card">
+                                          expand="lastProjectTable"
+                                          stylename="edit-card candidate-table-card">
+                                        <!-- Заголовок карточки -->
+                                        <hbox width="100%" stylename="candidate-table-card-header" spacing="true" align="MIDDLE_LEFT">
+                                            <label value="msg://msgPositionHistoryTitle" stylename="h4 bold candidate-table-card-title"/>
+                                        </hbox>
                                         <!-- Таблица последних проектов: №, вакансия, дата, взаимодействия,
                                              исследователь, рекрутер, кнопка просмотра взаимодействий. -->
                                         <table id="lastProjectTable"
                                                width="100%"
                                                height="100%"
-                                               stylename="borderless grid candidate-browse-grid no-horizontal-lines"
+                                               stylename="borderless grid candidate-browse-grid"
                                                editable="false"
                                                contextMenuEnabled="false"
                                                dataContainer="lastProjectDc">
                                             <columns>
                                                 <!-- Порядковый номер (генерируется контроллером). -->
-                                                <column id="number" width="30px" caption="№"
-                                                        generator="lastIteractionCount"/>
-                                                <!-- Вакансия (название, с ограничением длины). -->
-                                                <column id="vacancy" width="300px" maxTextLength="40"
+                                                <column id="number" width="40px" caption="№"
+                                                        generator="lastIteractionCount" align="CENTER"/>
+                                                <!-- Вакансия (название, с адаптивной шириной). -->
+                                                <column id="vacancy" expandRatio="1" maxTextLength="120"
                                                         caption="msg://msgVacancy"/>
                                                 <!-- Дата последнего взаимодействия. -->
-                                                <column id="max" width="70px" caption="msg://msgDate"/>
+                                                <column id="max" width="85px" caption="msg://msgDate" align="CENTER"/>
                                                 <!-- Последнее взаимодействие (генерируется контроллером). -->
-                                                <column id="lastInteraction" width="200px" maxTextLength="40"
+                                                <column id="lastInteraction" width="180px"
                                                         caption="msg://msgLastInteraction"
                                                         generator="lastInteractionGeneratorColumn"/>
                                                 <!-- Исследователь по вакансии (генератор). -->
-                                                <column id="researcher" width="100px" caption="msg://msgResearcher"
+                                                <column id="researcher" width="120px" caption="msg://msgResearcher"
                                                         generator="whoIsResearcherGeneratorColumn"/>
                                                 <!-- Рекрутер по вакансии (генератор). -->
-                                                <column id="recruter" width="100px" caption="msg://msgRecruter"
+                                                <column id="recruter" width="120px" caption="msg://msgRecruter"
                                                         generator="whoIsRecruterGeneratorColumn"/>
                                                 <!-- Кнопка просмотра взаимодействий по вакансии (генератор). -->
-                                                <column id="idViewIteractionsButton" width="100px"
+                                                <column id="idViewIteractionsButton" width="110px"
                                                         caption="msg://msgInteractionsView"
-                                                        generator="addInteractionsViewButton"/>
+                                                        generator="addInteractionsViewButton" align="CENTER"/>
                                             </columns>
+                                            <rowsCount/>
                                         </table>
                                     </vbox>
 
@@ -1318,26 +1324,32 @@
                                     <!-- Карточка подходящих вакансий: таблица открытых вакансий. -->
                                     <vbox id="jobCandidateSuitableVacancies"
                                           width="100%" height="100%"
-                                          spacing="true"
+                                          spacing="false"
                                           box.expandRatio="1"
-                                          stylename="job-candidate-card job-candidate-position-column edit-card">
+                                          expand="suggestVacancyTable"
+                                          stylename="edit-card candidate-table-card">
+                                        <!-- Заголовок карточки -->
+                                        <hbox width="100%" stylename="candidate-table-card-header" spacing="true" align="MIDDLE_LEFT">
+                                            <label value="msg://msgSuitableVacanciesTitle" stylename="h4 bold candidate-table-card-title"/>
+                                        </hbox>
                                         <!-- Таблица подходящих вакансий (статус отправки + название). -->
                                         <table id="suggestVacancyTable"
                                                contextMenuEnabled="false"
                                                width="100%"
                                                height="100%"
                                                editable="false"
-                                               stylename="borderless grid candidate-browse-grid no-horizontal-lines"
+                                               stylename="borderless grid candidate-browse-grid"
                                                dataContainer="suggestOpenPositionDc">
                                             <columns>
                                                 <!-- Индикатор статуса (отправлено/нет). -->
                                                 <column id="notSendedIconColumn" caption="msg://msgStatus"
-                                                        width="20px"/>
+                                                        width="45px" align="CENTER"/>
                                                 <!-- Название вакансии с HTML-разметкой в капшне. -->
-                                                <column id="vacansyName" captionAsHtml="true" maxTextLength="60"
+                                                <column id="vacansyName" captionAsHtml="true"
+                                                        expandRatio="1" maxTextLength="120"
                                                         caption="msg://msgSuggestVacansies"/>
                                             </columns>
-                                            <rows/>
+                                            <rowsCount/>
                                         </table>
                                     </vbox>
 

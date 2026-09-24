@@ -1157,6 +1157,22 @@
     box-sizing: border-box !important;
   }
 
+  .candidate-table-card-header {
+    padding: 9px 14px !important;
+    background: mix($v-app-background-color, $v-panel-background-color, 45%) !important;
+    border-bottom: 1px solid rgba($v-font-color, 0.12) !important;
+    box-sizing: border-box !important;
+
+    .candidate-table-card-title {
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.04em !important;
+      text-transform: uppercase !important;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      margin: 0 !important;
+    }
+  }
+
   .v-slot-candidate-table-card,
   .v-slot-candidate-cv-table-card {
     box-sizing: border-box !important;
@@ -1179,6 +1195,39 @@
     min-width: 0 !important;
     border: none !important;
     background: transparent !important;
+
+    /* Компактные кнопки внутри ячеек таблиц (например, «Просмотр») */
+    .candidate-table-btn.v-button {
+      height: 28px !important;
+      min-height: 28px !important;
+      padding: 0 10px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      border-radius: 5px !important;
+    }
+
+    /* Индикаторы статуса подходящих вакансий (h2-green, h2-blue, h2-red) */
+    .v-table-cell-content,
+    .v-grid-cell {
+      .h2-green {
+        color: #10b981 !important;
+        font-size: $v-font-size--h2 !important;
+        font-weight: bold !important;
+        display: inline-block !important;
+      }
+      .h2-blue {
+        color: #3b82f6 !important;
+        font-size: $v-font-size--h2 !important;
+        font-weight: bold !important;
+        display: inline-block !important;
+      }
+      .h2-red {
+        color: #ef4444 !important;
+        font-size: $v-font-size--h2 !important;
+        font-weight: bold !important;
+        display: inline-block !important;
+      }
+    }
 
     .v-grid-tablewrapper {
       border: none !important;

@@ -929,8 +929,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         List<Position> positions = new ArrayList<>();
 
         suggestVacancyTable.addStyleName("borderless");
-        suggestVacancyTable.addStyleName("no-horizontal-lines");
-        suggestVacancyTable.addStyleName("no-vertical-lines");
+        suggestVacancyTable.addStyleName("grid");
+        suggestVacancyTable.addStyleName("candidate-browse-grid");
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             List<JobCandidatePositionLists> positionListsForSuggest = ensurePositionListLoaded();
@@ -965,8 +965,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setLastProjectOfCandidate() {
         lastProjectTable.addStyleName("borderless");
-        lastProjectTable.addStyleName("no-horizontal-lines");
-        lastProjectTable.addStyleName("no-vertical-lines");
+        lastProjectTable.addStyleName("grid");
+        lastProjectTable.addStyleName("candidate-browse-grid");
     }
 
     private void checkContactsCandidateListener() {
@@ -4080,6 +4080,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public Component addInteractionsViewButton(Entity entity) {
         Button retButton = uiComponents.create(Button.NAME);
         retButton.setCaption("Просмотр");
+        retButton.setStyleName("secondary small candidate-table-btn");
+        retButton.setIconFromSet(CubaIcon.EYE);
 
         retButton.setAction(new BaseAction("listIteraction")
                 .withHandler(actionPerformedEvent -> {
