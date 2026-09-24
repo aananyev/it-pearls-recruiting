@@ -14,12 +14,18 @@ import com.company.hunttech.service.CandidateVacancyWorkflowService;
 import com.company.hunttech.service.dto.CandidateSkillsScanResult;
 import com.company.hunttech.service.dto.BulkTakeIntoWorkResult;
 import com.company.hunttech.service.dto.TakeIntoWorkResult;
+import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.entity.PersonelReserve;
+import com.company.hunttech.entity.Position;
 import com.company.hunttech.web.screens.candidatevacancymatch.CandidateOutreachDraftDialog;
 import com.company.hunttech.web.screens.candidatevacancymatch.RejectCandidateMatchDialog;
 import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
 import com.company.hunttech.web.screens.openposition.OpenPositionEdit;
+import com.company.hunttech.web.screens.personelreserve.PersonelReserveEdit;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -110,6 +116,9 @@ public class CandidateVacancyMatchScreen extends Screen {
     @Inject
     private UiComponents uiComponents;
 
+    @Inject
+    private UserSession userSession;
+
     /* Top Bar Components */
     @Inject
     private CollectionContainer<CandidateVacancyMatchItem> matchesDc;
@@ -122,6 +131,9 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     @Inject
     private Label<String> subTitleLabel;
+
+    @Inject
+    private Label<String> resultsTitleLabel;
 
     @Inject
     private ProgressBar analysisProgressBar;
@@ -168,6 +180,12 @@ public class CandidateVacancyMatchScreen extends Screen {
     /* Toolbar Action Buttons */
     @Inject
     private Button takeIntoWorkBtn;
+
+    @Inject
+    private Button addToReserveBtn;
+
+    @Inject
+    private Button quickAddToReserveBtn;
 
     @Inject
     private Button createInteractionBtn;
@@ -234,6 +252,45 @@ public class CandidateVacancyMatchScreen extends Screen {
     private VBoxLayout scoresBox;
 
     @Inject
+    private VBoxLayout interactionHistorySectionBox;
+
+    @Inject
+    private Label<String> historyHeaderTitle;
+
+    @Inject
+    private Label<String> historyWeightAdjustmentBadge;
+
+    @Inject
+    private Label<String> historyAnalysisSummaryLabel;
+
+    @Inject
+    private VBoxLayout interviewsSubBox;
+
+    @Inject
+    private Label<String> interviewsCountBadge;
+
+    @Inject
+    private Label<String> interviewsListLabel;
+
+    @Inject
+    private VBoxLayout employerRejectionsSubBox;
+
+    @Inject
+    private Label<String> employerRejectionsCountBadge;
+
+    @Inject
+    private Label<String> employerRejectionsListLabel;
+
+    @Inject
+    private VBoxLayout candidateRefusalsSubBox;
+
+    @Inject
+    private Label<String> candidateRefusalsCountBadge;
+
+    @Inject
+    private Label<String> candidateRefusalsListLabel;
+
+    @Inject
     private Label<String> roleFitLabel;
 
     @Inject
@@ -277,6 +334,21 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     @Inject
     private VBoxLayout summaryBox;
+
+    @Inject
+    private VBoxLayout salaryFitBox;
+
+    @Inject
+    private Label<String> salaryFitBadge;
+
+    @Inject
+    private Label<String> candidateSalaryDetailLabel;
+
+    @Inject
+    private Label<String> vacancySalaryDetailLabel;
+
+    @Inject
+    private Label<String> salaryFitDetailLabel;
 
     @Inject
     private Label<String> summaryTextLabel;
@@ -339,23 +411,6 @@ public class CandidateVacancyMatchScreen extends Screen {
             return label;
         });
 
-        matchesTable.addGeneratedColumn("recruiterDecisionDisplay", item -> {
-            Label<String> label = uiComponents.create(Label.TYPE_STRING);
-            String dec = item.getRecruiterDecision();
-            if (dec == null || dec.trim().isEmpty() || "—".equals(dec)) {
-                label.setValue("<span style='color: #6c757d;'>—</span>");
-            } else if ("В работе".equalsIgnoreCase(dec) || "IN_WORK".equalsIgnoreCase(dec)) {
-                label.setValue("<span style='background-color: #28a745; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>В работе</span>");
-            } else if ("Отложен".equalsIgnoreCase(dec) || "POSTPONED".equalsIgnoreCase(dec)) {
-                label.setValue("<span style='background-color: #fd7e14; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>Отложен</span>");
-            } else if ("Не подходит".equalsIgnoreCase(dec) || "REJECTED".equalsIgnoreCase(dec)) {
-                label.setValue("<span style='background-color: #dc3545; color: white; font-weight: bold; padding: 2px 6px; border-radius: 3px;'>Не подходит</span>");
-            } else {
-                label.setValue(escapeHtml(dec));
-            }
-            label.setHtmlEnabled(true);
-            return label;
-        });
 
         matchesTable.addGeneratedColumn("verdict", item -> {
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
@@ -396,6 +451,40 @@ public class CandidateVacancyMatchScreen extends Screen {
             }
             return label;
         });
+        matchesTable.addGeneratedColumn("recruiterDecision", item -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            label.setHtmlEnabled(true);
+            String dec = item.getRecruiterDecision();
+            String bg;
+            String color;
+            String text;
+            if ("В работе".equalsIgnoreCase(dec) || "IN_WORK".equalsIgnoreCase(dec)) {
+                bg = "rgba(39, 174, 96, 0.15)";
+                color = "#27ae60";
+                text = "🟢 В работе";
+            } else if ("В резерве".equalsIgnoreCase(dec) || "RESERVE".equalsIgnoreCase(dec)) {
+                bg = "rgba(142, 68, 173, 0.15)";
+                color = "#8e44ad";
+                text = "🟣 В резерве";
+            } else if ("Отложен".equalsIgnoreCase(dec) || "POSTPONED".equalsIgnoreCase(dec)) {
+                bg = "rgba(243, 156, 18, 0.15)";
+                color = "#f39c12";
+                text = "🟡 Отложен";
+            } else if ("Не подходит".equalsIgnoreCase(dec) || "REJECTED".equalsIgnoreCase(dec)) {
+                bg = "rgba(231, 76, 60, 0.15)";
+                color = "#e74c3c";
+                text = "🔴 Не подходит";
+            } else {
+                bg = "rgba(128, 128, 128, 0.12)";
+                color = "#7f8c8d";
+                text = "⚪ Новый";
+            }
+            label.setValue(String.format(
+                    "<span style='background: %s; color: %s; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-block; border: 1px solid %s;'>%s</span>",
+                    bg, color, color, text
+            ));
+            return label;
+        });
     }
 
     private void initDecisionFilter() {
@@ -403,6 +492,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         options.put("Все", "ALL");
         options.put("Не обработаны рекрутером", "UNPROCESSED");
         options.put("В работе", "IN_WORK");
+        options.put("В резерве", "RESERVE");
         options.put("Отложены", "POSTPONED");
         options.put("Не подходят", "REJECTED");
         decisionFilter.setOptionsMap(options);
@@ -422,6 +512,8 @@ public class CandidateVacancyMatchScreen extends Screen {
             stream = stream.filter(it -> it.getRecruiterDecision() == null || it.getRecruiterDecision().trim().isEmpty() || "—".equals(it.getRecruiterDecision()));
         } else if ("IN_WORK".equalsIgnoreCase(filterKey)) {
             stream = stream.filter(it -> "В работе".equalsIgnoreCase(it.getRecruiterDecision()) || "IN_WORK".equalsIgnoreCase(it.getRecruiterDecision()));
+        } else if ("RESERVE".equalsIgnoreCase(filterKey)) {
+            stream = stream.filter(it -> "В резерве".equalsIgnoreCase(it.getRecruiterDecision()) || "RESERVE".equalsIgnoreCase(it.getRecruiterDecision()));
         } else if ("POSTPONED".equalsIgnoreCase(filterKey)) {
             stream = stream.filter(it -> "Отложен".equalsIgnoreCase(it.getRecruiterDecision()) || "POSTPONED".equalsIgnoreCase(it.getRecruiterDecision()));
         } else if ("REJECTED".equalsIgnoreCase(filterKey)) {
@@ -476,6 +568,10 @@ public class CandidateVacancyMatchScreen extends Screen {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if (mode == Mode.CANDIDATE_TO_VACANCIES && candidate != null) {
+            getWindow().setCaption("Интеллектуальный поиск вакансий для кандидата");
+            if (resultsTitleLabel != null) {
+                resultsTitleLabel.setValue("Подходящие открытые вакансии");
+            }
             String fio = candidate.getFullName() != null ? candidate.getFullName() : "Кандидат";
             mainTitleLabel.setValue("Кандидат: " + fio);
 
@@ -488,9 +584,14 @@ public class CandidateVacancyMatchScreen extends Screen {
                 sub.append("📍 ").append(candidate.getCityOfResidence().getCityRuName());
             }
             subTitleLabel.setValue(sub.toString());
-            openEntityBtn.setCaption("Открыть вакансию");
+            openEntityBtn.setDescription("Открыть вакансию — Просмотреть подробную карточку вакансии");
+            openEntityBtn.setCaption(null);
             startAnalysis();
         } else if (mode == Mode.VACANCY_TO_CANDIDATES && openPosition != null) {
+            getWindow().setCaption("AI-поиск кандидатов на вакансию");
+            if (resultsTitleLabel != null) {
+                resultsTitleLabel.setValue("Подходящие кандидаты");
+            }
             String vacName = openPosition.getVacansyName() != null ? openPosition.getVacansyName() : "Вакансия";
             mainTitleLabel.setValue("Вакансия: " + vacName);
 
@@ -503,7 +604,8 @@ public class CandidateVacancyMatchScreen extends Screen {
                 sub.append("📍 ").append(openPosition.getCityPosition().getCityRuName());
             }
             subTitleLabel.setValue(sub.toString());
-            openEntityBtn.setCaption("Открыть кандидата");
+            openEntityBtn.setDescription("Открыть кандидата — Просмотреть подробную анкету кандидата");
+            openEntityBtn.setCaption(null);
             startAnalysis();
         } else {
             statusLabel.setValue("Объект для AI-подбора не выбран.");
@@ -527,6 +629,9 @@ public class CandidateVacancyMatchScreen extends Screen {
     private void startCandidateVacancyAnalysis() {
         currentMatchOperationId = UUID.randomUUID();
         analysisStartedAtMillis = System.currentTimeMillis();
+        progressStepSkillsLabel.setValue("1  Навыки");
+        progressStepVacanciesLabel.setValue("2  Открытые вакансии");
+        progressStepAiLabel.setValue("3  AI-сопоставление");
         skillRefreshStatusBox.setVisible(true);
         skillRefreshStatusLabel.setValue("Проверяем даты резюме и навыков кандидата...");
         setCandidateProgress(CandidateAnalysisStage.CHECKING_SKILLS, 0, "Проверка актуальности навыков");
@@ -679,13 +784,25 @@ public class CandidateVacancyMatchScreen extends Screen {
     private void startVacancyCandidateAnalysis() {
         currentMatchOperationId = UUID.randomUUID();
         final UUID operationId = currentMatchOperationId;
+        analysisStartedAtMillis = System.currentTimeMillis();
         skillRefreshStatusBox.setVisible(false);
         setBusy(true, "AI анализирует профили и формирует ранжированные рекомендации...");
-        analysisProgressBar.setIndeterminate(true);
-        analysisPhaseLabel.setValue("Анализ кандидатов");
-        analysisStepsLabel.setValue("Выполняется AI-сопоставление");
-        analysisPercentLabel.setValue("…");
-        analysisEtaLabel.setValue("Осталось: оценивается");
+        analysisProgressBar.setIndeterminate(false);
+        analysisProgressBar.setValue(0.05);
+        analysisPercentLabel.setValue("5%");
+        analysisPhaseLabel.setValue("Определение должностей");
+        analysisStepsLabel.setValue("Этап 1 из 3 · Должности");
+        statusLabel.setValue("Определение целевых должностей вакансии и сопоставление со справочником...");
+        analysisEtaLabel.setValue("Прошло: 0 сек · Осталось: оценивается");
+
+        progressStepSkillsLabel.setValue("1  Должности вакансии");
+        progressStepVacanciesLabel.setValue("2  Выборка кандидатов");
+        progressStepAiLabel.setValue("3  AI-сопоставление");
+        setProgressStepActive(progressStepSkillsLabel, true);
+        setProgressStepActive(progressStepVacanciesLabel, false);
+        setProgressStepActive(progressStepAiLabel, false);
+
+        analysisProgressTimer.start();
 
         BackgroundTask<Integer, CandidateVacancyMatchReport> task =
                 new BackgroundTask<Integer, CandidateVacancyMatchReport>(240, this) {
@@ -707,16 +824,19 @@ public class CandidateVacancyMatchScreen extends Screen {
 
                     @Override
                     public void done(CandidateVacancyMatchReport report) {
+                        stopAnalysisProgressTimer();
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
                         analysisProgressBar.setValue(1.0);
                         analysisPercentLabel.setValue("100%");
-                        analysisEtaLabel.setValue("Осталось: 0");
+                        long elapsedMillis = Math.max(0, System.currentTimeMillis() - analysisStartedAtMillis);
+                        analysisEtaLabel.setValue("Прошло: " + formatDuration(elapsedMillis) + " · Завершено");
                         handleReport(report);
                     }
 
                     @Override
                     public boolean handleTimeoutException() {
+                        stopAnalysisProgressTimer();
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
                         log.error("Timeout during vacancy-to-candidates matching: operationId={}", operationId);
@@ -730,6 +850,7 @@ public class CandidateVacancyMatchScreen extends Screen {
 
                     @Override
                     public boolean handleException(Exception ex) {
+                        stopAnalysisProgressTimer();
                         setBusy(false, null);
                         analysisProgressBar.setIndeterminate(false);
                         log.error("Vacancy-to-candidates task failed: operationId={}, errorType={}",
@@ -796,7 +917,11 @@ public class CandidateVacancyMatchScreen extends Screen {
 
     @Subscribe("analysisProgressTimer")
     public void onAnalysisProgressTimer(Timer.TimerActionEvent event) {
-        if (currentMatchOperationId == null || mode != Mode.CANDIDATE_TO_VACANCIES) {
+        if (currentMatchOperationId == null) {
+            return;
+        }
+        if (mode == Mode.VACANCY_TO_CANDIDATES) {
+            updateVacancyCandidateProgress(currentMatchOperationId);
             return;
         }
         try {
@@ -836,6 +961,66 @@ public class CandidateVacancyMatchScreen extends Screen {
         } catch (Exception ex) {
             // Не прерываем AI-операцию, если очередной снимок прогресса временно недоступен.
             log.debug("Could not poll candidate-vacancy match progress", ex);
+        }
+    }
+
+    private void updateVacancyCandidateProgress(UUID operationId) {
+        try {
+            CandidateVacancyMatchProgress progress = candidateVacancyMatchAiService
+                    .getVacancyMatchProgress(operationId);
+            long elapsedMillis = Math.max(0, System.currentTimeMillis() - analysisStartedAtMillis);
+            String elapsedFormatted = formatDuration(elapsedMillis);
+
+            if (progress == null) {
+                analysisEtaLabel.setValue("Прошло: " + elapsedFormatted + " · Осталось: оценивается");
+                return;
+            }
+
+            int totalCandidates = progress.getTotalVacancies();
+            int processedCandidates = progress.getProcessedVacancies();
+            String phase = progress.getPhase();
+            String statusMsg = progress.getStatusMessage();
+
+            if (totalCandidates <= 0) {
+                boolean isSelecting = phase != null && (phase.contains("Выборка") || phase.contains("Поиск"));
+                setProgressStepActive(progressStepSkillsLabel, true);
+                setProgressStepActive(progressStepVacanciesLabel, isSelecting);
+                setProgressStepActive(progressStepAiLabel, false);
+
+                int percent = isSelecting ? 15 : 8;
+                analysisProgressBar.setValue(percent / 100.0);
+                analysisPercentLabel.setValue(percent + "%");
+                analysisStepsLabel.setValue(isSelecting ? "Этап 2 из 3 · Выборка кандидатов" : "Этап 1 из 3 · Должности");
+                analysisPhaseLabel.setValue(phase != null ? phase : "Определение должностей");
+                statusLabel.setValue(statusMsg != null ? statusMsg : "Определение целевых должностей и поиск в справочнике...");
+                analysisEtaLabel.setValue("Прошло: " + elapsedFormatted + " · Осталось: оценивается");
+            } else {
+                setProgressStepActive(progressStepSkillsLabel, true);
+                setProgressStepActive(progressStepVacanciesLabel, true);
+                setProgressStepActive(progressStepAiLabel, true);
+
+                int percent = 20 + (int) Math.round(progress.getProgressPercent() * 0.78);
+                percent = Math.max(20, Math.min(99, percent));
+                analysisProgressBar.setValue(percent / 100.0);
+                analysisPercentLabel.setValue(percent + "%");
+
+                analysisStepsLabel.setValue("Этап 3 из 3 · Кандидатов: " + processedCandidates + " из " + totalCandidates);
+                analysisPhaseLabel.setValue(phase != null ? phase : "AI-анализ кандидатов");
+                statusLabel.setValue(statusMsg != null ? statusMsg : "Сопоставление резюме и навыков с вакансией...");
+
+                Long remainingMillis = progress.getEstimatedRemainingMillis();
+                if (remainingMillis != null && remainingMillis > 0) {
+                    analysisEtaLabel.setValue("Прошло: " + elapsedFormatted
+                            + " · Кандидатов: " + processedCandidates + " из " + totalCandidates
+                            + " · Осталось: примерно " + formatDuration(remainingMillis));
+                } else {
+                    analysisEtaLabel.setValue("Прошло: " + elapsedFormatted
+                            + " · Кандидатов: " + processedCandidates + " из " + totalCandidates
+                            + " · Осталось: оценивается");
+                }
+            }
+        } catch (Exception ex) {
+            log.debug("Could not poll vacancy-candidate match progress", ex);
         }
     }
 
@@ -977,8 +1162,10 @@ public class CandidateVacancyMatchScreen extends Screen {
 
         if (count > 1) {
             bulkTakeIntoWorkBtn.setVisible(true);
-            bulkTakeIntoWorkBtn.setCaption("Взять выбранных (" + count + ")");
+            bulkTakeIntoWorkBtn.setDescription("Взять выбранных (" + count + ") — Перевести всех отмеченных кандидатов в работу");
+            bulkTakeIntoWorkBtn.setCaption(null);
             takeIntoWorkBtn.setEnabled(false);
+            addToReserveBtn.setEnabled(false);
             createInteractionBtn.setEnabled(false);
             outreachDraftBtn.setEnabled(false);
             postponeBtn.setEnabled(false);
@@ -987,6 +1174,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         } else if (count == 1) {
             bulkTakeIntoWorkBtn.setVisible(false);
             takeIntoWorkBtn.setEnabled(true);
+            addToReserveBtn.setEnabled(true);
             createInteractionBtn.setEnabled(true);
             outreachDraftBtn.setEnabled(true);
             postponeBtn.setEnabled(true);
@@ -995,6 +1183,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         } else {
             bulkTakeIntoWorkBtn.setVisible(false);
             takeIntoWorkBtn.setEnabled(false);
+            addToReserveBtn.setEnabled(false);
             createInteractionBtn.setEnabled(false);
             outreachDraftBtn.setEnabled(false);
             postponeBtn.setEnabled(false);
@@ -1050,6 +1239,72 @@ public class CandidateVacancyMatchScreen extends Screen {
         domainFitLabel.setValue(String.format("%d / 10", item.getDomainFit() != null ? item.getDomainFit() : 0));
         totalScoreLabel.setValue(String.format("%d / 100", item.getScore() != null ? item.getScore() : 0));
 
+        // Умный анализ истории взаимодействий, собеседований и прошлых отказов
+        boolean hasInterviews = item.getPastInterviews() != null && !item.getPastInterviews().isEmpty();
+        boolean hasEmployerRejections = item.getPastRejectionsEmployerSide() != null && !item.getPastRejectionsEmployerSide().isEmpty();
+        boolean hasCandidateRefusals = item.getPastRejectionsCandidateSide() != null && !item.getPastRejectionsCandidateSide().isEmpty();
+        boolean hasWeight = item.getInteractionWeightAdjustment() != null && item.getInteractionWeightAdjustment() != 0;
+        boolean hasSummary = item.getInteractionHistoryAnalysis() != null && !item.getInteractionHistoryAnalysis().trim().isEmpty();
+
+        boolean hasInteractionAnalysis = hasInterviews || hasEmployerRejections || hasCandidateRefusals || hasWeight || hasSummary;
+
+        if (hasInteractionAnalysis) {
+            interactionHistorySectionBox.setVisible(true);
+
+            // Бейдж весового коэффициента
+            int weight = item.getInteractionWeightAdjustment() != null ? item.getInteractionWeightAdjustment() : 0;
+            String badgeText = (weight > 0 ? "+" : "") + weight + "% к рейтингу";
+            historyWeightAdjustmentBadge.setValue(badgeText);
+
+            historyWeightAdjustmentBadge.removeStyleName("candidate-vacancy-match-weight-positive");
+            historyWeightAdjustmentBadge.removeStyleName("candidate-vacancy-match-weight-negative");
+            historyWeightAdjustmentBadge.removeStyleName("candidate-vacancy-match-weight-neutral");
+            if (weight > 0) {
+                historyWeightAdjustmentBadge.addStyleName("candidate-vacancy-match-weight-positive");
+            } else if (weight < 0) {
+                historyWeightAdjustmentBadge.addStyleName("candidate-vacancy-match-weight-negative");
+            } else {
+                historyWeightAdjustmentBadge.addStyleName("candidate-vacancy-match-weight-neutral");
+            }
+
+            // Аналитическое резюме со структурированным списком
+            if (hasSummary) {
+                historyAnalysisSummaryLabel.setVisible(true);
+                historyAnalysisSummaryLabel.setValue(formatSummaryAsHtml(item.getInteractionHistoryAnalysis()));
+            } else {
+                historyAnalysisSummaryLabel.setVisible(false);
+            }
+
+            // Собеседования и их итоги
+            if (hasInterviews) {
+                interviewsSubBox.setVisible(true);
+                interviewsCountBadge.setValue(String.valueOf(item.getPastInterviews().size()));
+                interviewsListLabel.setValue(formatInterviewsListAsHtml(item.getPastInterviews()));
+            } else {
+                interviewsSubBox.setVisible(false);
+            }
+
+            // Отказы работодателей
+            if (hasEmployerRejections) {
+                employerRejectionsSubBox.setVisible(true);
+                employerRejectionsCountBadge.setValue(String.valueOf(item.getPastRejectionsEmployerSide().size()));
+                employerRejectionsListLabel.setValue(formatRejectionsListAsHtml(item.getPastRejectionsEmployerSide(), false));
+            } else {
+                employerRejectionsSubBox.setVisible(false);
+            }
+
+            // Отказы кандидата
+            if (hasCandidateRefusals) {
+                candidateRefusalsSubBox.setVisible(true);
+                candidateRefusalsCountBadge.setValue(String.valueOf(item.getPastRejectionsCandidateSide().size()));
+                candidateRefusalsListLabel.setValue(formatRejectionsListAsHtml(item.getPastRejectionsCandidateSide(), true));
+            } else {
+                candidateRefusalsSubBox.setVisible(false);
+            }
+        } else {
+            interactionHistorySectionBox.setVisible(false);
+        }
+
         // Reasons to offer
         if (item.getReasonsToOffer() != null && !item.getReasonsToOffer().isEmpty()) {
             reasonsBox.setVisible(true);
@@ -1088,12 +1343,43 @@ public class CandidateVacancyMatchScreen extends Screen {
             risksBox.setVisible(false);
         }
 
-        // Summary
+        // Summary & Salary Fit
+        String candSalary = item.getCandidateSalary();
+        String vacSalary = item.getVacancySalary();
+        String salaryFit = item.getSalaryFitAnalysis();
+        boolean hasSalaryData = (candSalary != null && !candSalary.trim().isEmpty())
+                || (vacSalary != null && !vacSalary.trim().isEmpty())
+                || (salaryFit != null && !salaryFit.trim().isEmpty());
+
+        if (hasSalaryData) {
+            salaryFitBox.setVisible(true);
+            candidateSalaryDetailLabel.setValue(candSalary != null && !candSalary.trim().isEmpty() ? candSalary : "Не указаны");
+            vacancySalaryDetailLabel.setValue(vacSalary != null && !vacSalary.trim().isEmpty() ? vacSalary : "По договоренности / не указано");
+            salaryFitDetailLabel.setValue(item.getSalaryFitDisplay());
+
+            resetSalaryFitBadge();
+
+            String fitStatus = item.getSalaryFitStatus() != null ? item.getSalaryFitStatus() : CandidateVacancyMatchItem.SALARY_FIT_BY_AGREEMENT;
+            salaryFitBadge.setValue(item.getSalaryFitStatusDisplay() != null ? item.getSalaryFitStatusDisplay().toUpperCase(java.util.Locale.ROOT) : "ПО ДОГОВОРЕННОСТИ");
+
+            if (CandidateVacancyMatchItem.SALARY_FIT_IN_RANGE.equals(fitStatus)
+                    || CandidateVacancyMatchItem.SALARY_FIT_BELOW.equals(fitStatus)) {
+                salaryFitBadge.addStyleName("candidate-vacancy-match-weight-positive");
+            } else if (CandidateVacancyMatchItem.SALARY_FIT_ABOVE.equals(fitStatus)) {
+                salaryFitBadge.addStyleName("candidate-vacancy-match-weight-negative");
+            } else {
+                salaryFitBadge.addStyleName("candidate-vacancy-match-weight-neutral");
+            }
+        } else {
+            clearSalaryFitBox();
+        }
+
         if (item.getSummary() != null && !item.getSummary().trim().isEmpty()) {
             summaryBox.setVisible(true);
             summaryTextLabel.setValue(escapeHtml(item.getSummary()));
         } else {
             summaryBox.setVisible(false);
+            summaryTextLabel.setValue("");
         }
 
         // AI Meta
@@ -1108,18 +1394,175 @@ public class CandidateVacancyMatchScreen extends Screen {
         }
     }
 
+    private void resetSalaryFitBadge() {
+        salaryFitBadge.setValue("—");
+        salaryFitBadge.removeStyleName("candidate-vacancy-match-weight-positive");
+        salaryFitBadge.removeStyleName("candidate-vacancy-match-weight-negative");
+        salaryFitBadge.removeStyleName("candidate-vacancy-match-weight-neutral");
+    }
+
+    private void clearSalaryFitBox() {
+        salaryFitBox.setVisible(false);
+        candidateSalaryDetailLabel.setValue("—");
+        vacancySalaryDetailLabel.setValue("—");
+        salaryFitDetailLabel.setValue("—");
+        resetSalaryFitBadge();
+    }
+
     private void clearDetailsPane() {
         detailTitle.setValue("Выберите строку из списка слева");
         detailMeta.setValue("");
         quickActionsBox.setVisible(false);
         recruiterDecisionBox.setVisible(false);
         scoresBox.setVisible(false);
+        interactionHistorySectionBox.setVisible(false);
+        interviewsSubBox.setVisible(false);
+        employerRejectionsSubBox.setVisible(false);
+        candidateRefusalsSubBox.setVisible(false);
         reasonsBox.setVisible(false);
         matchedSkillsBox.setVisible(false);
         missingReqsBox.setVisible(false);
         risksBox.setVisible(false);
         summaryBox.setVisible(false);
+        clearSalaryFitBox();
         aiMetaBox.setVisible(false);
+    }
+
+    private String formatSummaryAsHtml(String text) {
+        if (text == null || text.trim().isEmpty()) return "";
+        String[] lines = text.split("\n");
+        StringBuilder sb = new StringBuilder("<div class='candidate-vacancy-match-summary-block'>");
+        boolean inList = false;
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty()) continue;
+            if (trimmed.startsWith("•") || trimmed.startsWith("-") || trimmed.startsWith("*")) {
+                if (!inList) {
+                    sb.append("<ul class='candidate-vacancy-match-summary-list'>");
+                    inList = true;
+                }
+                String content = trimmed.substring(1).trim();
+                sb.append("<li>").append(escapeHtml(content)).append("</li>");
+            } else {
+                if (inList) {
+                    sb.append("</ul>");
+                    inList = false;
+                }
+                sb.append("<div class='candidate-vacancy-match-summary-header'>").append(escapeHtml(trimmed)).append("</div>");
+            }
+        }
+        if (inList) {
+            sb.append("</ul>");
+        }
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    private String formatInterviewsListAsHtml(List<String> list) {
+        if (list == null || list.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder("<div class='candidate-vacancy-match-history-cards'>");
+        for (String raw : list) {
+            sb.append("<div class='candidate-vacancy-match-history-card candidate-vacancy-match-history-card-interview'>");
+            String text = raw;
+            String date = "";
+            if (text.startsWith("[") && text.contains("]")) {
+                int endIdx = text.indexOf("]");
+                date = text.substring(1, endIdx);
+                text = text.substring(endIdx + 1).trim();
+            }
+
+            String[] parts = text.split("\\s*\\|\\s*");
+            String party = "";
+            String recruiter = "";
+            String vacancy = "";
+            String result = "";
+
+            for (String part : parts) {
+                if (part.startsWith("Сторона:")) {
+                    party = part.substring("Сторона:".length()).trim();
+                } else if (part.startsWith("Рекрутер:")) {
+                    recruiter = part.substring("Рекрутер:".length()).trim();
+                } else if (part.startsWith("Вакансия:")) {
+                    vacancy = part.substring("Вакансия:".length()).trim();
+                } else if (part.startsWith("Итоги:")) {
+                    result = part.substring("Итоги:".length()).trim();
+                } else if (result.isEmpty()) {
+                    result = part;
+                } else {
+                    result += " | " + part;
+                }
+            }
+
+            sb.append("<div class='candidate-vacancy-match-history-header-row'>");
+            if (!date.isEmpty()) {
+                sb.append("<span class='candidate-vacancy-match-history-date'>📅 ").append(escapeHtml(date)).append("</span>");
+            }
+            if (!party.isEmpty()) {
+                boolean isClient = party.toLowerCase(Locale.ROOT).contains("заказчик");
+                String cls = isClient ? "candidate-vacancy-match-tag-client" : "candidate-vacancy-match-tag-recruiter";
+                sb.append("<span class='candidate-vacancy-match-history-tag ").append(cls).append("'>")
+                  .append(isClient ? "🏢 " : "👥 ").append(escapeHtml(party)).append("</span>");
+            }
+            if (!recruiter.isEmpty() && !"Не указан".equalsIgnoreCase(recruiter)) {
+                sb.append("<span class='candidate-vacancy-match-history-recruiter'>👤 <b>Рекрутер:</b> ")
+                  .append(escapeHtml(recruiter)).append("</span>");
+            }
+            sb.append("</div>");
+
+            if (!vacancy.isEmpty() && !"Не указана".equalsIgnoreCase(vacancy)) {
+                sb.append("<div class='candidate-vacancy-match-history-vacancy'><b>Вакансия:</b> ")
+                  .append(escapeHtml(vacancy)).append("</div>");
+            }
+
+            if (!result.isEmpty()) {
+                sb.append("<div class='candidate-vacancy-match-history-result'><b>Итоги собеседования:</b> ")
+                  .append(escapeHtml(result)).append("</div>");
+            }
+
+            sb.append("</div>");
+        }
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    private String formatRejectionsListAsHtml(List<String> list, boolean isCandidateSide) {
+        if (list == null || list.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder("<div class='candidate-vacancy-match-history-cards'>");
+        String cardClass = isCandidateSide
+                ? "candidate-vacancy-match-history-card-candidate-refusal"
+                : "candidate-vacancy-match-history-card-employer-rejection";
+        String tagClass = isCandidateSide
+                ? "candidate-vacancy-match-tag-candidate-refusal"
+                : "candidate-vacancy-match-tag-employer-rejection";
+        String icon = isCandidateSide ? "⚠️ " : "⛔ ";
+
+        for (String raw : list) {
+            sb.append("<div class='candidate-vacancy-match-history-card ").append(cardClass).append("'>");
+            String text = raw;
+            String date = "";
+            if (text.startsWith("[") && text.contains("]")) {
+                int endIdx = text.indexOf("]");
+                date = text.substring(1, endIdx);
+                text = text.substring(endIdx + 1).trim();
+            }
+
+            sb.append("<div class='candidate-vacancy-match-history-header-row'>");
+            if (!date.isEmpty()) {
+                sb.append("<span class='candidate-vacancy-match-history-date'>📅 ").append(escapeHtml(date)).append("</span>");
+            }
+            sb.append("<span class='candidate-vacancy-match-history-tag ").append(tagClass).append("'>")
+              .append(icon).append(isCandidateSide ? "Отказ кандидата от офера/предложения" : "Отказ работодателя")
+              .append("</span>");
+            sb.append("</div>");
+
+            sb.append("<div class='candidate-vacancy-match-history-result'>")
+              .append(escapeHtml(text))
+              .append("</div>");
+
+            sb.append("</div>");
+        }
+        sb.append("</div>");
+        return sb.toString();
     }
 
     private String formatListAsHtml(List<String> list) {
@@ -1241,6 +1684,102 @@ public class CandidateVacancyMatchScreen extends Screen {
                                 }),
                         new DialogAction(DialogAction.Type.NO).withCaption("Отмена")
                 )
+                .show();
+    }
+
+    @Subscribe("addToReserveBtn")
+    public void onAddToReserveBtnClick(Button.ClickEvent event) {
+        executeAddToReserve();
+    }
+
+    @Subscribe("quickAddToReserveBtn")
+    public void onQuickAddToReserveBtnClick(Button.ClickEvent event) {
+        executeAddToReserve();
+    }
+
+    private void executeAddToReserve() {
+        CandidateVacancyMatchItem selected = matchesTable.getSingleSelected();
+        if (selected == null) return;
+
+        UUID candId = resolveCandidateId(selected);
+        UUID vacId = resolveVacancyId(selected);
+
+        if (candId == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Кандидат не определён")
+                    .withDescription("Не удалось определить кандидата для помещения в кадровый резерв")
+                    .show();
+            return;
+        }
+
+        JobCandidate cand = dataManager.load(JobCandidate.class)
+                .id(candId)
+                .view("jobCandidate-full-view")
+                .optional()
+                .orElse(null);
+
+        if (cand == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Кандидат не найден")
+                    .withDescription("Не удалось загрузить данные кандидата из базы данных")
+                    .show();
+            return;
+        }
+
+        OpenPosition vac = null;
+        if (vacId != null) {
+            vac = dataManager.load(OpenPosition.class)
+                    .id(vacId)
+                    .view("openPosition-view")
+                    .optional()
+                    .orElse(null);
+        }
+
+        final JobCandidate finalCand = cand;
+        final OpenPosition finalVac = vac;
+
+        Position targetPosition = null;
+        if (finalCand != null && finalCand.getPersonPosition() != null) {
+            targetPosition = finalCand.getPersonPosition();
+        } else if (finalVac != null && finalVac.getPositionType() != null) {
+            targetPosition = finalVac.getPositionType();
+        }
+
+        final Position finalPosition = targetPosition;
+
+        screenBuilders.editor(PersonelReserve.class, this)
+                .withScreenClass(PersonelReserveEdit.class)
+                .newEntity()
+                .withInitializer(reserve -> {
+                    reserve.setJobCandidate(finalCand);
+                    reserve.setPersonPosition(finalPosition);
+                    reserve.setOpenPosition(finalVac);
+                    if (userSession != null && userSession.getUser() instanceof ExtUser) {
+                        reserve.setRecruter((ExtUser) userSession.getUser());
+                    }
+                    reserve.setDate(new Date());
+                    GregorianCalendar cal = new GregorianCalendar();
+                    cal.add(java.util.Calendar.MONTH, 1);
+                    reserve.setEndDate(cal.getTime());
+                    reserve.setTermOfPlacement(30);
+                    reserve.setInProcess(true);
+                    reserve.setRemovedFromReserve(false);
+                })
+                .withOpenMode(OpenMode.DIALOG)
+                .withAfterCloseListener(afterCloseEvent -> {
+                    if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                        selected.setRecruiterDecision("В резерве");
+                        matchesDc.replaceItem(selected);
+                        populateDetailPane(selected);
+
+                        String candidateName = finalCand != null && finalCand.getFullName() != null
+                                ? finalCand.getFullName() : (selected.getCandidateFullName() != null ? selected.getCandidateFullName() : "Кандидат");
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Кадровый резерв")
+                                .withDescription(String.format("Кандидат «%s» успешно помещён в кадровый резерв", candidateName))
+                                .show();
+                    }
+                })
                 .show();
     }
 

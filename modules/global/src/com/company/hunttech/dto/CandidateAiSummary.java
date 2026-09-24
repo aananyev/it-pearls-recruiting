@@ -39,11 +39,21 @@ public class CandidateAiSummary implements Serializable {
         this.experienceSummary = experienceSummary;
     }
 
+    private String candidateSalaryExpectations;
+
     public List<String> getExplicitPreferences() {
         return explicitPreferences;
     }
 
     public void setExplicitPreferences(List<String> explicitPreferences) {
         this.explicitPreferences = explicitPreferences != null ? explicitPreferences : new ArrayList<>();
+    }
+
+    public String getCandidateSalaryExpectations() {
+        return candidateSalaryExpectations;
+    }
+
+    public void setCandidateSalaryExpectations(String candidateSalaryExpectations) {
+        this.candidateSalaryExpectations = candidateSalaryExpectations;
     }
 }

@@ -71,6 +71,21 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
     protected String summary;
 
     @MetaProperty
+    protected String interactionHistoryAnalysis;
+
+    @MetaProperty
+    protected List<String> pastRejectionsEmployerSide = new ArrayList<>();
+
+    @MetaProperty
+    protected List<String> pastRejectionsCandidateSide = new ArrayList<>();
+
+    @MetaProperty
+    protected List<String> pastInterviews = new ArrayList<>();
+
+    @MetaProperty
+    protected Integer interactionWeightAdjustment = 0;
+
+    @MetaProperty
     protected Integer priority;
 
     @MetaProperty
@@ -87,6 +102,15 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
 
     @MetaProperty
     protected String candidateSalary;
+
+    @MetaProperty
+    protected String vacancySalary;
+
+    @MetaProperty
+    protected String salaryFitAnalysis;
+
+    @MetaProperty
+    protected String salaryFitStatus;
 
     @MetaProperty
     protected String candidateRole;
@@ -171,6 +195,58 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
 
     public void setCandidateSalary(String candidateSalary) {
         this.candidateSalary = candidateSalary;
+    }
+
+    public String getVacancySalary() {
+        return vacancySalary;
+    }
+
+    public void setVacancySalary(String vacancySalary) {
+        this.vacancySalary = vacancySalary;
+    }
+
+    public String getSalaryFitAnalysis() {
+        return salaryFitAnalysis;
+    }
+
+    public void setSalaryFitAnalysis(String salaryFitAnalysis) {
+        this.salaryFitAnalysis = salaryFitAnalysis;
+    }
+
+    public String getSalaryFitStatus() {
+        return salaryFitStatus;
+    }
+
+    public void setSalaryFitStatus(String salaryFitStatus) {
+        this.salaryFitStatus = salaryFitStatus;
+    }
+
+    public static final String SALARY_FIT_IN_RANGE = "IN_RANGE";
+    public static final String SALARY_FIT_ABOVE = "ABOVE";
+    public static final String SALARY_FIT_BELOW = "BELOW";
+    public static final String SALARY_FIT_BY_AGREEMENT = "BY_AGREEMENT";
+
+    @MetaProperty
+    public String getSalaryFitStatusDisplay() {
+        if (SALARY_FIT_IN_RANGE.equals(salaryFitStatus)) return "В рамках вилки";
+        if (SALARY_FIT_ABOVE.equals(salaryFitStatus)) return "Выше вилки";
+        if (SALARY_FIT_BELOW.equals(salaryFitStatus)) return "Ниже вилки";
+        if (SALARY_FIT_BY_AGREEMENT.equals(salaryFitStatus)) return "По договоренности";
+        return "—";
+    }
+
+    @MetaProperty
+    public String getSalaryFitDisplay() {
+        if (salaryFitAnalysis != null && !salaryFitAnalysis.trim().isEmpty()) {
+            return salaryFitAnalysis;
+        }
+        if ((candidateSalary != null && !candidateSalary.trim().isEmpty())
+                || (vacancySalary != null && !vacancySalary.trim().isEmpty())) {
+            return String.format(java.util.Locale.ROOT, "Ожидания: %s | Предложение: %s",
+                    candidateSalary != null && !candidateSalary.trim().isEmpty() ? candidateSalary : "не указаны",
+                    vacancySalary != null && !vacancySalary.trim().isEmpty() ? vacancySalary : "не указано");
+        }
+        return "Не указано";
     }
 
     public String getCandidateRole() {
@@ -437,5 +513,77 @@ public class CandidateVacancyMatchItem extends BaseUuidEntity implements Seriali
             return "Нет явных пробелов";
         }
         return String.join(", ", missingCriticalRequirements);
+    }
+
+    public String getInteractionHistoryAnalysis() {
+        return interactionHistoryAnalysis;
+    }
+
+    public void setInteractionHistoryAnalysis(String interactionHistoryAnalysis) {
+        this.interactionHistoryAnalysis = interactionHistoryAnalysis;
+    }
+
+    public List<String> getPastRejectionsEmployerSide() {
+        return pastRejectionsEmployerSide;
+    }
+
+    public void setPastRejectionsEmployerSide(List<String> pastRejectionsEmployerSide) {
+        this.pastRejectionsEmployerSide = pastRejectionsEmployerSide != null ? pastRejectionsEmployerSide : new ArrayList<>();
+    }
+
+    public List<String> getPastRejectionsCandidateSide() {
+        return pastRejectionsCandidateSide;
+    }
+
+    public void setPastRejectionsCandidateSide(List<String> pastRejectionsCandidateSide) {
+        this.pastRejectionsCandidateSide = pastRejectionsCandidateSide != null ? pastRejectionsCandidateSide : new ArrayList<>();
+    }
+
+    public Integer getInteractionWeightAdjustment() {
+        return interactionWeightAdjustment;
+    }
+
+    public void setInteractionWeightAdjustment(Integer interactionWeightAdjustment) {
+        this.interactionWeightAdjustment = interactionWeightAdjustment != null ? interactionWeightAdjustment : 0;
+    }
+
+    @MetaProperty
+    public String getInteractionWeightAdjustmentDisplay() {
+        if (interactionWeightAdjustment == null || interactionWeightAdjustment == 0) {
+            return "0% (нейтрально)";
+        }
+        return (interactionWeightAdjustment > 0 ? "+" : "") + interactionWeightAdjustment + "% к рейтингу";
+    }
+
+    @MetaProperty
+    public String getPastRejectionsEmployerSideDisplay() {
+        if (pastRejectionsEmployerSide == null || pastRejectionsEmployerSide.isEmpty()) {
+            return "Отказов со стороны работодателей/клиентов не зафиксировано";
+        }
+        return "• " + String.join("\n• ", pastRejectionsEmployerSide);
+    }
+
+    @MetaProperty
+    public String getPastRejectionsCandidateSideDisplay() {
+        if (pastRejectionsCandidateSide == null || pastRejectionsCandidateSide.isEmpty()) {
+            return "Отказов от оферов/предложений не зафиксировано";
+        }
+        return "• " + String.join("\n• ", pastRejectionsCandidateSide);
+    }
+
+    public List<String> getPastInterviews() {
+        return pastInterviews;
+    }
+
+    public void setPastInterviews(List<String> pastInterviews) {
+        this.pastInterviews = pastInterviews != null ? pastInterviews : new ArrayList<>();
+    }
+
+    @MetaProperty
+    public String getPastInterviewsDisplay() {
+        if (pastInterviews == null || pastInterviews.isEmpty()) {
+            return "Собеседований в истории не зафиксировано";
+        }
+        return "• " + String.join("\n• ", pastInterviews);
     }
 }

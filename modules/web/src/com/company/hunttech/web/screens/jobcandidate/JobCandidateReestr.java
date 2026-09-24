@@ -9,8 +9,10 @@ import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.JobCandidateSignIcon;
 import com.company.hunttech.entity.SignIcons;
+import com.company.hunttech.entity.PersonelReserve;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.CandidateSkillEnrichmentService;
+import com.company.hunttech.web.screens.personelreserve.PersonelReserveEdit;
 import com.company.hunttech.service.dto.CandidateSkillsScanResult;
 import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.core.StarsAndOtherService;
@@ -65,9 +67,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1409,6 +1413,47 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Subscribe("actionsWithCandidateButton.scanSkillsAction")
     public void onScanSkillsAction(Action.ActionPerformedEvent event) {
         scanCandidateSkills();
+    }
+
+    @Subscribe("actionsWithCandidateButton.addPersonalReserveAction")
+    public void onActionsWithCandidateButtonAddPersonalReserveAction(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Выберите кандидата")
+                    .withDescription("Для добавления в кадровый резерв выберите кандидата из таблицы")
+                    .show();
+            return;
+        }
+
+        screenBuilders.editor(PersonelReserve.class, this)
+                .withScreenClass(PersonelReserveEdit.class)
+                .newEntity()
+                .withInitializer(reserve -> {
+                    reserve.setJobCandidate(selected);
+                    reserve.setPersonPosition(selected.getPersonPosition());
+                    if (userSession != null && userSession.getUser() instanceof ExtUser) {
+                        reserve.setRecruter((ExtUser) userSession.getUser());
+                    }
+                    reserve.setDate(new Date());
+                    GregorianCalendar cal = new GregorianCalendar();
+                    cal.add(java.util.Calendar.MONTH, 1);
+                    reserve.setEndDate(cal.getTime());
+                    reserve.setTermOfPlacement(30);
+                    reserve.setInProcess(true);
+                    reserve.setRemovedFromReserve(false);
+                })
+                .withOpenMode(OpenMode.DIALOG)
+                .withAfterCloseListener(afterCloseEvent -> {
+                    if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Кадровый резерв")
+                                .withDescription(String.format("Кандидат «%s» успешно помещён в кадровый резерв",
+                                        selected.getFullName() != null ? selected.getFullName() : ""))
+                                .show();
+                    }
+                })
+                .show();
     }
 
     /**

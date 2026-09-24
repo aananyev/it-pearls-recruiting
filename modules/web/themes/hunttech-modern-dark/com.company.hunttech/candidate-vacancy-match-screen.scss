@@ -223,15 +223,114 @@
   }
 
   .candidate-vacancy-match-actions-card {
-    padding: 10px 12px;
+    min-height: 46px;
+    padding: 0 12px !important;
     background: $candidate-vacancy-match-soft;
     box-shadow: none;
+    border: 1px solid $candidate-vacancy-match-border;
+    border-radius: 6px;
+    box-sizing: border-box !important;
+  }
+
+  .candidate-vacancy-match-card-toolbar {
+    padding: 6px 8px !important;
+    background: $candidate-vacancy-match-soft;
+    border-radius: 6px;
+    border: 1px solid $candidate-vacancy-match-border;
+    box-sizing: border-box !important;
+  }
+
+  /* Microsoft Office-like toolbar button styling */
+  .candidate-vacancy-match-toolbar-btn {
+    min-width: 32px !important;
+    width: 32px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+
+    .v-button-wrap {
+      padding: 0 !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .v-icon {
+      font-size: 14px !important;
+      margin: 0 !important;
+      color: $v-font-color !important;
+    }
+
+    .v-button-caption {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    &:hover:not(.v-disabled) {
+      background: rgba($v-font-color, 0.08) !important;
+      border-color: rgba($v-font-color, 0.2) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    &:active:not(.v-disabled) {
+      background: rgba($v-font-color, 0.14) !important;
+    }
+
+    &.primary {
+      .v-icon {
+        color: mix(#27ae60, $v-font-color, 75%) !important;
+      }
+      &:hover:not(.v-disabled) {
+        background: rgba(39, 174, 96, 0.15) !important;
+        border-color: rgba(39, 174, 96, 0.4) !important;
+      }
+    }
+
+    &.friendly {
+      .v-icon {
+        color: mix(#2980b9, $v-font-color, 75%) !important;
+      }
+      &:hover:not(.v-disabled) {
+        background: rgba(41, 128, 185, 0.15) !important;
+        border-color: rgba(41, 128, 185, 0.4) !important;
+      }
+    }
+
+    &.danger {
+      .v-icon {
+        color: mix(#e74c3c, $v-font-color, 75%) !important;
+      }
+      &:hover:not(.v-disabled) {
+        background: rgba(231, 76, 60, 0.15) !important;
+        border-color: rgba(231, 76, 60, 0.4) !important;
+      }
+    }
+
+    &.v-disabled {
+      opacity: 0.35 !important;
+      cursor: default !important;
+      pointer-events: none !important;
+    }
   }
 
   .candidate-vacancy-match-filter-caption {
     color: $candidate-vacancy-match-muted;
     font-size: 12px;
     font-weight: 600;
+    white-space: nowrap;
   }
 
   .candidate-vacancy-match-table {
@@ -241,12 +340,113 @@
     border: 1px solid $candidate-vacancy-match-border;
     border-radius: 6px;
     overflow: hidden;
+
+    .v-table-header-wrap {
+      font-size: 12px;
+      font-weight: 700;
+      background: $candidate-vacancy-match-soft;
+    }
+
+    .v-table-row,
+    .v-table-row-odd {
+      height: auto !important;
+      min-height: 64px !important;
+    }
+
+    .v-table-cell-content {
+      height: auto !important;
+      min-height: 64px !important;
+      vertical-align: middle !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      box-sizing: border-box !important;
+    }
+
+    .v-table-cell-wrapper {
+      height: auto !important;
+      max-height: 4.15em !important;
+      line-height: 1.35 !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 3 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+      vertical-align: middle !important;
+
+      > .v-widget,
+      > .v-label {
+        white-space: normal !important;
+        line-height: 1.35 !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        max-height: 4.15em !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+      }
+    }
+
+    .v-table-cell-content-score .v-table-cell-wrapper,
+    .v-table-cell-content-verdict .v-table-cell-wrapper,
+    .v-table-cell-content-recruiterDecision .v-table-cell-wrapper {
+      display: flex !important;
+      align-items: center !important;
+      max-height: none !important;
+    }
+
+    .v-table-cell-content-score .v-table-cell-wrapper,
+    .v-table-cell-content-recruiterDecision .v-table-cell-wrapper {
+      justify-content: center !important;
+    }
   }
 
-  .candidate-vacancy-match-table .v-table-header-wrap {
-    font-size: 12px;
-    font-weight: 700;
-    background: $candidate-vacancy-match-soft;
+  .suitable-check-datagrid {
+    .v-grid-row {
+      height: auto !important;
+      min-height: 64px !important;
+    }
+
+    .v-grid-cell {
+      height: auto !important;
+      min-height: 64px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      vertical-align: middle !important;
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      box-sizing: border-box !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 3 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+      max-height: 4.15em !important;
+
+      > span,
+      > div,
+      > .v-widget {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        max-height: 4.15em !important;
+        line-height: 1.35 !important;
+      }
+    }
+
+    .v-grid-cell[col-id="priority"],
+    .v-grid-cell[col-id="remoteWork"],
+    .v-grid-cell[col-id="blackRectangle"] {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
   }
 
   .candidate-vacancy-match-details-scroll {
@@ -279,6 +479,185 @@
 
   .candidate-vacancy-match-decision-section {
     border-left: 3px solid mix(#2e9f62, $v-font-color, 74%);
+  }
+
+  .candidate-vacancy-match-history-section {
+    border-left: 3px solid #8e44ad;
+  }
+
+  .candidate-vacancy-match-salary-section {
+    border-left: 3px solid #27ae60;
+  }
+
+  .candidate-vacancy-match-weight-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .candidate-vacancy-match-weight-positive {
+    background: rgba(#2e9f62, 0.18);
+    color: #2e9f62;
+    border: 1px solid rgba(#2e9f62, 0.4);
+  }
+
+  .candidate-vacancy-match-weight-negative {
+    background: rgba(#e74c3c, 0.18);
+    color: #e74c3c;
+    border: 1px solid rgba(#e74c3c, 0.4);
+  }
+
+  .candidate-vacancy-match-weight-neutral {
+    background: rgba($v-font-color, 0.1);
+    color: $candidate-vacancy-match-muted;
+    border: 1px solid rgba($v-font-color, 0.2);
+  }
+
+  .candidate-vacancy-match-history-summary {
+    white-space: pre-wrap !important;
+    line-height: 1.4 !important;
+    font-size: 13px !important;
+    color: $v-font-color;
+  }
+
+  .candidate-vacancy-match-sub-history-box {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba($v-font-color, 0.04);
+    border-radius: 4px;
+    border: 1px solid rgba($v-font-color, 0.08);
+  }
+
+  .candidate-vacancy-match-history-subcaption {
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: mix($v-font-color, $candidate-vacancy-match-accent, 85%);
+  }
+
+  .candidate-vacancy-match-summary-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    line-height: 1.45;
+  }
+
+  .candidate-vacancy-match-summary-header {
+    font-weight: 600;
+    font-size: 13px;
+    color: $v-font-color;
+  }
+
+  .candidate-vacancy-match-summary-list {
+    margin: 4px 0 2px 0;
+    padding-left: 20px;
+
+    li {
+      margin-bottom: 4px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: $v-font-color;
+    }
+  }
+
+  .candidate-vacancy-match-mini-badge {
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(#8e44ad, 0.25);
+    color: mix(#8e44ad, $v-font-color, 75%);
+    border: 1px solid rgba(#8e44ad, 0.4);
+  }
+
+  .candidate-vacancy-match-history-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  .candidate-vacancy-match-history-card {
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    background: rgba($v-font-color, 0.04);
+    border: 1px solid rgba($v-font-color, 0.1);
+  }
+
+  .candidate-vacancy-match-history-card-interview {
+    border-left: 3px solid mix(#2980b9, $v-font-color, 85%);
+    background: rgba(#2980b9, 0.1);
+  }
+
+  .candidate-vacancy-match-history-card-employer-rejection {
+    border-left: 3px solid mix(#e74c3c, $v-font-color, 85%);
+    background: rgba(#e74c3c, 0.1);
+  }
+
+  .candidate-vacancy-match-history-card-candidate-refusal {
+    border-left: 3px solid mix(#e67e22, $v-font-color, 85%);
+    background: rgba(#e67e22, 0.1);
+  }
+
+  .candidate-vacancy-match-history-header-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .candidate-vacancy-match-history-date {
+    font-weight: 700;
+    font-size: 11px;
+    color: $candidate-vacancy-match-muted;
+  }
+
+  .candidate-vacancy-match-history-tag {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .candidate-vacancy-match-tag-client {
+    background: rgba(#2980b9, 0.25);
+    color: mix(#2980b9, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-tag-recruiter {
+    background: rgba(#16a085, 0.25);
+    color: mix(#16a085, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-tag-employer-rejection {
+    background: rgba(#e74c3c, 0.25);
+    color: mix(#e74c3c, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-tag-candidate-refusal {
+    background: rgba(#e67e22, 0.25);
+    color: mix(#e67e22, $v-font-color, 75%);
+  }
+
+  .candidate-vacancy-match-history-recruiter {
+    font-size: 11px;
+    color: $v-font-color;
+  }
+
+  .candidate-vacancy-match-history-vacancy {
+    font-size: 12px;
+    margin-bottom: 2px;
+    color: $v-font-color;
+  }
+
+  .candidate-vacancy-match-history-result {
+    font-size: 12px;
+    line-height: 1.4;
+    color: $v-font-color;
   }
 
   .candidate-vacancy-match-detail-caption {
@@ -316,7 +695,6 @@
   @media (max-width: 1180px) {
     .candidate-vacancy-match-header,
     .candidate-vacancy-match-progress-card,
-    .candidate-vacancy-match-actions-card,
     .candidate-vacancy-match-details-card {
       padding: 9px 10px;
     }

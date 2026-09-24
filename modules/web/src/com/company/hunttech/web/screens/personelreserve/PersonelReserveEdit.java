@@ -182,11 +182,18 @@ public class PersonelReserveEdit extends StandardEditor<PersonelReserve> {
     }
 
     private void setOnlyMySubscribeCheckBox() {
-        onlyMySubscribeCheckBox.setValue(true);
-        openPositionsDl.setParameter("subscriber", userSession.getUser());
-        openPositionsDl.load();
+        boolean hasPreselectedPosition = getEditedEntity().getOpenPosition() != null;
+        if (hasPreselectedPosition) {
+            onlyMySubscribeCheckBox.setValue(false);
+            openPositionsDl.removeParameter("subscriber");
+            openPositionsDl.load();
+        } else {
+            onlyMySubscribeCheckBox.setValue(true);
+            openPositionsDl.setParameter("subscriber", userSession.getUser());
+            openPositionsDl.load();
+        }
 
-        if (openPositionsDc.getItems().size() == 0) {
+        if (openPositionsDc.getItems().size() == 0 && !hasPreselectedPosition) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(messageBundle.getMessage("msgWarning"))
                     .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))

@@ -93,6 +93,7 @@
                           box.expandRatio="1"
                           width="100%"
                           height="100%"
+                          stylename="suitable-check-datagrid"
                           dataContainer="openPositionDc">
                     <columns>
                         <column id="priority"
