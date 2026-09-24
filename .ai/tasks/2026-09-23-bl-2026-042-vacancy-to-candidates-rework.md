@@ -2,7 +2,7 @@
 
 ## Статус
 
-`IN_PROGRESS`
+`SUPERSEDED` (заменено актуальной реализацией BL-2026-042 от 2026-09-24: `.ai/tasks/2026-09-24-bl-2026-042-ai-candidate-matching-rework.md`)
 
 ## Git-контекст
 
