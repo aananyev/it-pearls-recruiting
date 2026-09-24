@@ -111,7 +111,7 @@
       border-radius: 0 !important;
     }
 
-    /* Заголовок «Резюме для вакансии»: лаконичный заголовок раздела */
+    /* Заголовок «Резюме для вакансии»: лаконичный заголовок раздела, текст — ЗАГЛАВНЫМИ. */
     .candidate-cv-sidebar-card-title,
     .candidate-cv-sidebar-card-title.v-label {
       display: block;
@@ -125,6 +125,7 @@
       font-weight: 700 !important;
       line-height: 20px !important;
       letter-spacing: normal !important;
+      text-transform: uppercase !important;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
@@ -172,28 +173,37 @@
       word-break: break-word;
     }
 
+
+
     .candidate-cv-navigation {
       box-sizing: border-box;
+      display: block !important;
       width: 100% !important;
-      padding-top: 10px;
+      min-width: 0 !important;
+      padding-top: 6px;
+      padding-bottom: 2px;
       border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
     }
 
-    /* Заголовок раздела навигации: полоса-заголовок с двумя горизонтальными
-     * inset-линиями (контракт HRM_HuntTech_Edit_Screen_Shared_Style_Contract §4.1). */
+    /* Заголовки разделов sidebar: полоса-заголовок с двумя горизонтальными
+     * inset-линиями (контракт HRM_HuntTech_Edit_Screen_Shared_Style_Contract §4.1).
+     * «Разделы» (навигация) и «Основные навыки» — единый стиль темы; текст — ЗАГЛАВНЫМИ. */
     .candidate-cv-navigation-title,
-    .candidate-cv-navigation-title.v-label {
+    .candidate-cv-navigation-title.v-label,
+    .candidate-cv-skills-title,
+    .candidate-cv-skills-title.v-label {
       display: block;
       width: 100% !important;
       box-sizing: border-box;
       min-height: 36px !important;
+      height: auto !important;
       padding: 7px 11px !important;
       color: #ffb11b !important;
       font-size: 15px !important;
       font-weight: 700 !important;
       line-height: 21px !important;
       letter-spacing: normal !important;
-      text-transform: none !important;
+      text-transform: uppercase !important;
       background: rgba(255, 255, 255, 0.045) !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
       box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
@@ -208,22 +218,24 @@
 
     .candidate-cv-nav-item.v-button {
       box-sizing: border-box;
+      display: block;
       width: 100% !important;
+      min-width: 0 !important;
+      min-height: 27px !important;
       height: auto !important;
-      min-height: 26px !important;
-      padding: 3px 8px !important;
-      margin: 1px 0 !important;
+      padding: 3px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
-      font-weight: 500 !important;
-      line-height: 16px !important;
-      text-align: left !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      text-align: center !important;
       background: transparent !important;
       border: 0 !important;
       border-left: 3px solid transparent !important;
-      border-radius: 0 4px 4px 0 !important;
+      border-radius: 0 5px 5px 0 !important;
       box-shadow: none !important;
       text-shadow: none !important;
+      opacity: 1 !important;
       transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
     }
 
@@ -232,20 +244,31 @@
       display: block;
       width: 100%;
       min-width: 0;
-      padding: 0 !important;
-      margin: 0 !important;
       color: inherit !important;
-      line-height: 16px !important;
-      text-align: left !important;
+      text-align: center !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
       word-break: break-word;
+    }
+
+    .candidate-cv-nav-item.v-button .v-icon {
+      vertical-align: middle;
+      margin-right: 6px;
     }
 
     .candidate-cv-nav-item.v-button:hover,
     .candidate-cv-nav-item.v-button:focus {
       color: #ffffff !important;
       background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Фикс высоты пункта 46px → 27px (приёмка 2026-08-03, по эталону JobCandidateEdit):
+       базовая halo-кнопка (.halo .v-button:before) вставляет пустой inline-block
+       псевдоэлемент; из-за блочного .v-button-wrap/.v-button-caption он образует
+       второй line box (20px) и растягивает кнопку до 46px. Скрываем его —
+       высота пункта = 20px + 6px padding = 26px → min-height 27px. */
+    .candidate-cv-nav-item:before {
+      display: none !important;
     }
 
     .candidate-cv-nav-item-active.v-button,
@@ -472,13 +495,22 @@
       min-height: 38px;
       font-size: 14px;
       font-weight: 600;
+      text-align: center;
+    }
+
+    .v-button .v-icon,
+    .candidate-cv-toolbar .v-button .v-icon,
+    .candidate-cv-footer .v-button .v-icon,
+    .candidate-cv-document-card .v-button .v-icon {
+      vertical-align: middle;
+      margin-right: 6px;
     }
 
     .candidate-cv-toolbar {
       box-sizing: border-box;
       width: 100% !important;
-      min-height: 50px;
-      padding: 6px 12px;
+      min-height: 58px;
+      padding: 10px 12px;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.14) !important;
       border-radius: 8px !important;
@@ -486,7 +518,7 @@
     }
 
     .candidate-cv-toolbar .v-button {
-      min-height: 36px;
+      min-height: 38px;
     }
 
     .candidate-cv-document-card .v-upload {
@@ -676,6 +708,80 @@
       overflow: hidden;
     }
 
+    /* Единое оформление таблиц по эталону OpenPositionReestrBrowse (BL-2026-022) */
+    .candidate-browse-grid.v-table,
+    .candidate-browse-grid.v-grid {
+      box-sizing: border-box;
+      min-width: 0;
+      border: none !important;
+      background: transparent !important;
+    }
+
+    .candidate-browse-grid .v-table-header-wrap,
+    .candidate-browse-grid .v-grid-header {
+      min-height: 38px;
+      background: mix($v-app-background-color, $v-panel-background-color, 64%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .candidate-browse-grid .v-table-header-cell,
+    .candidate-browse-grid .v-grid-header .v-grid-cell {
+      min-height: 38px;
+      padding: 0 10px !important;
+      color: mix($v-font-color, $v-panel-background-color, 88%) !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      line-height: 38px !important;
+      letter-spacing: 0;
+    }
+
+    .candidate-browse-grid .v-table-row,
+    .candidate-browse-grid .v-table-row-odd,
+    .candidate-browse-grid .v-grid-row {
+      min-height: 38px !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.08) !important;
+      transition: background-color 0.15s ease;
+    }
+
+    .candidate-browse-grid .v-table-row:hover,
+    .candidate-browse-grid .v-table-row-odd:hover,
+    .candidate-browse-grid .v-grid-row:hover {
+      background: rgba($v-selection-color, 0.07) !important;
+    }
+
+    .candidate-browse-grid .v-table-row.v-selected,
+    .candidate-browse-grid .v-table-row-odd.v-selected,
+    .candidate-browse-grid .v-grid-row-selected {
+      background: rgba($v-selection-color, 0.16) !important;
+    }
+
+    .candidate-browse-grid .v-table-cell-content,
+    .candidate-browse-grid .v-grid-cell {
+      box-sizing: border-box;
+      min-width: 0;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+      vertical-align: middle !important;
+    }
+
+    .candidate-browse-grid .v-table-cell-wrapper {
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+      padding: 6px 10px !important;
+    }
+
+    .candidate-browse-grid .v-buttons-panel .v-button {
+      min-height: 34px !important;
+      min-width: 34px !important;
+      border-radius: 4px !important;
+      font-size: 12.5px !important;
+      font-weight: 600 !important;
+    }
+
     .candidate-cv-table-card .v-grid-header,
     .candidate-cv-table-card .v-table-header-wrap {
       background: mix($v-app-background-color, $v-panel-background-color, 64%) !important;
@@ -691,7 +797,7 @@
     .candidate-cv-table-card .v-grid-row-selected > td,
     .candidate-cv-table-card .v-table-row.v-selected,
     .candidate-cv-table-card .v-table-row-odd.v-selected {
-      background: rgba($v-selection-color, 0.18) !important;
+      background: rgba($v-selection-color, 0.16) !important;
     }
 
     .candidate-cv-table-card .v-treegrid-expander {

@@ -2,28 +2,29 @@
 <!-- Dashboard-апплет показывает текущие кейсы рекрутера как Kanban без изменения IteractionList. -->
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
     <!-- Корневая карточка использует общий visual contract recruiter-dashboard-root. -->
-    <layout stylename="widget-border recruiter-dashboard-widget recruiter-kanban-widget"
+    <layout expand="kanbanScrollBox"
+            stylename="widget-border recruiter-dashboard-widget recruiter-kanban-widget"
             spacing="true"
             width="100%"
             height="100%">
-        <!-- Верхняя панель: заголовок и компактные фильтры управления -->
+        <!-- Верхняя панель: заголовок слева и компактные эргономичные фильтры справа -->
         <hbox id="headerBar" width="100%" spacing="true" alignment="MIDDLE_LEFT" stylename="recruiter-kanban-header-bar">
-            <vbox id="headerBox" spacing="false" width="100%">
+            <vbox id="headerBox" spacing="false" width="AUTO" stylename="recruiter-kanban-title-box">
                 <!-- Основной заголовок апплета. -->
-                <label value="Кандидаты в работе (Kanban)" stylename="widget-table-header"/>
+                <label value="Кандидаты в работе (Kanban)" stylename="widget-table-header recruiter-kanban-main-title"/>
                 <!-- Период и число найденных кейсов заполняются контроллером после bulk-загрузки. -->
                 <label id="periodLabel" stylename="recruiter-dashboard-subtitle"/>
             </vbox>
             <hbox id="filterControlsBox" spacing="true" alignment="MIDDLE_RIGHT" stylename="recruiter-kanban-filter-controls">
                 <lookupField id="recruiterLookupField" nullOptionVisible="false" width="220px"/>
-                <radioButtonGroup id="periodRadioGroup" orientation="horizontal"/>
+                <radioButtonGroup id="periodRadioGroup" orientation="horizontal" stylename="recruiter-kanban-period-radio"/>
                 <textField id="searchField" placeholder="Поиск кандидата..." width="180px"/>
-                <button id="refreshBtn" icon="REFRESH"/>
+                <button id="refreshBtn" icon="font-icon:REFRESH" description="Обновить доску" stylename="recruiter-kanban-refresh-btn"/>
             </hbox>
         </hbox>
         <!-- KPI-панель показывает распределение текущих кейсов по ключевым этапам. -->
         <hbox id="kpiBar" width="100%" spacing="true" stylename="recruiter-kpi-bar"/>
-        <!-- Горизонтальная прокрутка колонок Kanban -->
+        <!-- Горизонтальная прокрутка пайплайна колонок Kanban -->
         <scrollBox id="kanbanScrollBox" width="100%" height="100%" orientation="horizontal" scrollBars="horizontal" stylename="recruiter-kanban-scroll">
             <hbox id="kanbanBoard" width="AUTO" height="100%" spacing="true" stylename="recruiter-kanban-board"/>
         </scrollBox>

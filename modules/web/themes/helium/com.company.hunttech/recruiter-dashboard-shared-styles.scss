@@ -260,34 +260,35 @@
   }
 
   .recruiter-dashboard-root .recruiter-kpi-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-bottom: 6px !important;
   }
 
   .recruiter-dashboard-root .recruiter-kpi-card {
     box-sizing: border-box;
-    min-width: 150px;
-    flex: 1 1 150px;
-    padding: 12px 14px;
+    min-width: 120px;
+    flex: 1 1 120px;
+    padding: 6px 12px !important;
     background: mix($v-app-background-color, $v-panel-background-color, 32%);
     border: 1px solid $recruiter-dashboard-subtle-border;
     border-left: 3px solid $recruiter-dashboard-accent;
-    border-radius: 8px;
+    border-radius: 6px;
   }
 
   .recruiter-dashboard-root .recruiter-kpi-value {
     color: mix($v-font-color, $v-panel-background-color, 94%) !important;
-    font-size: 24px !important;
+    font-size: 18px !important;
     font-weight: 700 !important;
-    line-height: 28px !important;
+    line-height: 22px !important;
   }
 
   .recruiter-dashboard-root .recruiter-kpi-caption {
-    margin-top: 2px;
+    margin-top: 1px;
     color: $recruiter-dashboard-muted !important;
-    font-size: 12px !important;
-    line-height: 18px !important;
+    font-size: 11px !important;
+    line-height: 15px !important;
   }
 
   .recruiter-dashboard-root .recruiter-kpi-blue { border-left-color: #3b82f6; }
@@ -322,13 +323,26 @@
     border-radius: 7px;
   }
 
+  .recruiter-dashboard-root .recruiter-kanban-main-title {
+    padding: 0 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 22px !important;
+    margin: 0 0 2px 0 !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-title-box {
+    min-width: 0 !important;
+  }
+
   .recruiter-dashboard-root .recruiter-kanban-header-bar {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 12px !important;
+    gap: 8px !important;
     width: 100% !important;
+    margin-bottom: 4px !important;
   }
 
   .recruiter-dashboard-root .recruiter-kanban-filter-controls {
@@ -336,6 +350,17 @@
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 8px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-period-radio .v-select-option {
+    margin-right: 8px !important;
+    font-size: 12px !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-refresh-btn {
+    min-width: 34px !important;
+    height: 34px !important;
+    padding: 0 8px !important;
   }
 
   .recruiter-dashboard-root .recruiter-kpi-badge {
@@ -348,7 +373,7 @@
   .recruiter-dashboard-root .recruiter-kanban-scroll {
     width: 100% !important;
     height: 100% !important;
-    min-height: 560px !important;
+    min-height: 480px !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     padding-bottom: 6px !important;
@@ -414,7 +439,21 @@
     max-height: 560px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-right: 4px !important;
+    padding-right: 6px !important;
+    scrollbar-width: thin;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-column-scroll .v-scrollbox-content {
+    min-height: 100% !important;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-column-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .recruiter-dashboard-root .recruiter-kanban-column-scroll::-webkit-scrollbar-thumb {
+    background: rgba($v-font-color, 0.25);
+    border-radius: 4px;
   }
 
   .recruiter-dashboard-root .recruiter-kanban-card {

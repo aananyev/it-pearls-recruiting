@@ -68,11 +68,11 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
     }
 
     private void initFilters() {
-        // 1. Фильтр периода: 30 дней, 90 дней, За все время
+        // 1. Фильтр периода: 30 дн., 90 дн., Всё время
         Map<String, Integer> periodOptions = new LinkedHashMap<>();
-        periodOptions.put("За 30 дней", 30);
-        periodOptions.put("За 90 дней", 90);
-        periodOptions.put("За все время", 0);
+        periodOptions.put("30 дн.", 30);
+        periodOptions.put("90 дн.", 90);
+        periodOptions.put("Всё время", 0);
         periodRadioGroup.setOptionsMap(periodOptions);
         periodRadioGroup.setValue(90);
 
@@ -290,6 +290,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         scrollBox.setWidthFull();
         scrollBox.setHeight("540px");
         scrollBox.setOrientation(ScrollBoxLayout.Orientation.VERTICAL);
+        scrollBox.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.VERTICAL);
         scrollBox.setSpacing(true);
         scrollBox.setStyleName("recruiter-kanban-column-scroll");
 

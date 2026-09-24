@@ -628,7 +628,7 @@
                     <table id="jobHistoriesTable"
                            width="100%"
                            dataContainer="jobHistoriesDc"
-                           stylename="candidate-cv-job-history-table">
+                           stylename="borderless grid candidate-browse-grid candidate-cv-job-history-table">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -806,7 +806,7 @@
                            height="100%"
                            width="100%"
                            dataContainer="someFilesesDc"
-                           stylename="candidate-cv-table-card">
+                           stylename="borderless grid candidate-browse-grid candidate-cv-table-card">
                         <columns>
                             <column id="fileDescription"/>
                             <column id="fileType.nameFileType"/>
@@ -825,6 +825,7 @@
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
                         </actions>
+                        <rowsCount/>
                     </table>
                 </vbox>
             </tab>

@@ -891,6 +891,24 @@
       min-width: 0;
     }
 
+    .candidate-browse-grid .v-table-header-wrap,
+    .candidate-browse-grid .v-grid-header {
+      min-height: 38px;
+      background: mix($v-app-background-color, $v-panel-background-color, 64%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .candidate-browse-grid .v-table-header-cell,
+    .candidate-browse-grid .v-grid-header .v-grid-cell {
+      min-height: 38px;
+      padding: 0 10px !important;
+      color: mix($v-font-color, $v-panel-background-color, 88%) !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      line-height: 38px !important;
+      letter-spacing: 0;
+    }
+
     .candidate-browse-grid .v-grid-row,
     .candidate-browse-grid .v-table-row,
     .candidate-browse-grid .v-table-row-odd {

@@ -891,6 +891,24 @@
       min-width: 0;
     }
 
+    .candidate-browse-grid .v-table-header-wrap,
+    .candidate-browse-grid .v-grid-header {
+      min-height: 38px;
+      background: mix($v-app-background-color, $v-panel-background-color, 64%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .candidate-browse-grid .v-table-header-cell,
+    .candidate-browse-grid .v-grid-header .v-grid-cell {
+      min-height: 38px;
+      padding: 0 10px !important;
+      color: mix($v-font-color, $v-panel-background-color, 88%) !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      line-height: 38px !important;
+      letter-spacing: 0;
+    }
+
     .candidate-browse-grid .v-grid-row,
     .candidate-browse-grid .v-table-row,
     .candidate-browse-grid .v-table-row-odd {
@@ -1445,8 +1463,8 @@
   .skill-tree-cell-logo {
     object-fit: contain !important;
     border-radius: 6px !important;
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
     padding: 2px !important;
     box-sizing: border-box !important;
     display: inline-block !important;
@@ -1467,39 +1485,39 @@
   }
 
   .skill-priority-not-used {
-    background-color: rgba(148, 163, 184, 0.15) !important;
-    color: #94a3b8 !important;
-    border: 1px solid rgba(148, 163, 184, 0.25) !important;
+    background-color: rgba(148, 163, 184, 0.18) !important;
+    color: #475569 !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
   }
 
   .skill-priority-default {
-    background-color: rgba(59, 130, 246, 0.15) !important;
-    color: #60a5fa !important;
+    background-color: rgba(59, 130, 246, 0.12) !important;
+    color: #1d4ed8 !important;
     border: 1px solid rgba(59, 130, 246, 0.25) !important;
   }
 
   .skill-priority-subject {
-    background-color: rgba(245, 158, 11, 0.15) !important;
-    color: #fbbf24 !important;
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    color: #b45309 !important;
     border: 1px solid rgba(245, 158, 11, 0.25) !important;
   }
 
   .skill-priority-framework,
   .skill-priority-frameworks {
-    background-color: rgba(168, 85, 247, 0.15) !important;
-    color: #c084fc !important;
+    background-color: rgba(168, 85, 247, 0.12) !important;
+    color: #7e22ce !important;
     border: 1px solid rgba(168, 85, 247, 0.25) !important;
   }
 
   .skill-priority-methodology {
-    background-color: rgba(20, 184, 166, 0.15) !important;
-    color: #2dd4bf !important;
+    background-color: rgba(20, 184, 166, 0.12) !important;
+    color: #0f766e !important;
     border: 1px solid rgba(20, 184, 166, 0.25) !important;
   }
 
   .skill-priority-language {
-    background-color: rgba(34, 197, 94, 0.15) !important;
-    color: #4ade80 !important;
+    background-color: rgba(34, 197, 94, 0.12) !important;
+    color: #15803d !important;
     border: 1px solid rgba(34, 197, 94, 0.25) !important;
   }
 
