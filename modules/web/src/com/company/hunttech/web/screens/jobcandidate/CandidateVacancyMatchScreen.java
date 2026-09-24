@@ -418,6 +418,40 @@ public class CandidateVacancyMatchScreen extends Screen {
             }
             return label;
         });
+        matchesTable.addGeneratedColumn("recruiterDecision", item -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            label.setHtmlEnabled(true);
+            String dec = item.getRecruiterDecision();
+            String bg;
+            String color;
+            String text;
+            if ("В работе".equalsIgnoreCase(dec) || "IN_WORK".equalsIgnoreCase(dec)) {
+                bg = "rgba(39, 174, 96, 0.15)";
+                color = "#27ae60";
+                text = "🟢 В работе";
+            } else if ("В резерве".equalsIgnoreCase(dec) || "RESERVE".equalsIgnoreCase(dec)) {
+                bg = "rgba(142, 68, 173, 0.15)";
+                color = "#8e44ad";
+                text = "🟣 В резерве";
+            } else if ("Отложен".equalsIgnoreCase(dec) || "POSTPONED".equalsIgnoreCase(dec)) {
+                bg = "rgba(243, 156, 18, 0.15)";
+                color = "#f39c12";
+                text = "🟡 Отложен";
+            } else if ("Не подходит".equalsIgnoreCase(dec) || "REJECTED".equalsIgnoreCase(dec)) {
+                bg = "rgba(231, 76, 60, 0.15)";
+                color = "#e74c3c";
+                text = "🔴 Не подходит";
+            } else {
+                bg = "rgba(128, 128, 128, 0.12)";
+                color = "#7f8c8d";
+                text = "⚪ Новый";
+            }
+            label.setValue(String.format(
+                    "<span style='background: %s; color: %s; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-block; border: 1px solid %s;'>%s</span>",
+                    bg, color, color, text
+            ));
+            return label;
+        });
     }
 
     private void initDecisionFilter() {
@@ -425,6 +459,7 @@ public class CandidateVacancyMatchScreen extends Screen {
         options.put("Все", "ALL");
         options.put("Не обработаны рекрутером", "UNPROCESSED");
         options.put("В работе", "IN_WORK");
+        options.put("В резерве", "RESERVE");
         options.put("Отложены", "POSTPONED");
         options.put("Не подходят", "REJECTED");
         decisionFilter.setOptionsMap(options);
@@ -443,6 +478,10 @@ public class CandidateVacancyMatchScreen extends Screen {
         } else if ("IN_WORK".equalsIgnoreCase(filterKey)) {
             matchesDc.setItems(allReportItems.stream()
                     .filter(it -> "В работе".equalsIgnoreCase(it.getRecruiterDecision()) || "IN_WORK".equalsIgnoreCase(it.getRecruiterDecision()))
+                    .collect(Collectors.toList()));
+        } else if ("RESERVE".equalsIgnoreCase(filterKey)) {
+            matchesDc.setItems(allReportItems.stream()
+                    .filter(it -> "В резерве".equalsIgnoreCase(it.getRecruiterDecision()) || "RESERVE".equalsIgnoreCase(it.getRecruiterDecision()))
                     .collect(Collectors.toList()));
         } else if ("POSTPONED".equalsIgnoreCase(filterKey)) {
             matchesDc.setItems(allReportItems.stream()
@@ -475,7 +514,8 @@ public class CandidateVacancyMatchScreen extends Screen {
                 sub.append("📍 ").append(candidate.getCityOfResidence().getCityRuName());
             }
             subTitleLabel.setValue(sub.toString());
-            openEntityBtn.setCaption("Открыть вакансию");
+            openEntityBtn.setDescription("Открыть вакансию — Просмотреть подробную карточку вакансии");
+            openEntityBtn.setCaption(null);
             startAnalysis();
         } else if (mode == Mode.VACANCY_TO_CANDIDATES && openPosition != null) {
             getWindow().setCaption("AI-поиск кандидатов на вакансию");
@@ -494,7 +534,8 @@ public class CandidateVacancyMatchScreen extends Screen {
                 sub.append("📍 ").append(openPosition.getCityPosition().getCityRuName());
             }
             subTitleLabel.setValue(sub.toString());
-            openEntityBtn.setCaption("Открыть кандидата");
+            openEntityBtn.setDescription("Открыть кандидата — Просмотреть подробную анкету кандидата");
+            openEntityBtn.setCaption(null);
             startAnalysis();
         } else {
             statusLabel.setValue("Объект для AI-подбора не выбран.");
@@ -1056,7 +1097,8 @@ public class CandidateVacancyMatchScreen extends Screen {
 
         if (count > 1) {
             bulkTakeIntoWorkBtn.setVisible(true);
-            bulkTakeIntoWorkBtn.setCaption("Взять выбранных (" + count + ")");
+            bulkTakeIntoWorkBtn.setDescription("Взять выбранных (" + count + ") — Перевести всех отмеченных кандидатов в работу");
+            bulkTakeIntoWorkBtn.setCaption(null);
             takeIntoWorkBtn.setEnabled(false);
             addToReserveBtn.setEnabled(false);
             createInteractionBtn.setEnabled(false);

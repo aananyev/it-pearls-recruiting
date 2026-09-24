@@ -97,59 +97,62 @@
                            stylename="candidate-vacancy-match-count" align="MIDDLE_RIGHT"/>
                 </hbox>
 
-                <vbox spacing="true" width="100%" height="AUTO"
-                      stylename="candidate-vacancy-match-actions-card">
-                    <hbox spacing="true" width="100%" height="AUTO" align="MIDDLE_LEFT"
-                          stylename="candidate-vacancy-match-action-row">
+                <hbox id="tableActionsToolbar" spacing="true" width="100%" height="AUTO" align="MIDDLE_LEFT"
+                      expand="toolbarSpacer"
+                      stylename="candidate-vacancy-match-actions-card candidate-vacancy-match-toolbar">
+                    <hbox id="toolbarButtonsBox" spacing="true" height="AUTO" align="MIDDLE_LEFT"
+                          stylename="candidate-vacancy-match-toolbar-group">
                         <button id="takeIntoWorkBtn"
-                                caption="Взять в работу"
+                                description="Взять в работу — Начать работу по кандидату на выбранную вакансию"
                                 icon="font-icon:CHECK"
-                                stylename="primary"
+                                stylename="primary candidate-vacancy-match-toolbar-btn"
                                 enabled="false"/>
                         <button id="addToReserveBtn"
-                                caption="В кадровый резерв"
-                                description="Поместить в кадровый резерв"
-                                icon="SUPERSCRIPT"
+                                description="В кадровый резерв — Поместить кандидата в кадровый резерв с аналитикой"
+                                icon="font-icon:BOOKMARK"
+                                stylename="candidate-vacancy-match-toolbar-btn"
                                 enabled="false"/>
                         <button id="createInteractionBtn"
-                                caption="Взаимодействие"
-                                description="Создать взаимодействие с кандидатом"
+                                description="Взаимодействие — Зафиксировать собеседование или контакт с кандидатом"
                                 icon="font-icon:COMMENTS"
+                                stylename="candidate-vacancy-match-toolbar-btn"
                                 enabled="false"/>
                         <button id="outreachDraftBtn"
-                                caption="Предложение (AI)"
-                                description="Подготовить Outreach-предложение"
+                                description="Предложение (AI) — Сгенерировать персональный оффер или сопроводительное письмо"
                                 icon="font-icon:MAGIC"
+                                stylename="candidate-vacancy-match-toolbar-btn"
                                 enabled="false"/>
-                    </hbox>
-                    <hbox spacing="true" width="100%" height="AUTO" align="MIDDLE_LEFT"
-                          stylename="candidate-vacancy-match-action-row">
                         <button id="bulkTakeIntoWorkBtn"
-                                caption="Взять выбранных"
+                                description="Взять выбранных — Перевести всех отмеченных кандидатов в работу"
                                 icon="font-icon:USERS"
-                                stylename="friendly"
+                                stylename="friendly candidate-vacancy-match-toolbar-btn"
                                 visible="false"/>
                         <button id="openEntityBtn"
-                                caption="Открыть"
-                                icon="EXTERNAL_LINK"
+                                description="Открыть карточку — Просмотреть подробную анкету кандидата или вакансию"
+                                icon="font-icon:EXTERNAL_LINK"
+                                stylename="candidate-vacancy-match-toolbar-btn"
                                 enabled="false"/>
                         <button id="postponeBtn"
-                                caption="Отложить"
+                                description="Отложить — Отложить принятие решения по кандидату"
                                 icon="font-icon:CLOCK_O"
+                                stylename="candidate-vacancy-match-toolbar-btn"
                                 enabled="false"/>
                         <button id="rejectBtn"
-                                caption="Не подходит"
-                                icon="font-icon:TIMES"
-                                stylename="danger"
+                                description="Не подходит — Отклонить кандидата по текущей вакансии"
+                                icon="font-icon:BAN"
+                                stylename="danger candidate-vacancy-match-toolbar-btn"
                                 enabled="false"/>
                     </hbox>
-                    <hbox spacing="true" width="100%" height="AUTO" align="MIDDLE_LEFT"
-                          stylename="candidate-vacancy-match-filter-row">
+
+                    <hbox id="toolbarSpacer" width="100%" stylename="candidate-vacancy-match-toolbar-spacer"/>
+
+                    <hbox id="toolbarFilterBox" spacing="true" height="AUTO" align="MIDDLE_RIGHT"
+                          stylename="candidate-vacancy-match-toolbar-filter">
                         <label value="Решение рекрутера:" align="MIDDLE_LEFT"
                                stylename="candidate-vacancy-match-filter-caption"/>
-                        <lookupField id="decisionFilter" width="220px" nullOptionVisible="false"/>
+                        <lookupField id="decisionFilter" width="180px" nullOptionVisible="false"/>
                     </hbox>
-                </vbox>
+                </hbox>
 
                 <table id="matchesTable"
                        dataContainer="matchesDc"
@@ -160,6 +163,7 @@
                     <columns>
                         <column id="score" caption="AI Score" width="90px" align="CENTER"/>
                         <column id="verdict" caption="AI Вердикт" width="160px"/>
+                        <column id="recruiterDecision" caption="Решение рекрутера" width="135px" align="CENTER"/>
                         <column id="candidateName" caption="Кандидат" width="200px"/>
                         <column id="vacancyName" caption="Вакансия" width="200px"/>
                         <column id="positionName" caption="Должность" width="140px"/>
@@ -180,25 +184,33 @@
                     <label id="detailMeta" value=""
                            stylename="candidate-vacancy-match-detail-meta" width="100%"/>
 
-                    <!-- Быстрые действия рекрутера в карточке -->
-                    <hbox id="quickActionsBox" spacing="true" width="100%" height="AUTO" visible="false"
-                          stylename="candidate-vacancy-match-quick-actions">
-                        <vbox spacing="true" width="49%">
-                            <button id="quickTakeBtn" width="100%" caption="Взять в работу"
-                                    icon="font-icon:CHECK" stylename="primary"/>
-                            <button id="quickAddToReserveBtn" width="100%" caption="В резерв"
-                                    icon="SUPERSCRIPT"/>
-                            <button id="quickInteractionBtn" width="100%" caption="Взаимодействие"
-                                    icon="font-icon:COMMENTS"/>
-                            <button id="quickOutreachBtn" width="100%" caption="Предложение"
-                                    icon="font-icon:MAGIC"/>
-                        </vbox>
-                        <vbox spacing="true" width="49%">
-                            <button id="quickPostponeBtn" width="100%" caption="Отложить"
-                                    icon="font-icon:CLOCK_O"/>
-                            <button id="quickRejectBtn" width="100%" caption="Не подходит"
-                                    icon="font-icon:TIMES" stylename="danger"/>
-                        </vbox>
+                    <!-- Быстрые действия рекрутера в карточке: тулбар в 1 строку (Office-style) -->
+                    <hbox id="quickActionsBox" spacing="true" width="100%" height="AUTO" visible="false" align="MIDDLE_LEFT"
+                          stylename="candidate-vacancy-match-card-toolbar">
+                        <button id="quickTakeBtn"
+                                description="Взять в работу — Начать работу по кандидату на выбранную вакансию"
+                                icon="font-icon:CHECK"
+                                stylename="primary candidate-vacancy-match-toolbar-btn"/>
+                        <button id="quickAddToReserveBtn"
+                                description="В кадровый резерв — Поместить кандидата в кадровый резерв"
+                                icon="font-icon:BOOKMARK"
+                                stylename="candidate-vacancy-match-toolbar-btn"/>
+                        <button id="quickInteractionBtn"
+                                description="Взаимодействие — Зафиксировать собеседование или контакт с кандидатом"
+                                icon="font-icon:COMMENTS"
+                                stylename="candidate-vacancy-match-toolbar-btn"/>
+                        <button id="quickOutreachBtn"
+                                description="Предложение (AI) — Сгенерировать персональный оффер или первое письмо"
+                                icon="font-icon:MAGIC"
+                                stylename="candidate-vacancy-match-toolbar-btn"/>
+                        <button id="quickPostponeBtn"
+                                description="Отложить — Отложить принятие решения по кандидату"
+                                icon="font-icon:CLOCK_O"
+                                stylename="candidate-vacancy-match-toolbar-btn"/>
+                        <button id="quickRejectBtn"
+                                description="Не подходит — Отклонить кандидата по текущей вакансии"
+                                icon="font-icon:BAN"
+                                stylename="danger candidate-vacancy-match-toolbar-btn"/>
                     </hbox>
 
                     <!-- Статус решения рекрутера в карточке -->
