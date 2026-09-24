@@ -1213,6 +1213,11 @@
       }
     }
 
+    .v-grid-header .v-grid-cell {
+      display: inline-flex !important;
+      align-items: center !important;
+    }
+
     /* Строки (Table и DataGrid) — увеличены в 1.5 раза (38px -> 57px) */
     .v-table-row,
     .v-table-row-odd,
@@ -1255,6 +1260,97 @@
       }
     }
 
+    .v-grid-cell {
+      display: inline-flex !important;
+      align-items: center !important;
+
+      .v-icon {
+        font-size: 15px !important;
+        vertical-align: middle !important;
+      }
+    }
+
+    /* Центрирование иконочных и фиксированных столбцов */
+    .v-grid-cell[col-id="icon"],
+    .v-grid-cell[col-id="currentOpenCloseColumn"],
+    .v-grid-cell[col-id="commentColumn"],
+    .v-grid-cell[col-id="projectLogoColumn"],
+    .v-grid-cell[col-id="iconOriginalCVFile"],
+    .v-grid-cell[col-id="iconHuntTechCVFile"],
+    .v-grid-cell[col-id="letter"],
+    .v-grid-cell[col-id="rating"],
+    .v-grid-cell[col-id="dateIteraction"],
+    .v-grid-cell[col-id="datePost"],
+    .v-grid-cell[col-id="numberIteraction"],
+    .v-grid-header .v-grid-cell[col-id="icon"],
+    .v-grid-header .v-grid-cell[col-id="currentOpenCloseColumn"],
+    .v-grid-header .v-grid-cell[col-id="commentColumn"],
+    .v-grid-header .v-grid-cell[col-id="projectLogoColumn"],
+    .v-grid-header .v-grid-cell[col-id="iconOriginalCVFile"],
+    .v-grid-header .v-grid-cell[col-id="iconHuntTechCVFile"],
+    .v-grid-header .v-grid-cell[col-id="letter"],
+    .v-grid-header .v-grid-cell[col-id="rating"],
+    .v-grid-header .v-grid-cell[col-id="dateIteraction"],
+    .v-grid-header .v-grid-cell[col-id="datePost"],
+    .v-grid-header .v-grid-cell[col-id="numberIteraction"] {
+      justify-content: center !important;
+      text-align: center !important;
+    }
+
+    /* Логотип проекта в DataGrid */
+    .v-grid-cell[col-id="projectLogoColumn"] {
+      padding: 3px !important;
+
+      .v-hbox {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      img {
+        max-height: 48px !important;
+        max-width: 48px !important;
+        border-radius: 6px !important;
+        object-fit: contain !important;
+      }
+    }
+
+    /* Золотистый рейтинг */
+    .v-grid-cell[col-id="rating"] {
+      font-size: 13.5px !important;
+      color: #eab308 !important;
+      white-space: nowrap !important;
+    }
+
+    /* Иконки комментариев */
+    .v-grid-cell.pic-center-large-green .v-icon,
+    .pic-center-large-green {
+      color: #10b981 !important;
+      font-size: 16px !important;
+    }
+    .v-grid-cell.pic-center-large-red .v-icon,
+    .pic-center-large-red {
+      color: #94a3b8 !important;
+      font-size: 15px !important;
+    }
+
+    /* Ссылки на файлы CV */
+    .v-grid-cell[col-id="candidateOriginalCVColumn"],
+    .v-grid-cell[col-id="candidateHuntTechCVColumn"] {
+      .v-button-link {
+        font-weight: 600 !important;
+        font-size: 12.5px !important;
+        color: $v-selection-color !important;
+        text-decoration: none !important;
+
+        &:hover {
+          text-decoration: underline !important;
+        }
+      }
+    }
+
     /* Исключение разделителей строк для no-horizontal-lines */
     &.no-horizontal-lines .v-table-cell-content,
     &.no-horizontal-lines .v-grid-cell,
@@ -1273,12 +1369,30 @@
     }
 
     /* Кнопки в панели таблицы (buttonsPanel) */
-    .v-buttons-panel .v-button {
-      min-height: 34px !important;
-      height: 34px !important;
-      border-radius: 4px !important;
-      font-size: 12.5px !important;
-      font-weight: 600 !important;
+    .v-buttons-panel {
+      padding: 8px 12px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 35%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.1) !important;
+
+      .v-button {
+        min-height: 34px !important;
+        height: 34px !important;
+        border-radius: 6px !important;
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        padding: 0 12px !important;
+      }
+    }
+
+    /* Пагинатор и счетчик строк таблицы */
+    .c-table-rowcount,
+    .c-datagrid-rowcount {
+      padding: 6px 14px !important;
+      font-size: 12px !important;
+      color: mix($v-font-color, $v-panel-background-color, 65%) !important;
+      font-weight: 500 !important;
+      border-top: 1px solid rgba($v-font-color, 0.08) !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 25%) !important;
     }
 
     /* Групповые строки CUBA GroupTable */
