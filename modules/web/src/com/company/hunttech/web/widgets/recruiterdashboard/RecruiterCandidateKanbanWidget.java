@@ -162,7 +162,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         String search = searchField.getValue();
 
         StringBuilder jpql = new StringBuilder(
-                "select e from hunttech_IteractionList e where 1=1 ");
+                "select e from hunttech_IteractionList e where e.deleteTs is null and e.candidate is not null ");
 
         Map<String, Object> params = new HashMap<>();
 
@@ -181,16 +181,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             params.put("search", "%" + search.trim().toLowerCase() + "%");
         }
 
-        jpql.append("and e.numberIteraction = (")
-                .append(" select max(x.numberIteraction) from hunttech_IteractionList x ")
-                .append(" where x.candidate = e.candidate ");
-
-        if (selectedRecruiter != null) {
-            jpql.append(" and x.recrutier = :recrutier ");
-        }
-
-        jpql.append(" and ((e.vacancy is null and x.vacancy is null) or x.vacancy = e.vacancy)")
-                .append(") order by e.dateIteraction desc");
+        jpql.append("order by e.dateIteraction desc nulls last, e.numberIteraction desc, e.createTs desc");
 
         com.haulmont.cuba.core.global.FluentLoader.ByQuery<IteractionList, UUID> loader =
                 dataManager.load(IteractionList.class)
@@ -203,46 +194,37 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         List<IteractionList> cases = loader.list();
 
-        // 1. Дедупликация: карточка формируется по кандидату и проекту (вакансии).
-        // Если кандидат рассматривается по 2 проектам, на канбане отображаются 2 независимые карточки с их последними статусами.
-        Map<String, IteractionList> bestCasesByKey = new LinkedHashMap<>();
-        List<IteractionList> candidateLessCases = new ArrayList<>();
+        // 1. Кандидат отображается ровно столько раз, по скольким проектам (вакансиям) он проходит за выбранный период.
+        // Для каждой пары (кандидат, проект/вакансия) выбирается самое актуальное взаимодействие (по дате/номеру).
+        Map<String, IteractionList> projectCardsByKey = new LinkedHashMap<>();
 
         for (IteractionList item : cases) {
             JobCandidate candidate = item.getCandidate();
             if (candidate == null || candidate.getId() == null) {
-                candidateLessCases.add(item);
                 continue;
             }
             UUID candidateId = candidate.getId();
             UUID vacancyId = item.getVacancy() != null ? item.getVacancy().getId() : null;
             String caseKey = candidateId + ":" + (vacancyId != null ? vacancyId : "no-vacancy");
 
-            IteractionList existing = bestCasesByKey.get(caseKey);
+            IteractionList existing = projectCardsByKey.get(caseKey);
             if (existing == null) {
-                bestCasesByKey.put(caseKey, item);
+                projectCardsByKey.put(caseKey, item);
             } else {
-                KanbanStage currentStage = KanbanStage.resolve(item.getIteractionType());
-                KanbanStage existingStage = KanbanStage.resolve(existing.getIteractionType());
-                if (currentStage.getOrder() > existingStage.getOrder()) {
-                    bestCasesByKey.put(caseKey, item);
-                } else if (currentStage.getOrder() == existingStage.getOrder()) {
-                    Date currentDate = item.getDateIteraction();
-                    Date existingDate = existing.getDateIteraction();
-                    if (currentDate != null && (existingDate == null || currentDate.after(existingDate))) {
-                        bestCasesByKey.put(caseKey, item);
-                    } else if (currentDate != null && existingDate != null && currentDate.equals(existingDate)) {
-                        if (item.getNumberIteraction() != null && (existing.getNumberIteraction() == null
-                                || item.getNumberIteraction().compareTo(existing.getNumberIteraction()) > 0)) {
-                            bestCasesByKey.put(caseKey, item);
-                        }
+                Date curDate = item.getDateIteraction();
+                Date existDate = existing.getDateIteraction();
+                if (curDate != null && (existDate == null || curDate.after(existDate))) {
+                    projectCardsByKey.put(caseKey, item);
+                } else if (curDate != null && existDate != null && curDate.equals(existDate)) {
+                    if (item.getNumberIteraction() != null && (existing.getNumberIteraction() == null
+                            || item.getNumberIteraction().compareTo(existing.getNumberIteraction()) > 0)) {
+                        projectCardsByKey.put(caseKey, item);
                     }
                 }
             }
         }
 
-        List<IteractionList> uniqueCases = new ArrayList<>(bestCasesByKey.values());
-        uniqueCases.addAll(candidateLessCases);
+        List<IteractionList> uniqueCases = new ArrayList<>(projectCardsByKey.values());
 
         cachedColumns = loadDynamicColumns();
         List<DynamicKanbanColumn> columns = cachedColumns;
@@ -583,22 +565,24 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         draft.setIteractionType(defaultType);
 
         final DynamicKanbanColumn finalTargetCol = targetCol;
-        screenBuilders.editor(IteractionList.class, this)
+        IteractionListEdit editor = screenBuilders.editor(IteractionList.class, this)
                 .withScreenClass(IteractionListEdit.class)
                 .newEntity(draft)
                 .withOpenMode(OpenMode.DIALOG)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
-                        reload();
-                        notifications.create(Notifications.NotificationType.TRAY)
-                                .withCaption("Взаимодействие зарегистрировано")
-                                .withDescription("Кандидат перемещён в этап: " + finalTargetCol.getCaption())
-                                .show();
-                    } else {
-                        reload();
-                    }
-                })
-                .show();
+                .build();
+        editor.setRestrictedRootIteractionId(finalTargetCol.getId());
+        editor.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                reload();
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Взаимодействие зарегистрировано")
+                        .withDescription("Кандидат перемещён в этап: " + finalTargetCol.getCaption())
+                        .show();
+            } else {
+                reload();
+            }
+        });
+        editor.show();
     }
 
     /**

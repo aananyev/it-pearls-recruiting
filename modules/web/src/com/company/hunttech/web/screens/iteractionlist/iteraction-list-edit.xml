@@ -28,13 +28,21 @@
                         ]]>
                     <!-- Условие добавляет фильтр по номеру группы дерева, выбранной business-controller. -->
                     <condition>
-                        <!-- JPQL-условие подключает именованный параметр number без изменения базового запроса. -->
-                        <c:jpql>
-                            <!-- Фрагмент WHERE ограничивает типы одной веткой дерева взаимодействий. -->
-                            <c:where>
-                                e.iteractionTree.number like :number
-                            </c:where>
-                        </c:jpql>
+                        <and>
+                            <!-- JPQL-условие подключает именованный параметр number без изменения базового запроса. -->
+                            <c:jpql>
+                                <!-- Фрагмент WHERE ограничивает типы одной веткой дерева взаимодействий. -->
+                                <c:where>
+                                    e.iteractionTree.number like :number
+                                </c:where>
+                            </c:jpql>
+                            <!-- Ограничение по ID корневой группы дерева при перетаскивании на Kanban-доске -->
+                            <c:jpql>
+                                <c:where>
+                                    e.iteractionTree.id = :rootTreeId
+                                </c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>

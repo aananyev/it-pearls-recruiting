@@ -54,6 +54,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
     @Inject
+    private CollectionContainer<Iteraction> iteractionTypesDc;
+    @Inject
     private DateField<Date> addDate;
     @Inject
     private TextField<String> addString;
@@ -109,6 +111,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private boolean commentLoaded = false;
     private boolean openPositionsReady = false;
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
+    private UUID restrictedRootIteractionId;
+
+    public void setRestrictedRootIteractionId(UUID restrictedRootIteractionId) {
+        this.restrictedRootIteractionId = restrictedRootIteractionId;
+    }
 
     @Inject
     private EmailGenerationService emailGenerationService;
@@ -369,7 +376,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             newProject = countIteraction == 0;
 
-            if (newProject) {
+            if (restrictedRootIteractionId != null) {
+                iteractionTypesLc.removeParameter("number");
+                iteractionTypesLc.setParameter("rootTreeId", restrictedRootIteractionId);
+            } else if (newProject) {
                 // это начало цепочки - обрезаем выбор
                 iteractionTypesLc.setParameter("number", "001");
 
@@ -1090,6 +1100,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             dateIteractionField.setEditable(true);
         } else {
             dateIteractionField.setEditable(false);
+        }
+
+        if (restrictedRootIteractionId != null) {
+            iteractionTypesLc.removeParameter("number");
+            iteractionTypesLc.setParameter("rootTreeId", restrictedRootIteractionId);
+            iteractionTypesLc.load();
+            if (iteractionTypesDc.getItems().isEmpty()) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Внимание")
+                        .withDescription("В выбранной группе взаимодействий пока нет настроенных дочерних типов.")
+                        .show();
+            } else if (getEditedEntity().getIteractionType() == null) {
+                iteractionTypeField.setValue(iteractionTypesDc.getItems().get(0));
+            }
         }
     }
 
