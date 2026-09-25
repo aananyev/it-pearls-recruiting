@@ -66,6 +66,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
     private RecruiterKanbanDragDropExtension dndExtension;
     private boolean isInitialized = false;
     private final SimpleDateFormat dayFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private List<DynamicKanbanColumn> cachedColumns = new ArrayList<>();
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -243,35 +244,46 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         List<IteractionList> uniqueCases = new ArrayList<>(bestCasesByKey.values());
         uniqueCases.addAll(candidateLessCases);
 
-        Map<KanbanStage, List<IteractionList>> grouped =
-                new EnumMap<>(KanbanStage.class);
-        for (KanbanStage stage : KanbanStage.values()) {
-            grouped.put(stage, new ArrayList<>());
+        cachedColumns = loadDynamicColumns();
+        List<DynamicKanbanColumn> columns = cachedColumns;
+        Map<UUID, List<IteractionList>> grouped = new LinkedHashMap<>();
+        for (DynamicKanbanColumn col : columns) {
+            grouped.put(col.getId(), new ArrayList<>());
         }
+
         for (IteractionList item : uniqueCases) {
-            KanbanStage stage = KanbanStage.resolve(item.getIteractionType());
-            if (stage != KanbanStage.RESERVE) {
-                grouped.get(stage).add(item);
+            DynamicKanbanColumn targetCol = resolveColumn(item.getIteractionType(), columns);
+            if (targetCol != null && grouped.containsKey(targetCol.getId())) {
+                grouped.get(targetCol.getId()).add(item);
             }
         }
 
-        renderKpis(grouped);
-        renderBoard(grouped);
+        renderKpis(columns, grouped);
+        renderBoard(columns, grouped);
 
         String periodText = (days > 0) ? ("Последние " + days + " дней") : "За все время";
         String recruiterText = selectedRecruiter != null ? selectedRecruiter.getName() : "Все";
         periodLabel.setValue(periodText + " · " + recruiterText + " · " + uniqueCases.size() + " активных кейсов");
     }
 
-    private void renderKpis(Map<KanbanStage, List<IteractionList>> grouped) {
+    private void renderKpis(List<DynamicKanbanColumn> columns, Map<UUID, List<IteractionList>> grouped) {
         kpiBar.removeAll();
         int total = grouped.values().stream().mapToInt(List::size).sum();
         addKpi("Всего в работе", total, "recruiter-kpi-primary", "★ 100%");
-        addKpi("Ресерчинг", grouped.get(KanbanStage.RESEARCHING).size(), "recruiter-kpi-muted", "Группа 001");
-        addKpi("Хантинг", grouped.get(KanbanStage.HUNTING).size(), "recruiter-kpi-blue", "Группа 002");
-        addKpi("У заказчика", grouped.get(KanbanStage.CLIENT).size(), "recruiter-kpi-violet", "Группа 003");
-        addKpi("Оффер / финал", grouped.get(KanbanStage.OFFER).size(), "recruiter-kpi-green", "Успех");
-        addKpi("Отказ / архив", grouped.get(KanbanStage.OUTCOME).size() + grouped.get(KanbanStage.CASE_CLOSED).size(), "recruiter-kpi-muted", "Закрыто");
+
+        int count = 0;
+        for (DynamicKanbanColumn col : columns) {
+            count++;
+            int itemsCount = grouped.getOrDefault(col.getId(), Collections.emptyList()).size();
+            String suffix = col.getStyleSuffix() != null ? col.getStyleSuffix() : "";
+            String kpiStyle = "new".equals(suffix) ? "recruiter-kpi-muted"
+                    : "recruiter".equals(suffix) ? "recruiter-kpi-blue"
+                    : "client".equals(suffix) || "client-interview".equals(suffix) ? "recruiter-kpi-violet"
+                    : "offer".equals(suffix) ? "recruiter-kpi-green"
+                    : "recruiter-kpi-muted";
+            String badge = col.getCode() != null && !col.getCode().isEmpty() ? col.getCode() : ("Этап " + count);
+            addKpi(col.getCaption(), itemsCount, kpiStyle, badge);
+        }
     }
 
     private void addKpi(String caption, int value, String style, String badgeText) {
@@ -305,30 +317,25 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         kpiBar.add(card);
     }
 
-    private void renderBoard(Map<KanbanStage, List<IteractionList>> grouped) {
+    private void renderBoard(List<DynamicKanbanColumn> columns, Map<UUID, List<IteractionList>> grouped) {
         kanbanBoard.removeAll();
-        for (KanbanStage stage : new KanbanStage[]{
-                KanbanStage.RESEARCHING,
-                KanbanStage.HUNTING,
-                KanbanStage.CLIENT,
-                KanbanStage.OFFER,
-                KanbanStage.OUTCOME,
-                KanbanStage.CASE_CLOSED}) {
-            kanbanBoard.add(createColumn(stage, grouped.get(stage)));
+        for (DynamicKanbanColumn col : columns) {
+            List<IteractionList> items = grouped.getOrDefault(col.getId(), Collections.emptyList());
+            kanbanBoard.add(createColumn(col, items));
         }
         if (dndExtension != null) {
             dndExtension.reinit();
         }
     }
 
-    private VBoxLayout createColumn(KanbanStage stage, List<IteractionList> items) {
+    private VBoxLayout createColumn(DynamicKanbanColumn stage, List<IteractionList> items) {
         VBoxLayout column = uiComponents.create(VBoxLayout.class);
         column.setWidth("300px");
         column.setHeight("100%");
         column.setStyleName("recruiter-kanban-column " + stage.getStyleName());
         column.setSpacing(true);
-        column.unwrap(com.vaadin.ui.AbstractComponent.class).setId("kanban-column-" + stage.name());
-        column.unwrap(com.vaadin.ui.AbstractComponent.class).setDescription("stage:" + stage.name());
+        column.unwrap(com.vaadin.ui.AbstractComponent.class).setId("kanban-column-" + stage.getId());
+        column.unwrap(com.vaadin.ui.AbstractComponent.class).setDescription("stage:" + stage.getId());
 
         HBoxLayout header = uiComponents.create(HBoxLayout.class);
         header.setWidthFull();
@@ -376,11 +383,11 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         return column;
     }
 
-    private VBoxLayout createCandidateCard(IteractionList item, KanbanStage stage) {
+    private VBoxLayout createCandidateCard(IteractionList item, DynamicKanbanColumn stage) {
         VBoxLayout card = uiComponents.create(VBoxLayout.class);
         card.setWidthFull();
         card.setSpacing(true);
-        card.setStyleName("recruiter-kanban-card card-stage-" + stage.name());
+        card.setStyleName("recruiter-kanban-card card-stage-" + stage.getStyleSuffix());
         card.unwrap(com.vaadin.ui.AbstractComponent.class).setId("kanban-card-" + item.getId());
 
         JobCandidate candidate = item.getCandidate();
@@ -497,17 +504,45 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         return card;
     }
 
-    private void handleCardMoved(String interactionIdStr, String targetStageName) {
-        if (interactionIdStr == null || targetStageName == null) return;
+    private void handleCardMoved(String interactionIdStr, String targetColIdentifier) {
+        if (interactionIdStr == null || targetColIdentifier == null) return;
 
         UUID interactionId;
-        KanbanStage targetStage;
         try {
             interactionId = UUID.fromString(interactionIdStr);
-            targetStage = KanbanStage.valueOf(targetStageName);
         } catch (Exception e) {
             return;
         }
+
+        List<DynamicKanbanColumn> columns = (cachedColumns != null && !cachedColumns.isEmpty())
+                ? cachedColumns : loadDynamicColumns();
+        DynamicKanbanColumn targetCol = null;
+
+        // 1. Попытка найти колонку по прямому UUID
+        try {
+            UUID targetColId = UUID.fromString(targetColIdentifier);
+            for (DynamicKanbanColumn col : columns) {
+                if (col.getId().equals(targetColId)) {
+                    targetCol = col;
+                    break;
+                }
+            }
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        // 2. Попытка найти колонку по коду, названию или суффиксу стиля
+        if (targetCol == null) {
+            for (DynamicKanbanColumn col : columns) {
+                if (targetColIdentifier.equalsIgnoreCase(col.getCode())
+                        || targetColIdentifier.equalsIgnoreCase(col.getCaption())
+                        || (col.getStyleSuffix() != null && targetColIdentifier.equalsIgnoreCase(col.getStyleSuffix()))) {
+                    targetCol = col;
+                    break;
+                }
+            }
+        }
+
+        if (targetCol == null) return;
 
         IteractionList sourceItem = dataManager.load(IteractionList.class)
                 .id(interactionId)
@@ -517,10 +552,17 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         if (sourceItem == null) return;
 
-        KanbanStage currentStage = KanbanStage.resolve(sourceItem.getIteractionType());
-        if (currentStage == targetStage) return;
+        DynamicKanbanColumn currentCol = resolveColumn(sourceItem.getIteractionType(), columns);
+        if (currentCol != null && currentCol.getId().equals(targetCol.getId())) return;
 
-        Iteraction defaultType = findDefaultIteractionForStage(targetStage);
+        Iteraction defaultType = findDefaultIteractionForColumn(targetCol.getId());
+        if (defaultType == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Не удалось определить действие")
+                    .withDescription("Для группы «" + targetCol.getCaption() + "» не найдено подходящее действие")
+                    .show();
+            return;
+        }
 
         IteractionList draft = metadata.create(IteractionList.class);
         draft.setCandidate(sourceItem.getCandidate());
@@ -540,6 +582,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         draft.setDateIteraction(new Date());
         draft.setIteractionType(defaultType);
 
+        final DynamicKanbanColumn finalTargetCol = targetCol;
         screenBuilders.editor(IteractionList.class, this)
                 .withScreenClass(IteractionListEdit.class)
                 .newEntity(draft)
@@ -549,32 +592,217 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
                         reload();
                         notifications.create(Notifications.NotificationType.TRAY)
                                 .withCaption("Взаимодействие зарегистрировано")
-                                .withDescription("Кандидат перемещён в этап: " + targetStage.getCaption())
+                                .withDescription("Кандидат перемещён в этап: " + finalTargetCol.getCaption())
                                 .show();
                     } else {
-                        // Пользователь нажал "Отменить" - карточка возвращается в прежний столбец
                         reload();
                     }
                 })
                 .show();
     }
 
-    private Iteraction findDefaultIteractionForStage(KanbanStage targetStage) {
-        List<Iteraction> allTypes = dataManager.load(Iteraction.class)
-                .query("select e from hunttech_Iteraction e left join fetch e.iteractionTree where e.deleteTs is null order by e.number asc")
+    /**
+     * Динамическая загрузка колонок Канбана из таблицы Iteraction (элементы верхнего уровня).
+     * Любой добавленный в таблицу Iteraction корневой элемент автоматически формирует новую колонку.
+     */
+    public List<DynamicKanbanColumn> loadDynamicColumns() {
+        List<Iteraction> rootIteractions = dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e where e.iteractionTree is null and e.deleteTs is null order by e.number asc, e.iterationName asc")
                 .list();
 
-        for (Iteraction type : allTypes) {
-            if (KanbanStage.resolve(type) == targetStage && type.getIteractionTree() != null) {
-                return type;
+        List<DynamicKanbanColumn> columns = new ArrayList<>();
+        int defaultOrder = 100;
+
+        for (Iteraction root : rootIteractions) {
+            String num = root.getNumber() != null ? root.getNumber().trim() : "";
+            String name = root.getIterationName() != null ? root.getIterationName().trim().toLowerCase(Locale.ROOT) : "";
+
+            // Исключаем каналы связи (005 Тип взаимодействия), кадровый резерв и комментарии
+            if ("005".equals(num) || name.contains("тип взаимодействия") || name.contains("тип взаимодейтсвия")) {
+                continue;
+            }
+            if (Boolean.TRUE.equals(root.getSignPersonalReserve())
+                    || Boolean.TRUE.equals(root.getSignPersonalReserveRemove())
+                    || Boolean.TRUE.equals(root.getSignPersonalReserveDelete())
+                    || Boolean.TRUE.equals(root.getSignPersonalReservePut())
+                    || name.contains("кадров")) {
+                continue;
+            }
+            if (Boolean.TRUE.equals(root.getSignComment()) || "комментарий".equals(name)) {
+                continue;
+            }
+
+            int order = defaultOrder++;
+            if (!num.isEmpty()) {
+                try {
+                    order = Integer.parseInt(num.replaceAll("\\D+", ""));
+                } catch (Exception ignored) {
+                }
+            }
+
+            String styleName = resolveColumnStyle(num, name);
+            String styleSuffix = resolveStyleSuffix(num, name);
+            String caption = root.getIterationName() != null ? root.getIterationName() : ("Группа " + num);
+
+            columns.add(new DynamicKanbanColumn(root.getId(), num, caption, styleName, styleSuffix, order));
+        }
+
+        columns.sort(Comparator.comparingInt(DynamicKanbanColumn::getOrder));
+        return columns;
+    }
+
+    private String resolveColumnStyle(String num, String name) {
+        if ("001".equals(num) || name.contains("ресерчинг")) return "recruiter-stage-new";
+        if ("002".equals(num) || name.contains("хантинг")) return "recruiter-stage-recruiter";
+        if ("003".equals(num) || name.contains("заказчик")) return "recruiter-stage-client";
+        if ("008".equals(num) || name.contains("успех") || name.contains("офер") || name.contains("оффер")) return "recruiter-stage-offer";
+        if ("007".equals(num) || name.contains("отказ")) return "recruiter-stage-outcome";
+        if ("010".equals(num) || name.contains("закрытие")) return "recruiter-stage-outcome";
+        if ("009".equals(num) || name.contains("задач")) return "recruiter-stage-client-interview";
+        return "recruiter-stage-recruiter";
+    }
+
+    private String resolveStyleSuffix(String num, String name) {
+        if ("001".equals(num) || name.contains("ресерчинг")) return "new";
+        if ("002".equals(num) || name.contains("хантинг")) return "recruiter";
+        if ("003".equals(num) || name.contains("заказчик")) return "client";
+        if ("008".equals(num) || name.contains("успех") || name.contains("офер") || name.contains("оффер")) return "offer";
+        if ("007".equals(num) || name.contains("отказ")) return "outcome";
+        if ("010".equals(num) || name.contains("закрытие")) return "closed";
+        if ("009".equals(num) || name.contains("задач")) return "client-interview";
+        return "default";
+    }
+
+    public DynamicKanbanColumn resolveColumn(Iteraction type, List<DynamicKanbanColumn> columns) {
+        if (type == null || columns == null || columns.isEmpty()) {
+            return (columns != null && !columns.isEmpty()) ? columns.get(0) : null;
+        }
+
+        // 1. Иерархия: находим корень дерева взаимодействий с защитой от циклов
+        Iteraction root = type;
+        Set<UUID> visited = new HashSet<>();
+        while (root.getIteractionTree() != null && visited.add(root.getId())) {
+            root = root.getIteractionTree();
+        }
+
+        // 2. Ищем прямое совпадение по ID корня
+        UUID rootId = root.getId();
+        if (rootId != null) {
+            for (DynamicKanbanColumn col : columns) {
+                if (rootId.equals(col.getId())) {
+                    return col;
+                }
             }
         }
-        for (Iteraction type : allTypes) {
-            if (KanbanStage.resolve(type) == targetStage) {
-                return type;
+
+        // 3. Совпадение по коду/номеру корня
+        String rootNum = root.getNumber() != null ? root.getNumber().trim() : "";
+        if (!rootNum.isEmpty()) {
+            for (DynamicKanbanColumn col : columns) {
+                if (rootNum.equalsIgnoreCase(col.getCode())) {
+                    return col;
+                }
             }
         }
-        return null;
+
+        // 4. Совпадение по наименованию
+        String rootName = root.getIterationName() != null ? root.getIterationName().trim().toLowerCase(Locale.ROOT) : "";
+        for (DynamicKanbanColumn col : columns) {
+            if (rootName.equals(col.getCaption().toLowerCase(Locale.ROOT))) {
+                return col;
+            }
+        }
+
+        // 5. Fallback по бизнес-флагам для legacy-записей
+        if (Boolean.TRUE.equals(type.getSignEndCase())) {
+            for (DynamicKanbanColumn col : columns) {
+                if ("010".equals(col.getCode()) || col.getCaption().toLowerCase(Locale.ROOT).contains("закрытие")) return col;
+            }
+        }
+        if (Boolean.TRUE.equals(type.getSignStartCase())) {
+            for (DynamicKanbanColumn col : columns) {
+                if ("008".equals(col.getCode()) || col.getCaption().toLowerCase(Locale.ROOT).contains("успех")) return col;
+            }
+        }
+        if (Boolean.TRUE.equals(type.getSignClientInterview()) || Boolean.TRUE.equals(type.getSignSendToClient())) {
+            for (DynamicKanbanColumn col : columns) {
+                if ("003".equals(col.getCode()) || col.getCaption().toLowerCase(Locale.ROOT).contains("заказчик")) return col;
+            }
+        }
+        if (Boolean.TRUE.equals(type.getSignOurInterviewAssigned()) || Boolean.TRUE.equals(type.getSignOurInterview())) {
+            for (DynamicKanbanColumn col : columns) {
+                if ("002".equals(col.getCode()) || col.getCaption().toLowerCase(Locale.ROOT).contains("хантинг")) return col;
+            }
+        }
+
+        return columns.get(0);
+    }
+
+    private Iteraction findDefaultIteractionForColumn(UUID rootId) {
+        if (rootId == null) return null;
+        List<Iteraction> children = dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e left join fetch e.iteractionTree where e.iteractionTree.id = :rootId and e.deleteTs is null order by e.number asc, e.iterationName asc")
+                .parameter("rootId", rootId)
+                .list();
+
+        if (!children.isEmpty()) {
+            for (Iteraction child : children) {
+                if (Boolean.TRUE.equals(child.getMandatoryIteraction())) {
+                    return child;
+                }
+            }
+            return children.get(0);
+        }
+
+        return dataManager.load(Iteraction.class)
+                .id(rootId)
+                .optional()
+                .orElse(null);
+    }
+
+    /**
+     * DTO динамической колонки Канбана.
+     */
+    public static class DynamicKanbanColumn {
+        private final UUID id;
+        private final String code;
+        private final String caption;
+        private final String styleName;
+        private final String styleSuffix;
+        private final int order;
+
+        public DynamicKanbanColumn(UUID id, String code, String caption, String styleName, String styleSuffix, int order) {
+            this.id = id;
+            this.code = code;
+            this.caption = caption;
+            this.styleName = styleName;
+            this.styleSuffix = styleSuffix;
+            this.order = order;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getCaption() {
+            return caption;
+        }
+
+        public String getStyleName() {
+            return styleName;
+        }
+
+        public String getStyleSuffix() {
+            return styleSuffix;
+        }
+
+        public int getOrder() {
+            return order;
+        }
     }
 
     private Date daysAgo(int days) {

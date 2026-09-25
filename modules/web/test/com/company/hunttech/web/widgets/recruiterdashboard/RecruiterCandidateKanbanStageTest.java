@@ -71,4 +71,42 @@ public class RecruiterCandidateKanbanStageTest {
         assertNotEquals("Кандидат с двумя разными проектами должен иметь независимые ключи карточек",
                 keyDks, keyAgima);
     }
+
+    @Test
+    public void testDynamicColumnAdditionAndResolution() {
+        RecruiterCandidateKanbanWidget widget = new RecruiterCandidateKanbanWidget();
+
+        UUID root1Id = UUID.randomUUID();
+        UUID root2Id = UUID.randomUUID();
+        UUID newCustomRootId = UUID.randomUUID(); // Пользователь создал новый элемент верхнего уровня в Iteraction!
+
+        RecruiterCandidateKanbanWidget.DynamicKanbanColumn col1 =
+                new RecruiterCandidateKanbanWidget.DynamicKanbanColumn(root1Id, "001", "Ресерчинг", "recruiter-stage-new", "new", 1);
+        RecruiterCandidateKanbanWidget.DynamicKanbanColumn col2 =
+                new RecruiterCandidateKanbanWidget.DynamicKanbanColumn(root2Id, "002", "Хантинг", "recruiter-stage-recruiter", "recruiter", 2);
+        RecruiterCandidateKanbanWidget.DynamicKanbanColumn colNew =
+                new RecruiterCandidateKanbanWidget.DynamicKanbanColumn(newCustomRootId, "004", "Проверка СБ и комплаенс", "recruiter-stage-client", "client", 4);
+
+        java.util.List<RecruiterCandidateKanbanWidget.DynamicKanbanColumn> columns =
+                java.util.Arrays.asList(col1, col2, colNew);
+
+        // Создаем дочернее взаимодействие, ссылающееся на новый корневой элемент
+        Iteraction newRoot = new Iteraction();
+        newRoot.setId(newCustomRootId);
+        newRoot.setNumber("004");
+        newRoot.setIterationName("Проверка СБ и комплаенс");
+
+        Iteraction childAction = new Iteraction();
+        childAction.setId(UUID.randomUUID());
+        childAction.setNumber("4.01");
+        childAction.setIterationName("Анкета передана в службу безопасности");
+        childAction.setIteractionTree(newRoot);
+
+        RecruiterCandidateKanbanWidget.DynamicKanbanColumn resolved = widget.resolveColumn(childAction, columns);
+
+        assertEquals("Кандидат с новым действием должен автоматически попасть в новую динамическую колонку",
+                newCustomRootId, resolved.getId());
+        assertEquals("Проверка СБ и комплаенс", resolved.getCaption());
+    }
 }
+
