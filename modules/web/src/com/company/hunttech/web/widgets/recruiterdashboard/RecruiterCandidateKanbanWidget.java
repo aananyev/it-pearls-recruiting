@@ -25,6 +25,10 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
+import com.haulmont.cuba.core.entity.KeyValueEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -33,6 +37,8 @@ import java.util.*;
 @UiDescriptor("recruiter-candidate-kanban-widget.xml")
 @DashboardWidget(name = "Kanban")
 public class RecruiterCandidateKanbanWidget extends ScreenFragment implements RefreshableWidget {
+
+    private static final Logger log = LoggerFactory.getLogger(RecruiterCandidateKanbanWidget.class);
 
     @Inject
     private DataManager dataManager;
@@ -149,6 +155,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
     }
 
     private void reload() {
+        refreshIteractionHierarchyCache();
         User selectedRecruiter = recruiterLookupField.getValue();
         if (selectedRecruiter == null) {
             selectedRecruiter = userSession.getCurrentOrSubstitutedUser();
@@ -585,11 +592,85 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         editor.show();
     }
 
+    private volatile Map<UUID, IteractionNode> iteractionHierarchyCache = Collections.emptyMap();
+
+    public static class IteractionNode {
+        private final UUID id;
+        private final String number;
+        private final String name;
+        private final UUID parentId;
+
+        public IteractionNode(UUID id, String number, String name, UUID parentId) {
+            this.id = id;
+            this.number = number != null ? number.trim() : "";
+            this.name = name != null ? name.trim() : "";
+            this.parentId = parentId;
+        }
+
+        public UUID getId() { return id; }
+        public String getNumber() { return number; }
+        public String getName() { return name; }
+        public UUID getParentId() { return parentId; }
+    }
+
+    public synchronized void refreshIteractionHierarchyCache() {
+        try {
+            List<KeyValueEntity> rows = dataManager.loadValues(
+                    "select e.id, e.number, e.iterationName, e.iteractionTree.id from hunttech_Iteraction e where e.deleteTs is null")
+                    .properties("id", "number", "iterationName", "parentId")
+                    .list();
+            Map<UUID, IteractionNode> map = new HashMap<>();
+            for (KeyValueEntity row : rows) {
+                UUID id = row.getValue("id");
+                String num = row.getValue("number");
+                String name = row.getValue("iterationName");
+                UUID parentId = row.getValue("parentId");
+                if (id != null) {
+                    map.put(id, new IteractionNode(id, num, name, parentId));
+                }
+            }
+            this.iteractionHierarchyCache = Collections.unmodifiableMap(map);
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить иерархию взаимодействий: {}", e.getMessage());
+        }
+    }
+
+    public IteractionNode resolveRootIteractionNode(UUID typeId) {
+        if (typeId == null) {
+            return null;
+        }
+        Map<UUID, IteractionNode> cache = this.iteractionHierarchyCache;
+        if (cache.isEmpty()) {
+            refreshIteractionHierarchyCache();
+            cache = this.iteractionHierarchyCache;
+        }
+        IteractionNode current = cache.get(typeId);
+        if (current == null) {
+            refreshIteractionHierarchyCache();
+            cache = this.iteractionHierarchyCache;
+            current = cache.get(typeId);
+            if (current == null) {
+                return null;
+            }
+        }
+        Set<UUID> visited = new HashSet<>();
+        while (current.getParentId() != null && visited.add(current.getId())) {
+            IteractionNode parent = cache.get(current.getParentId());
+            if (parent == null) {
+                break;
+            }
+            current = parent;
+        }
+        return current;
+    }
+
     /**
      * Динамическая загрузка колонок Канбана из таблицы Iteraction (элементы верхнего уровня).
      * Любой добавленный в таблицу Iteraction корневой элемент автоматически формирует новую колонку.
      */
     public List<DynamicKanbanColumn> loadDynamicColumns() {
+        refreshIteractionHierarchyCache();
+
         List<Iteraction> rootIteractions = dataManager.load(Iteraction.class)
                 .query("select e from hunttech_Iteraction e where e.iteractionTree is null and e.deleteTs is null order by e.number asc, e.iterationName asc")
                 .list();
@@ -662,15 +743,24 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             return (columns != null && !columns.isEmpty()) ? columns.get(0) : null;
         }
 
-        // 1. Иерархия: находим корень дерева взаимодействий с защитой от циклов
-        Iteraction root = type;
-        Set<UUID> visited = new HashSet<>();
-        while (root.getIteractionTree() != null && visited.add(root.getId())) {
-            root = root.getIteractionTree();
+        UUID typeId = type.getId();
+        IteractionNode root = resolveRootIteractionNode(typeId);
+
+        Iteraction rootEntity = null;
+        if (root == null) {
+            try {
+                Iteraction curr = type;
+                Set<UUID> visited = new HashSet<>();
+                while (curr.getIteractionTree() != null && visited.add(curr.getId())) {
+                    curr = curr.getIteractionTree();
+                }
+                rootEntity = curr;
+            } catch (Throwable ignored) {
+            }
         }
 
-        // 2. Ищем прямое совпадение по ID корня
-        UUID rootId = root.getId();
+        // 1. Ищем прямое совпадение по ID корня
+        UUID rootId = root != null ? root.getId() : (rootEntity != null ? rootEntity.getId() : null);
         if (rootId != null) {
             for (DynamicKanbanColumn col : columns) {
                 if (rootId.equals(col.getId())) {
@@ -679,8 +769,10 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             }
         }
 
-        // 3. Совпадение по коду/номеру корня
-        String rootNum = root.getNumber() != null ? root.getNumber().trim() : "";
+        // 2. Совпадение по коду/номеру корня
+        String rootNum = root != null ? root.getNumber()
+                : (rootEntity != null && rootEntity.getNumber() != null ? rootEntity.getNumber().trim()
+                : (type.getNumber() != null ? type.getNumber().trim() : ""));
         if (!rootNum.isEmpty()) {
             for (DynamicKanbanColumn col : columns) {
                 if (rootNum.equalsIgnoreCase(col.getCode())) {
@@ -689,15 +781,17 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             }
         }
 
-        // 4. Совпадение по наименованию
-        String rootName = root.getIterationName() != null ? root.getIterationName().trim().toLowerCase(Locale.ROOT) : "";
+        // 3. Совпадение по наименованию
+        String rootName = root != null ? root.getName().toLowerCase(Locale.ROOT)
+                : (rootEntity != null && rootEntity.getIterationName() != null ? rootEntity.getIterationName().trim().toLowerCase(Locale.ROOT)
+                : (type.getIterationName() != null ? type.getIterationName().trim().toLowerCase(Locale.ROOT) : ""));
         for (DynamicKanbanColumn col : columns) {
             if (rootName.equals(col.getCaption().toLowerCase(Locale.ROOT))) {
                 return col;
             }
         }
 
-        // 5. Fallback по бизнес-флагам для legacy-записей
+        // 4. Fallback по бизнес-флагам для legacy-записей
         if (Boolean.TRUE.equals(type.getSignEndCase())) {
             for (DynamicKanbanColumn col : columns) {
                 if ("010".equals(col.getCode()) || col.getCaption().toLowerCase(Locale.ROOT).contains("закрытие")) return col;
@@ -844,11 +938,15 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
                 return RESERVE;
             }
 
-            // 1. Иерархия: находим корень дерева взаимодействий с защитой от циклов
+            // 1. Иерархия: находим корень дерева взаимодействий с защитой от циклов и detached indirection
             Iteraction root = type;
             Set<UUID> visited = new HashSet<>();
-            while (root.getIteractionTree() != null && visited.add(root.getId())) {
-                root = root.getIteractionTree();
+            try {
+                while (root.getIteractionTree() != null && visited.add(root.getId())) {
+                    root = root.getIteractionTree();
+                }
+            } catch (Throwable ignored) {
+                // Если entity detached и lazy relationship не загружен, работаем с текущим узлом
             }
 
             String rootNum = root.getNumber() != null ? root.getNumber().trim() : "";
