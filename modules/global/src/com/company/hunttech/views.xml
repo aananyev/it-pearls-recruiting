@@ -1066,6 +1066,11 @@
         </property>
         <property name="iteractionType" view="_minimal">
             <property name="iterationName"/>
+            <property name="number"/>
+            <property name="iteractionTree" view="_minimal">
+                <property name="iterationName"/>
+                <property name="number"/>
+            </property>
             <property name="signOurInterviewAssigned"/>
             <property name="signOurInterview"/>
             <property name="signClientInterview"/>

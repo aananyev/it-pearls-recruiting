@@ -202,9 +202,9 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         List<IteractionList> cases = loader.list();
 
-        // 1. Дедупликация: кандидат не должен повторяться на доске два и более раз.
-        // Выбираем наиболее старшую (самую правую) стадию, при равенстве стадий — более свежее взаимодействие.
-        Map<UUID, IteractionList> bestCasesByCandidate = new LinkedHashMap<>();
+        // 1. Дедупликация: карточка формируется по кандидату и проекту (вакансии).
+        // Если кандидат рассматривается по 2 проектам, на канбане отображаются 2 независимые карточки с их последними статусами.
+        Map<String, IteractionList> bestCasesByKey = new LinkedHashMap<>();
         List<IteractionList> candidateLessCases = new ArrayList<>();
 
         for (IteractionList item : cases) {
@@ -214,35 +214,43 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
                 continue;
             }
             UUID candidateId = candidate.getId();
-            IteractionList existing = bestCasesByCandidate.get(candidateId);
+            UUID vacancyId = item.getVacancy() != null ? item.getVacancy().getId() : null;
+            String caseKey = candidateId + ":" + (vacancyId != null ? vacancyId : "no-vacancy");
+
+            IteractionList existing = bestCasesByKey.get(caseKey);
             if (existing == null) {
-                bestCasesByCandidate.put(candidateId, item);
+                bestCasesByKey.put(caseKey, item);
             } else {
-                RecruiterDashboardStage currentStage = RecruiterDashboardStage.resolve(item.getIteractionType());
-                RecruiterDashboardStage existingStage = RecruiterDashboardStage.resolve(existing.getIteractionType());
+                KanbanStage currentStage = KanbanStage.resolve(item.getIteractionType());
+                KanbanStage existingStage = KanbanStage.resolve(existing.getIteractionType());
                 if (currentStage.getOrder() > existingStage.getOrder()) {
-                    bestCasesByCandidate.put(candidateId, item);
+                    bestCasesByKey.put(caseKey, item);
                 } else if (currentStage.getOrder() == existingStage.getOrder()) {
                     Date currentDate = item.getDateIteraction();
                     Date existingDate = existing.getDateIteraction();
                     if (currentDate != null && (existingDate == null || currentDate.after(existingDate))) {
-                        bestCasesByCandidate.put(candidateId, item);
+                        bestCasesByKey.put(caseKey, item);
+                    } else if (currentDate != null && existingDate != null && currentDate.equals(existingDate)) {
+                        if (item.getNumberIteraction() != null && (existing.getNumberIteraction() == null
+                                || item.getNumberIteraction().compareTo(existing.getNumberIteraction()) > 0)) {
+                            bestCasesByKey.put(caseKey, item);
+                        }
                     }
                 }
             }
         }
 
-        List<IteractionList> uniqueCases = new ArrayList<>(bestCasesByCandidate.values());
+        List<IteractionList> uniqueCases = new ArrayList<>(bestCasesByKey.values());
         uniqueCases.addAll(candidateLessCases);
 
-        Map<RecruiterDashboardStage, List<IteractionList>> grouped =
-                new EnumMap<>(RecruiterDashboardStage.class);
-        for (RecruiterDashboardStage stage : RecruiterDashboardStage.values()) {
+        Map<KanbanStage, List<IteractionList>> grouped =
+                new EnumMap<>(KanbanStage.class);
+        for (KanbanStage stage : KanbanStage.values()) {
             grouped.put(stage, new ArrayList<>());
         }
         for (IteractionList item : uniqueCases) {
-            RecruiterDashboardStage stage = RecruiterDashboardStage.resolve(item.getIteractionType());
-            if (stage != RecruiterDashboardStage.RESERVE) {
+            KanbanStage stage = KanbanStage.resolve(item.getIteractionType());
+            if (stage != KanbanStage.RESERVE) {
                 grouped.get(stage).add(item);
             }
         }
@@ -252,21 +260,18 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         String periodText = (days > 0) ? ("Последние " + days + " дней") : "За все время";
         String recruiterText = selectedRecruiter != null ? selectedRecruiter.getName() : "Все";
-        periodLabel.setValue(periodText + " · " + recruiterText + " · " + uniqueCases.size() + " активных кандидатов");
+        periodLabel.setValue(periodText + " · " + recruiterText + " · " + uniqueCases.size() + " активных кейсов");
     }
 
-    private void renderKpis(Map<RecruiterDashboardStage, List<IteractionList>> grouped) {
+    private void renderKpis(Map<KanbanStage, List<IteractionList>> grouped) {
         kpiBar.removeAll();
         int total = grouped.values().stream().mapToInt(List::size).sum();
         addKpi("Всего в работе", total, "recruiter-kpi-primary", "★ 100%");
-        addKpi("Новые контакты", grouped.get(RecruiterDashboardStage.NEW).size(), "recruiter-kpi-muted", "Этап 1");
-        addKpi("Интервью",
-                grouped.get(RecruiterDashboardStage.RECRUITER_INTERVIEW).size()
-                        + grouped.get(RecruiterDashboardStage.CLIENT_INTERVIEW).size(),
-                "recruiter-kpi-blue", "Этап 2-4");
-        addKpi("У заказчика", grouped.get(RecruiterDashboardStage.CLIENT).size(), "recruiter-kpi-violet", "Этап 3");
-        addKpi("Оффер / финал", grouped.get(RecruiterDashboardStage.OFFER).size(), "recruiter-kpi-green", "Финал");
-        addKpi("Исход / архив", grouped.get(RecruiterDashboardStage.OUTCOME).size(), "recruiter-kpi-muted", "Закрыто");
+        addKpi("Ресерчинг", grouped.get(KanbanStage.RESEARCHING).size(), "recruiter-kpi-muted", "Группа 001");
+        addKpi("Хантинг", grouped.get(KanbanStage.HUNTING).size(), "recruiter-kpi-blue", "Группа 002");
+        addKpi("У заказчика", grouped.get(KanbanStage.CLIENT).size(), "recruiter-kpi-violet", "Группа 003");
+        addKpi("Оффер / финал", grouped.get(KanbanStage.OFFER).size(), "recruiter-kpi-green", "Успех");
+        addKpi("Отказ / архив", grouped.get(KanbanStage.OUTCOME).size() + grouped.get(KanbanStage.CASE_CLOSED).size(), "recruiter-kpi-muted", "Закрыто");
     }
 
     private void addKpi(String caption, int value, String style, String badgeText) {
@@ -300,15 +305,15 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         kpiBar.add(card);
     }
 
-    private void renderBoard(Map<RecruiterDashboardStage, List<IteractionList>> grouped) {
+    private void renderBoard(Map<KanbanStage, List<IteractionList>> grouped) {
         kanbanBoard.removeAll();
-        for (RecruiterDashboardStage stage : new RecruiterDashboardStage[]{
-                RecruiterDashboardStage.NEW,
-                RecruiterDashboardStage.RECRUITER_INTERVIEW,
-                RecruiterDashboardStage.CLIENT,
-                RecruiterDashboardStage.CLIENT_INTERVIEW,
-                RecruiterDashboardStage.OFFER,
-                RecruiterDashboardStage.OUTCOME}) {
+        for (KanbanStage stage : new KanbanStage[]{
+                KanbanStage.RESEARCHING,
+                KanbanStage.HUNTING,
+                KanbanStage.CLIENT,
+                KanbanStage.OFFER,
+                KanbanStage.OUTCOME,
+                KanbanStage.CASE_CLOSED}) {
             kanbanBoard.add(createColumn(stage, grouped.get(stage)));
         }
         if (dndExtension != null) {
@@ -316,7 +321,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         }
     }
 
-    private VBoxLayout createColumn(RecruiterDashboardStage stage, List<IteractionList> items) {
+    private VBoxLayout createColumn(KanbanStage stage, List<IteractionList> items) {
         VBoxLayout column = uiComponents.create(VBoxLayout.class);
         column.setWidth("300px");
         column.setHeight("100%");
@@ -371,7 +376,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         return column;
     }
 
-    private VBoxLayout createCandidateCard(IteractionList item, RecruiterDashboardStage stage) {
+    private VBoxLayout createCandidateCard(IteractionList item, KanbanStage stage) {
         VBoxLayout card = uiComponents.create(VBoxLayout.class);
         card.setWidthFull();
         card.setSpacing(true);
@@ -496,10 +501,10 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         if (interactionIdStr == null || targetStageName == null) return;
 
         UUID interactionId;
-        RecruiterDashboardStage targetStage;
+        KanbanStage targetStage;
         try {
             interactionId = UUID.fromString(interactionIdStr);
-            targetStage = RecruiterDashboardStage.valueOf(targetStageName);
+            targetStage = KanbanStage.valueOf(targetStageName);
         } catch (Exception e) {
             return;
         }
@@ -512,7 +517,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         if (sourceItem == null) return;
 
-        RecruiterDashboardStage currentStage = RecruiterDashboardStage.resolve(sourceItem.getIteractionType());
+        KanbanStage currentStage = KanbanStage.resolve(sourceItem.getIteractionType());
         if (currentStage == targetStage) return;
 
         Iteraction defaultType = findDefaultIteractionForStage(targetStage);
@@ -554,14 +559,18 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
                 .show();
     }
 
-    private Iteraction findDefaultIteractionForStage(RecruiterDashboardStage targetStage) {
+    private Iteraction findDefaultIteractionForStage(KanbanStage targetStage) {
         List<Iteraction> allTypes = dataManager.load(Iteraction.class)
-                .query("select e from hunttech_Iteraction e order by e.number asc")
-                .view("_local")
+                .query("select e from hunttech_Iteraction e left join fetch e.iteractionTree where e.deleteTs is null order by e.number asc")
                 .list();
 
         for (Iteraction type : allTypes) {
-            if (RecruiterDashboardStage.resolve(type) == targetStage) {
+            if (KanbanStage.resolve(type) == targetStage && type.getIteractionTree() != null) {
+                return type;
+            }
+        }
+        for (Iteraction type : allTypes) {
+            if (KanbanStage.resolve(type) == targetStage) {
                 return type;
             }
         }
@@ -572,5 +581,101 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         calendar.add(java.util.Calendar.DAY_OF_MONTH, -days);
         return calendar.getTime();
+    }
+
+    /**
+     * Этапы Канбан-доски, сформированные по главным группам справочника Iteraction.
+     */
+    public enum KanbanStage {
+        RESEARCHING("001", "Ресерчинг", "recruiter-stage-new", 0),
+        HUNTING("002", "Хантинг", "recruiter-stage-recruiter", 1),
+        CLIENT("003", "На стороне заказчика", "recruiter-stage-client", 2),
+        OFFER("008", "УСПЕХ", "recruiter-stage-offer", 3),
+        OUTCOME("007", "ОТКАЗ", "recruiter-stage-outcome", 4),
+        CASE_CLOSED("010", "Закрытие кейса", "recruiter-stage-outcome", 5),
+        RESERVE("", "Кадровый резерв", "recruiter-stage-reserve", -1);
+
+        private final String code;
+        private final String caption;
+        private final String styleName;
+        private final int order;
+
+        KanbanStage(String code, String caption, String styleName, int order) {
+            this.code = code;
+            this.caption = caption;
+            this.styleName = styleName;
+            this.order = order;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getCaption() {
+            return caption;
+        }
+
+        public String getStyleName() {
+            return styleName;
+        }
+
+        public int getOrder() {
+            return order;
+        }
+
+        public static KanbanStage resolve(Iteraction type) {
+            if (type == null) {
+                return RESEARCHING;
+            }
+            if (Boolean.TRUE.equals(type.getSignPersonalReserve())
+                    || Boolean.TRUE.equals(type.getSignPersonalReservePut())) {
+                return RESERVE;
+            }
+
+            // 1. Иерархия: находим корень дерева взаимодействий с защитой от циклов
+            Iteraction root = type;
+            Set<UUID> visited = new HashSet<>();
+            while (root.getIteractionTree() != null && visited.add(root.getId())) {
+                root = root.getIteractionTree();
+            }
+
+            String rootNum = root.getNumber() != null ? root.getNumber().trim() : "";
+            String rootName = root.getIterationName() != null ? root.getIterationName().trim().toLowerCase(Locale.ROOT) : "";
+
+            if ("001".equals(rootNum) || rootName.contains("ресерчинг")) {
+                return RESEARCHING;
+            }
+            if ("002".equals(rootNum) || rootName.contains("хантинг")) {
+                return HUNTING;
+            }
+            if ("003".equals(rootNum) || rootName.contains("заказчик")) {
+                return CLIENT;
+            }
+            if ("008".equals(rootNum) || rootName.contains("успех") || rootName.contains("офер") || rootName.contains("оффер")) {
+                return OFFER;
+            }
+            if ("007".equals(rootNum) || rootName.contains("отказ")) {
+                return OUTCOME;
+            }
+            if ("010".equals(rootNum) || rootName.contains("закрытие")) {
+                return CASE_CLOSED;
+            }
+
+            // 2. Fallback по бизнес-флагам для legacy-записей
+            if (Boolean.TRUE.equals(type.getSignEndCase())) {
+                return CASE_CLOSED;
+            }
+            if (Boolean.TRUE.equals(type.getSignStartCase()) || rootName.contains("offer")) {
+                return OFFER;
+            }
+            if (Boolean.TRUE.equals(type.getSignClientInterview()) || Boolean.TRUE.equals(type.getSignSendToClient())) {
+                return CLIENT;
+            }
+            if (Boolean.TRUE.equals(type.getSignOurInterviewAssigned()) || Boolean.TRUE.equals(type.getSignOurInterview())) {
+                return HUNTING;
+            }
+
+            return RESEARCHING;
+        }
     }
 }

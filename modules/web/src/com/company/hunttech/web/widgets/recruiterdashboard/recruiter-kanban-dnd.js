@@ -71,8 +71,8 @@ window.com_company_hunttech_web_widgets_recruiterdashboard_RecruiterKanbanDragDr
             const col = card.closest('.recruiter-kanban-column');
             if (!col) return;
 
-            cardId = card.getAttribute('data-card-id');
-            sourceStage = col.getAttribute('data-stage');
+            cardId = card.getAttribute('data-card-id') || (card.id ? card.id.replace(/^kanban-card-/, '') : null);
+            sourceStage = col.getAttribute('data-stage') || (col.id ? col.id.replace(/^kanban-column-/, '') : null);
             if (!cardId || !sourceStage) return;
 
             if (e.button === 2) {
@@ -147,7 +147,7 @@ window.com_company_hunttech_web_widgets_recruiterdashboard_RecruiterKanbanDragDr
                 const clientY = (ev && typeof ev.clientY === 'number') ? ev.clientY : (startRect ? startRect.top : 0);
                 const elemBelow = document.elementFromPoint(clientX, clientY);
                 const targetCol = elemBelow ? elemBelow.closest('.recruiter-kanban-column') : null;
-                const targetStage = targetCol ? targetCol.getAttribute('data-stage') : null;
+                const targetStage = targetCol ? (targetCol.getAttribute('data-stage') || (targetCol.id ? targetCol.id.replace(/^kanban-column-/, '') : null)) : null;
 
                 if (targetCol && targetStage && targetStage !== sourceStage) {
                     // Перемещение в другую колонку: серверный вызов диалога IteractionListEdit
