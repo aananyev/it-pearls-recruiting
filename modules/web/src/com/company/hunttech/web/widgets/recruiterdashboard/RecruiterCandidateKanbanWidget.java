@@ -1,19 +1,30 @@
 package com.company.hunttech.web.widgets.recruiterdashboard;
 
+import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.CompanyDepartament;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.Iteraction;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.JobCandidateSignIcon;
+import com.company.hunttech.entity.Project;
+import com.company.hunttech.entity.SignIcons;
+import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
 import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.events.DashboardEvent;
 import com.haulmont.addon.dashboard.web.widget.RefreshableWidget;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.ScreenFragment.InitEvent;
@@ -32,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @UiController("hunttech_RecruiterCandidateKanbanWidget")
 @UiDescriptor("recruiter-candidate-kanban-widget.xml")
@@ -68,6 +80,10 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
     private Metadata metadata;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Dialogs dialogs;
+
+    public static final String ALL_RECRUITERS_CODE = "__ALL_RECRUITERS__";
 
     private RecruiterKanbanDragDropExtension dndExtension;
     private boolean isInitialized = false;
@@ -112,6 +128,12 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
                 .list();
 
         Map<String, User> recruiterOptions = new LinkedHashMap<>();
+
+        User allRecruitersOption = metadata.create(User.class);
+        allRecruitersOption.setName("ВСЕ");
+        allRecruitersOption.setLogin(ALL_RECRUITERS_CODE);
+        recruiterOptions.put("ВСЕ", allRecruitersOption);
+
         if (currentUser != null) {
             recruiterOptions.put("Мои кейсы (" + currentUser.getName() + ")", currentUser);
         }
@@ -157,9 +179,8 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
     private void reload() {
         refreshIteractionHierarchyCache();
         User selectedRecruiter = recruiterLookupField.getValue();
-        if (selectedRecruiter == null) {
-            selectedRecruiter = userSession.getCurrentOrSubstitutedUser();
-        }
+        boolean isAllRecruiters = (selectedRecruiter == null
+                || ALL_RECRUITERS_CODE.equals(selectedRecruiter.getLogin()));
 
         Integer days = periodRadioGroup.getValue();
         if (days == null) {
@@ -173,7 +194,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         Map<String, Object> params = new HashMap<>();
 
-        if (selectedRecruiter != null) {
+        if (!isAllRecruiters && selectedRecruiter != null) {
             jpql.append("and e.recrutier = :recrutier ");
             params.put("recrutier", selectedRecruiter);
         }
@@ -233,6 +254,50 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         List<IteractionList> uniqueCases = new ArrayList<>(projectCardsByKey.values());
 
+        // 2. Определение ответственного рекрутера для режима «ВСЕ»:
+        // Рекрутер - это тот сотрудник, кто назначил или провел собеседование на стороне HuntTech (последняя запись).
+        Map<UUID, String> candidateHunttechRecruiterMap = new HashMap<>();
+        if (isAllRecruiters && !uniqueCases.isEmpty()) {
+            List<UUID> candidateIds = uniqueCases.stream()
+                    .map(IteractionList::getCandidate)
+                    .filter(Objects::nonNull)
+                    .map(JobCandidate::getId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            if (!candidateIds.isEmpty()) {
+                List<IteractionList> interviewItems = dataManager.load(IteractionList.class)
+                        .query("select e from hunttech_IteractionList e " +
+                                "where e.deleteTs is null and e.candidate.id in :candIds and " +
+                                "(e.iteractionType.signOurInterviewAssigned = true " +
+                                " or e.iteractionType.signOurInterview = true " +
+                                " or lower(e.iteractionType.iterationName) like '%собеседован%рекрутер%' " +
+                                " or lower(e.iteractionType.iterationName) like '%интервью%hunttech%') " +
+                                "order by e.dateIteraction desc nulls last, e.numberIteraction desc, e.createTs desc")
+                        .parameter("candIds", candidateIds)
+                        .view("recruiter-dashboard-iteraction-list-view")
+                        .list();
+
+                for (IteractionList it : interviewItems) {
+                    if (it.getCandidate() != null && it.getCandidate().getId() != null) {
+                        UUID cId = it.getCandidate().getId();
+                        if (!candidateHunttechRecruiterMap.containsKey(cId)) {
+                            String rName = null;
+                            if (it.getRecrutier() != null && it.getRecrutier().getName() != null) {
+                                rName = it.getRecrutier().getName();
+                            } else if (it.getRecrutierName() != null && !it.getRecrutierName().isEmpty()) {
+                                rName = it.getRecrutierName();
+                            }
+                            if (rName != null) {
+                                candidateHunttechRecruiterMap.put(cId, rName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         cachedColumns = loadDynamicColumns();
         List<DynamicKanbanColumn> columns = cachedColumns;
         Map<UUID, List<IteractionList>> grouped = new LinkedHashMap<>();
@@ -248,10 +313,10 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         }
 
         renderKpis(columns, grouped);
-        renderBoard(columns, grouped);
+        renderBoard(columns, grouped, isAllRecruiters, candidateHunttechRecruiterMap);
 
         String periodText = (days > 0) ? ("Последние " + days + " дней") : "За все время";
-        String recruiterText = selectedRecruiter != null ? selectedRecruiter.getName() : "Все";
+        String recruiterText = isAllRecruiters ? "ВСЕ" : selectedRecruiter.getName();
         periodLabel.setValue(periodText + " · " + recruiterText + " · " + uniqueCases.size() + " активных кейсов");
     }
 
@@ -306,25 +371,30 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         kpiBar.add(card);
     }
 
-    private void renderBoard(List<DynamicKanbanColumn> columns, Map<UUID, List<IteractionList>> grouped) {
+    private void renderBoard(List<DynamicKanbanColumn> columns,
+                             Map<UUID, List<IteractionList>> grouped,
+                             boolean isAllRecruiters,
+                             Map<UUID, String> candidateHunttechRecruiterMap) {
         kanbanBoard.removeAll();
         for (DynamicKanbanColumn col : columns) {
             List<IteractionList> items = grouped.getOrDefault(col.getId(), Collections.emptyList());
-            kanbanBoard.add(createColumn(col, items));
+            kanbanBoard.add(createColumn(col, items, isAllRecruiters, candidateHunttechRecruiterMap));
         }
         if (dndExtension != null) {
             dndExtension.reinit();
         }
     }
 
-    private VBoxLayout createColumn(DynamicKanbanColumn stage, List<IteractionList> items) {
+    private VBoxLayout createColumn(DynamicKanbanColumn stage,
+                                    List<IteractionList> items,
+                                    boolean isAllRecruiters,
+                                    Map<UUID, String> candidateHunttechRecruiterMap) {
         VBoxLayout column = uiComponents.create(VBoxLayout.class);
         column.setWidth("300px");
         column.setHeight("100%");
         column.setStyleName("recruiter-kanban-column " + stage.getStyleName());
         column.setSpacing(true);
         column.unwrap(com.vaadin.ui.AbstractComponent.class).setId("kanban-column-" + stage.getId());
-        column.unwrap(com.vaadin.ui.AbstractComponent.class).setDescription("stage:" + stage.getId());
 
         HBoxLayout header = uiComponents.create(HBoxLayout.class);
         header.setWidthFull();
@@ -362,7 +432,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             cardsBox.add(empty);
         } else {
             for (IteractionList item : items) {
-                cardsBox.add(createCandidateCard(item, stage));
+                cardsBox.add(createCandidateCard(item, stage, isAllRecruiters, candidateHunttechRecruiterMap));
             }
         }
 
@@ -372,7 +442,10 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         return column;
     }
 
-    private VBoxLayout createCandidateCard(IteractionList item, DynamicKanbanColumn stage) {
+    private VBoxLayout createCandidateCard(IteractionList item,
+                                           DynamicKanbanColumn stage,
+                                           boolean isAllRecruiters,
+                                           Map<UUID, String> candidateHunttechRecruiterMap) {
         VBoxLayout card = uiComponents.create(VBoxLayout.class);
         card.setWidthFull();
         card.setSpacing(true);
@@ -381,7 +454,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         JobCandidate candidate = item.getCandidate();
 
-        // 1. Шапка: Круглый аватар + ФИО + Должность
+        // 1. Шапка: Круглый аватар + ФИО + Должность + Кнопка меню действий
         HBoxLayout header = uiComponents.create(HBoxLayout.class);
         header.setSpacing(true);
         header.setWidthFull();
@@ -421,9 +494,13 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         nameBox.add(name);
         nameBox.add(posLabel);
 
+        PopupButton actionsBtn = createCardActionsButton(item, stage);
+
         header.add(img);
         header.add(nameBox);
+        header.add(actionsBtn);
         header.expand(nameBox);
+        actionsBtn.setAlignment(Component.Alignment.TOP_RIGHT);
         card.add(header);
 
         // 2. Инфо-строка: Рейтинг ★ + Локация 📍
@@ -447,14 +524,43 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         infoRow.add(cityLabel);
         card.add(infoRow);
 
-        // 3. Вакансия
+        // 3. Проект (с всплывающей подсказкой полного наименования) и Вакансия
+        Project proj = item.getVacancy() != null ? item.getVacancy().getProjectName() : null;
+        String projName = proj != null ? proj.getProjectName() : null;
+        String fullProjectName = buildFullProjectName(proj);
+
+        Label<String> projectLabel = uiComponents.create(Label.TYPE_STRING);
+        projectLabel.setHtmlEnabled(true);
+        projectLabel.setValue("📁 <b>" + escapeHtml(projName != null && !projName.isEmpty() ? projName : "Проект не указан") + "</b>");
+        projectLabel.setDescription(fullProjectName.isEmpty() ? (projName != null ? projName : "Проект не указан") : fullProjectName);
+        projectLabel.setStyleName("recruiter-kanban-project-title");
+        card.add(projectLabel);
+
         Label<String> vacancy = uiComponents.create(Label.TYPE_STRING);
         String vacName = item.getVacancy() == null ? "Без вакансии" : item.getVacancy().getVacansyName();
         vacancy.setValue("💼 " + vacName);
         vacancy.setStyleName("recruiter-kanban-vacancy");
         card.add(vacancy);
 
-        // 4. Статус взаимодействия и дата
+        // 4. Если выбран режим «ВСЕ» — выводим рекрутера этого кандидата
+        if (isAllRecruiters) {
+            String assignedRecruiter = candidateHunttechRecruiterMap.get(candidate != null ? candidate.getId() : null);
+            if (assignedRecruiter == null && item.getRecrutier() != null) {
+                assignedRecruiter = item.getRecrutier().getName();
+            }
+            if (assignedRecruiter == null) {
+                assignedRecruiter = item.getRecrutierName();
+            }
+            if (assignedRecruiter != null && !assignedRecruiter.trim().isEmpty()) {
+                Label<String> recruiterBadge = uiComponents.create(Label.TYPE_STRING);
+                recruiterBadge.setHtmlEnabled(true);
+                recruiterBadge.setValue("<span style=\"color: #475569; font-size: 11px;\">👤 Рекрутер: <b>" + escapeHtml(assignedRecruiter) + "</b></span>");
+                recruiterBadge.setStyleName("recruiter-kanban-assigned-box");
+                card.add(recruiterBadge);
+            }
+        }
+
+        // 5. Статус взаимодействия и дата
         HBoxLayout statusRow = uiComponents.create(HBoxLayout.class);
         statusRow.setWidthFull();
         statusRow.setSpacing(true);
@@ -476,7 +582,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         statusRow.expand(interaction);
         card.add(statusRow);
 
-        // 5. Кнопка «Карточка профиля»
+        // 6. Кнопка «Карточка профиля»
         if (candidate != null) {
             Button openBtn = uiComponents.create(Button.class);
             openBtn.setCaption("Карточка профиля");
@@ -491,6 +597,401 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         }
 
         return card;
+    }
+
+    private String buildFullProjectName(Project proj) {
+        if (proj == null) return "Проект не указан";
+        StringBuilder sb = new StringBuilder();
+        try {
+            if (proj.getProjectDepartment() != null) {
+                CompanyDepartament dept = proj.getProjectDepartment();
+                if (dept.getCompanyName() != null) {
+                    String comp = dept.getCompanyName().getCompanyShortName();
+                    if (comp == null || comp.trim().isEmpty()) {
+                        comp = dept.getCompanyName().getComanyName();
+                    }
+                    if (comp != null && !comp.trim().isEmpty()) {
+                        sb.append(comp.trim());
+                    }
+                }
+                if (dept.getDepartamentRuName() != null && !dept.getDepartamentRuName().trim().isEmpty()) {
+                    if (sb.length() > 0) sb.append(" / ");
+                    sb.append(dept.getDepartamentRuName().trim());
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Не удалось прочитать подразделение проекта: {}", e.getMessage());
+        }
+        if (proj.getProjectName() != null && !proj.getProjectName().trim().isEmpty()) {
+            if (sb.length() > 0) sb.append(" · ");
+            sb.append(proj.getProjectName().trim());
+        }
+        return sb.length() > 0 ? sb.toString() : (proj.getProjectName() != null ? proj.getProjectName() : "Проект не указан");
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
+    private PopupButton createCardActionsButton(IteractionList item, DynamicKanbanColumn stage) {
+        PopupButton actionsBtn = uiComponents.create(PopupButton.class);
+        actionsBtn.setIcon("font-icon:ELLIPSIS_V");
+        actionsBtn.setCaption("");
+        actionsBtn.setDescription("Дополнительные действия");
+        actionsBtn.setStyleName("borderless icon-only small recruiter-card-menu-btn");
+        actionsBtn.setShowActionIcons(true);
+        actionsBtn.setPopupOpenDirection(PopupButton.PopupOpenDirection.BOTTOM_LEFT);
+
+        JobCandidate candidate = item.getCandidate();
+
+        // 1. Создать взаимодействие
+        actionsBtn.addAction(new BaseAction("createInteraction")
+                .withCaption("Создать взаимодействие")
+                .withIcon("font-icon:PLUS_CIRCLE")
+                .withHandler(e -> openCreateInteractionDialog(item, null, "Новое взаимодействие")));
+
+        // 2. Назначить собеседование рекрутера
+        actionsBtn.addAction(new BaseAction("scheduleRecruiterInterview")
+                .withCaption("Назначить собеседование рекрутера")
+                .withIcon("font-icon:CALENDAR_PLUS_O")
+                .withHandler(e -> openCreateInteractionDialog(item, findRecruiterInterviewType(), "Назначить собеседование рекрутера")));
+
+        // 3. Назначить собеседование у заказчика
+        actionsBtn.addAction(new BaseAction("scheduleClientInterview")
+                .withCaption("Назначить собеседование у заказчика")
+                .withIcon("font-icon:USERS")
+                .withHandler(e -> openCreateInteractionDialog(item, findClientInterviewType(), "Назначить собеседование у заказчика")));
+
+        // 4. Перенести в колонку...
+        actionsBtn.addAction(new BaseAction("moveToColumn")
+                .withCaption("Перенести в колонку...")
+                .withIcon("font-icon:ARROWS")
+                .withHandler(e -> openMoveToColumnDialog(item, stage)));
+
+        // 5. Сделать комментарий
+        actionsBtn.addAction(new BaseAction("addComment")
+                .withCaption("Сделать комментарий")
+                .withIcon("font-icon:COMMENTING_O")
+                .withHandler(e -> openCreateInteractionDialog(item, findCommentType(), "Комментарий")));
+
+        // 6. Закрыть процесс взаимодействия / отказ
+        actionsBtn.addAction(new BaseAction("closeCase")
+                .withCaption("Закрыть процесс взаимодействия / отказ")
+                .withIcon("font-icon:BAN")
+                .withHandler(e -> openCreateInteractionDialog(item, findEndProcessType(), "Закрыть процесс / отказ")));
+
+        // 7. Карточка профиля
+        actionsBtn.addAction(new BaseAction("openProfile")
+                .withCaption("Карточка профиля")
+                .withIcon("font-icon:USER")
+                .withHandler(e -> {
+                    if (candidate != null) {
+                        screenBuilders.editor(JobCandidate.class, this)
+                                .editEntity(candidate)
+                                .build()
+                                .show();
+                    }
+                }));
+
+        // 8. Последнее резюме (открыть)
+        actionsBtn.addAction(new BaseAction("openLatestCv")
+                .withCaption("Последнее резюме (открыть)")
+                .withIcon("font-icon:FILE_TEXT_O")
+                .withHandler(e -> openLatestCandidateCv(candidate)));
+
+        // 9. Поставить признак...
+        actionsBtn.addAction(new BaseAction("setSignLabel")
+                .withCaption("Поставить признак...")
+                .withIcon("font-icon:TAG")
+                .withHandler(e -> openSetSignIconDialog(candidate)));
+
+        return actionsBtn;
+    }
+
+    private void openCreateInteractionDialog(IteractionList sourceItem, Iteraction defaultType, String targetCaption) {
+        IteractionList draft = metadata.create(IteractionList.class);
+
+        JobCandidate targetCandidate = sourceItem.getCandidate();
+        if (targetCandidate != null && targetCandidate.getId() != null) {
+            try {
+                targetCandidate = dataManager.load(JobCandidate.class)
+                        .id(targetCandidate.getId())
+                        .view("jobCandidate-iteraction-list-suggestion-view")
+                        .optional().orElse(targetCandidate);
+            } catch (Exception e) {
+                log.debug("Не удалось загрузить представление кандидата: {}", e.getMessage());
+                targetCandidate = sourceItem.getCandidate();
+            }
+        }
+        draft.setCandidate(targetCandidate);
+        draft.setVacancy(sourceItem.getVacancy());
+
+        ExtUser targetRecruiter = null;
+        try {
+            targetRecruiter = sourceItem.getRecrutier();
+        } catch (Exception e) {
+            log.debug("Не удалось извлечь рекрутера из исходного взаимодействия: {}", e.getMessage());
+        }
+        if (targetRecruiter == null && recruiterLookupField.getValue() != null && !ALL_RECRUITERS_CODE.equals(recruiterLookupField.getValue().getLogin())) {
+            targetRecruiter = dataManager.load(ExtUser.class)
+                    .id(recruiterLookupField.getValue().getId())
+                    .optional().orElse(null);
+        }
+        if (targetRecruiter == null && userSession.getCurrentOrSubstitutedUser() != null) {
+            targetRecruiter = dataManager.load(ExtUser.class)
+                    .id(userSession.getCurrentOrSubstitutedUser().getId())
+                    .optional().orElse(null);
+        }
+        draft.setRecrutier(targetRecruiter);
+        draft.setDateIteraction(new Date());
+        if (defaultType != null) {
+            draft.setIteractionType(defaultType);
+        }
+
+        IteractionListEdit editor = screenBuilders.editor(IteractionList.class, this)
+                .withScreenClass(IteractionListEdit.class)
+                .newEntity(draft)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        editor.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                reload();
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Взаимодействие зарегистрировано")
+                        .withDescription(targetCaption != null ? targetCaption : "")
+                        .show();
+            }
+        });
+        editor.show();
+    }
+
+    private void openMoveToColumnDialog(IteractionList item, DynamicKanbanColumn currentStage) {
+        List<DynamicKanbanColumn> targetColumns = new ArrayList<>();
+        List<DynamicKanbanColumn> allCols = (cachedColumns != null && !cachedColumns.isEmpty())
+                ? cachedColumns : loadDynamicColumns();
+
+        for (DynamicKanbanColumn col : allCols) {
+            if (!col.getId().equals(currentStage.getId())) {
+                targetColumns.add(col);
+            }
+        }
+
+        if (targetColumns.isEmpty()) {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption("Нет доступных колонок для перемещения")
+                    .show();
+            return;
+        }
+
+        dialogs.createInputDialog(this)
+                .withCaption("Перенести кандидата в колонку")
+                .withParameters(
+                        InputParameter.parameter("targetColumn")
+                                .withField(() -> {
+                                    LookupField<DynamicKanbanColumn> lookup = uiComponents.create(LookupField.class);
+                                    lookup.setCaption("Целевая колонка:");
+                                    lookup.setWidthFull();
+                                    lookup.setRequired(true);
+                                    lookup.setNullOptionVisible(false);
+                                    Map<String, DynamicKanbanColumn> opts = new LinkedHashMap<>();
+                                    for (DynamicKanbanColumn c : targetColumns) {
+                                        opts.put(c.getCaption(), c);
+                                    }
+                                    lookup.setOptionsMap(opts);
+                                    lookup.setValue(targetColumns.get(0));
+                                    return lookup;
+                                })
+                )
+                .withActions(DialogActions.OK_CANCEL)
+                .withCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(DialogOutcome.OK)) {
+                        DynamicKanbanColumn targetCol = closeEvent.getValue("targetColumn");
+                        if (targetCol != null) {
+                            handleCardMoved(item.getId().toString(), targetCol.getId().toString());
+                        }
+                    }
+                })
+                .show();
+    }
+
+    private void openLatestCandidateCv(JobCandidate candidate) {
+        if (candidate == null) return;
+        CandidateCV lastCv = dataManager.load(CandidateCV.class)
+                .query("select c from hunttech_CandidateCV c where c.candidate = :candidate order by c.datePost desc nulls last, c.createTs desc")
+                .parameter("candidate", candidate)
+                .view("candidateCV-view")
+                .maxResults(1)
+                .optional()
+                .orElse(null);
+
+        if (lastCv != null) {
+            screenBuilders.editor(CandidateCV.class, this)
+                    .editEntity(lastCv)
+                    .withScreenClass(CandidateCVEdit.class)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .build()
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption("Резюме не найдено")
+                    .withDescription("У кандидата нет сохранённых резюме в системе")
+                    .show();
+        }
+    }
+
+    private void openSetSignIconDialog(JobCandidate candidate) {
+        if (candidate == null) return;
+        List<SignIcons> allSigns = dataManager.load(SignIcons.class)
+                .query("select s from hunttech_SignIcons s order by s.titleRu asc, s.titleEnd asc")
+                .view("signIcons-view")
+                .list();
+
+        if (allSigns.isEmpty()) {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption("Справочник признаков пуст")
+                    .show();
+            return;
+        }
+
+        List<JobCandidateSignIcon> existingSigns = dataManager.load(JobCandidateSignIcon.class)
+                .query("select e from hunttech_JobCandidateSignIcon e where e.jobCandidate = :cand order by e.createTs desc")
+                .parameter("cand", candidate)
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        SignIcons currentIcon = existingSigns.isEmpty() ? null : existingSigns.get(0).getSignIcon();
+
+        dialogs.createInputDialog(this)
+                .withCaption("Поставить признак (лейбл)")
+                .withParameters(
+                        InputParameter.parameter("signIcon")
+                                .withField(() -> {
+                                    LookupField<SignIcons> lookup = uiComponents.create(LookupField.class);
+                                    lookup.setCaption("Выберите признак (лейбл):");
+                                    lookup.setWidthFull();
+                                    Map<String, SignIcons> options = new LinkedHashMap<>();
+                                    options.put("(Снять признак)", null);
+                                    for (SignIcons s : allSigns) {
+                                        String title = (s.getTitleRu() != null && !s.getTitleRu().isEmpty())
+                                                ? s.getTitleRu()
+                                                : (s.getTitleEnd() != null ? s.getTitleEnd() : "Признак");
+                                        options.put(title, s);
+                                    }
+                                    lookup.setOptionsMap(options);
+                                    lookup.setNullOptionVisible(true);
+                                    if (currentIcon != null) {
+                                        lookup.setValue(currentIcon);
+                                    }
+                                    return lookup;
+                                })
+                )
+                .withActions(DialogActions.OK_CANCEL)
+                .withCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(DialogOutcome.OK)) {
+                        SignIcons selected = closeEvent.getValue("signIcon");
+                        if (selected != null) {
+                            if (existingSigns.isEmpty()) {
+                                JobCandidateSignIcon jcsi = metadata.create(JobCandidateSignIcon.class);
+                                jcsi.setJobCandidate(candidate);
+                                jcsi.setSignIcon(selected);
+                                if (userSession.getUser() instanceof ExtUser) {
+                                    jcsi.setUser((ExtUser) userSession.getUser());
+                                }
+                                dataManager.commit(jcsi);
+                            } else {
+                                JobCandidateSignIcon jcsi = existingSigns.get(0);
+                                jcsi.setSignIcon(selected);
+                                dataManager.commit(jcsi);
+                                for (int i = 1; i < existingSigns.size(); i++) {
+                                    dataManager.remove(existingSigns.get(i));
+                                }
+                            }
+                            notifications.create(Notifications.NotificationType.TRAY)
+                                    .withCaption("Признак установлен")
+                                    .withDescription(selected.getTitleRu() != null ? selected.getTitleRu() : "")
+                                    .show();
+                        } else {
+                            for (JobCandidateSignIcon oldSign : existingSigns) {
+                                dataManager.remove(oldSign);
+                            }
+                            notifications.create(Notifications.NotificationType.TRAY)
+                                    .withCaption("Признак снят")
+                                    .show();
+                        }
+                        reload();
+                    }
+                })
+                .show();
+    }
+
+    private Iteraction findRecruiterInterviewType() {
+        Iteraction type = dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e where e.signOurInterviewAssigned = true or e.signOurInterview = true order by e.number asc")
+                .view("iteraction-list-type-view")
+                .maxResults(1)
+                .optional()
+                .orElse(null);
+        if (type == null) {
+            type = findTypeByNamePattern("%собеседован%");
+        }
+        return type;
+    }
+
+    private Iteraction findClientInterviewType() {
+        Iteraction type = dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e where e.signClientInterview = true order by e.number asc")
+                .view("iteraction-list-type-view")
+                .maxResults(1)
+                .optional()
+                .orElse(null);
+        if (type == null) {
+            type = findTypeByNamePattern("%заказчик%");
+        }
+        return type;
+    }
+
+    private Iteraction findCommentType() {
+        Iteraction type = dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e where e.signComment = true order by e.number asc")
+                .view("iteraction-list-type-view")
+                .maxResults(1)
+                .optional()
+                .orElse(null);
+        if (type == null) {
+            type = findTypeByNamePattern("%комментар%");
+        }
+        return type;
+    }
+
+    private Iteraction findEndProcessType() {
+        Iteraction type = dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e where e.signEndCase = true order by e.number asc")
+                .view("iteraction-list-type-view")
+                .maxResults(1)
+                .optional()
+                .orElse(null);
+        if (type == null) {
+            type = findTypeByNamePattern("%отказ%");
+        }
+        return type;
+    }
+
+    private Iteraction findTypeByNamePattern(String pattern) {
+        return dataManager.load(Iteraction.class)
+                .query("select e from hunttech_Iteraction e where lower(e.iterationName) like :pattern order by e.number asc")
+                .parameter("pattern", pattern)
+                .view("iteraction-list-type-view")
+                .maxResults(1)
+                .optional()
+                .orElse(null);
     }
 
     private void handleCardMoved(String interactionIdStr, String targetColIdentifier) {
@@ -559,9 +1060,9 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         if (targetCandidate != null && targetCandidate.getId() != null) {
             try {
                 targetCandidate = dataManager.load(JobCandidate.class)
-                        .id(targetCandidate.getId())
-                        .view("jobCandidate-iteraction-list-suggestion-view")
-                        .optional().orElse(targetCandidate);
+                .id(targetCandidate.getId())
+                .view("jobCandidate-iteraction-list-suggestion-view")
+                .optional().orElse(targetCandidate);
             } catch (Exception e) {
                 log.debug("Не удалось загрузить представление кандидата: {}", e.getMessage());
                 targetCandidate = sourceItem.getCandidate();
@@ -576,9 +1077,12 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             log.debug("Не удалось извлечь рекрутера из исходного взаимодействия: {}", e.getMessage());
         }
         if (targetRecruiter == null && recruiterLookupField.getValue() != null) {
-            targetRecruiter = dataManager.load(ExtUser.class)
-                    .id(recruiterLookupField.getValue().getId())
-                    .optional().orElse(null);
+            User selUser = recruiterLookupField.getValue();
+            if (!ALL_RECRUITERS_CODE.equals(selUser.getLogin()) && selUser.getId() != null) {
+                targetRecruiter = dataManager.load(ExtUser.class)
+                        .id(selUser.getId())
+                        .optional().orElse(null);
+            }
         }
         if (targetRecruiter == null && userSession.getCurrentOrSubstitutedUser() != null) {
             targetRecruiter = dataManager.load(ExtUser.class)

@@ -1068,6 +1068,7 @@
                     <property name="departamentRuName"/>
                     <property name="companyName" view="_minimal">
                         <property name="companyShortName"/>
+                        <property name="comanyName"/>
                     </property>
                 </property>
             </property>
