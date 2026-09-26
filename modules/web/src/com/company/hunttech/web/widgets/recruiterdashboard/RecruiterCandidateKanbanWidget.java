@@ -475,10 +475,12 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         VBoxLayout nameBox = uiComponents.create(VBoxLayout.class);
         nameBox.setSpacing(false);
+        nameBox.setWidthFull();
 
         LinkButton name = uiComponents.create(LinkButton.class);
         name.setCaption(candidate == null ? "Кандидат" : candidate.getFullName());
         name.setStyleName("recruiter-candidate-link bold");
+        name.setWidthFull();
         if (candidate != null) {
             name.addClickListener(event -> screenBuilders.editor(JobCandidate.class, this)
                     .editEntity(candidate)
@@ -488,6 +490,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         Label<String> posLabel = uiComponents.create(Label.TYPE_STRING);
         posLabel.setHtmlEnabled(true);
+        posLabel.setWidthFull();
         String posName = (candidate != null && candidate.getPersonPosition() != null && candidate.getPersonPosition().getPositionRuName() != null)
                 ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
         posLabel.setValue("<span class=\"recruiter-kanban-position-badge\">" + posName + "</span>");
@@ -532,12 +535,14 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
 
         Label<String> projectLabel = uiComponents.create(Label.TYPE_STRING);
         projectLabel.setHtmlEnabled(true);
+        projectLabel.setWidthFull();
         projectLabel.setValue("📁 <b>" + escapeHtml(projName != null && !projName.isEmpty() ? projName : "Проект не указан") + "</b>");
         projectLabel.setDescription(fullProjectName.isEmpty() ? (projName != null ? projName : "Проект не указан") : fullProjectName);
         projectLabel.setStyleName("recruiter-kanban-project-title");
         card.add(projectLabel);
 
         Label<String> vacancy = uiComponents.create(Label.TYPE_STRING);
+        vacancy.setWidthFull();
         String vacName = item.getVacancy() == null ? "Без вакансии" : item.getVacancy().getVacansyName();
         vacancy.setValue("💼 " + vacName);
         vacancy.setStyleName("recruiter-kanban-vacancy");
@@ -555,6 +560,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             if (assignedRecruiter != null && !assignedRecruiter.trim().isEmpty()) {
                 Label<String> recruiterBadge = uiComponents.create(Label.TYPE_STRING);
                 recruiterBadge.setHtmlEnabled(true);
+                recruiterBadge.setWidthFull();
                 recruiterBadge.setValue("<span style=\"color: #475569; font-size: 11px;\">👤 Рекрутер: <b>" + escapeHtml(assignedRecruiter) + "</b></span>");
                 recruiterBadge.setStyleName("recruiter-kanban-assigned-box");
                 card.add(recruiterBadge);
@@ -567,6 +573,7 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         statusRow.setSpacing(true);
 
         Label<String> interaction = uiComponents.create(Label.TYPE_STRING);
+        interaction.setWidthFull();
         interaction.setValue(item.getIteractionType() == null
                 ? "Статус не определён"
                 : item.getIteractionType().getIterationName());

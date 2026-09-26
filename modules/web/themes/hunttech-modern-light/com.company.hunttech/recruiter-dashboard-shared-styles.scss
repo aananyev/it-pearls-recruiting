@@ -470,6 +470,14 @@
     &:active {
       cursor: grabbing;
     }
+
+    .v-label,
+    .c-label {
+      white-space: normal !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+      word-wrap: break-word !important;
+    }
   }
 
   .recruiter-dashboard-root .recruiter-kanban-column.recruiter-kanban-column-drop-hover {
@@ -482,6 +490,16 @@
     color: mix($v-font-color, $v-panel-background-color, 96%) !important;
     font-size: 13px !important;
     font-weight: 700 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    text-align: left !important;
+
+    .v-button-caption {
+      white-space: normal !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+    }
   }
 
   .recruiter-dashboard-root .recruiter-kanban-position-badge {
@@ -493,6 +511,9 @@
     font-size: 11px !important;
     font-weight: 600 !important;
     margin-top: 2px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   .recruiter-dashboard-root .recruiter-kanban-vacancy,
@@ -502,6 +523,9 @@
     color: $recruiter-dashboard-muted !important;
     font-size: 11px !important;
     line-height: 16px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   .recruiter-dashboard-root .recruiter-kanban-interaction {
@@ -548,6 +572,9 @@
     color: mix($v-font-color, $v-panel-background-color, 85%) !important;
     line-height: 16px !important;
     cursor: help;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   .recruiter-dashboard-root .recruiter-kanban-assigned-box {
@@ -557,6 +584,9 @@
     border-radius: 4px;
     font-size: 11px;
     color: mix($v-font-color, $recruiter-dashboard-accent, 70%);
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   .recruiter-dashboard-root .recruiter-funnel-content {
