@@ -554,7 +554,20 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         }
 
         IteractionList draft = metadata.create(IteractionList.class);
-        draft.setCandidate(sourceItem.getCandidate());
+
+        JobCandidate targetCandidate = sourceItem.getCandidate();
+        if (targetCandidate != null && targetCandidate.getId() != null) {
+            try {
+                targetCandidate = dataManager.load(JobCandidate.class)
+                        .id(targetCandidate.getId())
+                        .view("jobCandidate-iteraction-list-suggestion-view")
+                        .optional().orElse(targetCandidate);
+            } catch (Exception e) {
+                log.debug("Не удалось загрузить представление кандидата: {}", e.getMessage());
+                targetCandidate = sourceItem.getCandidate();
+            }
+        }
+        draft.setCandidate(targetCandidate);
         draft.setVacancy(sourceItem.getVacancy());
         ExtUser targetRecruiter = null;
         try {

@@ -343,10 +343,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         }
 
-        if (vacancyFiels.getValue() != null)
-            if (vacancyFiels.getValue().getProjectName() != null)
-                if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
-                    if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null)
+        try {
+            if (vacancyFiels.getValue() != null && vacancyFiels.getValue().getProjectName() != null) {
+                if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null) {
+                    if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null) {
                         if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null) {
                             String labetText = new StringBuilder()
                                     .append("<h3><b>")
@@ -365,8 +365,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
                             companyLabel.setValue(labetText);
 
-                            projectLabel.setValue(event.getValue().getProjectName().getProjectName());
+                            projectLabel.setValue(vacancyFiels.getValue().getProjectName().getProjectName());
                         }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось отобразить данные компании/подразделения вакансии: {}", e.getMessage());
+        }
 
         if (!isClosedVacancy()) {
             Integer countIteraction = dataManager.loadValue(QUERY_COUNT_BY_CANDIDATE_VACANCY, Integer.class)
