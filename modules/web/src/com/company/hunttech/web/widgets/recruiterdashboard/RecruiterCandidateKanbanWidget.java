@@ -556,7 +556,12 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
         IteractionList draft = metadata.create(IteractionList.class);
         draft.setCandidate(sourceItem.getCandidate());
         draft.setVacancy(sourceItem.getVacancy());
-        ExtUser targetRecruiter = sourceItem.getRecrutier();
+        ExtUser targetRecruiter = null;
+        try {
+            targetRecruiter = sourceItem.getRecrutier();
+        } catch (Exception e) {
+            log.debug("Не удалось извлечь рекрутера из исходного взаимодействия: {}", e.getMessage());
+        }
         if (targetRecruiter == null && recruiterLookupField.getValue() != null) {
             targetRecruiter = dataManager.load(ExtUser.class)
                     .id(recruiterLookupField.getValue().getId())
