@@ -1526,53 +1526,58 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             setStatusOfVacancyLabel(event);
         }
 
-        if (event.getValue() != null) {
-            if (event.getValue().getProjectName() != null) {
+        boolean logoSet = false;
+        try {
+            if (event.getValue() != null && event.getValue().getProjectName() != null) {
                 if (event.getValue().getProjectName().getProjectLogo() != null) {
                     projectLogoImage.setValueSource(
                             new ContainerValueSource<>(iteractionListDc, "vacancy.projectName.projectLogo"));
-                } else {
-                    projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                    logoSet = true;
                 }
-            } else {
-                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
             }
-        } else {
+        } catch (Exception e) {
+            log.warn("Не удалось получить projectLogo вакансии", e);
+        }
+        if (!logoSet) {
             projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
         }
     }
 
     private void setClosingDateLabel() {
-        OpenPosition vacancy = vacancyFiels.getValue();
-        if (vacancy != null && vacancy.getClosingDate() != null) {
-            Date current = new Date();
-            closingDateVacancyLabel.addStyleName("table-textwrap");
+        try {
+            OpenPosition vacancy = vacancyFiels.getValue();
+            if (vacancy != null && vacancy.getClosingDate() != null) {
+                Date current = new Date();
+                closingDateVacancyLabel.addStyleName("table-textwrap");
 
-            if (current.after(vacancy.getClosingDate())) {
-                closingDateVacancyLabel.addStyleName("h4-red");
+                if (current.after(vacancy.getClosingDate())) {
+                    closingDateVacancyLabel.addStyleName("h4-red");
 
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-                closingDateVacancyLabel.setValue(new StringBuilder()
-                        .append(messageBundle.getMessage("msgClosingDate"))
-                        .append(": ")
-                        .append(sdf.format(vacancy.getClosingDate()))
-                        .append(" ")
-                        .append(messageBundle.getMessage("msgOverdue"))
-                        .toString());
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+                    closingDateVacancyLabel.setValue(new StringBuilder()
+                            .append(messageBundle.getMessage("msgClosingDate"))
+                            .append(": ")
+                            .append(sdf.format(vacancy.getClosingDate()))
+                            .append(" ")
+                            .append(messageBundle.getMessage("msgOverdue"))
+                            .toString());
+                } else {
+                    closingDateVacancyLabel.addStyleName("h4-green");
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+                    closingDateVacancyLabel.setValue(new StringBuilder()
+                            .append(messageBundle.getMessage("msgClosingDate"))
+                            .append(": ")
+                            .append(sdf.format(vacancy.getClosingDate()))
+                            .toString());
+                }
+
+                closingDateVacancyLabel.setVisible(true);
             } else {
-                closingDateVacancyLabel.addStyleName("h4-green");
-
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-                closingDateVacancyLabel.setValue(new StringBuilder()
-                        .append(messageBundle.getMessage("msgClosingDate"))
-                        .append(": ")
-                        .append(sdf.format(vacancy.getClosingDate()))
-                        .toString());
+                closingDateVacancyLabel.setVisible(false);
             }
-
-
-            closingDateVacancyLabel.setVisible(true);
-        } else {
+        } catch (Exception e) {
+            log.warn("Не удалось отобразить срок закрытия вакансии", e);
             closingDateVacancyLabel.setVisible(false);
         }
     }
@@ -1581,45 +1586,51 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             = "select v from hunttech_OpenPosition v where not (v.openClose = true) and v.positionType = :positionType";
 
     private void setStatusOfVacancyLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if (event.getValue() != null) {
-            if (event.getValue().getOpenClose()) {
-                statusOfVacansyLabel.setValue("ЗАКРЫТА");
-                statusOfVacansyLabel.setStyleName("h3-red");
+        try {
+            if (event.getValue() != null) {
+                if (Boolean.TRUE.equals(event.getValue().getOpenClose())) {
+                    statusOfVacansyLabel.setValue("ЗАКРЫТА");
+                    statusOfVacansyLabel.setStyleName("h3-red");
 
-
-                List<OpenPosition> alternatives = dataManager
-                        .load(OpenPosition.class)
-                        .query(QUERY_STATUS_OF_VACANCY)
-                        .view("_minimal")
-                        .parameter("positionType", event.getValue().getPositionType())
-                        .list();
-
-                if (alternatives.size() > 0) {
-                    alternativeVacancyLinkButton.setVisible(true);
-                    alternativeVacancyLinkButton.addStyleName("transition-red");
-
-//                    String description = "<b>Альтернативные вакансии для кандидата:</b></br><ul>";
-                    StringBuilder descriptionSB = new StringBuilder("<b>Альтернативные вакансии для кандидата:</b></br><ul>");
-                    for (OpenPosition openPosition : alternatives) {
-//                        description += "<li>" + openPosition.getVacansyName();
-                        descriptionSB.append("<li>")
-                                .append(openPosition.getVacansyName());
+                    List<OpenPosition> alternatives = Collections.emptyList();
+                    try {
+                        alternatives = dataManager
+                                .load(OpenPosition.class)
+                                .query(QUERY_STATUS_OF_VACANCY)
+                                .view("_minimal")
+                                .parameter("positionType", event.getValue().getPositionType())
+                                .list();
+                    } catch (Exception e) {
+                        log.warn("Не удалось загрузить альтернативные вакансии", e);
                     }
 
-//                    description += "</ul>";
-                    descriptionSB.append("</ul>");
+                    if (alternatives != null && alternatives.size() > 0) {
+                        alternativeVacancyLinkButton.setVisible(true);
+                        alternativeVacancyLinkButton.addStyleName("transition-red");
 
-                    alternativeVacancyLinkButton.setDescription(descriptionSB.toString());
+                        StringBuilder descriptionSB = new StringBuilder("<b>Альтернативные вакансии для кандидата:</b></br><ul>");
+                        for (OpenPosition openPosition : alternatives) {
+                            descriptionSB.append("<li>")
+                                    .append(openPosition.getVacansyName());
+                        }
+                        descriptionSB.append("</ul>");
+
+                        alternativeVacancyLinkButton.setDescription(descriptionSB.toString());
+                    } else {
+                        alternativeVacancyLinkButton.setVisible(false);
+                    }
                 } else {
+                    statusOfVacansyLabel.setValue("ОТКРЫТА");
+                    statusOfVacansyLabel.setStyleName("h3-green");
+
                     alternativeVacancyLinkButton.setVisible(false);
                 }
             } else {
-                statusOfVacansyLabel.setValue("ОТКРЫТА");
-                statusOfVacansyLabel.setStyleName("h3-green");
-
+                statusOfVacansyLabel.setValue("");
                 alternativeVacancyLinkButton.setVisible(false);
             }
-        } else {
+        } catch (Exception e) {
+            log.warn("Не удалось отобразить статус вакансии", e);
             statusOfVacansyLabel.setValue("");
             alternativeVacancyLinkButton.setVisible(false);
         }
@@ -1641,51 +1652,56 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setPriorityLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
-        String priorityStr = "";
+        try {
+            String priorityStr = "";
+            Integer priorityVal = null;
+            if (event.getValue() != null) {
+                priorityVal = event.getValue().getPriority();
+            }
 
-        for (Map.Entry<String, Integer> pair : priorityMap.entrySet()) {
-            if (event.getValue() != null && pair.getValue() != null) {
-                if (event.getValue().getPriority().equals(pair.getValue())) {
-                    priorityStr = pair.getKey();
+            for (Map.Entry<String, Integer> pair : priorityMap.entrySet()) {
+                if (priorityVal != null && pair.getValue() != null) {
+                    if (priorityVal.equals(pair.getValue())) {
+                        priorityStr = pair.getKey();
+                        break;
+                    }
+                } else {
                     break;
                 }
-            } else {
-                break;
             }
-        }
 
-        String icon = "";
+            String icon = null;
 
-        if (event.getValue() != null) {
-            switch (event.getValue().getPriority()) {
-                case -1:
-                    icon = StandartPriorityVacancy.DRAFT_ICON;
-                    break;
-                case 0: //"Paused"
-                    icon = StandartPriorityVacancy.PAUSED_ICON;
-                    break;
-                case 1: //"Low"
-                    icon = StandartPriorityVacancy.LOW_ICON;
-                    break;
-                case 2: //"Normal"
-                    icon = StandartPriorityVacancy.NORMAL_ICON;
-                    break;
-                case 3: //"High"
-                    icon = StandartPriorityVacancy.HIGH_ICON;
-                    break;
-                case 4: //"Critical"
-                    icon = StandartPriorityVacancy.CRITICAL_ICON;
-                    break;
+            if (priorityVal != null) {
+                switch (priorityVal) {
+                    case -1:
+                        icon = StandartPriorityVacancy.DRAFT_ICON;
+                        break;
+                    case 0: //"Paused"
+                        icon = StandartPriorityVacancy.PAUSED_ICON;
+                        break;
+                    case 1: //"Low"
+                        icon = StandartPriorityVacancy.LOW_ICON;
+                        break;
+                    case 2: //"Normal"
+                        icon = StandartPriorityVacancy.NORMAL_ICON;
+                        break;
+                    case 3: //"High"
+                        icon = StandartPriorityVacancy.HIGH_ICON;
+                        break;
+                    case 4: //"Critical"
+                        icon = StandartPriorityVacancy.CRITICAL_ICON;
+                        break;
+                }
             }
-        } else {
-            icon = null;
-        }
 
-        if (!priorityStr.equals("")) {
-            currentPriorityLabel.setValue(priorityStr);
-            trafficLighterImage.setSource(ThemeResource.class).setPath(icon);
-            ratingImage.setSource(ThemeResource.class).setPath(icon);
-            ;
+            if (!priorityStr.equals("")) {
+                currentPriorityLabel.setValue(priorityStr);
+                trafficLighterImage.setSource(ThemeResource.class).setPath(icon);
+                ratingImage.setSource(ThemeResource.class).setPath(icon);
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось отобразить приоритет вакансии", e);
         }
     }
 

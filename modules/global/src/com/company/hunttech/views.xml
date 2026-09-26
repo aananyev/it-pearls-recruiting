@@ -1064,6 +1064,7 @@
             <property name="vacansyName"/>
             <property name="projectName" view="_minimal">
                 <property name="projectName"/>
+                <property name="projectLogo"/>
                 <property name="projectDepartment" view="_minimal">
                     <property name="departamentRuName"/>
                     <property name="companyName" view="_minimal">

@@ -7,6 +7,7 @@ import com.company.hunttech.entity.Iteraction;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.JobCandidateSignIcon;
+import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.Project;
 import com.company.hunttech.entity.SignIcons;
 import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
@@ -731,7 +732,20 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             }
         }
         draft.setCandidate(targetCandidate);
-        draft.setVacancy(sourceItem.getVacancy());
+
+        OpenPosition targetVacancy = sourceItem.getVacancy();
+        if (targetVacancy != null && targetVacancy.getId() != null) {
+            try {
+                targetVacancy = dataManager.load(OpenPosition.class)
+                        .id(targetVacancy.getId())
+                        .view("openPosition-iteraction-list-picker-view")
+                        .optional().orElse(targetVacancy);
+            } catch (Exception e) {
+                log.debug("Не удалось загрузить представление вакансии: {}", e.getMessage());
+                targetVacancy = sourceItem.getVacancy();
+            }
+        }
+        draft.setVacancy(targetVacancy);
 
         ExtUser targetRecruiter = null;
         try {
@@ -1069,7 +1083,20 @@ public class RecruiterCandidateKanbanWidget extends ScreenFragment implements Re
             }
         }
         draft.setCandidate(targetCandidate);
-        draft.setVacancy(sourceItem.getVacancy());
+
+        OpenPosition targetVacancy = sourceItem.getVacancy();
+        if (targetVacancy != null && targetVacancy.getId() != null) {
+            try {
+                targetVacancy = dataManager.load(OpenPosition.class)
+                        .id(targetVacancy.getId())
+                        .view("openPosition-iteraction-list-picker-view")
+                        .optional().orElse(targetVacancy);
+            } catch (Exception e) {
+                log.debug("Не удалось загрузить представление вакансии: {}", e.getMessage());
+                targetVacancy = sourceItem.getVacancy();
+            }
+        }
+        draft.setVacancy(targetVacancy);
         ExtUser targetRecruiter = null;
         try {
             targetRecruiter = sourceItem.getRecrutier();
